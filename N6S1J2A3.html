@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S1 J2 · Trouver le nom noyau du GN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f28b82; --jour-fonce:#c0392b; --jour-clair:#fff0ef; --jour-pale:#f9c0bb;
+  --day-glow:rgba(242,139,130,.35);
+  --bg:#fffdf7; --dark:#1a1f2e; --dark-2:#232a3d;
+  --vert:#22c55e; --vert-neon:#4ade80;
+  --rouge:#ef4444; --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--txt); min-height:100vh; overflow-x:hidden; padding:16px 12px 50px; position:relative; }
+
+/* bulles */
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.5; z-index:0; pointer-events:none; }
+.b1{ width:200px;height:200px;background:#ffd84d;     top:-60px;right:-50px; }
+.b2{ width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px; }
+.b3{ width:150px;height:150px;background:#9be7a5;     top:45%;right:-70px; }
+.b4{ width:130px;height:130px;background:#f9b8c5;     top:30%;left:-60px; }
+
+.wrap{ position:relative;z-index:1;max-width:620px;margin:0 auto;width:100%; }
+
+/* HEADER */
+.header{ text-align:center;margin-bottom:18px; }
+.logo-badge{ display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#5a0000;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px var(--day-glow);margin-bottom:10px;white-space:nowrap;max-width:100%; }
+.dots{ display:inline-flex;gap:3px; }
+.dots i{ width:7px;height:7px;border-radius:50%;background:#5a0000;display:block; }
+.dots i:nth-child(2){ opacity:.6; } .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:3px;color:var(--gris);text-transform:uppercase;margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.3rem);line-height:1.15;color:var(--txt);margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif;font-size:clamp(.65rem,2.5vw,.82rem);letter-spacing:1.5px;color:var(--gris);margin-bottom:14px;word-break:break-word; }
+.badge-revision{ display:inline-block;background:var(--jour);color:#5a0000;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.72rem,2.5vw,.82rem);letter-spacing:1px;padding:9px 16px;border-radius:24px;word-break:break-word;text-align:center;box-shadow:0 4px 14px var(--day-glow);animation:pulse 1.8s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{transform:scale(1);box-shadow:0 4px 14px var(--day-glow);}50%{transform:scale(1.05);box-shadow:0 6px 22px rgba(242,139,130,.7);} }
+
+/* GAME */
+.game{ background:var(--dark);border:2px solid var(--jour);border-radius:18px;padding:16px 14px;margin-bottom:20px;box-shadow:0 0 24px var(--day-glow),inset 0 0 40px rgba(0,0,0,.3); }
+.game-label{ font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:2px;color:var(--jour);opacity:.85;margin-bottom:10px; }
+.etoiles{ text-align:center;margin-bottom:14px;font-size:clamp(1.1rem,4vw,1.55rem);letter-spacing:clamp(3px,1.5vw,8px); }
+.star{ color:rgba(255,255,255,.22);transition:.3s;display:inline-block; }
+.star.on{ color:var(--jour);text-shadow:0 0 12px var(--jour);animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{transform:scale(0);}60%{transform:scale(1.5);}100%{transform:scale(1);} }
+.scoreboard{ display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
+.score-col{ background:var(--dark-2);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px 4px;text-align:center; }
+.score-num{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.8rem,7vw,2.6rem);line-height:1; }
+.reussis .score-num{ color:var(--vert-neon);text-shadow:0 0 10px rgba(74,222,128,.6); }
+.restants .score-num{ color:var(--jour);text-shadow:0 0 10px var(--day-glow); }
+.erreurs  .score-num{ color:var(--rouge);text-shadow:0 0 10px rgba(239,68,68,.5); }
+.score-lbl{ font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:1px;color:rgba(255,255,255,.5);margin-top:5px;text-transform:uppercase; }
+.xp-head{ display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+.xp-head span{ font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--jour);opacity:.85; }
+.xp-head span:last-child{ font-size:.68rem;font-weight:700;opacity:1; }
+.xp-bar{ height:9px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden; }
+.xp-fill{ height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f9c0bb);box-shadow:0 0 10px var(--jour);border-radius:8px;transition:width .6s cubic-bezier(.22,1,.36,1); }
+.defi-count{ text-align:center;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.65); }
+
+/* CARD */
+.card{ background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);animation:fadeUp .4s ease both; }
+@keyframes fadeUp{ from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+.rainbow{ height:6px;background:linear-gradient(90deg,#ff5e5e,var(--jour),#f9c0bb,#3ab5d8,#a884ff,#ff5e5e);background-size:300% 100%;animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{background-position:0% 0;}100%{background-position:300% 0;} }
+.card-body{ padding:16px 12px 20px; }
+.card-head{ display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap; }
+.defi-num{ font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.85rem,3vw,1rem);letter-spacing:1px;color:var(--txt);white-space:nowrap;max-width:100%; }
+.type-badge{ font-family:'Orbitron',sans-serif;font-size:.58rem;font-weight:700;background:var(--jour-clair);color:var(--jour-fonce);padding:4px 9px;border-radius:14px;border:1px solid var(--jour-pale);white-space:nowrap;max-width:100%; }
+
+/* ══ ÉTAPE VISUELLE ══ */
+.etape-indicator{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  margin-bottom:20px;
+}
+.etape{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  flex:1;
+}
+.etape-num{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.85rem;
+  border:2px solid #e0d8cc;background:#f5f0e8;color:#aaa;
+  transition:.3s;
+}
+.etape.active .etape-num{ border-color:var(--jour);background:var(--jour);color:#5a0000; }
+.etape.done   .etape-num{ border-color:var(--vert);background:var(--vert);color:#fff; }
+.etape-label{ font-size:.65rem;color:var(--gris);text-align:center;font-weight:600;letter-spacing:.5px;word-break:break-word;max-width:70px; }
+.etape.active .etape-label{ color:var(--jour-fonce); }
+.etape.done   .etape-label{ color:var(--vert); }
+.etape-line{ flex:0 0 16px;height:2px;background:#e0d8cc;margin-top:-16px; }
+.etape-line.done{ background:var(--vert); }
+
+/* ══ ZONE GN (étape 1) ══ */
+.zone-gn{
+  background:var(--dark);border:2px solid var(--jour);border-radius:16px;
+  padding:18px 14px;text-align:center;margin-bottom:16px;
+  box-shadow:0 0 20px var(--day-glow);
+}
+.zone-gn .gn-label{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;
+  letter-spacing:2px;color:var(--jour);opacity:.75;text-transform:uppercase;margin-bottom:10px;
+}
+.zone-gn .gn-text{
+  font-size:clamp(1.2rem,5vw,1.7rem);font-weight:700;color:#fff;
+  line-height:1.4;word-break:break-word;
+}
+.zone-gn .gn-sous{
+  margin-top:10px;font-family:'JetBrains Mono',monospace;
+  font-size:clamp(.72rem,2.5vw,.82rem);color:rgba(255,255,255,.45);
+  letter-spacing:1px;
+}
+
+/* ══ CONSIGNE ÉTAPE ══ */
+.consigne-etape{
+  background:var(--jour-clair);border-left:4px solid var(--jour);
+  border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:18px;
+  font-size:clamp(.88rem,3vw,.98rem);color:#5a0000;font-weight:600;
+  line-height:1.5;word-break:break-word;
+}
+
+/* ══ CHOIX (étape 2) ══ */
+.choix{ display:flex;flex-direction:column;gap:9px;margin-bottom:6px; }
+.choix-btn{
+  text-align:left;font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,3vw,.98rem);
+  padding:13px 14px;border:2px solid #e8e2d4;background:#fffdf7;
+  border-radius:12px;cursor:pointer;transition:.15s;color:var(--txt);
+  display:flex;align-items:center;gap:10px;
+  min-height:48px;-webkit-tap-highlight-color:transparent;
+}
+.choix-btn .lettre{
+  flex-shrink:0;width:28px;height:28px;border-radius:50%;
+  background:var(--jour-clair);color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--jour-pale);transition:.15s;
+}
+.choix-btn:hover:not(.locked){ border-color:var(--jour);background:var(--jour-clair); }
+.choix-btn.selected{ border-color:var(--jour);background:var(--jour-clair);box-shadow:0 0 0 3px rgba(242,139,130,.25); }
+.choix-btn.selected .lettre{ background:var(--jour);color:#5a0000; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{ border-color:var(--vert);background:#e7faec; }
+.choix-btn.good .lettre{ background:var(--vert);color:#fff; }
+.choix-btn.bad{  border-color:var(--rouge);background:#fdeaea; }
+.choix-btn.bad  .lettre{ background:var(--rouge);color:#fff; }
+
+/* ══ BOUTONS ══ */
+.btns{ display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:clamp(.72rem,2.5vw,.82rem);letter-spacing:1px;
+  padding:12px 18px;border:none;border-radius:10px;
+  cursor:pointer;transition:transform .12s;color:#fff;
+  min-height:48px;-webkit-tap-highlight-color:transparent;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-valider:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-suivant{ background:var(--jour);color:#5a0000;display:none; }
+.btn-suivant.visible{ display:inline-flex; }
+.btn-suivant.visible:not(:disabled){ animation:neon-jour 1.4s ease-in-out infinite; }
+@keyframes neon-vert{ 0%,100%{box-shadow:0 0 6px rgba(34,197,94,.5);}50%{box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-jour{ 0%,100%{box-shadow:0 0 6px rgba(242,139,130,.5);}50%{box-shadow:0 0 18px rgba(242,139,130,.95);} }
+.btn:disabled{ background:#d8d8d8 !important;color:#fff !important;cursor:not-allowed;animation:none !important;box-shadow:none !important; }
+@media(max-width:480px){ .btns{flex-direction:column;} .btn{width:100%;} }
+@media(max-width:380px){
+  .etape-label{ font-size:.58rem; max-width:55px; }
+  .etape-num{ width:30px; height:30px; font-size:.75rem; }
+  .etape-line{ flex:0 0 10px; }
+  .game{ padding:12px 10px; }
+  .card-body{ padding:12px 10px 16px; }
+  .score-col{ padding:8px 2px; }
+}
+
+
+/* Feedback */
+.feedback{ display:none;margin-top:14px;padding:13px 14px;border-radius:10px;font-weight:bold;font-size:clamp(.88rem,3vw,1rem);line-height:1.5;word-break:break-word; }
+.feedback.show{ display:block;animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:#e7faec;color:#157f3a;border:1px solid #9be7a5; }
+.feedback.ko{ background:#fdeaea;color:#c0392b;border:1px solid #f5b5b5; }
+
+/* Correction */
+.correction{ display:none;margin-top:12px;padding:13px 16px;background:#fff8e6;border:1px dashed var(--jour);border-radius:10px;font-size:clamp(.84rem,3vw,.92rem);color:#5a0000;line-height:1.7;word-break:break-word; }
+.correction.show{ display:block;animation:pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* Nav retour */
+.nav{ display:flex;justify-content:flex-start;margin-top:16px; }
+.nav button{ font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:500;letter-spacing:.5px;padding:10px 16px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;color:#888;cursor:pointer;transition:.15s;min-height:44px;-webkit-tap-highlight-color:transparent; }
+.nav button:not(:disabled):hover{ background:#eee;color:#555; }
+.nav button:disabled{ opacity:.4;cursor:not-allowed; }
+
+/* +XP */
+.xp-pop{ position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.5);font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.5rem;color:var(--jour);text-shadow:0 0 20px var(--jour),0 4px 10px rgba(0,0,0,.3);z-index:50;opacity:0;pointer-events:none; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.25);}70%{opacity:1;transform:translate(-50%,-80%) scale(1);}100%{opacity:0;transform:translate(-50%,-130%) scale(.9);} }
+
+/* RÉSULTATS */
+.results{ display:none; }
+.results.show{ display:block;animation:fadeUp .5s ease; }
+.mission{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,5vw,1.7rem);text-align:center;color:var(--jour-fonce);letter-spacing:2px;margin-bottom:6px; }
+.big-score{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2rem,9vw,3.4rem);text-align:center;color:var(--jour);text-shadow:0 0 16px var(--day-glow);margin:8px 0; }
+.res-stars{ text-align:center;font-size:clamp(1.2rem,5vw,1.7rem);letter-spacing:4px;color:var(--jour);margin-bottom:8px; }
+.gg{ text-align:center;font-family:'Orbitron',sans-serif;font-size:clamp(.78rem,2.5vw,.88rem);color:var(--vert);font-weight:700;letter-spacing:1px;margin-bottom:18px;word-break:break-word; }
+.recap{ background:#faf7ef;border-radius:12px;padding:12px 14px;margin-bottom:18px; }
+.recap-item{ display:flex;justify-content:space-between;align-items:flex-start;padding:9px 4px;border-bottom:1px solid #ece4cf;font-size:clamp(.78rem,2.5vw,.86rem);gap:10px; }
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600;color:var(--txt);flex:1;word-break:break-word;line-height:1.5; }
+.recap-item .st{ font-size:1rem;flex-shrink:0; }
+.btn-rejouer{ display:block;width:100%;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,3vw,1rem);letter-spacing:1px;padding:14px;border:none;border-radius:12px;color:#5a0000;background:var(--jour);cursor:pointer;min-height:48px;-webkit-tap-highlight-color:transparent;animation:neon-jour 1.4s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div class="bulle b1"></div>
+<div class="bulle b2"></div>
+<div class="bulle b3"></div>
+<div class="bulle b4"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · FRANÇAIS · 6E
+    </div>
+    <div class="semaine">Semaine 1 – Jour 2</div>
+    <h1 class="titre">Je relève le <span class="accent">défi</span>&nbsp;!</h1>
+    <div class="sous-titre">Le groupe nominal &middot; 6 questions</div>
+    <div class="badge-revision">DÉFI 1 · QCM · NOM NOYAU DU GN</div>
+  </div>
+
+  <!-- GAME PANEL -->
+  <div class="game">
+    <div class="game-label">DÉFI 1 · QCM · NOM NOYAU DU GN · 6E</div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="scoreboard">
+      <div class="score-col reussis"><div class="score-num" id="sc-ok">0</div><div class="score-lbl">Réussis</div></div>
+      <div class="score-col restants"><div class="score-num" id="sc-rest">6</div><div class="score-lbl">Restants</div></div>
+      <div class="score-col erreurs"><div class="score-num" id="sc-err">0</div><div class="score-lbl">Erreurs</div></div>
+    </div>
+    <div class="xp-head"><span>XP PROGRESS</span><span id="xp-pct">0 %</span></div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="defi-count" id="defi-count">QUESTION 1 / 6</div>
+  </div>
+
+  <!-- CARD EXERCICE -->
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+
+      <div class="card-head">
+        <div class="defi-num" id="card-num">QUESTION 01</div>
+        <div class="type-badge">NOM NOYAU DU GN</div>
+      </div>
+
+      <!-- ÉTAPES VISUELLES -->
+      <div class="etape-indicator" id="etape-indicator">
+        <div class="etape active" id="et1">
+          <div class="etape-num">1</div>
+          <div class="etape-label">Lis le GN</div>
+        </div>
+        <div class="etape-line" id="line1"></div>
+        <div class="etape" id="et2">
+          <div class="etape-num">2</div>
+          <div class="etape-label">Choisis le noyau</div>
+        </div>
+        <div class="etape-line" id="line2"></div>
+        <div class="etape" id="et3">
+          <div class="etape-num">3</div>
+          <div class="etape-label">Résultat</div>
+        </div>
+      </div>
+
+      <!-- GN affiché -->
+      <div class="zone-gn">
+        <div class="gn-label">Groupe nominal</div>
+        <div class="gn-text" id="gn-text"></div>
+        <div class="gn-sous" id="gn-sous">Quel est le nom noyau ?</div>
+      </div>
+
+      <!-- Consigne contextuelle -->
+      <div class="consigne-etape" id="consigne-etape">
+        👇 Choisis le mot qui est le <strong>nom noyau</strong> de ce groupe nominal.
+      </div>
+
+      <!-- Choix QCM -->
+      <div class="choix" id="choix"></div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" disabled onclick="valider()">✔ VALIDER</button>
+        <button class="btn btn-suivant" id="btn-suivant" onclick="suivant()">SUIVANT →</button>
+      </div>
+
+      <div class="feedback"   id="feedback"></div>
+      <div class="correction" id="correction"></div>
+
+      <div class="nav">
+        <button id="btn-retour" disabled onclick="retour()">← Retour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div class="card results" id="results-card" style="margin-top:20px;">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 6</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg"></div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" onclick="rejouer()">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* ══ DONNÉES
+   Chaque carte : le GN complet, le nom noyau (bonne réponse),
+   + 3 distracteurs plausibles (autres mots du GN ou mots proches).
+   La correction explique POURQUOI c'est ce mot.
+══ */
+const CARTES = [
+  {
+    gn: "une vieille maison abandonnée",
+    noyau: "maison",
+    distracteurs: ["vieille", "abandonnée", "une"],
+    correction: "<b>maison</b> est le nom noyau : c'est le nom autour duquel tout s'organise. « une » est le déterminant, « vieille » et « abandonnée » sont des adjectifs qui décrivent la maison."
+  },
+  {
+    gn: "le grand chien noir",
+    noyau: "chien",
+    distracteurs: ["grand", "noir", "le"],
+    correction: "<b>chien</b> est le nom noyau. « le » est le déterminant, « grand » et « noir » sont des adjectifs qui décrivent le chien."
+  },
+  {
+    gn: "des nuages gris et lourds",
+    noyau: "nuages",
+    distracteurs: ["gris", "lourds", "des"],
+    correction: "<b>nuages</b> est le nom noyau (au pluriel). « des » est le déterminant, « gris » et « lourds » sont des adjectifs."
+  },
+  {
+    gn: "cette route étroite et dangereuse",
+    noyau: "route",
+    distracteurs: ["cette", "étroite", "dangereuse"],
+    correction: "<b>route</b> est le nom noyau. « cette » est un déterminant démonstratif, « étroite » et « dangereuse » sont des adjectifs."
+  },
+  {
+    gn: "mon meilleur ami d'enfance",
+    noyau: "ami",
+    distracteurs: ["meilleur", "enfance", "mon"],
+    correction: "<b>ami</b> est le nom noyau. « mon » est un déterminant possessif, « meilleur » est un adjectif, « d'enfance » est un complément du nom."
+  },
+  {
+    gn: "les livres de la bibliothèque municipale",
+    noyau: "livres",
+    distracteurs: ["bibliothèque", "municipale", "les"],
+    correction: "<b>livres</b> est le nom noyau. « les » est le déterminant, « de la bibliothèque municipale » est un complément du nom."
+  }
+];
+
+const TOTAL = CARTES.length;
+const LETTRES = ['A','B','C','D'];
+const $ = id => document.getElementById(id);
+
+let idx = 0, reussis = 0, erreurs = 0;
+let etat = []; // {validated, correct, picked}
+let selectedChoice = null;
+
+function resetState(){
+  idx=0; reussis=0; erreurs=0;
+  selectedChoice=null;
+  etat = CARTES.map(()=>({validated:false,correct:false,picked:null,ordre:null}));
+}
+resetState();
+
+/* Mélange des choix à la création de l'état */
+function getOrdre(i){
+  if(etat[i].ordre) return etat[i].ordre;
+  const c = CARTES[i];
+  const choix = [c.noyau, ...c.distracteurs];
+  // Mélange Fisher-Yates
+  for(let j=choix.length-1;j>0;j--){
+    const k=Math.floor(Math.random()*(j+1));
+    [choix[j],choix[k]]=[choix[k],choix[j]];
+  }
+  etat[i].ordre = choix;
+  return choix;
+}
+
+function buildStars(){
+  const c=$('etoiles'); c.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const s=document.createElement('span'); s.className='star'; s.textContent='★'; c.appendChild(s);
+  }
+}
+buildStars();
+
+function updateScore(){
+  $('sc-ok').textContent=reussis;
+  $('sc-err').textContent=erreurs;
+  $('sc-rest').textContent=TOTAL-reussis;
+  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<reussis));
+  const pct=Math.round((reussis/TOTAL)*100);
+  $('xp-fill').style.width=pct+'%'; $('xp-pct').textContent=pct+' %';
+}
+
+function setEtape(n){
+  // n = 1, 2 ou 3
+  [1,2,3].forEach(i=>{
+    const el=$('et'+i);
+    el.classList.remove('active','done');
+    if(i<n) el.classList.add('done');
+    else if(i===n) el.classList.add('active');
+  });
+  [1,2].forEach(i=>{
+    $('line'+i).classList.toggle('done',i<n);
+  });
+}
+
+function render(){
+  selectedChoice=null;
+  const c=CARTES[idx], e=etat[idx];
+  const ordre=getOrdre(idx);
+
+  $('card-num').textContent='QUESTION '+String(idx+1).padStart(2,'0');
+  $('defi-count').textContent='QUESTION '+(idx+1)+' / '+TOTAL;
+  $('gn-text').textContent=c.gn;
+
+  // Zones reset
+  $('feedback').className='feedback';
+  $('feedback').innerHTML='';
+  $('correction').className='correction';
+  $('correction').innerHTML='';
+  $('btn-valider').disabled=true;
+  $('btn-valider').style.display='';
+  $('btn-suivant').classList.remove('visible');
+  $('btn-suivant').disabled=true;
+
+  if(e.validated){
+    setEtape(3);
+    $('gn-sous').textContent='Nom noyau trouvé !';
+    $('consigne-etape').innerHTML='✅ Exercice terminé — lis la correction ci-dessous.';
+    $('btn-valider').style.display='none';
+    $('btn-suivant').classList.add('visible');
+    $('btn-suivant').disabled=false;
+    $('btn-suivant').textContent=(idx===TOTAL-1)?'VOIR LES RÉSULTATS':'SUIVANT →';
+  } else {
+    setEtape(2);
+    $('gn-sous').textContent='Quel est le nom noyau ?';
+    $('consigne-etape').innerHTML='👇 Clique sur le mot qui est le <strong>nom noyau</strong> de ce groupe nominal.';
+  }
+
+  // Choix
+  const cont=$('choix'); cont.innerHTML='';
+  ordre.forEach((mot,i)=>{
+    const b=document.createElement('button');
+    b.className='choix-btn';
+    b.innerHTML='<span class="lettre">'+LETTRES[i]+'</span><span>'+mot+'</span>';
+    b.dataset.mot=mot;
+    if(e.validated){
+      b.classList.add('locked');
+      if(mot===c.noyau)                           b.classList.add('good');
+      if(mot===e.picked && mot!==c.noyau)         b.classList.add('bad');
+    } else {
+      b.addEventListener('click',()=>pickChoice(mot,b));
+    }
+    cont.appendChild(b);
+  });
+  if(e.validated){ selectedChoice=e.picked; showFeedback(e.correct); showCorrection(); }
+
+  $('btn-retour').disabled=(idx===0);
+  updateScore();
+}
+
+function pickChoice(mot,btn){
+  if(etat[idx].validated) return;
+  selectedChoice=mot;
+  document.querySelectorAll('.choix-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  $('btn-valider').disabled=false;
+}
+
+function valider(){
+  const c=CARTES[idx], e=etat[idx];
+  if(e.validated||selectedChoice===null) return;
+  const correct=(selectedChoice===c.noyau);
+  e.validated=true; e.correct=correct; e.picked=selectedChoice;
+  if(correct){ reussis++; fireXP(); } else { erreurs++; }
+  showFeedback(correct); showCorrection();
+  setEtape(3);
+  $('btn-valider').disabled=true; $('btn-valider').style.display='none';
+  $('btn-suivant').classList.add('visible'); $('btn-suivant').disabled=false;
+  $('btn-suivant').textContent=(idx===TOTAL-1)?'VOIR LES RÉSULTATS':'SUIVANT →';
+  $('gn-sous').textContent='Nom noyau : '+c.noyau;
+  $('consigne-etape').innerHTML='✅ Exercice terminé — lis la correction ci-dessous.';
+  document.querySelectorAll('.choix-btn').forEach(b=>{
+    b.classList.add('locked');
+    if(b.dataset.mot===c.noyau) b.classList.add('good');
+    if(b.dataset.mot===selectedChoice&&selectedChoice!==c.noyau) b.classList.add('bad');
+  });
+  updateScore();
+}
+
+function showFeedback(correct){
+  const fb=$('feedback');
+  fb.className='feedback show '+(correct?'ok':'ko');
+  fb.innerHTML=correct
+    ?'<b>Bravo !</b> Tu as trouvé le bon nom noyau.'
+    :'<b>Pas tout à fait.</b> Relis l\'explication ci-dessous pour comprendre.';
+}
+function showCorrection(){
+  const c=$('correction'); c.className='correction show';
+  c.innerHTML='<b>Explication :</b> '+CARTES[idx].correction;
+}
+
+function suivant(){
+  if(idx<TOTAL-1){ idx++; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else showResults();
+}
+function retour(){
+  if(idx>0){ idx--; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function fireXP(){
+  const p=$('xp-pop'); p.classList.remove('go'); void p.offsetWidth; p.classList.add('go');
+}
+
+function showResults(){
+  $('exo-card').style.display='none';
+  $('results-card').classList.add('show');
+  $('res-score').textContent=reussis+' / '+TOTAL;
+  let stars=''; for(let i=0;i<TOTAL;i++) stars+=(i<reussis)?'★':'☆';
+  $('res-stars').textContent=stars;
+  const r=reussis/TOTAL;
+  $('res-msg').textContent=
+    reussis===TOTAL ?'// PARFAIT — toutes les questions réussies !':
+    r>=.75          ?'// TRÈS BIEN — encore un petit effort !':
+    r>=.5           ?'// BIEN — continue à t\'entraîner !':
+                     '// À RETRAVAILLER — relis les explications.';
+  let html=''; CARTES.forEach((c,i)=>{
+    const ok=etat[i].correct;
+    html+='<div class="recap-item"><span class="eq">Carte '+(i+1)+' — <em>'+c.gn+'</em><br>Noyau&nbsp;: <b>'+c.noyau+'</b></span><span class="st">'+(ok?'✓':'✗')+'</span></div>';
+  });
+  $('res-recap').innerHTML=html;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function rejouer(){
+  resetState(); buildStars();
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display='';
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+render();
+</script>
+</body>
+</html>
