@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S1 J2 · Texte à trous GN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f28b82; --jour-fonce:#c0392b; --jour-clair:#fff0ef; --jour-pale:#f9c0bb;
+  --day-color:#f28b82; --day-dark:#c0392b; --day-light:#fff0ef; --day-border:#f9c0bb;
+  --day-glow:rgba(242,139,130,.3);
+  --surface:#ffffff; --border:#e8e4d9;
+  --yellow:#f5c518; --green:#8dc63f; --pink:#f28b82; --orange:#f5a623;
+  --text:#2b2b2b; --muted:#8b8b8b;
+  --radius:16px;
+  --bg:#fffdf7; --dark:#1a1f2e; --dark-2:#232a3d;
+  --vert:#22c55e; --vert-neon:#4ade80;
+  --rouge:#ef4444; --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--txt); min-height:100vh; overflow-x:hidden; position:relative; padding:16px 12px 50px; }
+
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.55; z-index:0; pointer-events:none; }
+.bulle-jaune { width:200px; height:200px; background:#ffd84d;         top:-60px;  right:-50px; }
+.bulle-jour  { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte { width:150px; height:150px; background:#9be7a5;         top:45%;   right:-70px; }
+.bulle-rose  { width:130px; height:130px; background:#f9b8c5;         top:30%;   left:-60px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; width:100%; }
+
+.header{ text-align:center; margin-bottom:18px; }
+.logo-badge{ display:inline-flex; align-items:center; gap:8px; background:var(--jour); color:#5a0000; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:1.5px; padding:6px 14px; border-radius:20px; box-shadow:0 3px 10px var(--day-glow); margin-bottom:10px; white-space:nowrap; }
+.logo-badge .dots{ display:inline-flex; gap:3px; flex-shrink:0; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#5a0000; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; } .logo-badge .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif; font-size:.75rem; letter-spacing:3px; color:var(--gris); text-transform:uppercase; margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.4rem,6vw,2.3rem); line-height:1.15; color:var(--txt); margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:clamp(.65rem,2.5vw,.82rem); letter-spacing:1.5px; color:var(--gris); margin-bottom:14px; word-break:break-word; }
+.badge-revision{ display:inline-block; background:var(--jour); color:#5a0000; font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.72rem,2.5vw,.82rem); letter-spacing:1px; padding:9px 22px; border-radius:24px; box-shadow:0 4px 14px var(--day-glow); animation:pulse 1.8s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ transform:scale(1); box-shadow:0 4px 14px var(--day-glow); } 50%{ transform:scale(1.05); box-shadow:0 6px 22px rgba(242,139,130,.7); } }
+
+.game{ background:var(--dark); border:2px solid var(--jour); border-radius:18px; padding:16px 14px; margin-bottom:20px; box-shadow:0 0 24px var(--day-glow), inset 0 0 40px rgba(0,0,0,.3); }
+.game-label{ font-family:'JetBrains Mono','Orbitron',monospace; font-size:.62rem; font-weight:700; letter-spacing:2px; color:var(--jour); opacity:.85; margin-bottom:10px; }
+.etoiles{ text-align:center; margin-bottom:14px; font-size:clamp(1.1rem,4vw,1.55rem); letter-spacing:clamp(3px,1.5vw,8px); }
+.etoiles .star{ color:rgba(255,255,255,.28); transition:.3s; display:inline-block; }
+.etoiles .star.on{ color:var(--jour); text-shadow:0 0 12px var(--jour),0 0 20px var(--jour); animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.score-col{ background:var(--dark-2); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:10px 4px; text-align:center; }
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.6rem,6vw,2.6rem); line-height:1; }
+.score-col.reussis  .score-num{ color:var(--vert-neon); text-shadow:0 0 10px rgba(74,222,128,.6); }
+.score-col.restants .score-num{ color:var(--jour);      text-shadow:0 0 10px var(--day-glow); }
+.score-col.erreurs  .score-num{ color:var(--rouge);     text-shadow:0 0 10px rgba(239,68,68,.5); }
+.score-lbl{ font-family:'JetBrains Mono',monospace; font-size:.55rem; font-weight:500; letter-spacing:1px; color:rgba(255,255,255,.5); margin-top:5px; text-transform:uppercase; }
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{ font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1px; color:var(--jour); opacity:.85; }
+.xp-head span:last-child{  font-family:'Orbitron',sans-serif; font-size:.68rem; font-weight:700; color:var(--jour); }
+.xp-bar{ height:9px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; }
+.xp-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f9c0bb); box-shadow:0 0 10px var(--jour); border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+.defi-count{ text-align:center; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:.75rem; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,.65); }
+
+.card{ background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04); animation:fadeUp .4s ease both; }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
+.rainbow{ height:6px; background:linear-gradient(90deg,#ff5e5e,var(--jour),#f9c0bb,#3ab5d8,#a884ff,#ff5e5e); background-size:300% 100%; animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+.card-body{ padding:16px 14px 18px; }
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px; flex-wrap:wrap; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.85rem,3vw,1rem); letter-spacing:1px; color:var(--txt); white-space:nowrap; }
+.type-badge{ font-family:'Orbitron',sans-serif; font-size:.58rem; font-weight:700; background:var(--jour-clair); color:var(--jour-fonce); padding:4px 9px; border-radius:14px; border:1px solid var(--jour-pale); white-space:nowrap; }
+
+/* ── BANQUE DE MOTS ── */
+.banque-label{ font-size:clamp(.78rem,2.5vw,.86rem); font-weight:700; color:var(--txt); margin-bottom:8px; }
+.banque{
+  display:flex; flex-wrap:wrap; gap:8px;
+  background:var(--jour-clair); border:2px solid var(--jour-pale);
+  border-radius:12px; padding:12px 14px; margin-bottom:20px;
+}
+.mot-banque{
+  font-family:'JetBrains Mono',monospace; font-weight:600;
+  font-size:clamp(.82rem,3vw,.94rem);
+  background:#fff; border:2px solid var(--jour);
+  color:var(--jour-fonce); border-radius:8px;
+  padding:6px 12px; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:.15s; white-space:nowrap; min-height:36px;
+  display:inline-flex; align-items:center;
+}
+.mot-banque:hover{ background:var(--jour); color:#5a0000; }
+.mot-banque.used{ opacity:.35; pointer-events:none; text-decoration:line-through; background:#f0f0f0; border-color:#ccc; color:#999; }
+
+/* ── TEXTE À TROUS ── */
+.texte-trous{
+  font-size:clamp(.92rem,3.5vw,1.06rem); line-height:2.4;
+  color:var(--txt); word-break:break-word; margin-bottom:16px;
+}
+.trou{
+  display:inline-block;
+  min-width:90px; height:30px;
+  border-bottom:3px solid var(--jour);
+  border-radius:0;
+  background:var(--jour-clair);
+  border-radius:6px 6px 0 0;
+  padding:0 8px;
+  font-family:'JetBrains Mono',monospace; font-weight:700;
+  font-size:clamp(.82rem,3vw,.92rem);
+  color:var(--jour-fonce);
+  cursor:pointer; vertical-align:middle;
+  transition:.15s; text-align:center;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.trou.filled{ background:var(--jour-clair); border-color:var(--jour-fonce); }
+.trou.correct{ background:#e7faec; border-color:var(--vert); color:#157f3a; }
+.trou.wrong  { background:#fdeaea; border-color:var(--rouge); color:#c0392b; }
+.trou.selected{ box-shadow:0 0 0 3px var(--jour); }
+.trou-placeholder{ color:var(--jour); opacity:.6; font-size:.78rem; }
+
+/* ── BOUTONS ── */
+.btns{ display:flex; gap:9px; flex-wrap:wrap; margin:16px 0 4px; }
+.btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.72rem,2.5vw,.82rem); letter-spacing:1px; padding:12px 16px; border:none; border-radius:10px; cursor:pointer; transition:transform .12s; color:#fff; min-height:44px; -webkit-tap-highlight-color:transparent; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice { background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#5a0000; display:none; }
+.btn-suivant.visible{ display:inline-flex; }
+.btn-effacer{ background:#888; }
+
+.btn-valider:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation:neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant.visible:not(:disabled){ animation:neon-jour 1.4s ease-in-out infinite; }
+.btn-effacer:not(:disabled){ animation:neon-gris 1.4s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(242,139,130,.5);} 50%{ box-shadow:0 0 18px rgba(242,139,130,.95);} }
+@keyframes neon-gris{ 0%,100%{ box-shadow:0 0 4px rgba(0,0,0,.2);}      50%{ box-shadow:0 0 10px rgba(0,0,0,.35);} }
+.btn:disabled{ background:#d8d8d8 !important; color:#fff !important; cursor:not-allowed; animation:none !important; box-shadow:none !important; }
+
+@media(max-width:420px){ .btns{ flex-direction:column; } .btn{ width:100%; } }
+
+/* Indice */
+.indice-box{ display:none; margin-top:12px; padding:12px 14px; background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px; font-size:clamp(.82rem,3vw,.9rem); color:#1a6e88; line-height:1.6; word-break:break-word; }
+.indice-box.show{ display:block; animation:pop .35s ease; }
+
+/* Feedback */
+.feedback{ display:none; margin-top:14px; padding:13px 14px; border-radius:10px; font-weight:bold; font-size:clamp(.88rem,3vw,1rem); line-height:1.5; word-break:break-word; }
+.feedback.show{ display:block; animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{ background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+.feedback.moyen{ background:#fff8e6; color:#8a6000; border:1px solid var(--jour-pale); }
+
+/* Correction */
+.correction{ display:none; margin-top:12px; padding:13px 16px; background:#fff8e6; border:1px dashed var(--jour); border-radius:10px; font-size:clamp(.84rem,3vw,.92rem); color:#5a0000; line-height:1.7; word-break:break-word; }
+.correction.show{ display:block; animation:pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+.nav{ display:flex; justify-content:flex-start; margin-top:16px; }
+.nav button{ font-family:'Orbitron',sans-serif; font-size:.75rem; font-weight:500; letter-spacing:.5px; padding:10px 16px; border-radius:8px; border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s; min-height:44px; -webkit-tap-highlight-color:transparent; }
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+
+.xp-pop{ position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5); font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.5rem; color:var(--jour); text-shadow:0 0 20px var(--jour),0 4px 10px rgba(0,0,0,.3); z-index:50; opacity:0; pointer-events:none; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); } 25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); } 70%{ opacity:1; transform:translate(-50%,-80%) scale(1); } 100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); } }
+
+.results{ display:none; }
+.results.show{ display:block; animation:fadeUp .4s ease; }
+.results .mission{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.1rem,5vw,1.7rem); text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px; }
+.results .big-score{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2rem,9vw,3.4rem); text-align:center; color:var(--jour); text-shadow:0 0 16px var(--day-glow); margin:8px 0; }
+.results .res-stars{ text-align:center; font-size:clamp(1.2rem,5vw,1.7rem); letter-spacing:4px; color:var(--jour); margin-bottom:8px; }
+.results .gg{ text-align:center; font-family:'Orbitron',sans-serif; font-size:clamp(.78rem,2.5vw,.88rem); color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:18px; word-break:break-word; }
+.recap{ background:#faf7ef; border-radius:12px; padding:12px 14px; margin-bottom:18px; }
+.recap-item{ display:flex; justify-content:space-between; align-items:center; padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:clamp(.78rem,2.5vw,.86rem); gap:10px; }
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; word-break:break-word; }
+.recap-item .st{ font-size:1rem; flex-shrink:0; }
+.btn-rejouer{ display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.88rem,3vw,1rem); letter-spacing:1px; padding:14px; border:none; border-radius:12px; color:#5a0000; background:var(--jour); cursor:pointer; min-height:44px; -webkit-tap-highlight-color:transparent; animation:neon-jour 1.4s ease-in-out infinite; }
+.btn-rejouer:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · FRANÇAIS · 6E
+    </div>
+    <div class="semaine">Semaine 1 – Jour 2</div>
+    <h1 class="titre">Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">Le groupe nominal &middot; 2 exercices texte à trous</div>
+    <div class="badge-revision">DÉFI 2 · TEXTE À TROUS · COMPLÉTER LES GN</div>
+  </div>
+
+  <div class="game">
+    <div class="game-label">DÉFI 2 · TEXTE À TROUS · COMPLÉTER LES GN · 6E</div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">2</div>
+        <div class="score-lbl">Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">Erreurs</div>
+      </div>
+    </div>
+    <div class="xp-head">
+      <span>XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="defi-count" id="defi-count">EXERCICE 1 / 2</div>
+  </div>
+
+  <!-- CARD -->
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+
+      <div class="card-head">
+        <div class="defi-num" id="card-defi-num">EXERCICE 01</div>
+        <div class="type-badge">TEXTE À TROUS</div>
+      </div>
+
+      <p id="consigne-txt" style="font-size:clamp(.88rem,3vw,.98rem);margin-bottom:14px;line-height:1.6;color:var(--txt);word-break:break-word;"></p>
+
+      <!-- BANQUE DE MOTS -->
+      <div class="banque-label">📦 Banque de mots :</div>
+      <div class="banque" id="banque"></div>
+
+      <!-- TEXTE À TROUS -->
+      <div class="texte-trous" id="texte-trous"></div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" disabled onclick="valider()">✔ VALIDER</button>
+        <button class="btn btn-indice"  id="btn-indice"  onclick="showIndice()">? INDICE</button>
+        <button class="btn btn-effacer" id="btn-effacer" onclick="effacer()">✕ EFFACER</button>
+        <button class="btn btn-suivant" id="btn-suivant" onclick="suivant()">SUIVANT →</button>
+      </div>
+
+      <div class="indice-box" id="indice-box"></div>
+      <div class="feedback"   id="feedback"></div>
+      <div class="correction" id="correction"></div>
+
+      <div class="nav">
+        <button id="btn-retour" disabled onclick="retour()">← Retour</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div class="card results" id="results-card" style="margin-top:20px;">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 2</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" onclick="rejouer()">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* ══ DONNÉES ══
+   Chaque exercice a :
+   - consigne : texte affiché
+   - banque   : tous les mots proposés (dans le désordre)
+   - trous    : tableau d'objets {avant, apres, reponse}
+                "avant"  = texte avant le trou
+                "apres"  = texte après le trou (jusqu'au prochain trou ou fin)
+                "reponse"= mot exact attendu (doit figurer dans banque)
+   - indice   : piste sans donner la réponse
+   - correction : explication après validation
+*/
+const EXERCICES = [
+  {
+    consigne: "Complète les groupes nominaux en choisissant le bon mot dans la banque. Clique d'abord sur un mot de la banque, puis sur le trou où tu veux le placer.",
+    banque: ["sinueux", "vieux", "magnifiques", "petite", "rugueuse", "dorées"],
+    trous: [
+      { avant: "Dans la forêt, un ", reponse: "vieux", apres: " chêne se dressait fièrement." },
+      { avant: "Les feuilles ", reponse: "dorées", apres: " tombaient doucement sur le sol." },
+      { avant: "Une ", reponse: "petite", apres: " souris courait entre les racines." },
+      { avant: "L'écorce ", reponse: "rugueuse", apres: " du tronc abritait des insectes." },
+      { avant: "Des champignons ", reponse: "magnifiques", apres: " poussaient au pied de l'arbre." },
+      { avant: "Un sentier ", reponse: "sinueux", apres: " traversait toute la forêt." }
+    ],
+    indice: "Lis toute la phrase avant de choisir. L'adjectif doit s'accorder avec le nom (masculin/féminin, singulier/pluriel).",
+    correction: "Les GN complétés : <b>un vieux chêne</b> — <b>les feuilles dorées</b> — <b>une petite souris</b> — <b>l'écorce rugueuse</b> — <b>des champignons magnifiques</b> — <b>un sentier sinueux</b>."
+  },
+  {
+    consigne: "Complète les groupes nominaux avec le déterminant ou le nom qui convient. Clique sur un mot de la banque, puis sur le trou correspondant.",
+    banque: ["rivière", "Ce", "lumière", "Les", "ancien", "maison"],
+    trous: [
+      { avant: "", reponse: "Ce", apres: " vieux pont enjambait la rivière." },
+      { avant: "Une ", reponse: "lumière", apres: " douce éclairait la pièce." },
+      { avant: "Un ", reponse: "ancien", apres: " tableau ornait le mur." },
+      { avant: "", reponse: "Les", apres: " enfants joyeux jouaient dans la rue." },
+      { avant: "La grande ", reponse: "maison", apres: " blanche appartenait à leur famille." },
+      { avant: "Une longue ", reponse: "rivière", apres: " bleue traversait la vallée." }
+    ],
+    indice: "Certains trous attendent un déterminant (le, la, les, ce, un…), d'autres attendent un nom. Lis la phrase entière pour comprendre ce qui manque.",
+    correction: "Les GN complétés : <b>Ce vieux pont</b> — <b>une lumière douce</b> — <b>un ancien tableau</b> — <b>Les enfants joyeux</b> — <b>La grande maison blanche</b> — <b>une longue rivière bleue</b>."
+  }
+];
+
+const TOTAL = EXERCICES.length;
+const $ = id => document.getElementById(id);
+
+let idx = 0, reussis = 0, erreurs = 0;
+let etat = [];
+let selectedMot = null;   // mot sélectionné dans la banque
+let selectedTrou = null;  // index du trou sélectionné
+let reponsesEleve = [];   // [mot ou null] par trou
+
+function resetState(){
+  idx=0; reussis=0; erreurs=0;
+  etat = EXERCICES.map(()=>({ validated:false, correct:false, score:0 }));
+  selectedMot=null; selectedTrou=null; reponsesEleve=[];
+}
+resetState();
+
+function buildStars(){
+  const c=$('etoiles'); c.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const s=document.createElement('span'); s.className='star'; s.textContent='★'; c.appendChild(s);
+  }
+}
+buildStars();
+
+function render(){
+  selectedMot=null; selectedTrou=null;
+  const ex=EXERCICES[idx], e=etat[idx];
+  if(!e.validated) reponsesEleve=ex.trous.map(()=>null);
+
+  $('card-defi-num').textContent='EXERCICE '+String(idx+1).padStart(2,'0');
+  $('defi-count').textContent='EXERCICE '+(idx+1)+' / '+TOTAL;
+  $('consigne-txt').textContent=ex.consigne;
+
+  renderBanque();
+  renderTexte();
+
+  $('indice-box').className='indice-box';
+  $('feedback').className='feedback'; $('feedback').innerHTML='';
+  $('correction').className='correction'; $('correction').innerHTML='';
+  $('btn-valider').disabled=true;
+  const bs=$('btn-suivant');
+  if(e.validated){ bs.classList.add('visible'); bs.disabled=false; } else { bs.classList.remove('visible'); bs.disabled=true; }
+  $('btn-indice').disabled=e.validated;
+  $('btn-indice').style.display=e.validated?'none':'';
+  $('btn-effacer').disabled=e.validated;
+  $('btn-effacer').style.display=e.validated?'none':'';
+  $('btn-valider').style.display=e.validated?'none':'';
+
+  if(e.validated){ showFeedback(e.correct, e.score); showCorrection(); }
+  $('btn-retour').disabled=(idx===0);
+  $('sc-reussis').textContent=reussis;
+  $('sc-erreurs').textContent=erreurs;
+  $('sc-restants').textContent=TOTAL-reussis;
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>s.classList.toggle('on',i<reussis));
+  const pct=Math.round((reussis/TOTAL)*100);
+  $('xp-fill').style.width=pct+'%'; $('xp-pct').textContent=pct+' %';
+}
+
+function renderBanque(){
+  const ex=EXERCICES[idx]; const b=$('banque'); b.innerHTML='';
+  const reponses=new Set(ex.trous.map(t=>t.reponse));
+  ex.banque.forEach(mot=>{
+    const btn=document.createElement('button');
+    btn.className='mot-banque'; btn.textContent=mot;
+    btn.dataset.mot=mot;
+    // Marquer comme utilisé si déjà placé
+    if(reponsesEleve.includes(mot)) btn.classList.add('used');
+    btn.addEventListener('click',()=>clicBanque(mot,btn));
+    b.appendChild(btn);
+  });
+}
+
+function renderTexte(){
+  const ex=EXERCICES[idx]; const e=etat[idx];
+  const container=$('texte-trous'); container.innerHTML='';
+  ex.trous.forEach((t,i)=>{
+    if(t.avant){ const sp=document.createElement('span'); sp.textContent=t.avant; container.appendChild(sp); }
+    const trou=document.createElement('span');
+    trou.className='trou'; trou.dataset.i=i;
+    const val=reponsesEleve[i];
+    if(e.validated){
+      const ok=(val===t.reponse);
+      trou.classList.add(ok?'correct':'wrong');
+      trou.textContent=val||t.reponse;
+    } else {
+      trou.textContent=val||'';
+      if(!val){ trou.innerHTML='<span class="trou-placeholder">…</span>'; }
+      if(val) trou.classList.add('filled');
+      if(selectedTrou===i) trou.classList.add('selected');
+      trou.addEventListener('click',()=>clicTrou(i));
+    }
+    container.appendChild(trou);
+    if(t.apres){ const sp=document.createElement('span'); sp.textContent=t.apres; container.appendChild(sp); }
+  });
+}
+
+function clicBanque(mot, btn){
+  if(etat[idx].validated) return;
+  selectedMot=mot;
+  // Désélectionner tous les boutons banque visuellement
+  document.querySelectorAll('.mot-banque').forEach(b=>b.style.outline='');
+  btn.style.outline='2px solid var(--jour-fonce)';
+  // Si un trou est déjà sélectionné → placer immédiatement
+  if(selectedTrou!==null){ placerMot(); }
+}
+
+function clicTrou(i){
+  if(etat[idx].validated) return;
+  if(selectedMot!==null){
+    selectedTrou=i; placerMot();
+  } else {
+    // Sélectionner le trou (pour retirer un mot)
+    if(reponsesEleve[i]){
+      // Retirer le mot et le remettre dans la banque
+      const ancien=reponsesEleve[i];
+      reponsesEleve[i]=null;
+      document.querySelectorAll('.mot-banque').forEach(b=>{
+        if(b.dataset.mot===ancien){ b.classList.remove('used'); b.style.outline=''; }
+      });
+    }
+    selectedTrou=i;
+    renderTexte();
+    checkValider();
+  }
+}
+
+function placerMot(){
+  if(selectedMot===null||selectedTrou===null) return;
+  // Si le trou avait déjà un mot, remettre l'ancien dans la banque
+  const ancien=reponsesEleve[selectedTrou];
+  if(ancien&&ancien!==selectedMot){
+    document.querySelectorAll('.mot-banque').forEach(b=>{
+      if(b.dataset.mot===ancien){ b.classList.remove('used'); b.style.outline=''; }
+    });
+  }
+  reponsesEleve[selectedTrou]=selectedMot;
+  // Marquer mot banque comme utilisé
+  document.querySelectorAll('.mot-banque').forEach(b=>{
+    if(b.dataset.mot===selectedMot){ b.classList.add('used'); b.style.outline=''; }
+  });
+  selectedMot=null; selectedTrou=null;
+  renderTexte();
+  checkValider();
+}
+
+function checkValider(){
+  const allFilled=reponsesEleve.every(r=>r!==null);
+  $('btn-valider').disabled=!allFilled;
+}
+
+function effacer(){
+  if(etat[idx].validated) return;
+  reponsesEleve=EXERCICES[idx].trous.map(()=>null);
+  selectedMot=null; selectedTrou=null;
+  document.querySelectorAll('.mot-banque').forEach(b=>{ b.classList.remove('used'); b.style.outline=''; });
+  renderTexte(); $('btn-valider').disabled=true;
+}
+
+function valider(){
+  const ex=EXERCICES[idx], e=etat[idx];
+  if(e.validated) return;
+  let bons=0;
+  ex.trous.forEach((t,i)=>{ if(reponsesEleve[i]===t.reponse) bons++; });
+  const total=ex.trous.length;
+  const correct=(bons===total);
+  e.validated=true; e.correct=correct; e.score=bons;
+  if(correct){ reussis++; fireXP(); } else { erreurs++; }
+  showFeedback(correct,bons);
+  showCorrection();
+  renderTexte();
+  $('btn-valider').disabled=true; $('btn-valider').style.display='none';
+  $('btn-indice').disabled=true; $('btn-indice').style.display='none';
+  $('btn-effacer').disabled=true; $('btn-effacer').style.display='none';
+  const bs=$('btn-suivant'); bs.classList.add('visible'); bs.disabled=false;
+  $('sc-reussis').textContent=reussis; $('sc-erreurs').textContent=erreurs; $('sc-restants').textContent=TOTAL-reussis;
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>s.classList.toggle('on',i<reussis));
+  const pct=Math.round((reussis/TOTAL)*100);
+  $('xp-fill').style.width=pct+'%'; $('xp-pct').textContent=pct+' %';
+}
+
+function showFeedback(correct,score){
+  const fb=$('feedback'); const total=EXERCICES[idx].trous.length;
+  if(correct){
+    fb.className='feedback ok show';
+    fb.innerHTML='<b>Parfait !</b> Tous les groupes nominaux sont correctement complétés.';
+  } else if(score>=total*.75){
+    fb.className='feedback moyen show';
+    fb.innerHTML='<b>Très bien !</b> '+score+' / '+total+' bons. Relis la correction pour les autres.';
+  } else if(score>=total*.5){
+    fb.className='feedback moyen show';
+    fb.innerHTML='<b>Bien essayé.</b> '+score+' / '+total+' bons. Attention aux accords adjectif/nom.';
+  } else {
+    fb.className='feedback ko show';
+    fb.innerHTML='<b>À retravailler.</b> '+score+' / '+total+' bons. Relis attentivement la correction.';
+  }
+}
+
+function showCorrection(){
+  const c=$('correction'); c.className='correction show';
+  c.innerHTML='<b>Correction :</b> '+EXERCICES[idx].correction;
+}
+
+function showIndice(){
+  if(etat[idx].validated) return;
+  const box=$('indice-box'); box.className='indice-box show';
+  box.innerHTML='<b>Indice :</b> '+EXERCICES[idx].indice;
+}
+
+function suivant(){
+  if(!etat[idx].validated) return;
+  if(idx<TOTAL-1){ idx++; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else showResults();
+}
+
+function retour(){
+  if(idx>0){ idx--; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function fireXP(){
+  const p=$('xp-pop'); p.classList.remove('go'); void p.offsetWidth; p.classList.add('go');
+}
+
+function showResults(){
+  $('exo-card').style.display='none';
+  const r=$('results-card'); r.classList.add('show');
+  $('res-score').textContent=reussis+' / '+TOTAL;
+  let stars=''; for(let i=0;i<TOTAL;i++) stars+=(i<reussis)?'★':'☆';
+  $('res-stars').textContent=stars;
+  const ratio=reussis/TOTAL;
+  let msg;
+  if(reussis===TOTAL)  msg='// PARFAIT — tous les GN complétés sans faute !';
+  else if(ratio>=.75)  msg='// TRÈS BIEN — encore un peu d\'entraînement !';
+  else if(ratio>=.5)   msg='// BIEN — relis les corrections, tu progresses !';
+  else                 msg='// À RETRAVAILLER — reprends les exercices depuis le début.';
+  $('res-msg').textContent=msg;
+  let html=''; EXERCICES.forEach((ex,i)=>{
+    const ok=etat[i].correct;
+    html+='<div class="recap-item"><span class="eq">Exercice '+(i+1)+' — '+ex.trous.length+' trous<br><small>Score : '+(etat[i].score||0)+' / '+ex.trous.length+'</small></span><span class="st">'+(ok?'✓':'✗')+'</span></div>';
+  });
+  $('res-recap').innerHTML=html;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function rejouer(){
+  resetState(); buildStars();
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display='';
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+render();
+</script>
+</body>
+</html>
