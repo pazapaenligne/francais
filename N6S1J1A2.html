@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S1 J1 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623; --day-dark:#c47a10;
+      --day-light:#fff5e0; --day-border:#f5d080;
+      --day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:#8dc63f;bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;
+      font-size:.8rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+
+    .fable-box{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.85rem 1rem;margin-bottom:1.2rem;font-size:.84rem;
+      color:var(--day-dark);line-height:1.9;font-style:italic;}
+    .fable-box strong{font-style:normal;font-weight:700;}
+
+    .eq-box{background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1rem;
+      font-size:clamp(1rem,2.5vw,1.15rem);font-weight:700;color:var(--day-dark);line-height:1.5;}
+
+    /* Indice (masqué par défaut, révélé après 1 mauvaise tentative) */
+    .hint-box{margin-bottom:1rem;padding:.75rem 1rem;background:#fffbeb;
+      border:1.5px dashed var(--yellow);border-radius:10px;font-size:.85rem;
+      color:#7a6010;display:none;line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+
+    .choices{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;}
+    .choice{display:flex;align-items:flex-start;gap:.8rem;padding:.7rem 1rem;
+      border:2px solid var(--border);border-radius:10px;cursor:pointer;
+      background:var(--bg);transition:border-color .15s,background .15s;
+      font-size:.95rem;line-height:1.5;position:relative;z-index:2;user-select:none;}
+    .choice:hover:not([aria-disabled="true"]){border-color:var(--day-color);background:var(--day-light);}
+    .choice.selected{border-color:var(--day-color);background:var(--day-light);}
+    .choice.correct-choice{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .choice.wrong-choice{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+    .choice.reveal-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .choice[aria-disabled="true"]{cursor:default;pointer-events:none;}
+    .choice-letter{width:26px;height:26px;border-radius:50%;background:var(--border);
+      display:flex;align-items:center;justify-content:center;font-size:.78rem;
+      font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;
+      transition:background .15s,color .15s;}
+    .choice.selected      .choice-letter{background:var(--day-color);color:#fff;}
+    .choice.correct-choice .choice-letter{background:var(--green);color:#fff;}
+    .choice.wrong-choice   .choice-letter{background:var(--pink);color:#fff;}
+    .choice.reveal-correct .choice-letter{background:var(--green);color:#fff;}
+    .choice-text{flex:1;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;
+      border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;
+      position:relative;z-index:2;min-height:2.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;transform:none;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .btn-hint:hover:not(:disabled){opacity:.9;}
+
+    .feedback{margin-top:1.2rem;padding:.9rem 1.1rem;border-radius:10px;font-size:.9rem;
+      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;
+      font-size:.82rem;margin-top:.3rem;line-height:1.9;}
+
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;
+      position:relative;z-index:2;}
+
+    .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 1rem;
+      background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+      font-size:.82rem;line-height:1.6;flex-wrap:wrap;}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+    .recap-q{flex:1;min-width:160px;color:var(--muted);font-size:.78rem;}
+    .recap-a{color:var(--day-dark);font-weight:700;font-size:.82rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .4s ease both;}
+    @media(max-width:480px){.card{padding:1.3rem;}.btn{font-size:.85rem;padding:.55rem 1rem;}}
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+    </div>
+    <div class="week-label">Semaine 1 &ndash; Jour 1</div>
+    <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">Le Corbeau et le Renard</span></h1>
+    <p class="subtitle">9 questions &middot; Compr&eacute;hension de texte</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-label">Question 1 / 9</span>
+      <span id="prog-pct">0&nbsp;%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="score-row">
+    <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span>&nbsp;correctes</div>
+    <div class="chip wrong">  <div class="dot"></div><span id="count-ko">0</span>&nbsp;erreurs</div>
+    <div class="chip remaining"><div class="dot"></div><span id="count-rem">9</span>&nbsp;restantes</div>
+  </div>
+
+  <div class="card" id="ex-card">
+    <div class="card-stripe"></div>
+    <div class="q-num" id="q-num">Question 1 / 9</div>
+    <div class="theme-badge" id="q-theme">Compr&eacute;hension</div>
+
+    <div class="fable-box">
+      <strong>Rappel :</strong> Ma&icirc;tre corbeau sur un arbre perch&eacute;, tenait en son bec un fromage. Ma&icirc;tre renard par l&rsquo;odeur all&eacute;ch&eacute;, lui tint &agrave; peu pr&egrave;s ce langage&nbsp;: &laquo;&nbsp;Et bonjour, Monsieur du corbeau, que vous &ecirc;tes joli&nbsp;! que vous me semblez beau&nbsp;! Sans mentir, si votre ramage se rapporte &agrave; votre plumage, vous &ecirc;tes le Ph&eacute;nix des h&ocirc;tes de ces bois&nbsp;&raquo;. Le corbeau, fier et orgueilleux, voulut montrer sa voix. Il ouvre son bec et laisse tomber son fromage. Le renard s&rsquo;en saisit et le trompe.
+    </div>
+
+    <div class="eq-box" id="q-question"></div>
+
+    <div class="hint-box" id="hint-box"></div>
+
+    <div class="choices" id="choices-container"></div>
+
+    <!-- Phase 1 : avant validation -->
+    <div class="btn-row" id="row1">
+      <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()" disabled>&#10003;&nbsp;V&eacute;rifier</button>
+      <button class="btn btn-hint"    id="btn-hint"  onclick="showHint()">?&nbsp;Indice</button>
+    </div>
+    <!-- Phase 2 : après validation -->
+    <div class="btn-row" id="row2" style="display:none;">
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()">Suivant&nbsp;&#8594;</button>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <span class="feedback-icon" id="fb-icon"></span>
+      <div style="flex:1;">
+        <div id="fb-msg" style="font-weight:700;margin-bottom:.25rem;"></div>
+        <div class="feedback-detail" id="fb-detail"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">&#8592;&nbsp;Pr&eacute;c&eacute;dent</button>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);align-self:center;" id="nav-info"></span>
+    </div>
+  </div>
+
+  <div class="results" id="results-screen">
+    <div class="results-card">
+      <div class="logo-badge" style="margin-bottom:.5rem">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        R&eacute;sultats
+      </div>
+      <div class="results-score"><span class="s-num" id="score-num">0</span>/9</div>
+      <div class="stars" id="stars-row"></div>
+      <div class="results-msg" id="results-msg"></div>
+      <div class="recap-list" id="recap-list"></div>
+      <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">
+        &#128260;&nbsp;Recommencer
+      </button>
+    </div>
+  </div>
+
+<script>
+/* ─── DONNÉES ────────────────────────────────────────────── */
+var EXERCISES = [
+  {
+    q:      "O\u00f9 se trouve le corbeau au d\u00e9but de la fable\u00a0?",
+    theme:  "Compr\u00e9hension",
+    choices:["Dans un terrier.", "Sur un arbre.", "Au bord d\u2019une rivi\u00e8re.", "Dans son nid."],
+    ans:    1,
+    hint:   "Relis la toute premi\u00e8re phrase de la fable.",
+    fbOk:   "Oui\u00a0! La fable commence par \u00ab\u00a0Ma\u00eetre corbeau sur un arbre perch\u00e9\u00a0\u00bb.",
+    fbKo:   "Relis la premi\u00e8re ligne\u00a0: \u00ab\u00a0Ma\u00eetre corbeau sur un arbre perch\u00e9\u00a0\u00bb."
+  },
+  {
+    q:      "Que tient le corbeau\u00a0?",
+    theme:  "Compr\u00e9hension",
+    choices:["Un morceau de pain.", "Un fromage.", "Une noix.", "Un poisson."],
+    ans:    1,
+    hint:   "Relis les deux premi\u00e8res phrases.",
+    fbOk:   "Exact\u00a0! \u00ab\u00a0Tenait en son bec un fromage\u00a0\u00bb.",
+    fbKo:   "C\u2019est \u00ab\u00a0un fromage\u00a0\u00bb qu\u2019il tient dans son bec."
+  },
+  {
+    q:      "Pourquoi le renard s\u2019approche-t-il du corbeau\u00a0?",
+    theme:  "Compr\u00e9hension",
+    choices:["Il veut devenir son ami.", "Il est attir\u00e9 par l\u2019odeur du fromage.", "Il cherche un endroit pour dormir.", "Il veut chanter avec lui."],
+    ans:    1,
+    hint:   "Le mot \u00ab\u00a0all\u00e9ch\u00e9\u00a0\u00bb signifie \u00ab\u00a0attir\u00e9 par une odeur\u00a0\u00bb.",
+    fbOk:   "Bonne analyse\u00a0! Le renard est \u00ab\u00a0par l\u2019odeur all\u00e9ch\u00e9\u00a0\u00bb, c\u2019est-\u00e0-dire attir\u00e9 par l\u2019odeur du fromage.",
+    fbKo:   "Le texte dit \u00ab\u00a0Ma\u00eetre renard par l\u2019odeur all\u00e9ch\u00e9\u00a0\u00bb\u00a0: c\u2019est l\u2019odeur du fromage qui l\u2019attire."
+  },
+  {
+    q:      "Quelle citation justifie la r\u00e9ponse \u00e0 la question pr\u00e9c\u00e9dente\u00a0?",
+    theme:  "Justification",
+    choices:["Ma\u00eetre corbeau sur un arbre perch\u00e9.", "Ma\u00eetre renard par l\u2019odeur all\u00e9ch\u00e9.", "Que vous \u00eates joli\u00a0!", "Le corbeau, honteux et confus."],
+    ans:    1,
+    hint:   "Une citation doit venir directement du texte et r\u00e9pondre \u00e0 \u00ab\u00a0pourquoi\u00a0\u00bb.",
+    fbOk:   "Parfait\u00a0! C\u2019est bien \u00ab\u00a0par l\u2019odeur all\u00e9ch\u00e9\u00a0\u00bb qui explique la motivation du renard.",
+    fbKo:   "La bonne citation est \u00ab\u00a0Ma\u00eetre renard par l\u2019odeur all\u00e9ch\u00e9\u00a0\u00bb\u00a0: elle montre directement pourquoi il s\u2019approche."
+  },
+  {
+    q:      "Que fait le renard pour obtenir le fromage\u00a0?",
+    theme:  "Analyse",
+    choices:["Il menace le corbeau.", "Il grimpe \u00e0 l\u2019arbre.", "Il flatte le corbeau.", "Il demande poliment un morceau."],
+    ans:    2,
+    hint:   "Relis les paroles du renard\u00a0: que dit-il au corbeau\u00a0?",
+    fbOk:   "Bien vu\u00a0! Le renard flatte le corbeau (\u00ab\u00a0que vous \u00eates joli\u00a0!\u00a0\u00bb) pour le faire ouvrir le bec.",
+    fbKo:   "Le renard ne menace pas et ne grimpe pas\u00a0: il flatte le corbeau avec des compl\u00e9ments (\u00ab\u00a0que vous \u00eates joli\u00a0!\u00a0\u00bb)."
+  },
+  {
+    q:      "Quelle qualit\u00e9 le renard pr\u00e9tend-il admirer chez le corbeau\u00a0?",
+    theme:  "Analyse",
+    choices:["Sa force.", "Sa belle voix.", "Sa rapidit\u00e9.", "Son intelligence."],
+    ans:    1,
+    hint:   "Relis les compliments du renard\u00a0: que lui demande-t-il de montrer\u00a0?",
+    fbOk:   "Exact\u00a0! Le renard dit \u00ab\u00a0si votre ramage se rapporte \u00e0 votre plumage\u00a0\u00bb pour inciter le corbeau \u00e0 chanter.",
+    fbKo:   "Le renard parle de \u00ab\u00a0ramage\u00a0\u00bb (= voix, chant). Il pr\u00e9tend vouloir entendre la belle voix du corbeau."
+  },
+  {
+    q:      "Quelle citation montre la flatterie du renard\u00a0?",
+    theme:  "Justification",
+    choices:["Le renard s\u2019en saisit.", "Que vous \u00eates joli\u00a0! que vous me semblez beau\u00a0!", "Il ouvre son bec.", "Jura, mais un peu tard."],
+    ans:    1,
+    hint:   "Une flatterie est un compl\u00e9ment exag\u00e9r\u00e9. Cherche les exclamations du renard.",
+    fbOk:   "Parfait\u00a0! Cette phrase est le coeur de la flatterie\u00a0: le renard exag\u00e8re les compliments pour tromper le corbeau.",
+    fbKo:   "La bonne citation est \u00ab\u00a0Que vous \u00eates joli\u00a0! que vous me semblez beau\u00a0!\u00a0\u00bb\u00a0: c\u2019est un compl\u00e9ment exag\u00e9r\u00e9 typique de la flatterie."
+  },
+  {
+    q:      "Pourquoi le corbeau ouvre-t-il le bec\u00a0?",
+    theme:  "Compr\u00e9hension",
+    choices:["Pour r\u00e9pondre au renard.", "Pour rire.", "Pour montrer sa voix.", "Pour avaler le fromage."],
+    ans:    2,
+    hint:   "Le corbeau est \u00ab\u00a0fier et orgueilleux\u00a0\u00bb\u00a0: qu\u2019est-ce qui le pousse \u00e0 agir\u00a0?",
+    fbOk:   "Oui\u00a0! Le corbeau \u00ab\u00a0voulut montrer sa voix\u00a0\u00bb, trop fier de lui pour r\u00e9sister aux compliments.",
+    fbKo:   "Le texte dit \u00ab\u00a0voulut montrer sa voix\u00a0\u00bb\u00a0: c\u2019est l\u2019orgueil du corbeau qui le pousse \u00e0 ouvrir le bec."
+  },
+  {
+    q:      "Que se passe-t-il quand le corbeau ouvre le bec\u00a0?",
+    theme:  "Compr\u00e9hension",
+    choices:["Le renard s\u2019enfuit.", "Le fromage tombe.", "Le corbeau s\u2019envole.", "L\u2019arbre se casse."],
+    ans:    1,
+    hint:   "Relis la derni\u00e8re partie de la fable.",
+    fbOk:   "Bien\u00a0! \u00ab\u00a0Il ouvre son bec et laisse tomber son fromage\u00a0\u00bb\u00a0: le renard avait tout pr\u00e9vu.",
+    fbKo:   "En ouvrant le bec pour chanter, le corbeau \u00ab\u00a0laisse tomber son fromage\u00a0\u00bb\u00a0: c\u2019est exactement ce que voulait le renard."
+  }
+];
+
+/* ─── ÉTAT ───────────────────────────────────────────────── */
+var TOTAL       = EXERCISES.length;
+var current     = 0;
+var userAnswers = new Array(TOTAL).fill(null); // null = pas r\u00e9pondu
+var hintUsed    = new Array(TOTAL).fill(false);
+var letters     = ['A','B','C','D'];
+
+function $(id){ return document.getElementById(id); }
+
+/* ─── RENDU D'UNE QUESTION ──────────────────────────────── */
+function render(){
+  var ex = EXERCISES[current];
+
+  $('q-num').textContent   = 'Question ' + (current+1) + ' / ' + TOTAL;
+  $('q-theme').textContent = ex.theme;
+  $('q-question').textContent = ex.q;
+
+  // Réinitialiser l'indice
+  var hb = $('hint-box');
+  hb.className = 'hint-box';
+  hb.textContent = '';
+
+  // Construire les choix
+  var cc = $('choices-container');
+  cc.innerHTML = '';
+  delete cc.dataset.sel;
+  ex.choices.forEach(function(txt, i){
+    var div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = '<span class="choice-letter">' + letters[i] + '</span>'
+                  + '<span class="choice-text">' + txt + '</span>';
+    div.addEventListener('click', function(){ selectChoice(i); });
+    cc.appendChild(div);
+  });
+
+  // Réinitialiser feedback et boutons
+  $('feedback').className  = 'feedback';
+  $('row1').style.display  = 'flex';
+  $('row2').style.display  = 'none';
+  $('btn-check').disabled  = true;
+  $('btn-hint').disabled   = false;
+
+  // Si question déjà répondue → restaurer l'état
+  if(userAnswers[current] !== null){
+    // Remonter l'indice si utilisé
+    if(hintUsed[current]){
+      hb.textContent = '? Indice\u00a0: ' + ex.hint;
+      hb.className   = 'hint-box show';
+    }
+    applyResult(userAnswers[current], false);
+  }
+
+  updateProgress();
+  updateNav();
+}
+
+/* ─── SÉLECTION D'UN CHOIX ──────────────────────────────── */
+function selectChoice(idx){
+  if(userAnswers[current] !== null) return; // déjà validé
+  var choices = $('choices-container').querySelectorAll('.choice');
+  choices.forEach(function(c){ c.classList.remove('selected'); });
+  choices[idx].classList.add('selected');
+  $('choices-container').dataset.sel = idx;
+  $('btn-check').disabled = false;
+}
+
+/* ─── VALIDER ───────────────────────────────────────────── */
+function checkAnswer(){
+  var sel = parseInt($('choices-container').dataset.sel);
+  if(isNaN(sel)) return;
+  userAnswers[current] = sel;
+  applyResult(sel, true);
+  updateChips();
+}
+
+/* ─── APPLIQUER LE RÉSULTAT ─────────────────────────────── */
+function applyResult(sel, animate){
+  var ex      = EXERCISES[current];
+  var correct = (sel === ex.ans);
+  var choices = $('choices-container').querySelectorAll('.choice');
+
+  // Bloquer tous les choix
+  choices.forEach(function(c){ c.setAttribute('aria-disabled','true'); });
+
+  // Coloriser le choix de l'élève
+  choices[sel].classList.remove('selected');
+  choices[sel].classList.add(correct ? 'correct-choice' : 'wrong-choice');
+
+  // Si faux → révéler la bonne réponse EN VERT (mais seulement après que l'élève a répondu)
+  if(!correct){ choices[ex.ans].classList.add('reveal-correct'); }
+
+  // Feedback détaillé
+  var fb  = $('feedback');
+  fb.className = 'feedback show ' + (correct ? 'ok' : 'ko');
+  $('fb-icon').innerHTML = correct ? '&#x2705;' : '&#x274C;';
+  $('fb-msg').textContent  = correct ? 'Bonne r\u00e9ponse\u00a0!' : 'Pas tout \u00e0 fait\u2026';
+  $('fb-detail').textContent = correct ? ex.fbOk : ex.fbKo;
+
+  // Switcher les boutons
+  $('row1').style.display = 'none';
+  $('row2').style.display = 'flex';
+  var isLast = (current === TOTAL - 1);
+  $('btn-next').textContent = isLast ? 'Voir mes r\u00e9sultats \uD83C\uDFC6' : 'Suivant \u2192';
+}
+
+/* ─── INDICE (sans révéler la réponse) ──────────────────── */
+function showHint(){
+  var ex = EXERCISES[current];
+  var hb = $('hint-box');
+  hb.textContent = '? Indice\u00a0: ' + ex.hint;
+  hb.className   = 'hint-box show';
+  hintUsed[current] = true;
+  $('btn-hint').disabled = true; // un seul indice par question
+}
+
+/* ─── NAVIGATION ─────────────────────────────────────────── */
+function nextQ(){
+  if(current < TOTAL - 1){ current++; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else showResults();
+}
+
+function prevQ(){
+  if(current > 0){ current--; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function updateNav(){
+  $('btn-prev').disabled = (current === 0);
+  $('nav-info').textContent = (current + 1) + ' / ' + TOTAL;
+}
+
+/* ─── PROGRESS & CHIPS ───────────────────────────────────── */
+function updateProgress(){
+  var answered = userAnswers.filter(function(a){ return a !== null; }).length;
+  var pct = Math.round(answered / TOTAL * 100);
+  $('progress-bar').style.width = pct + '%';
+  $('prog-label').textContent   = 'Question ' + (current+1) + ' / ' + TOTAL;
+  $('prog-pct').textContent     = pct + '\u00a0%';
+}
+
+function updateChips(){
+  var ok  = userAnswers.filter(function(a,i){ return a !== null && a === EXERCISES[i].ans; }).length;
+  var ko  = userAnswers.filter(function(a,i){ return a !== null && a !== EXERCISES[i].ans; }).length;
+  var rem = userAnswers.filter(function(a){ return a === null; }).length;
+  $('count-ok').textContent  = ok;
+  $('count-ko').textContent  = ko;
+  $('count-rem').textContent = rem;
+}
+
+/* ─── RÉSULTATS FINAUX ───────────────────────────────────── */
+function showResults(){
+  $('ex-card').style.display = 'none';
+  $('results-screen').classList.add('show');
+
+  var ok = userAnswers.filter(function(a,i){ return a !== null && a === EXERCISES[i].ans; }).length;
+  $('score-num').textContent = ok;
+
+  var stars = ok >= 9 ? 5 : ok >= 7 ? 4 : ok >= 5 ? 3 : ok >= 3 ? 2 : 1;
+  $('stars-row').textContent = '\u2B50'.repeat(stars) + '\u2606'.repeat(5-stars);
+
+  var msgs = [
+    'Tu es en train d\u2019apprendre \u00e0 comprendre un texte. Continue \u00e0 t\u2019appuyer sur le texte.',
+    'Tu progresses\u00a0: cherche bien les informations dans le texte.',
+    'Tu progresses, tu sais de mieux en mieux trouver les informations.',
+    'Bon travail\u00a0! Tu comprends de mieux en mieux la fable.',
+    'Bon travail\u00a0! Tu comprends la plupart des \u00e9l\u00e9ments.',
+    'Bien jou\u00e9\u00a0! Tu comprends bien la fable.',
+    'Excellent\u00a0! Tu ma\u00eetrises tr\u00e8s bien la compr\u00e9hension du texte.',
+    'Excellent\u00a0! Tu retrouves pr\u00e8s de toutes les informations.',
+    'Tr\u00e8s bien\u00a0! Encore un effort pour la perfection.',
+    'Parfait\u00a0! Tu ma\u00eetrises la compr\u00e9hension de ce texte\u00a0! \uD83C\uDF89'
+  ];
+  $('results-msg').textContent = msgs[Math.min(ok, msgs.length-1)];
+
+  // Récapitulatif question par question
+  var list = $('recap-list');
+  list.innerHTML = '';
+  EXERCISES.forEach(function(ex, i){
+    var ua      = userAnswers[i];
+    var correct = (ua !== null && ua === ex.ans);
+    var div     = document.createElement('div');
+    div.className = 'recap-item ' + (correct ? 'ok-item' : 'ko-item');
+    div.innerHTML =
+      '<span style="flex-shrink:0;">' + (correct ? '\u2705' : '\u274C') + '</span>'
+      + '<span class="recap-q">' + ex.q + '</span>'
+      + '<span class="recap-a">' + ex.choices[ex.ans] + '</span>';
+    list.appendChild(div);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── RECOMMENCER ────────────────────────────────────────── */
+function restart(){
+  userAnswers = new Array(TOTAL).fill(null);
+  hintUsed    = new Array(TOTAL).fill(false);
+  current     = 0;
+  $('ex-card').style.display = 'block';
+  $('results-screen').classList.remove('show');
+  updateChips();
+  render();
+}
+
+/* ─── INIT ───────────────────────────────────────────────── */
+render();
+updateChips();
+</script>
+</body>
+</html>
