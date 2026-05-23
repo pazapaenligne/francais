@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 3ème S1 J5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   Couleur du jour : VENDREDI (Jour 5)
+   #f5c518 / #8a6000 / #fffbeb / #f5e08a
+   ============================================================ */
+:root{
+  --jour:        #f5c518;   /* couleur principale du jour */
+  --jour-fonce:  #8a6000;   /* version foncée */
+  --jour-clair:  #fffbeb;   /* fond très clair */
+  --jour-pale:   #f5e08a;   /* version pâle */
+
+  --bg:          #fffdf7;   /* fond général clair Pazapa */
+  --dark:        #1a1f2e;   /* encart game sombre */
+  --dark-2:      #232a3d;
+  --vert:        #22c55e;   /* réussis - vert néon */
+  --vert-neon:   #4ade80;
+  --rouge:       #ef4444;   /* erreurs */
+  --txt:         #2b2b2b;
+  --gris:        #8b8b8b;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  padding: 20px 16px 50px;
+}
+
+/* ====== BULLES STATIQUES DE FOND (ne pas toucher) ====== */
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.55; z-index:0; pointer-events:none; }
+.bulle-jaune  { width:200px; height:200px; background:#ffd84d; top:-60px;   right:-50px; }
+.bulle-jour   { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte  { width:150px; height:150px; background:#9be7a5; top:45%;     right:-70px; }
+.bulle-rose   { width:130px; height:130px; background:#f9b8c5; top:30%;     left:-60px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
+
+/* ====================== HEADER ====================== */
+.header{ text-align:center; margin-bottom:22px; }
+
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(245,197,24,.4);
+  margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:16px;
+}
+.sous-titre code{ color:var(--jour-fonce); font-weight:700; }
+
+.badge-revision{
+  display:inline-block;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(245,197,24,.45);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1);   box-shadow:0 4px 14px rgba(245,197,24,.45); }
+  50%    { transform:scale(1.05);box-shadow:0 6px 22px rgba(245,197,24,.7); }
+}
+
+/* ================ ENCART GAME SOMBRE ================ */
+.game{
+  background: var(--dark);
+  border:2px solid var(--jour);
+  border-radius:18px;
+  padding:18px 20px 16px;
+  margin-bottom:24px;
+  box-shadow:0 0 24px rgba(245,197,24,.18), inset 0 0 40px rgba(0,0,0,.3);
+}
+.game-label{
+  font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700;
+  letter-spacing:2px; color:var(--jour); opacity:.85; margin-bottom:12px;
+}
+
+/* étoiles */
+.etoiles{ text-align:center; margin-bottom:18px; font-size:1.55rem; letter-spacing:8px; }
+.etoiles .star{ color:rgba(255,255,255,.28); transition:.3s; display:inline-block; }
+.etoiles .star.on{
+  color:var(--jour);
+  text-shadow:0 0 12px var(--jour), 0 0 20px var(--jour);
+  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* scoreboard */
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.score-col{
+  background: var(--dark-2);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px; padding:12px 6px; text-align:center;
+}
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; line-height:1; }
+.score-col.reussis .score-num{ color:var(--vert-neon); text-shadow:0 0 10px rgba(74,222,128,.6); }
+.score-col.restants .score-num{ color:var(--jour); text-shadow:0 0 10px rgba(245,197,24,.5); }
+.score-col.erreurs .score-num{ color:var(--rouge); text-shadow:0 0 10px rgba(239,68,68,.5); }
+.score-lbl{
+  font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:500;
+  letter-spacing:1.5px; color:rgba(255,255,255,.5); margin-top:6px; text-transform:uppercase;
+}
+
+/* barre XP */
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour); opacity:.85;
+}
+.xp-head span:last-child{
+  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour);
+}
+.xp-bar{
+  height:9px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden;
+}
+.xp-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--jour-fonce), var(--jour), #fff0a8);
+  box-shadow:0 0 10px var(--jour);
+  border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1);
+}
+.defi-count{
+  text-align:center; margin-top:12px;
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700;
+  letter-spacing:2px; color:rgba(255,255,255,.65);
+}
+
+/* ================== CARD EXERCICE ================== */
+.card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+}
+.rainbow{
+  height:6px;
+  background:linear-gradient(90deg,#ff5e5e,#f5c518,#9be7a5,#3ab5d8,#a884ff,#ff5e5e);
+  background-size:300% 100%;
+  animation: slide 4s linear infinite;
+}
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+
+.card-body{ padding:22px 24px 24px; }
+
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
+.type-badge{
+  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  padding:5px 12px; border-radius:14px; border:1px solid var(--jour-pale);
+}
+
+/* encart équation */
+.equation{
+  background:var(--dark);
+  border:2px solid var(--jour);
+  border-radius:14px;
+  padding:26px 20px;
+  text-align:center;
+  margin-bottom:18px;
+  box-shadow:inset 0 0 30px rgba(0,0,0,.3);
+}
+.equation .eq-txt{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.4rem;
+  color:var(--jour);
+  text-shadow:0 0 14px rgba(245,197,24,.55), 0 0 4px rgba(245,197,24,.8);
+  letter-spacing:2px;
+}
+.equation sup{ font-size:1.3rem; }
+.cursor{
+  display:inline-block; width:3px; height:1.9rem; background:var(--jour);
+  margin-left:4px; vertical-align:-6px;
+  box-shadow:0 0 8px var(--jour);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+.consigne{ font-size:.95rem; color:#555; margin-bottom:16px; }
+
+/* zone saisie */
+.saisie-lbl{ font-weight:bold; font-size:.92rem; margin-bottom:10px; color:var(--txt); }
+.intervalle{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:1.8rem; font-weight:bold; color:var(--jour-fonce);
+  margin-bottom:6px;
+}
+.intervalle .brk{ font-family:'Orbitron',sans-serif; }
+.intervalle input{
+  width:78px; height:54px; text-align:center;
+  font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:700;
+  border:2px solid var(--jour-pale);
+  background:var(--jour-clair);
+  border-radius:10px; color:var(--jour-fonce);
+  outline:none; transition:.2s;
+}
+.intervalle input::placeholder{ color:var(--jour); opacity:.5; }
+.intervalle input:focus{
+  border-color:var(--jour);
+  box-shadow:0 0 0 3px rgba(245,197,24,.25);
+}
+.intervalle .sep{ font-size:1.4rem; color:var(--gris); }
+
+/* boutons */
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff; position:relative;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{  background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#3a2c00; }
+
+.btn-valider:not(:disabled){ animation: neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation: neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant:not(:disabled){ animation: neon-jour 1.4s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(245,197,24,.5);} 50%{ box-shadow:0 0 18px rgba(245,197,24,.95);} }
+
+.btn:disabled{
+  background:#d8d8d8 !important; color:#fff !important;
+  cursor:not-allowed; animation:none !important; box-shadow:none !important;
+}
+
+/* indice */
+.indice-box{
+  display:none; margin-top:14px; padding:13px 16px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:.9rem; color:#1a6e88;
+}
+.indice-box.show{ display:block; animation: pop .35s ease; }
+
+/* feedback */
+.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
+.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{  background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{  background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+
+/* correction */
+.correction{
+  display:none; margin-top:14px; padding:15px 18px;
+  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
+  font-size:.92rem; color:#5a4500; line-height:1.6;
+}
+.correction.show{ display:block; animation: pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* navigation */
+.nav{ display:flex; justify-content:space-between; margin-top:20px; }
+.nav button{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:500;
+  letter-spacing:.5px; padding:9px 16px; border-radius:8px;
+  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
+}
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+
+/* +25 XP flottant */
+.xp-pop{
+  position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3rem;
+  color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3);
+  z-index:50; opacity:0; pointer-events:none;
+}
+.xp-pop.go{ animation: xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); }
+}
+
+/* ================= ÉCRAN RÉSULTATS ================= */
+.results{ display:none; }
+.results.show{ display:block; animation: pop .5s ease; }
+.results .mission{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.8rem;
+  text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px;
+}
+.results .big-score{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem;
+  text-align:center; color:var(--jour);
+  text-shadow:0 0 16px rgba(245,197,24,.5); margin:8px 0;
+}
+.results .res-stars{ text-align:center; font-size:1.8rem; letter-spacing:6px; color:var(--jour); margin-bottom:10px; }
+.results .gg{
+  text-align:center; font-family:'Orbitron',sans-serif; font-size:.9rem;
+  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:20px;
+}
+.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.recap-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.9rem;
+}
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-family:'Orbitron',sans-serif; font-weight:700; color:var(--txt); }
+.recap-item .st{ font-size:1.1rem; }
+.btn-rejouer{
+  display:block; width:100%;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px;
+  padding:14px; border:none; border-radius:12px; color:#3a2c00;
+  background:var(--jour); cursor:pointer;
+  animation: neon-jour 1.4s ease-in-out infinite;
+}
+.btn-rejouer:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+
+<!-- bulles statiques de fond -->
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="wrap">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 3ÈME
+    </div>
+    <div class="semaine">Semaine 1 – Jour 5</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre"><code>x² &lt; k</code> &nbsp;·&nbsp; inéquations · 4 challenges</div>
+    <div class="badge-revision">▶ DÉFI RÉVISION 3ÈME</div>
+  </div>
+
+  <!-- ===== ENCART GAME SOMBRE ===== -->
+  <div class="game">
+    <div class="game-label">▶ DÉFI RÉVISION 3ÈME</div>
+
+    <div class="etoiles" id="etoiles">
+      <span class="star">★</span>
+      <span class="star">★</span>
+      <span class="star">★</span>
+      <span class="star">★</span>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">△ Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">4</div>
+        <div class="score-lbl">◆ Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">△ Erreurs</div>
+      </div>
+    </div>
+
+    <div class="xp-head">
+      <span>▶ XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+
+    <div class="defi-count" id="defi-count">DÉFI 1 / 4</div>
+  </div>
+
+  <!-- ===== CARD EXERCICE ===== -->
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="defi-num" id="card-defi-num">DÉFI 01</div>
+        <div class="type-badge" id="card-type">x² &lt; k</div>
+      </div>
+
+      <div class="equation">
+        <span class="eq-txt" id="eq-txt"></span><span class="cursor"></span>
+      </div>
+
+      <div class="consigne">Exprime l'ensemble solution sous forme d'intervalle ouvert.</div>
+
+      <div class="saisie-lbl">Ensemble solution :</div>
+      <div class="intervalle">
+        <span class="brk">]</span>
+        <input type="text" id="in-a" placeholder="?" autocomplete="off" inputmode="text">
+        <span class="sep">;</span>
+        <input type="text" id="in-b" placeholder="?" autocomplete="off" inputmode="text">
+        <span class="brk">[</span>
+      </div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" disabled>✓ VALIDER</button>
+        <button class="btn btn-indice"  id="btn-indice">? INDICE</button>
+        <button class="btn btn-suivant" id="btn-suivant" disabled>SUIVANT →</button>
+      </div>
+
+      <div class="indice-box" id="indice-box"></div>
+      <div class="feedback"   id="feedback"></div>
+      <div class="correction" id="correction"></div>
+
+      <div class="nav">
+        <button id="btn-retour" disabled>← Retour</button>
+        <button id="btn-nav-suivant" disabled>Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ÉCRAN RÉSULTATS ===== -->
+  <div class="card results" id="results-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 4</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- +25 XP flottant -->
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* =========================================================
+   DONNÉES DES 4 DÉFIS  (vérifiées mathématiquement)
+   Format : x² < k  →  ]-√k ; +√k[
+   ========================================================= */
+const DEFIS = [
+  { type:"x² < k", eqHtml:'x<sup>2</sup> &lt; 9',  eqTxt:'x² < 9',
+    a:"-3", b:"3",
+    indice:"La fonction carré : x² < k équivaut à -√k < x < √k. Cherche √9.",
+    correction:"x² &lt; 9 ⟺ |x| &lt; 3 ⟺ <b>-3 &lt; x &lt; 3</b>. Comme l'inégalité est <b>stricte</b>, les bornes sont exclues : S = <b>]-3 ; 3[</b>." },
+
+  { type:"x² < k", eqHtml:'x<sup>2</sup> &lt; 16', eqTxt:'x² < 16',
+    a:"-4", b:"4",
+    indice:"x² < k ⟺ -√k < x < √k. Quelle est la racine carrée de 16 ?",
+    correction:"x² &lt; 16 ⟺ |x| &lt; 4 ⟺ <b>-4 &lt; x &lt; 4</b>. Inégalité stricte ⟹ bornes exclues : S = <b>]-4 ; 4[</b>." },
+
+  { type:"x² < k", eqHtml:'x<sup>2</sup> &lt; 25', eqTxt:'x² < 25',
+    a:"-5", b:"5",
+    indice:"Pense à √25. L'ensemble est symétrique par rapport à 0.",
+    correction:"x² &lt; 25 ⟺ |x| &lt; 5 ⟺ <b>-5 &lt; x &lt; 5</b>. Bornes exclues (inégalité stricte) : S = <b>]-5 ; 5[</b>." },
+
+  { type:"x² < k", eqHtml:'x<sup>2</sup> &lt; 49', eqTxt:'x² < 49',
+    a:"-7", b:"7",
+    indice:"49 = 7 × 7. Quelle est donc la borne de l'intervalle ?",
+    correction:"x² &lt; 49 ⟺ |x| &lt; 7 ⟺ <b>-7 &lt; x &lt; 7</b>. Inégalité stricte ⟹ S = <b>]-7 ; 7[</b>." }
+];
+
+const TOTAL = DEFIS.length;
+
+/* ===================== ÉTAT ===================== */
+let idx = 0;
+let reussis = 0;
+let erreurs = 0;
+let etat = [];   // {validated, correct} pour chaque défi
+
+function resetState(){
+  idx = 0; reussis = 0; erreurs = 0;
+  etat = DEFIS.map(()=>({ validated:false, correct:false }));
+}
+resetState();
+
+/* ============== RÉFÉRENCES DOM ============== */
+const $ = id => document.getElementById(id);
+const inA = $('in-a'), inB = $('in-b');
+const btnValider = $('btn-valider'), btnIndice = $('btn-indice'), btnSuivant = $('btn-suivant');
+const btnRetour = $('btn-retour'), btnNavSuivant = $('btn-nav-suivant');
+
+/* ============== NORMALISATION SAISIE ============== */
+// Accepte "-3" ; "−3" (signe moins unicode) ; espaces ; "3"
+function norm(v){
+  return (v||'').trim()
+    .replace(/\s+/g,'')
+    .replace(/−/g,'-')      // moins unicode -> tiret
+    .replace(/,/g,'.');     // virgule -> point
+}
+
+/* ===================== RENDER ===================== */
+function render(){
+  const d = DEFIS[idx];
+  const e = etat[idx];
+
+  // scoreboard
+  $('sc-reussis').textContent  = reussis;
+  $('sc-erreurs').textContent  = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis;
+
+  // étoiles (s'allument selon nb de réussis)
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  // XP
+  const pct = Math.round((reussis / TOTAL) * 100);
+  $('xp-fill').style.width = pct + '%';
+  $('xp-pct').textContent  = pct + ' %';
+
+  // compteur défi
+  $('defi-count').textContent = 'DÉFI ' + (idx+1) + ' / ' + TOTAL;
+  $('card-defi-num').textContent = 'DÉFI ' + String(idx+1).padStart(2,'0');
+  $('card-type').innerHTML = d.type;
+  $('eq-txt').innerHTML = d.eqHtml;
+
+  // inputs
+  inA.value = ''; inB.value = '';
+  inA.disabled = e.validated;
+  inB.disabled = e.validated;
+
+  // si déjà validé, on réaffiche les valeurs
+  if(e.validated){
+    inA.value = d.a; inB.value = d.b;
+  }
+
+  // reset zones
+  $('indice-box').className = 'indice-box';
+  $('indice-box').innerHTML = '';
+  $('feedback').className = 'feedback';
+  $('feedback').innerHTML = '';
+  $('correction').className = 'correction';
+  $('correction').innerHTML = '';
+
+  // si défi déjà validé -> remontre feedback + correction
+  if(e.validated){
+    showFeedback(e.correct);
+    showCorrection();
+  }
+
+  // boutons
+  refreshButtons();
+
+  // navigation
+  btnRetour.disabled = (idx === 0);
+}
+
+/* ============== GESTION DES BOUTONS ============== */
+function refreshButtons(){
+  const e = etat[idx];
+  const filled = norm(inA.value) !== '' && norm(inB.value) !== '';
+  // Valider : actif si rempli ET pas encore validé
+  btnValider.disabled = (!filled || e.validated);
+  // Suivant (dans la barre de boutons) : actif uniquement si validé
+  btnSuivant.disabled = !e.validated;
+  // Suivant (navigation) : idem
+  btnNavSuivant.disabled = !e.validated;
+}
+
+inA.addEventListener('input', refreshButtons);
+inB.addEventListener('input', refreshButtons);
+
+/* ============== VALIDATION ============== */
+function valider(){
+  const d = DEFIS[idx];
+  const e = etat[idx];
+  if(e.validated) return;
+
+  const ua = norm(inA.value);
+  const ub = norm(inB.value);
+
+  // comparaison numérique pour tolérer "3" vs "3.0" etc.
+  const okA = parseFloat(ua) === parseFloat(d.a);
+  const okB = parseFloat(ub) === parseFloat(d.b);
+  const correct = okA && okB;
+
+  e.validated = true;
+  e.correct = correct;
+
+  if(correct){
+    reussis++;
+    fireXP();
+  } else {
+    erreurs++;
+  }
+
+  inA.disabled = true; inB.disabled = true;
+
+  showFeedback(correct);
+  showCorrection();
+  render();   // met à jour scoreboard, étoiles, XP, boutons
+
+  // si dernier défi validé -> bouton suivant mène aux résultats
+}
+
+function showFeedback(correct){
+  const fb = $('feedback');
+  if(correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '✅ Bravo ! Bonne réponse.';
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '❌ Pas tout à fait. Regarde la correction.';
+  }
+}
+
+function showCorrection(){
+  const d = DEFIS[idx];
+  const c = $('correction');
+  c.className = 'correction show';
+  c.innerHTML = '<b>Correction :</b> ' + d.correction;
+}
+
+/* ============== INDICE (jamais la réponse) ============== */
+function indice(){
+  const d = DEFIS[idx];
+  const box = $('indice-box');
+  box.className = 'indice-box show';
+  box.innerHTML = '💡 <b>Indice :</b> ' + d.indice;
+}
+
+/* ============== NAVIGATION ============== */
+function suivant(){
+  if(!etat[idx].validated) return;
+  if(idx < TOTAL - 1){
+    idx++;
+    render();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    showResults();
+  }
+}
+function retour(){
+  if(idx > 0){ idx--; render(); window.scrollTo({ top:0, behavior:'smooth' }); }
+}
+
+/* ============== +25 XP FLOTTANT ============== */
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go');
+  void p.offsetWidth; // reflow
+  p.classList.add('go');
+}
+
+/* ============== ÉCRAN RÉSULTATS ============== */
+function showResults(){
+  $('exo-card').style.display = 'none';
+  const r = $('results-card');
+  r.classList.add('show');
+
+  $('res-score').textContent = reussis + ' / ' + TOTAL;
+
+  // étoiles résultats
+  let stars = '';
+  for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
+  $('res-stars').textContent = stars;
+
+  // message gaming selon score
+  let msg;
+  if(reussis === TOTAL)      msg = '// PARFAIT — GG, tous les défis validés ! 🏆';
+  else if(reussis >= TOTAL*0.75) msg = '// EXCELLENT — presque parfait !';
+  else if(reussis >= TOTAL*0.5)  msg = '// BIEN JOUÉ — continue comme ça !';
+  else if(reussis > 0)           msg = '// PAS MAL — relance un défi pour progresser !';
+  else                           msg = '// COURAGE — réessaie, tu vas y arriver !';
+  $('res-msg').textContent = msg;
+
+  // récap
+  let html = '';
+  DEFIS.forEach((d,i)=>{
+    const ok = etat[i].correct;
+    html += '<div class="recap-item">'
+          + '<span class="eq">' + d.eqTxt + '</span>'
+          + '<span class="st">' + (ok ? '✅' : '❌') + '</span>'
+          + '</div>';
+  });
+  $('res-recap').innerHTML = html;
+
+  // mettre les étoiles du game à jour
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== REJOUER ============== */
+function rejouer(){
+  resetState();
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display = '';
+  render();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== LISTENERS ============== */
+btnValider.addEventListener('click', valider);
+btnIndice .addEventListener('click', indice);
+btnSuivant.addEventListener('click', suivant);
+btnNavSuivant.addEventListener('click', suivant);
+btnRetour .addEventListener('click', retour);
+$('btn-rejouer').addEventListener('click', rejouer);
+
+// Entrée = valider
+[inA, inB].forEach(el=>{
+  el.addEventListener('keydown', e=>{
+    if(e.key === 'Enter' && !btnValider.disabled) valider();
+  });
+});
+
+/* ============== INIT ============== */
+render();
+</script>
+</body>
+</html>
