@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S1 J2 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f28b82; --day-dark:#c0392b; --day-dark2:#8b1a11;
+      --day-light:#fff0ef; --day-border:#f9c0bb;
+      --day-glow:rgba(242,139,130,.3);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --green-light:#eaf3de; --green-dark:#3d7a10;
+      --pink:#f28b82; --pink-light:#fff0ef;
+      --orange:#f5a623; --orange-light:#fff5e0;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px; --radius-sm:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.5rem 0.75rem 3rem;
+      overflow-x:hidden;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:640px;}
+
+    /* BULLES */
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:220px;height:220px;background:var(--day-color);
+      top:-60px;right:-60px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:160px;height:160px;background:var(--green);
+      bottom:80px;left:-40px;pointer-events:none;}
+
+    /* HEADER */
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--yellow);color:#000;
+      font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.28rem .85rem;border-radius:99px;margin-bottom:.45rem;
+      white-space:nowrap;
+    }
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:clamp(.76rem,2.5vw,.88rem);margin-top:.35rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    /* PROGRESS */
+    .progress-wrap{width:100%;margin-bottom:.9rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;
+      font-size:.73rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .progress-bg{background:var(--border);border-radius:99px;height:6px;overflow:hidden;}
+    .progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;width:0%;}
+
+    /* CHIPS */
+    .chips-row{display:flex;gap:.5rem;margin-bottom:1.2rem;flex-wrap:wrap;
+      position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;
+      border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);
+      font-weight:600;white-space:nowrap;}
+    .chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .chip.ok  .dot{background:var(--green);}
+    .chip.ko  .dot{background:var(--pink);}
+    .chip.rem .dot{background:var(--muted);}
+
+    /* CARD */
+    .card{width:100%;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.2rem;
+      position:relative;z-index:1;
+      box-shadow:0 4px 18px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green),var(--orange));}
+    .ex-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.62rem;font-weight:700;
+      padding:.14rem .52rem;border-radius:4px;text-transform:uppercase;
+      letter-spacing:.07em;margin-bottom:.65rem;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);white-space:nowrap;}
+
+    /* CONSIGNE */
+    .consigne-box{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+      padding:.7rem .9rem;margin-bottom:1rem;
+      font-size:clamp(.82rem,2.5vw,.9rem);color:var(--day-dark);
+      line-height:1.75;word-break:break-word;}
+
+    /* INSTRUCTION INTERACTION */
+    .interact-tip{background:#fffbeb;border:1.5px dashed var(--yellow);
+      border-radius:var(--radius-sm);padding:.55rem .8rem;margin-bottom:1rem;
+      font-size:clamp(.76rem,2.3vw,.82rem);color:#7a6010;
+      font-family:'JetBrains Mono',monospace;line-height:1.7;word-break:break-word;}
+
+    /* ZONE MOTS */
+    .words-pool-label{font-size:.7rem;font-weight:700;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.07em;margin-bottom:.45rem;
+      font-family:'JetBrains Mono',monospace;}
+    .words-pool{display:flex;flex-wrap:wrap;gap:.45rem;
+      min-height:48px;padding:.5rem .6rem;
+      background:var(--bg);border:2px solid var(--border);
+      border-radius:var(--radius-sm);margin-bottom:1.1rem;}
+
+    /* MOT DRAGGABLE */
+    .word-chip{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:.45rem .85rem;border-radius:8px;
+      border:2px solid var(--day-border);background:var(--day-light);
+      color:var(--day-dark);font-weight:700;
+      font-size:clamp(.85rem,2.8vw,1rem);
+      cursor:pointer;min-height:44px;
+      transition:transform .13s,box-shadow .13s,border-color .13s,background .13s;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;-webkit-user-select:none;
+      white-space:nowrap;
+    }
+    .word-chip:hover{transform:translateY(-2px);box-shadow:0 4px 12px var(--day-glow);}
+    .word-chip.selected{
+      background:var(--day-color);color:#fff;border-color:var(--day-dark);
+      box-shadow:0 4px 14px var(--day-glow);transform:translateY(-2px);
+    }
+    .word-chip.placed{
+      background:#e8e4d9;color:var(--muted);border-color:var(--border);
+      cursor:default;pointer-events:none;font-style:italic;
+    }
+    /* après vérif */
+    .word-chip.ok-w{background:var(--green-light);color:var(--green-dark);
+      border-color:var(--green);pointer-events:none;}
+    .word-chip.ko-w{background:var(--pink-light);color:var(--day-dark2);
+      border-color:var(--pink);pointer-events:none;text-decoration:line-through;}
+
+    /* COLONNES DROP */
+    .cols-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem;}
+    @media(max-width:400px){
+      .cols-wrap{grid-template-columns:1fr;gap:.55rem;}
+    }
+    .drop-col{
+      border:2px dashed var(--border);border-radius:var(--radius-sm);
+      padding:.6rem .5rem .5rem;
+      min-height:110px;display:flex;flex-direction:column;
+      transition:border-color .15s,background .15s;
+      position:relative;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .drop-col:hover,.drop-col.dragover{
+      border-color:var(--day-color);background:var(--day-light);}
+    .drop-col.active-target{
+      border-color:var(--day-color);background:var(--day-light);
+      border-style:solid;
+      box-shadow:0 0 0 3px var(--day-glow);
+    }
+    .col-label{
+      font-size:clamp(.72rem,2.3vw,.8rem);font-weight:800;
+      color:var(--day-dark);text-align:center;margin-bottom:.45rem;
+      font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+      letter-spacing:.06em;word-break:break-word;
+    }
+    .col-slot{font-size:.72rem;color:var(--muted);text-align:center;
+      font-family:'JetBrains Mono',monospace;padding:.25rem 0;
+      font-style:italic;}
+    .col-words{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;
+      flex:1;align-content:flex-start;padding-top:.1rem;}
+    /* chips dans les colonnes */
+    .col-chip{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:.35rem .7rem;border-radius:7px;
+      border:2px solid var(--day-border);background:var(--day-light);
+      color:var(--day-dark);font-weight:700;
+      font-size:clamp(.8rem,2.5vw,.92rem);
+      cursor:pointer;min-height:36px;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;-webkit-user-select:none;
+      white-space:nowrap;
+      transition:background .13s,border-color .13s;
+    }
+    .col-chip:hover{background:#ffe4e2;border-color:var(--day-dark);}
+    /* après vérif */
+    .col-chip.ok-w{background:var(--green-light);color:var(--green-dark);
+      border-color:var(--green);pointer-events:none;}
+    .col-chip.ko-w{background:var(--pink-light);color:var(--day-dark2);
+      border-color:var(--pink);pointer-events:none;text-decoration:line-through;}
+    .col-chip.miss-w{background:#fff3cd;color:#856404;
+      border-color:var(--yellow);pointer-events:none;}
+
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.55rem;flex-wrap:wrap;}
+    @media(max-width:479px){
+      .btn-row{flex-direction:column;}
+      .btn-row .btn{width:100%;justify-content:center;}
+    }
+    .btn{display:inline-flex;align-items:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.85rem,2.5vw,.92rem);font-weight:700;
+      cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;
+      min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;transform:none!important;}
+    .btn-primary{background:var(--day-color);color:#fff;
+      box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);
+      box-shadow:0 5px 14px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--muted);
+      border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    /* FEEDBACK */
+    .feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:var(--radius-sm);
+      font-size:clamp(.82rem,2.5vw,.9rem);display:none;
+      align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;}
+    .feedback.show{display:flex;}
+    .feedback.ok {background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#856404;}
+    .feedback.ko {background:var(--pink-light);border:1.5px solid var(--pink);color:var(--day-dark);}
+    .fb-icon{font-size:1.3rem;flex-shrink:0;}
+    .fb-title{font-weight:700;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.78rem;
+      color:var(--text);margin-top:.25rem;line-height:1.85;}
+
+    /* LÉGENDE */
+    .legende{display:none;flex-wrap:wrap;gap:.6rem;margin-top:.7rem;
+      font-size:.74rem;color:var(--muted);align-items:center;
+      font-family:'JetBrains Mono',monospace;}
+    .legende.show{display:flex;}
+    .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;display:inline-block;}
+
+    /* RÉSULTATS */
+    .results{display:none;width:100%;position:relative;z-index:1;
+      animation:fadeUp .4s ease both;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 18px rgba(0,0,0,.06);text-align:center;}
+    .results-score{font-size:clamp(2.6rem,10vw,4.2rem);font-weight:800;
+      line-height:1;margin:.6rem 0 .3rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.7rem;margin:.4rem 0 .8rem;letter-spacing:.08em;}
+    .results-msg{color:var(--muted);font-size:clamp(.84rem,2.5vw,.95rem);
+      margin-bottom:1.4rem;line-height:1.8;word-break:break-word;}
+    .recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;
+      margin-bottom:1.4rem;text-align:left;}
+    @media(max-width:400px){.recap-grid{grid-template-columns:1fr;}}
+    .recap-col{background:var(--bg);border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);padding:.6rem .75rem;}
+    .recap-col-title{font-size:.7rem;font-weight:800;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.06em;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .recap-word{font-size:.82rem;font-weight:700;padding:.2rem 0;
+      border-bottom:1px solid var(--border);display:flex;
+      align-items:center;gap:.35rem;word-break:break-word;}
+    .recap-word:last-child{border-bottom:none;}
+
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(14px);}
+      to  {opacity:1;transform:translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 1 – Jour 2</div>
+      <h1>Je m'entraîne · <span class="hl">Le groupe nominal</span></h1>
+      <p class="subtitle">Classe les mots dans la bonne catégorie</p>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="prog-label">0 / 9 mots placés</span>
+        <span id="prog-pct">0 %</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <div class="chip ok"><div class="dot"></div><span id="cnt-ok">0</span> correct(s)</div>
+      <div class="chip ko"><div class="dot"></div><span id="cnt-ko">0</span> erreur(s)</div>
+      <div class="chip rem"><div class="dot"></div><span id="cnt-rem">9</span> restant(s)</div>
+    </div>
+
+    <div class="card" id="ex-card">
+      <div class="card-stripe"></div>
+      <div class="ex-num">Exercice · Classement</div>
+      <div class="theme-badge">Groupe nominal</div>
+
+      <div class="consigne-box">
+        Maintenant, à toi de jouer ! Remets chaque élément du groupe nominal à sa bonne place en appuyant dessus puis en choisissant la colonne. Attention : certains mots sont essentiels pour construire le groupe nominal correctement !
+      </div>
+
+      <div class="interact-tip">
+        💡 Appuie sur un mot pour le sélectionner (il devient rose), puis appuie sur la colonne où tu veux le placer. Appuie à nouveau sur un mot dans une colonne pour le retirer.
+      </div>
+
+      <!-- MOTS DISPONIBLES -->
+      <div class="words-pool-label">Mots à classer :</div>
+      <div class="words-pool" id="words-pool"></div>
+
+      <!-- COLONNES -->
+      <div class="cols-wrap">
+        <div class="drop-col" id="col-0" onclick="handleColClick(0)">
+          <div class="col-label">Déterminants</div>
+          <div class="col-words" id="colwords-0"></div>
+          <div class="col-slot" id="colslot-0">Appuie ici</div>
+        </div>
+        <div class="drop-col" id="col-1" onclick="handleColClick(1)">
+          <div class="col-label">Noms</div>
+          <div class="col-words" id="colwords-1"></div>
+          <div class="col-slot" id="colslot-1">Appuie ici</div>
+        </div>
+        <div class="drop-col" id="col-2" onclick="handleColClick(2)">
+          <div class="col-label">Adjectifs</div>
+          <div class="col-words" id="colwords-2"></div>
+          <div class="col-slot" id="colslot-2">Appuie ici</div>
+        </div>
+      </div>
+
+      <!-- LÉGENDE post-vérif -->
+      <div class="legende" id="legende">
+        <span class="leg-dot" style="background:#eaf3de;border:1.5px solid #8dc63f;"></span> Correct
+        <span class="leg-dot" style="background:#fff0ef;border:1.5px solid #f28b82;"></span> Incorrect
+        <span class="leg-dot" style="background:#fff3cd;border:1.5px solid #f5c518;"></span> Attendu ici
+      </div>
+
+      <!-- BOUTONS -->
+      <div class="btn-row" id="row1" style="margin-top:.9rem;">
+        <button class="btn btn-primary" id="btn-check" onclick="verifier()" disabled>✓ Vérifier</button>
+        <button class="btn btn-ghost" onclick="effacer()">✕ Effacer</button>
+      </div>
+      <div class="btn-row" id="row2" style="display:none;margin-top:.9rem;">
+        <button class="btn btn-primary" onclick="showResults()">🏆 Voir mes résultats</button>
+        <button class="btn btn-ghost" onclick="recommencer()">↺ Recommencer</button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div>
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-detail" id="fb-detail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="results" id="results-screen">
+      <div class="results-card">
+        <div class="logo-badge" style="margin-bottom:.6rem;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Résultats
+        </div>
+        <div class="results-score">
+          <span class="s-num" id="r-score">0</span>/9
+        </div>
+        <div class="stars" id="r-stars"></div>
+        <div class="results-msg" id="r-msg"></div>
+        <div class="recap-grid" id="r-recap"></div>
+        <button class="btn btn-primary" onclick="recommencer()" style="width:100%;justify-content:center;">
+          ↺ Recommencer
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ══ DONNÉES (issues du H5P, aucun mot inventé) ══════════════════════ */
+// index : 0=journal 1=ancienne 2=école 3=forêt 4=des 5=quotidien 6=grande 7=une 8=le
+var WORDS = [
+  {id:0, txt:'journal'},
+  {id:1, txt:'ancienne'},
+  {id:2, txt:'\u00e9cole'},
+  {id:3, txt:'for\u00eat'},
+  {id:4, txt:'des'},
+  {id:5, txt:'quotidien'},
+  {id:6, txt:'grande'},
+  {id:7, txt:'une'},
+  {id:8, txt:'le'}
+];
+
+// correctElements par colonne (indices WORDS)
+// col 0 = Déterminants : 8(le), 7(une), 4(des)
+// col 1 = Noms         : 2(école), 3(forêt), 0(journal)
+// col 2 = Adjectifs    : 6(grande), 1(ancienne), 5(quotidien)
+var CORRECT = {
+  0: [8, 7, 4],
+  1: [2, 3, 0],
+  2: [6, 1, 5]
+};
+
+var COL_LABELS = ['D\u00e9terminants', 'Noms', 'Adjectifs'];
+
+/* ══ ÉTAT ════════════════════════════════════════════════════════════ */
+var placement   = {};   // wordId -> colId (ou null si dans pool)
+var selected    = null; // wordId sélectionné
+var checked     = false;
+
+/* ══ BUILD POOL ═══════════════════════════════════════════════════ */
+function buildPool(){
+  var pool = document.getElementById('words-pool');
+  pool.innerHTML = '';
+  WORDS.forEach(function(w){
+    var chip = document.createElement('span');
+    chip.className = 'word-chip';
+    chip.id = 'wchip-' + w.id;
+    chip.textContent = w.txt;
+    chip.addEventListener('click', function(){ handlePoolClick(w.id); });
+    pool.appendChild(chip);
+  });
+}
+
+/* ══ CLIC SUR UN MOT DU POOL ══════════════════════════════════════ */
+function handlePoolClick(wid){
+  if(checked) return;
+  if(selected === wid){
+    // désélectionner
+    selected = null;
+    document.getElementById('wchip-'+wid).classList.remove('selected');
+    highlightCols(false);
+    return;
+  }
+  // sélectionner
+  if(selected !== null){
+    var prev = document.getElementById('wchip-'+selected);
+    if(prev) prev.classList.remove('selected');
+  }
+  selected = wid;
+  document.getElementById('wchip-'+wid).classList.add('selected');
+  highlightCols(true);
+}
+
+/* ══ CLIC SUR UN MOT DANS UNE COLONNE (retrait) ══════════════════ */
+function handleColChipClick(wid, colId){
+  if(checked) return;
+  // retirer le mot de la colonne → revenir dans le pool
+  removeFromCol(wid, colId);
+  placement[wid] = null;
+  var chip = document.getElementById('wchip-'+wid);
+  chip.classList.remove('placed');
+  updateAll();
+  // Si un mot était sélectionné, on le garde
+}
+
+/* ══ CLIC SUR UNE COLONNE ═════════════════════════════════════════ */
+function handleColClick(colId){
+  if(checked) return;
+  if(selected === null) return;
+  var wid = selected;
+  // Placer le mot dans la colonne
+  placement[wid] = colId;
+  selected = null;
+  var chip = document.getElementById('wchip-'+wid);
+  chip.classList.remove('selected');
+  chip.classList.add('placed');
+  highlightCols(false);
+  renderCols();
+  updateAll();
+}
+
+/* ══ RENDER COLONNES ══════════════════════════════════════════════ */
+function renderCols(){
+  for(var c=0;c<3;c++){
+    var cw = document.getElementById('colwords-'+c);
+    var cs = document.getElementById('colslot-'+c);
+    cw.innerHTML = '';
+    var wordsInCol = [];
+    WORDS.forEach(function(w){
+      if(placement[w.id] === c) wordsInCol.push(w);
+    });
+    wordsInCol.forEach(function(w){
+      var span = document.createElement('span');
+      span.className = checked ? 'col-chip' : 'col-chip';
+      span.textContent = w.txt;
+      if(!checked){
+        (function(wid, colId){
+          span.addEventListener('click', function(e){
+            e.stopPropagation();
+            handleColChipClick(wid, colId);
+          });
+        })(w.id, c);
+      }
+      cw.appendChild(span);
+    });
+    cs.style.display = wordsInCol.length > 0 ? 'none' : 'block';
+  }
+}
+
+function removeFromCol(wid, colId){
+  // rien à faire dans placement ici, appelé avant placement[wid]=null
+  var cw = document.getElementById('colwords-'+colId);
+  var chips = cw.querySelectorAll('.col-chip');
+  chips.forEach(function(ch){
+    if(ch.textContent === getWordTxt(wid)) ch.remove();
+  });
+  var cs = document.getElementById('colslot-'+colId);
+  var remaining = cw.querySelectorAll('.col-chip').length;
+  cs.style.display = remaining > 0 ? 'none' : 'block';
+}
+
+function getWordTxt(wid){
+  for(var i=0;i<WORDS.length;i++) if(WORDS[i].id===wid) return WORDS[i].txt;
+  return '';
+}
+
+/* ══ HIGHLIGHT COLS ═══════════════════════════════════════════════ */
+function highlightCols(on){
+  for(var c=0;c<3;c++){
+    var col = document.getElementById('col-'+c);
+    col.classList.toggle('active-target', on);
+  }
+}
+
+/* ══ UPDATE PROGRESS + CHIPS + BTN ═══════════════════════════════ */
+function updateAll(){
+  var placed = Object.keys(placement).filter(function(k){ return placement[k] !== null; }).length;
+  var pct    = Math.round(placed / WORDS.length * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = placed + ' / ' + WORDS.length + ' mots plac\u00e9s';
+  document.getElementById('prog-pct').textContent   = pct + ' %';
+  document.getElementById('cnt-rem').textContent    = WORDS.length - placed;
+  document.getElementById('btn-check').disabled     = (placed === 0);
+}
+
+/* ══ EFFACER ══════════════════════════════════════════════════════ */
+function effacer(){
+  if(checked) return;
+  WORDS.forEach(function(w){
+    placement[w.id] = null;
+    var chip = document.getElementById('wchip-'+w.id);
+    chip.classList.remove('placed','selected');
+  });
+  selected = null;
+  highlightCols(false);
+  renderCols();
+  updateAll();
+}
+
+/* ══ VÉRIFIER ═════════════════════════════════════════════════════ */
+function verifier(){
+  checked = true;
+  var ok = 0, ko = 0;
+
+  // Colorer les chips dans les colonnes
+  for(var c=0;c<3;c++){
+    var cw = document.getElementById('colwords-'+c);
+    var chips = cw.querySelectorAll('.col-chip');
+    chips.forEach(function(span){
+      var txt = span.textContent.trim();
+      var wid = getWidByTxt(txt);
+      var isCorrect = CORRECT[c].indexOf(wid) !== -1;
+      span.classList.add(isCorrect ? 'ok-w' : 'ko-w');
+      span.style.pointerEvents = 'none';
+      if(isCorrect) ok++;
+      else          ko++;
+    });
+
+    // Montrer les mots manquants attendus dans cette colonne
+    CORRECT[c].forEach(function(wid){
+      if(placement[wid] !== c){
+        // mot attendu ici mais absent ou mal placé
+        var miss = document.createElement('span');
+        miss.className = 'col-chip miss-w';
+        miss.textContent = getWordTxt(wid);
+        cw.appendChild(miss);
+      }
+    });
+
+    document.getElementById('colslot-'+c).style.display = 'none';
+  }
+
+  // Colorer les mots restants dans le pool
+  WORDS.forEach(function(w){
+    var chip = document.getElementById('wchip-'+w.id);
+    if(placement[w.id] === null){
+      chip.classList.add('placed');
+      chip.style.opacity = '.45';
+      chip.style.pointerEvents = 'none';
+    }
+  });
+
+  document.getElementById('cnt-ok').textContent = ok;
+  document.getElementById('cnt-ko').textContent = ko;
+  document.getElementById('legende').classList.add('show');
+
+  // Feedback
+  var score = Math.max(0, ok - ko);
+  var total = WORDS.length;
+  var pct   = Math.round(score / total * 100);
+  document.getElementById('prog-fill').style.width  = Math.round(ok/total*100) + '%';
+  document.getElementById('prog-label').textContent = ok + ' / ' + total + ' corrects';
+  document.getElementById('prog-pct').textContent   = Math.round(ok/total*100) + ' %';
+
+  var fb    = document.getElementById('feedback');
+  var cls, icon, title, detail;
+
+  if(pct >= 76){
+    cls='ok'; icon='✅'; title='Excellent !';
+    detail='Tu ma\u00eetrises bien les cat\u00e9gories du groupe nominal. Les d\u00e9terminants introduisent le nom, les adjectifs l\u2019enrichissent.';
+  } else if(pct >= 51){
+    cls='mid'; icon='👍'; title='Bon travail !';
+    detail='Tu as bien identifi\u00e9 la plupart des \u00e9l\u00e9ments. V\u00e9rifie les mots en jaune dans les colonnes : ce sont ceux que tu as manqu\u00e9s.';
+  } else if(pct >= 26){
+    cls='mid'; icon='🙂'; title='Continue !';
+    detail='Tu progresses ! Rappel : le d\u00e9terminant pr\u00e9c\u00e8de le nom (le, une, des), le nom est le noyau (chien, \u00e9cole\u2026), l\u2019adjectif d\u00e9crit le nom (grand, ancien\u2026).';
+  } else {
+    cls='ko'; icon='💪'; title='Essaie encore !';
+    detail='Pas de panique. Relis la le\u00e7on, puis recommence. Rappel : d\u00e9terminant = le/la/un/une/des, nom = le mot principal, adjectif = qualifie le nom.';
+  }
+
+  fb.className = 'feedback show ' + cls;
+  document.getElementById('fb-icon').textContent  = icon;
+  document.getElementById('fb-title').textContent = title;
+  document.getElementById('fb-detail').textContent = detail;
+
+  document.getElementById('row1').style.display = 'none';
+  document.getElementById('row2').style.display = 'flex';
+}
+
+function getWidByTxt(txt){
+  for(var i=0;i<WORDS.length;i++) if(WORDS[i].txt===txt) return WORDS[i].id;
+  return -1;
+}
+
+/* ══ RÉSULTATS ════════════════════════════════════════════════════ */
+function showResults(){
+  document.getElementById('ex-card').style.display = 'none';
+  document.getElementById('results-screen').classList.add('show');
+
+  var ok = 0;
+  for(var c=0;c<3;c++){
+    CORRECT[c].forEach(function(wid){
+      if(placement[wid] === c) ok++;
+    });
+  }
+
+  document.getElementById('r-score').textContent = ok;
+  var stars = ok >= 9 ? 5 : ok >= 7 ? 4 : ok >= 5 ? 3 : ok >= 3 ? 2 : 1;
+  document.getElementById('r-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(5-stars);
+
+  var msgs = [
+    'Pas encore tout \u00e0 fait\u2026 Relis la le\u00e7on sur le groupe nominal et recommence\u00a0!',
+    'Tu progresses\u00a0! Certaines cat\u00e9gories sont encore \u00e0 consolider.',
+    'Pas mal\u00a0! Tu commences \u00e0 bien identifier les cat\u00e9gories du groupe nominal.',
+    'Bon travail\u00a0! Tu ma\u00eetrises bien la construction du groupe nominal.',
+    'Excellent\u00a0! Tu ma\u00eetrises parfaitement les \u00e9l\u00e9ments du groupe nominal\u00a0!'
+  ];
+  document.getElementById('r-msg').textContent = msgs[stars-1];
+
+  // Récap par colonne
+  var recap = document.getElementById('r-recap');
+  recap.innerHTML = '';
+  for(var c=0;c<3;c++){
+    var div = document.createElement('div');
+    div.className = 'recap-col';
+    div.innerHTML = '<div class="recap-col-title">'+COL_LABELS[c]+'</div>';
+    CORRECT[c].forEach(function(wid){
+      var correct = (placement[wid] === c);
+      var row = document.createElement('div');
+      row.className = 'recap-word';
+      row.innerHTML = (correct ? '✅' : '❌') + ' ' + getWordTxt(wid);
+      row.style.color = correct ? 'var(--green-dark)' : 'var(--day-dark)';
+      div.appendChild(row);
+    });
+    recap.appendChild(div);
+  }
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ RECOMMENCER ══════════════════════════════════════════════════ */
+function recommencer(){
+  checked  = false;
+  selected = null;
+  placement = {};
+  WORDS.forEach(function(w){ placement[w.id] = null; });
+
+  document.getElementById('ex-card').style.display = 'block';
+  document.getElementById('results-screen').classList.remove('show');
+  document.getElementById('row1').style.display = 'flex';
+  document.getElementById('row2').style.display = 'none';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('legende').classList.remove('show');
+  document.getElementById('cnt-ok').textContent = '0';
+  document.getElementById('cnt-ko').textContent = '0';
+
+  buildPool();
+  renderCols();
+  updateAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ INIT ═════════════════════════════════════════════════════════ */
+WORDS.forEach(function(w){ placement[w.id] = null; });
+buildPool();
+renderCols();
+updateAll();
+</script>
+</body>
+</html>
