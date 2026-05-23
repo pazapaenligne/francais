@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – Homophones être</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Couleur du jour : Mercredi Vert ── */
+    :root{
+      --day-color:#8dc63f; --day-dark:#3d7a10;
+      --day-light:#f0faeb; --day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.3);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --pink:#f28b82;
+      --orange:#f5a623; --blue:#3ab5d8;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;word-break:break-word;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;
+      opacity:.13;width:340px;height:340px;background:var(--yellow);
+      top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;
+      opacity:.13;width:260px;height:260px;background:var(--day-color);
+      bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:180px;height:180px;background:var(--blue);
+      bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:120px;height:120px;background:var(--pink);
+      top:200px;left:-30px;pointer-events:none;}
+
+    /* Header */
+    header{text-align:center;margin-bottom:1.8rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;
+      background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      color:var(--muted);margin-bottom:.5rem;}
+    .hero-icon{font-size:2.4rem;margin-bottom:.4rem;display:block;}
+    h1{font-size:clamp(1.2rem,3.5vw,1.7rem);font-weight:800;line-height:1.3;}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;}
+    /* Bandeau accroche */
+    .accroche{
+      display:inline-block;background:var(--day-light);
+      border:2px solid var(--day-border);border-radius:12px;
+      padding:.6rem 1.2rem;margin-top:.8rem;
+      font-size:.88rem;font-weight:700;color:var(--day-dark);
+      line-height:1.6;
+    }
+
+    /* Progression */
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.1rem;
+      position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;
+      font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* Chips */
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.5rem;
+      flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;
+      border-radius:99px;font-size:.8rem;
+      font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+
+    /* Card */
+    .card{width:100%;max-width:680px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.8rem 2rem 1.6rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+    .q-header{display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:.8rem;}
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .q-type{font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;white-space:nowrap;
+      text-transform:uppercase;letter-spacing:.07em;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);}
+
+    /* Question */
+    .q-text{font-size:1rem;font-weight:700;color:var(--text);word-break:break-word;
+      margin-bottom:1.2rem;line-height:1.7;border-left:4px solid var(--day-color);
+      padding-left:.9rem;}
+
+    /* Indice gramm */
+    .rule-box{background:var(--day-light);border:1.5px solid var(--day-border);word-break:break-word;
+      border-radius:10px;padding:.65rem 1rem;margin-bottom:1.2rem;
+      font-size:.82rem;font-family:'JetBrains Mono',monospace;
+      color:var(--day-dark);line-height:1.8;}
+    .rule-box strong{color:var(--day-color);}
+
+    /* Choix QCM */
+    .choices{display:flex;flex-direction:column;gap:.55rem;
+      margin-bottom:1.2rem;position:relative;z-index:2;}
+    .choice{display:flex;align-items:flex-start;gap:.8rem;-webkit-tap-highlight-color:transparent;
+      padding:.7rem 1rem;border:2px solid var(--border);border-radius:11px;
+      cursor:pointer;font-size:.95rem;line-height:1.6;
+      background:var(--bg);transition:all .15s;position:relative;z-index:2;}
+    .choice:hover:not(.locked){border-color:var(--day-color);
+      background:var(--day-light);transform:translateX(3px);}
+    .choice.selected{border-color:var(--day-color);background:var(--day-light);}
+    .choice.correct-c{border-color:var(--green);background:#f0faeb;cursor:default;}
+    .choice.wrong-c  {border-color:var(--pink); background:#fff0ef;cursor:default;}
+    .choice.missed-c {border-color:var(--green);background:#f0faeb;
+      border-style:dashed;cursor:default;}
+    .choice.locked{cursor:default;}
+    .choice-radio{width:18px;height:18px;border-radius:50%;
+      border:2px solid var(--border);flex-shrink:0;margin-top:.15rem;
+      transition:all .15s;}
+    .choice-checkbox{width:18px;height:18px;border-radius:4px;
+      border:2px solid var(--border);flex-shrink:0;margin-top:.15rem;
+      transition:all .15s;}
+    .choice.selected .choice-radio,
+    .choice.selected .choice-checkbox{background:var(--day-color);border-color:var(--day-color);}
+    .choice.correct-c .choice-radio,
+    .choice.correct-c .choice-checkbox,
+    .choice.missed-c .choice-radio,
+    .choice.missed-c .choice-checkbox{background:var(--green);border-color:var(--green);}
+    .choice.wrong-c .choice-radio,
+    .choice.wrong-c .choice-checkbox{background:var(--pink);border-color:var(--pink);}
+    /* Phrase mise en valeur */
+    .phrase{font-family:'JetBrains Mono',monospace;font-size:.95rem;
+      font-weight:600;}
+    
+    
+
+    /* Boutons */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;
+      position:relative;z-index:2;margin-bottom:.5rem;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;-webkit-tap-highlight-color:transparent;
+      padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.92rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;
+      position:relative;z-index:2;min-height:2.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;
+      box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);
+      box-shadow:0 5px 16px var(--day-glow);}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    /* Indice */
+    .hint-box{margin-top:.9rem;background:#fffbeb;
+      border:1.5px dashed var(--yellow);border-radius:10px;
+      padding:.75rem 1rem;font-size:.85rem;color:#7a6010;
+      display:none;line-height:1.8;}
+    .hint-box.show{display:block;}
+
+    /* Feedback */
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;
+      font-size:.9rem;display:none;align-items:flex-start;gap:.7rem;line-height:1.7;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-size:.85rem;margin-top:.3rem;line-height:1.8;word-break:break-word;}
+
+    /* Nav */
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.2rem;
+      gap:.7rem;position:relative;z-index:2;}
+
+    /* Résultats */
+    .results{width:100%;max-width:680px;text-align:center;
+      display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2.5rem 2rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;
+      line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;
+      gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;
+      padding:.6rem 1rem;background:var(--bg);
+      border:1.5px solid var(--border);border-radius:10px;
+      font-size:.82rem;line-height:1.6;}
+    .recap-item .rq{flex:1;color:var(--day-dark);}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .4s ease both;}
+    @media(max-width:480px){
+      .card{padding:1.3rem;}
+      .btn{font-size:.85rem;padding:.55rem 1rem;width:100%;justify-content:center;}
+      .btn-row{flex-direction:column;}
+      .nav-row{flex-direction:column-reverse;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 3</div>
+  <span class="hero-icon">🔍</span>
+  <h1>J&rsquo;observe et je <span class="hl">teste</span></h1>
+  <p class="subtitle">Homophones du verbe &ecirc;tre &middot; est / es / et / ai</p>
+  <div class="accroche">
+    Des erreurs se sont gliss&eacute;es dans les phrases&hellip;<br>
+    <strong>Sauras-tu les rep&eacute;rer ?</strong>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 / 5</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"  ><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">5</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="q-header">
+    <div class="q-num" id="q-num">Question 1</div>
+    <div class="q-type" id="q-type">Choix unique</div>
+  </div>
+  <div class="rule-box" id="rule-box"></div>
+  <div class="q-text" id="q-text"></div>
+  <div class="choices" id="choices-list"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()" disabled>
+      &#10003; V&eacute;rifier
+    </button>
+    <button class="btn btn-hint" onclick="toggleHint()">? Indice</button>
+  </div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <div>
+      <div id="fb-msg"></div>
+      <div class="feedback-detail" id="fb-detail"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">
+      &larr; Pr&eacute;c&eacute;dent
+    </button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>
+      Suivant &rarr;
+    </button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/5</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn btn-primary" onclick="restart()"
+            style="margin:0 auto;display:flex;">
+      &#128260; Recommencer
+    </button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   EXERCICES — Homophones du verbe être (H5P fidèle)
+   Contenu vérifié : Q1✅ Q2✅ Q3✅ Q4✅ Q5✅
+══════════════════════════════════════════════════════ */
+var EXERCISES = [
+
+  /* Q1 — Choix unique : trouver la phrase avec "est" correct */
+  {
+    type: "single",
+    typeLabel: "Choix unique",
+    q: "Quelle phrase utilise correctement le mot \u00ab\u00a0est\u00a0\u00bb\u00a0?",
+    rule: "<strong>Rappel :</strong> \u00ab\u00a0est\u00a0\u00bb = verbe \u00eatre, 3e personne du singulier (il/elle/on). "
+        + "On peut le remplacer par \u00ab\u00a0\u00e9tait\u00a0\u00bb pour v\u00e9rifier.",
+    hint: "Essaie de remplacer le mot par \u00ab\u00a0\u00e9tait\u00a0\u00bb. Si \u00e7a marche, c\u2019est \u00ab\u00a0est\u00a0\u00bb.",
+    choices: [
+      { text: "Elle <strong>et</strong> tr\u00e8s gentille.", correct: false,
+        fb: "\u00ab\u00a0et\u00a0\u00bb est une conjonction de coordination. Ici on veut le verbe \u00eatre : \u00ab\u00a0Elle <strong>est</strong> tr\u00e8s gentille\u00a0\u00bb." },
+      { text: "Mon fr\u00e8re <strong>est</strong> en retard.", correct: true,
+        fb: "Correct\u00a0! \u00ab\u00a0est\u00a0\u00bb = verbe \u00eatre \u00e0 la 3e personne. On peut dire \u00ab\u00a0Mon fr\u00e8re <em>\u00e9tait</em> en retard\u00a0\u00bb \u2192 \u00e7a fonctionne\u00a0!" },
+      { text: "Il <strong>ait</strong> parti hier.", correct: false,
+        fb: "\u00ab\u00a0ait\u00a0\u00bb est le subjonctif de \u00ab\u00a0avoir\u00a0\u00bb. La forme correcte ici serait \u00ab\u00a0Il <strong>est</strong> parti hier\u00a0\u00bb." }
+    ]
+  },
+
+  /* Q2 — Choix multiples : identifier les phrases correctes */
+  {
+    type: "multi",
+    typeLabel: "Choix multiples",
+    q: "Dans quelles phrases le mot est-il bien employ\u00e9\u00a0? (plusieurs r\u00e9ponses possibles)",
+    rule: "<strong>Rappel :</strong> \u00ab\u00a0es\u00a0\u00bb = verbe \u00eatre, 2e personne du singulier (tu). "
+        + "\u00ab\u00a0est\u00a0\u00bb = 3e personne (il/elle/on).",
+    hint: "Regarde le sujet de chaque phrase : \u00ab\u00a0tu\u00a0\u00bb \u2192 \u00ab\u00a0es\u00a0\u00bb, \u00ab\u00a0il/elle\u00a0\u00bb \u2192 \u00ab\u00a0est\u00a0\u00bb.",
+    choices: [
+      { text: "Tu <strong>es</strong> content de venir.", correct: true,
+        fb: "Correct\u00a0! \u00ab\u00a0tu es\u00a0\u00bb : sujet = tu \u2192 forme \u00ab\u00a0es\u00a0\u00bb." },
+      { text: "Il <strong>et</strong> moi allons jouer.", correct: false,
+        fb: "\u00ab\u00a0et\u00a0\u00bb est une conjonction, pas un verbe. La phrase \u00ab\u00a0Il et moi\u00a0\u00bb ne contient pas de verbe \u00eatre : pas d\u2019homophone \u00e0 utiliser ici." },
+      { text: "Elle <strong>est</strong> absente aujourd\u2019hui.", correct: true,
+        fb: "Correct\u00a0! \u00ab\u00a0elle est\u00a0\u00bb : sujet = elle \u2192 forme \u00ab\u00a0est\u00a0\u00bb." },
+      { text: "Il <strong>ait</strong> un nouveau v\u00e9lo.", correct: false,
+        fb: "\u00ab\u00a0ait\u00a0\u00bb = subjonctif de \u00ab\u00a0avoir\u00a0\u00bb. La forme correcte ici serait \u00ab\u00a0Il <strong>a</strong> un nouveau v\u00e9lo\u00a0\u00bb (verbe avoir, indicatif)." }
+    ]
+  },
+
+  /* Q3 — Choix unique : choisir la bonne phrase */
+  {
+    type: "single",
+    typeLabel: "Choix unique",
+    q: "Choisis la bonne phrase\u00a0:",
+    rule: "<strong>Rappel :</strong> Avec le sujet \u00ab\u00a0tu\u00a0\u00bb, le verbe \u00eatre s\u2019\u00e9crit \u00ab\u00a0es\u00a0\u00bb "
+        + "(et non \u00ab\u00a0est\u00a0\u00bb qui est pour il/elle, ni \u00ab\u00a0et\u00a0\u00bb qui est une conjonction).",
+    hint: "Sujet = \u00ab\u00a0tu\u00a0\u00bb \u2192 quelle forme du verbe \u00eatre correspond ?",
+    choices: [
+      { text: "Tu <strong>es</strong> tr\u00e8s gentil.", correct: true,
+        fb: "Correct\u00a0! Sujet \u00ab\u00a0tu\u00a0\u00bb \u2192 \u00ab\u00a0es\u00a0\u00bb. On peut v\u00e9rifier : \u00ab\u00a0Tu <em>\u00e9tais</em> tr\u00e8s gentil\u00a0\u00bb fonctionne." },
+      { text: "Tu <strong>et</strong> tr\u00e8s gentil.", correct: false,
+        fb: "\u00ab\u00a0et\u00a0\u00bb est une conjonction de coordination (il relie deux \u00e9l\u00e9ments). Ce n\u2019est pas un verbe. Il fallait \u00ab\u00a0es\u00a0\u00bb." },
+      { text: "Tu <strong>est</strong> tr\u00e8s gentil.", correct: false,
+        fb: "\u00ab\u00a0est\u00a0\u00bb est la 3e personne du singulier (il/elle/on). Avec \u00ab\u00a0tu\u00a0\u00bb il faut \u00ab\u00a0es\u00a0\u00bb." }
+    ]
+  },
+
+  /* Q4 — Choix unique : repérer l'erreur */
+  {
+    type: "single",
+    typeLabel: "Trouver l\u2019erreur",
+    q: "Quelle phrase contient une erreur\u00a0?",
+    rule: "<strong>M\u00e9thode :</strong> Pour chaque phrase, v\u00e9rifie si le mot utilis\u00e9 "
+        + "correspond bien au sujet. Sujet \u00ab\u00a0il/elle\u00a0\u00bb \u2192 \u00ab\u00a0est\u00a0\u00bb | Sujet \u00ab\u00a0tu\u00a0\u00bb \u2192 \u00ab\u00a0es\u00a0\u00bb",
+    hint: "Regarde bien le sujet de chaque phrase. \u00ab\u00a0Marie\u00a0\u00bb = 3e personne.",
+    choices: [
+      { text: "Il <strong>est</strong> content de son dessin.", correct: false,
+        fb: "Cette phrase est correcte\u00a0: sujet \u00ab\u00a0il\u00a0\u00bb \u2192 \u00ab\u00a0est\u00a0\u00bb." },
+      { text: "Je suis heureux <strong>et</strong> fier.", correct: false,
+        fb: "Cette phrase est correcte\u00a0: \u00ab\u00a0et\u00a0\u00bb relie \u00ab\u00a0heureux\u00a0\u00bb et \u00ab\u00a0fier\u00a0\u00bb \u2014 c\u2019est bien la conjonction." },
+      { text: "Marie <strong>es</strong> en retard.", correct: true,
+        fb: "Erreur rep\u00e9r\u00e9e\u00a0! \u00ab\u00a0es\u00a0\u00bb est r\u00e9serv\u00e9 au sujet \u00ab\u00a0tu\u00a0\u00bb. Avec \u00ab\u00a0Marie\u00a0\u00bb (3e personne), il faut \u00ab\u00a0est\u00a0\u00bb : \u00ab\u00a0Marie <strong>est</strong> en retard\u00a0\u00bb." }
+    ]
+  },
+
+  /* Q5 — Vrai/Faux */
+  {
+    type: "single",
+    typeLabel: "Vrai ou Faux",
+    q: "\u00ab\u00a0Et\u00a0\u00bb est un verbe conjugu\u00e9.",
+    rule: "<strong>Les homophones \u00e0 conna\u00eetre :</strong><br>"
+        + "\u00ab\u00a0<strong>est</strong>\u00a0\u00bb = verbe \u00eatre (il <em>\u00e9tait</em>)<br>"
+        + "\u00ab\u00a0<strong>es</strong>\u00a0\u00bb = verbe \u00eatre avec \u00ab\u00a0tu\u00a0\u00bb<br>"
+        + "\u00ab\u00a0<strong>et</strong>\u00a0\u00bb = conjonction de coordination (relie deux \u00e9l\u00e9ments)<br>"
+        + "\u00ab\u00a0<strong>ai</strong>\u00a0\u00bb = verbe avoir avec \u00ab\u00a0je\u00a0\u00bb",
+    hint: "Peut-on dire \u00ab\u00a0J\u2019ai et tu es\u00a0\u00bb ? Ou est-ce qu\u2019\u00ab\u00a0et\u00a0\u00bb a une autre fonction ?",
+    choices: [
+      { text: "Vrai", correct: false,
+        fb: "Faux\u00a0! \u00ab\u00a0et\u00a0\u00bb est une <strong>conjonction de coordination</strong>. Elle relie deux mots ou deux propositions (\u00ab\u00a0chat <em>et</em> chien\u00a0\u00bb). Ce n\u2019est pas un verbe." },
+      { text: "Faux", correct: true,
+        fb: "Exact\u00a0! \u00ab\u00a0et\u00a0\u00bb est une conjonction de coordination, pas un verbe. Les verbes sont \u00ab\u00a0est\u00a0\u00bb, \u00ab\u00a0es\u00a0\u00bb et \u00ab\u00a0ai\u00a0\u00bb." }
+    ]
+  }
+];
+
+/* ══ State ══════════════════════════════════════════════ */
+var TOTAL = EXERCISES.length;
+var current = 0;
+var userAnswers  = new Array(TOTAL).fill(null); // single: index | multi: [indexes]
+var hintVisible  = false;
+var $ = function(id){ return document.getElementById(id); };
+
+/* ══ Render ═════════════════════════════════════════════ */
+function render(){
+  var ex = EXERCISES[current];
+  $("q-num").textContent = "Question " + (current+1);
+  $("q-type").textContent = ex.typeLabel;
+  $("q-text").innerHTML  = ex.q;
+  $("rule-box").innerHTML = ex.rule;
+  $("hint-box").innerHTML = "";
+  $("hint-box").classList.remove("show");
+  hintVisible = false;
+  $("feedback").className = "feedback";
+
+  var answered = userAnswers[current] !== null;
+  buildChoices(ex, answered);
+
+  $("btn-check").disabled = !answered && true; // will be enabled after selection
+  if(answered){
+    $("btn-check").disabled = true;
+    $("btn-next").disabled  = false;
+    var correct = isCorrect(current);
+    showFeedback(correct, current);
+  } else {
+    $("btn-check").disabled = true; // enabled only after selection
+    $("btn-next").disabled  = true;
+  }
+  updateProgress();
+  $("btn-prev").disabled = current === 0;
+}
+
+function buildChoices(ex, locked){
+  var container = $("choices-list");
+  container.innerHTML = "";
+  var ua = userAnswers[current];
+
+  ex.choices.forEach(function(ch, idx){
+    var div = document.createElement("div");
+    div.className = "choice";
+
+    var icon = document.createElement("div");
+    icon.className = ex.type === "multi" ? "choice-checkbox" : "choice-radio";
+
+    var txt = document.createElement("span");
+    txt.innerHTML = ch.text;
+
+    if(locked){
+      div.classList.add("locked");
+      var selected = ex.type === "multi"
+        ? (ua && ua.indexOf(idx) !== -1)
+        : (ua === idx);
+      if(ch.correct)          div.classList.add("correct-c");
+      else if(selected)       div.classList.add("wrong-c");
+    } else {
+      // Pas encore répondu
+      var isSelected = ex.type === "multi"
+        ? (window._multiSel && window._multiSel.indexOf(idx) !== -1)
+        : (window._singleSel === idx);
+      if(isSelected) div.classList.add("selected");
+
+      div.onclick = (function(i){ return function(){ selectChoice(i); }; })(idx);
+    }
+
+    div.appendChild(icon);
+    div.appendChild(txt);
+    container.appendChild(div);
+  });
+}
+
+/* ══ Sélection ══════════════════════════════════════════ */
+function selectChoice(idx){
+  var ex = EXERCISES[current];
+  if(ex.type === "single"){
+    window._singleSel = idx;
+    window._multiSel  = null;
+  } else {
+    if(!window._multiSel) window._multiSel = [];
+    var pos = window._multiSel.indexOf(idx);
+    if(pos === -1) window._multiSel.push(idx);
+    else           window._multiSel.splice(pos, 1);
+  }
+  buildChoices(ex, false);
+  var hasSelection = ex.type === "single"
+    ? window._singleSel !== undefined && window._singleSel !== null
+    : window._multiSel && window._multiSel.length > 0;
+  $("btn-check").disabled = !hasSelection;
+}
+
+/* ══ Validation ═════════════════════════════════════════ */
+function checkAnswer(){
+  var ex = EXERCISES[current];
+  if(ex.type === "single"){
+    if(window._singleSel === undefined || window._singleSel === null) return;
+    userAnswers[current] = window._singleSel;
+  } else {
+    if(!window._multiSel || window._multiSel.length === 0) return;
+    userAnswers[current] = window._multiSel.slice().sort();
+  }
+  window._singleSel = null;
+  window._multiSel  = null;
+  render();
+}
+
+function isCorrect(idx){
+  var ex = EXERCISES[idx];
+  var ua = userAnswers[idx];
+  if(ex.type === "single"){
+    return ex.choices[ua].correct;
+  } else {
+    var correctIdxs = [];
+    ex.choices.forEach(function(c,i){ if(c.correct) correctIdxs.push(i); });
+    correctIdxs.sort();
+    var uaSorted = ua.slice().sort();
+    if(uaSorted.length !== correctIdxs.length) return false;
+    for(var i=0;i<correctIdxs.length;i++){
+      if(uaSorted[i] !== correctIdxs[i]) return false;
+    }
+    return true;
+  }
+}
+
+function showFeedback(correct, idx){
+  var ex = EXERCISES[idx];
+  var ua = userAnswers[idx];
+  var fb = $("feedback");
+  fb.className = "feedback show " + (correct ? "ok" : "ko");
+  $("fb-icon").textContent = correct ? "\u2705" : "\u274C";
+
+  var msgs = [
+    "Bonne r\u00e9ponse\u00a0!", "Excellent\u00a0!", "Tr\u00e8s bien\u00a0!", "Parfait\u00a0!"
+  ];
+  var koMsgs = [
+    "Pas tout \u00e0 fait\u2026", "Attention\u00a0!", "Encore un effort\u00a0!"
+  ];
+
+  $("fb-msg").textContent = correct
+    ? msgs[Math.floor(Math.random()*msgs.length)]
+    : koMsgs[Math.floor(Math.random()*koMsgs.length)];
+
+  // Feedback détaillé : prendre le feedback de la réponse choisie
+  var det = "";
+  if(ex.type === "single"){
+    det = ex.choices[ua].fb || "";
+  } else {
+    // Multi : montrer le fb des mauvais choix
+    var ua2 = Array.isArray(ua) ? ua : [];
+    var fbParts = [];
+    ex.choices.forEach(function(c, i){
+      var wasSelected = ua2.indexOf(i) !== -1;
+      if(!c.correct && wasSelected && c.fb) fbParts.push(c.fb);
+      if(c.correct && !wasSelected && c.fb) fbParts.push(c.fb);
+    });
+    // Si tout bon, feedback positif
+    if(correct){
+      ex.choices.forEach(function(c, i){
+        if(c.correct && c.fb) fbParts.push(c.fb);
+      });
+    }
+    det = fbParts.join(" / ");
+  }
+  $("fb-detail").innerHTML = det;
+}
+
+/* ══ Indice ═════════════════════════════════════════════ */
+function toggleHint(){
+  hintVisible = !hintVisible;
+  var h = $("hint-box");
+  if(hintVisible){
+    h.innerHTML = "<strong>? Indice\u00a0:</strong> " + EXERCISES[current].hint;
+    h.classList.add("show");
+  } else {
+    h.classList.remove("show");
+  }
+}
+
+/* ══ Progression ════════════════════════════════════════ */
+function updateProgress(){
+  var answered = userAnswers.filter(function(a){ return a !== null; }).length;
+  var ok = userAnswers.filter(function(a,i){ return a !== null && isCorrect(i); }).length;
+  var pct = Math.round((answered / TOTAL) * 100);
+  $("progress-bar").style.width = pct + "%";
+  $("prog-label").textContent = "Question " + (current+1) + " / " + TOTAL;
+  $("prog-pct").textContent = pct + "\u00a0%";
+  $("count-ok").textContent = ok;
+  $("count-ko").textContent = answered - ok;
+  $("count-rem").textContent = TOTAL - answered;
+}
+
+function nextQ(){
+  if(current < TOTAL-1){ current++; window._singleSel=null; window._multiSel=null; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showResults();
+}
+function prevQ(){ if(current>0){ current--; window._singleSel=null; window._multiSel=null; render(); } }
+
+/* ══ Résultats ══════════════════════════════════════════ */
+function showResults(){
+  $("ex-card").style.display = "none";
+  $("results-screen").classList.add("show");
+  var ok = userAnswers.filter(function(a,i){ return a!==null && isCorrect(i); }).length;
+  $("score-num").textContent = ok;
+  var stars = ok>=5?5:ok>=4?4:ok>=3?3:ok>=2?2:1;
+  $("stars-row").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5-stars);
+  var msgs = [
+    "Revois les homophones du verbe \u00eatre.",
+    "Encore quelques confusions. Continue\u00a0!",
+    "Pas mal\u00a0! Quelques erreurs \u00e0 corriger.",
+    "Bien jou\u00e9\u00a0!",
+    "Tr\u00e8s bien\u00a0! Tu ma\u00eetrises presque tout.",
+    "Excellent\u00a0! Tu ma\u00eetrises les homophones du verbe \u00eatre\u00a0! \uD83C\uDF89"
+  ];
+  $("results-msg").textContent = msgs[Math.min(ok, msgs.length-1)];
+
+  var list = $("recap-list"); list.innerHTML = "";
+  EXERCISES.forEach(function(ex, i){
+    var correct = userAnswers[i] !== null && isCorrect(i);
+    var div = document.createElement("div");
+    div.className = "recap-item " + (correct ? "ok-item" : "ko-item");
+    // Bonne(s) réponse(s)
+    var corrTexts = ex.choices.filter(function(c){ return c.correct; })
+      .map(function(c){ return c.text.replace(/<[^>]+>/g,''); }).join(" / ");
+    div.innerHTML = "<span>" + (correct ? "\u2705" : "\u274C") + "</span>"
+      + "<span class='rq'>Q" + (i+1) + " — " + ex.q.replace(/<[^>]+>/g,'').substring(0,50) + "\u2026</span>"
+      + "<span style='color:#3d7a10;font-size:.78rem;'>" + corrTexts + "</span>";
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  userAnswers = new Array(TOTAL).fill(null);
+  current = 0;
+  window._singleSel = null; window._multiSel = null;
+  $("ex-card").style.display = "block";
+  $("results-screen").classList.remove("show");
+  render();
+}
+
+/* ══ Init ═══════════════════════════════════════════════ */
+window._singleSel = null; window._multiSel = null;
+document.addEventListener("DOMContentLoaded", function(){ render(); });
+</script>
+</body>
+</html>
