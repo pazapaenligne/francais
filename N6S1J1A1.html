@@ -107,13 +107,14 @@
     .txt-label{display:block;font-family:'JetBrains Mono',monospace;font-size:.65rem;
       color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;}
 
-    /* FIX: zone de tap agrandie pour mobile (min 44px de hauteur effective via padding) */
+    /* FIX: inline-block + nowrap empêche la coupure entre le mot et sa ponctuation */
+    .word-wrap{display:inline;white-space:nowrap;}
     .w{
-      display:inline;cursor:pointer;border-radius:4px;
-      padding:3px 3px; /* FIX: augmenté pour faciliter le tap */
+      display:inline-block;cursor:pointer;border-radius:4px;
+      padding:3px 3px;
       transition:background .13s,color .13s;
       -webkit-user-select:none;user-select:none;
-      -webkit-tap-highlight-color:transparent; /* FIX: supprime le flash bleu sur iOS */
+      -webkit-tap-highlight-color:transparent;
     }
     .w:hover{background:var(--day-light);color:var(--day-dark);}
     .w.sel{background:var(--day-color);color:#fff;font-weight:700;border-radius:5px;
@@ -349,22 +350,36 @@ function buildText(){
     tokens.forEach(function(tok){
       if(!tok) return;
       if(/^\s+$/.test(tok)){
-        container.appendChild(document.createTextNode('\u00a0'));
+        container.appendChild(document.createTextNode(' '));
         return;
       }
-      var clean = norm(tok);
+      // Sépare le mot de sa ponctuation finale (ex: "cieux," → "cieux" + ",")
+      var m     = tok.match(/^([^\u00ab\u00bb\u00a0\u202f!?,.:;\u2026»«]+)(.*)/);
+      var word  = m ? m[1] : tok;
+      var punct = m ? m[2] : '';
+      var clean = norm(word);
       var idx   = queue.indexOf(clean);
       var isAns = idx !== -1;
-      var span  = document.createElement('span');
-      span.textContent = tok;
+
       if(clean.length > 1){
+        // Wrapper nowrap : mot + ponctuation ne se séparent jamais
+        var wrapper = document.createElement('span');
+        wrapper.style.cssText = 'display:inline;white-space:nowrap;';
+
+        var span = document.createElement('span');
+        span.textContent = word;
         span.className = 'w';
         span.dataset.answer = isAns ? '1' : '0';
         if(isAns) queue.splice(idx, 1);
         span.addEventListener('click', function(){ toggle(span); });
         wordEls.push({el: span, isAnswer: isAns});
+
+        wrapper.appendChild(span);
+        if(punct) wrapper.appendChild(document.createTextNode(punct));
+        container.appendChild(wrapper);
+      } else {
+        container.appendChild(document.createTextNode(tok));
       }
-      container.appendChild(span);
     });
     if(vi < VERSES.length - 1) container.appendChild(document.createElement('br'));
   });
