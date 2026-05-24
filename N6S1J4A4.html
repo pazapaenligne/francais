@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S1 J4 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#3ab5d8; --day-dark:#1a6e88; --day-dark2:#0d4a5e;
+      --day-light:#e8f6fb; --day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.28);
+      --sel-color:#f5a623; --sel-dark:#c47a10;
+      --sel-light:#fff5e0; --sel-border:#f5d080;
+      --sel-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --green-light:#f0faeb; --green-dark:#3d7a10;
+      --pink:#f28b82; --pink-light:#fff0ef;
+      --orange:#f5a623; --orange-light:#fff5e0;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px; --radius-sm:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.5rem 0.75rem 3rem;
+      overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:640px;}
+
+    /* BULLES */
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;
+      width:200px;height:200px;background:var(--day-color);
+      top:-60px;right:-60px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;
+      width:150px;height:150px;background:var(--orange);
+      bottom:80px;left:-40px;pointer-events:none;}
+
+    /* HEADER */
+    header{text-align:center;margin-bottom:1.3rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--yellow);color:#000;
+      font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.28rem .85rem;border-radius:99px;margin-bottom:.4rem;white-space:nowrap;}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:clamp(.75rem,2.5vw,.86rem);margin-top:.3rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    /* PROGRESS */
+    .progress-wrap{width:100%;margin-bottom:.8rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;
+      font-size:.72rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .progress-bg{background:var(--border);border-radius:99px;height:6px;overflow:hidden;}
+    .progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;width:0%;}
+
+    /* CHIPS SCORE */
+    .chips-row{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;
+      position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;
+      border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);
+      font-weight:600;white-space:nowrap;}
+    .chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .chip.ok  .dot{background:var(--green);}
+    .chip.ko  .dot{background:var(--pink);}
+    .chip.rem .dot{background:var(--muted);}
+
+    /* CARD */
+    .card{width:100%;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.2rem;
+      position:relative;z-index:1;
+      box-shadow:0 4px 18px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+    .ex-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.62rem;font-weight:700;
+      padding:.14rem .52rem;border-radius:4px;text-transform:uppercase;
+      letter-spacing:.07em;margin-bottom:.65rem;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);white-space:nowrap;}
+
+    /* CONSIGNE */
+    .consigne-box{background:var(--bg);border:1.5px solid var(--border);
+      border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+      padding:.7rem .9rem;margin-bottom:1rem;
+      font-size:clamp(.82rem,2.5vw,.9rem);color:var(--text);
+      line-height:1.75;word-break:break-word;}
+    .consigne-box strong{color:var(--day-dark);}
+
+    /* RAPPEL */
+    .rappel-box{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.7rem .9rem;margin-bottom:1rem;
+      font-size:clamp(.78rem,2.3vw,.85rem);color:var(--day-dark);
+      line-height:1.8;word-break:break-word;}
+    .rappel-box .r-title{font-weight:800;font-family:'JetBrains Mono',monospace;
+      font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+      margin-bottom:.4rem;color:var(--day-dark);}
+    .rappel-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;}
+    .rappel-pill{display:inline-flex;align-items:center;gap:.3rem;
+      background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:99px;padding:.2rem .65rem;
+      font-size:.78rem;font-weight:700;color:var(--day-dark);white-space:nowrap;}
+
+    /* POOL */
+    .pool-label{font-size:.7rem;font-weight:700;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;
+      font-family:'JetBrains Mono',monospace;}
+    .verbes-pool{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem;}
+
+    .verb-chip{
+      display:flex;align-items:center;gap:.7rem;
+      padding:.6rem .9rem;border-radius:var(--radius-sm);
+      border:1.5px solid var(--border);background:var(--surface);
+      color:var(--text);font-weight:700;
+      font-size:clamp(.88rem,2.8vw,1rem);line-height:1.4;
+      cursor:pointer;min-height:48px;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;-webkit-user-select:none;
+      transition:border-color .13s,background .13s,box-shadow .13s;
+      word-break:break-word;
+    }
+    .verb-chip .vdot{width:10px;height:10px;border-radius:50%;
+      background:var(--border);flex-shrink:0;
+      transition:background .13s;}
+ 
+    .verb-chip:hover:not(.placed):not(.correct-c):not(.wrong-c){
+      border-color:var(--sel-color);background:var(--sel-light);}
+    .verb-chip.selected-v{
+      border-color:var(--sel-color);background:var(--sel-light);
+      box-shadow:0 0 0 3px var(--sel-glow);}
+    .verb-chip.selected-v .vdot{background:var(--sel-color);}
+    .verb-chip.placed{opacity:.38;cursor:default;pointer-events:none;}
+    .verb-chip.correct-c{border-color:var(--green);background:var(--green-light);
+      color:var(--green-dark);cursor:default;pointer-events:none;}
+    .verb-chip.correct-c .vdot{background:var(--green);}
+    .verb-chip.wrong-c{border-color:var(--pink);background:var(--pink-light);
+      color:#c0392b;cursor:default;}
+    .verb-chip.wrong-c .vdot{background:var(--pink);}
+
+    /* COLONNES */
+    .cols-wrap{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem;}
+    .drop-col{
+      border:2px solid var(--border);border-radius:var(--radius-sm);
+      padding:.7rem .6rem .6rem;min-height:120px;
+      display:flex;flex-direction:column;
+      transition:border-color .14s,background .14s,box-shadow .14s;
+      cursor:pointer;-webkit-tap-highlight-color:transparent;
+      background:var(--surface);
+    }
+    .drop-col:hover{border-color:var(--sel-color);background:var(--sel-light);}
+    .drop-col.active-target{
+      border-color:var(--sel-color);background:var(--sel-light);
+      border-style:solid;box-shadow:0 0 0 3px var(--sel-glow);}
+    .col-header{text-align:center;margin-bottom:.5rem;
+      padding-bottom:.5rem;border-bottom:1.5px solid var(--border);}
+    .col-num{font-size:clamp(1.1rem,4vw,1.5rem);font-weight:900;
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;line-height:1.1;}
+    .col-type{font-size:.68rem;font-weight:700;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;opacity:.8;}
+    .col-ex{font-size:.63rem;color:var(--muted);font-style:italic;margin-top:.15rem;
+      font-family:'JetBrains Mono',monospace;}
+    .col-count{font-size:.65rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);text-align:center;margin-bottom:.35rem;}
+    .col-words{display:flex;flex-direction:column;gap:.3rem;flex:1;}
+    .col-slot{font-size:.68rem;color:var(--muted);text-align:center;
+      font-family:'JetBrains Mono',monospace;padding:.2rem 0;font-style:italic;}
+    .col-chip{
+      display:flex;align-items:center;gap:.5rem;
+      padding:.35rem .55rem;border-radius:6px;
+      border:1.5px solid var(--border);background:var(--bg);
+      color:var(--text);font-weight:700;
+      font-size:clamp(.78rem,2.5vw,.88rem);line-height:1.4;
+      cursor:pointer;min-height:36px;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;word-break:break-word;
+      transition:background .13s;
+    }
+    .col-chip:hover{background:var(--sel-light);border-color:var(--sel-color);}
+    .col-chip.correct-c{background:var(--green-light);border-color:var(--green);
+      color:var(--green-dark);pointer-events:none;}
+    .col-chip.wrong-c{background:var(--pink-light);border-color:var(--pink);
+      color:#c0392b;pointer-events:none;}
+    .col-chip.miss-w{background:#fff3cd;border-color:var(--yellow);
+      color:#856404;pointer-events:none;}
+
+    /* LÉGENDE */
+    .legende{display:none;flex-wrap:wrap;gap:.6rem;margin-top:.6rem;margin-bottom:.5rem;
+      font-size:.73rem;color:var(--muted);align-items:center;
+      font-family:'JetBrains Mono',monospace;}
+    .legende.show{display:flex;}
+    .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;display:inline-block;}
+
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem;}
+    @media(max-width:479px){
+      .btn-row{flex-direction:column;}
+      .btn-row .btn{width:100%;justify-content:center;}
+    }
+    .btn{display:inline-flex;align-items:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.83rem,2.5vw,.92rem);font-weight:700;
+      cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;
+      min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-primary{background:var(--day-color);color:#fff;
+      box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);
+      box-shadow:0 5px 14px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--muted);
+      border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    /* FEEDBACK */
+    .feedback{margin-top:.9rem;padding:.85rem 1rem;border-radius:var(--radius-sm);
+      font-size:clamp(.82rem,2.5vw,.9rem);display:none;
+      align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;}
+    .feedback.show{display:flex;}
+    .feedback.ok {background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#856404;}
+    .feedback.ko {background:var(--pink-light);border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+    .fb-icon{font-size:1.3rem;flex-shrink:0;}
+    .fb-title{font-weight:700;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.78rem;
+      color:var(--text);margin-top:.2rem;line-height:1.85;}
+
+    /* RÉSULTATS */
+    .results{display:none;width:100%;position:relative;z-index:1;
+      animation:fadeUp .4s ease both;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 18px rgba(0,0,0,.06);text-align:center;}
+    .r-score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;
+      line-height:1;margin:.6rem 0 .3rem;}
+    .r-score-big .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.08em;}
+    .r-msg{color:var(--muted);font-size:clamp(.84rem,2.5vw,.95rem);
+      margin-bottom:1rem;line-height:1.8;word-break:break-word;}
+    .recap-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;
+      margin-bottom:1.4rem;text-align:left;}
+    .recap-col{background:var(--bg);border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);padding:.65rem .8rem;}
+    .recap-col-title{font-size:.68rem;font-weight:800;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.06em;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .recap-word{font-size:.84rem;padding:.2rem 0;
+      border-bottom:1px solid var(--border);display:flex;
+      align-items:center;gap:.3rem;word-break:break-word;font-weight:700;}
+    .recap-word:last-child{border-bottom:none;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 1 – Jour 4</div>
+      <h1>J'observe et je teste ·<br><span class="hl">Les groupes de verbes</span></h1>
+      <p class="subtitle">Avant de commencer, teste ce dont tu te souviens.</p>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="prog-label">0 / 8 verbes placés</span>
+        <span id="prog-pct">0 %</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <div class="chip ok"><div class="dot"></div><span id="cnt-ok">0</span> correct(s)</div>
+      <div class="chip ko"><div class="dot"></div><span id="cnt-ko">0</span> erreur(s)</div>
+      <div class="chip rem"><div class="dot"></div><span id="cnt-rem">8</span> restant(s)</div>
+    </div>
+
+    <div class="card" id="ex-card">
+      <div class="card-stripe"></div>
+      <div class="ex-num">Exercice · Classement</div>
+      <div class="theme-badge">Groupes de verbes au présent</div>
+
+      <div class="consigne-box">
+        <strong>Avant de commencer, teste ce dont tu te souviens sur les groupes de verbes !</strong><br>
+        Appuie sur un verbe pour le sélectionner (il devient orange), puis appuie sur la colonne <strong>1er Groupe</strong> ou <strong>2e Groupe</strong>.
+        Appuie sur un verbe dans une colonne pour le retirer.
+      </div>
+
+      <!-- RAPPEL -->
+      <div class="rappel-box">
+        <div class="r-title">💡 Rappel rapide</div>
+        <div>
+          <strong>1er groupe</strong> : infinitif en <strong>-er</strong>
+          <div class="rappel-row">
+            <span class="rappel-pill">parler → je parle</span>
+            <span class="rappel-pill">jouer → ils jouent</span>
+          </div>
+        </div>
+        <div style="margin-top:.5rem;">
+          <strong>2e groupe</strong> : infinitif en <strong>-ir</strong> · présent avec <strong>-iss-</strong>
+          <div class="rappel-row">
+            <span class="rappel-pill">finir → je finis</span>
+            <span class="rappel-pill">grandir → vous grandissez</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pool-label">Verbes à classer :</div>
+      <div class="verbes-pool" id="verbes-pool"></div>
+
+      <!-- COLONNES -->
+      <div class="cols-wrap">
+        <div class="drop-col" id="col-g1" onclick="dropTo('g1')">
+          <div class="col-header">
+            <div class="col-num">1er</div>
+            <div class="col-type">Groupe</div>
+            <div class="col-ex">infinitif en -er</div>
+          </div>
+          <div class="col-count" id="colcount-g1">0 verbe(s)</div>
+          <div class="col-words" id="colwords-g1"></div>
+          <div class="col-slot" id="colslot-g1">↑ Appuie ici</div>
+        </div>
+        <div class="drop-col" id="col-g2" onclick="dropTo('g2')">
+          <div class="col-header">
+            <div class="col-num">2e</div>
+            <div class="col-type">Groupe</div>
+            <div class="col-ex">infinitif en -ir (-iss-)</div>
+          </div>
+          <div class="col-count" id="colcount-g2">0 verbe(s)</div>
+          <div class="col-words" id="colwords-g2"></div>
+          <div class="col-slot" id="colslot-g2">↑ Appuie ici</div>
+        </div>
+      </div>
+
+      <div class="legende" id="legende">
+        <span class="leg-dot" style="background:#f0faeb;border:1.5px solid #8dc63f;"></span> Correct
+        &nbsp;
+        <span class="leg-dot" style="background:#fff0ef;border:1.5px solid #f28b82;"></span> Incorrect
+        &nbsp;
+        <span class="leg-dot" style="background:#fff3cd;border:1.5px solid #f5c518;"></span> Attendu ici
+      </div>
+
+      <div class="btn-row" id="row-verif">
+        <button class="btn btn-primary" id="btn-verif" onclick="verifier()">✓ Vérifier</button>
+        <button class="btn btn-ghost" onclick="recommencer()">↺ Recommencer</button>
+      </div>
+      <div class="btn-row" id="row-result" style="display:none;">
+        <button class="btn btn-primary" onclick="showResults()">🏆 Voir mes résultats</button>
+        <button class="btn btn-ghost" onclick="recommencer()">↺ Recommencer</button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div>
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-detail" id="fb-detail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="results" id="results-screen">
+      <div class="results-card">
+        <div class="logo-badge" style="margin-bottom:.6rem;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Résultats
+        </div>
+        <div class="r-score-big"><span class="s-num" id="r-score">0</span>/8</div>
+        <div class="stars" id="r-stars"></div>
+        <div class="r-msg" id="r-msg"></div>
+        <div class="recap-grid" id="r-recap"></div>
+        <button class="btn btn-primary" onclick="recommencer()"
+          style="width:100%;justify-content:center;">↺ Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ══ DONNÉES (issues du H5P, aucun mot inventé) ═══════════════ */
+// col g1 = 1er groupe (-er) : indices 1(je parle), 4(je regarde), 6(nous distinguons), 7(ils jouent)
+// col g2 = 2e groupe (-ir/-iss-) : indices 0(je finis), 2(vous grandissez), 3(tu choisis), 5(nous réussissons)
+var VERBES = [
+  {id:0, txt:'je finis',          inf:'finir',          groupe:'g2'},
+  {id:1, txt:'je parle',          inf:'parler',         groupe:'g1'},
+  {id:2, txt:'vous grandissez',   inf:'grandir',        groupe:'g2'},
+  {id:3, txt:'tu choisis',        inf:'choisir',        groupe:'g2'},
+  {id:4, txt:'je regarde',        inf:'regarder',       groupe:'g1'},
+  {id:5, txt:'nous réussissons',  inf:'réussir',        groupe:'g2'},
+  {id:6, txt:'nous distinguons',  inf:'distinguer',     groupe:'g1'},
+  {id:7, txt:'ils jouent',        inf:'jouer',          groupe:'g1'}
+];
+var TOTAL = VERBES.length; // 8
+var COLS  = {g1:'1er Groupe', g2:'2e Groupe'};
+
+/* ══ ÉTAT ═══════════════════════════════════════════════════ */
+var placement = {}, selected = null, checked = false;
+var bonPrev = 0, mauvPrev = 0;
+
+function $(id){ return document.getElementById(id); }
+
+/* ══ BUILD ═══════════════════════════════════════════════════ */
+function buildExo(){
+  placement = {}; selected = null; checked = false;
+  bonPrev = 0; mauvPrev = 0;
+  VERBES.forEach(function(v){ placement[v.id] = null; });
+
+  var pool = $('verbes-pool'); pool.innerHTML = '';
+  VERBES.forEach(function(v){
+    var chip = document.createElement('div');
+    chip.className = 'verb-chip'; chip.dataset.id = v.id;
+  chip.innerHTML =
+  '<span class="vdot"></span>'
+  +'<span>'+v.txt+'</span>';
+    chip.addEventListener('click', function(){ selectVerb(v.id, chip); });
+    pool.appendChild(chip);
+  });
+
+  ['g1','g2'].forEach(function(g){
+    $('colwords-'+g).innerHTML = '';
+    $('colslot-'+g).style.display = 'block';
+    $('colcount-'+g).textContent = '0 verbe(s)';
+  });
+
+  $('feedback').className = 'feedback';
+  $('legende').classList.remove('show');
+  $('row-verif').style.display  = 'flex';
+  $('row-result').style.display = 'none';
+  $('btn-verif').disabled = false;
+  $('ex-card').style.display = 'block';
+  $('results-screen').classList.remove('show');
+  updateProgress();
+}
+
+/* ══ SÉLECTION ═══════════════════════════════════════════════ */
+function selectVerb(id, chip){
+  if(checked) return;
+  // Si déjà dans une colonne, retirer d'abord
+  if(placement[id] !== null){
+    removeFromCol(id);
+    selected = id;
+    document.querySelectorAll('#verbes-pool .verb-chip').forEach(function(c){ c.classList.remove('selected-v'); });
+    chip.classList.add('selected-v');
+    highlightCols(true); return;
+  }
+  // Toggle sélection
+  if(selected === id){
+    selected = null; chip.classList.remove('selected-v');
+    highlightCols(false); return;
+  }
+  document.querySelectorAll('#verbes-pool .verb-chip').forEach(function(c){ c.classList.remove('selected-v'); });
+  selected = id; chip.classList.add('selected-v');
+  highlightCols(true);
+}
+
+function dropTo(groupe){
+  if(selected === null || checked) return;
+  var id = selected;
+  if(placement[id] !== null) removeFromCol(id);
+  placement[id] = groupe;
+
+  // Marquer pool chip comme placé
+  var pc = document.querySelector('#verbes-pool .verb-chip[data-id="'+id+'"]');
+  if(pc){ pc.classList.remove('selected-v'); pc.classList.add('placed'); }
+
+  // Créer chip dans la colonne
+  var v = VERBES[id];
+  var cw = $('colwords-'+groupe);
+  var span = document.createElement('div');
+  span.className = 'col-chip'; span.dataset.id = id;
+ span.innerHTML = '<span>'+v.txt+'</span>';
+  span.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(!checked) removeFromCol(id);
+  });
+  cw.appendChild(span);
+  updateColCount(groupe);
+  selected = null; highlightCols(false);
+  updateProgress();
+}
+
+function removeFromCol(id){
+  var g = placement[id]; if(!g) return;
+  var el = $('colwords-'+g).querySelector('[data-id="'+id+'"]');
+  if(el) el.remove();
+  placement[id] = null;
+  var pc = document.querySelector('#verbes-pool .verb-chip[data-id="'+id+'"]');
+  if(pc) pc.classList.remove('placed','selected-v');
+  updateColCount(g);
+  updateProgress();
+}
+
+function updateColCount(g){
+  var n = $('colwords-'+g).querySelectorAll('.col-chip').length;
+  $('colcount-'+g).textContent = n + ' verbe(s)';
+  $('colslot-'+g).style.display = n > 0 ? 'none' : 'block';
+}
+
+function highlightCols(on){
+  ['g1','g2'].forEach(function(g){
+    $('col-'+g).classList.toggle('active-target', on);
+  });
+}
+
+/* ══ PROGRESS ═══════════════════════════════════════════════ */
+function updateProgress(){
+  var placed = Object.values(placement).filter(function(v){ return v !== null; }).length;
+  var pct    = Math.round(placed / TOTAL * 100);
+  $('prog-fill').style.width  = pct + '%';
+  $('prog-label').textContent = placed + ' / ' + TOTAL + ' verbes placés';
+  $('prog-pct').textContent   = pct + ' %';
+  $('btn-verif').disabled     = (placed === 0);
+}
+
+function updateChips(ok, ko){
+  $('cnt-ok').textContent  = ok;
+  $('cnt-ko').textContent  = ko;
+  $('cnt-rem').textContent = Math.max(0, TOTAL - ok - ko);
+}
+
+/* ══ VÉRIFIER ═══════════════════════════════════════════════ */
+function verifier(){
+  var allPlaced = VERBES.every(function(v){ return placement[v.id] !== null; });
+  if(!allPlaced){
+    showFb('info','⚠️','Attention !','Place tous les verbes avant de vérifier.');
+    return;
+  }
+  checked = true; $('btn-verif').disabled = true;
+  var bon = 0, mauv = 0;
+
+  VERBES.forEach(function(v){
+    var correct = placement[v.id] === v.groupe;
+    if(correct) bon++; else mauv++;
+
+    // Colorier dans la colonne
+    var zc = $('colwords-'+placement[v.id]).querySelector('[data-id="'+v.id+'"]');
+    if(zc) zc.classList.add(correct ? 'correct-c' : 'wrong-c');
+
+    // Colorier dans le pool
+    var pc = document.querySelector('#verbes-pool .verb-chip[data-id="'+v.id+'"]');
+    if(pc) pc.classList.add(correct ? 'correct-c' : 'wrong-c');
+  });
+
+  // Afficher les verbes manqués dans leur bonne colonne
+  VERBES.forEach(function(v){
+    if(placement[v.id] !== v.groupe){
+      var cw = $('colwords-'+v.groupe);
+      var miss = document.createElement('div');
+      miss.className = 'col-chip miss-w'; miss.dataset.id = 'miss'+v.id;
+      miss.innerHTML = '<span>'+v.txt+'</span><span style="font-size:.68rem;color:#856404;font-family:\'JetBrains Mono\',monospace;margin-left:auto;">attendu ici</span>';
+      cw.appendChild(miss);
+      updateColCount(v.groupe);
+    }
+  });
+
+  bonPrev = bon; mauvPrev = mauv;
+  updateChips(bon, mauv);
+  $('legende').classList.add('show');
+  $('row-verif').style.display  = 'none';
+  $('row-result').style.display = 'flex';
+
+  // Feedback
+  var pct = bon / TOTAL;
+  var cls, icon, title, detail;
+  if(bon === TOTAL){
+    cls='ok'; icon='✅'; title='Parfait ! 8/8 !';
+    detail='Tu distingues parfaitement les verbes du 1er et du 2e groupe ! 1er groupe = infinitif -er. 2e groupe = infinitif -ir avec -iss- au présent (finissons, grandissons…).';
+  } else if(pct >= .75){
+    cls='ok'; icon='👍'; title='Très bien ! '+bon+'/8';
+    detail=bon+' sur 8. Rappel : le 2e groupe a toujours -iss- (nous finissons). Si l\'infinitif est en -er → 1er groupe, toujours.';
+  } else if(pct >= .5){
+    cls='mid'; icon='🙂'; title='Bien ! '+bon+'/8';
+    detail='Rappel clé : pour distinguer les groupes, cherche l\'infinitif. -er → 1er groupe. -ir AVEC -iss- → 2e groupe. Pas de -iss- → 3e groupe (hors programme ici).';
+  } else {
+    cls='ko'; icon='💪'; title='Continue ! '+bon+'/8';
+    detail='Astuce : regarde les verbes en jaune (attendus). Pour chaque verbe, retrouve son infinitif : -er = 1er groupe. -ir avec -iss- (finissons, grandissons) = 2e groupe.';
+  }
+  showFb(cls, icon, title, detail);
+}
+
+/* ══ RÉSULTATS ═══════════════════════════════════════════════ */
+function showResults(){
+  $('ex-card').style.display = 'none';
+  $('results-screen').classList.add('show');
+
+  $('r-score').textContent = bonPrev;
+  var stars = bonPrev >= 8 ? 5 : bonPrev >= 6 ? 4 : bonPrev >= 4 ? 3 : bonPrev >= 2 ? 2 : 1;
+  $('r-stars').textContent = '⭐'.repeat(stars)+'☆'.repeat(5-stars);
+  var msgs = [
+    'Il est important de revoir les terminaisons des -er et -ir. Relis la leçon !',
+    'Tu commences à repérer les groupes. Vérifie bien la racine des verbes en -ir.',
+    'Bon travail ! Concentre-toi encore sur les verbes en -ir pour bien distinguer les groupes.',
+    'Très bien ! Tu maîtrises la plupart des règles.',
+    'Excellent ! Tu distingues avec précision les verbes du 1er et du 2e groupe !'
+  ];
+  $('r-msg').textContent = msgs[stars-1];
+
+  // Récap par colonne
+  var recap = $('r-recap'); recap.innerHTML = '';
+  ['g1','g2'].forEach(function(g){
+    var div = document.createElement('div');
+    div.className = 'recap-col';
+    var label = g === 'g1' ? '1er Groupe (-er)' : '2e Groupe (-ir)';
+    div.innerHTML = '<div class="recap-col-title">'+label+'</div>';
+    VERBES.filter(function(v){ return v.groupe === g; }).forEach(function(v){
+      var ok = placement[v.id] === g;
+      var row = document.createElement('div');
+      row.className = 'recap-word';
+      row.style.color = ok ? 'var(--green-dark)' : '#c0392b';
+      row.innerHTML = (ok ? '✅' : '❌')+' '+v.txt;
+      div.appendChild(row);
+    });
+    recap.appendChild(div);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ HELPERS ════════════════════════════════════════════════ */
+function showFb(cls, icon, title, detail){
+  var fb = $('feedback');
+  fb.className = 'feedback show '+cls;
+  $('fb-icon').textContent  = icon;
+  $('fb-title').textContent = title;
+  $('fb-detail').textContent = detail;
+}
+
+function recommencer(){
+  buildExo();
+  updateChips(0,0);
+}
+
+/* INIT */
+buildExo();
+updateChips(0,0);
+</script>
+</body>
+</html>
