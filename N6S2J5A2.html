@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'explore – S1 J5 – 6e</title>
+  <style>
+    :root {
+      --jaune:#f5c518; --jaune-dark:#8a6000; --jaune-pale:#fffbeb; --jaune-border:#f5e08a;
+      --vert:#8dc63f;  --vert-dark:#3d7a10;  --vert-pale:#f0faeb;
+      --rose:#f28b82;  --rose-pale:#fff0ef;
+      --bleu:#3ab5d8;  --orange:#f5a623;
+      --bg:#ffffff;    --surface:#fafafa;   --border:#e8e4d9;
+      --text:#1a1d23;  --muted:#8a8f9a;
+      --radius:16px;   --radius-sm:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.5rem 0.75rem 3rem;
+      overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:660px;}
+
+    /* BULLES */
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:280px;height:280px;top:-90px;right:-90px;
+      background:radial-gradient(circle,rgba(245,197,24,.18),transparent 70%);}
+    .b2{width:220px;height:220px;bottom:-70px;left:-70px;
+      background:radial-gradient(circle,rgba(141,198,63,.15),transparent 70%);}
+    .b3{width:160px;height:160px;top:38%;left:-60px;
+      background:radial-gradient(circle,rgba(58,181,216,.12),transparent 70%);}
+    .b4{width:140px;height:140px;bottom:18%;right:-50px;
+      background:radial-gradient(circle,rgba(245,166,35,.12),transparent 70%);}
+
+    /* HEADER */
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:var(--jaune);color:#000;
+      font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+      padding:.32rem .95rem;border-radius:99px;margin-bottom:.55rem;
+      box-shadow:0 3px 14px rgba(245,197,24,.4);white-space:nowrap;
+    }
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-size:.9rem;color:var(--muted);margin-bottom:.5rem;letter-spacing:.04em;}
+    h1{
+      font-size:clamp(1.6rem,6vw,2.6rem);font-weight:800;line-height:1.2;
+      word-break:break-word;margin-bottom:.5rem;
+    }
+    h1 .hl{color:var(--jaune-dark);}
+    .soustitre-badge{
+      display:inline-block;
+      background:var(--vert);color:#fff;
+      font-size:clamp(.75rem,2.5vw,.88rem);font-weight:800;
+      letter-spacing:.08em;text-transform:uppercase;
+      padding:.45rem 1.2rem;border-radius:99px;
+      box-shadow:0 3px 12px rgba(141,198,63,.4);
+    }
+
+    /* PROGRESS */
+    .progress-wrap{width:100%;margin-bottom:.9rem;position:relative;z-index:1;}
+    .progress-info{
+      display:flex;justify-content:space-between;
+      font-size:.82rem;color:var(--muted);margin-bottom:.35rem;letter-spacing:.02em;
+    }
+    .progress-bg{background:#ede9e0;border-radius:99px;height:7px;overflow:hidden;}
+    .progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--jaune),var(--orange));
+      border-radius:99px;transition:width .5s ease;width:0%;}
+
+    /* CHIPS */
+    .chips-row{display:flex;gap:.5rem;margin-bottom:1.1rem;flex-wrap:wrap;
+      position:relative;z-index:1;}
+    .chip{
+      display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;
+      border-radius:99px;font-size:.8rem;font-weight:700;
+      border:1.5px solid var(--border);background:var(--bg);
+      white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.05);
+    }
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.ok  .dot{background:var(--vert);}
+    .chip.ko  .dot{background:var(--rose);}
+    .chip.rem .dot{background:var(--muted);}
+
+    /* CARD */
+    .card{
+      width:100%;background:var(--bg);
+      border:1.5px solid #e0ddd5;border-radius:var(--radius);
+      padding:1.5rem 1.3rem 1.4rem;
+      position:relative;z-index:1;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);
+      animation:fadeUp .35s ease both;
+    }
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--jaune),var(--orange),var(--rose),var(--bleu),var(--vert));}
+    .ex-num{font-size:.72rem;font-weight:700;color:var(--muted);
+      letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem;}
+    .theme-badge{
+      display:inline-block;font-size:.68rem;font-weight:800;
+      padding:.18rem .65rem;border-radius:99px;
+      text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;
+      background:var(--jaune-pale);color:var(--jaune-dark);
+      border:1.5px solid var(--jaune-border);white-space:nowrap;
+    }
+
+    /* CONSIGNE */
+    .consigne{
+      background:var(--surface);border:1.5px solid var(--border);
+      border-left:5px solid var(--jaune);border-radius:var(--radius-sm);
+      padding:.85rem 1rem;margin-bottom:1rem;
+      font-size:clamp(.95rem,2.8vw,1.08rem);color:var(--text);
+      line-height:1.7;word-break:break-word;
+    }
+    .consigne strong{color:var(--jaune-dark);}
+
+    /* RAPPEL */
+    .rappel{
+      background:var(--vert-pale);border:1.5px solid #b5e08a;
+      border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1.1rem;
+      font-size:clamp(.88rem,2.6vw,1rem);color:var(--vert-dark);
+      line-height:1.8;word-break:break-word;
+    }
+    .rappel-title{font-size:.75rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:.08em;color:var(--vert-dark);margin-bottom:.4rem;}
+
+    /* COUNTER */
+    .counter-row{
+      display:flex;align-items:center;gap:.6rem;
+      font-size:.85rem;color:var(--muted);margin-bottom:.8rem;
+    }
+    .counter-badge{
+      background:var(--jaune-pale);color:var(--jaune-dark);
+      font-weight:800;font-size:.9rem;
+      padding:.18rem .65rem;border-radius:99px;
+      border:1.5px solid var(--jaune-border);
+    }
+
+    /* PHRASES */
+    .phrases-zone{
+      background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);padding:1.1rem 1.2rem;
+      margin-bottom:.9rem;word-break:break-word;
+    }
+    .phrase-line{
+      display:flex;align-items:baseline;flex-wrap:wrap;
+      gap:.2rem;margin-bottom:1rem;padding-bottom:1rem;
+      border-bottom:1px solid var(--border);
+    }
+    .phrase-line:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+    .phrase-num{
+      font-size:.8rem;font-weight:800;color:var(--muted);
+      margin-right:.3rem;flex-shrink:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--border);border-radius:99px;
+      padding:.1rem .5rem;
+    }
+
+    /* MOTS */
+    .mot{
+      display:inline-block;
+      font-size:clamp(1rem,3vw,1.15rem);font-weight:600;
+      padding:.2rem .4rem;border-radius:6px;
+      cursor:pointer;line-height:1.6;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;-webkit-user-select:none;
+      transition:background .12s,color .12s,transform .1s;
+      min-height:36px;
+    }
+    .mot:hover{background:var(--jaune-pale);color:var(--jaune-dark);}
+    .mot.marked{
+      background:var(--jaune);color:#000;font-weight:800;
+      box-shadow:0 2px 10px rgba(245,197,24,.5);
+      transform:scale(1.05);
+    }
+    .mot.correct-m{background:#22c55e;color:#fff;font-weight:800;cursor:default;transform:scale(1);}
+    .mot.wrong-m  {background:var(--rose);color:#fff;font-weight:800;cursor:default;transform:scale(1);text-decoration:line-through;}
+    .mot.miss-m   {background:#f59e0b;color:#fff;font-weight:800;cursor:default;transform:scale(1);}
+    .non-mot{
+      display:inline-block;
+      font-size:clamp(1rem,3vw,1.15rem);font-weight:600;
+      padding:.2rem .1rem;color:var(--muted);line-height:1.6;cursor:default;
+    }
+
+    /* LÉGENDE */
+    .legende{
+      display:none;flex-wrap:wrap;gap:.7rem;margin-bottom:.9rem;
+      font-size:.82rem;color:var(--muted);align-items:center;
+    }
+    .legende.show{display:flex;}
+    .leg-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;display:inline-block;}
+
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1rem;}
+    @media(max-width:479px){
+      .btn-row{flex-direction:column;}
+      .btn-row .btn{width:100%;justify-content:center;}
+    }
+    .btn{
+      display:inline-flex;align-items:center;gap:.4rem;
+      padding:.7rem 1.3rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.88rem,2.5vw,1rem);font-weight:800;
+      cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;
+      min-height:2.8rem;-webkit-tap-highlight-color:transparent;
+      letter-spacing:.02em;
+    }
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-primary{
+      background:var(--jaune);color:#000;
+      box-shadow:0 4px 14px rgba(245,197,24,.45);
+    }
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);
+      box-shadow:0 6px 18px rgba(245,197,24,.55);}
+    .btn-ghost{
+      background:transparent;color:var(--muted);
+      border:1.5px solid var(--border);
+    }
+    .btn-ghost:hover:not(:disabled){border-color:var(--jaune);color:var(--text);}
+    .btn-sol{
+      background:transparent;color:var(--jaune-dark);
+      border:1.5px solid var(--jaune-border);
+    }
+    .btn-sol:hover:not(:disabled){background:var(--jaune-pale);}
+
+    /* FEEDBACK */
+    .feedback{
+      margin-top:1rem;padding:.95rem 1.1rem;border-radius:var(--radius-sm);
+      font-size:clamp(.88rem,2.5vw,1rem);display:none;
+      align-items:flex-start;gap:.7rem;line-height:1.75;word-break:break-word;
+    }
+    .feedback.show{display:flex;}
+    .feedback.ok {background:var(--vert-pale);border:2px solid var(--vert);color:var(--vert-dark);}
+    .feedback.mid{background:#fffbeb;border:2px solid var(--jaune);color:#856404;}
+    .feedback.ko {background:var(--rose-pale);border:2px solid var(--rose);color:#c0392b;}
+    .feedback.info{background:var(--jaune-pale);border:2px solid var(--jaune-border);color:var(--jaune-dark);}
+    .fb-icon{font-size:1.5rem;flex-shrink:0;}
+    .fb-title{font-weight:800;font-size:1.05rem;margin-bottom:.25rem;}
+    .fb-detail{font-size:.88rem;color:var(--text);margin-top:.25rem;line-height:1.85;}
+
+    /* RÉSULTATS */
+    .results{display:none;width:100%;position:relative;z-index:1;animation:fadeUp .4s ease both;}
+    .results.show{display:block;}
+    .results-card{
+      background:var(--bg);border:1.5px solid #e0ddd5;
+      border-radius:var(--radius);padding:2.2rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center;
+    }
+    .r-score{font-size:clamp(3rem,12vw,5rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;}
+    .r-score .s-num{color:var(--jaune-dark);}
+    .stars{font-size:2rem;margin:.4rem 0 .9rem;letter-spacing:.1em;}
+    .r-msg{
+      color:var(--muted);font-size:clamp(.9rem,2.8vw,1.05rem);
+      margin-bottom:1.5rem;line-height:1.8;word-break:break-word;
+    }
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div>
+  <div class="bul b2"></div>
+  <div class="bul b3"></div>
+  <div class="bul b4"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 1 – Jour 5</div>
+      <h1>J'explore · <span class="hl">Le nom noyau</span></h1>
+      <div class="soustitre-badge">· 5 groupes nominaux ·</div>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="prog-label">Challenge 1 / 5</span>
+        <span id="prog-pct">0 %</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <div class="chip ok"><div class="dot"></div><span id="cnt-ok">0</span> réussie(s)</div>
+      <div class="chip ko"><div class="dot"></div><span id="cnt-ko">0</span> erreur(s)</div>
+      <div class="chip rem"><div class="dot"></div><span id="cnt-rem">5</span> restante(s)</div>
+    </div>
+
+    <div class="card" id="ex-card">
+      <div class="card-stripe"></div>
+      <div class="ex-num">Exercice · Identification</div>
+      <div class="theme-badge">Nom noyau du GN</div>
+
+      <div class="consigne">
+        Dans chaque groupe nominal, <strong>appuie sur le nom noyau</strong> (le mot principal du groupe). Il y a un seul nom noyau par groupe.
+      </div>
+
+      <div class="rappel">
+        <div class="rappel-title">💡 Rappel</div>
+        Le <strong>nom noyau</strong> est le mot le plus important du GN. Sans lui, le groupe n'existe pas. Les adjectifs et le déterminant gravitent autour de lui.<br>
+        Ex. : <em>Les petites <u>abeilles</u> dorées</em> → noyau = <strong>abeilles</strong>
+      </div>
+
+      <div class="counter-row">
+        Mots surlignés : <span class="counter-badge" id="mark-count">0</span>
+      </div>
+
+      <div class="phrases-zone" id="phrases-zone"></div>
+
+      <div class="legende" id="legende">
+        <span class="leg-dot" style="background:#22c55e;"></span> Correct &emsp;
+        <span class="leg-dot" style="background:#f28b82;"></span> Incorrect &emsp;
+        <span class="leg-dot" style="background:#f59e0b;"></span> Manqué
+      </div>
+
+      <div class="btn-row" id="row1">
+        <button class="btn btn-primary" onclick="verifier()">✓ Vérifier</button>
+        <button class="btn btn-ghost" onclick="effacer()">✕ Effacer</button>
+      </div>
+      <div class="btn-row" id="row2" style="display:none;">
+        <button class="btn btn-primary" onclick="showResults()">🏆 Mes résultats</button>
+        <button class="btn btn-ghost" onclick="recommencer()">↺ Recommencer</button>
+        <button class="btn btn-sol" onclick="afficherSolution()">👁 Solution</button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div>
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-detail" id="fb-detail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="results" id="results-screen">
+      <div class="results-card">
+        <div class="logo-badge" style="margin-bottom:.7rem;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Résultats
+        </div>
+        <div class="r-score"><span class="s-num" id="r-score">0</span>/5</div>
+        <div class="stars" id="r-stars"></div>
+        <div class="r-msg" id="r-msg"></div>
+        <button class="btn btn-primary" onclick="recommencer()"
+          style="width:100%;justify-content:center;">↺ Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ══ DONNÉES — issues du H5P (* = nom noyau) ══════════════════
+   1. Les petites *abeilles* dorées.
+   2. Un grand *arbre*.
+   3. Deux *chats* gris.
+   4. La longue *allée* fleurie.
+   5. Les *fleurs* rouges.
+═══════════════════════════════════════════════════════════════ */
+var PHRASES = [
+  { num:1, tokens:[
+    {w:'Les',       a:false},
+    {w:'petites',   a:false},
+    {w:'abeilles',  a:true},
+    {w:'dorées',    a:false},
+    {w:'.',         p:true}
+  ]},
+  { num:2, tokens:[
+    {w:'Un',        a:false},
+    {w:'grand',     a:false},
+    {w:'arbre',     a:true},
+    {w:'.',         p:true}
+  ]},
+  { num:3, tokens:[
+    {w:'Deux',      a:false},
+    {w:'chats',     a:true},
+    {w:'gris',      a:false},
+    {w:'.',         p:true}
+  ]},
+  { num:4, tokens:[
+    {w:'La',        a:false},
+    {w:'longue',    a:false},
+    {w:'allée',     a:true},
+    {w:'fleurie',   a:false},
+    {w:'.',         p:true}
+  ]},
+  { num:5, tokens:[
+    {w:'Les',       a:false},
+    {w:'fleurs',    a:true},
+    {w:'rouges',    a:false},
+    {w:'.',         p:true}
+  ]}
+];
+
+var TOTAL   = PHRASES.length; // 5
+var marked  = new Set();
+var checked = false;
+var bonPrev = 0, mauvPrev = 0;
+
+function $(id){ return document.getElementById(id); }
+
+/* ══ BUILD ══════════════════════════════════════════════════ */
+function build(){
+  marked.clear(); checked=false; bonPrev=0; mauvPrev=0;
+  var zone=$('phrases-zone'); zone.innerHTML='';
+
+  PHRASES.forEach(function(ph, pi){
+    var line=document.createElement('div');
+    line.className='phrase-line';
+
+    var numSpan=document.createElement('span');
+    numSpan.className='phrase-num'; numSpan.textContent=ph.num;
+    line.appendChild(numSpan);
+
+    ph.tokens.forEach(function(tok, ti){
+      if(tok.p){
+        var dot=document.createElement('span');
+        dot.className='non-mot'; dot.textContent='.';
+        line.appendChild(dot); return;
+      }
+      var span=document.createElement('span');
+      span.className='mot';
+      span.textContent=tok.w;
+      span.dataset.pi=pi; span.dataset.ti=ti;
+      span.addEventListener('click', function(){ toggleMot(pi,ti,span); });
+      line.appendChild(span);
+    });
+
+    zone.appendChild(line);
+  });
+
+  $('feedback').className='feedback';
+  $('legende').classList.remove('show');
+  $('row1').style.display='flex';
+  $('row2').style.display='none';
+  $('ex-card').style.display='block';
+  $('results-screen').classList.remove('show');
+  $('mark-count').textContent='0';
+  updateProgress(0);
+  updateChips(0,0);
+}
+
+/* ══ INTERACTION ════════════════════════════════════════════ */
+function toggleMot(pi,ti,span){
+  if(checked) return;
+  var key=pi+'-'+ti;
+  if(marked.has(key)){ marked.delete(key); span.classList.remove('marked'); }
+  else { marked.add(key); span.classList.add('marked'); }
+  $('mark-count').textContent=marked.size;
+  var bon=countCorrect();
+  updateProgress(bon);
+}
+
+function countCorrect(){
+  var n=0;
+  marked.forEach(function(key){
+    var p=key.split('-'); var pi=+p[0]; var ti=+p[1];
+    if(PHRASES[pi].tokens[ti].a) n++;
+  });
+  return n;
+}
+
+function updateProgress(bon){
+  var pct=Math.round(bon/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent='Challenge '+Math.min(bon+1,TOTAL)+' / '+TOTAL;
+  $('prog-pct').textContent=pct+' %';
+}
+
+function updateChips(ok,ko){
+  $('cnt-ok').textContent=ok;
+  $('cnt-ko').textContent=ko;
+  $('cnt-rem').textContent=Math.max(0,TOTAL-ok);
+}
+
+/* ══ EFFACER ════════════════════════════════════════════════ */
+function effacer(){
+  if(checked) return;
+  document.querySelectorAll('.mot.marked').forEach(function(s){s.classList.remove('marked');});
+  marked.clear();
+  $('mark-count').textContent='0';
+  updateProgress(0);
+}
+
+/* ══ VÉRIFIER ═══════════════════════════════════════════════ */
+function verifier(){
+  checked=true;
+  var bon=0, mauv=0, missed=0;
+
+  marked.forEach(function(key){
+    var p=key.split('-'); var pi=+p[0]; var ti=+p[1];
+    var span=$('phrases-zone').querySelector('[data-pi="'+pi+'"][data-ti="'+ti+'"]');
+    if(!span) return;
+    var correct=PHRASES[pi].tokens[ti].a;
+    span.classList.remove('marked');
+    span.classList.add(correct?'correct-m':'wrong-m');
+    if(correct) bon++; else mauv++;
+  });
+
+  PHRASES.forEach(function(ph,pi){
+    ph.tokens.forEach(function(tok,ti){
+      if(!tok.a||tok.p) return;
+      var key=pi+'-'+ti;
+      if(!marked.has(key)){
+        missed++;
+        var span=$('phrases-zone').querySelector('[data-pi="'+pi+'"][data-ti="'+ti+'"]');
+        if(span) span.classList.add('miss-m');
+      }
+    });
+  });
+
+  bonPrev=bon; mauvPrev=mauv;
+  updateChips(bon, mauv);
+  var pct=Math.round(bon/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=bon+' / '+TOTAL+' corrects';
+  $('prog-pct').textContent=pct+' %';
+
+  $('legende').classList.add('show');
+  $('row1').style.display='none';
+  $('row2').style.display='flex';
+
+  var cls,icon,title,detail;
+  if(bon===TOTAL && mauv===0){
+    cls='ok'; icon='✅'; title='Parfait ! 5/5 !';
+    detail='Tu identifies parfaitement le nom noyau dans chaque groupe nominal. Le nom noyau est le mot autour duquel s\'organisent le déterminant et les adjectifs.';
+  } else if(bon>=4 && mauv===0){
+    cls='ok'; icon='👍'; title='Très bien ! '+bon+'/5';
+    detail='Presque parfait ! Vérifie le groupe en orange — c\'est le nom noyau manqué. Cherche le mot qu\'on ne peut pas supprimer sans détruire le sens.';
+  } else if(bon>=3){
+    cls='mid'; icon='🙂'; title='Bien ! '+bon+'/5';
+    detail=(mauv>0?mauv+' mot(s) incorrectement sélectionné(s). ':'')+
+      'Rappel : le nom noyau est le seul mot irremplaçable du GN. Le déterminant et les adjectifs l\'entourent mais ne sont pas le noyau.';
+  } else {
+    cls='ko'; icon='💪'; title='Continue ! '+bon+'/5';
+    detail='Astuce : enlève mentalement le déterminant et les adjectifs. Ce qui reste est le nom noyau. Ex. : Les petites abeilles dorées → quel mot reste si tu enlèves tout ? → abeilles.';
+  }
+
+  $('feedback').className='feedback show '+cls;
+  $('fb-icon').textContent=icon;
+  $('fb-title').textContent=title;
+  $('fb-detail').textContent=detail;
+}
+
+/* ══ SOLUTION ════════════════════════════════════════════════ */
+function afficherSolution(){
+  document.querySelectorAll('.mot').forEach(function(span){
+    var pi=+span.dataset.pi; var ti=+span.dataset.ti;
+    span.className='mot';
+    if(PHRASES[pi].tokens[ti].a) span.classList.add('correct-m');
+  });
+  $('feedback').className='feedback show info';
+  $('fb-icon').textContent='💡';
+  $('fb-title').textContent='Solution affichée.';
+  $('fb-detail').textContent='Noyaux : abeilles · arbre · chats · allée · fleurs. Ce sont les seuls mots qu\'on ne peut pas supprimer sans détruire le groupe nominal.';
+}
+
+/* ══ RÉSULTATS ═══════════════════════════════════════════════ */
+function showResults(){
+  $('ex-card').style.display='none';
+  $('results-screen').classList.add('show');
+  $('r-score').textContent=bonPrev;
+  var s=bonPrev>=5?5:bonPrev>=4?4:bonPrev>=3?3:bonPrev>=2?2:1;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msgs=[
+    'Relis la leçon sur le nom noyau et recommence !',
+    'Tu progresses ! Rappelle-toi : le noyau est le mot irremplaçable.',
+    'Bien ! Tu identifies la plupart des noms noyaux.',
+    'Très bien ! Tu maîtrises presque parfaitement le nom noyau.',
+    'Parfait ! Tu identifies le nom noyau dans tous les groupes !'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ RECOMMENCER ═════════════════════════════════════════════ */
+function recommencer(){ build(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* INIT */
+build();
+</script>
+</body>
+</html>
