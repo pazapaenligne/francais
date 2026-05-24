@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S1 J5 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5c518; --day-dark:#8a6000; --day-dark2:#5a3e00;
+      --day-light:#fffbeb; --day-border:#f5e08a;
+      --day-glow:rgba(245,197,24,.32);
+      --bg:#fffdf7; --surface:#ffffff; --surface2:#fafaf6; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --green-light:#f0faeb; --green-dark:#3d7a10;
+      --pink:#f28b82; --pink-light:#fff0ef;
+      --orange:#f5a623; --blue:#3ab5d8;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:18px; --radius-sm:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1rem 0.75rem 3rem;
+      overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:640px;position:relative;z-index:1;}
+
+    /* BULLES */
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:300px;height:300px;top:-100px;right:-100px;
+      background:radial-gradient(circle,rgba(245,197,24,.18),transparent 70%);}
+    .b2{width:240px;height:240px;bottom:-80px;left:-80px;
+      background:radial-gradient(circle,rgba(245,166,35,.14),transparent 70%);}
+    .b3{width:160px;height:160px;top:35%;left:-60px;
+      background:radial-gradient(circle,rgba(58,181,216,.10),transparent 70%);}
+    .b4{width:130px;height:130px;bottom:22%;right:-50px;
+      background:radial-gradient(circle,rgba(141,198,63,.10),transparent 70%);}
+
+    /* HEADER */
+    header{text-align:center;margin-bottom:1.4rem;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--day-color);color:#000;
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;
+      box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;
+    }
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.25rem,4.5vw,2rem);font-weight:800;line-height:1.25;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    /* PROGRESS */
+    .progress-wrap{width:100%;margin-bottom:.9rem;}
+    .progress-info{display:flex;justify-content:space-between;
+      font-size:.72rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.32rem;}
+    .progress-bg{background:#ede9e0;border-radius:99px;height:6px;overflow:hidden;}
+    .progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--orange));
+      border-radius:99px;transition:width .5s ease;width:0%;}
+
+    /* CHIPS */
+    .chips-row{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;
+      border-radius:99px;font-size:.73rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);
+      font-weight:600;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+    .chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .chip.ok .dot{background:var(--green);}
+    .chip.ko .dot{background:var(--pink);}
+    .chip.rem .dot{background:var(--muted);}
+
+    /* CARD */
+    .card{
+      width:100%;background:var(--surface);
+      border:1.5px solid #ebe8e0;border-radius:var(--radius);
+      padding:1.4rem 1.2rem 1.4rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);
+      animation:fadeUp .35s ease both;
+    }
+    .card-stripe{height:5px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      margin:-1.4rem -1.2rem 1.2rem;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink),var(--blue),var(--day-color));}
+    .ex-num{font-size:.67rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{
+      display:inline-block;font-size:.62rem;font-weight:700;
+      padding:.14rem .55rem;border-radius:99px;text-transform:uppercase;
+      letter-spacing:.07em;margin-bottom:.75rem;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);white-space:nowrap;
+    }
+
+    /* CONSIGNE */
+    .consigne{
+      background:var(--surface2);border:1.5px solid var(--border);
+      border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+      padding:.75rem 1rem;margin-bottom:1rem;
+      font-size:clamp(.9rem,2.5vw,1rem);color:var(--text);
+      line-height:1.7;word-break:break-word;
+    }
+    .consigne strong{color:var(--day-dark);}
+
+    /* RAPPEL */
+    .rappel{
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.75rem 1rem;margin-bottom:1.1rem;
+      font-size:clamp(.85rem,2.4vw,.95rem);color:var(--day-dark);
+      line-height:1.85;word-break:break-word;
+    }
+    .rappel-title{font-family:'JetBrains Mono',monospace;font-size:.68rem;
+      font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+      color:var(--day-dark);margin-bottom:.4rem;}
+    .conj-table{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.45rem;}
+    .conj-pill{
+      background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:99px;padding:.18rem .7rem;
+      font-size:.82rem;font-weight:700;color:var(--day-dark);white-space:nowrap;
+      font-family:'JetBrains Mono',monospace;
+    }
+
+    /* ══ ZONE DE JEU ══ */
+    .game-area{margin-bottom:1rem;}
+
+    /* Sujets = zones de dépôt */
+    .subjects-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:.6rem;
+      margin-bottom:1rem;
+    }
+    @media(max-width:400px){
+      .subjects-grid{grid-template-columns:1fr 1fr;}
+    }
+
+    .drop-zone{
+      min-height:80px;
+      background:var(--day-light);
+      border:2px dashed var(--day-border);
+      border-radius:var(--radius-sm);
+      padding:.5rem .5rem .4rem;
+      display:flex;flex-direction:column;align-items:center;
+      gap:.3rem;transition:border-color .15s,background .15s;
+      position:relative;
+    }
+    .drop-zone.drag-over{
+      border-color:var(--day-dark);background:#fff8d0;
+    }
+    .drop-zone.correct-dz{
+      border-color:var(--green);background:var(--green-light);
+    }
+    .drop-zone.wrong-dz{
+      border-color:var(--pink);background:var(--pink-light);
+    }
+    .dz-label{
+      font-size:clamp(.95rem,3vw,1.15rem);font-weight:800;
+      color:var(--day-dark);letter-spacing:.04em;
+      font-family:'JetBrains Mono',monospace;
+      background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:99px;padding:.12rem .65rem;white-space:nowrap;
+      margin-bottom:.2rem;
+    }
+    .dz-slot{
+      min-height:44px;width:100%;
+      display:flex;align-items:center;justify-content:center;
+    }
+    /* icône résultat dans le slot après vérif */
+    .dz-result{
+      font-size:.75rem;font-weight:700;margin-top:.1rem;
+      font-family:'JetBrains Mono',monospace;
+    }
+    .dz-result.ok-r{color:var(--green-dark);}
+    .dz-result.ko-r{color:#c0392b;}
+
+    /* Verbes = draggables */
+    .verbs-bank{
+      background:var(--surface2);border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);padding:.75rem .8rem;
+      margin-bottom:.8rem;
+    }
+    .verbs-bank-title{
+      font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+      margin-bottom:.55rem;
+    }
+    .verbs-row{display:flex;flex-wrap:wrap;gap:.5rem;}
+
+    .verb-chip{
+      display:inline-flex;align-items:center;justify-content:center;
+      background:var(--day-color);color:#000;
+      font-size:clamp(.9rem,2.8vw,1.05rem);font-weight:800;
+      font-family:'JetBrains Mono',monospace;
+      padding:.45rem .9rem;border-radius:99px;
+      cursor:grab;user-select:none;-webkit-user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      box-shadow:0 3px 10px var(--day-glow);
+      transition:transform .12s,box-shadow .12s,opacity .15s;
+      min-height:44px;touch-action:none;
+      border:none;outline:none;
+    }
+    .verb-chip:active,.verb-chip.dragging{
+      cursor:grabbing;transform:scale(1.08) rotate(-2deg);
+      box-shadow:0 6px 18px var(--day-glow);opacity:.9;
+    }
+    .verb-chip.placed{
+      background:var(--surface2);color:var(--muted);
+      box-shadow:none;cursor:default;
+      border:1.5px dashed var(--border);
+      pointer-events:none;
+    }
+    .verb-chip.correct-v{background:#22c55e;color:#fff;cursor:default;pointer-events:none;}
+    .verb-chip.wrong-v  {background:var(--pink);color:#fff;cursor:default;pointer-events:none;text-decoration:line-through;}
+
+    /* Verbe déposé dans une zone */
+    .dropped-verb{
+      display:inline-flex;align-items:center;justify-content:center;
+      background:var(--day-color);color:#000;
+      font-size:clamp(.88rem,2.6vw,1rem);font-weight:800;
+      font-family:'JetBrains Mono',monospace;
+      padding:.3rem .75rem;border-radius:99px;
+      box-shadow:0 2px 8px var(--day-glow);
+      cursor:pointer;-webkit-tap-highlight-color:transparent;
+      min-height:44px;
+    }
+
+    /* LÉGENDE */
+    .legende{display:none;flex-wrap:wrap;gap:.6rem;margin-bottom:.85rem;
+      font-size:.76rem;color:var(--muted);align-items:center;
+      font-family:'JetBrains Mono',monospace;}
+    .legende.show{display:flex;}
+    .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;display:inline-block;}
+
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    @media(max-width:479px){
+      .btn-row{flex-direction:column;}
+      .btn-row .btn{width:100%;justify-content:center;}
+    }
+    .btn{
+      display:inline-flex;align-items:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;
+      cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;
+      min-height:2.8rem;-webkit-tap-highlight-color:transparent;
+    }
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+    .btn-sol{background:transparent;color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .btn-sol:hover:not(:disabled){background:var(--day-light);}
+
+    /* FEEDBACK */
+    .feedback{
+      margin-top:1rem;padding:.9rem 1.1rem;border-radius:var(--radius-sm);
+      font-size:clamp(.88rem,2.4vw,.98rem);display:none;
+      align-items:flex-start;gap:.65rem;line-height:1.75;word-break:break-word;
+    }
+    .feedback.show{display:flex;}
+    .feedback.ok {background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#856404;}
+    .feedback.ko {background:var(--pink-light);border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+    .fb-icon{font-size:1.4rem;flex-shrink:0;}
+    .fb-title{font-weight:700;font-size:1rem;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      color:var(--text);margin-top:.2rem;line-height:1.85;}
+
+    /* RÉSULTATS */
+    .results{display:none;width:100%;animation:fadeUp .4s ease both;}
+    .results.show{display:block;}
+    .results-card{
+      background:var(--surface);border:1.5px solid #ebe8e0;
+      border-radius:var(--radius);padding:2rem 1.4rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center;
+    }
+    .r-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;}
+    .r-score .s-num{color:var(--day-dark);}
+    .stars{font-size:1.9rem;margin:.4rem 0 .9rem;letter-spacing:.08em;}
+    .r-msg{color:var(--muted);font-size:clamp(.9rem,2.5vw,1.02rem);
+      margin-bottom:1.5rem;line-height:1.8;word-break:break-word;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div>
+  <div class="bul b2"></div>
+  <div class="bul b3"></div>
+  <div class="bul b4"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 1 – Jour 5</div>
+      <h1>Je m'entraîne · <span class="hl">Accord sujet-verbe</span></h1>
+      <p class="subtitle">Relie chaque sujet au verbe qui convient</p>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="prog-label">0 / 6 reliés</span>
+        <span id="prog-pct">0 %</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <div class="chip ok"><div class="dot"></div><span id="cnt-ok">0</span> correct(s)</div>
+      <div class="chip ko"><div class="dot"></div><span id="cnt-ko">0</span> erreur(s)</div>
+      <div class="chip rem"><div class="dot"></div><span id="cnt-rem">6</span> restant(s)</div>
+    </div>
+
+    <div class="card" id="ex-card">
+      <div class="card-stripe"></div>
+      <div class="ex-num">Exercice · Glisser-déposer</div>
+      <div class="theme-badge">Conjugaison · Présent</div>
+
+      <div class="consigne">
+        <strong>Glisse chaque verbe</strong> vers le pronom sujet qui lui correspond.<br>
+        <span style="font-size:.85em;color:var(--muted);">Sur mobile : appuie sur un verbe, puis appuie sur le sujet voulu.</span>
+      </div>
+
+      <div class="rappel">
+        <div class="rappel-title">💡 Rappel — Terminaisons fréquentes au présent</div>
+        <div class="conj-table">
+          <span class="conj-pill">Je → -e / -s</span>
+          <span class="conj-pill">Tu → -es / -s</span>
+          <span class="conj-pill">Il/Elle → -e / -t</span>
+          <span class="conj-pill">Nous → -ons</span>
+          <span class="conj-pill">Vous → -ez</span>
+          <span class="conj-pill">Ils/Elles → -ent</span>
+        </div>
+      </div>
+
+      <div class="game-area">
+        <!-- Zones de dépôt (sujets) -->
+        <div class="subjects-grid" id="subjects-grid"></div>
+
+        <!-- Banque de verbes -->
+        <div class="verbs-bank">
+          <div class="verbs-bank-title">🔡 Verbes à placer</div>
+          <div class="verbs-row" id="verbs-row"></div>
+        </div>
+      </div>
+
+      <div class="legende" id="legende">
+        <span class="leg-dot" style="background:#22c55e;"></span> Correct &emsp;
+        <span class="leg-dot" style="background:#f28b82;"></span> Incorrect &emsp;
+        <span class="leg-dot" style="background:#f59e0b;"></span> Attendu
+      </div>
+
+      <div class="btn-row" id="row1">
+        <button class="btn btn-primary" id="btn-check" onclick="verifier()" disabled>✓ Vérifier</button>
+        <button class="btn btn-ghost" onclick="effacer()">✕ Tout effacer</button>
+      </div>
+      <div class="btn-row" id="row2" style="display:none;">
+        <button class="btn btn-primary" onclick="showResults()">🏆 Résultats</button>
+        <button class="btn btn-ghost" onclick="recommencer()">↺ Recommencer</button>
+        <button class="btn btn-sol" onclick="afficherSolution()">👁 Solution</button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div>
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-detail" id="fb-detail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="results" id="results-screen">
+      <div class="results-card">
+        <div class="logo-badge" style="margin-bottom:.6rem;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Résultats
+        </div>
+        <div class="r-score"><span class="s-num" id="r-score">0</span>/6</div>
+        <div class="stars" id="r-stars"></div>
+        <div class="r-msg" id="r-msg"></div>
+        <button class="btn btn-primary" onclick="recommencer()"
+          style="width:100%;justify-content:center;">↺ Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ══ DONNÉES issues du H5P (verbes encodés base64) ═══════
+   Sujets (dropZones) → verbe correct
+   Je / Tu / Il / Nous / Vous / Ils
+═══════════════════════════════════════════════════════════ */
+var PAIRS = [
+  { subject: 'Je',   verb: atob('YWRtaXJl'),       id: 'je'   },
+  { subject: 'Tu',   verb: atob('b2JzZXJ2ZXM='),   id: 'tu'   },
+  { subject: 'Il',   verb: atob('ZmluaXQ='),        id: 'il'   },
+  { subject: 'Nous', verb: atob('cmVtcGxpc3NvbnM='),id: 'nous' },
+  { subject: 'Vous', verb: atob('YWdpc3Nleg=='),    id: 'vous' },
+  { subject: 'Ils',  verb: atob('Y2hvaXNpc3NlbnQ='),id: 'ils'  }
+];
+
+var TOTAL = PAIRS.length; // 6
+
+/* État */
+var placements = {}; // dzId → verbId
+var checked = false;
+var bonPrev = 0;
+
+/* Mobile tap-to-place state */
+var selectedVerb = null; // id du verbe sélectionné
+
+function $(id){ return document.getElementById(id); }
+
+/* ══ BUILD ══════════════════════════════════════════════ */
+function build(){
+  placements = {};
+  checked = false;
+  bonPrev = 0;
+  selectedVerb = null;
+
+  // Grille de sujets
+  var grid = $('subjects-grid');
+  grid.innerHTML = '';
+  PAIRS.forEach(function(p){
+    var dz = document.createElement('div');
+    dz.className = 'drop-zone';
+    dz.id = 'dz-' + p.id;
+    dz.dataset.dzid = p.id;
+
+    var lbl = document.createElement('div');
+    lbl.className = 'dz-label';
+    lbl.textContent = p.subject;
+    dz.appendChild(lbl);
+
+    var slot = document.createElement('div');
+    slot.className = 'dz-slot';
+    slot.id = 'slot-' + p.id;
+    dz.appendChild(slot);
+
+    // Desktop drag events
+    dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', function(){ dz.classList.remove('drag-over'); });
+    dz.addEventListener('drop', function(e){
+      e.preventDefault();
+      dz.classList.remove('drag-over');
+      if(checked) return;
+      var vid = e.dataTransfer.getData('verbId');
+      if(!vid) return;
+      placeVerb(p.id, vid);
+    });
+
+    // Mobile tap-to-place
+    dz.addEventListener('click', function(){
+      if(checked) return;
+      if(selectedVerb){
+        placeVerb(p.id, selectedVerb);
+        clearSelection();
+      }
+    });
+
+    grid.appendChild(dz);
+  });
+
+  // Banque de verbes (ordre mélangé)
+  var row = $('verbs-row');
+  row.innerHTML = '';
+  var shuffled = PAIRS.map(function(p){ return p.verb; });
+  shuffled = shuffled.sort(function(){ return Math.random() - 0.5; });
+
+  shuffled.forEach(function(verb){
+    var chip = document.createElement('div');
+    chip.className = 'verb-chip';
+    chip.id = 'verb-' + verb;
+    chip.textContent = verb;
+    chip.draggable = true;
+    chip.dataset.verbid = verb;
+
+    // Desktop drag
+    chip.addEventListener('dragstart', function(e){
+      if(checked) return;
+      e.dataTransfer.setData('verbId', verb);
+      chip.classList.add('dragging');
+    });
+    chip.addEventListener('dragend', function(){
+      chip.classList.remove('dragging');
+    });
+
+    // Mobile tap toggle
+    chip.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(checked || chip.classList.contains('placed')) return;
+      if(selectedVerb === verb){
+        clearSelection();
+      } else {
+        clearSelection();
+        selectedVerb = verb;
+        chip.style.outline = '3px solid var(--day-dark)';
+        chip.style.outlineOffset = '2px';
+      }
+    });
+
+    row.appendChild(chip);
+  });
+
+  $('feedback').className = 'feedback';
+  $('legende').classList.remove('show');
+  $('row1').style.display = 'flex';
+  $('row2').style.display = 'none';
+  $('ex-card').style.display = 'block';
+  $('results-screen').classList.remove('show');
+  $('btn-check').disabled = true;
+  updateProgress();
+  updateChips(0, 0);
+}
+
+/* ══ PLACEMENT ══════════════════════════════════════════ */
+function placeVerb(dzId, verbId){
+  // Retirer le verbe d'une éventuelle zone précédente
+  Object.keys(placements).forEach(function(k){
+    if(placements[k] === verbId && k !== dzId){
+      delete placements[k];
+      $('slot-' + k).innerHTML = '';
+      $('dz-' + k).classList.remove('drag-over');
+    }
+  });
+
+  // Si la zone cible avait déjà un verbe, le remettre en banque
+  if(placements[dzId] && placements[dzId] !== verbId){
+    var oldVerb = placements[dzId];
+    var oldChip = $('verb-' + oldVerb);
+    if(oldChip){ oldChip.classList.remove('placed'); }
+  }
+
+  // Placer
+  placements[dzId] = verbId;
+  var slot = $('slot-' + dzId);
+  slot.innerHTML = '';
+  var dropped = document.createElement('span');
+  dropped.className = 'dropped-verb';
+  dropped.textContent = verbId;
+  // Clic sur le verbe déposé = le retirer
+  dropped.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(checked) return;
+    removeVerb(dzId, verbId);
+  });
+  slot.appendChild(dropped);
+
+  // Marquer le chip comme placé
+  var chip = $('verb-' + verbId);
+  if(chip) chip.classList.add('placed');
+
+  updateProgress();
+  updateCheckBtn();
+}
+
+function removeVerb(dzId, verbId){
+  delete placements[dzId];
+  $('slot-' + dzId).innerHTML = '';
+  var chip = $('verb-' + verbId);
+  if(chip){ chip.classList.remove('placed'); }
+  updateProgress();
+  updateCheckBtn();
+}
+
+function clearSelection(){
+  selectedVerb = null;
+  document.querySelectorAll('.verb-chip').forEach(function(c){
+    c.style.outline = '';
+    c.style.outlineOffset = '';
+  });
+}
+
+/* ══ PROGRESS & CHIPS ═══════════════════════════════════ */
+function updateProgress(){
+  var placed = Object.keys(placements).length;
+  var pct = Math.round(placed / TOTAL * 100);
+  $('prog-fill').style.width = pct + '%';
+  $('prog-label').textContent = placed + ' / ' + TOTAL + ' reliés';
+  $('prog-pct').textContent = pct + ' %';
+}
+
+function updateCheckBtn(){
+  var placed = Object.keys(placements).length;
+  $('btn-check').disabled = (placed < TOTAL);
+}
+
+function updateChips(ok, ko){
+  $('cnt-ok').textContent = ok;
+  $('cnt-ko').textContent = ko;
+  $('cnt-rem').textContent = Math.max(0, TOTAL - ok);
+}
+
+/* ══ EFFACER ════════════════════════════════════════════ */
+function effacer(){
+  if(checked) return;
+  Object.keys(placements).forEach(function(dzId){
+    var verbId = placements[dzId];
+    $('slot-' + dzId).innerHTML = '';
+    var chip = $('verb-' + verbId);
+    if(chip) chip.classList.remove('placed');
+  });
+  placements = {};
+  clearSelection();
+  updateProgress();
+  updateCheckBtn();
+}
+
+/* ══ VÉRIFIER ═══════════════════════════════════════════ */
+function verifier(){
+  checked = true;
+  clearSelection();
+  var bon = 0, mauv = 0;
+
+  PAIRS.forEach(function(p){
+    var dz = $('dz-' + p.id);
+    var slot = $('slot-' + p.id);
+    var placed = placements[p.id];
+    var correct = (placed === p.verb);
+
+    if(placed){
+      var dropped = slot.querySelector('.dropped-verb');
+      if(dropped){
+        dropped.style.background = correct ? '#22c55e' : 'var(--pink)';
+        dropped.style.color = '#fff';
+        dropped.style.cursor = 'default';
+      }
+      dz.classList.add(correct ? 'correct-dz' : 'wrong-dz');
+      if(correct) bon++; else mauv++;
+
+      var chip = $('verb-' + placed);
+      if(chip) chip.classList.add(correct ? 'correct-v' : 'wrong-v');
+    }
+
+    // Afficher la bonne réponse si faux ou absent
+    if(!correct){
+      var res = document.createElement('div');
+      res.className = 'dz-result ko-r';
+      res.textContent = '→ ' + p.verb;
+      dz.appendChild(res);
+      dz.classList.add('wrong-dz');
+    }
+  });
+
+  bonPrev = bon;
+  updateChips(bon, mauv);
+  var pct = Math.round(bon / TOTAL * 100);
+  $('prog-fill').style.width = pct + '%';
+  $('prog-label').textContent = bon + ' / ' + TOTAL + ' corrects';
+  $('prog-pct').textContent = pct + ' %';
+
+  $('legende').classList.add('show');
+  $('row1').style.display = 'none';
+  $('row2').style.display = 'flex';
+
+  // Feedback
+  var cls, icon, title, detail;
+  if(bon === TOTAL){
+    cls='ok'; icon='✅'; title='Parfait ! 6/6 !';
+    detail='Bravo ! Tu maîtrises l\'accord sujet-verbe au présent. Chaque pronom a ses terminaisons caractéristiques : -e/-s pour je, -es/-s pour tu, -ons pour nous, -ez pour vous, -ent pour ils.';
+  } else if(bon >= 5){
+    cls='ok'; icon='👍'; title='Très bien ! ' + bon + '/6';
+    detail='Presque parfait ! Une petite erreur : consulte la zone en rouge pour voir la bonne réponse. Attention aux verbes en -ir (finit, remplissons, agissez, choisissent) qui ont des terminaisons différentes des verbes en -er.';
+  } else if(bon >= 3){
+    cls='mid'; icon='🙂'; title='Bien ! ' + bon + '/6';
+    detail='Tu commences à maîtriser l\'accord. Rappel : la terminaison du verbe dépend du pronom sujet. Nous → toujours -ons, Vous → toujours -ez, Ils → toujours -ent.';
+  } else {
+    cls='ko'; icon='💪'; title='Continue ! ' + bon + '/6';
+    detail='Astuce : cherche d\'abord les terminaisons. -ons → c\'est forcément nous. -ez → c\'est forcément vous. -ent → c\'est forcément ils. Commence par ceux-là !';
+  }
+
+  $('feedback').className = 'feedback show ' + cls;
+  $('fb-icon').textContent = icon;
+  $('fb-title').textContent = title;
+  $('fb-detail').textContent = detail;
+}
+
+/* ══ SOLUTION ═══════════════════════════════════════════ */
+function afficherSolution(){
+  PAIRS.forEach(function(p){
+    var dz = $('dz-' + p.id);
+    var slot = $('slot-' + p.id);
+    // Vider la zone et afficher la bonne réponse
+    slot.innerHTML = '';
+    var dropped = document.createElement('span');
+    dropped.className = 'dropped-verb';
+    dropped.textContent = p.verb;
+    dropped.style.background = '#22c55e';
+    dropped.style.color = '#fff';
+    dropped.style.cursor = 'default';
+    slot.appendChild(dropped);
+    dz.className = 'drop-zone correct-dz';
+    // Retirer le message d'erreur éventuel
+    var koMsg = dz.querySelector('.dz-result');
+    if(koMsg) koMsg.remove();
+  });
+  $('feedback').className = 'feedback show info';
+  $('fb-icon').textContent = '💡';
+  $('fb-title').textContent = 'Solution affichée.';
+  $('fb-detail').textContent = 'Je admire · Tu observes · Il finit · Nous remplissons · Vous agissez · Ils choisissent.';
+}
+
+/* ══ RÉSULTATS ══════════════════════════════════════════ */
+function showResults(){
+  $('ex-card').style.display = 'none';
+  $('results-screen').classList.add('show');
+  $('r-score').textContent = bonPrev;
+  var s = bonPrev >= 6 ? 5 : bonPrev >= 5 ? 4 : bonPrev >= 4 ? 3 : bonPrev >= 2 ? 2 : 1;
+  $('r-stars').textContent = '⭐'.repeat(s) + '☆'.repeat(5 - s);
+  var msgs = [
+    'Relis la leçon sur l\'accord sujet-verbe et recommence !',
+    'Tu commences à reconnaître les accords. Continue l\'entraînement !',
+    'Bon travail ! Les accords sujet-verbe sont globalement corrects.',
+    'Très bien ! Tu maîtrises presque tous les accords sujet-verbe.',
+    'Excellent ! Tu maîtrises parfaitement les accords sujet-verbe !'
+  ];
+  $('r-msg').textContent = msgs[s - 1];
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ══ RECOMMENCER ════════════════════════════════════════ */
+function recommencer(){
+  build();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* INIT */
+build();
+</script>
+</body>
+</html>
