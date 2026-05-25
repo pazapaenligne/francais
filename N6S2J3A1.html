@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S2 J3 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#8dc63f; --day-dark:#3d7a10; --day-dark2:#2a5a08;
+      --day-light:#f0faeb; --day-border:#b5e08a; --day-glow:rgba(141,198,63,.30);
+      --bg:#fffdf7; --surface:#ffffff; --surface2:#f7faf3; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --green-light:#f0faeb; --green-dark:#3d7a10;
+      --pink:#f28b82; --pink-light:#fff0ef;
+      --orange:#f5a623; --orange-light:#fff5e0;
+      --blue:#3ab5d8; --red:#b94040; --red-light:#f7eded;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:18px; --radius-sm:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1rem 0.75rem 3rem;
+      overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+
+    /* BULLES */
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:320px;height:320px;top:-110px;right:-110px;
+      background:radial-gradient(circle,rgba(245,197,24,.18),transparent 70%);}
+    .b2{width:260px;height:260px;bottom:-90px;left:-90px;
+      background:radial-gradient(circle,rgba(141,198,63,.18),transparent 70%);}
+    .b3{width:180px;height:180px;top:38%;right:-70px;
+      background:radial-gradient(circle,rgba(141,198,63,.12),transparent 70%);}
+    .b4{width:150px;height:150px;bottom:25%;left:-60px;
+      background:radial-gradient(circle,rgba(242,139,130,.14),transparent 70%);}
+
+    /* HEADER */
+    header{text-align:center;margin-bottom:1.3rem;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--day-color);color:#fff;
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;
+      box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;
+    }
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:800;line-height:1.25;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    /* COMPTEUR RADAR */
+    .radar-bar{
+      display:flex;align-items:center;gap:.8rem;
+      background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.6rem 1rem;
+      margin-bottom:.9rem;box-shadow:0 2px 10px var(--day-glow);
+    }
+    .radar-icon{font-size:1.5rem;flex-shrink:0;}
+    .radar-info{flex:1;min-width:0;}
+    .radar-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+    .radar-progress-bg{background:#e8e4d9;border-radius:99px;height:8px;overflow:hidden;}
+    .radar-progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;}
+    .radar-count{
+      font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;
+      color:var(--day-dark);white-space:nowrap;
+    }
+
+    /* PHRASE COUNTER */
+    .phrase-counter{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:.7rem;
+    }
+    .phrase-dots{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .phrase-dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--border);transition:background .3s;flex-shrink:0;
+    }
+    .phrase-dot.done-ok{background:var(--day-color);}
+    .phrase-dot.done-err{background:var(--red);}
+    .phrase-dot.active{background:var(--day-dark);box-shadow:0 0 0 3px var(--day-light);}
+    .phrase-num-label{
+      font-family:'JetBrains Mono',monospace;font-size:.75rem;
+      color:var(--muted);white-space:nowrap;
+    }
+
+    /* CARD PRINCIPALE */
+    .card{
+      width:100%;background:var(--surface);
+      border:1.5px solid #e8e4d9;border-radius:var(--radius);
+      padding:1.4rem 1.2rem 1.4rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);
+      animation:fadeUp .35s ease both;
+      position:relative;overflow:hidden;
+    }
+    .card-stripe{height:5px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      margin:-1.4rem -1.2rem 1.2rem;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--blue),var(--day-color));}
+    .ex-num{font-size:.67rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{
+      display:inline-block;font-size:.62rem;font-weight:700;
+      padding:.14rem .55rem;border-radius:99px;text-transform:uppercase;
+      letter-spacing:.07em;margin-bottom:.85rem;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);white-space:nowrap;
+    }
+
+    /* PHRASE AFFICHÉE */
+    .phrase-display{
+      background:var(--surface2);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:1.1rem 1.2rem;
+      margin-bottom:1rem;text-align:center;
+      font-size:clamp(1.1rem,3.5vw,1.4rem);font-weight:700;
+      color:var(--text);line-height:1.75;word-break:break-word;
+      min-height:80px;display:flex;align-items:center;justify-content:center;
+      flex-wrap:wrap;gap:.3rem;
+    }
+    .phrase-display .guillemet{color:var(--muted);font-weight:400;}
+
+    /* MOTS CLIQUABLES (étape 2) */
+    .word-btn{
+      display:inline-flex;align-items:center;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(1.05rem,3.5vw,1.35rem);font-weight:700;
+      background:transparent;border:none;cursor:pointer;
+      border-radius:8px;padding:.15rem .35rem;
+      -webkit-tap-highlight-color:transparent;
+      transition:background .12s,color .12s,transform .1s;
+      min-height:44px;color:var(--text);line-height:1.5;
+    }
+    .word-btn:hover{background:var(--day-light);color:var(--day-dark);}
+    .word-btn:active{transform:scale(.95);}
+    .word-btn.selected{
+      background:var(--day-color);color:#fff;
+      box-shadow:0 2px 8px var(--day-glow);
+    }
+    .word-btn.correct-w{
+      background:#22c55e;color:#fff;cursor:default;
+      box-shadow:0 2px 8px rgba(34,197,94,.3);
+    }
+    .word-btn.wrong-w{
+      background:var(--red);color:#fff;cursor:default;
+      text-decoration:line-through;
+    }
+    .word-punct{
+      font-size:clamp(1.05rem,3.5vw,1.35rem);font-weight:700;
+      color:var(--muted);display:inline-flex;align-items:center;
+      min-height:44px;padding:.15rem 0;
+    }
+
+    /* CONSIGNE ÉTAPE 2 */
+    .step2-hint{
+      font-size:clamp(.85rem,2.4vw,.95rem);color:var(--day-dark);
+      font-weight:700;text-align:center;margin-bottom:.75rem;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.5rem .85rem;
+      word-break:break-word;display:none;
+    }
+    .step2-hint.show{display:block;}
+
+    /* BOUTONS ÉTAPE 1 */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:.9rem;}
+    @media(max-width:479px){
+      .btn-row{flex-direction:column;}
+      .btn-row .btn{width:100%;justify-content:center;}
+    }
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.7rem 1.3rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.9rem,2.5vw,1.05rem);font-weight:700;
+      cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;
+      min-height:2.8rem;-webkit-tap-highlight-color:transparent;
+    }
+    .btn:active{transform:scale(.95);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-ok{
+      background:var(--day-color);color:#fff;
+      box-shadow:0 3px 14px var(--day-glow);flex:1;
+    }
+    .btn-ok:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px var(--day-glow);}
+    .btn-err{
+      background:var(--red);color:#fff;
+      box-shadow:0 3px 14px rgba(185,64,64,.28);flex:1;
+    }
+    .btn-err:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px rgba(185,64,64,.35);}
+    .btn-next{
+      background:var(--day-dark);color:#fff;
+      box-shadow:0 3px 14px var(--day-glow);width:100%;justify-content:center;
+    }
+    .btn-next:hover:not(:disabled){transform:translateY(-1px);}
+    .btn-ghost{
+      background:transparent;color:var(--muted);
+      border:1.5px solid var(--border);
+    }
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    /* FEEDBACK */
+    .feedback{
+      padding:.85rem 1rem;border-radius:var(--radius-sm);
+      font-size:clamp(.88rem,2.4vw,.98rem);
+      display:none;align-items:flex-start;gap:.6rem;
+      line-height:1.75;word-break:break-word;margin-bottom:.85rem;
+    }
+    .feedback.show{display:flex;}
+    .feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7a1f1f;}
+    .feedback.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+    .fb-icon{font-size:1.3rem;flex-shrink:0;}
+    .fb-body{flex:1;min-width:0;}
+    .fb-title{font-weight:700;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      color:var(--text);line-height:1.8;}
+
+    /* ÉCRAN DE FIN */
+    .end-screen{display:none;width:100%;animation:fadeUp .45s ease both;}
+    .end-screen.show{display:block;}
+    .end-card{
+      background:var(--surface);border:1.5px solid #e8e4d9;
+      border-radius:var(--radius);padding:2.2rem 1.5rem;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center;
+    }
+    .end-icon{font-size:3rem;margin-bottom:.6rem;display:block;}
+    .end-title{font-size:clamp(1.4rem,5vw,2.2rem);font-weight:800;
+      color:var(--day-dark);margin-bottom:.5rem;word-break:break-word;}
+    .end-score-row{
+      display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;
+      margin:1rem 0 1.2rem;
+    }
+    .end-badge{
+      display:flex;flex-direction:column;align-items:center;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.65rem 1.2rem;
+      min-width:90px;
+    }
+    .end-badge-num{font-size:1.8rem;font-weight:800;color:var(--day-dark);}
+    .end-badge-lbl{font-family:'JetBrains Mono',monospace;font-size:.7rem;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.1rem;}
+    .end-msg{color:var(--muted);font-size:clamp(.9rem,2.5vw,1.02rem);
+      margin-bottom:1.5rem;line-height:1.85;word-break:break-word;
+      max-width:480px;margin-left:auto;margin-right:auto;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+    .pulse{animation:pulse .4s ease;}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div>
+  <div class="bul b2"></div>
+  <div class="bul b3"></div>
+  <div class="bul b4"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 2 – Jour 3</div>
+      <h1>J'observe et je teste · <span class="hl">Homonymes du verbe avoir</span></h1>
+      <p class="subtitle">Active ton radar et pars à la recherche des erreurs.</p>
+    </header>
+
+    <!-- RADAR BAR -->
+    <div class="radar-bar">
+      <span class="radar-icon">&#128270;</span>
+      <div class="radar-info">
+        <div class="radar-label">Indices trouvés</div>
+        <div class="radar-progress-bg">
+          <div class="radar-progress-fill" id="radar-fill"></div>
+        </div>
+      </div>
+      <div class="radar-count"><span id="radar-num">0</span> / 2</div>
+    </div>
+
+    <!-- POINTS DE PROGRESSION -->
+    <div class="phrase-counter">
+      <div class="phrase-dots" id="phrase-dots"></div>
+      <div class="phrase-num-label" id="phrase-num-label">Phrase 1 / 8</div>
+    </div>
+
+    <!-- CARD EXERCICE -->
+    <div class="card" id="ex-card">
+      <div class="card-stripe"></div>
+      <div class="ex-num">J'observe et je teste · Quiz</div>
+      <div class="theme-badge">Orthographe · a / à</div>
+
+      <!-- Consigne -->
+      <div style="background:var(--surface2);border:1.5px solid var(--border);
+        border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+        padding:.7rem 1rem;margin-bottom:1rem;font-size:clamp(.88rem,2.4vw,.98rem);
+        line-height:1.7;word-break:break-word;">
+        <strong style="color:var(--day-dark);">Alerte !</strong>
+        Des erreurs se sont glissées dans certaines phrases.
+        Active ton radar et pars à leur recherche.<br>
+        <span style="font-size:.85em;color:var(--muted);">
+          Il n'y a pas forcément une erreur dans chaque phrase.
+        </span>
+      </div>
+
+      <!-- Phrase -->
+      <div class="phrase-display" id="phrase-display"></div>
+
+      <!-- Hint étape 2 -->
+      <div class="step2-hint" id="step2-hint">
+        Clique sur le mot qui contient l'erreur.
+      </div>
+
+      <!-- Feedback -->
+      <div class="feedback" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div class="fb-body">
+          <div class="fb-title" id="fb-title"></div>
+          <div class="fb-detail" id="fb-detail"></div>
+        </div>
+      </div>
+
+      <!-- Boutons étape 1 -->
+      <div class="btn-row" id="row-step1">
+        <button class="btn btn-ok" id="btn-ok" onclick="choixCorrect()">
+          &#10003; Phrase correcte
+        </button>
+        <button class="btn btn-err" id="btn-err" onclick="choixErreur()">
+          &#128680; Erreur détectée
+        </button>
+      </div>
+
+      <!-- Bouton suivant -->
+      <div id="row-next" style="display:none;">
+        <button class="btn btn-next" onclick="phraseNext()">
+          Phrase suivante &#8594;
+        </button>
+      </div>
+
+      <!-- Bouton recommencer (fin) -->
+      <div id="row-restart" style="display:none;margin-top:.5rem;">
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;"
+          onclick="recommencer()">&#8635; Recommencer depuis le début</button>
+      </div>
+    </div>
+
+    <!-- ÉCRAN DE FIN -->
+    <div class="end-screen" id="end-screen">
+      <div class="end-card">
+        <div class="logo-badge" style="margin-bottom:.8rem;background:var(--day-color);color:#fff;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Mission accomplie !
+        </div>
+        <span class="end-icon">&#128270;</span>
+        <div class="end-title">Radar activé !</div>
+        <div class="end-score-row">
+          <div class="end-badge">
+            <div class="end-badge-num" id="end-indices">0</div>
+            <div class="end-badge-lbl">indice(s) trouvé(s)</div>
+          </div>
+          <div class="end-badge">
+            <div class="end-badge-num" id="end-phrases">0</div>
+            <div class="end-badge-lbl">phrase(s) correcte(s)</div>
+          </div>
+        </div>
+        <div class="end-msg">
+          Tu as commencé à repérer les indices qui permettent de distinguer
+          les homonymes du verbe « avoir ».
+          Tu vas maintenant approfondir ton enquête pour découvrir comment
+          les reconnaître avec certitude.
+        </div>
+        <button class="btn btn-ok" style="width:100%;justify-content:center;"
+          onclick="recommencer()">&#8635; Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ══ DONNÉES ════════════════════════════════════════════════
+   correct : true = phrase sans erreur
+   erreur  : null si correct, sinon index du mot fautif (0-based, hors ponctuation)
+   explication : feedback pédagogique
+═══════════════════════════════════════════════════════════ */
+var PHRASES = [
+  {
+    texte: 'Léa a un nouveau vélo.',
+    correct: true,
+    erreur: null,
+    explication: 'Le mot « a » est ici le verbe avoir conjugué à la 3e personne du singulier (elle a). On peut le remplacer par « avait » : « Léa avait un nouveau vélo. » — cela fonctionne, donc c\'est bien le verbe avoir.'
+  },
+  {
+    texte: 'Tu à oublié ton cahier.',
+    correct: false,
+    erreur: 1, // "à" (index 1 dans les mots non-ponctuation)
+    explication: '« À » avec un accent est une préposition (direction, lieu). Ici, il faut le verbe avoir : « Tu as oublié… ». Astuce : si on peut remplacer par « avait », c\'est le verbe avoir, donc sans accent.'
+  },
+  {
+    texte: 'Mon frère a gagné la course.',
+    correct: true,
+    erreur: null,
+    explication: '« A » est le verbe avoir (il/elle a). On peut le remplacer par « avait » : « Mon frère avait gagné la course. » — c\'est correct, donc pas d\'accent.'
+  },
+  {
+    texte: 'Tu as terminé ton exercice.',
+    correct: true,
+    erreur: null,
+    explication: '« As » est le verbe avoir conjugué à la 2e personne du singulier. Phrase parfaitement correcte.'
+  },
+  {
+    texte: 'Le chat a mangé ses croquettes.',
+    correct: true,
+    erreur: null,
+    explication: '« A » est le verbe avoir. On peut le remplacer par « avait » : « Le chat avait mangé… » — correct, donc sans accent.'
+  },
+  {
+    texte: 'Il va à la bibliothèque.',
+    correct: true,
+    erreur: null,
+    explication: '« À » est ici une préposition de lieu (direction). Ce n\'est pas le verbe avoir : on ne peut pas remplacer par « avait ». C\'est donc bien « à » avec accent — et la phrase est correcte.'
+  },
+  {
+    texte: 'Emma a huit ans.',
+    correct: true,
+    erreur: null,
+    explication: '« A » est le verbe avoir (elle a). On peut le remplacer par « avait » : « Emma avait huit ans. » — correct, sans accent.'
+  },
+  {
+    texte: 'Tu a beaucoup progressé.',
+    correct: false,
+    erreur: 1, // "a" (index 1)
+    explication: 'Avec le sujet « tu », le verbe avoir se conjugue « as » et non « a ». « Tu as beaucoup progressé. » — « a » est réservé à il/elle/on.'
+  }
+];
+
+var TOTAL = PHRASES.length;
+var TOTAL_ERREURS = PHRASES.filter(function(p){ return !p.correct; }).length; // 2
+
+var idx = 0;           // phrase courante
+var step = 1;          // 1 = choix correct/erreur, 2 = clic sur le mot
+var indicesTrouves = 0;
+var phrasesCorrectes = 0;
+var phrasesDone = [];  // résultats par phrase : 'ok' | 'err-found' | 'err-missed' | 'false-alarm'
+
+var FEEDBACKS_OK = [
+  'Bien vu ! Tu as repéré correctement l\'indice.',
+  'Excellent repérage ! Ton radar fonctionne parfaitement.',
+  'Tu observes attentivement les indices.',
+  'Bien joué ! Tu as l\'œil aiguisé.'
+];
+var FEEDBACKS_KO = [
+  'Observe encore. Relis la phrase et cherche le rôle du mot.',
+  'Un indice t\'a échappé. Regarde le sujet de la phrase.',
+  'Essaie de remplacer le mot pour vérifier ton hypothèse.'
+];
+
+function rnd(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function $(id){ return document.getElementById(id); }
+
+/* ══ BUILD ══════════════════════════════════════════════════ */
+function build(){
+  idx = 0; step = 1;
+  indicesTrouves = 0; phrasesCorrectes = 0; phrasesDone = [];
+
+  $('ex-card').style.display = 'block';
+  $('end-screen').classList.remove('show');
+  renderDots();
+  renderPhrase();
+  updateRadar();
+}
+
+/* ══ POINTS DE PROGRESSION ══════════════════════════════════ */
+function renderDots(){
+  var dotsEl = $('phrase-dots');
+  dotsEl.innerHTML = '';
+  PHRASES.forEach(function(_, i){
+    var d = document.createElement('div');
+    d.className = 'phrase-dot' + (i === idx ? ' active' : '');
+    if(i < phrasesDone.length){
+      var res = phrasesDone[i];
+      d.classList.remove('active');
+      if(res === 'ok' || res === 'err-found') d.classList.add('done-ok');
+      else d.classList.add('done-err');
+    }
+    dotsEl.appendChild(d);
+  });
+  $('phrase-num-label').textContent = 'Phrase ' + (idx + 1) + ' / ' + TOTAL;
+}
+
+/* ══ AFFICHER UNE PHRASE ════════════════════════════════════ */
+function renderPhrase(){
+  var p = PHRASES[idx];
+  var display = $('phrase-display');
+  display.innerHTML = '';
+  step = 1;
+
+  // Affichage simple (texte complet entre guillemets)
+  var open = document.createElement('span');
+  open.className = 'guillemet'; open.textContent = '\u00ab\u00a0';
+  display.appendChild(open);
+
+  // Extraire mots et ponctuation finale
+  var raw = p.texte.replace(/[.!?]$/, '');
+  var punct = p.texte.slice(raw.length);
+  var words = raw.split(' ');
+
+  words.forEach(function(w, wi){
+    var span = document.createElement('span');
+    span.textContent = w;
+    span.style.display = 'inline';
+    display.appendChild(span);
+    if(wi < words.length - 1){
+      display.appendChild(document.createTextNode('\u00a0'));
+    }
+  });
+
+  // ponctuation
+  var pSpan = document.createElement('span');
+  pSpan.className = 'guillemet';
+  pSpan.textContent = punct + '\u00a0\u00bb';
+  display.appendChild(pSpan);
+
+  // UI
+  $('step2-hint').classList.remove('show');
+  $('feedback').className = 'feedback';
+  $('row-step1').style.display = 'flex';
+  $('row-next').style.display = 'none';
+  $('row-restart').style.display = 'none';
+  $('btn-ok').disabled = false;
+  $('btn-err').disabled = false;
+}
+
+/* ══ ÉTAPE 1 — CHOIX CORRECT ════════════════════════════════ */
+function choixCorrect(){
+  $('btn-ok').disabled = true;
+  $('btn-err').disabled = true;
+  var p = PHRASES[idx];
+
+  if(p.correct){
+    // Bonne réponse : phrase correcte
+    phrasesCorrectes++;
+    phrasesDone.push('ok');
+    showFeedback('ok',
+      'Bien vu !',
+      FEEDBACKS_OK[Math.floor(Math.random() * FEEDBACKS_OK.length)] +
+      ' ' + p.explication);
+    showNext();
+  } else {
+    // Fausse alerte : il y avait une erreur
+    phrasesDone.push('false-alarm');
+    showFeedback('ko',
+      'Observe encore.',
+      'Cette phrase contient bien une erreur. ' + FEEDBACKS_KO[Math.floor(Math.random() * FEEDBACKS_KO.length)]);
+    showNext();
+  }
+  renderDots();
+  updateRadar();
+}
+
+/* ══ ÉTAPE 1 — CHOIX ERREUR ═════════════════════════════════ */
+function choixErreur(){
+  $('btn-ok').disabled = true;
+  $('btn-err').disabled = true;
+  var p = PHRASES[idx];
+
+  if(!p.correct){
+    // Correct : il y a bien une erreur — passer à l'étape 2
+    $('row-step1').style.display = 'none';
+    $('step2-hint').classList.add('show');
+    renderMotsCliquables();
+  } else {
+    // Fausse alarme : la phrase était correcte
+    phrasesDone.push('false-alarm');
+    showFeedback('ko',
+      'Observe encore.',
+      'Cette phrase est en réalité correcte. ' + p.explication);
+    showNext();
+    renderDots();
+    updateRadar();
+  }
+}
+
+/* ══ ÉTAPE 2 — MOTS CLIQUABLES ══════════════════════════════ */
+function renderMotsCliquables(){
+  var p = PHRASES[idx];
+  var display = $('phrase-display');
+  display.innerHTML = '';
+
+  var raw = p.texte.replace(/[.!?]$/, '');
+  var punct = p.texte.slice(raw.length);
+  var words = raw.split(' ');
+
+  words.forEach(function(w, wi){
+    var btn = document.createElement('button');
+    btn.className = 'word-btn';
+    btn.textContent = w;
+    btn.dataset.wi = wi;
+    btn.addEventListener('click', function(){ checkMot(wi, btn, words, punct); });
+    display.appendChild(btn);
+  });
+
+  // Ponctuation non cliquable
+  var pSpan = document.createElement('span');
+  pSpan.className = 'word-punct';
+  pSpan.textContent = punct;
+  display.appendChild(pSpan);
+}
+
+/* ══ VÉRIFICATION DU MOT CLIQUÉ ════════════════════════════ */
+function checkMot(wi, btn, words, punct){
+  var p = PHRASES[idx];
+  // Désactiver tous les boutons
+  $('phrase-display').querySelectorAll('.word-btn').forEach(function(b){ b.disabled = true; });
+
+  if(wi === p.erreur){
+    // Bonne détection
+    btn.classList.add('correct-w');
+    indicesTrouves++;
+    phrasesDone.push('err-found');
+    showFeedback('ok',
+      'Indice trouvé !',
+      FEEDBACKS_OK[Math.floor(Math.random() * FEEDBACKS_OK.length)] +
+      '\u00a0' + p.explication);
+  } else {
+    // Mauvaise sélection — montrer le bon mot
+    btn.classList.add('wrong-w');
+    $('phrase-display').querySelectorAll('.word-btn').forEach(function(b){
+      if(+b.dataset.wi === p.erreur) b.classList.add('correct-w');
+    });
+    phrasesDone.push('err-missed');
+    showFeedback('ko',
+      'Pas tout à fait.',
+      'Le mot erroné est « ' + words[p.erreur] + ' ». ' + p.explication);
+  }
+
+  $('step2-hint').classList.remove('show');
+  renderDots();
+  updateRadar();
+  showNext();
+}
+
+/* ══ FEEDBACK ═══════════════════════════════════════════════ */
+function showFeedback(cls, title, detail){
+  var icons = {ok:'&#10003;', ko:'&#33;', info:'&#128270;'};
+  $('feedback').className = 'feedback show ' + cls;
+  $('fb-icon').innerHTML = icons[cls] || icons.info;
+  $('fb-title').textContent = title;
+  $('fb-detail').textContent = detail;
+}
+
+/* ══ BOUTON SUIVANT ═════════════════════════════════════════ */
+function showNext(){
+  if(idx < TOTAL - 1){
+    $('row-next').style.display = 'block';
+  } else {
+    // Dernière phrase : afficher recommencer + fin
+    $('row-restart').style.display = 'block';
+    setTimeout(showEnd, 900);
+  }
+}
+
+function phraseNext(){
+  idx++;
+  renderDots();
+  renderPhrase();
+}
+
+/* ══ RADAR ══════════════════════════════════════════════════ */
+function updateRadar(){
+  $('radar-num').textContent = indicesTrouves;
+  var pct = Math.round(indicesTrouves / TOTAL_ERREURS * 100);
+  $('radar-fill').style.width = pct + '%';
+  // Pulse sur le compteur si on vient de trouver
+  $('radar-num').classList.remove('pulse');
+  void $('radar-num').offsetWidth;
+  $('radar-num').classList.add('pulse');
+}
+
+/* ══ ÉCRAN DE FIN ═══════════════════════════════════════════ */
+function showEnd(){
+  $('ex-card').style.display = 'none';
+  $('end-screen').classList.add('show');
+  $('end-indices').textContent = indicesTrouves;
+  $('end-phrases').textContent = phrasesCorrectes;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ RECOMMENCER ════════════════════════════════════════════ */
+function recommencer(){
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* INIT */
+build();
+</script>
+</body>
+</html>
