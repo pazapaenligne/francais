@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pazapa – Je relève le défi ! S2J1</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--day:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;--day-glow:#f5d080;--bg:#fffdf7;--surface:#fff;--dark:#1a1f2e;--green-neo:#39ff14;--red-neo:#ff4444;--gold:#f5c518;--radius:14px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden;position:relative;}
+.bubble{position:fixed;border-radius:50%;opacity:.18;pointer-events:none;z-index:0;}
+.b1{width:320px;height:320px;background:#f5c518;top:-80px;right:-80px;}
+.b2{width:260px;height:260px;background:var(--day);bottom:-60px;left:-60px;}
+.b3{width:160px;height:160px;background:#8dc63f;top:40%;right:-40px;}
+.b4{width:130px;height:130px;background:#f28b82;top:55%;left:-30px;}
+.page{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:24px 16px 60px;}
+/* HEADER */
+.header{text-align:center;margin-bottom:28px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;border-radius:999px;padding:6px 16px;font-weight:700;font-size:14px;color:#5a3e00;margin-bottom:8px;box-shadow:0 2px 8px rgba(245,197,24,.35);}
+.logo-dots{display:flex;gap:5px;}
+.logo-dots span{width:9px;height:9px;border-radius:50%;}
+.dot1{background:#f28b82;}.dot2{background:#8dc63f;}.dot3{background:#3ab5d8;}
+.semaine-jour{font-size:13px;color:#888;margin-bottom:10px;}
+.main-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:900;color:var(--day-dark);text-shadow:0 2px 12px var(--day-glow);margin-bottom:6px;}
+.sub-title{font-size:15px;color:#555;margin-bottom:14px;line-height:1.5;}
+.defi-badge{display:inline-block;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;background:var(--dark);color:var(--day);padding:7px 18px;border-radius:999px;border:2px solid var(--day);animation:pulse 2s ease-in-out infinite;letter-spacing:.06em;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,.5);}50%{box-shadow:0 0 0 10px rgba(245,166,35,0);}}
+/* GAME BOX */
+.game-box{background:var(--dark);border:2.5px solid var(--day);border-radius:var(--radius);padding:22px 20px 18px;margin-bottom:22px;box-shadow:0 0 24px rgba(245,166,35,.18);}
+.game-box-label{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--day);opacity:.7;letter-spacing:.1em;margin-bottom:14px;}
+.stars-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px;}
+.star{font-size:2rem;color:#333;transition:color .3s,transform .3s;user-select:none;}
+.star.lit{color:#fff;animation:popStar .4s ease;}
+@keyframes popStar{0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(1);}}
+.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.score-col{text-align:center;}
+.score-label{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase;}
+.score-val{font-family:'Orbitron',sans-serif;font-size:clamp(2.2rem,6vw,2.8rem);font-weight:900;line-height:1;}
+.col-ok .score-label{color:var(--green-neo);}.col-ok .score-val{color:var(--green-neo);text-shadow:0 0 10px var(--green-neo);}
+.col-left .score-label{color:var(--day);}.col-left .score-val{color:var(--day);text-shadow:0 0 10px var(--day-glow);}
+.col-err .score-label{color:var(--red-neo);}.col-err .score-val{color:var(--red-neo);text-shadow:0 0 10px var(--red-neo);}
+.xp-track{background:#2a3045;border-radius:999px;height:10px;overflow:hidden;margin-bottom:6px;border:1px solid #3a4060;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--day));border-radius:999px;transition:width .5s ease;}
+.xp-info{display:flex;justify-content:space-between;font-family:'Orbitron',sans-serif;font-size:11px;color:var(--day);opacity:.85;}
+/* CARD */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:0 4px 24px rgba(0,0,0,.10);overflow:hidden;margin-bottom:20px;}
+.rainbow-bar{height:5px;background:linear-gradient(90deg,#f28b82,#f5c518,#8dc63f,#3ab5d8,#f5a623);background-size:200% 100%;animation:rainbow 3s linear infinite;}
+@keyframes rainbow{0%{background-position:0%}100%{background-position:200%}}
+.card-body{padding:22px 20px;}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.q-num{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--day-dark);background:var(--day-light);padding:4px 12px;border-radius:999px;border:1px solid var(--day);}
+.q-type-badge{font-size:11px;background:var(--dark);color:var(--day);padding:3px 10px;border-radius:999px;font-weight:700;border:1px solid var(--day);}
+/* TEXTE SUPPORT */
+.text-encart{background:var(--dark);border:1.5px solid var(--day);border-radius:10px;padding:14px 16px;margin-bottom:16px;color:var(--day);text-shadow:0 0 8px var(--day-glow);line-height:1.75;max-height:200px;overflow-y:auto;}
+.text-encart::-webkit-scrollbar{width:4px;}.text-encart::-webkit-scrollbar-track{background:#2a3045;}.text-encart::-webkit-scrollbar-thumb{background:var(--day);border-radius:99px;}
+.encart-label{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.1em;color:var(--day);opacity:.7;margin-bottom:8px;font-style:normal;display:block;}
+.encart-chapeau{font-style:normal;font-size:12px;color:#9aa;}
+.encart-corps{font-size:13px;font-style:italic;}
+.encart-did{color:#777;font-style:normal;}
+.cursor{display:inline-block;width:2px;height:1em;background:var(--day);vertical-align:middle;margin-left:2px;animation:blink .8s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* QUESTION */
+.question-text{font-size:15px;color:#222;margin-bottom:10px;font-weight:700;line-height:1.5;}
+.multi-label{font-size:11px;color:#888;background:#f0f0f0;display:inline-block;padding:2px 10px;border-radius:999px;margin-bottom:10px;}
+/* OPTIONS */
+.options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid #ddd;background:#fafafa;cursor:pointer;font-size:14px;color:#222;transition:all .15s;line-height:1.4;text-align:left;width:100%;min-height:44px;}
+.opt:hover:not([data-locked]){border-color:var(--day);background:var(--day-light);}
+.opt.selected{border-color:var(--day);background:var(--day-light);color:var(--day-dark);}
+.opt.correct{border-color:#39c24a;background:#efffef;color:#1a6e28;}
+.opt.wrong{border-color:#ff4444;background:#fff0f0;color:#8b0000;}
+.opt.missed{border-color:#f5c518;background:#fffbeb;color:#7a5800;}
+.opt-letter{min-width:26px;height:26px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;transition:background .15s,color .15s;}
+.selected .opt-letter{background:var(--day);color:#fff;}
+.correct .opt-letter{background:#39c24a;color:#fff;}
+.wrong .opt-letter{background:#ff4444;color:#fff;}
+.missed .opt-letter{background:#f5c518;color:#fff;}
+/* FEEDBACK */
+.feedback{display:none;padding:10px 14px;border-radius:10px;font-size:14px;margin-bottom:14px;line-height:1.5;animation:popIn .35s ease;}
+.feedback.ok{display:block;background:#efffef;border:1.5px solid #39c24a;color:#1a6e28;}
+.feedback.ko{display:block;background:#fff0f0;border:1.5px solid #ff4444;color:#8b0000;}
+.feedback.pa{display:block;background:#fffbeb;border:1.5px solid #f5c518;color:#7a5800;}
+@keyframes popIn{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+/* INDICE */
+.hint-wrap{margin-bottom:14px;}
+.hint-box{display:none;background:#e8f4ff;border:1px solid #3ab5d8;border-radius:8px;padding:9px 13px;font-size:13px;color:#1a4e66;margin-top:8px;line-height:1.5;}
+.hint-box.show{display:block;}
+/* BOUTONS */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;padding:12px 18px;border-radius:8px;border:2px solid;cursor:pointer;letter-spacing:.05em;transition:transform .15s,filter .15s;min-height:44px;display:flex;align-items:center;gap:6px;flex:1 1 120px;justify-content:center;}
+.btn-valid{background:#1a6e28;color:#fff;border-color:#39c24a;}
+.btn-valid:not(:disabled){animation:neon-green 2s ease-in-out infinite;}
+@keyframes neon-green{0%,100%{box-shadow:0 0 6px #39c24a;}50%{box-shadow:0 0 18px #39c24a,0 0 6px #fff;}}
+.btn-hint{background:#0d4a6e;color:#fff;border-color:#3ab5d8;}
+.btn-hint:not(:disabled){animation:neon-blue 2s ease-in-out infinite;}
+@keyframes neon-blue{0%,100%{box-shadow:0 0 6px #3ab5d8;}50%{box-shadow:0 0 18px #3ab5d8,0 0 6px #fff;}}
+.btn-next{background:var(--day-dark);color:#fff;border-color:var(--day);}
+.btn-next:not(:disabled){animation:neon-day 2s ease-in-out infinite;}
+@keyframes neon-day{0%,100%{box-shadow:0 0 6px var(--day);}50%{box-shadow:0 0 18px var(--day),0 0 6px #fff;}}
+.btn:disabled{opacity:.38;cursor:not-allowed;box-shadow:none;}
+.btn:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.1);}
+/* NAV */
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+.nav-btn{background:none;border:none;cursor:pointer;color:var(--day-dark);font-weight:700;font-size:13px;font-family:Arial,sans-serif;padding:8px 4px;text-decoration:underline;min-height:44px;}
+.nav-btn:disabled{opacity:.3;cursor:default;}
+.nav-info{font-size:12px;color:#aaa;}
+/* XP POP */
+.xp-pop{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:var(--gold);text-shadow:0 0 20px var(--gold);pointer-events:none;z-index:999;display:none;}
+@keyframes xpAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.7);}30%{opacity:1;transform:translate(-50%,-60%) scale(1.15);}70%{opacity:1;transform:translate(-50%,-75%) scale(1);}100%{opacity:0;transform:translate(-50%,-90%) scale(.9);}}
+/* RÉSULTATS */
+.result-screen{display:none;text-align:center;background:var(--dark);border:2.5px solid var(--day);border-radius:var(--radius);padding:36px 24px;color:#fff;margin-bottom:20px;box-shadow:0 0 40px rgba(245,166,35,.2);}
+.result-screen.show{display:block;}
+.result-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.4rem,5vw,2.2rem);font-weight:900;color:var(--day);text-shadow:0 0 18px var(--day-glow);margin-bottom:6px;letter-spacing:.06em;}
+.result-sub{font-size:13px;color:var(--day);opacity:.7;margin-bottom:20px;}
+.result-score-big{font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,8vw,4rem);font-weight:900;color:var(--gold);text-shadow:0 0 24px var(--gold);margin-bottom:8px;}
+.result-stars{font-size:2rem;margin-bottom:14px;}
+.result-msg{font-size:15px;color:#ccc;margin-bottom:20px;line-height:1.6;}
+.result-gg{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--green-neo);letter-spacing:.1em;text-shadow:0 0 10px var(--green-neo);margin-bottom:22px;}
+.result-recap{text-align:left;margin-bottom:22px;}
+.recap-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #2a3045;font-size:13px;color:#ccc;}
+.recap-item:last-child{border-bottom:none;}
+.recap-ok{color:var(--green-neo);font-weight:700;}
+.recap-ko{color:var(--red-neo);font-weight:700;}
+.recap-pa{color:var(--gold);font-weight:700;}
+.btn-newgame{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;padding:13px 28px;border-radius:10px;background:var(--day-dark);color:#fff;border:2px solid var(--day);cursor:pointer;letter-spacing:.06em;min-height:44px;animation:neon-day 2s ease-in-out infinite;}
+.btn-newgame:hover{filter:brightness(1.15);transform:translateY(-2px);}
+/* TABLETTE */
+@media(max-width:600px){
+  .btn{font-size:11px;padding:10px 12px;}
+  .score-val{font-size:2rem;}
+  .card-body{padding:16px 14px;}
+}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div>
+<div class="bubble b3"></div><div class="bubble b4"></div>
+<div class="xp-pop" id="xpPop">+25 XP !</div>
+<div class="page">
+
+  <header class="header">
+    <div class="logo-badge">
+      <div class="logo-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div>
+      Pazapa &middot; Fran&ccedil;ais &middot; 6e
+    </div>
+    <div class="semaine-jour">Semaine 2 &middot; Jour 1</div>
+    <div class="main-title">&#127942; Je rel&egrave;ve le d&eacute;fi&nbsp;!</div>
+    <div class="sub-title">Fin de l&rsquo;investigation&nbsp;: ce que cache vraiment la sc&egrave;ne du Petit Poucet.</div>
+    <div class="defi-badge">&#9654; D&Eacute;FI R&Eacute;VISION 6E</div>
+  </header>
+
+  <div class="game-box">
+    <div class="game-box-label">&#9654; D&Eacute;FI R&Eacute;VISION 6E &mdash; COMPR&Eacute;HENSION DE TEXTE</div>
+    <div class="stars-row">
+      <span class="star" id="s0">&#9733;</span><span class="star" id="s1">&#9733;</span>
+      <span class="star" id="s2">&#9733;</span><span class="star" id="s3">&#9733;</span>
+      <span class="star" id="s4">&#9733;</span>
+    </div>
+    <div class="scoreboard">
+      <div class="score-col col-ok"><div class="score-label">R&eacute;ussis</div><div class="score-val" id="sc-ok">0</div></div>
+      <div class="score-col col-left"><div class="score-label">Restants</div><div class="score-val" id="sc-left">10</div></div>
+      <div class="score-col col-err"><div class="score-label">Erreurs</div><div class="score-val" id="sc-err">0</div></div>
+    </div>
+    <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="xp-info">
+      <span id="xpPct">0 % XP</span>
+      <span id="defiLabel">D&Eacute;FI 1 / 10</span>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="rainbow-bar"></div>
+    <div class="card-body">
+      <div class="q-header">
+        <div class="q-num" id="qNum">D&Eacute;FI 1</div>
+        <div class="q-type-badge" id="qType">QCM</div>
+      </div>
+      <div class="text-encart">
+        <span class="encart-label">&#128216; TEXTE SUPPORT &mdash; Le Petit Poucet (Laurent Gutmann)</span>
+        <span class="encart-chapeau">Les parents tentent d&rsquo;abandonner leur enfant une premi&egrave;re fois dans la for&ecirc;t, mais celui-ci retrouve le chemin de la maison gr&acirc;ce aux cailloux blancs sem&eacute;s sur sa route. Ils l&rsquo;abandonnent &agrave; nouveau dans les bois. Cette fois, le Petit Poucet a jet&eacute; sur son chemin des mini-pizzas.</span><br><br>
+        <span class="encart-corps"><strong style="color:var(--day)">Petit Poucet&nbsp;:</strong> Ils sont bizarres, mes parents&nbsp;: &ccedil;a fait deux fois qu&rsquo;on joue &agrave; cache-cache, deux fois qu&rsquo;ils disparaissent, on dirait que &ccedil;a les amuse, &agrave; leur &acirc;ge c&rsquo;est un peu &eacute;trange. S&rsquo;ils veulent m&rsquo;abandonner dans la for&ecirc;t, pourquoi ne le font-ils pas, simplement&nbsp;? Pourquoi leur faut-il cette mise en sc&egrave;ne ridicule&nbsp;? <span class="encart-did">(Des oiseaux arrivent.)</span> Salut les oiseaux, vous en voulez un bout&nbsp;? Oui, c&rsquo;est encore moi, on commence &agrave; se conna&icirc;tre. <span class="encart-did">(La nuit commence &agrave; tomber.)</span> Je ne vois pas mes mini-pizzas sur le chemin&nbsp;; &eacute;videmment les cailloux, c&rsquo;&eacute;tait plus gros. C&rsquo;est bizarre, je suis s&ucirc;r d&rsquo;en avoir laiss&eacute; une ici&nbsp;; et l&agrave;. Il faut que je reparte de mon point d&rsquo;arriv&eacute;e. L&agrave;. Non l&agrave;. &Ccedil;a devient inqu&eacute;tant. Non, d&eacute;sol&eacute; les oiseaux, je n&rsquo;ai plus rien &agrave; vous offrir, vous &ecirc;tes trop gourmands, vous n&rsquo;avez qu&rsquo;&agrave; manger des cailloux, &ccedil;a vous coupera l&rsquo;app&eacute;tit. Mais dites donc, ce n&rsquo;est pas vous qui avez mang&eacute; mes mini-pizzas par terre&nbsp;? Mais si, c&rsquo;est vous, ce n&rsquo;est plus dr&ocirc;le du tout&nbsp;! <span class="encart-did">(On entend les loups.)</span> Maman&nbsp;! Papa&nbsp;! Papa&nbsp;! Maman&nbsp;! S&rsquo;il vous pla&icirc;t, revenez, j&rsquo;ai peur&nbsp;! <span class="encart-did">(Encore les loups.)</span> Je suis trop petit pour mourir d&eacute;vor&eacute; par les loups. Je suis arriv&eacute; par l&agrave;. Non, par l&agrave;. Elle est nulle, cette for&ecirc;t, elle est pareille dans tous les sens. <span class="encart-did">(On entend les loups de plus belle, le Petit Poucet se couche sur le sol.)</span> Non les loups, je suis petit, il faut me laisser, je vais dormir, je vais r&ecirc;ver, vous ne pouvez pas me manger, je suis dans mon lit, je suis dans ma chambre, dans ma maison. &Ccedil;a y est, je r&ecirc;ve, vous pouvez partir, je suis hors d&rsquo;atteinte. <span class="encart-did">(Il se recroqueville, soudain on voit une lumi&egrave;re dans la nuit.)</span> Ma maison&nbsp;! Maman&nbsp;! Papa&nbsp;! &Ccedil;a sent bon, &ccedil;a sent la maison. Il y a quelqu&rsquo;un&nbsp;?<span class="cursor"></span></span>
+      </div>
+      <div class="question-text" id="qText"></div>
+      <div class="multi-label" id="qMultiLabel" style="display:none">Plusieurs r&eacute;ponses possibles</div>
+      <div class="options" id="optsZone"></div>
+      <div class="hint-wrap">
+        <button class="btn btn-hint" id="btnHint" onclick="showHint()">&#128161; INDICE</button>
+        <div class="hint-box" id="hintBox"></div>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div class="btn-row">
+        <button class="btn btn-valid" id="btnValid" onclick="valider()" disabled>&#10003; VALIDER</button>
+        <button class="btn btn-next"  id="btnNext"  onclick="suivant()"  disabled>SUIVANT &#9654;</button>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn" id="btnBack" onclick="goBack()" disabled>&#8592; Retour</button>
+        <span class="nav-info" id="navInfo">1 / 10</span>
+        <button class="nav-btn" id="btnFwd" onclick="goFwd()" disabled>Suivant &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-screen" id="resultScreen">
+    <div class="result-title">MISSION ACCOMPLIE</div>
+    <div class="result-sub">// Investigation termin&eacute;e &mdash; rapport final</div>
+    <div class="result-score-big" id="resScore">0 / 10</div>
+    <div class="result-stars" id="resStars"></div>
+    <div class="result-msg" id="resMsg"></div>
+    <div class="result-gg" id="resGG"></div>
+    <div class="result-recap" id="resRecap"></div>
+    <button class="btn-newgame" onclick="recommencer()">&#9654; NOUVEAU D&Eacute;FI</button>
+  </div>
+
+</div>
+<script>
+const QS=[
+  {text:"Pourquoi le Petit Poucet trouve-t-il le comportement de ses parents \u00ab\u00a0bizarre\u00a0\u00bb\u00a0?",multi:false,
+   opts:["Parce qu\u2019ils rient beaucoup.","Parce qu\u2019ils disparaissent comme dans un jeu.","Parce qu\u2019ils lui expliquent clairement ce qu\u2019ils font.","Parce qu\u2019ils semblent s\u2019amuser \u00e0 le laisser seul."],
+   correct:[1],hint:null,
+   feedback:"Le Petit Poucet comprend que ce n\u2019est pas un vrai jeu\u00a0: ses parents disparaissent volontairement. Cela cr\u00e9e un malaise chez lui, car il sent que quelque chose ne tourne pas rond."},
+  {text:"Que cherche vraiment \u00e0 comprendre le Petit Poucet lorsqu\u2019il parle de \u00ab\u00a0mise en sc\u00e8ne ridicule\u00a0\u00bb\u00a0?",multi:false,
+   opts:["Pourquoi ses parents jouent avec lui.","Pourquoi ses parents ne l\u2019abandonnent pas directement.","Pourquoi il doit ramasser des cailloux.","Pourquoi les oiseaux le suivent et aiment les pizzas."],
+   correct:[1],hint:"Relis\u00a0: \u00ab\u00a0S\u2019ils veulent m\u2019abandonner dans la for\u00eat, pourquoi ne le font-ils pas, simplement\u00a0?\u00a0\u00bb \u2014 que cherche-t-il \u00e0 comprendre\u00a0?",
+   feedback:"Il per\u00e7oit que ses parents veulent l\u2019abandonner, mais il ne comprend pas pourquoi ils le font de mani\u00e8re d\u00e9tourn\u00e9e. Il cherche du sens dans leur comportement."},
+  {text:"Que r\u00e9v\u00e8le son attitude envers les oiseaux au d\u00e9but\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Il se sent en confiance.","Il se m\u00e9fie d\u2019eux.","Il les consid\u00e8re comme des compagnons.","Il pense qu\u2019ils peuvent le guider."],
+   correct:[0,2],hint:"Observe comment il leur parle et ce qu\u2019il fait avec eux.",
+   feedback:"Il leur parle comme \u00e0 des amis et partage sa nourriture. Cela montre qu\u2019il cherche du r\u00e9confort aupr\u00e8s d\u2019eux, comme s\u2019il compensait l\u2019absence de ses parents."},
+  {text:"Pourquoi le Petit Poucet commence-t-il \u00e0 s\u2019inqui\u00e9ter\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Il ne retrouve plus les mini-pizzas.","Il entend ses parents l\u2019appeler.","La nuit tombe.","Il se perd dans ses pens\u00e9es."],
+   correct:[0,2],hint:"Cherche les deux \u00e9v\u00e9nements qui se produisent en m\u00eame temps dans le texte.",
+   feedback:"La disparition des mini-pizzas signifie qu\u2019il n\u2019a plus de rep\u00e8res. La nuit qui tombe renforce son sentiment de danger et d\u2019isolement."},
+  {text:"Que comprend le Petit Poucet lorsqu\u2019il accuse les oiseaux d\u2019avoir mang\u00e9 les mini-pizzas\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Qu\u2019il ne pourra plus retrouver son chemin.","Que les oiseaux sont dangereux.","Que sa strat\u00e9gie n\u2019a pas fonctionn\u00e9.","Que les oiseaux veulent l\u2019aider."],
+   correct:[0,2],hint:"Les mini-pizzas servaient \u00e0 quoi, au d\u00e9part\u00a0? Que se passe-t-il maintenant qu\u2019elles ont disparu\u00a0?",
+   feedback:"Il r\u00e9alise que son plan \u00e9tait fragile. Les oiseaux n\u2019ont pas agi contre lui, mais leur comportement a d\u00e9truit sa seule chance de retrouver la maison."},
+  {text:"Que montrent les appels \u00ab\u00a0Maman\u00a0! Papa\u00a0!\u00a0\u00bb\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Il joue encore avec ses parents.","Il prend peur.","Il veut attirer les loups.","Il esp\u00e8re encore \u00eatre sauv\u00e9."],
+   correct:[1,3],hint:"Ces cris arrivent juste apr\u00e8s qu\u2019on entend les loups \u2014 que ressent-il \u00e0 ce moment-l\u00e0\u00a0?",
+   feedback:"Ses cris r\u00e9p\u00e9t\u00e9s montrent une peur r\u00e9elle. Malgr\u00e9 tout, il garde l\u2019espoir que ses parents reviendront, ce qui souligne sa vuln\u00e9rabilit\u00e9."},
+  {text:"Pourquoi dit-il \u00ab\u00a0Je suis trop petit pour mourir d\u00e9vor\u00e9 par les loups\u00a0\u00bb\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Pour se rassurer.","Pour faire rire les loups.","Pour exprimer sa peur.","Pour montrer qu\u2019il conna\u00eet la for\u00eat."],
+   correct:[0,2],hint:"Est-ce que cette phrase calme vraiment sa peur, ou trahit-elle quelque chose\u00a0?",
+   feedback:"Il tente de se convaincre qu\u2019il ne risque rien, mais ses paroles r\u00e9v\u00e8lent surtout sa terreur. C\u2019est une mani\u00e8re de lutter contre la panique."},
+  {text:"Que cherche-t-il \u00e0 faire en disant \u00ab\u00a0Je vais dormir, je vais r\u00eaver\u2026 vous ne pouvez pas me manger\u00a0\u00bb\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Appeler ses parents en secret.","Faire semblant de dormir pour tromper les loups.","Se calmer en se racontant une histoire.","Se prot\u00e9ger en imaginant un autre endroit."],
+   correct:[2,3],hint:"Il dit ensuite\u00a0: \u00ab\u00a0je suis dans ma chambre, dans ma maison\u00a0\u00bb \u2014 dans quel espace se r\u00e9fugie-t-il\u00a0?",
+   feedback:"Il utilise l\u2019imagination comme refuge. En se projetant dans sa chambre, il tente d\u2019\u00e9chapper mentalement \u00e0 la peur et au danger."},
+  {text:"Que repr\u00e9sente la lumi\u00e8re aper\u00e7ue dans la nuit\u00a0?",multi:false,
+   opts:["Un danger.","Un espoir.","Une illusion.","Un souvenir."],
+   correct:[1],hint:null,
+   feedback:"La lumi\u00e8re symbolise une sortie possible, un retour vers la s\u00e9curit\u00e9. C\u2019est un contraste fort avec l\u2019obscurit\u00e9 mena\u00e7ante de la for\u00eat."},
+  {text:"Pourquoi le Petit Poucet r\u00e9p\u00e8te-t-il \u00ab\u00a0\u00c7a sent bon, \u00e7a sent la maison\u00a0\u00bb\u00a0? (Plusieurs r\u00e9ponses possibles.)",multi:true,
+   opts:["Pour v\u00e9rifier qu\u2019il ne r\u00eave pas.","Pour se rassurer.","Pour appeler ses parents.","Pour exprimer son soulagement."],
+   correct:[1,3],hint:"Pourquoi r\u00e9p\u00e8te-t-il deux fois la m\u00eame id\u00e9e\u00a0? Quel effet produit cette r\u00e9p\u00e9tition\u00a0?",
+   feedback:"L\u2019odeur de la maison lui redonne confiance. La r\u00e9p\u00e9tition montre qu\u2019il se raccroche \u00e0 ce signe rassurant pour calmer sa peur."}
+];
+
+let cur=0,userAns=QS.map(()=>[]),validated=QS.map(()=>false),scores=QS.map(()=>null),hintsUsed=QS.map(()=>false),resultsDone=false;
+
+function starsFromScore(t){return t>=9?5:t>=7.5?4:t>=6?3:t>=4?2:t>0?1:0;}
+
+function render(){
+  const q=QS[cur];
+  document.getElementById('qNum').textContent='D\u00c9FI '+(cur+1);
+  document.getElementById('qType').textContent=q.multi?'QCM multiple':'QCM';
+  document.getElementById('qText').textContent=q.text;
+  document.getElementById('qMultiLabel').style.display=q.multi?'inline-block':'none';
+
+  const zone=document.getElementById('optsZone');
+  zone.innerHTML='';
+  q.opts.forEach((o,oi)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    const sel=userAns[cur].includes(oi),cor=q.correct.includes(oi),locked=validated[cur];
+    if(locked){
+      btn.setAttribute('data-locked','1');btn.disabled=true;
+      if(cor&&sel)btn.classList.add('correct');
+      else if(!cor&&sel)btn.classList.add('wrong');
+      else if(cor&&!sel)btn.classList.add('missed');
+    }else if(sel)btn.classList.add('selected');
+    btn.innerHTML='<span class="opt-letter">'+['a','b','c','d'][oi]+'</span>'+o;
+    if(!locked)btn.onclick=()=>toggleOpt(oi);
+    zone.appendChild(btn);
+  });
+
+  /* indice */
+  const hintBox=document.getElementById('hintBox'),btnHint=document.getElementById('btnHint');
+  if(!q.hint){
+    btnHint.style.display='none';hintBox.classList.remove('show');
+  }else{
+    const hintVisible=hintsUsed[cur]||validated[cur];
+    btnHint.style.display=hintVisible?'none':'flex';
+    btnHint.disabled=false;
+    hintBox.textContent=q.hint;
+    hintBox.classList.toggle('show',hintVisible);
+  }
+
+  /* feedback */
+  const fb=document.getElementById('feedback');
+  fb.className='feedback';
+  if(validated[cur]){
+    const sc=scores[cur];
+    if(sc===1){fb.classList.add('ok');fb.innerHTML='\u2713 Bravo\u00a0! '+q.feedback;}
+    else if(sc===0.5){fb.classList.add('pa');fb.innerHTML='\u26a0 Presque\u00a0! Il manquait une bonne r\u00e9ponse. '+q.feedback;}
+    else{fb.classList.add('ko');fb.innerHTML='\u2717 Pas tout \u00e0 fait. '+q.feedback;}
+  }
+
+  /* boutons */
+  const isLast=cur===QS.length-1;
+  document.getElementById('btnValid').disabled=userAns[cur].length===0||validated[cur];
+  document.getElementById('btnNext').disabled=!validated[cur];
+  document.getElementById('btnNext').textContent=isLast?(validated[cur]?'VOIR LES R\u00c9SULTATS \u2605':'SUIVANT \u25b6'):'SUIVANT \u25b6';
+  document.getElementById('btnBack').disabled=cur===0;
+  document.getElementById('btnFwd').disabled=!validated[cur]||isLast;
+  document.getElementById('navInfo').textContent=(cur+1)+' / '+QS.length;
+  document.getElementById('defiLabel').textContent='D\u00c9FI '+(cur+1)+' / '+QS.length;
+  updateGame();
+}
+
+function toggleOpt(oi){
+  if(validated[cur])return;
+  const q=QS[cur],arr=userAns[cur];
+  if(q.multi){const i=arr.indexOf(oi);i===-1?arr.push(oi):arr.splice(i,1);}
+  else{userAns[cur]=arr[0]===oi?[]:[oi];}
+  render();
+}
+
+function showHint(){hintsUsed[cur]=true;render();}
+
+function valider(){
+  if(validated[cur])return;
+  validated[cur]=true;
+  const q=QS[cur],sel=userAns[cur],cor=q.correct;
+  const allCor=cor.every(c=>sel.includes(c)),noWrong=sel.every(s=>cor.includes(s));
+  const full=allCor&&noWrong;
+  const partial=!full&&cor.some(c=>sel.includes(c))&&noWrong&&q.multi;
+  scores[cur]=full?1:partial?0.5:0;
+  render();
+  if(scores[cur]>0)showXP();
+  /* si toutes validées → résultats automatiques après délai */
+  if(!resultsDone&&validated.every(v=>v)){resultsDone=true;setTimeout(showResults,1100);}
+}
+
+function suivant(){
+  if(cur===QS.length-1){
+    if(validated[cur]){if(!resultsDone){resultsDone=true;showResults();}}
+  }else{cur++;render();}
+}
+
+function goBack(){if(cur>0){cur--;render();}}
+function goFwd(){if(cur<QS.length-1&&validated[cur]){cur++;render();}}
+
+function updateGame(){
+  const done=scores.filter(s=>s!==null).length;
+  const total=scores.reduce((a,s)=>a+(s||0),0);
+  const pct=Math.round(total/QS.length*100);
+  const nErr=scores.filter(s=>s===0).length;
+  document.getElementById('sc-ok').textContent=total%1===0?String(total):total.toFixed(1);
+  document.getElementById('sc-left').textContent=QS.length-done;
+  document.getElementById('sc-err').textContent=nErr;
+  document.getElementById('xpFill').style.width=pct+'%';
+  document.getElementById('xpPct').textContent=pct+' % XP';
+  const sc=starsFromScore(total);
+  for(let i=0;i<5;i++)document.getElementById('s'+i).classList.toggle('lit',i<sc);
+}
+
+function showXP(){
+  const el=document.getElementById('xpPop');
+  el.style.display='block';el.style.animation='none';
+  void el.offsetWidth;
+  el.style.animation='xpAnim 1.2s ease forwards';
+  setTimeout(()=>{el.style.display='none';},1250);
+}
+
+function showResults(){
+  document.getElementById('card').style.display='none';
+  document.getElementById('resultScreen').classList.add('show');
+  const total=scores.reduce((a,s)=>a+(s||0),0);
+  const pct=total/QS.length;
+  document.getElementById('resScore').textContent=(total%1===0?String(total):total.toFixed(1))+' / 10';
+  const sc=starsFromScore(total);
+  document.getElementById('resStars').textContent='★'.repeat(sc)+'☆'.repeat(5-sc);
+  let msg='',gg='';
+  if(pct>=.9){msg="Extraordinaire\u00a0! Tu as men\u00e9 cette investigation avec une pr\u00e9cision remarquable.";gg="// GG \u2014 Mission valid\u00e9e \u00e0 100\u00a0%\u00a0!";}
+  else if(pct>=.75){msg="Tr\u00e8s bien jou\u00e9\u00a0! Tu as su lire entre les lignes et rep\u00e9rer ce que la sc\u00e8ne cache vraiment.";gg="// GG \u2014 Niveau d\u00e9pass\u00e9\u00a0!";}
+  else if(pct>=.6){msg="Bon travail\u00a0! Tu as compris l\u2019essentiel du texte. Revois les r\u00e9ponses en orange pour progresser encore.";gg="// Bien jou\u00e9 \u2014 continue comme \u00e7a\u00a0!";}
+  else{msg="Continue \u00e0 t\u2019entra\u00eener\u00a0! Relis le texte et observe ce que les silences du Petit Poucet r\u00e9v\u00e8lent.";gg="// Prochaine tentative\u00a0: tu vas y arriver\u00a0!";}
+  document.getElementById('resMsg').textContent=msg;
+  document.getElementById('resGG').textContent=gg;
+  const recap=document.getElementById('resRecap');recap.innerHTML='';
+  QS.forEach((_,i)=>{
+    const s=scores[i],div=document.createElement('div');div.className='recap-item';
+    const lbl=s===1?'<span class="recap-ok">\u2713 Juste</span>':s===0.5?'<span class="recap-pa">\u26a0 Partiel</span>':'<span class="recap-ko">\u2717 Faux</span>';
+    div.innerHTML='<span>Question '+(i+1)+'</span>'+lbl;recap.appendChild(div);
+  });
+  document.getElementById('resultScreen').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function recommencer(){
+  cur=0;resultsDone=false;
+  userAns=QS.map(()=>[]);validated=QS.map(()=>false);scores=QS.map(()=>null);hintsUsed=QS.map(()=>false);
+  document.getElementById('card').style.display='block';
+  document.getElementById('resultScreen').classList.remove('show');
+  render();
+  document.getElementById('card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+render();
+</script>
+</body>
+</html>
