@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa – Je relève le défi – S2 J3</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#8dc63f; --day-dark:#3d7a10;
+  --day-light:#f0faeb; --day-border:#b5e08a;
+  --day-glow:rgba(141,198,63,.35);
+  --bg:#fffdf7; --surface:#ffffff; --surface2:#faf8f2;
+  --border:#e8e4d9; --border2:#ddd8cc;
+  --yellow:#f5c518; --green:#8dc63f; --pink:#f28b82; --orange:#f5a623;
+  --text:#1a1d23; --muted:#8a8f9a;
+  --radius:14px; --radius-sm:9px;
+  --neon-g:0 0 12px rgba(141,198,63,.55),0 0 28px rgba(141,198,63,.2);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.6rem 1rem 3.5rem;position:relative;overflow-x:hidden;
+}
+/* GRID BG */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(141,198,63,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(141,198,63,.04) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+/* BULLES PAZAPA */
+.g1{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(4px);opacity:.55;width:220px;height:220px;background:#ffd84d;top:-60px;right:-50px;}
+.g2{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(4px);opacity:.55;width:240px;height:240px;background:var(--day-border);bottom:-80px;left:-70px;}
+.g3{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(4px);opacity:.45;width:150px;height:150px;background:#9be7a5;top:45%;right:-70px;}
+.g4{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(4px);opacity:.45;width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px;}
+
+.wrap{width:100%;max-width:760px;position:relative;z-index:1;}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1.6rem;}
+.logo-badge{
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#fff;font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;padding:.3rem 1rem;border-radius:99px;
+  margin-bottom:.6rem;white-space:nowrap;box-shadow:var(--neon-g);
+}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.78rem;color:var(--muted);margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;}
+
+/* BADGE DÉTECTIVE */
+.badge-zone{
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  margin-bottom:1.4rem;
+}
+.badge-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(1.1rem,4.5vw,1.8rem);
+  background:linear-gradient(135deg,var(--day-dark),var(--day-color),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:.04em;line-height:1.2;
+}
+.badge-wrapper{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:110px;height:110px;
+}
+.badge-svg{width:110px;height:110px;}
+.badge-loupe{
+  position:absolute;font-size:2.6rem;
+  animation:loupe-idle 2.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 8px rgba(141,198,63,.5));
+}
+@keyframes loupe-idle{
+  0%,100%{transform:rotate(-8deg) scale(1);}
+  50%{transform:rotate(8deg) scale(1.08);}
+}
+.badge-loupe.found{animation:loupe-found .6s cubic-bezier(.18,.89,.32,1.6) forwards;}
+@keyframes loupe-found{
+  0%{transform:rotate(-8deg) scale(1);}
+  40%{transform:rotate(15deg) scale(1.3);}
+  70%{transform:rotate(-5deg) scale(1.2);}
+  100%{transform:rotate(0deg) scale(1.1);}
+}
+.badge-count{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:.7rem;
+  color:#fff;position:absolute;bottom:14px;
+  background:var(--day-color);padding:.1rem .45rem;border-radius:99px;
+  box-shadow:var(--neon-g);
+}
+
+/* BARRE PROGRESSION */
+.prog-wrap{width:100%;margin-bottom:1.4rem;}
+.prog-info{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:.3rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--orange));border-radius:99px;transition:width .6s cubic-bezier(.22,1,.36,1);box-shadow:var(--neon-g);}
+
+/* ACCROCHE */
+.accroche{
+  width:100%;background:#13161e;
+  border:1px solid rgba(141,198,63,.3);
+  border-radius:var(--radius);padding:1.4rem 1.6rem;margin-bottom:1.4rem;
+  position:relative;overflow:hidden;
+  box-shadow:0 6px 24px rgba(0,0,0,.15);
+  animation:fadeUp .4s ease both;
+}
+.accroche::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--orange),var(--yellow));
+  box-shadow:0 0 10px rgba(141,198,63,.4);
+}
+.accroche-titre{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(.95rem,3.5vw,1.3rem);color:var(--day-color);
+  text-shadow:var(--neon-g);margin-bottom:.7rem;letter-spacing:.04em;
+}
+.accroche-corps{color:#c8c0d0;font-size:clamp(.88rem,2.8vw,.98rem);line-height:1.9;word-break:break-word;}
+.accroche-corps strong{color:var(--orange);}
+.accroche-defi{
+  margin-top:.9rem;padding:.7rem 1rem;
+  background:rgba(141,198,63,.12);border:1px solid rgba(141,198,63,.3);
+  border-radius:var(--radius-sm);
+  color:#e8d0d0;font-weight:700;font-size:clamp(.88rem,2.8vw,.98rem);line-height:1.7;
+}
+
+/* CARD EXERCICE */
+.card{
+  width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:0;position:relative;z-index:1;
+  box-shadow:0 6px 24px rgba(0,0,0,.08);animation:fadeUp .4s ease both;
+  margin-bottom:1.4rem;overflow:hidden;
+}
+.card-header{background:#13161e;padding:1.2rem 1.6rem 1.1rem;border-bottom:1px solid rgba(141,198,63,.2);}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--orange),var(--yellow));box-shadow:0 0 10px rgba(141,198,63,.4);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#5a6080;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.12em;}
+.theme-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;padding:.14rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;background:rgba(141,198,63,.12);color:var(--day-color);border:1px solid rgba(141,198,63,.3);}
+.consigne-hd{background:rgba(141,198,63,.07);border:1px solid rgba(141,198,63,.2);border-radius:var(--radius-sm);padding:.7rem 1rem;color:#e0c8c8;font-size:clamp(.84rem,2.6vw,.92rem);line-height:1.8;}
+.consigne-hd li{margin-left:1.2rem;margin-bottom:.2rem;}
+.card-body{background:var(--surface);padding:1.4rem 1.6rem;}
+
+/* ARTICLE JOURNAL */
+.journal-wrap{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:1.2rem 1.4rem;
+  margin-bottom:1.1rem;font-size:clamp(.95rem,3vw,1.06rem);line-height:2.4;
+}
+.phrase{display:block;margin-bottom:.2rem;word-break:break-word;}
+.word{
+  display:inline;cursor:default;border-radius:4px;padding:1px 2px;
+  transition:background .12s,color .12s,box-shadow .12s;
+}
+.word.clickable{
+  cursor:pointer;
+}
+.word.clickable:hover{background:rgba(141,198,63,.08);border-radius:3px;}
+.word.selected{background:var(--day-color);color:#fff;border-bottom-color:var(--day-dark);box-shadow:var(--neon-g);}
+.word.correct-w{background:#e7faec;color:#2f6e10;border-bottom:2px solid var(--green);cursor:default;font-weight:700;}
+.word.wrong-w{background:#fff0ef;color:#c0392b;border-bottom:2px solid var(--pink);text-decoration:line-through;}
+
+/* POPUP CHOIX */
+.popup-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:100;display:none;align-items:center;justify-content:center;
+  padding:1rem;
+}
+.popup-overlay.show{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.popup{
+  background:var(--surface);border:2px solid var(--day-color);
+  border-radius:var(--radius);padding:1.4rem 1.6rem;
+  max-width:400px;width:100%;
+  box-shadow:0 12px 40px rgba(0,0,0,.3),var(--neon-g);
+  animation:popIn .3s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes popIn{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+.popup-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.9rem;color:var(--day-color);margin-bottom:.5rem;letter-spacing:.04em;}
+.popup-phrase{background:var(--day-light);border:1px solid var(--day-border);border-radius:var(--radius-sm);padding:.6rem .9rem;margin-bottom:1rem;font-size:.92rem;line-height:1.7;color:var(--day-dark);font-weight:600;}
+.popup-phrase .err{background:var(--day-color);color:#fff;padding:1px 6px;border-radius:4px;}
+.popup-choix{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.8rem;}
+.choix-btn{
+  padding:.75rem 1rem;border:2px solid var(--border);border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;
+  cursor:pointer;background:var(--surface2);color:var(--text);
+  transition:border-color .15s,background .15s,transform .1s;
+  min-height:48px;text-align:left;
+}
+.choix-btn:hover{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+.choix-btn:active{transform:scale(.97);}
+.popup-annuler{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);background:transparent;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.5rem 1rem;cursor:pointer;width:100%;min-height:40px;}
+.popup-annuler:hover{border-color:var(--day-color);color:var(--text);}
+
+/* RÉCOMPENSE INLINE */
+.reward-inline{
+  display:none;
+  margin-top:1rem;
+  padding:1rem 1.2rem;
+  background:linear-gradient(135deg,#1a0a0a,#2a0f0f);
+  border:2px solid var(--day-color);
+  border-radius:var(--radius);
+  box-shadow:var(--neon-g);
+  animation:rewardPop .5s cubic-bezier(.18,.89,.32,1.6) both;
+  align-items:center;gap:1rem;flex-wrap:wrap;
+}
+.reward-inline.show{display:flex;}
+@keyframes rewardPop{
+  0%{transform:scale(.7) translateY(20px);opacity:0;}
+  60%{transform:scale(1.06) translateY(-4px);opacity:1;}
+  100%{transform:scale(1) translateY(0);opacity:1;}
+}
+.reward-badge-big{font-size:2.8rem;filter:drop-shadow(0 0 12px rgba(141,198,63,.9));animation:spin-badge .6s cubic-bezier(.18,.89,.32,1.6);}
+@keyframes spin-badge{0%{transform:rotate(-20deg) scale(.5);}60%{transform:rotate(10deg) scale(1.15);}100%{transform:rotate(0deg) scale(1);}}
+.reward-text{flex:1;}
+.reward-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.9rem,3vw,1.1rem);color:var(--day-color);text-shadow:var(--neon-g);margin-bottom:.3rem;}
+.reward-detail{font-size:clamp(.8rem,2.5vw,.9rem);color:#c8c0d0;line-height:1.6;}
+.reward-stars{font-size:1.2rem;margin-top:.3rem;letter-spacing:.1em;}
+.notif{
+  position:fixed;top:1.2rem;left:50%;transform:translateX(-50%) translateY(-120px);
+  background:#13161e;border:1.5px solid var(--day-color);
+  border-radius:var(--radius);padding:.7rem 1.4rem;
+  font-family:'Orbitron',sans-serif;font-size:.82rem;font-weight:700;
+  color:var(--day-color);box-shadow:var(--neon-g);z-index:200;
+  transition:transform .4s cubic-bezier(.22,1,.36,1);white-space:nowrap;
+}
+.notif.show{transform:translateX(-50%) translateY(0);}
+
+/* BOUTONS */
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+.btn{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.65rem 1.3rem;border-radius:var(--radius-sm);
+  font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.06em;
+  cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;
+}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-p{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;box-shadow:var(--neon-g);}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 0 20px rgba(141,198,63,.6);}
+.btn-g{background:var(--surface2);color:var(--muted);border:1.5px solid var(--border2);}
+.btn-g:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+/* FEEDBACK */
+.fb{margin-top:1rem;padding:.8rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.86rem,2.6vw,.94rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.8;word-break:break-word;}
+.fb.show{display:flex;animation:pop .3s cubic-bezier(.18,.89,.32,1.6);}
+.fb.ok{background:#e7faec;border:1.5px solid var(--green);color:#2f6e10;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.fb.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+.fb-icon{font-size:1.3rem;flex-shrink:0;}
+
+/* RÉSULTAT FINAL */
+.resultat{
+  width:100%;background:#13161e;
+  border:1px solid rgba(141,198,63,.35);
+  border-radius:var(--radius);padding:0;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  display:none;
+}
+.resultat.show{display:block;animation:fadeUp .5s ease both;}
+.resultat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--orange),var(--yellow));box-shadow:0 0 10px rgba(141,198,63,.4);}
+.res-inner{padding:2rem 1.6rem;text-align:center;}
+.res-badge{font-size:4rem;animation:trophy-bounce 1.6s ease-in-out infinite;filter:drop-shadow(0 0 14px rgba(141,198,63,.7));margin-bottom:.8rem;display:block;}
+@keyframes trophy-bounce{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-10px) rotate(5deg);}}
+.res-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.2rem,5vw,1.8rem);color:var(--day-color);text-shadow:var(--neon-g);margin-bottom:.8rem;letter-spacing:.04em;}
+.res-texte{color:#c8c0d0;font-size:clamp(.9rem,3vw,1rem);line-height:1.9;margin-bottom:1.4rem;word-break:break-word;}
+.res-texte strong{color:var(--orange);}
+.res-stars{font-size:2rem;letter-spacing:.15em;margin-bottom:1rem;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pop{0%{transform:scale(.9);}60%{transform:scale(1.03);}100%{transform:scale(1);}}
+
+@media(max-width:480px){
+  .card-body{padding:1.1rem 1rem;}
+  .card-header{padding:1rem 1rem .9rem;}
+  .journal-wrap{padding:.9rem 1rem;}
+  .tools{flex-direction:column;}
+  .btn{width:100%;justify-content:center;}
+  .popup{padding:1.1rem 1.2rem;}
+}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div><div class="g3"></div><div class="g4"></div>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#f5a623"></span>
+    Pazapa &middot; Français &middot; 6ème
+  </div>
+  <div class="week-label">Semaine 2 &ndash; Jour 3</div>
+</header>
+
+<!-- BADGE DÉTECTIVE -->
+<div class="badge-zone">
+  <div class="badge-title">Je relève le défi !</div>
+  <div class="badge-wrapper">
+    <svg class="badge-svg" viewBox="0 0 110 110">
+      <!-- Fond badge -->
+      <polygon points="55,8 100,30 100,80 55,102 10,80 10,30" fill="#1a0a0a" stroke="rgba(141,198,63,.4)" stroke-width="2"/>
+      <!-- Pièces du badge (2 segments) -->
+      <!-- Pièce 1 : gauche -->
+      <polygon id="piece1" points="55,8 10,30 10,80 55,55" fill="rgba(141,198,63,.12)" stroke="rgba(141,198,63,.3)" stroke-width="1.5" class="badge-piece"/>
+      <!-- Pièce 2 : droite -->
+      <polygon id="piece2" points="55,8 100,30 100,80 55,55" fill="rgba(141,198,63,.12)" stroke="rgba(141,198,63,.3)" stroke-width="1.5" class="badge-piece"/>
+      <!-- Bas -->
+      <polygon id="piece3" points="55,55 10,80 55,102 100,80" fill="rgba(141,198,63,.12)" stroke="rgba(141,198,63,.3)" stroke-width="1.5" class="badge-piece"/>
+    </svg>
+    <div class="badge-loupe" id="badge-loupe">&#128269;</div>
+    <div class="badge-count" id="badge-count">0 / 2</div>
+  </div>
+</div>
+
+<!-- BARRE PROGRESSION -->
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 erreur corrigée sur 2</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<!-- ACCROCHE -->
+<div class="accroche">
+  <div class="card-stripe"></div>
+  <div class="accroche-titre">&#128240; Mission : Sauver le journal de l&rsquo;école</div>
+  <div class="accroche-corps">
+    <strong>Catastrophe&nbsp;!</strong><br>
+    Le journaliste du journal de l&rsquo;école a rédigé son article trop rapidement.
+    Plusieurs homonymes du verbe &laquo;&nbsp;avoir&nbsp;&raquo; ont été mal écrits.<br><br>
+    Le journal doit être imprimé aujourd&rsquo;hui et tu es le dernier correcteur disponible&nbsp;!
+  </div>
+  <div class="accroche-defi">
+    &#127919; <strong>Ton défi&nbsp;:</strong> retrouver toutes les erreurs et corriger l&rsquo;article avant sa publication.
+  </div>
+</div>
+
+<!-- CARTE EXERCICE -->
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="card-header">
+    <div class="q-num">Défi &middot; Homonymes du verbe avoir</div>
+    <div class="theme-badge">Orthographe grammaticale</div>
+    <div class="consigne-hd">
+      <ul>
+        <li>Lis attentivement l&rsquo;article.</li>
+        <li>Repère les erreurs liées aux homonymes du verbe &laquo;&nbsp;avoir&nbsp;&raquo;.</li>
+        <li>Clique sur chaque erreur puis choisis la bonne correction.</li>
+        <li><strong>Attention&nbsp;: certaines phrases sont déjà correctes&nbsp;!</strong></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="journal-wrap" id="journal"></div>
+
+    <!-- RÉCOMPENSE INLINE -->
+    <div class="reward-inline" id="reward-inline">
+      <div class="reward-badge-big" id="reward-icon">&#128270;</div>
+      <div class="reward-text">
+        <div class="reward-titre" id="reward-titre"></div>
+        <div class="reward-detail" id="reward-detail"></div>
+        <div class="reward-stars" id="reward-stars"></div>
+      </div>
+    </div>
+      <button class="btn btn-g" onclick="recommencer()">&#8635; Recommencer</button>
+    </div>
+    <div class="fb" id="fb-main">
+      <span class="fb-icon" id="fb-icon"></span>
+      <div id="fb-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RÉSULTAT FINAL -->
+<div class="resultat" id="resultat">
+  <div class="res-inner">
+    <span class="res-badge">&#127942;</span>
+    <div class="res-titre">&#127881; Félicitations&nbsp;!</div>
+    <div class="res-texte">
+      Tu as sauvé le journal de l&rsquo;école.<br><br>
+      Grâce à ton sens de l&rsquo;observation, les homonymes du verbe &laquo;&nbsp;avoir&nbsp;&raquo;
+      n&rsquo;ont plus de secret pour toi.<br><br>
+      Tu sais désormais utiliser les bons indices pour choisir entre
+      <strong>&laquo;&nbsp;a&nbsp;&raquo;</strong>,
+      <strong>&laquo;&nbsp;as&nbsp;&raquo;</strong> et
+      <strong>&laquo;&nbsp;à&nbsp;&raquo;</strong>.
+    </div>
+    <div class="res-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+    <button class="btn btn-p" onclick="recommencer()" style="margin:0 auto;">&#8635; Recommencer</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- POPUP CORRECTION -->
+<div class="popup-overlay" id="popup-overlay">
+  <div class="popup">
+    <div class="popup-titre">&#128269; Quelle est la bonne correction&nbsp;?</div>
+    <div class="popup-phrase" id="popup-phrase"></div>
+    <div class="popup-choix" id="popup-choix"></div>
+    <button class="popup-annuler" onclick="closePopup()">&#215; Annuler</button>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div class="notif" id="notif"></div>
+
+<script>
+/* ════════════════════════════════════════
+   DONNÉES
+════════════════════════════════════════ */
+var PHRASES = [
+  {
+    id:0,
+    text:"Demain, notre classe participera à une sortie au musée.",
+    words:[
+      {w:"Demain,",err:false,click:false},{w:"notre",err:false,click:false},{w:"classe",err:false,click:false},
+      {w:"participera",err:false,click:false},{w:"à",err:false,click:true},
+      {w:"une",err:false,click:false},{w:"sortie",err:false,click:false},{w:"au",err:false,click:false},{w:"musée.",err:false,click:false}
+    ]
+  },
+  {
+    id:1,
+    text:"Tu à reçu l'autorisation de sortie la semaine dernière.",
+    errWord:"à", correction:"as",
+    choices:["a","as","à"],
+    answerIdx:1,
+    words:[
+      {w:"Tu",err:false,click:false},{w:"à",err:true,click:true},{w:"reçu",err:false,click:false},
+      {w:"l'autorisation",err:false,click:false},{w:"de",err:false,click:false},{w:"sortie",err:false,click:false},
+      {w:"la",err:false,click:false},{w:"semaine",err:false,click:false},{w:"dernière.",err:false,click:false}
+    ]
+  },
+  {
+    id:2,
+    text:"Chaque élève a préparé son carnet de visite.",
+    words:[
+      {w:"Chaque",err:false,click:false},{w:"élève",err:false,click:false},{w:"a",err:false,click:true},
+      {w:"préparé",err:false,click:false},{w:"son",err:false,click:false},{w:"carnet",err:false,click:false},
+      {w:"de",err:false,click:false},{w:"visite.",err:false,click:false}
+    ]
+  },
+  {
+    id:3,
+    text:"Le bus arrivera à huit heures devant l'école.",
+    words:[
+      {w:"Le",err:false,click:false},{w:"bus",err:false,click:false},{w:"arrivera",err:false,click:false},
+      {w:"à",err:false,click:true},{w:"huit",err:false,click:false},{w:"heures",err:false,click:false},
+      {w:"devant",err:false,click:false},{w:"l'école.",err:false,click:false}
+    ]
+  },
+  {
+    id:4,
+    text:"Tu as pensé à prendre un stylo et quelques feuilles.",
+    words:[
+      {w:"Tu",err:false,click:false},{w:"as",err:false,click:true},{w:"pensé",err:false,click:false},
+      {w:"à",err:false,click:true},{w:"prendre",err:false,click:false},{w:"un",err:false,click:false},
+      {w:"stylo",err:false,click:false},{w:"et",err:false,click:false},{w:"quelques",err:false,click:false},{w:"feuilles.",err:false,click:false}
+    ]
+  },
+  {
+    id:5,
+    text:"Notre professeur a prévu plusieurs activités.",
+    words:[
+      {w:"Notre",err:false,click:false},{w:"professeur",err:false,click:false},{w:"a",err:false,click:true},
+      {w:"prévu",err:false,click:false},{w:"plusieurs",err:false,click:false},{w:"activités.",err:false,click:false}
+    ]
+  },
+  {
+    id:6,
+    text:"Si tu a des questions, tu pourras les poser au guide.",
+    errWord:"a", correction:"as",
+    choices:["a","as","à"],
+    answerIdx:1,
+    words:[
+      {w:"Si",err:false,click:false},{w:"tu",err:false,click:false},{w:"a",err:true,click:true},{w:"des",err:false,click:false},
+      {w:"questions,",err:false,click:false},{w:"tu",err:false,click:false},{w:"pourras",err:false,click:false},
+      {w:"les",err:false,click:false},{w:"poser",err:false,click:false},{w:"au",err:false,click:false},{w:"guide.",err:false,click:false}
+    ]
+  },
+  {
+    id:7,
+    text:"Nous avons hâte de découvrir les expositions.",
+    words:[
+      {w:"Nous",err:false,click:false},{w:"avons",err:false,click:false},{w:"hâte",err:false,click:false},
+      {w:"de",err:false,click:false},{w:"découvrir",err:false,click:false},{w:"les",err:false,click:false},{w:"expositions.",err:false,click:false}
+    ]
+  }
+];
+
+var TOTAL_ERRORS = 2;
+var corrected = 0;        // nb d'erreurs corrigées
+var wrongClicks = 0;      // nb de clics sur mots sans erreur
+var activePhrase = null;  // phrase en cours de correction
+var done = false;
+
+/* ════════════════════════════════════════
+   BUILD JOURNAL
+════════════════════════════════════════ */
+function buildJournal(){
+  var journal = document.getElementById('journal');
+  journal.innerHTML = '';
+  PHRASES.forEach(function(ph){
+    var line = document.createElement('span');
+    line.className = 'phrase';
+    ph.words.forEach(function(tok, wi){
+      var span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = tok.w;
+      span.dataset.ph  = ph.id;
+      span.dataset.wi  = wi;
+
+      if(tok.corrected){
+        span.classList.add('correct-w');
+        span.textContent = ph.correction + (tok.w.endsWith(',') ? ',' : tok.w.endsWith('.') ? '.' : '');
+      } else if(tok.err && !tok.corrected){
+        span.classList.add('clickable');
+        span.addEventListener('click', function(){ onWordClick(ph, tok, span); });
+      } else if(tok.click){
+        // a / as / à corrects → cliquables mais pas des erreurs
+        span.classList.add('clickable');
+        span.addEventListener('click', function(){ onFalseClick(ph, tok, span); });
+      }
+      // tous les autres mots : non cliquables, cursor default
+
+      line.appendChild(span);
+      if(wi < ph.words.length - 1) line.appendChild(document.createTextNode(' '));
+    });
+    journal.appendChild(line);
+  });
+}
+
+/* ════════════════════════════════════════
+   INTERACTIONS
+════════════════════════════════════════ */
+function onWordClick(ph, tok, span){
+  if(done) return;
+  if(tok.corrected) return;
+  activePhrase = ph;
+  openPopup(ph, tok, span);
+}
+
+function onFalseClick(ph, tok, span){
+  if(done) return;
+  wrongClicks++;
+  bipErreur();
+  var fb = document.getElementById('fb-main');
+  fb.className = 'fb show info';
+  document.getElementById('fb-icon').innerHTML = '&#128270;';
+  document.getElementById('fb-msg').innerHTML =
+    '<strong>Ce mot est correct&nbsp;!</strong> Le mot &laquo;&nbsp;' + tok.w + '&nbsp;&raquo; est bien écrit dans cette phrase. Continue ta recherche&nbsp;!';
+  setTimeout(function(){ fb.className = 'fb'; }, 2500);
+}
+
+/* ════════════════════════════════════════
+   POPUP
+════════════════════════════════════════ */
+function openPopup(ph, tok, span){
+  var overlay = document.getElementById('popup-overlay');
+  // Afficher la phrase avec le mot en surbrillance
+  var phraseHtml = ph.text.replace(tok.w, '<span class="err">' + tok.w + '</span>');
+  document.getElementById('popup-phrase').innerHTML = phraseHtml;
+  var choixZone = document.getElementById('popup-choix');
+  choixZone.innerHTML = '';
+  ph.choices.forEach(function(c, i){
+    var btn = document.createElement('button');
+    btn.className = 'choix-btn';
+    btn.textContent = c;
+    btn.addEventListener('click', function(){ onChoix(ph, tok, i, c); });
+    choixZone.appendChild(btn);
+  });
+  overlay.classList.add('show');
+}
+
+function closePopup(){
+  document.getElementById('popup-overlay').classList.remove('show');
+  activePhrase = null;
+}
+
+function onChoix(ph, tok, choixIdx, choixVal){
+  closePopup();
+  if(choixIdx === ph.answerIdx){
+    // Bonne réponse
+    tok.corrected = true;
+    corrected++;
+    buildJournal();
+    updateProgress();
+    updateBadge();
+    bipSucces();
+    // Récompense inline
+    showRewardInline();
+    // Feedback
+    var fb = document.getElementById('fb-main');
+    fb.className = 'fb show ok';
+    document.getElementById('fb-icon').textContent = '✓';
+    document.getElementById('fb-msg').innerHTML =
+      '<strong>Bravo&nbsp;!</strong> &laquo;&nbsp;' + tok.w + '&nbsp;&raquo; doit s\'écrire &laquo;&nbsp;<strong>' + ph.correction + '</strong>&nbsp;&raquo; ici. Tu peux remplacer par &laquo;&nbsp;avais&nbsp;&raquo; pour vérifier&nbsp;: si ça fonctionne, c\'est le verbe avoir conjugué.';
+    if(corrected === TOTAL_ERRORS){
+      setTimeout(showResultat, 1800);
+    }
+  } else {
+    // Mauvaise correction
+    bipErreur();
+    var fb = document.getElementById('fb-main');
+    fb.className = 'fb show ko';
+    document.getElementById('fb-icon').textContent = '✗';
+    var hint = choixVal === 'à' ?
+      '&laquo;&nbsp;à&nbsp;&raquo; est une préposition (= direction, lieu). Si tu peux le remplacer par &laquo;&nbsp;avait&nbsp;&raquo;, c\'est le verbe avoir.' :
+      choixVal === 'a' ?
+      '&laquo;&nbsp;a&nbsp;&raquo; est la 3e personne du singulier (il/elle). Ici le sujet est &laquo;&nbsp;tu&nbsp;&raquo; : il faut la 2e personne.' :
+      '&laquo;&nbsp;as&nbsp;&raquo; est la bonne forme mais réessaie&nbsp;!';
+    document.getElementById('fb-msg').innerHTML =
+      '<strong>Pas tout à fait.</strong> ' + hint;
+  }
+}
+
+/* ════════════════════════════════════════
+   PROGRESSION & BADGE
+════════════════════════════════════════ */
+function updateProgress(){
+  var pct = Math.round(corrected/TOTAL_ERRORS*100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = corrected + ' erreur' + (corrected>1?'s':'') + ' corrigée' + (corrected>1?'s':'') + ' sur ' + TOTAL_ERRORS;
+  document.getElementById('prog-pct').textContent = pct + ' %';
+}
+
+function updateBadge(){
+  document.getElementById('badge-count').textContent = corrected + ' / ' + TOTAL_ERRORS;
+  // Illuminer les pièces progressivement
+  var pieces = ['piece1','piece2','piece3'];
+  for(var i=0;i<corrected && i<pieces.length;i++){
+    var p = document.getElementById(pieces[i]);
+    if(p) p.setAttribute('fill', 'rgba(141,198,63,.7)');
+  }
+  // Animer la loupe
+  var loupe = document.getElementById('badge-loupe');
+  loupe.classList.remove('found');
+  void loupe.offsetWidth;
+  loupe.classList.add('found');
+  if(corrected === TOTAL_ERRORS){
+    // Badge complet
+    var p3 = document.getElementById('piece3');
+    if(p3) p3.setAttribute('fill','rgba(141,198,63,.7)');
+    document.getElementById('badge-count').textContent = '&#127942; Badge complet&nbsp;!';
+    document.getElementById('badge-count').innerHTML = '&#127942;';
+  }
+}
+
+function showRewardInline(){
+  var r = document.getElementById('reward-inline');
+  var icon = document.getElementById('reward-icon');
+  var titre = document.getElementById('reward-titre');
+  var detail = document.getElementById('reward-detail');
+  var stars = document.getElementById('reward-stars');
+
+  // Reset animation
+  r.classList.remove('show');
+  void r.offsetWidth;
+
+  if(corrected === 1){
+    icon.innerHTML = '&#128270;';
+    titre.textContent = 'Indice retrouvé\u00a0!';
+    detail.textContent = 'Tu as repéré la 1re erreur. Il en reste encore une\u00a0— continue ta lecture\u00a0!';
+    stars.textContent = '\u2B50\u2606\u2606';
+  } else {
+    icon.innerHTML = '&#127942;';
+    titre.textContent = 'Badge complété\u00a0!';
+    detail.textContent = 'Toutes les erreurs ont été corrigées. Tu as sauvé le journal\u00a0!';
+    stars.textContent = '\u2B50\u2B50\u2B50';
+  }
+  r.classList.add('show');
+  r.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function showNotif(msg){
+  var n = document.getElementById('notif');
+  n.innerHTML = msg;
+  n.classList.add('show');
+  setTimeout(function(){ n.classList.remove('show'); }, 2200);
+}
+
+/* ════════════════════════════════════════
+   RÉSULTAT FINAL
+════════════════════════════════════════ */
+function showResultat(){
+  done = true;
+  document.getElementById('resultat').classList.add('show');
+  document.getElementById('resultat').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* ════════════════════════════════════════
+   RECOMMENCER
+════════════════════════════════════════ */
+function recommencer(){
+  corrected = 0; wrongClicks = 0; done = false; activePhrase = null;
+  // Réinitialiser les corrections dans les données
+  PHRASES.forEach(function(ph){
+    if(ph.words) ph.words.forEach(function(tok){ tok.corrected = false; });
+  });
+  // Réinitialiser badge SVG
+  ['piece1','piece2','piece3'].forEach(function(id){
+    var p = document.getElementById(id);
+    if(p) p.setAttribute('fill','rgba(141,198,63,.12)');
+  });
+  document.getElementById('badge-count').textContent = '0 / 2';
+  var loupe = document.getElementById('badge-loupe');
+  loupe.classList.remove('found');
+  // Réinitialiser UI
+  document.getElementById('reward-inline').classList.remove('show');
+  document.getElementById('fb-main').className = 'fb';
+  document.getElementById('resultat').classList.remove('show');
+  document.getElementById('popup-overlay').classList.remove('show');
+  updateProgress();
+  buildJournal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ════════════════════════════════════════
+   BIP SONORE ERREUR (Web Audio API)
+════════════════════════════════════════ */
+function bipErreur(){
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(180, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.22);
+  } catch(e){}
+}
+
+function bipSucces(){
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [[440,.08],[550,.18],[660,.32]].forEach(function(n){
+      var osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type='sine'; osc.frequency.value=n[0];
+      gain.gain.setValueAtTime(0.18,ctx.currentTime+n[1]);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+n[1]+0.18);
+      osc.start(ctx.currentTime+n[1]); osc.stop(ctx.currentTime+n[1]+0.2);
+    });
+  } catch(e){}
+}
+buildJournal();
+updateProgress();
+
+// Fermer popup si clic hors
+document.getElementById('popup-overlay').addEventListener('click', function(e){
+  if(e.target === this) closePopup();
+});
+</script>
+</body>
+</html>
