@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mission 1 : À la poursuite des homonymes !</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Special+Elite&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --day-color:#f5c518;--day-dark:#8a6000;--day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.3);
+  --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--ink:#1a1a2e;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1.8rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.6rem;}
+h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;font-family:'Special Elite',cursive;}
+h1 .hl{color:var(--day-color);}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+.progress-wrap{width:100%;max-width:680px;margin-bottom:1rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;width:0%;}
+
+.score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+.chip .dot{width:8px;height:8px;border-radius:50%;}
+.chip.correct .dot{background:var(--green);}
+.chip.wrong   .dot{background:var(--pink);}
+.chip.remaining .dot{background:var(--muted);}
+
+/* Coffre */
+.safe-wrap{width:100%;max-width:680px;position:relative;z-index:1;margin-bottom:1.4rem;background:var(--ink);border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12);animation:fadeUp .4s ease both;}
+.safe-stripe{height:4px;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.safe-inner{padding:1.4rem 1.8rem 1.6rem;position:relative;}
+.safe-inner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(245,197,24,.03) 10px,rgba(245,197,24,.03) 20px);pointer-events:none;}
+.safe-header{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+.safe-door{text-align:center;margin-bottom:1rem;}
+.safe-emoji{font-size:64px;display:inline-block;transition:transform .4s;filter:drop-shadow(0 0 12px rgba(245,197,24,.4));}
+.safe-emoji.open{animation:coffreOpen .6s cubic-bezier(.34,1.56,.64,1) forwards;}
+.keys-row{display:flex;justify-content:center;gap:24px;}
+.key-slot{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.key-emoji{font-size:28px;filter:grayscale(1) opacity(.22);transition:filter .4s cubic-bezier(.34,1.56,.64,1),transform .5s cubic-bezier(.34,1.56,.64,1);}
+.key-emoji.unlocked{filter:none;animation:keyUnlock .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+.key-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.key-lbl.unlocked{color:var(--day-color);}
+
+/* Cards */
+.card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.6rem 1.8rem 1.4rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.2rem;animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.8rem;text-transform:uppercase;letter-spacing:.1em;}
+
+.phrase-box{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1rem;font-family:'Special Elite',cursive;font-size:clamp(1rem,2.5vw,1.25rem);color:var(--day-dark);line-height:1.7;}
+.blank{display:inline-block;background:var(--day-color);color:var(--day-dark);border-radius:6px;padding:0 10px;min-width:44px;text-align:center;font-weight:900;letter-spacing:.5px;transition:background .3s,color .3s;}
+.blank.ok{background:var(--green);color:#fff;}
+.blank.err{background:var(--pink);color:#fff;}
+
+.choices{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem;}
+.choice-btn{padding:.55rem 1.3rem;border-radius:10px;border:2px solid var(--border);background:var(--surface);font-family:'Special Elite',cursive;font-size:1rem;font-weight:600;color:var(--text);cursor:pointer;min-height:44px;transition:all .15s;-webkit-appearance:none;appearance:none;}
+.choice-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-color);transform:translateY(-1px);box-shadow:0 3px 10px var(--day-glow);}
+.choice-btn.correct{background:var(--green);color:#fff;border-color:#3d7a10;}
+.choice-btn.wrong  {background:var(--pink);color:#fff;border-color:#c0392b;}
+.choice-btn.reveal {background:var(--green);color:#fff;border-color:#3d7a10;}
+.choice-btn:disabled{cursor:default;opacity:.8;}
+
+.feedback{margin-top:.7rem;padding:.6rem .9rem;border-radius:10px;font-size:.88rem;display:none;align-items:center;gap:.6rem;font-family:'JetBrains Mono',monospace;}
+.feedback.show{display:flex;}
+.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+
+/* Doc act2 */
+.doc-card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.2rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+.doc-stripe{height:4px;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.doc-head{background:var(--ink);padding:.7rem 1.4rem;display:flex;align-items:center;gap:.8rem;}
+.doc-label{font-family:'Special Elite',cursive;font-size:.95rem;color:var(--day-color);letter-spacing:.05em;}
+.doc-tag{margin-left:auto;background:var(--day-color);color:var(--day-dark);font-size:.6rem;font-weight:800;border-radius:99px;padding:.15rem .7rem;letter-spacing:.08em;text-transform:uppercase;}
+.doc-body{padding:1.2rem 1.4rem;}
+.doc-choices{display:flex;flex-direction:column;gap:.55rem;}
+.doc-btn{padding:.75rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);font-family:'Special Elite',cursive;font-size:1rem;color:var(--text);cursor:pointer;text-align:left;min-height:48px;transition:all .15s;-webkit-appearance:none;appearance:none;display:flex;align-items:center;gap:.8rem;}
+.doc-btn::before{content:'';width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .2s;}
+.doc-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-color);}
+.doc-btn:hover:not(:disabled)::before{border-color:var(--day-color);}
+.doc-btn.correct{background:#f0faeb;border-color:#b5e08a;color:#2f6e10;}
+.doc-btn.correct::before{background:var(--green);border-color:var(--green);}
+.doc-btn.wrong  {background:#fff0ef;border-color:#f9c0bb;color:#c0392b;}
+.doc-btn.wrong::before{background:var(--pink);border-color:var(--pink);}
+.doc-btn.reveal {background:#f0faeb;border-color:#b5e08a;color:#2f6e10;}
+.doc-btn.reveal::before{background:var(--green);border-color:var(--green);}
+.doc-btn:disabled{cursor:default;}
+
+.key-won{display:none;margin-top:.9rem;background:var(--ink);border-radius:10px;padding:.65rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--day-color);text-align:center;letter-spacing:.06em;animation:popIn .45s cubic-bezier(.34,1.56,.64,1);}
+.key-won.show{display:block;}
+
+.section-wrap{width:100%;max-width:680px;position:relative;z-index:1;}
+.section-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;}
+.section-num{background:var(--day-color);color:var(--day-dark);font-size:.65rem;font-weight:800;border-radius:99px;padding:.2rem .75rem;letter-spacing:.06em;text-transform:uppercase;}
+.section-title-txt{font-family:'Special Elite',cursive;font-size:1rem;color:var(--text);}
+
+.btn-row-main{width:100%;max-width:680px;display:flex;gap:.7rem;flex-wrap:wrap;position:relative;z-index:1;margin-bottom:.8rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.4rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.38;cursor:default;}
+.btn-primary{background:var(--day-color);color:var(--day-dark);flex:1;box-shadow:0 3px 10px var(--day-glow);justify-content:center;}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+.results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;overflow:hidden;}
+.results-card .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.results-badge-big{font-size:60px;margin-bottom:.5rem;}
+.results-title{font-family:'Special Elite',cursive;font-size:1.7rem;color:var(--day-color);margin-bottom:.4rem;}
+.results-sub{color:var(--muted);font-size:.9rem;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+.results-score{font-size:clamp(2.5rem,8vw,4rem);font-weight:800;line-height:1;margin:.5rem 0 .3rem;}
+.results-score .s-num{color:var(--day-color);}
+.stars{font-size:1.8rem;margin:.3rem 0 1rem;}
+.results-msg{color:var(--muted);font-size:.9rem;margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace;}
+.recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.8rem;}
+.recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.6;}
+.recap-item.ok-item{border-color:#b5e08a;}
+.recap-item.ko-item{border-color:#f9c0bb;}
+
+.memo-card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.4rem 1.6rem;position:relative;z-index:1;margin-top:.8rem;display:none;animation:fadeUp .4s ease both;}
+.memo-card.show{display:block;}
+.memo-card .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.memo-table{width:100%;border-collapse:collapse;margin-top:.8rem;font-size:.83rem;}
+.memo-table th{background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.5rem .8rem;border:1.5px solid var(--day-border);text-align:left;}
+.memo-table td{padding:.55rem .8rem;border:1.5px solid var(--border);font-family:'JetBrains Mono',monospace;}
+.memo-table tr:nth-child(even) td{background:var(--bg);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes keyUnlock{0%{filter:none;transform:scale(.4) rotate(-30deg);opacity:0}60%{transform:scale(1.25) rotate(8deg);opacity:1}80%{transform:scale(.92) rotate(-4deg)}100%{transform:scale(1) rotate(0);filter:none;opacity:1}}
+@keyframes coffreOpen{0%{transform:scale(1)}35%{transform:scale(1.18) rotate(-5deg)}65%{transform:scale(1.12) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes loupePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-20deg)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(5deg)}70%{transform:translate(-50%,-50%) scale(.95) rotate(-2deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1) rotate(0)}}
+.loupe-anim{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;z-index:9999;pointer-events:none;}
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+<div class="loupe-anim" id="loupeAnim"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 2 &ndash; Jour 5 &middot; Je m&rsquo;entra&icirc;ne</div>
+  <h1>&#128270; Mission 1 &middot; <span class="hl">&Agrave; la poursuite des homonymes&nbsp;!</span></h1>
+  <p class="subtitle">12 &eacute;preuves &middot; est / et / es / ai / son / sont &middot; 3 cl&eacute;s &agrave; trouver</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="progLabel">0 / 12 r&eacute;ponses</span>
+    <span id="progPct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progFill"></div></div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="cOk">0</span>&nbsp;correct(s)</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="cErr">0</span>&nbsp;erreur(s)</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cRem">12</span>&nbsp;restant(s)</div>
+</div>
+
+<!-- Coffre -->
+<div class="safe-wrap">
+  <div class="safe-stripe"></div>
+  <div class="safe-inner">
+    <div class="safe-header">&#128274;&nbsp;Coffre secret &mdash; 3 cl&eacute;s requises pour l&rsquo;ouvrir</div>
+    <div class="safe-door"><span class="safe-emoji" id="safeEmoji">&#128274;</span></div>
+    <div class="keys-row">
+      <div class="key-slot"><div class="key-emoji" id="key1">&#128273;</div><div class="key-lbl" id="key1lbl">Cl&eacute;&nbsp;1</div></div>
+      <div class="key-slot"><div class="key-emoji" id="key2">&#128273;</div><div class="key-lbl" id="key2lbl">Cl&eacute;&nbsp;2</div></div>
+      <div class="key-slot"><div class="key-emoji" id="key3">&#128273;</div><div class="key-lbl" id="key3lbl">Cl&eacute;&nbsp;3</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Dossier 1 -->
+<div class="section-wrap">
+  <div class="section-head">
+    <span class="section-num">Dossier 1</span>
+    <span class="section-title-txt">Phrases sabot&eacute;es &mdash; Retrouve le bon mot</span>
+  </div>
+  <div id="act1"></div>
+</div>
+
+<!-- Dossier 2 -->
+<div class="section-wrap">
+  <div class="section-head">
+    <span class="section-num">Dossier 2</span>
+    <span class="section-title-txt">Faux documents &mdash; Identifie la phrase correcte &amp; r&eacute;cup&egrave;re les cl&eacute;s &#128273;</span>
+  </div>
+  <div id="act2"></div>
+</div>
+
+<div class="btn-row-main">
+  <button class="btn btn-primary" id="btnVerif" disabled>&#10003;&nbsp;Valider toutes mes r&eacute;ponses</button>
+  <button class="btn btn-ghost"   id="btnRestart" style="display:none">&#128260;&nbsp;Recommencer</button>
+</div>
+
+<div class="results" id="resultsScreen">
+  <div class="results-card">
+    <div class="card-stripe"></div>
+    <div class="results-badge-big">&#127885;</div>
+    <div class="results-title">Badge d&eacute;bloqu&eacute;&nbsp;!</div>
+    <div class="results-sub">Tu es un v&eacute;ritable d&eacute;tective des homonymes.</div>
+    <div class="results-score"><span class="s-num" id="scoreNum">0</span><span style="color:var(--muted);font-size:2rem">&nbsp;/ 12</span></div>
+    <div class="stars" id="starsRow"></div>
+    <div class="results-msg" id="resultsMsg"></div>
+    <div class="recap-list" id="recapList"></div>
+    <button class="btn btn-primary" onclick="location.reload()" style="margin:0 auto;display:flex;">&#128260;&nbsp;Recommencer l&rsquo;enqu&ecirc;te</button>
+  </div>
+</div>
+
+<div class="memo-card" id="memoCard">
+  <div class="card-stripe"></div>
+  <div class="q-num" style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:.8rem;text-transform:uppercase;letter-spacing:.1em;">&#128218;&nbsp;R&egrave;gle &agrave; retenir</div>
+  <table class="memo-table">
+    <tr><th>Mot</th><th>Nature</th><th>Astuce</th></tr>
+    <tr><td><strong>est</strong></td><td>verbe &ecirc;tre (il/elle)</td><td>Remplace par &laquo;&nbsp;&eacute;tait&nbsp;&raquo;&nbsp;: si &ccedil;a marche &rarr; <em>est</em>.</td></tr>
+    <tr><td><strong>et</strong></td><td>conjonction de coordination</td><td>Remplace par &laquo;&nbsp;ainsi que&nbsp;&raquo;&nbsp;: si &ccedil;a marche &rarr; <em>et</em>.</td></tr>
+    <tr><td><strong>es</strong></td><td>verbe &ecirc;tre (tu)</td><td>Sujet = <em>tu</em> &rarr; &eacute;cris <em>es</em>.</td></tr>
+    <tr><td><strong>ai</strong></td><td>verbe avoir (je / j&rsquo;)</td><td>Sujet = <em>je</em> &rarr; &eacute;cris <em>ai</em>.</td></tr>
+    <tr><td><strong>son</strong></td><td>d&eacute;terminant possessif</td><td>Remplace par &laquo;&nbsp;mon&nbsp;&raquo;&nbsp;: si &ccedil;a marche &rarr; <em>son</em>.</td></tr>
+    <tr><td><strong>sont</strong></td><td>verbe &ecirc;tre (ils/elles)</td><td>Remplace par &laquo;&nbsp;&eacute;taient&nbsp;&raquo;&nbsp;: si &ccedil;a marche &rarr; <em>sont</em>.</td></tr>
+  </table>
+</div>
+
+<script>
+/* ══ DOSSIER 1 — 9 phrases (est/et/es/ai + son/sont) ══ */
+var Q1=[
+  {id:"q1", phrase:"Mon voisin ___ d\u00e9j\u00e0 parti.", choices:["ai","est"],   answer:"est"},
+  {id:"q2", phrase:"J\u2019___ oubli\u00e9 mon manteau dans la salle.",               choices:["ai","est"],   answer:"ai"},
+  {id:"q3", phrase:"Tu ___ pr\u00eat pour commencer l\u2019exercice.",                choices:["es","est"],   answer:"es"},
+  {id:"q4", phrase:"Le ma\u00eetre ___ les \u00e9l\u00e8ves corrigent l\u2019exercice.", choices:["est","et"], answer:"et"},
+  {id:"q5", phrase:"Le cahier ___ pos\u00e9 sur la table.",                           choices:["es","est"],   answer:"est"},
+  {id:"q6", phrase:"Tu ___ arriv\u00e9 avant la sonnerie.",                           choices:["es","ai"],    answer:"es"},
+  {id:"q7", phrase:"Il a rang\u00e9 ___ cartable avant de partir.",                   choices:["son","sont"], answer:"son"},
+  {id:"q8", phrase:"Les \u00e9l\u00e8ves ___ arriv\u00e9s en retard ce matin.",       choices:["son","sont"], answer:"sont"},
+  {id:"q9", phrase:"___ livre est pos\u00e9 sur le bureau.",                          choices:["Son","Sont"], answer:"Son"}
+];
+
+/* ══ DOSSIER 2 — 3 documents avec clés ══ */
+var Q2=[
+  {
+    id:"s1",
+    choices:["Tu est content.","Tu es content.","Tu ai content."],
+    answer:1, keyNum:1
+  },
+  {
+    id:"s2",
+    choices:["J\u2019est termin\u00e9.","J\u2019ai termin\u00e9.","J\u2019es termin\u00e9."],
+    answer:1, keyNum:2
+  },
+  {
+    id:"s3",
+    choices:["Amina son amie ont travaill\u00e9 ensemble.","Amina et son amie ont travaill\u00e9 ensemble.","Amina sont amie ont travaill\u00e9 ensemble."],
+    answer:1, keyNum:3
+  }
+];
+
+var TOTAL=Q1.length+Q2.length; /* 12 */
+var sel1={},sel2={},isDone=false,keysFound=0;
+
+function setChips(ok,err,rem){
+  document.getElementById("cOk").textContent=ok;
+  document.getElementById("cErr").textContent=err;
+  document.getElementById("cRem").textContent=rem;
+  var n=ok+err;
+  document.getElementById("progLabel").textContent=n+" / "+TOTAL+" r\u00e9ponses";
+  document.getElementById("progPct").textContent=Math.round(n/TOTAL*100)+"\u00a0%";
+  document.getElementById("progFill").style.width=Math.round(n/TOTAL*100)+"%";
+}
+
+var loupeT=null;
+function showLoupe(ok){
+  var el=document.getElementById("loupeAnim");
+  el.textContent=ok?"\uD83D\uDD0D":"\u274C";
+  el.style.display="block";
+  if(loupeT)clearTimeout(loupeT);
+  el.style.animation="none";void el.offsetWidth;
+  el.style.animation="loupePop .65s ease forwards";
+  loupeT=setTimeout(function(){el.style.display="none";},700);
+}
+
+function unlockKey(num){
+  keysFound++;
+  var ke=document.getElementById("key"+num);
+  var kl=document.getElementById("key"+num+"lbl");
+  ke.classList.add("unlocked");
+  kl.classList.add("unlocked");
+  kl.textContent="Cl\u00e9\u00a0"+num+"\u00a0\u2713";
+  if(keysFound===3){
+    var se=document.getElementById("safeEmoji");
+    se.textContent="\uD83D\uDCE6";
+    se.classList.add("open");
+  }
+}
+
+function checkVerifBtn(){
+  var done=0;
+  for(var k in sel1)done++;
+  for(var k in sel2)done++;
+  document.getElementById("btnVerif").disabled=(done<TOTAL);
+}
+
+function refreshChips(){
+  var ok=0,err=0,done=0;
+  for(var k in sel1){done++;if(sel1[k].ok)ok++;else err++;}
+  for(var k in sel2){done++;if(sel2[k].ok)ok++;else err++;}
+  setChips(ok,err,TOTAL-done);
+}
+
+/* ── Build Dossier 1 ── */
+var act1=document.getElementById("act1");
+for(var i=0;i<Q1.length;i++){
+  (function(q,idx){
+    var card=document.createElement("div");
+    card.className="card";
+    card.style.animationDelay=(0.22+idx*.07)+"s";
+    var phraseHtml=q.phrase.replace("___","<span class='blank' id='bl_"+q.id+"'>___</span>");
+    card.innerHTML=
+      "<div class='card-stripe'></div>"+
+      "<div class='q-num'>Dossier n\u00b0\u00a0"+(idx+1)+"\u00a0\u2014\u00a0Phrase suspect\u00e9e</div>"+
+      "<div class='phrase-box'>"+phraseHtml+"</div>"+
+      "<div class='choices' id='ch_"+q.id+"'></div>"+
+      "<div class='feedback' id='fb_"+q.id+"'><span id='fbi_"+q.id+"'></span>&nbsp;<span id='fbm_"+q.id+"'></span></div>";
+    act1.appendChild(card);
+    var chDiv=card.querySelector("#ch_"+q.id);
+    for(var c=0;c<q.choices.length;c++){
+      (function(choice){
+        var b=document.createElement("button");
+        b.setAttribute("type","button");b.className="choice-btn";
+        b.textContent=choice;
+        b.addEventListener("click",function(){
+          if(isDone||sel1[q.id]!=null)return;
+          var ok=(choice===q.answer);
+          sel1[q.id]={val:choice,ok:ok};
+          var blank=document.getElementById("bl_"+q.id);
+          blank.textContent=choice;blank.classList.add(ok?"ok":"err");
+          var all=chDiv.querySelectorAll(".choice-btn");
+          for(var bi=0;bi<all.length;bi++){
+            all[bi].disabled=true;
+            if(all[bi].textContent===choice)all[bi].classList.add(ok?"correct":"wrong");
+            if(!ok&&all[bi].textContent===q.answer)all[bi].classList.add("reveal");
+          }
+          var fb=document.getElementById("fb_"+q.id);
+          fb.className="feedback show "+(ok?"ok":"ko");
+          document.getElementById("fbi_"+q.id).textContent=ok?"\uD83D\uDD0D":"\u26A0\uFE0F";
+          document.getElementById("fbm_"+q.id).textContent=ok?"Indice r\u00e9cup\u00e9r\u00e9\u00a0!":"Cette piste semble fausse\u2026";
+          showLoupe(ok);refreshChips();checkVerifBtn();
+        });
+        chDiv.appendChild(b);
+      })(q.choices[c]);
+    }
+  })(Q1[i],i);
+}
+
+/* ── Build Dossier 2 ── */
+var act2=document.getElementById("act2");
+for(var i=0;i<Q2.length;i++){
+  (function(s,idx){
+    var dc=document.createElement("div");
+    dc.className="doc-card";
+    dc.style.animationDelay=(0.72+idx*.1)+"s";
+    dc.innerHTML=
+      "<div class='doc-stripe'></div>"+
+      "<div class='doc-head'>"+
+        "<span class='doc-label'>\uD83D\uDCC4 Document suspect n\u00b0\u00a0"+(idx+1)+"</span>"+
+        "<span class='doc-tag'>FALSIFI\u00C9</span>"+
+      "</div>"+
+      "<div class='doc-body'>"+
+        "<div class='doc-choices' id='dc_"+s.id+"'></div>"+
+        "<div class='key-won' id='kw_"+s.id+"'>\uD83D\uDD11\u00a0Cl\u00e9\u00a0"+s.keyNum+" r\u00e9cup\u00e9r\u00e9e\u00a0!</div>"+
+      "</div>";
+    act2.appendChild(dc);
+    var dcDiv=dc.querySelector("#dc_"+s.id);
+    for(var c=0;c<s.choices.length;c++){
+      (function(choice,cidx){
+        var b=document.createElement("button");
+        b.setAttribute("type","button");b.className="doc-btn";
+        b.textContent=choice;
+        b.addEventListener("click",function(){
+          if(isDone||sel2[s.id]!=null)return;
+          var ok=(cidx===s.answer);
+          sel2[s.id]={idx:cidx,ok:ok};
+          var all=dcDiv.querySelectorAll(".doc-btn");
+          for(var bi=0;bi<all.length;bi++){
+            all[bi].disabled=true;
+            if(bi===cidx)all[bi].classList.add(ok?"correct":"wrong");
+            if(!ok&&bi===s.answer)all[bi].classList.add("reveal");
+          }
+          if(ok){document.getElementById("kw_"+s.id).classList.add("show");unlockKey(s.keyNum);}
+          showLoupe(ok);refreshChips();checkVerifBtn();
+        });
+        dcDiv.appendChild(b);
+      })(s.choices[c],c);
+    }
+  })(Q2[i],i);
+}
+
+/* ── Vérifier ── */
+document.getElementById("btnVerif").addEventListener("click",function(){
+  if(isDone)return;
+  isDone=true;
+  document.getElementById("btnVerif").style.display="none";
+  document.getElementById("btnRestart").style.display="";
+  var ok=0,err=0,recap=[];
+  for(var i=0;i<Q1.length;i++){
+    var r=sel1[Q1[i].id];
+    var good=r&&r.ok;
+    if(good)ok++;else err++;
+    recap.push({text:Q1[i].phrase.replace("___","["+Q1[i].answer+"]"),ok:good});
+  }
+  for(var i=0;i<Q2.length;i++){
+    var r=sel2[Q2[i].id];
+    var good=r&&r.ok;
+    if(good)ok++;else err++;
+    recap.push({text:Q2[i].choices[Q2[i].answer],ok:good});
+  }
+  setChips(ok,err,0);
+  var pct=Math.round(ok/TOTAL*100);
+  var stars,msg;
+  if(pct===100){stars="\u2605\u2605\u2605\u2605\u2605";msg="Parfait\u00a0! Tu ma\u00eetrises tous les homonymes.";}
+  else if(pct>=75){stars="\u2605\u2605\u2605\u2605\u2606";msg="Tr\u00e8s bien\u00a0! Relis les erreurs dans le m\u00e9mo.";}
+  else if(pct>=50){stars="\u2605\u2605\u2605\u2606\u2606";msg="Bien\u00a0! Quelques confusions \u00e0 corriger.";}
+  else{stars="\u2605\u2606\u2606\u2606\u2606";msg="\u00c0 retravailler. Consulte le m\u00e9mo ci-dessous.";}
+  var recapHtml="";
+  for(var i=0;i<recap.length;i++){
+    recapHtml+="<div class='recap-item "+(recap[i].ok?"ok-item":"ko-item")+"'>"+
+      "<span>"+(recap[i].ok?"\u2705":"\u274C")+"</span><span>"+recap[i].text+"</span></div>";
+  }
+  document.getElementById("scoreNum").textContent=ok;
+  document.getElementById("starsRow").textContent=stars;
+  document.getElementById("resultsMsg").textContent=msg;
+  document.getElementById("recapList").innerHTML=recapHtml;
+  document.getElementById("resultsScreen").classList.add("show");
+  document.getElementById("memoCard").classList.add("show");
+});
+
+document.getElementById("btnRestart").addEventListener("click",function(){location.reload();});
+</script>
+</body>
+</html>
