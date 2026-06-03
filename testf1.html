@@ -384,7 +384,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="start-badge">
     <span class="dot" style="background:#e8002d"></span>
     <span class="dot" style="background:#f5c518"></span>
-    Pazapa &middot; Maths &middot; 4e/3e
+    Pazapa &middot; Maths &middot; 3e
   </div>
   <div class="start-title">Grand Prix<br>des &Eacute;quations</div>
   <div class="start-sub">R&eacute;sous les &eacute;quations pour franchir la ligne d&rsquo;arriv&eacute;e.</div>
@@ -454,7 +454,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="win-badge">
     <span class="dot" style="background:#e8002d"></span>
     <span class="dot" style="background:#f5c518"></span>
-    Pazapa &middot; Maths &middot; 4e/3e
+    Pazapa &middot; Maths &middot; 3e
   </div>
   <div class="win-flags">&#127937;&#127937;&#127937;</div>
   <div class="win-title">&#127881; Arriv&eacute;e !</div>
@@ -524,6 +524,84 @@ function playWrong(){beep(200,.4,.4,'sawtooth');}
 function playBeepCount(){beep(660,.18,.5,'square');}
 function playGo(){beep(1320,.2,.5,'square');setTimeout(function(){beep(1760,.28,.4,'square');},150);}
 function playWin(){[0,150,300,450,600].forEach(function(d,i){setTimeout(function(){beep(440+i*220,.25,.4,'square');},d);});}
+
+/* ── MOTEUR DE COURSE (WebAudio synthétique) ── */
+var engineCtx = null, engineOsc = null, engineGain = null, engineRunning = false;
+
+function startEngine(){
+  if(engineRunning) return;
+  try{
+    engineCtx  = new (window.AudioContext||window.webkitAudioContext)();
+    // Oscillateur principal — grondement grave
+    engineOsc  = engineCtx.createOscillator();
+    engineGain = engineCtx.createGain();
+    // Filtre passe-bas pour adoucir
+    var filter = engineCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 320;
+    // LFO pour simuler la vibration moteur
+    var lfo     = engineCtx.createOscillator();
+    var lfoGain = engineCtx.createGain();
+    lfo.frequency.value = 28;       // 28 Hz = vibration moteur
+    lfoGain.gain.value  = 35;       // amplitude de la modulation
+    lfo.connect(lfoGain);
+    lfoGain.connect(engineOsc.frequency);
+    engineOsc.frequency.value = 90; // fréquence de base du moteur
+    engineOsc.type = 'sawtooth';    // timbre de moteur
+    engineGain.gain.value = 0;      // départ silencieux
+    engineOsc.connect(filter);
+    filter.connect(engineGain);
+    engineGain.connect(engineCtx.destination);
+    // Deuxième couche harmonique
+    var osc2  = engineCtx.createOscillator();
+    var gain2 = engineCtx.createGain();
+    osc2.frequency.value = 180;
+    osc2.type = 'square';
+    gain2.gain.value = 0;
+    lfoGain.connect(osc2.frequency);
+    osc2.connect(filter);
+    gain2.connect(engineCtx.destination);
+    osc2.connect(gain2);
+    // Démarrer tous les oscillateurs
+    engineOsc.start(); lfo.start(); osc2.start();
+    // Monter le volume progressivement
+    engineGain.gain.linearRampToValueAtTime(0.18, engineCtx.currentTime + 0.8);
+    gain2.gain.linearRampToValueAtTime(0.07, engineCtx.currentTime + 0.8);
+    engineRunning = true;
+    // Accélération : monter légèrement la fréquence en boucle
+    var baseFreq = 90;
+    var direction = 1;
+    setInterval(function(){
+      if(!engineRunning || !engineCtx) return;
+      baseFreq += direction * 0.4;
+      if(baseFreq > 115) direction = -1;
+      if(baseFreq < 80)  direction = 1;
+      engineOsc.frequency.setTargetAtTime(baseFreq, engineCtx.currentTime, 0.3);
+    }, 120);
+  }catch(e){ console.log('Engine audio error:', e); }
+}
+
+function stopEngine(){
+  if(!engineRunning || !engineGain) return;
+  try{
+    engineGain.gain.linearRampToValueAtTime(0, engineCtx.currentTime + 0.6);
+    setTimeout(function(){
+      try{ engineCtx.close(); }catch(e){}
+      engineCtx = null; engineOsc = null; engineGain = null;
+      engineRunning = false;
+    }, 700);
+  }catch(e){}
+}
+
+function revEngine(){
+  // Accélération rapide à la bonne réponse
+  if(!engineRunning || !engineOsc || !engineCtx) return;
+  engineOsc.frequency.setTargetAtTime(200, engineCtx.currentTime, 0.05);
+  setTimeout(function(){
+    if(engineOsc && engineCtx) engineOsc.frequency.setTargetAtTime(90, engineCtx.currentTime, 0.4);
+  }, 400);
+}
+
 function toggleSound(){soundEnabled=!soundEnabled;$('sound-btn').textContent=soundEnabled?'\uD83D\uDD0A':'\uD83D\uDD07';}
 
 /* ── GÉNÉRATION CHOIX ─────────────────────── */
@@ -543,27 +621,31 @@ function startCountdown(){
   showScreen('screen-countdown');
   var lights=[$('l1'),$('l2'),$('l3'),$('l4'),$('l5')];
   var num=$('countdown-num');
-  var step=0;
-  function nextLight(){
-    if(step<5){lights[step].classList.add('on');playBeepCount();step++;setTimeout(nextLight,600);}
-    else{
-      num.textContent='3';num.className='countdown-num rouge-txt';playBeepCount();
-      setTimeout(function(){
-        num.textContent='2';num.className='countdown-num rouge-txt';
-        void num.offsetWidth;playBeepCount();
-        setTimeout(function(){
-          num.textContent='1';void num.offsetWidth;playBeepCount();
-          setTimeout(function(){
-            lights.forEach(function(l){l.classList.remove('on');l.classList.add('go');});
-            num.textContent='GO !';num.className='countdown-num vert-txt';
-            void num.offsetWidth;playGo();
-            setTimeout(function(){startGame();},900);
-          },800);
-        },800);
-      },500);
-    }
+  // Allumer les 5 feux rapidement (250ms chacun = 1.25s total)
+  // puis 3-2-1-GO enchaîné sans pause
+  lights.forEach(function(l){ l.classList.remove('on','go'); });
+  num.textContent=''; num.className='countdown-num rouge-txt';
+  var t = 0;
+  for(var i=0;i<5;i++){
+    (function(idx){ setTimeout(function(){ lights[idx].classList.add('on'); playBeepCount(); }, t); })(i);
+    t += 250;
   }
-  setTimeout(nextLight,400);
+  // Après les feux : 3 → 2 → 1 → GO (700ms chacun)
+  setTimeout(function(){
+    num.textContent='3'; void num.offsetWidth; playBeepCount();
+  }, t);
+  setTimeout(function(){
+    num.textContent='2'; void num.offsetWidth; playBeepCount();
+  }, t+700);
+  setTimeout(function(){
+    num.textContent='1'; void num.offsetWidth; playBeepCount();
+  }, t+1400);
+  setTimeout(function(){
+    lights.forEach(function(l){ l.classList.remove('on'); l.classList.add('go'); });
+    num.textContent='GO !'; num.className='countdown-num vert-txt';
+    void num.offsetWidth; playGo();
+  }, t+2100);
+  setTimeout(function(){ startGame(); }, t+2900);
 }
 
 /* ── DÉMARRAGE ────────────────────────────── */
@@ -573,6 +655,7 @@ function startGame(){
   $('circuit-prog').style.width='0%';
   showScreen('screen-game');
   startTimer();
+  startEngine();
   renderQ();
 }
 
@@ -618,7 +701,7 @@ function checkAnswer(chosen,correct,list){
   if(ok){
     score++;
     fb.className='feedback-right show ok';fb.textContent='\u2705 Bonne r\u00e9ponse !';
-    playCorrect();advanceCar();
+    playCorrect();revEngine();advanceCar();
   }else{
     fb.className='feedback-right show ko';
     fb.textContent='\u274c Mauvaise r\u00e9ponse \u2014 x = '+correct;
@@ -650,6 +733,7 @@ function finishGame(){
   $('circuit-prog').style.width='100%';
   var col=document.querySelector('.col-circuit');
   $('car-in-circuit').style.bottom=(col.offsetHeight-50)+'px';
+  stopEngine();
   setTimeout(function(){playWin();showResults();},900);
 }
 
@@ -681,6 +765,7 @@ function launchConfetti(){
 /* ── RESET ────────────────────────────────── */
 function resetGame(){
   clearInterval(timerInt);
+  stopEngine();
   showScreen('screen-start');
 }
 </script>
