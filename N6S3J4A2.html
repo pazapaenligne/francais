@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S3 J4 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8; --day-dark:#1a6e88; --day-dark2:#0f4f63;
+      --day-light:#e8f6fb; --day-border:#9dd4e8; --day-glow:rgba(58,181,216,.28);
+      --bg:#fffdf7; --surface:#ffffff; --surface2:#f4fafd; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-light:#e7faec; --green-dark:#157f3a;
+      --pink:#f28b82; --red:#b94040; --red-light:#fdeaea;
+      --orange:#f5a623;
+      --text:#1a1d23; --muted:#7a7470; --radius:16px; --radius-sm:11px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.4rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+    .wrap{width:100%;max-width:680px;}
+
+    /* BULLES standard */
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:220px;height:220px;background:var(--yellow);top:-60px;right:-60px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:200px;height:200px;background:var(--day-color);bottom:-50px;left:-60px;pointer-events:none;}
+    .bubble3{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:150px;height:150px;background:var(--green);top:42%;right:-60px;pointer-events:none;}
+    .bubble4{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:130px;height:130px;background:#f7b8c5;top:30%;left:-50px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.3rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--day-color);color:#fff;
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.2rem,4vw,1.85rem);font-weight:800;line-height:1.25;word-break:break-word;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .progress-wrap{width:100%;margin-bottom:.9rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .progress-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;width:0%;}
+
+    .chips-row{display:flex;gap:.5rem;margin-bottom:1.2rem;flex-wrap:wrap;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:99px;font-size:.74rem;
+      font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+    .chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .chip.ok .dot{background:var(--green);}
+    .chip.ko .dot{background:var(--red);}
+    .chip.rem .dot{background:var(--muted);}
+
+    .card{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.3rem;position:relative;z-index:1;box-shadow:0 6px 26px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;overflow:hidden;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:5px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--green),var(--yellow),var(--orange),var(--day-color));}
+    .activity-title{font-size:clamp(1rem,3.2vw,1.2rem);font-weight:800;color:var(--day-dark);margin-bottom:.4rem;line-height:1.3;}
+    .ex-num{font-size:.67rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.62rem;font-weight:700;padding:.14rem .55rem;border-radius:99px;
+      text-transform:uppercase;letter-spacing:.07em;margin-bottom:.8rem;background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);white-space:nowrap;}
+    .consigne-box{background:var(--surface2);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);
+      border-radius:var(--radius-sm);padding:.7rem 1rem;margin-bottom:1rem;font-size:clamp(.86rem,2.4vw,.96rem);
+      color:var(--day-dark);line-height:1.7;word-break:break-word;}
+    .interact-tip{background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:var(--radius-sm);
+      padding:.55rem .85rem;margin-bottom:1rem;font-size:clamp(.76rem,2.3vw,.83rem);color:#7a6010;
+      font-family:'JetBrains Mono',monospace;line-height:1.7;word-break:break-word;}
+
+    /* POOLS typés */
+    .pool-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .pool{display:flex;flex-wrap:wrap;gap:.4rem;padding:.5rem .55rem;background:var(--bg);
+      border:2px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.5rem;min-height:46px;}
+    .tok{display:inline-flex;align-items:center;justify-content:center;padding:.45rem .8rem;border-radius:9px;
+      border:2px solid var(--day-border);background:var(--day-light);color:var(--day-dark);font-weight:700;
+      font-size:clamp(.84rem,2.6vw,.96rem);cursor:pointer;min-height:42px;-webkit-tap-highlight-color:transparent;
+      user-select:none;-webkit-user-select:none;white-space:nowrap;transition:transform .12s,box-shadow .12s,background .12s,border-color .12s;}
+    .tok:hover{transform:translateY(-1px);box-shadow:0 3px 10px var(--day-glow);}
+    .tok.selected{background:var(--day-color);color:#fff;border-color:var(--day-dark);box-shadow:0 3px 12px var(--day-glow);}
+    .tok.used{opacity:.32;pointer-events:none;}
+
+    /* PHRASE ROWS (act1) */
+    .phrase-rows{display:flex;flex-direction:column;gap:.55rem;margin:1rem 0;}
+    .prow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;background:var(--surface2);
+      border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.55rem .6rem;}
+    .prow .rnum{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);min-width:18px;}
+    .slot{flex:1;min-width:84px;min-height:42px;border:2px dashed var(--day-border);border-radius:9px;
+      background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:.3rem .4rem;
+      font-weight:700;font-size:clamp(.8rem,2.4vw,.92rem);cursor:pointer;color:var(--day-dark);
+      -webkit-tap-highlight-color:transparent;transition:border-color .12s,background .12s;line-height:1.25;}
+    .slot.empty{color:var(--muted);font-weight:400;font-style:italic;font-size:.74rem;border-style:dashed;}
+    .slot.filled{border-style:solid;background:var(--day-light);}
+    .slot.target{border-color:var(--day-color);background:var(--day-light);box-shadow:0 0 0 3px var(--day-glow);}
+    .slot.ok-s{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+    .slot.ko-s{border-color:var(--red);background:var(--red-light);color:#7a1f1f;}
+    .prow .dot-end{font-weight:700;color:var(--muted);}
+
+    /* USINE (act2) 3 colonnes */
+    .usine-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin:1rem 0;}
+    @media(max-width:520px){.usine-cols{grid-template-columns:1fr;}}
+    .ucol{border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);padding:.55rem .5rem;}
+    .ucol-label{font-size:.66rem;font-weight:800;color:var(--day-dark);text-align:center;margin-bottom:.5rem;
+      font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;}
+    .uopt{display:block;width:100%;text-align:center;padding:.5rem .4rem;margin-bottom:.4rem;border-radius:8px;
+      border:2px solid var(--day-border);background:#fff;color:var(--text);font-weight:700;
+      font-size:clamp(.78rem,2.3vw,.9rem);cursor:pointer;min-height:42px;-webkit-tap-highlight-color:transparent;
+      transition:.12s;word-break:break-word;line-height:1.25;}
+    .uopt:last-child{margin-bottom:0;}
+    .uopt:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .uopt.sel{border-color:var(--day-color);background:var(--day-color);color:#fff;}
+    .uopt.locked{opacity:.3;pointer-events:none;}
+    .usine-output{margin:.8rem 0;display:flex;flex-direction:column;gap:.4rem;}
+    .uphrase{background:var(--green-light);border:1.5px solid var(--green);border-radius:9px;padding:.5rem .8rem;
+      font-weight:700;color:var(--green-dark);font-size:clamp(.84rem,2.5vw,.94rem);line-height:1.4;word-break:break-word;}
+    .uphrase.bad{background:var(--red-light);border-color:var(--red);color:#7a1f1f;}
+
+    /* COFFRES (act3) */
+    .coffre-pool{display:flex;flex-wrap:wrap;gap:.4rem;padding:.55rem .6rem;background:var(--bg);
+      border:2px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.9rem;min-height:46px;}
+    .coffres{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin-bottom:.6rem;}
+    @media(max-width:560px){.coffres{grid-template-columns:1fr;}}
+    .coffre{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.55rem .5rem;min-height:120px;
+      display:flex;flex-direction:column;cursor:pointer;transition:.13s;-webkit-tap-highlight-color:transparent;}
+    .coffre:hover{border-color:var(--day-color);background:var(--day-light);}
+    .coffre.target{border-color:var(--day-color);background:var(--day-light);border-style:solid;box-shadow:0 0 0 3px var(--day-glow);}
+    .coffre-label{font-size:.66rem;font-weight:800;color:var(--day-dark);text-align:center;margin-bottom:.45rem;
+      font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.03em;word-break:break-word;}
+    .coffre-words{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;flex:1;align-content:flex-start;}
+    .coffre-slot{font-size:.66rem;color:var(--muted);text-align:center;font-family:'JetBrains Mono',monospace;font-style:italic;padding:.2rem 0;}
+    .cardchip{display:inline-flex;align-items:center;justify-content:center;padding:.35rem .65rem;border-radius:7px;
+      border:2px solid var(--day-border);background:var(--day-light);color:var(--day-dark);font-weight:700;
+      font-size:clamp(.78rem,2.3vw,.88rem);cursor:pointer;min-height:34px;-webkit-tap-highlight-color:transparent;
+      user-select:none;-webkit-user-select:none;white-space:nowrap;transition:.12s;}
+    .cardchip:hover{background:#d3edf6;border-color:var(--day-dark);}
+    .cardchip.ok-w{background:var(--green-light);color:var(--green-dark);border-color:var(--green);pointer-events:none;}
+    .cardchip.ko-w{background:var(--red-light);color:#7a1f1f;border-color:var(--red);pointer-events:none;text-decoration:line-through;}
+    .cardchip.miss-w{background:#fff3cd;color:#856404;border-color:var(--yellow);pointer-events:none;}
+
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.4rem;}
+    @media(max-width:479px){.btn-row{flex-direction:column;}.btn-row .btn{width:100%;justify-content:center;}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem 1.25rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;font-size:clamp(.86rem,2.5vw,.95rem);font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-dark{background:var(--day-dark);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-dark:hover:not(:disabled){transform:translateY(-1px);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .feedback{margin-top:.9rem;padding:.8rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.84rem,2.4vw,.93rem);
+      display:none;align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#856404;}
+    .feedback.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7a1f1f;}
+    .fb-icon{font-size:1.3rem;flex-shrink:0;}
+    .fb-title{font-weight:700;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text);margin-top:.2rem;line-height:1.8;}
+
+    .legende{display:none;flex-wrap:wrap;gap:.6rem;margin-top:.6rem;font-size:.72rem;color:var(--muted);align-items:center;font-family:'JetBrains Mono',monospace;}
+    .legende.show{display:flex;}
+    .leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;display:inline-block;}
+
+    /* RÉSULTATS */
+    .results{display:none;width:100%;position:relative;z-index:1;animation:fadeUp .4s ease both;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:2.1rem 1.4rem;box-shadow:0 6px 26px rgba(0,0,0,.06);text-align:center;}
+    .results-icon{font-size:2.8rem;display:block;margin-bottom:.4rem;}
+    .results-score{font-size:clamp(2.4rem,9vw,3.6rem);font-weight:800;line-height:1;margin:.4rem 0 .2rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.7rem;margin:.3rem 0 .7rem;letter-spacing:.08em;}
+    .results-msg{color:var(--muted);font-size:clamp(.86rem,2.5vw,.96rem);margin-bottom:1.3rem;line-height:1.8;word-break:break-word;max-width:480px;margin-left:auto;margin-right:auto;}
+    .recap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.4rem;}
+    @media(max-width:480px){.recap-grid{grid-template-columns:1fr;}}
+    .recap-col{background:var(--surface2);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);padding:.7rem .6rem;}
+    .recap-col-title{font-size:.64rem;font-weight:800;color:var(--day-dark);text-transform:uppercase;letter-spacing:.04em;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;line-height:1.3;}
+    .recap-col-score{font-size:1.5rem;font-weight:800;color:var(--day-dark);}
+    .recap-col-lbl{font-size:.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.1rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div><div class="bubble2"></div><div class="bubble3"></div><div class="bubble4"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 3 – Jour 4</div>
+      <h1>Je m'entraîne · <span class="hl">Le passé composé</span></h1>
+      <p class="subtitle">Trois missions pour maîtriser l'accord du participe passé.</p>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="prog-label">Mission 1 / 3</span>
+        <span id="prog-pct">0 %</span>
+      </div>
+      <div class="progress-bg"><div class="progress-fill" id="prog-fill"></div></div>
+    </div>
+
+    <div class="chips-row">
+      <div class="chip ok"><div class="dot"></div><span id="cnt-ok">0</span> correct(s)</div>
+      <div class="chip ko"><div class="dot"></div><span id="cnt-ko">0</span> erreur(s)</div>
+      <div class="chip rem"><div class="dot"></div><span id="cnt-rem">6</span> restant(s)</div>
+    </div>
+
+    <!-- ════════ ACTIVITÉ 1 ════════ -->
+    <div class="card" id="act1">
+      <div class="card-stripe"></div>
+      <div class="activity-title">🧩 Mission 1 — Reconstruis les souvenirs</div>
+      <div class="ex-num">Activité · Assemblage</div>
+      <div class="theme-badge">Sujet + auxiliaire + participe</div>
+
+      <div class="consigne-box">
+        Reconstitue les souvenirs en assemblant correctement le <strong>sujet</strong>, l'<strong>auxiliaire</strong> et le <strong>participe passé</strong> de chaque phrase.
+      </div>
+      <div class="interact-tip">
+        💡 Appuie sur une étiquette (elle devient bleue), puis appuie sur la case correspondante. Chaque case n'accepte que les étiquettes de sa catégorie. Appuie sur une étiquette déjà placée pour la retirer.
+      </div>
+
+      <div class="pool-label">Sujets :</div>
+      <div class="pool" id="pool-sujet"></div>
+      <div class="pool-label">Auxiliaires :</div>
+      <div class="pool" id="pool-aux"></div>
+      <div class="pool-label">Participes passés :</div>
+      <div class="pool" id="pool-part"></div>
+
+      <div class="phrase-rows" id="a1-rows"></div>
+
+      <div class="legende" id="a1-legende">
+        <span class="leg-dot" style="background:#e7faec;border:1.5px solid #22c55e;"></span> Bien placé
+        <span class="leg-dot" style="background:#fdeaea;border:1.5px solid #b94040;"></span> Mal placé
+      </div>
+
+      <div class="btn-row" id="a1-row1">
+        <button class="btn btn-primary" id="a1-check" onclick="a1Verifier()" disabled>✓ Vérifier</button>
+        <button class="btn btn-ghost" onclick="a1Effacer()">✕ Effacer</button>
+      </div>
+      <div class="btn-row" id="a1-row2" style="display:none;">
+        <button class="btn btn-dark" onclick="goAct2()">Mission 2 →</button>
+        <button class="btn btn-ghost" onclick="a1Reset()">↺ Recommencer</button>
+      </div>
+
+      <div class="feedback" id="a1-fb">
+        <span class="fb-icon" id="a1-fb-icon"></span>
+        <div><div class="fb-title" id="a1-fb-title"></div><div class="fb-detail" id="a1-fb-detail"></div></div>
+      </div>
+    </div>
+
+    <!-- ════════ ACTIVITÉ 2 ════════ -->
+    <div class="card" id="act2" style="display:none;">
+      <div class="card-stripe"></div>
+      <div class="activity-title">🏭 Mission 2 — L'usine du passé composé</div>
+      <div class="ex-num">Activité · Construction</div>
+      <div class="theme-badge">Fabrique la phrase</div>
+
+      <div class="consigne-box">
+        Fabrique des phrases correctes au passé composé. Choisis <strong>un sujet</strong>, <strong>un auxiliaire</strong> et <strong>un participe passé</strong>, puis assemble&nbsp;!
+      </div>
+      <div class="interact-tip">
+        💡 Sélectionne une étiquette dans chacune des trois colonnes, puis appuie sur « Assembler ». Chaque sujet ne peut être assemblé qu'une seule fois.
+      </div>
+
+      <div class="usine-cols">
+        <div class="ucol"><div class="ucol-label">Sujet</div><div id="u-sujet"></div></div>
+        <div class="ucol"><div class="ucol-label">Auxiliaire</div><div id="u-aux"></div></div>
+        <div class="ucol"><div class="ucol-label">Participe</div><div id="u-part"></div></div>
+      </div>
+
+      <div class="usine-output" id="u-output"></div>
+
+      <div class="feedback" id="a2-fb">
+        <span class="fb-icon" id="a2-fb-icon"></span>
+        <div><div class="fb-title" id="a2-fb-title"></div><div class="fb-detail" id="a2-fb-detail"></div></div>
+      </div>
+
+      <div class="btn-row" id="a2-row1">
+        <button class="btn btn-primary" id="a2-assemble" onclick="a2Assembler()" disabled>⚙️ Assembler</button>
+      </div>
+      <div class="btn-row" id="a2-row2" style="display:none;">
+        <button class="btn btn-dark" onclick="goAct3()">Mission 3 →</button>
+        <button class="btn btn-ghost" onclick="a2Reset()">↺ Recommencer</button>
+      </div>
+    </div>
+
+    <!-- ════════ ACTIVITÉ 3 ════════ -->
+    <div class="card" id="act3" style="display:none;">
+      <div class="card-stripe"></div>
+      <div class="activity-title">📦 Mission 3 — Le coffre des participes passés</div>
+      <div class="ex-num">Activité · Classement</div>
+      <div class="theme-badge">1er · 2e · 3e groupe</div>
+
+      <div class="consigne-box">
+        Range chaque participe passé dans le bon coffre, selon le <strong>groupe de son verbe</strong>.
+      </div>
+      <div class="interact-tip">
+        💡 Appuie sur une carte (elle devient bleue), puis appuie sur le coffre où la ranger. Appuie sur une carte déjà rangée pour la retirer.
+      </div>
+
+      <div class="pool-label">Participes à ranger :</div>
+      <div class="coffre-pool" id="a3-pool"></div>
+
+      <div class="coffres" id="a3-coffres"></div>
+
+      <div class="legende" id="a3-legende">
+        <span class="leg-dot" style="background:#e7faec;border:1.5px solid #22c55e;"></span> Correct
+        <span class="leg-dot" style="background:#fdeaea;border:1.5px solid #b94040;"></span> Incorrect
+        <span class="leg-dot" style="background:#fff3cd;border:1.5px solid #f5c518;"></span> Attendu ici
+      </div>
+
+      <div class="btn-row" id="a3-row1">
+        <button class="btn btn-primary" id="a3-check" onclick="a3Verifier()" disabled>✓ Vérifier</button>
+        <button class="btn btn-ghost" onclick="a3Effacer()">✕ Effacer</button>
+      </div>
+      <div class="btn-row" id="a3-row2" style="display:none;">
+        <button class="btn btn-primary" onclick="showResults()">🏆 Voir mes résultats</button>
+        <button class="btn btn-ghost" onclick="a3Reset()">↺ Recommencer</button>
+      </div>
+
+      <div class="feedback" id="a3-fb">
+        <span class="fb-icon" id="a3-fb-icon"></span>
+        <div><div class="fb-title" id="a3-fb-title"></div><div class="fb-detail" id="a3-fb-detail"></div></div>
+      </div>
+    </div>
+
+    <!-- ════════ RÉSULTATS ════════ -->
+    <div class="results" id="results">
+      <div class="results-card">
+        <span class="results-icon">🏆</span>
+        <div class="logo-badge" style="margin-bottom:.6rem;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Missions accomplies !
+        </div>
+        <div class="results-score"><span class="s-num" id="r-score">0</span> / 32</div>
+        <div class="stars" id="r-stars"></div>
+        <div class="recap-grid">
+          <div class="recap-col"><div class="recap-col-title">M1 · Souvenirs</div><div class="recap-col-score"><span id="r-s1">0</span>/6</div><div class="recap-col-lbl">phrases</div></div>
+          <div class="recap-col"><div class="recap-col-title">M2 · Usine</div><div class="recap-col-score"><span id="r-s2">0</span>/6</div><div class="recap-col-lbl">phrases</div></div>
+          <div class="recap-col"><div class="recap-col-title">M3 · Coffre</div><div class="recap-col-score"><span id="r-s3">0</span>/20</div><div class="recap-col-lbl">cartes</div></div>
+        </div>
+        <div class="results-msg" id="r-msg"></div>
+        <button class="btn btn-primary" onclick="restartAll()" style="width:100%;justify-content:center;">↺ Tout recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ════════════════════════════════════════════════
+   ACTIVITÉ 1 — RECONSTRUIS LES SOUVENIRS
+   Map sujet -> {aux, part}. Score /6 par phrase complète.
+════════════════════════════════════════════════ */
+var SUJETS = ["Les voyageurs","Nous","Le promeneur","Les étoiles","Les collines","Les feuilles"];
+var AUX1   = ["sont","avons","est","sont","sont","sont"];   // 4×sont, avons, est
+var PART1  = ["partis","observé","arrivé","apparues","éclairées","tombées"];
+var MAP1 = {
+  "Les voyageurs":{aux:"sont", part:"partis"},
+  "Nous":        {aux:"avons",part:"observé"},
+  "Le promeneur":{aux:"est",  part:"arrivé"},
+  "Les étoiles": {aux:"sont", part:"apparues"},
+  "Les collines":{aux:"sont", part:"éclairées"},
+  "Les feuilles":{aux:"sont", part:"tombées"}
+};
+var NROWS = 6;
+
+var a1checked=false, a1sel=null; // a1sel={type,val,id}
+var a1used={};       // tokenId -> true si placé
+var a1slots=[];      // [{sujet:{val,id}|null, aux:..., part:...}]
+var a1score=0;
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function a1Build(){
+  a1checked=false; a1sel=null; a1used={}; a1score=0;
+  a1slots=[];
+  for(var r=0;r<NROWS;r++) a1slots.push({sujet:null,aux:null,part:null});
+
+  buildPool('pool-sujet','sujet',SUJETS);
+  buildPool('pool-aux','aux',AUX1);
+  buildPool('pool-part','part',PART1);
+
+  var rows=$('a1-rows'); rows.innerHTML='';
+  for(var r=0;r<NROWS;r++){
+    var div=document.createElement('div');
+    div.className='prow';
+    div.innerHTML='<span class="rnum">'+(r+1)+'</span>'
+      +slotHTML(r,'sujet','sujet…')
+      +slotHTML(r,'aux','aux.')
+      +slotHTML(r,'part','participe…')
+      +'<span class="dot-end">.</span>';
+    rows.appendChild(div);
+  }
+  bindSlots();
+  $('a1-legende').classList.remove('show');
+  $('a1-fb').className='feedback';
+  $('a1-row1').style.display='flex';
+  $('a1-row2').style.display='none';
+  a1UpdateCheck();
+  setChips(0,0,'—');
+}
+
+function buildPool(poolId,type,arr){
+  var pool=$(poolId); pool.innerHTML='';
+  // étiquettes mélangées, id = type+index original (pour gérer doublons "sont")
+  var items=arr.map(function(v,i){return {val:v,id:type+'-'+i};});
+  shuffle(items).forEach(function(it){
+    var t=document.createElement('span');
+    t.className='tok'; t.id='tok-'+it.id; t.textContent=it.val;
+    t.dataset.type=type; t.dataset.val=it.val; t.dataset.id=it.id;
+    t.addEventListener('click',function(){ a1PickTok(type,it.val,it.id,t); });
+    pool.appendChild(t);
+  });
+}
+function slotHTML(r,type,ph){
+  return '<span class="slot empty" data-r="'+r+'" data-type="'+type+'">'+ph+'</span>';
+}
+function bindSlots(){
+  $('a1-rows').querySelectorAll('.slot').forEach(function(s){
+    s.addEventListener('click',function(){ a1SlotClick(s); });
+  });
+}
+
+function a1PickTok(type,val,id,el){
+  if(a1checked||a1used[id]) return;
+  if(a1sel && a1sel.id===id){ a1sel=null; el.classList.remove('selected'); a1Highlight(null); return; }
+  document.querySelectorAll('.tok.selected').forEach(function(t){t.classList.remove('selected');});
+  a1sel={type:type,val:val,id:id};
+  el.classList.add('selected');
+  a1Highlight(type);
+}
+function a1Highlight(type){
+  $('a1-rows').querySelectorAll('.slot').forEach(function(s){
+    var match = type && s.dataset.type===type && s.classList.contains('empty');
+    s.classList.toggle('target', !!match);
+  });
+}
+function a1SlotClick(s){
+  if(a1checked) return;
+  var r=+s.dataset.r, type=s.dataset.type;
+  var cur=a1slots[r][type];
+  // si la case est pleine -> retirer (remettre au pool)
+  if(cur){
+    a1used[cur.id]=false;
+    var tk=$('tok-'+cur.id); if(tk) tk.classList.remove('used');
+    a1slots[r][type]=null;
+    s.className='slot empty'; s.dataset.r=r; s.dataset.type=type;
+    s.textContent = (type==='sujet'?'sujet…':type==='aux'?'aux.':'participe…');
+    a1UpdateCheck();
+    return;
+  }
+  // case vide : placer la sélection si même type
+  if(!a1sel || a1sel.type!==type) return;
+  a1slots[r][type]={val:a1sel.val,id:a1sel.id};
+  a1used[a1sel.id]=true;
+  var tk=$('tok-'+a1sel.id); if(tk){tk.classList.remove('selected');tk.classList.add('used');}
+  s.className='slot filled'; s.dataset.r=r; s.dataset.type=type;
+  s.textContent=a1sel.val;
+  a1sel=null;
+  a1Highlight(null);
+  a1UpdateCheck();
+}
+function a1UpdateCheck(){
+  var placed=0;
+  a1slots.forEach(function(row){ if(row.sujet)placed++; if(row.aux)placed++; if(row.part)placed++; });
+  $('a1-check').disabled = (placed<18);
+  // chips : restantes = cases vides
+  setChips('—','—',18-placed);
+}
+
+/* Participes interchangeables : pour ces sujets féminin pluriel, l'accord est
+   identique, donc « apparues » et « éclairées » sont acceptés indifféremment. */
+var PART_EQUIV = {
+  "Les collines": ["éclairées","apparues"],
+  "Les étoiles":  ["apparues","éclairées"]
+};
+function partOK(suj, val){
+  var expect = MAP1[suj];
+  if(!expect) return false;
+  if(PART_EQUIV[suj]) return PART_EQUIV[suj].indexOf(val) !== -1;
+  return val === expect.part;
+}
+
+function a1Verifier(){
+  if(a1checked) return;
+  a1checked=true;
+  var ok=0;
+  $('a1-rows').querySelectorAll('.prow').forEach(function(prow,r){
+    var row=a1slots[r];
+    var slots=prow.querySelectorAll('.slot');
+    var suj=row.sujet?row.sujet.val:null;
+    var expect = suj?MAP1[suj]:null;
+    var rowCorrect = !!(suj && expect && row.aux && row.part
+                        && row.aux.val===expect.aux
+                        && partOK(suj, row.part.val));
+    // coloration élément par élément
+    slots.forEach(function(s){
+      var type=s.dataset.type;
+      var val=row[type]?row[type].val:null;
+      s.classList.remove('target');
+      if(!val){ s.classList.add('ko-s'); return; }
+      var good=false;
+      if(type==='sujet')      good = !!MAP1[val];
+      else if(type==='aux')   good = expect ? (val===expect.aux) : false;
+      else if(type==='part')  good = suj ? partOK(suj, val) : false;
+      s.classList.add(good?'ok-s':'ko-s');
+    });
+    if(rowCorrect) ok++;
+  });
+  a1score=ok;
+  $('a1-legende').classList.add('show');
+  setChips(ok, NROWS-ok, 0);
+
+  var fb=$('a1-fb'); var cls,icon,title,detail;
+  if(ok===6){cls='ok';icon='✅';title='Mission réussie !';detail='Les six souvenirs sont parfaitement reconstitués. Tu maîtrises l\'accord du participe passé.';}
+  else if(ok>=4){cls='mid';icon='👍';title='Bon travail !';detail='Tu as reconstitué '+ok+' phrases sur 6. Vérifie les accords : avec être, le participe s\'accorde avec le sujet.';}
+  else if(ok>=1){cls='mid';icon='🙂';title='Continue !';detail=ok+' phrase(s) correcte(s). Rappel : avec « être », le participe s\'accorde (féminin -e, pluriel -s) ; avec « avoir », il ne s\'accorde pas avec le sujet.';}
+  else {cls='ko';icon='💪';title='Essaie encore !';detail='Regarde bien chaque sujet : « Les feuilles » est féminin pluriel (tombées), « Le promeneur » est masculin singulier (est arrivé)…';}
+  fb.className='feedback show '+cls;
+  $('a1-fb-icon').textContent=icon; $('a1-fb-title').textContent=title; $('a1-fb-detail').textContent=detail;
+
+  $('a1-row1').style.display='none';
+  $('a1-row2').style.display='flex';
+  updateProgress(1);
+}
+function a1Effacer(){
+  if(a1checked) return;
+  a1Build();
+}
+function a1Reset(){ a1Build(); scrollTop(); }
+
+/* ════════════════════════════════════════════════
+   ACTIVITÉ 2 — L'USINE (3 colonnes, assemblage 1 par 1)
+   Score /6 (sujets assemblés correctement).
+════════════════════════════════════════════════ */
+var MAP2 = {
+  "Les oiseaux":{aux:"sont", parts:["revenus","apparus"]},
+  "Nous":       {aux:"avons",parts:["admiré","perdu"]},
+  "La porte":   {aux:"est",  parts:["restée fermée"]},
+  "Les nuages": {aux:"sont", parts:["apparus","revenus"]},
+  "Le voyageur":{aux:"est",  parts:["parti","perdu","admiré"]},
+  "Les arbres": {aux:"ont",  parts:["perdu","admiré"]}
+};
+var U_SUJ = ["Les oiseaux","Nous","La porte","Les nuages","Le voyageur","Les arbres"];
+var U_AUX = ["sont","avons","est","ont"];
+var U_PART= ["revenus","admiré","restée fermée","apparus","parti","perdu"];
+
+var a2sel={sujet:null,aux:null,part:null};
+var a2locked={}; // sujet -> 'ok'|'ko'
+var a2score=0, a2done=0;
+
+function a2Build(){
+  a2sel={sujet:null,aux:null,part:null}; a2locked={}; a2score=0; a2done=0;
+  ucol('u-sujet',U_SUJ,'sujet');
+  ucol('u-aux',U_AUX,'aux');
+  ucol('u-part',U_PART,'part');
+  $('u-output').innerHTML='';
+  $('a2-fb').className='feedback';
+  $('a2-row1').style.display='flex';
+  $('a2-row2').style.display='none';
+  $('a2-assemble').disabled=true;
+  setChips(0,0,6);
+}
+function ucol(id,arr,type){
+  var c=$(id); c.innerHTML='';
+  shuffle(arr).forEach(function(v){
+    var b=document.createElement('button');
+    b.className='uopt'; b.textContent=v; b.dataset.val=v; b.dataset.type=type;
+    b.addEventListener('click',function(){ a2Pick(type,v,b); });
+    c.appendChild(b);
+  });
+}
+function a2Pick(type,val,btn){
+  if(btn.classList.contains('locked')) return;
+  var parent=btn.parentNode;
+  parent.querySelectorAll('.uopt').forEach(function(o){o.classList.remove('sel');});
+  btn.classList.add('sel');
+  a2sel[type]=val;
+  $('a2-assemble').disabled = !(a2sel.sujet && a2sel.aux && a2sel.part);
+}
+function a2Assembler(){
+  if(!(a2sel.sujet&&a2sel.aux&&a2sel.part)) return;
+  if(a2locked[a2sel.sujet]) return;
+  var suj=a2sel.sujet, expect=MAP2[suj];
+  var correct = (a2sel.aux===expect.aux && expect.parts.indexOf(a2sel.part)!==-1);
+  a2locked[suj]= correct?'ok':'ko';
+  a2done++;
+  if(correct) a2score++;
+
+  // verrouiller le sujet utilisé
+  $('u-sujet').querySelectorAll('.uopt').forEach(function(o){
+    if(o.dataset.val===suj){ o.classList.add('locked'); o.classList.remove('sel'); }
+  });
+  // déselectionner aux/part
+  $('u-aux').querySelectorAll('.uopt').forEach(function(o){o.classList.remove('sel');});
+  $('u-part').querySelectorAll('.uopt').forEach(function(o){o.classList.remove('sel');});
+
+  // afficher la production
+  var out=$('u-output');
+  var line=document.createElement('div');
+  line.className='uphrase'+(correct?'':' bad');
+  if(correct){
+    line.textContent='✅ '+suj+' '+a2sel.aux+' '+a2sel.part+'.';
+  } else {
+    var modele=suj+' '+expect.aux+' '+expect.parts[0]+'.';
+    line.innerHTML='❌ '+suj+' '+a2sel.aux+' '+a2sel.part+'.  <span style="font-weight:400;">→ Exemple correct : '+modele+'</span>';
+  }
+  out.appendChild(line);
+
+  a2sel={sujet:null,aux:null,part:null};
+  $('a2-assemble').disabled=true;
+  setChips(a2score, a2done-a2score, 6-a2done);
+
+  // feedback ponctuel
+  var fb=$('a2-fb');
+  if(correct){
+    fb.className='feedback show ok';
+    $('a2-fb-icon').textContent='✅'; $('a2-fb-title').textContent='Phrase fabriquée !';
+    $('a2-fb-detail').textContent='Le sujet, l\'auxiliaire et le participe sont bien accordés.';
+  } else {
+    fb.className='feedback show ko';
+    $('a2-fb-icon').textContent='❌'; $('a2-fb-title').textContent='Pas tout à fait…';
+    $('a2-fb-detail').textContent='Vérifie l\'auxiliaire (être ou avoir) et l\'accord du participe avec le sujet.';
+  }
+
+  if(a2done>=6){
+    fb.className='feedback show '+(a2score===6?'ok':a2score>=4?'mid':'ko');
+    $('a2-fb-icon').textContent = a2score===6?'✅':a2score>=4?'👍':'💪';
+    $('a2-fb-title').textContent = 'Usine terminée : '+a2score+' / 6';
+    $('a2-fb-detail').textContent = a2score===6
+      ? 'Toutes les phrases sont correctes. Excellent assemblage !'
+      : 'Observe les phrases corrigées ci-dessus pour repérer les bons accords.';
+    $('a2-row1').style.display='none';
+    $('a2-row2').style.display='flex';
+    updateProgress(2);
+  }
+}
+function a2Reset(){ a2Build(); scrollTop(); }
+
+/* ════════════════════════════════════════════════
+   ACTIVITÉ 3 — LE COFFRE (tri en 3 groupes) — Score /20
+════════════════════════════════════════════════ */
+var COFFRES = ["1er groupe (verbes en -er)","2e groupe (verbes en -ir)","3e groupe (verbes irréguliers)"];
+var CARTES = [
+  {t:"observé",g:0},{t:"admiré",g:0},{t:"traversé",g:0},{t:"chanté",g:0},{t:"marché",g:0},{t:"regardé",g:0},
+  {t:"réfléchi",g:1},{t:"grandi",g:1},{t:"choisi",g:1},{t:"réussi",g:1},{t:"applaudi",g:1},{t:"obéi",g:1},
+  {t:"pris",g:2},{t:"mis",g:2},{t:"ouvert",g:2},{t:"voulu",g:2},{t:"eu",g:2},{t:"été",g:2},{t:"venu",g:2},{t:"vu",g:2}
+];
+var NCARTES = CARTES.length; // 20
+var a3place={}, a3sel=null, a3checked=false, a3score=0;
+
+function a3Build(){
+  a3place={}; a3sel=null; a3checked=false; a3score=0;
+  CARTES.forEach(function(_,i){a3place[i]=null;});
+  // pool
+  var pool=$('a3-pool'); pool.innerHTML='';
+  shuffle(CARTES.map(function(c,i){return i;})).forEach(function(i){
+    var chip=document.createElement('span');
+    chip.className='cardchip'; chip.id='cc-'+i; chip.textContent=CARTES[i].t;
+    chip.addEventListener('click',function(){ a3Pick(i); });
+    pool.appendChild(chip);
+  });
+  // coffres
+  var wrap=$('a3-coffres'); wrap.innerHTML='';
+  COFFRES.forEach(function(lbl,g){
+    var col=document.createElement('div');
+    col.className='coffre'; col.id='coffre-'+g;
+    col.addEventListener('click',function(){ a3Drop(g); });
+    col.innerHTML='<div class="coffre-label">📦 '+lbl+'</div><div class="coffre-words" id="cw-'+g+'"></div><div class="coffre-slot" id="cs-'+g+'">Ranger ici</div>';
+    wrap.appendChild(col);
+  });
+  $('a3-legende').classList.remove('show');
+  $('a3-fb').className='feedback';
+  $('a3-row1').style.display='flex';
+  $('a3-row2').style.display='none';
+  a3UpdateCheck();
+}
+function a3Pick(i){
+  if(a3checked) return;
+  if(a3sel===i){ a3sel=null; $('cc-'+i).classList.remove('selected'); a3Hl(false); refreshSel(); return; }
+  if(a3sel!==null){ var p=$('cc-'+a3sel); if(p)p.classList.remove('selected'); }
+  a3sel=i; var el=$('cc-'+i);
+  // si la carte est dans un coffre, on la retire d'abord
+  if(a3place[i]!==null){ a3RemoveFromCoffre(i); }
+  refreshSel(); a3Hl(true);
+}
+function refreshSel(){
+  document.querySelectorAll('#a3-pool .cardchip, .coffre-words .cardchip').forEach(function(c){c.classList.remove('selected');});
+  if(a3sel!==null){ var e=$('cc-'+a3sel); if(e) e.classList.add('selected'); }
+}
+function a3Hl(on){ COFFRES.forEach(function(_,g){ $('coffre-'+g).classList.toggle('target',on); }); }
+function a3Drop(g){
+  if(a3checked||a3sel===null) return;
+  a3place[a3sel]=g;
+  renderCoffres();
+  var i=a3sel; a3sel=null; a3Hl(false);
+  a3UpdateCheck();
+}
+function a3RemoveFromCoffre(i){
+  a3place[i]=null; renderCoffres(); a3UpdateCheck();
+}
+function renderCoffres(){
+  COFFRES.forEach(function(_,g){
+    var cw=$('cw-'+g); cw.innerHTML='';
+    var any=false;
+    CARTES.forEach(function(c,i){
+      if(a3place[i]===g){
+        any=true;
+        var chip=document.createElement('span');
+        chip.className='cardchip'; chip.id='cc-'+i; chip.textContent=c.t;
+        if(!a3checked) chip.addEventListener('click',function(e){ e.stopPropagation(); a3Pick(i); });
+        cw.appendChild(chip);
+      }
+    });
+    $('cs-'+g).style.display=any?'none':'block';
+  });
+  // remettre dans le pool celles non placées
+  var pool=$('a3-pool'); pool.innerHTML='';
+  CARTES.forEach(function(c,i){
+    if(a3place[i]===null){
+      var chip=document.createElement('span');
+      chip.className='cardchip'+(a3sel===i?' selected':''); chip.id='cc-'+i; chip.textContent=c.t;
+      if(!a3checked) chip.addEventListener('click',function(){ a3Pick(i); });
+      pool.appendChild(chip);
+    }
+  });
+}
+function a3UpdateCheck(){
+  var placed=CARTES.filter(function(_,i){return a3place[i]!==null;}).length;
+  $('a3-check').disabled=(placed===0);
+  setChips('—','—',NCARTES-placed);
+}
+function a3Effacer(){ if(a3checked) return; a3Build(); }
+function a3Verifier(){
+  if(a3checked) return;
+  a3checked=true;
+  var ok=0,ko=0;
+  COFFRES.forEach(function(_,g){
+    var cw=$('cw-'+g); cw.innerHTML='';
+    CARTES.forEach(function(c,i){
+      if(a3place[i]===g){
+        var chip=document.createElement('span');
+        var good=(c.g===g);
+        chip.className='cardchip '+(good?'ok-w':'ko-w'); chip.textContent=c.t;
+        cw.appendChild(chip);
+        if(good)ok++; else ko++;
+      }
+    });
+    // cartes attendues ici mais absentes
+    CARTES.forEach(function(c,i){
+      if(c.g===g && a3place[i]!==g){
+        var miss=document.createElement('span');
+        miss.className='cardchip miss-w'; miss.textContent=c.t;
+        cw.appendChild(miss);
+      }
+    });
+    $('cs-'+g).style.display='none';
+  });
+  // cartes non rangées
+  $('a3-pool').querySelectorAll('.cardchip').forEach(function(ch){ ch.style.opacity='.4'; ch.style.pointerEvents='none'; });
+  a3score=ok;
+  $('a3-legende').classList.add('show');
+  setChips(ok, ko, 0);
+
+  var pct=Math.round(ok/NCARTES*100);
+  var fb=$('a3-fb'); var cls,icon,title,detail;
+  if(pct>=85){cls='ok';icon='✅';title='Coffres bien rangés !';detail='Tu reconnais très bien les groupes : -er (1er), -ir type finir (2e), et les irréguliers (3e).';}
+  else if(pct>=60){cls='mid';icon='👍';title='Bon travail !';detail='La plupart des participes sont bien classés. Les cartes en jaune montrent celles à revoir.';}
+  else if(pct>=30){cls='mid';icon='🙂';title='Continue !';detail='Rappel : 1er groupe → -é (observé) ; 2e groupe → -i (réfléchi, choisi) ; 3e groupe → formes variées (pris, ouvert, vu…).';}
+  else {cls='ko';icon='💪';title='Essaie encore !';detail='Observe la terminaison : -é = 1er groupe, -i (verbes comme finir) = 2e groupe, le reste = 3e groupe.';}
+  fb.className='feedback show '+cls;
+  $('a3-fb-icon').textContent=icon; $('a3-fb-title').textContent=title; $('a3-fb-detail').textContent=detail;
+
+  $('a3-row1').style.display='none';
+  $('a3-row2').style.display='flex';
+  updateProgress(3);
+}
+function a3Reset(){ a3Build(); scrollTop(); }
+
+/* ════════ NAVIGATION ════════ */
+function goAct2(){ $('act1').style.display='none'; $('act2').style.display='block'; a2Build(); scrollTop(); }
+function goAct3(){ $('act2').style.display='none'; $('act3').style.display='block'; a3Build(); scrollTop(); }
+
+function setChips(ok,ko,rem){
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
+}
+function updateProgress(done){
+  var pct=Math.round(done/3*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent='Mission '+Math.min(done+1,3)+' / 3';
+  $('prog-pct').textContent=pct+' %';
+  if(done>=3){ $('prog-label').textContent='Missions terminées'; }
+}
+function scrollTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ════════ RÉSULTATS ════════ */
+function showResults(){
+  $('act3').style.display='none';
+  $('results').classList.add('show');
+  var total=a1score+a2score+a3score;
+  var max=6+6+20; // 32
+  $('r-score').textContent=total;
+  $('r-s1').textContent=a1score;
+  $('r-s2').textContent=a2score;
+  $('r-s3').textContent=a3score;
+  var pct=total/max;
+  var stars=pct>=.9?5:pct>=.75?4:pct>=.5?3:pct>=.25?2:1;
+  $('r-stars').textContent='⭐'.repeat(stars)+'☆'.repeat(5-stars);
+  var msg;
+  if(pct>=.9) msg='Bravo ! Tu maîtrises le passé composé et l\'accord du participe passé. Mission parfaitement accomplie !';
+  else if(pct>=.75) msg='Très bon travail ! Tu construis bien les phrases au passé composé. Encore un petit effort sur les accords.';
+  else if(pct>=.5) msg='Bon niveau ! Tu progresses bien. Relis les corrections pour consolider les accords avec être et avoir.';
+  else msg='Tu es en cours d\'apprentissage. Reprends les missions : avec être le participe s\'accorde, avec avoir non.';
+  $('r-msg').textContent=msg;
+  $('prog-fill').style.width='100%'; $('prog-pct').textContent='100 %';
+  scrollTop();
+}
+function restartAll(){
+  $('results').classList.remove('show');
+  $('act2').style.display='none'; $('act3').style.display='none';
+  $('act1').style.display='block';
+  a1Build();
+  $('prog-fill').style.width='0%'; $('prog-pct').textContent='0 %'; $('prog-label').textContent='Mission 1 / 3';
+  scrollTop();
+}
+
+/* ════════ INIT ════════ */
+a1Build();
+</script>
+</body>
+</html>
