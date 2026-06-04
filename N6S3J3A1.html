@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J3 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#8dc63f; --day-dark:#3d7a10; --day-dark2:#2a5a08;
+      --day-light:#f0faeb; --day-border:#b5e08a; --day-glow:rgba(141,198,63,.30);
+      --bg:#fffdf7; --surface:#ffffff; --surface2:#f7faf3; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --green-light:#f0faeb; --green-dark:#3d7a10;
+      --pink:#f28b82; --pink-light:#fff0ef;
+      --orange:#f5a623; --orange-light:#fff5e0;
+      --blue:#3ab5d8; --red:#b94040; --red-light:#f7eded;
+      --text:#1a1d23; --muted:#7a7470; --radius:18px; --radius-sm:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1rem 0.75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:320px;height:320px;top:-110px;right:-110px;
+      background:radial-gradient(circle,rgba(245,197,24,.18),transparent 70%);}
+    .b2{width:260px;height:260px;bottom:-90px;left:-90px;
+      background:radial-gradient(circle,rgba(141,198,63,.18),transparent 70%);}
+    .b3{width:180px;height:180px;top:38%;right:-70px;
+      background:radial-gradient(circle,rgba(141,198,63,.12),transparent 70%);}
+    .b4{width:150px;height:150px;bottom:25%;left:-60px;
+      background:radial-gradient(circle,rgba(242,139,130,.14),transparent 70%);}
+
+    header{text-align:center;margin-bottom:1.3rem;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--day-color);color:#fff;
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;
+      box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:800;line-height:1.25;word-break:break-word;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .radar-bar{display:flex;align-items:center;gap:.8rem;
+      background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.6rem 1rem;
+      margin-bottom:.9rem;box-shadow:0 2px 10px var(--day-glow);}
+    .radar-icon{font-size:1.5rem;flex-shrink:0;}
+    .radar-info{flex:1;min-width:0;}
+    .radar-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+    .radar-progress-bg{background:#e8e4d9;border-radius:99px;height:8px;overflow:hidden;}
+    .radar-progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;}
+    .radar-count{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;
+      color:var(--day-dark);white-space:nowrap;}
+
+    .phrase-counter{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;}
+    .phrase-dots{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .phrase-dot{width:10px;height:10px;border-radius:50%;
+      background:var(--border);transition:background .3s;flex-shrink:0;}
+    .phrase-dot.done-ok{background:var(--day-color);}
+    .phrase-dot.done-err{background:var(--red);}
+    .phrase-dot.active{background:var(--day-dark);box-shadow:0 0 0 3px var(--day-light);}
+    .phrase-num-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);white-space:nowrap;}
+
+    .card{width:100%;background:var(--surface);
+      border:1.5px solid #e8e4d9;border-radius:var(--radius);
+      padding:1.4rem 1.2rem 1.4rem;box-shadow:0 8px 32px rgba(0,0,0,.07);
+      animation:fadeUp .35s ease both;position:relative;overflow:hidden;}
+    .card-stripe{height:5px;border-radius:var(--radius) var(--radius) 0 0;
+      margin:-1.4rem -1.2rem 1.2rem;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--blue),var(--day-color));}
+    .ex-num{font-size:.67rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .activity-title{font-size:clamp(.95rem,3vw,1.1rem);font-weight:800;color:var(--day-dark);
+      margin-bottom:.5rem;line-height:1.35;}
+    .theme-badge{display:inline-block;font-size:.62rem;font-weight:700;
+      padding:.14rem .55rem;border-radius:99px;text-transform:uppercase;
+      letter-spacing:.07em;margin-bottom:.85rem;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);white-space:nowrap;}
+
+    .consigne-box{background:var(--surface2);border:1.5px solid var(--border);
+      border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+      padding:.7rem 1rem;margin-bottom:1rem;font-size:clamp(.88rem,2.4vw,.98rem);
+      line-height:1.7;word-break:break-word;}
+    .consigne-box strong{color:var(--day-dark);}
+
+    .phrase-display{background:var(--surface2);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin-bottom:1rem;text-align:center;
+      font-size:clamp(1.05rem,3.4vw,1.35rem);font-weight:700;color:var(--text);line-height:1.7;
+      word-break:break-word;min-height:72px;display:flex;align-items:center;justify-content:center;}
+
+    /* QUESTION "pourquoi" */
+    .why-q{font-size:clamp(.92rem,2.7vw,1.05rem);font-weight:700;color:var(--day-dark);
+      text-align:center;margin-bottom:.9rem;line-height:1.5;word-break:break-word;}
+
+    /* CHOIX */
+    .choices{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.9rem;}
+    .choice{display:flex;align-items:flex-start;gap:.7rem;padding:.8rem .9rem;
+      border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;
+      background:var(--bg);transition:border-color .13s,background .13s;
+      font-size:clamp(.88rem,2.5vw,.98rem);line-height:1.5;word-break:break-word;
+      min-height:48px;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+    .choice:hover:not([aria-disabled="true"]){border-color:var(--day-color);background:var(--day-light);}
+    .choice.selected{border-color:var(--day-color);background:var(--day-light);}
+    .choice.correct-c{border-color:var(--green);background:#e7faec;color:var(--green-dark);font-weight:700;}
+    .choice.wrong-c{border-color:var(--red);background:var(--red-light);color:#7a1f1f;}
+    .choice.reveal-c{border-color:var(--green);background:#e7faec;color:var(--green-dark);font-weight:700;}
+    .choice[aria-disabled="true"]{cursor:default;pointer-events:none;}
+    .choice-mark{width:26px;height:26px;border-radius:50%;background:var(--border);flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;
+      font-family:'JetBrains Mono',monospace;transition:.13s;min-width:26px;}
+    .choice.selected .choice-mark{background:var(--day-color);color:#fff;}
+    .choice.correct-c .choice-mark{background:var(--green);color:#fff;}
+    .choice.wrong-c .choice-mark{background:var(--red);color:#fff;}
+    .choice.reveal-c .choice-mark{background:var(--green);color:#fff;}
+    .choice-text{flex:1;word-break:break-word;}
+
+    /* BOUTONS BINAIRES (act1) */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:.9rem;}
+    @media(max-width:479px){.btn-row{flex-direction:column;}.btn-row .btn{width:100%;justify-content:center;}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem 1.3rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.9rem,2.5vw,1.05rem);font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.95);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-ok{background:var(--day-color);color:#fff;box-shadow:0 3px 14px var(--day-glow);flex:1;}
+    .btn-ok:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px var(--day-glow);}
+    .btn-err{background:var(--red);color:#fff;box-shadow:0 3px 14px rgba(185,64,64,.28);flex:1;}
+    .btn-err:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px rgba(185,64,64,.35);}
+    .btn-next{background:var(--day-dark);color:#fff;box-shadow:0 3px 14px var(--day-glow);width:100%;justify-content:center;}
+    .btn-next:hover:not(:disabled){transform:translateY(-1px);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .feedback{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.88rem,2.4vw,.98rem);
+      display:none;align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;margin-bottom:.85rem;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7a1f1f;}
+    .fb-icon{font-size:1.3rem;flex-shrink:0;}
+    .fb-body{flex:1;min-width:0;}
+    .fb-title{font-weight:700;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);line-height:1.8;}
+
+    .end-screen{display:none;width:100%;animation:fadeUp .45s ease both;}
+    .end-screen.show{display:block;}
+    .end-card{background:var(--surface);border:1.5px solid #e8e4d9;border-radius:var(--radius);
+      padding:2.2rem 1.5rem;box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center;}
+    .end-icon{font-size:3rem;margin-bottom:.6rem;display:block;}
+    .end-title{font-size:clamp(1.4rem,5vw,2.2rem);font-weight:800;color:var(--day-dark);margin-bottom:.5rem;word-break:break-word;}
+    .stars{font-size:1.8rem;margin:.3rem 0 .8rem;letter-spacing:.08em;}
+    .end-score-row{display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;margin:1rem 0 1.2rem;}
+    .end-badge{display:flex;flex-direction:column;align-items:center;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.65rem 1.2rem;min-width:90px;}
+    .end-badge-num{font-size:1.8rem;font-weight:800;color:var(--day-dark);}
+    .end-badge-lbl{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.06em;margin-top:.1rem;}
+    .end-msg{color:var(--muted);font-size:clamp(.9rem,2.5vw,1.02rem);margin-bottom:1.5rem;
+      line-height:1.85;word-break:break-word;max-width:480px;margin-left:auto;margin-right:auto;}
+    .decouverte{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:1rem 1.1rem;margin-bottom:1.4rem;text-align:left;}
+    .decouverte-title{font-weight:800;color:var(--day-dark);margin-bottom:.5rem;
+      font-size:clamp(.92rem,2.6vw,1rem);}
+    .decouverte ul{list-style:none;padding:0;margin:0;}
+    .decouverte li{font-size:clamp(.85rem,2.4vw,.94rem);line-height:1.7;padding:.25rem 0;
+      display:flex;gap:.5rem;align-items:flex-start;color:var(--text);}
+    .decouverte li::before{content:'\2192';color:var(--day-color);font-weight:bold;flex-shrink:0;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+    .pulse{animation:pulse .4s ease;}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div>
+  <div class="bul b2"></div>
+  <div class="bul b3"></div>
+  <div class="bul b4"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 3 – Jour 3</div>
+      <h1>J'observe et je teste · <span class="hl">L'accord du participe passé</span></h1>
+      <p class="subtitle">Active ton radar et observe les indices d'accord.</p>
+    </header>
+
+    <div class="radar-bar">
+      <span class="radar-icon">&#128270;</span>
+      <div class="radar-info">
+        <div class="radar-label" id="radar-label">Progression</div>
+        <div class="radar-progress-bg">
+          <div class="radar-progress-fill" id="radar-fill"></div>
+        </div>
+      </div>
+      <div class="radar-count"><span id="radar-num">0</span> / 11</div>
+    </div>
+
+    <div class="phrase-counter">
+      <div class="phrase-dots" id="phrase-dots"></div>
+      <div class="phrase-num-label" id="phrase-num-label">Question 1 / 11</div>
+    </div>
+
+    <!-- ════ ACTIVITÉ 1 : Correct / Incorrect ════ -->
+    <div class="card" id="act1-card">
+      <div class="card-stripe"></div>
+      <div class="activity-title">🔎 Activité 1 — L'accord est-il nécessaire ?</div>
+      <div class="ex-num">J'observe et je teste · Quiz</div>
+      <div class="theme-badge">Participe passé</div>
+
+      <div class="consigne-box">
+        <strong>Observe chaque phrase.</strong> Le participe passé est-il correctement écrit&nbsp;? À toi de juger&nbsp;: correct ou incorrect&nbsp;?
+      </div>
+
+      <div class="phrase-display" id="a1-phrase"></div>
+
+      <div class="feedback" id="a1-feedback">
+        <span class="fb-icon" id="a1-fb-icon"></span>
+        <div class="fb-body">
+          <div class="fb-title" id="a1-fb-title"></div>
+          <div class="fb-detail" id="a1-fb-detail"></div>
+        </div>
+      </div>
+
+      <div class="btn-row" id="a1-row1">
+        <button class="btn btn-ok" id="a1-btn-ok" onclick="a1Choice(true)">&#10003; Correct</button>
+        <button class="btn btn-err" id="a1-btn-err" onclick="a1Choice(false)">&#10007; Incorrect</button>
+      </div>
+      <div id="a1-row-next" style="display:none;">
+        <button class="btn btn-next" onclick="a1Next()">Phrase suivante &#8594;</button>
+      </div>
+    </div>
+
+    <!-- ════ ACTIVITÉ 2 : Que remarques-tu ? ════ -->
+    <div class="card" id="act2-card" style="display:none;">
+      <div class="card-stripe"></div>
+      <div class="activity-title">🔎 Activité 2 — Que remarques-tu ?</div>
+      <div class="ex-num">J'observe et je teste · Quiz</div>
+      <div class="theme-badge">Indice d'accord</div>
+
+      <div class="consigne-box">
+        <strong>Observe la phrase.</strong> Repère l'indice qui explique l'accord du participe passé.
+      </div>
+
+      <div class="phrase-display" id="a2-phrase"></div>
+      <div class="why-q" id="a2-why"></div>
+
+      <div class="choices" id="a2-choices"></div>
+
+      <div class="feedback" id="a2-feedback">
+        <span class="fb-icon" id="a2-fb-icon"></span>
+        <div class="fb-body">
+          <div class="fb-title" id="a2-fb-title"></div>
+          <div class="fb-detail" id="a2-fb-detail"></div>
+        </div>
+      </div>
+
+      <div class="btn-row" id="a2-row1">
+        <button class="btn btn-ok" id="a2-check" onclick="a2Check()" disabled>&#10003; Vérifier</button>
+      </div>
+      <div id="a2-row-next" style="display:none;">
+        <button class="btn btn-next" id="a2-next" onclick="a2Next()">Suivant &#8594;</button>
+      </div>
+    </div>
+
+    <!-- ════ ÉCRAN DE FIN ════ -->
+    <div class="end-screen" id="end-screen">
+      <div class="end-card">
+        <div class="logo-badge" style="margin-bottom:.8rem;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Observation terminée !
+        </div>
+        <span class="end-icon">&#128161;</span>
+        <div class="end-title">Tes découvertes</div>
+        <div class="stars" id="end-stars"></div>
+        <div class="end-score-row">
+          <div class="end-badge">
+            <div class="end-badge-num" id="end-score">0</div>
+            <div class="end-badge-lbl">bonnes réponses</div>
+          </div>
+          <div class="end-badge">
+            <div class="end-badge-num" id="end-total">11</div>
+            <div class="end-badge-lbl">observations</div>
+          </div>
+        </div>
+
+        <div class="decouverte">
+          <div class="decouverte-title">💡 Ce que tu as commencé à remarquer :</div>
+          <ul>
+            <li>Avec <strong>être</strong>, le participe passé semble changer selon le sujet (il s'accorde).</li>
+            <li>Avec <strong>avoir</strong>, il semble souvent rester inchangé.</li>
+            <li>Les marques <strong>e</strong>, <strong>s</strong>, <strong>es</strong> donnent des indices sur le sujet.</li>
+          </ul>
+        </div>
+
+        <div class="end-msg">
+          Tu as posé tes premières hypothèses sur l'accord du participe passé. Dans l'étape « J'explore », tu vas découvrir la règle qui se cache derrière ces indices&nbsp;!
+        </div>
+        <button class="btn btn-ok" style="width:100%;justify-content:center;" onclick="recommencer()">&#8635; Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ════ ACTIVITÉ 1 : 6 phrases correct/incorrect ════ */
+var A1 = [
+  { texte:"Les fleurs se sont ouvertes au lever du soleil.", correct:true,
+    fb:"« ouvertes » s'accorde avec « les fleurs » (féminin pluriel) : c'est correct." },
+  { texte:"Les feuilles sont tombé dans le jardin.", correct:false,
+    correction:"Les feuilles sont tombées dans le jardin.",
+    fb:"Avec l'auxiliaire être, le participe s'accorde avec le sujet « les feuilles » (féminin pluriel) : il faut « tombées »." },
+  { texte:"Le poète a observé les nuages.", correct:true,
+    fb:"Avec l'auxiliaire avoir, le participe ne s'accorde pas avec le sujet : « observé » reste invariable ici. C'est correct." },
+  { texte:"Les étoiles sont apparu dans le ciel.", correct:false,
+    correction:"Les étoiles sont apparues dans le ciel.",
+    fb:"Avec être, le participe s'accorde avec « les étoiles » (féminin pluriel) : il faut « apparues »." },
+  { texte:"La rivière a traversé la vallée.", correct:true,
+    fb:"Avec l'auxiliaire avoir, le participe « traversé » reste invariable ici. C'est correct." },
+  { texte:"Les collines sont restées silencieuses.", correct:true,
+    fb:"« restées » s'accorde avec « les collines » (féminin pluriel) via l'auxiliaire être : c'est correct." }
+];
+
+/* ════ ACTIVITÉ 2 : 5 questions "pourquoi" ════ */
+var A2 = [
+  { phrase:"Les fleurs se sont ouvertes.",
+    why:"Pourquoi écrit-on « ouvertes » avec -es ?",
+    choices:["Parce que le verbe est au passé.","Parce que le sujet est féminin pluriel.","Parce qu'il y a plusieurs verbes."],
+    ans:1,
+    fbOk:"Exact ! « les fleurs » est féminin pluriel, donc le participe prend -es.",
+    fbKo:"C'est parce que le sujet « les fleurs » est féminin pluriel que le participe prend -es." },
+  { phrase:"Les oiseaux sont partis.",
+    why:"Pourquoi écrit-on « partis » avec -s ?",
+    choices:["Parce que le sujet est masculin pluriel.","Parce que le verbe est long.","Parce qu'il y a un complément."],
+    ans:0,
+    fbOk:"Bravo ! « les oiseaux » est masculin pluriel, donc le participe prend -s.",
+    fbKo:"C'est parce que le sujet « les oiseaux » est masculin pluriel que le participe prend -s." },
+  { phrase:"La rivière est restée calme.",
+    why:"Pourquoi écrit-on « restée » avec -e ?",
+    choices:["Parce que le sujet est féminin.","Parce que le sujet est au pluriel.","Parce que le verbe est au passé composé."],
+    ans:0,
+    fbOk:"Oui ! « la rivière » est féminin singulier, donc le participe prend -e.",
+    fbKo:"C'est parce que le sujet « la rivière » est féminin que le participe prend -e." },
+  { phrase:"Le poète a observé le paysage.",
+    why:"Pourquoi écrit-on « observé » sans accord ?",
+    choices:["Parce que le sujet est masculin.","Parce qu'il est employé avec l'auxiliaire avoir.","Parce que la phrase est courte."],
+    ans:1,
+    fbOk:"Exact ! Avec l'auxiliaire avoir, le participe ne s'accorde pas avec le sujet.",
+    fbKo:"C'est parce qu'il est employé avec l'auxiliaire avoir que « observé » ne s'accorde pas avec le sujet." },
+  { phrase:"Les promeneurs ont admiré le coucher du soleil.",
+    why:"Pourquoi écrit-on « admiré » sans -s ?",
+    choices:["Parce qu'il n'y a qu'un seul coucher de soleil.","Parce qu'il est employé avec l'auxiliaire avoir.","Parce que le verbe est à l'infinitif."],
+    ans:1,
+    fbOk:"Bravo ! Avec l'auxiliaire avoir, le participe reste invariable ici, malgré le sujet pluriel.",
+    fbKo:"C'est parce qu'il est employé avec l'auxiliaire avoir que « admiré » ne prend pas de -s." }
+];
+
+var TOTAL = A1.length + A2.length; // 11
+var results = []; // 'ok' | 'ko' par question (ordre global)
+var score = 0;
+
+/* navigation */
+var phase = 1;      // 1 = activité 1, 2 = activité 2
+var i1 = 0, i2 = 0;
+
+function $(id){ return document.getElementById(id); }
+
+function globalIndex(){
+  return (phase === 1) ? i1 : (A1.length + i2);
+}
+
+function renderDots(){
+  var el = $('phrase-dots');
+  el.innerHTML = '';
+  for(var k=0;k<TOTAL;k++){
+    var d = document.createElement('div');
+    d.className = 'phrase-dot';
+    if(k < results.length){
+      d.classList.add(results[k] === 'ok' ? 'done-ok' : 'done-err');
+    } else if(k === globalIndex()){
+      d.classList.add('active');
+    }
+    el.appendChild(d);
+  }
+  var gi = globalIndex();
+  $('phrase-num-label').textContent = 'Question ' + (gi+1) + ' / ' + TOTAL;
+}
+
+function updateRadar(){
+  $('radar-num').textContent = score;
+  var pct = Math.round(score / TOTAL * 100);
+  $('radar-fill').style.width = pct + '%';
+  $('radar-num').classList.remove('pulse');
+  void $('radar-num').offsetWidth;
+  $('radar-num').classList.add('pulse');
+}
+
+/* ════ ACTIVITÉ 1 ════ */
+function renderA1(){
+  var p = A1[i1];
+  $('a1-phrase').textContent = '\u00ab\u00a0' + p.texte + '\u00a0\u00bb';
+  $('a1-feedback').className = 'feedback';
+  $('a1-row1').style.display = 'flex';
+  $('a1-row-next').style.display = 'none';
+  $('a1-btn-ok').disabled = false;
+  $('a1-btn-err').disabled = false;
+  renderDots();
+  updateRadar();
+}
+
+function a1Choice(saidCorrect){
+  var p = A1[i1];
+  $('a1-btn-ok').disabled = true;
+  $('a1-btn-err').disabled = true;
+  var good = (saidCorrect === p.correct);
+  if(good){ score++; results.push('ok'); } else { results.push('ko'); }
+
+  var fb = $('a1-feedback');
+  if(good){
+    fb.className = 'feedback show ok';
+    $('a1-fb-icon').innerHTML = '&#10003;';
+    $('a1-fb-title').textContent = 'Bien vu !';
+    $('a1-fb-detail').textContent = p.fb;
+  } else {
+    fb.className = 'feedback show ko';
+    $('a1-fb-icon').innerHTML = '!';
+    $('a1-fb-title').textContent = 'Observe encore.';
+    var d = p.fb;
+    if(!p.correct && p.correction) d += '  Phrase correcte : « ' + p.correction + ' »';
+    $('a1-fb-detail').textContent = d;
+  }
+  $('a1-row-next').style.display = 'block';
+  renderDots();
+  updateRadar();
+}
+
+function a1Next(){
+  if(i1 < A1.length - 1){
+    i1++; renderA1(); window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    /* passer à l'activité 2 */
+    phase = 2; i2 = 0;
+    $('act1-card').style.display = 'none';
+    $('act2-card').style.display = 'block';
+    renderA2();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+/* ════ ACTIVITÉ 2 ════ */
+var a2sel = null;
+function renderA2(){
+  var q = A2[i2];
+  a2sel = null;
+  $('a2-phrase').textContent = '\u00ab\u00a0' + q.phrase + '\u00a0\u00bb';
+  $('a2-why').textContent = q.why;
+
+  var cc = $('a2-choices');
+  cc.innerHTML = '';
+  q.choices.forEach(function(txt, k){
+    var div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = '<span class="choice-mark">'+String.fromCharCode(65+k)+'</span><span class="choice-text">'+txt+'</span>';
+    div.addEventListener('click', function(){ a2Select(k, div); });
+    cc.appendChild(div);
+  });
+
+  $('a2-feedback').className = 'feedback';
+  $('a2-row1').style.display = 'flex';
+  $('a2-row-next').style.display = 'none';
+  $('a2-check').disabled = true;
+  renderDots();
+  updateRadar();
+}
+
+function a2Select(k, div){
+  if($('a2-feedback').classList.contains('show')) return;
+  a2sel = k;
+  $('a2-choices').querySelectorAll('.choice').forEach(function(c){ c.classList.remove('selected'); });
+  div.classList.add('selected');
+  $('a2-check').disabled = false;
+}
+
+function a2Check(){
+  if(a2sel === null) return;
+  var q = A2[i2];
+  var items = $('a2-choices').querySelectorAll('.choice');
+  items.forEach(function(c){ c.setAttribute('aria-disabled','true'); });
+  var good = (a2sel === q.ans);
+  if(good){ score++; results.push('ok'); } else { results.push('ko'); }
+
+  items[a2sel].classList.remove('selected');
+  items[a2sel].classList.add(good ? 'correct-c' : 'wrong-c');
+  if(!good) items[q.ans].classList.add('reveal-c');
+
+  var fb = $('a2-feedback');
+  fb.className = 'feedback show ' + (good ? 'ok' : 'ko');
+  $('a2-fb-icon').innerHTML = good ? '&#10003;' : '!';
+  $('a2-fb-title').textContent = good ? 'Bien observé !' : 'Pas tout à fait…';
+  $('a2-fb-detail').textContent = good ? q.fbOk : q.fbKo;
+
+  $('a2-row1').style.display = 'none';
+  $('a2-row-next').style.display = 'block';
+  $('a2-next').textContent = (i2 === A2.length - 1) ? 'Voir mes découvertes \u2192' : 'Suivant \u2192';
+  renderDots();
+  updateRadar();
+}
+
+function a2Next(){
+  if(i2 < A2.length - 1){
+    i2++; renderA2(); window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    showEnd();
+  }
+}
+
+/* ════ FIN ════ */
+function showEnd(){
+  $('act2-card').style.display = 'none';
+  $('end-screen').classList.add('show');
+  $('end-score').textContent = score;
+  $('end-total').textContent = TOTAL;
+  var pct = score / TOTAL;
+  var stars = pct >= .9 ? 5 : pct >= .75 ? 4 : pct >= .5 ? 3 : pct >= .25 ? 2 : 1;
+  $('end-stars').textContent = '\u2b50'.repeat(stars) + '\u2606'.repeat(5-stars);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ════ RESET ════ */
+function recommencer(){
+  phase = 1; i1 = 0; i2 = 0; score = 0; results = []; a2sel = null;
+  $('end-screen').classList.remove('show');
+  $('act2-card').style.display = 'none';
+  $('act1-card').style.display = 'block';
+  renderA1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* INIT */
+$('radar-label').textContent = 'Bonnes réponses';
+$('radar-num').textContent = '0';
+document.querySelector('.radar-count').innerHTML = '<span id="radar-num">0</span> / ' + TOTAL;
+renderA1();
+</script>
+</body>
+</html>
