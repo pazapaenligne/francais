@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S3 J1 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623; --day-dark:#c47a10;
+      --day-light:#fff5e0; --day-border:#f5d080;
+      --day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.3rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:.82rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* Badges preuves */
+    .badges-row{display:flex;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:center;
+      position:relative;z-index:1;width:100%;max-width:680px;}
+    .badge-preuve{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);
+      background:var(--surface);display:flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--muted);
+      transition:all .3s ease;flex-shrink:0;}
+    .badge-preuve.done{background:var(--green);border-color:var(--green);color:#fff;
+      box-shadow:0 2px 8px rgba(141,198,63,.4);transform:scale(1.08);}
+
+    /* Texte support */
+    .texte-support{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.2rem 1rem;margin-bottom:1.2rem;
+      position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .texte-support .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+    .texte-support .txt-label{display:block;font-family:'JetBrains Mono',monospace;font-size:.65rem;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;text-align:center;}
+    .texte-support p{font-size:.92rem;line-height:2;color:var(--text);text-align:center;}
+    .texte-support .author{display:block;margin-top:.7rem;font-family:'JetBrains Mono',monospace;
+      font-size:.75rem;font-style:italic;color:var(--muted);}
+
+    /* Intro mission */
+    .mission-intro{width:100%;max-width:680px;background:linear-gradient(135deg,var(--day-light),#fff);
+      border:2px solid var(--day-border);border-radius:var(--radius);padding:1.4rem 1.2rem;
+      margin-bottom:1.2rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;}
+    .mission-intro .mission-title{font-size:1.05rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;}
+    .mission-intro p{font-size:.9rem;line-height:1.7;color:var(--text);margin-bottom:.6rem;}
+    .mission-intro .mission-call{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;color:var(--day-dark);}
+
+    /* Card affaire */
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.4rem 1rem 1.2rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;margin-bottom:1rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+    .affaire-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+    .affaire-titre{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .objectif{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--day-dark);
+      background:var(--day-light);border:1.5px solid var(--day-border);border-radius:8px;
+      padding:.4rem .7rem;margin-bottom:.9rem;}
+
+    .etape-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:.9rem 0 .5rem;
+      display:flex;align-items:center;gap:.4rem;}
+    .etape-num{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;height:1.4rem;
+      border-radius:50%;background:var(--day-color);color:#fff;font-size:.72rem;flex-shrink:0;}
+
+    .q-text{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.5;}
+
+    .options{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.4rem;}
+    .opt{display:flex;align-items:flex-start;gap:.7rem;padding:.65rem .8rem;border-radius:10px;
+      border:2px solid var(--border);background:var(--bg);cursor:pointer;
+      transition:border-color .15s,background .15s;font-size:.9rem;color:var(--text);line-height:1.5;
+      -webkit-tap-highlight-color:transparent;min-height:44px;}
+    .opt:hover{border-color:var(--day-color);background:var(--day-light);}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);font-weight:700;}
+    .opt.ok{border-color:var(--green);background:#d4edda;color:#1a4d0d;font-weight:700;}
+    .opt.ko{border-color:var(--pink);background:#ffe0de;color:#8b1a1a;font-weight:700;text-decoration:line-through;}
+    .opt.miss{border-color:var(--yellow);background:#fff3cd;color:#5a3e00;font-weight:700;}
+    .opt.locked{opacity:.5;pointer-events:none;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;
+      flex-shrink:0;width:1.2rem;padding-top:.1rem;}
+
+    .preuve-zone{display:none;margin-top:.9rem;padding:.9rem .85rem .8rem;
+      background:linear-gradient(135deg,#fffaf0,var(--day-light));
+      border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);
+      border-radius:12px;position:relative;box-shadow:inset 0 1px 6px rgba(245,166,35,.08);}
+    .preuve-zone.show{display:block;animation:fadeUp .35s ease both;}
+    .preuve-zone::before{content:'\1F50E  PREUVE';position:absolute;top:-.55rem;left:14px;
+      background:var(--day-color);color:#fff;font-family:'JetBrains Mono',monospace;
+      font-size:.62rem;font-weight:700;letter-spacing:.1em;padding:.15rem .6rem;
+      border-radius:99px;box-shadow:0 2px 6px var(--day-glow);}
+    .preuve-zone .opt{background:var(--surface);}
+    .preuve-zone .opt:hover{background:#fff;border-color:var(--day-dark);}
+
+    .q-feedback{font-size:.82rem;font-family:'JetBrains Mono',monospace;border-radius:8px;
+      padding:.5rem .7rem;margin-top:.6rem;display:none;line-height:1.6;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#1a4d0d;}
+    .q-feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#8b1a1a;}
+
+    .valider-affaire{margin-top:.8rem;}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.9rem;
+      font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;
+      min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+    .btn-block{width:100%;}
+
+    /* Mission finale + résultats */
+    .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;margin-top:.5rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .mission-finale{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--day-dark);
+      background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+      padding:.8rem;margin-bottom:1.2rem;line-height:1.6;}
+    .results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.6rem 0 .4rem;color:var(--text);}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 1rem;letter-spacing:.2rem;}
+    .results-msg{color:var(--text);font-size:.95rem;margin-bottom:1.5rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      .card{padding:1.1rem .85rem 1rem;}
+      .btn{font-size:.85rem;padding:.6rem .9rem;}
+      .texte-support p{font-size:.86rem;line-height:1.9;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+    </div>
+    <div class="week-label">Semaine 3 &ndash; Jour 1</div>
+    <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">L&rsquo;Enqu&ecirc;te du Printemps</span></h1>
+    <p class="subtitle">Prouve que le printemps a chass&eacute; l&rsquo;hiver&nbsp;!</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-label">0 / 5 affaires r&eacute;solues</span>
+      <span id="prog-pct">0&nbsp;%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="badges-row" id="badges-row"></div>
+
+  <!-- INTRO MISSION -->
+  <div class="mission-intro">
+    <div class="mission-title">Ta mission, enqu&ecirc;teur&nbsp;!</div>
+    <p>
+      Un grand changement vient de se produire dans la nature&hellip; mais personne ne sait l&rsquo;expliquer&nbsp;! Le po&egrave;te Charles d&rsquo;Orl&eacute;ans a laiss&eacute; un message myst&eacute;rieux dans son po&egrave;me.
+    </p>
+    <p>
+      Pour chaque affaire, tu devras d&rsquo;abord <strong>trouver la bonne r&eacute;ponse</strong>, puis <strong>prouver ce que tu avances</strong> en choisissant la citation exacte du po&egrave;me. Pas de preuve, pas de victoire&nbsp;!
+    </p>
+    <p class="mission-call">5 affaires &agrave; r&eacute;soudre. Collecte les 5 preuves pour percer le secret du po&egrave;me&nbsp;!</p>
+  </div>
+
+  <!-- TEXTE SUPPORT -->
+  <div class="texte-support">
+    <div class="card-stripe"></div>
+    <span class="txt-label">Le dossier &mdash; Le temps a laiss&eacute; son manteau, Charles d&rsquo;Orl&eacute;ans</span>
+    <p>
+      Le temps a laiss&eacute; son manteau<br>
+      De vent, de froidure et de pluie,<br>
+      Et s&rsquo;est v&ecirc;tu de broderie,<br>
+      De soleil riant, clair et beau.<br><br>
+      Il n&rsquo;y a b&ecirc;te ni oiseau<br>
+      Qu&rsquo;en son jargon ne chante ou crie&nbsp;:<br>
+      Le temps a laiss&eacute; son manteau<br>
+      De vent, de froidure et de pluie.<br><br>
+      Rivi&egrave;re, fontaine et ruisseau<br>
+      Portent en livr&eacute;e jolie<br>
+      Gouttes d&rsquo;argent d&rsquo;orf&egrave;vrerie&nbsp;;<br>
+      Chacun s&rsquo;habille de nouveau,<br>
+      Le temps a laiss&eacute; son manteau.
+      <span class="author">Charles d&rsquo;Orl&eacute;ans</span>
+    </p>
+  </div>
+
+  <!-- AFFAIRES -->
+  <div id="affaires-container"></div>
+
+  <!-- RÉSULTATS -->
+  <div class="results" id="results-screen">
+    <div class="results-card">
+      <div class="logo-badge" style="margin-bottom:.7rem">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Enqu&ecirc;te termin&eacute;e
+      </div>
+      <div class="mission-finale" id="mission-finale"></div>
+      <div class="results-score"><span class="s-num" id="score-num">0</span>/5</div>
+      <div class="stars" id="stars-row"></div>
+      <div class="results-msg" id="results-msg"></div>
+      <button class="btn btn-primary" onclick="recommencer()" style="margin:0 auto;display:flex;">Refaire l&rsquo;enqu&ecirc;te</button>
+    </div>
+  </div>
+
+<script>
+/* ============================================================
+   L'ENQUÊTE DU PRINTEMPS — 5 affaires
+   Chaque affaire : question (QCM) → preuve (citation)
+   Toutes les citations sont EXACTES (tirées du poème)
+============================================================ */
+var AFFAIRES = [
+  {
+    num: 1,
+    titre: "L\u2019identit\u00e9 du suspect",
+    objectif: "Comprendre la personnification : qui agit dans le po\u00e8me\u00a0?",
+    question: "Dans le po\u00e8me, qui \u00ab\u00a0laisse son manteau\u00a0\u00bb et \u00ab\u00a0s\u2019habille\u00a0\u00bb comme une personne\u00a0?",
+    options: ["Le po\u00e8te","Le temps","Un oiseau","La rivi\u00e8re"],
+    correct: 1,
+    fb_ko: "Relis le premier vers : c\u2019est \u00ab\u00a0le temps\u00a0\u00bb qui est trait\u00e9 comme une personne qui change de v\u00eatements.",
+    preuve_consigne: "Quelle citation prouve que le temps est trait\u00e9 comme une personne\u00a0?",
+    preuves: [
+      "\u00ab\u00a0Le temps a laiss\u00e9 son manteau\u00a0\u00bb",
+      "\u00ab\u00a0Il n\u2019y a b\u00eate ni oiseau\u00a0\u00bb",
+      "\u00ab\u00a0Rivi\u00e8re, fontaine et ruisseau\u00a0\u00bb"
+    ],
+    preuve_correct: 0,
+    preuve_fb_ko: "La bonne preuve montre une action humaine : \u00ab\u00a0laiss\u00e9 son manteau\u00a0\u00bb. C\u2019est le temps qui se d\u00e9shabille comme une personne."
+  },
+  {
+    num: 2,
+    titre: "Le manteau abandonn\u00e9",
+    objectif: "Identifier la saison que le temps quitte (compr\u00e9hension implicite).",
+    question: "Quelle saison le temps laisse-t-il derri\u00e8re lui, comme un vieux manteau\u00a0?",
+    options: ["L\u2019\u00e9t\u00e9","L\u2019automne","L\u2019hiver","Le printemps"],
+    correct: 2,
+    fb_ko: "Le \u00ab\u00a0manteau\u00a0\u00bb est fait de vent, de froid et de pluie : ce sont les signes de l\u2019hiver que le temps abandonne.",
+    preuve_consigne: "Quelle citation d\u00e9crit ce vieux manteau d\u2019hiver\u00a0?",
+    preuves: [
+      "\u00ab\u00a0De soleil riant, clair et beau\u00a0\u00bb",
+      "\u00ab\u00a0De vent, de froidure et de pluie\u00a0\u00bb",
+      "\u00ab\u00a0Chacun s\u2019habille de nouveau\u00a0\u00bb"
+    ],
+    preuve_correct: 1,
+    preuve_fb_ko: "Cherche les mots du froid : \u00ab\u00a0vent\u00a0\u00bb, \u00ab\u00a0froidure\u00a0\u00bb et \u00ab\u00a0pluie\u00a0\u00bb d\u00e9crivent bien l\u2019hiver."
+  },
+  {
+    num: 3,
+    titre: "Le nouvel habit",
+    objectif: "Rep\u00e9rer l\u2019image du printemps et l\u2019\u00e9motion positive.",
+    question: "De quoi le temps s\u2019habille-t-il maintenant, \u00e0 la place de son manteau d\u2019hiver\u00a0?",
+    options: ["De neige","De soleil et de lumi\u00e8re","De nuages","De feuilles mortes"],
+    correct: 1,
+    fb_ko: "Le temps \u00ab\u00a0s\u2019est v\u00eatu de broderie, de soleil riant\u00a0\u00bb : il porte maintenant la lumi\u00e8re du printemps.",
+    preuve_consigne: "Quelle citation montre ce bel habit de printemps\u00a0?",
+    preuves: [
+      "\u00ab\u00a0De soleil riant, clair et beau\u00a0\u00bb",
+      "\u00ab\u00a0Qu\u2019en son jargon ne chante ou crie\u00a0\u00bb",
+      "\u00ab\u00a0De vent, de froidure et de pluie\u00a0\u00bb"
+    ],
+    preuve_correct: 0,
+    preuve_fb_ko: "Le bel habit, c\u2019est le \u00ab\u00a0soleil riant, clair et beau\u00a0\u00bb : des mots joyeux et lumineux."
+  },
+  {
+    num: 4,
+    titre: "Les t\u00e9moins vivants",
+    objectif: "Comprendre que la nature enti\u00e8re f\u00eate le printemps.",
+    question: "Qui se met \u00e0 chanter pour f\u00eater le retour du beau temps\u00a0?",
+    options: ["Les enfants","Les b\u00eates et les oiseaux","Le po\u00e8te","Le vent"],
+    correct: 1,
+    fb_ko: "Le po\u00e8me dit qu\u2019il n\u2019y a \u00ab\u00a0b\u00eate ni oiseau\u00a0\u00bb qui ne chante : tous les animaux f\u00eatent le printemps.",
+    preuve_consigne: "Quelle citation prouve que les animaux chantent\u00a0?",
+    preuves: [
+      "\u00ab\u00a0Il n\u2019y a b\u00eate ni oiseau / Qu\u2019en son jargon ne chante ou crie\u00a0\u00bb",
+      "\u00ab\u00a0Rivi\u00e8re, fontaine et ruisseau\u00a0\u00bb",
+      "\u00ab\u00a0Le temps a laiss\u00e9 son manteau\u00a0\u00bb"
+    ],
+    preuve_correct: 0,
+    preuve_fb_ko: "Cherche les mots \u00ab\u00a0b\u00eate\u00a0\u00bb, \u00ab\u00a0oiseau\u00a0\u00bb et \u00ab\u00a0chante\u00a0\u00bb : ce sont les animaux qui chantent dans leur \u00ab\u00a0jargon\u00a0\u00bb."
+  },
+  {
+    num: 5,
+    titre: "Le tr\u00e9sor cach\u00e9",
+    objectif: "Interpr\u00e9ter une m\u00e9taphore (l\u2019eau compar\u00e9e \u00e0 des bijoux).",
+    question: "\u00c0 quoi le po\u00e8te compare-t-il les gouttes d\u2019eau des rivi\u00e8res\u00a0?",
+    options: ["\u00c0 des larmes","\u00c0 des bijoux d\u2019argent pr\u00e9cieux","\u00c0 des fleurs","\u00c0 des flocons de neige"],
+    correct: 1,
+    fb_ko: "Le po\u00e8te parle de \u00ab\u00a0gouttes d\u2019argent d\u2019orf\u00e8vrerie\u00a0\u00bb : il compare l\u2019eau \u00e0 des bijoux faits par un orf\u00e8vre.",
+    preuve_consigne: "Quelle citation contient cette image pr\u00e9cieuse\u00a0?",
+    preuves: [
+      "\u00ab\u00a0Gouttes d\u2019argent d\u2019orf\u00e8vrerie\u00a0\u00bb",
+      "\u00ab\u00a0Portent en livr\u00e9e jolie\u00a0\u00bb",
+      "\u00ab\u00a0Chacun s\u2019habille de nouveau\u00a0\u00bb"
+    ],
+    preuve_correct: 0,
+    preuve_fb_ko: "L\u2019image pr\u00e9cieuse, ce sont les \u00ab\u00a0gouttes d\u2019argent d\u2019orf\u00e8vrerie\u00a0\u00bb : l\u2019eau brille comme de l\u2019argent travaill\u00e9."
+  }
+];
+
+var TOTAL = AFFAIRES.length;
+var state = AFFAIRES.map(function(){ return {qSel:-1, pSel:-1, validated:false, success:false}; });
+
+function buildBadges(){
+  var row = document.getElementById('badges-row');
+  row.innerHTML = '';
+  for(var i=0;i<TOTAL;i++){
+    var b = document.createElement('div');
+    b.className = 'badge-preuve';
+    b.id = 'badge-'+i;
+    b.textContent = (i+1);
+    row.appendChild(b);
+  }
+}
+
+function buildAffaires(){
+  var container = document.getElementById('affaires-container');
+  container.innerHTML = '';
+
+  AFFAIRES.forEach(function(af, ai){
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card-'+ai;
+
+    var stripe = document.createElement('div');
+    stripe.className = 'card-stripe';
+    card.appendChild(stripe);
+
+    var num = document.createElement('div');
+    num.className = 'affaire-num';
+    num.textContent = 'Affaire '+af.num+' / '+TOTAL;
+    card.appendChild(num);
+
+    var titre = document.createElement('div');
+    titre.className = 'affaire-titre';
+    titre.textContent = af.titre;
+    card.appendChild(titre);
+
+    var obj = document.createElement('div');
+    obj.className = 'objectif';
+    obj.innerHTML = '\uD83C\uDFAF\u00a0Objectif\u00a0: ' + af.objectif;
+    /* pas d'emoji animal/visage : la cible 🎯 est autorisée (objet) */
+    card.appendChild(obj);
+
+    /* ÉTAPE 1 : question */
+    var lab1 = document.createElement('div');
+    lab1.className = 'etape-label';
+    lab1.innerHTML = '<span class="etape-num">1</span> Trouve la r\u00e9ponse';
+    card.appendChild(lab1);
+
+    var q = document.createElement('div');
+    q.className = 'q-text';
+    q.textContent = af.question;
+    card.appendChild(q);
+
+    var opts = document.createElement('div');
+    opts.className = 'options';
+    var letters = ['a','b','c','d'];
+    af.options.forEach(function(opt, oi){
+      var o = document.createElement('div');
+      o.className = 'opt';
+      o.id = 'q-'+ai+'-'+oi;
+      var l = document.createElement('span');
+      l.className = 'opt-letter';
+      l.textContent = letters[oi]+')';
+      o.appendChild(l);
+      var t = document.createElement('span');
+      t.textContent = opt;
+      o.appendChild(t);
+      o.addEventListener('click', function(){ selectQ(ai, oi); });
+      opts.appendChild(o);
+    });
+    card.appendChild(opts);
+
+    /* ÉTAPE 2 : preuve (cachée au départ) */
+    var preuveZone = document.createElement('div');
+    preuveZone.className = 'preuve-zone';
+    preuveZone.id = 'preuve-zone-'+ai;
+
+    /* Espace pour le badge PREUVE */
+    var spacer = document.createElement('div');
+    spacer.style.height = '.5rem';
+    preuveZone.appendChild(spacer);
+
+    var pc = document.createElement('div');
+    pc.className = 'q-text';
+    pc.style.fontSize = '.9rem';
+    pc.textContent = af.preuve_consigne;
+    preuveZone.appendChild(pc);
+
+    var popts = document.createElement('div');
+    popts.className = 'options';
+    af.preuves.forEach(function(pr, pi){
+      var o = document.createElement('div');
+      o.className = 'opt';
+      o.id = 'p-'+ai+'-'+pi;
+      var l = document.createElement('span');
+      l.className = 'opt-letter';
+      l.textContent = '\uD83D\uDD0E';
+      /* loupe = objet autorisé */
+      o.appendChild(l);
+      var t = document.createElement('span');
+      t.textContent = pr;
+      o.appendChild(t);
+      o.addEventListener('click', function(){ selectP(ai, pi); });
+      popts.appendChild(o);
+    });
+    preuveZone.appendChild(popts);
+
+    card.appendChild(preuveZone);
+
+    /* Feedback */
+    var fb = document.createElement('div');
+    fb.className = 'q-feedback';
+    fb.id = 'fb-'+ai;
+    card.appendChild(fb);
+
+    /* Bouton valider l'affaire */
+    var btnWrap = document.createElement('div');
+    btnWrap.className = 'valider-affaire';
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-block';
+    btn.id = 'btn-valider-'+ai;
+    btn.textContent = 'Valider cette affaire';
+    btn.disabled = true;
+    btn.addEventListener('click', function(){ validerAffaire(ai); });
+    btnWrap.appendChild(btn);
+    card.appendChild(btnWrap);
+
+    container.appendChild(card);
+  });
+}
+
+function selectQ(ai, oi){
+  if(state[ai].validated) return;
+  /* deselect ancien */
+  if(state[ai].qSel !== -1){
+    var old = document.getElementById('q-'+ai+'-'+state[ai].qSel);
+    if(old) old.classList.remove('sel');
+  }
+  state[ai].qSel = oi;
+  document.getElementById('q-'+ai+'-'+oi).classList.add('sel');
+  /* Révéler l'étape 2 */
+  document.getElementById('preuve-zone-'+ai).classList.add('show');
+  checkReady(ai);
+}
+
+function selectP(ai, pi){
+  if(state[ai].validated) return;
+  if(state[ai].pSel !== -1){
+    var old = document.getElementById('p-'+ai+'-'+state[ai].pSel);
+    if(old) old.classList.remove('sel');
+  }
+  state[ai].pSel = pi;
+  document.getElementById('p-'+ai+'-'+pi).classList.add('sel');
+  checkReady(ai);
+}
+
+function checkReady(ai){
+  var ready = state[ai].qSel !== -1 && state[ai].pSel !== -1;
+  document.getElementById('btn-valider-'+ai).disabled = !ready;
+}
+
+function validerAffaire(ai){
+  if(state[ai].validated) return;
+  state[ai].validated = true;
+  var af = AFFAIRES[ai];
+  var s = state[ai];
+
+  /* Verrouiller boutons */
+  document.getElementById('btn-valider-'+ai).disabled = true;
+  document.getElementById('btn-valider-'+ai).style.display = 'none';
+
+  /* Corriger QCM */
+  af.options.forEach(function(_, oi){
+    var el = document.getElementById('q-'+ai+'-'+oi);
+    el.classList.remove('sel');
+    el.classList.add('locked');
+    if(oi === af.correct) el.classList.add('ok');
+    else if(oi === s.qSel) el.classList.add('ko');
+  });
+  /* Corriger preuve */
+  af.preuves.forEach(function(_, pi){
+    var el = document.getElementById('p-'+ai+'-'+pi);
+    el.classList.remove('sel');
+    el.classList.add('locked');
+    if(pi === af.preuve_correct) el.classList.add('ok');
+    else if(pi === s.pSel) el.classList.add('ko');
+  });
+
+  var qOK = s.qSel === af.correct;
+  var pOK = s.pSel === af.preuve_correct;
+  s.success = qOK && pOK;
+
+  /* Feedback */
+  var fb = document.getElementById('fb-'+ai);
+  if(s.success){
+    fb.className = 'q-feedback show ok';
+    fb.innerHTML = '\u2713\u00a0Affaire r\u00e9solue\u00a0! Bonne r\u00e9ponse ET bonne preuve. Tu as gagn\u00e9 ta preuve\u00a0!';
+    var badge = document.getElementById('badge-'+ai);
+    badge.classList.add('done');
+    badge.innerHTML = '\u2713';
+  } else {
+    fb.className = 'q-feedback show ko';
+    var msg = '';
+    if(!qOK) msg += af.fb_ko + ' ';
+    if(!pOK) msg += af.preuve_fb_ko;
+    if(qOK && !pOK) msg = 'Ta r\u00e9ponse est bonne, mais la preuve ne convient pas. ' + af.preuve_fb_ko;
+    fb.innerHTML = msg;
+  }
+
+  updateProgress();
+  checkAllDone();
+}
+
+function updateProgress(){
+  var done = state.filter(function(s){ return s.validated; }).length;
+  var solved = state.filter(function(s){ return s.success; }).length;
+  var pct = Math.round(done / TOTAL * 100);
+  document.getElementById('prog-label').textContent = solved+' / '+TOTAL+' affaires r\u00e9solues';
+  document.getElementById('prog-pct').textContent = pct+'\u00a0%';
+  document.getElementById('progress-bar').style.width = pct+'%';
+}
+
+function checkAllDone(){
+  var allDone = state.every(function(s){ return s.validated; });
+  if(allDone) showResults();
+}
+
+function showResults(){
+  var score = state.filter(function(s){ return s.success; }).length;
+  var pct = score / TOTAL * 100;
+
+  var finale = document.getElementById('mission-finale');
+  if(score === TOTAL){
+    finale.innerHTML = '\uD83C\uDFC6\u00a0Mission accomplie\u00a0! Gr\u00e2ce \u00e0 tes 5 preuves, tu as perc\u00e9 le secret du po\u00e8me\u00a0: <strong>le temps a quitt\u00e9 son manteau d\u2019hiver pour s\u2019habiller du printemps</strong>, et toute la nature le f\u00eate\u00a0!';
+  } else if(score >= 3){
+    finale.innerHTML = '\uD83D\uDD0E\u00a0Bonne enqu\u00eate\u00a0! Tu as r\u00e9uni '+score+' preuves sur 5. Le secret du printemps se dessine, mais quelques indices t\u2019\u00e9chappent encore.';
+  } else {
+    finale.innerHTML = '\uD83D\uDCDC\u00a0L\u2019enqu\u00eate continue\u00a0! Relis bien le po\u00e8me et cherche les indices vers par vers. Chaque preuve compte pour r\u00e9soudre le myst\u00e8re.';
+  }
+
+  var stars = score>=5?5 : score>=4?4 : score>=3?3 : score>=2?2 : 1;
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('stars-row').textContent = '\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+
+  var msgs = ['Continue \u2014 relis le dossier\u00a0!','Bon d\u00e9but d\u2019enqu\u00eate\u00a0!',
+    'Belle progression\u00a0!','Excellent travail d\u2019enqu\u00eateur\u00a0!',
+    'Bravo, fin limier\u00a0!','Ma\u00eetre enqu\u00eateur du printemps\u00a0!'];
+  document.getElementById('results-msg').textContent = msgs[Math.min(score, msgs.length-1)];
+
+  document.getElementById('results-screen').classList.add('show');
+  document.getElementById('results-screen').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function recommencer(){
+  state = AFFAIRES.map(function(){ return {qSel:-1, pSel:-1, validated:false, success:false}; });
+  document.getElementById('results-screen').classList.remove('show');
+  document.getElementById('progress-bar').style.width = '0%';
+  document.getElementById('prog-label').textContent = '0 / '+TOTAL+' affaires r\u00e9solues';
+  document.getElementById('prog-pct').textContent = '0\u00a0%';
+  buildBadges();
+  buildAffaires();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+buildBadges();
+buildAffaires();
+</script>
+</body>
+</html>
