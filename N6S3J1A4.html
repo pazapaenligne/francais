@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S3 J1 · Le temps a laissé son manteau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623; --jour-fonce:#c47a10;
+  --jour-clair:#fff5e0; --jour-pale:#f5d080;
+  --day-color:#f5a623; --day-dark:#c47a10;
+  --day-light:#fff5e0; --day-border:#f5d080;
+  --day-glow:rgba(245,166,35,.3);
+  --surface:#ffffff; --border:#e8e4d9;
+  --yellow:#f5c518; --green:#8dc63f;
+  --pink:#f28b82;   --orange:#f5a623;
+  --text:#2b2b2b;   --muted:#8b8b8b;
+  --radius:16px;
+  --bg:#fffdf7; --dark:#1a1f2e; --dark-2:#232a3d;
+  --vert:#22c55e; --vert-neon:#4ade80;
+  --rouge:#ef4444; --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg); color:var(--txt);
+  min-height:100vh; overflow-x:hidden; position:relative;
+  padding:16px 12px 50px;
+}
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.55; z-index:0; pointer-events:none; }
+.bulle-jaune { width:200px; height:200px; background:#ffd84d; top:-60px;  right:-50px; }
+.bulle-jour  { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte { width:150px; height:150px; background:#9be7a5; top:45%;   right:-70px; }
+.bulle-rose  { width:130px; height:130px; background:#f9b8c5; top:30%;   left:-60px; }
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; width:100%; }
+
+.header{ text-align:center; margin-bottom:18px; }
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--jour); color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(245,166,35,.4); margin-bottom:10px; white-space:nowrap;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; flex-shrink:0; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif; font-size:.75rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size:clamp(1.4rem,6vw,2.3rem); line-height:1.15; color:var(--txt); margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:clamp(.65rem,2.5vw,.82rem);
+  letter-spacing:1.5px; color:var(--gris); margin-bottom:14px; word-break:break-word; }
+.badge-revision{ display:inline-block; background:var(--jour); color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.72rem,2.5vw,.82rem);
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(245,166,35,.45); animation:pulse 1.8s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(245,166,35,.45); }
+  50%{ transform:scale(1.05); box-shadow:0 6px 22px rgba(245,166,35,.7); } }
+
+/* INTRO INVESTIGATION */
+.investigation{
+  background:linear-gradient(135deg,var(--jour-clair),#fff);
+  border:2px solid var(--jour-pale); border-left:5px solid var(--jour);
+  border-radius:14px; padding:16px 16px 14px; margin-bottom:20px;
+  box-shadow:0 4px 16px rgba(245,166,35,.12);
+}
+.investigation .inv-titre{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.9rem,3.5vw,1.05rem); color:var(--jour-fonce);
+  margin-bottom:8px; letter-spacing:.5px;
+}
+.investigation p{ font-size:clamp(.84rem,3vw,.94rem); line-height:1.7; color:var(--txt); }
+
+.game{ background:var(--dark); border:2px solid var(--jour); border-radius:18px;
+  padding:16px 14px; margin-bottom:20px;
+  box-shadow:0 0 24px rgba(245,166,35,.18), inset 0 0 40px rgba(0,0,0,.3); }
+.game-label{ font-family:'JetBrains Mono','Orbitron',monospace; font-size:.62rem; font-weight:700;
+  letter-spacing:2px; color:var(--jour); opacity:.85; margin-bottom:10px; }
+.etoiles{ text-align:center; margin-bottom:14px;
+  font-size:clamp(1.1rem,4vw,1.55rem); letter-spacing:clamp(3px,1.5vw,8px); }
+.etoiles .star{ color:rgba(255,255,255,.28); transition:.3s; display:inline-block; }
+.etoiles .star.on{ color:var(--jour);
+  text-shadow:0 0 12px var(--jour),0 0 20px var(--jour);
+  animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
+.card{ animation:fadeUp .4s ease both; }
+.results.show{ animation:fadeUp .4s ease both; }
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.score-col{ background:var(--dark-2); border:1px solid rgba(255,255,255,.07);
+  border-radius:12px; padding:10px 4px; text-align:center; }
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size:clamp(1.6rem,6vw,2.6rem); line-height:1; }
+.score-col.reussis  .score-num{ color:var(--vert-neon); text-shadow:0 0 10px rgba(74,222,128,.6); }
+.score-col.restants .score-num{ color:var(--jour);      text-shadow:0 0 10px rgba(245,166,35,.5); }
+.score-col.erreurs  .score-num{ color:var(--rouge);     text-shadow:0 0 10px rgba(239,68,68,.5); }
+.score-lbl{ font-family:'JetBrains Mono',monospace; font-size:.55rem; font-weight:500;
+  letter-spacing:1px; color:rgba(255,255,255,.5); margin-top:5px; text-transform:uppercase; }
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{ font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1px; color:var(--jour); opacity:.85; }
+.xp-head span:last-child{  font-family:'Orbitron',sans-serif; font-size:.68rem; font-weight:700; color:var(--jour); }
+.xp-bar{ height:9px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; }
+.xp-fill{ height:100%; width:0%;
+  background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#ffd98a);
+  box-shadow:0 0 10px var(--jour); border-radius:8px;
+  transition:width .6s cubic-bezier(.22,1,.36,1); }
+.defi-count{ text-align:center; margin-top:10px;
+  font-family:'JetBrains Mono',monospace; font-size:.75rem; font-weight:700;
+  letter-spacing:2px; color:rgba(255,255,255,.65); }
+
+.card{ background:#fff; border-radius:18px; overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04); }
+.rainbow{ height:6px;
+  background:linear-gradient(90deg,#ff5e5e,#f5a623,#9be7a5,#3ab5d8,#a884ff,#ff5e5e);
+  background-size:300% 100%; animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+.card-body{ padding:16px 14px 18px; }
+.card-head{ display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:14px; gap:8px; flex-wrap:wrap; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.85rem,3vw,1rem); letter-spacing:1px; color:var(--txt); white-space:nowrap; }
+.type-badges{ display:flex; gap:6px; flex-wrap:wrap; }
+.type-badge{ font-family:'Orbitron',sans-serif; font-size:.58rem; font-weight:700;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  padding:4px 9px; border-radius:14px; border:1px solid var(--jour-pale); white-space:nowrap; }
+
+.texte-fable{ background:var(--dark); border:2px solid var(--jour); border-radius:14px;
+  padding:14px 16px; margin-bottom:14px; box-shadow:inset 0 0 30px rgba(0,0,0,.3); }
+.texte-fable .ft-titre{ font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.65rem,2.5vw,.78rem); letter-spacing:1px; color:var(--jour);
+  text-shadow:0 0 10px rgba(245,166,35,.5); margin-bottom:10px; text-align:center; }
+.texte-fable .ft-corps{ font-family:Arial,sans-serif;
+  font-size:clamp(.82rem,3vw,.92rem); line-height:1.9; color:#e8e6dd;
+  font-style:italic; word-break:break-word; text-align:center; }
+.texte-fable .ft-auteur{ display:block; margin-top:10px;
+  font-family:'JetBrains Mono',monospace; font-size:.72rem; font-style:normal;
+  color:rgba(245,166,35,.85); text-align:center; }
+
+.question-txt{ font-size:clamp(.95rem,3.5vw,1.12rem); font-weight:bold; color:var(--txt);
+  margin-bottom:14px; line-height:1.5; word-break:break-word; }
+.choix{ display:flex; flex-direction:column; gap:9px; margin-bottom:6px; }
+.choix-btn{ text-align:left; font-family:Arial,sans-serif; font-size:clamp(.88rem,3vw,.98rem);
+  padding:12px 14px; border:2px solid #e8e2d4; background:#fffdf7;
+  border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt);
+  display:flex; align-items:center; gap:10px; min-height:44px; -webkit-tap-highlight-color:transparent; }
+.choix-btn .lettre{ flex-shrink:0; width:26px; height:26px; border-radius:50%;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.78rem;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--jour-pale); }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
+.choix-btn.selected{ border-color:var(--jour); background:var(--jour-clair); box-shadow:0 0 0 3px rgba(245,166,35,.2); }
+.choix-btn.selected .lettre{ background:var(--jour); color:#3a2c00; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{ border-color:var(--vert); background:#e7faec; }
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{  border-color:var(--rouge); background:#fdeaea; }
+.choix-btn.bad  .lettre{ background:var(--rouge); color:#fff; }
+
+.btns{ display:flex; gap:9px; flex-wrap:wrap; margin:16px 0 4px; }
+.btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.72rem,2.5vw,.82rem);
+  letter-spacing:1px; padding:12px 16px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff; min-height:44px;
+  -webkit-tap-highlight-color:transparent; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{  background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#3a2c00; display:none; }
+.btn-suivant.visible{ display:inline-flex; }
+.btn-valider:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation:neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant.visible:not(:disabled){ animation:neon-jour 1.4s ease-in-out infinite; }
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(245,166,35,.5);} 50%{ box-shadow:0 0 18px rgba(245,166,35,.95);} }
+.btn:disabled{ background:#d8d8d8 !important; color:#fff !important;
+  cursor:not-allowed; animation:none !important; box-shadow:none !important; }
+@media(max-width:420px){ .btns{ flex-direction:column; } .btn{ width:100%; } }
+
+.indice-box{ display:none; margin-top:12px; padding:12px 14px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:clamp(.82rem,3vw,.9rem); color:#1a6e88; line-height:1.6; word-break:break-word; }
+.indice-box.show{ display:block; animation:pop .35s ease; }
+.feedback{ display:none; margin-top:14px; padding:13px 14px; border-radius:10px; font-weight:bold;
+  font-size:clamp(.88rem,3vw,1rem); line-height:1.5; word-break:break-word; }
+.feedback.show{ display:block; animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{ background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+.correction{ display:none; margin-top:12px; padding:13px 16px;
+  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
+  font-size:clamp(.84rem,3vw,.92rem); color:#5a4500; line-height:1.7; word-break:break-word; }
+.correction.show{ display:block; animation:pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+.nav{ display:flex; justify-content:flex-start; margin-top:16px; }
+.nav button{ font-family:'Orbitron',sans-serif; font-size:.75rem; font-weight:500;
+  letter-spacing:.5px; padding:10px 16px; border-radius:8px;
+  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
+  min-height:44px; -webkit-tap-highlight-color:transparent; }
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+.xp-pop{ position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.5rem;
+  color:var(--jour); text-shadow:0 0 20px var(--jour),0 4px 10px rgba(0,0,0,.3);
+  z-index:50; opacity:0; pointer-events:none; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); } }
+.results{ display:none; }
+.results.show{ display:block; animation:pop .5s ease; }
+.results .mission{ font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size:clamp(1.1rem,5vw,1.7rem); text-align:center; color:var(--jour-fonce);
+  letter-spacing:2px; margin-bottom:6px; }
+.results .big-score{ font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size:clamp(2rem,9vw,3.4rem); text-align:center; color:var(--jour);
+  text-shadow:0 0 16px rgba(245,166,35,.5); margin:8px 0; }
+.results .res-stars{ text-align:center; font-size:clamp(1.2rem,5vw,1.7rem); letter-spacing:4px; color:var(--jour); margin-bottom:8px; }
+.results .gg{ text-align:center; font-family:'Orbitron',sans-serif; font-size:clamp(.78rem,2.5vw,.88rem);
+  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:18px; word-break:break-word; }
+.recap{ background:#faf7ef; border-radius:12px; padding:12px 14px; margin-bottom:18px; }
+.recap-item{ display:flex; justify-content:space-between; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:clamp(.78rem,2.5vw,.86rem); gap:10px; }
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; word-break:break-word; }
+.recap-item .st{ font-size:1rem; flex-shrink:0; }
+.btn-rejouer{ display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.88rem,3vw,1rem); letter-spacing:1px; padding:14px; border:none; border-radius:12px;
+  color:#3a2c00; background:var(--jour); cursor:pointer; min-height:44px;
+  -webkit-tap-highlight-color:transparent; animation:neon-jour 1.4s ease-in-out infinite; }
+.btn-rejouer:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · FRANÇAIS · 6E
+    </div>
+    <div class="semaine">Semaine 3 – Jour 1</div>
+    <h1 class="titre">Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">Le temps a laissé son manteau &middot; 7 challenges</div>
+    <div class="badge-revision">DÉFI COMPRÉHENSION &amp; INTERPRÉTATION · PRINTEMPS &amp; RENOUVEAU</div>
+  </div>
+
+  <!-- INTRO INVESTIGATION -->
+  <div class="investigation">
+    <div class="inv-titre">🌷 Étape de l'investigation : ce que révèle le poème</div>
+    <p>
+      Tu arrives à une étape importante de ton enquête : il est temps d'analyser ce que le poème «&nbsp;Le temps a laissé son manteau&nbsp;» nous montre vraiment. Lis attentivement chaque question, puis choisis la réponse qui te semble la plus juste. Pour réussir, appuie-toi sur les mots du texte, les images de la nature… mais aussi sur les émotions qu'elles suggèrent.
+    </p>
+  </div>
+
+  <div class="game">
+    <div class="game-label">DÉFI COMPRÉHENSION &amp; INTERPRÉTATION 6E · PRINTEMPS &amp; RENOUVEAU</div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">7</div>
+        <div class="score-lbl">Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">Erreurs</div>
+      </div>
+    </div>
+    <div class="xp-head">
+      <span>XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="defi-count" id="defi-count">DÉFI 1 / 7</div>
+  </div>
+
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="defi-num" id="card-defi-num">DÉFI 01</div>
+        <div class="type-badges">
+          <div class="type-badge">COMPRÉHENSION &amp; INTERPRÉTATION</div>
+        </div>
+      </div>
+
+      <div class="texte-fable">
+        <div class="ft-titre">LE TEMPS A LAISSÉ SON MANTEAU</div>
+        <div class="ft-corps">
+          Le temps a laissé son manteau<br>
+          De vent, de froidure et de pluie,<br>
+          Et s'est vêtu de broderie,<br>
+          De soleil riant, clair et beau.<br><br>
+          Il n'y a bête ni oiseau<br>
+          Qu'en son jargon ne chante ou crie&nbsp;:<br>
+          Le temps a laissé son manteau<br>
+          De vent, de froidure et de pluie.<br><br>
+          Rivière, fontaine et ruisseau<br>
+          Portent en livrée jolie<br>
+          Gouttes d'argent d'orfèvrerie&nbsp;;<br>
+          Chacun s'habille de nouveau,<br>
+          Le temps a laissé son manteau.
+          <span class="ft-auteur">— Charles d'Orléans</span>
+        </div>
+      </div>
+
+      <div class="question-txt" id="question-txt"></div>
+      <div class="choix" id="choix"></div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" disabled>&#10003; VALIDER</button>
+        <button class="btn btn-indice"  id="btn-indice">? INDICE</button>
+        <button class="btn btn-suivant" id="btn-suivant">SUIVANT &rarr;</button>
+      </div>
+
+      <div class="indice-box" id="indice-box"></div>
+      <div class="feedback"   id="feedback"></div>
+      <div class="correction" id="correction"></div>
+
+      <div class="nav">
+        <button id="btn-retour" disabled>&larr; Retour</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card results" id="results-card" style="margin-top:20px;">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// ENQUÊTE TERMINÉE</div>
+      <div class="big-score" id="res-score">0 / 7</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+const DEFIS = [
+  {
+    titre:"Le sens du manteau",
+    question:"Que représente le «\u00a0manteau\u00a0» que le temps a laissé ?",
+    choices:[
+      "Un vrai vêtement de laine.",
+      "L'hiver, avec son vent, son froid et sa pluie.",
+      "Un nuage dans le ciel.",
+      "Un cadeau du printemps."
+    ],
+    correct:1,
+    indice:"Regarde de quoi ce manteau est fait au deuxième vers.",
+    correction:"Le manteau est une image : il est fait «\u00a0de vent, de froidure et de pluie\u00a0». C'est donc <b>l'hiver</b> que le temps abandonne."
+  },
+  {
+    titre:"La personnification",
+    question:"Pourquoi dit-on que le temps est «\u00a0personnifié\u00a0» dans le poème ?",
+    choices:[
+      "Parce qu'il parle aux oiseaux.",
+      "Parce qu'il a un prénom.",
+      "Parce qu'il s'habille et se déshabille comme une personne.",
+      "Parce qu'il se bat contre l'hiver."
+    ],
+    correct:2,
+    indice:"Observe les actions du temps : «\u00a0a laissé son manteau\u00a0», «\u00a0s'est vêtu\u00a0».",
+    correction:"Le temps fait des actions humaines : il «\u00a0laisse son manteau\u00a0» et «\u00a0s'est vêtu de broderie\u00a0». On le traite comme une personne : c'est une <b>personnification</b>."
+  },
+  {
+    titre:"Le nouvel habit",
+    question:"De quoi le temps s'habille-t-il à la place de l'hiver ?",
+    choices:[
+      "De neige et de glace.",
+      "De soleil, clair et beau.",
+      "De feuilles mortes.",
+      "De brouillard."
+    ],
+    correct:1,
+    indice:"Lis le quatrième vers, juste après «\u00a0s'est vêtu de broderie\u00a0».",
+    correction:"Le temps s'est vêtu «\u00a0de soleil riant, clair et beau\u00a0» : il porte maintenant la <b>lumière et la douceur du printemps</b>."
+  },
+  {
+    titre:"La preuve du beau temps",
+    question:"Quelle citation montre que le beau temps est arrivé ?",
+    choices:[
+      "«\u00a0De vent, de froidure et de pluie\u00a0».",
+      "«\u00a0De soleil riant, clair et beau\u00a0».",
+      "«\u00a0Le temps a laissé son manteau\u00a0».",
+      "«\u00a0Qu'en son jargon ne chante ou crie\u00a0»."
+    ],
+    correct:1,
+    indice:"Cherche les mots qui évoquent la lumière et la joie.",
+    correction:"«\u00a0De soleil riant, clair et beau\u00a0» : le soleil est même «\u00a0riant\u00a0», comme une personne joyeuse. C'est l'<b>image du printemps</b>."
+  },
+  {
+    titre:"Les animaux du printemps",
+    question:"Que font les bêtes et les oiseaux au retour du printemps ?",
+    choices:[
+      "Ils dorment.",
+      "Ils s'en vont.",
+      "Ils chantent ou crient dans leur «\u00a0jargon\u00a0».",
+      "Ils se cachent du froid."
+    ],
+    correct:2,
+    indice:"Lis les deux vers : «\u00a0Il n'y a bête ni oiseau / Qu'en son jargon ne chante ou crie\u00a0».",
+    correction:"«\u00a0Il n'y a bête ni oiseau / Qu'en son jargon ne chante ou crie\u00a0» : tous les animaux chantent, chacun dans son langage. La <b>nature entière est joyeuse</b>."
+  },
+  {
+    titre:"L'image précieuse",
+    question:"À quoi le poète compare-t-il les gouttes d'eau des rivières ?",
+    choices:[
+      "À des larmes de tristesse.",
+      "À des bijoux d'argent précieux.",
+      "À des flocons de neige.",
+      "À des étoiles du ciel."
+    ],
+    correct:1,
+    indice:"Que veut dire «\u00a0gouttes d'argent d'orfèvrerie\u00a0» ? Pense au travail des bijoux.",
+    correction:"«\u00a0Gouttes d'argent d'orfèvrerie\u00a0» compare l'eau à des <b>bijoux précieux</b> faits par un orfèvre. C'est une métaphore qui montre la beauté du printemps."
+  },
+  {
+    titre:"Le secret du poète",
+    question:"Quelle émotion le poète exprime-t-il dans tout le poème ?",
+    choices:[
+      "La peur de l'hiver.",
+      "La colère contre la pluie.",
+      "La tristesse de la nuit.",
+      "La joie de voir revenir le printemps."
+    ],
+    correct:3,
+    indice:"Repense aux mots «\u00a0riant\u00a0», «\u00a0jolie\u00a0», «\u00a0chante\u00a0», «\u00a0s'habille de nouveau\u00a0».",
+    correction:"Tout le poème célèbre le renouveau : le soleil «\u00a0riant\u00a0», la livrée «\u00a0jolie\u00a0», les animaux qui «\u00a0chantent\u00a0». Charles d'Orléans exprime la <b>joie de voir revenir le printemps</b>."
+  }
+];
+
+const TOTAL = DEFIS.length;
+const LETTRES = ['A','B','C','D'];
+const $ = id => document.getElementById(id);
+
+let idx = 0, reussis = 0, erreurs = 0;
+let etat = [], selectedChoice = null;
+
+function resetState(){
+  idx = 0; reussis = 0; erreurs = 0;
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null }));
+  selectedChoice = null;
+}
+resetState();
+
+function buildStars(){
+  const c = $('etoiles'); c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const s = document.createElement('span');
+    s.className='star'; s.textContent='★';
+    c.appendChild(s);
+  }
+}
+buildStars();
+
+function render(){
+  selectedChoice = null;
+  const d = DEFIS[idx], e = etat[idx];
+
+  $('sc-reussis').textContent  = reussis;
+  $('sc-erreurs').textContent  = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis;
+
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  const pct = Math.round((reussis/TOTAL)*100);
+  $('xp-fill').style.width = pct+'%';
+  $('xp-pct').textContent  = pct+' %';
+
+  $('defi-count').textContent    = 'DÉFI '+(idx+1)+' / '+TOTAL;
+  $('card-defi-num').textContent = 'DÉFI '+String(idx+1).padStart(2,'0');
+  $('question-txt').textContent  = d.question;
+
+  const cont = $('choix'); cont.innerHTML = '';
+  d.choices.forEach((txt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'choix-btn';
+    b.innerHTML = '<span class="lettre">'+LETTRES[i]+'</span><span>'+txt+'</span>';
+    b.dataset.i = i;
+    if(e.validated){
+      b.classList.add('locked');
+      if(i === d.correct)                   b.classList.add('good');
+      if(i === e.picked && i !== d.correct) b.classList.add('bad');
+    } else {
+      b.addEventListener('click', ()=> pickChoice(i, b));
+    }
+    cont.appendChild(b);
+  });
+  if(e.validated) selectedChoice = e.picked;
+
+  $('indice-box').className = 'indice-box';
+  $('indice-box').innerHTML = '';
+  $('feedback').className   = 'feedback';
+  $('feedback').innerHTML   = '';
+  $('correction').className = 'correction';
+  $('correction').innerHTML = '';
+
+  if(e.validated){ showFeedback(e.correct); showCorrection(); }
+
+  refreshButtons();
+  $('btn-retour').disabled = (idx === 0);
+}
+
+function pickChoice(i, btn){
+  if(etat[idx].validated) return;
+  selectedChoice = i;
+  document.querySelectorAll('#choix .choix-btn').forEach(b=> b.classList.remove('selected'));
+  btn.classList.add('selected');
+  refreshButtons();
+}
+
+function refreshButtons(){
+  const e = etat[idx];
+  const validated = e.validated;
+  $('btn-valider').disabled = (selectedChoice === null || validated);
+  $('btn-valider').style.display = validated ? 'none' : '';
+  $('btn-indice').disabled = validated;
+  $('btn-indice').style.display = validated ? 'none' : '';
+  const bs = $('btn-suivant');
+  if(validated){
+    bs.classList.add('visible');
+    bs.disabled = false;
+    bs.textContent = (idx === TOTAL-1) ? 'VOIR LES RÉSULTATS' : 'SUIVANT \u2192';
+  } else {
+    bs.classList.remove('visible');
+    bs.disabled = true;
+  }
+}
+
+function valider(){
+  const d = DEFIS[idx], e = etat[idx];
+  if(e.validated || selectedChoice === null) return;
+  const correct = (selectedChoice === d.correct);
+  e.validated = true; e.correct = correct; e.picked = selectedChoice;
+  if(correct){ reussis++; fireXP(); } else { erreurs++; }
+  showFeedback(correct);
+  showCorrection();
+  render();
+}
+
+function showFeedback(correct){
+  const fb = $('feedback');
+  if(correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '<b>Bonne réponse !</b> Tu as trouvé un indice du printemps.';
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '<b>Pas tout à fait.</b> Relis la correction pour comprendre pourquoi.';
+  }
+}
+
+function showCorrection(){
+  const c = $('correction');
+  c.className = 'correction show';
+  c.innerHTML = '<b>Correction :</b> ' + DEFIS[idx].correction;
+}
+
+function indice(){
+  if(etat[idx].validated) return;
+  const box = $('indice-box');
+  box.className = 'indice-box show';
+  box.innerHTML = '<b>Indice :</b> ' + DEFIS[idx].indice;
+}
+
+function suivant(){
+  if(!etat[idx].validated) return;
+  if(idx < TOTAL-1){ idx++; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else { showResults(); }
+}
+function retour(){
+  if(idx > 0){ idx--; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go');
+  void p.offsetWidth;
+  p.classList.add('go');
+}
+
+function showResults(){
+  $('exo-card').style.display = 'none';
+  const r = $('results-card');
+  r.classList.add('show');
+  $('res-score').textContent = reussis+' / '+TOTAL;
+  let stars='';
+  for(let i=0;i<TOTAL;i++) stars += (i<reussis)?'★':'☆';
+  $('res-stars').textContent = stars;
+  const ratio = reussis/TOTAL;
+  let msg;
+  if(reussis===TOTAL)  msg='// PARFAIT — tu as percé tous les secrets du poème !';
+  else if(ratio>=.75)  msg='// TRÈS BIEN — tu comprends bien l\u2019arrivée du printemps !';
+  else if(ratio>=.5)   msg='// BIEN JOUÉ — quelques indices à retrouver, mais tu progresses.';
+  else if(reussis>0)   msg='// CONTINUE — relis le poème, d\u2019autres indices t\u2019attendent.';
+  else                 msg='// À RETRAVAILLER — reprends le poème vers par vers et réessaie.';
+  $('res-msg').textContent = msg;
+  let html='';
+  DEFIS.forEach((d,i)=>{
+    const ok = etat[i].correct;
+    html += '<div class="recap-item">'
+          + '<span class="eq">Défi '+(i+1)+' — '+d.titre+'</span>'
+          + '<span class="st">'+(ok?'✓':'✗')+'</span>'
+          +'</div>';
+  });
+  $('res-recap').innerHTML = html;
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i<reussis);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function rejouer(){
+  resetState();
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display='';
+  buildStars();
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+$('btn-valider') .addEventListener('click', valider);
+$('btn-indice')  .addEventListener('click', indice);
+$('btn-suivant') .addEventListener('click', suivant);
+$('btn-retour')  .addEventListener('click', retour);
+$('btn-rejouer') .addEventListener('click', rejouer);
+
+render();
+</script>
+</body>
+</html>
