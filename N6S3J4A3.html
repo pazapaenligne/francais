@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA — Course des souvenirs</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+:root{
+  --day:#3ab5d8; --day-dark:#1a6e88; --day-light:#e8f6fb;
+  --day-glow:rgba(58,181,216,.7);
+  --jaune:#f5c518; --jaune-dark:#c49010;
+  --vert:#00c853;
+  --bg:#08161d; --bg2:#0c1f27;
+  --surface:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.12);
+  --text:#f0f0f0; --muted:#9bbac4;
+  --or:#ffd700; --argent:#c0c0c0;
+  --radius:14px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh;}
+.screen{display:none;width:100%;min-height:100vh;}
+.screen.active{display:flex;}
+
+/* ═══ ÉCRAN DÉPART ═══════════════════════════ */
+#screen-start{
+  flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 0%,#103040 0%,#08161d 60%);
+  padding:2rem 1.5rem;text-align:center;position:relative;overflow:hidden;
+}
+#screen-start::after{
+  content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(58,181,216,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.start-badge{
+  position:relative;z-index:2;
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:var(--jaune);color:#000;
+  font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:.32rem 1rem;border-radius:99px;margin-bottom:1.6rem;
+  box-shadow:0 3px 16px rgba(245,197,24,.45);
+}
+.start-badge .dot{width:8px;height:8px;border-radius:50%;}
+.start-title{
+  position:relative;z-index:2;font-family:'Orbitron',sans-serif;
+  font-size:clamp(2rem,7.5vw,3.6rem);font-weight:900;line-height:1.1;
+  letter-spacing:.04em;margin-bottom:.7rem;
+  background:linear-gradient(135deg,#9fe1f4,#3ab5d8,#9fe1f4);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmer 2.6s linear infinite;text-transform:uppercase;
+}
+@keyframes shimmer{to{background-position:200% center;}}
+.start-sub{position:relative;z-index:2;font-size:clamp(.9rem,2.5vw,1.05rem);color:#cfe6ee;margin-bottom:1.2rem;line-height:1.6;max-width:560px;}
+.start-info{
+  position:relative;z-index:2;
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:99px;padding:.45rem 1.2rem;margin-bottom:2rem;
+  font-size:.85rem;color:var(--day);font-weight:700;
+}
+.btn-start{
+  position:relative;z-index:2;font-family:'Orbitron',sans-serif;
+  background:var(--day);color:#06222c;border:none;border-radius:18px;
+  font-size:clamp(1.2rem,4vw,1.7rem);font-weight:900;
+  padding:1.1rem 3rem;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;
+  box-shadow:0 0 0 6px rgba(58,181,216,.22),0 8px 40px rgba(58,181,216,.55);
+  min-height:68px;-webkit-tap-highlight-color:transparent;
+  animation:pulsStart 1.5s ease-in-out infinite;transition:transform .12s;
+}
+.btn-start:hover{transform:scale(1.05);}
+.btn-start:active{transform:scale(.96);animation:none;}
+@keyframes pulsStart{
+  0%,100%{box-shadow:0 0 0 6px rgba(58,181,216,.22),0 8px 40px rgba(58,181,216,.55);}
+  50%{box-shadow:0 0 0 16px rgba(58,181,216,0),0 12px 50px rgba(58,181,216,.8);}
+}
+
+/* ═══ COMPTE À REBOURS ════════════════════════ */
+#screen-countdown{flex-direction:column;align-items:center;justify-content:center;background:var(--bg);}
+.countdown-lights{display:flex;gap:.8rem;margin-bottom:2.5rem;}
+.light{width:46px;height:46px;border-radius:50%;background:#0a2730;border:3px solid #103a47;transition:background .1s,box-shadow .1s;}
+.light.on{background:var(--day);box-shadow:0 0 24px 10px rgba(58,181,216,.8);}
+.light.go{background:var(--vert);box-shadow:0 0 28px 12px rgba(0,200,83,.9);}
+.countdown-num{font-family:'Orbitron',sans-serif;font-size:clamp(5rem,20vw,9rem);font-weight:900;line-height:1;text-align:center;text-shadow:0 0 50px currentColor;animation:countPop .4s cubic-bezier(.18,.89,.32,1.6) both;}
+.bleu-txt{color:var(--day);}.vert-txt{color:var(--vert);}
+@keyframes countPop{from{transform:scale(2.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* ═══ ÉCRAN JEU — 2 COLONNES ═════════════════ */
+#screen-game{flex-direction:row;align-items:stretch;background:var(--bg);}
+.col-circuit{flex:0 0 42%;max-width:42%;position:relative;overflow:hidden;background:#16242b;display:flex;flex-direction:column;}
+.circuit-road{position:absolute;inset:0;background:#243640;}
+.road-edge-l,.road-edge-r{position:absolute;top:0;bottom:0;width:26px;z-index:2;background:repeating-linear-gradient(180deg,var(--day) 0,var(--day) 22px,#fff 22px,#fff 44px);}
+.road-edge-l{left:0;}.road-edge-r{right:0;}
+.road-center{position:absolute;left:50%;transform:translateX(-50%);width:6px;height:200%;top:-100%;background:repeating-linear-gradient(180deg,rgba(255,255,255,.6) 0,rgba(255,255,255,.6) 28px,transparent 28px,transparent 52px);animation:roadScroll .7s linear infinite;z-index:1;}
+@keyframes roadScroll{from{transform:translateX(-50%) translateY(0);}to{transform:translateX(-50%) translateY(50%);}}
+.finish-line{position:absolute;top:0;left:26px;right:26px;height:30px;background:repeating-linear-gradient(90deg,#fff 0,#fff 15px,#000 15px,#000 30px);z-index:3;}
+.finish-flag{position:absolute;top:2px;right:30px;font-size:1.7rem;z-index:4;animation:flagWave .5s ease-in-out infinite alternate;}
+@keyframes flagWave{from{transform:rotate(-4deg);}to{transform:rotate(4deg);}}
+.car-in-circuit{position:absolute;left:50%;transform:translateX(-50%);z-index:10;transition:bottom .7s cubic-bezier(.22,1,.36,1);bottom:30px;}
+.car-in-circuit svg{width:clamp(96px,22vw,150px);display:block;filter:drop-shadow(0 0 18px var(--day-glow)) drop-shadow(0 8px 24px rgba(0,0,0,.8));animation:carIdle .35s ease-in-out infinite alternate;}
+@keyframes carIdle{from{transform:rotate(-.4deg) scale(1);}to{transform:rotate(.4deg) scale(1.015);}}
+.car-in-circuit.zoom-effect svg{animation:carZoom .55s ease-out both!important;}
+@keyframes carZoom{0%{transform:scale(1);}40%{transform:scale(1.3);}100%{transform:scale(1);}}
+@keyframes brakeShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-2.5deg)}75%{transform:translateX(4px) rotate(2.5deg)}}
+.car-in-circuit.brake-effect svg{animation:brakeShake .45s ease!important;filter:drop-shadow(0 0 20px rgba(232,0,45,.85)) drop-shadow(0 8px 24px rgba(0,0,0,.8))!important;}
+.exhaust{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);width:11px;background:linear-gradient(180deg,rgba(159,225,244,.9),rgba(58,181,216,.4),transparent);border-radius:4px;animation:exhaustPulse .2s ease-in-out infinite alternate;}
+@keyframes exhaustPulse{from{height:12px;opacity:.7;}to{height:28px;opacity:1;}}
+.circuit-progress{position:absolute;bottom:0;left:26px;right:26px;height:6px;background:rgba(255,255,255,.1);z-index:5;}
+.circuit-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--vert),var(--jaune),var(--day));transition:width .6s cubic-bezier(.22,1,.36,1);box-shadow:0 0 8px rgba(245,197,24,.6);}
+
+.col-questions{flex:1;display:flex;flex-direction:column;background:var(--bg2);padding:1.6rem 1.4rem;overflow-y:auto;position:relative;}
+.hud-right{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+.hud-timer{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:.06em;}
+.hud-q-label{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--day);font-weight:700;letter-spacing:.04em;}
+.sound-btn{background:transparent;border:1px solid var(--border);border-radius:6px;padding:.3rem .6rem;cursor:pointer;color:var(--muted);font-size:.95rem;transition:color .15s;-webkit-tap-highlight-color:transparent;min-height:36px;}
+.sound-btn:hover{color:#fff;}
+.q-prompt{font-size:clamp(1.25rem,3.2vw,1.85rem);font-weight:700;color:#fff;text-align:left;margin:.6rem 0 1.6rem;line-height:1.55;}
+.q-prompt .blank{color:var(--day);letter-spacing:.04em;}
+.q-prompt .verb-hint{display:inline-block;color:var(--jaune);font-weight:800;font-size:.62em;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.4);border-radius:6px;padding:.05em .5em;vertical-align:middle;margin-left:.2em;white-space:nowrap;}
+.choices-list{display:flex;flex-direction:column;gap:.7rem;}
+.choice-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:#dff3fa;font-size:clamp(1rem,2.5vw,1.2rem);font-weight:700;padding:.95rem 1.4rem;cursor:pointer;transition:background .12s,border-color .12s,transform .1s,color .12s;min-height:56px;-webkit-tap-highlight-color:transparent;text-align:left;}
+.choice-btn:hover:not(:disabled){background:rgba(58,181,216,.15);border-color:var(--day);transform:translateX(4px);color:#fff;}
+.choice-btn:active:not(:disabled){transform:scale(.98);}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.correct-ans{background:rgba(0,200,83,.18);border-color:var(--vert);color:var(--vert);animation:flashGreen .5s ease both;}
+.choice-btn.wrong-ans{background:rgba(232,0,45,.18);border-color:#e8002d;color:#ff8a9a;opacity:.85;}
+@keyframes flashGreen{0%{box-shadow:0 0 0 0 rgba(0,200,83,.8);}50%{box-shadow:0 0 0 14px rgba(0,200,83,0);}100%{box-shadow:none;}}
+.feedback-right{margin-top:1.1rem;padding:.85rem 1.1rem;border-radius:var(--radius-sm);font-size:clamp(.92rem,2.3vw,1.02rem);font-weight:600;display:none;animation:popUp .3s cubic-bezier(.18,.89,.32,1.6) both;line-height:1.5;}
+.feedback-right.show{display:block;}
+.feedback-right.ok{background:rgba(0,200,83,.15);color:#7df0a8;border:1px solid var(--vert);}
+.feedback-right.ko{background:rgba(232,0,45,.13);color:#ffc3cd;border:1px solid #e8002d;}
+@keyframes popUp{from{transform:scale(.85) translateY(6px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+
+/* ═══ ÉCRAN VICTOIRE ═══════════════════════════ */
+#screen-win{flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#10322a,var(--bg));text-align:center;padding:2rem 1.5rem;position:relative;overflow:hidden;}
+.confetti-c{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.conf{position:absolute;width:8px;height:8px;border-radius:2px;animation:confFall linear both;will-change:transform;}
+@keyframes confFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg);}100%{opacity:.3;transform:translateY(110vh) rotate(720deg);}}
+.win-badge{position:relative;z-index:2;display:inline-flex;align-items:center;gap:.45rem;background:var(--jaune);color:#000;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.32rem 1rem;border-radius:99px;margin-bottom:1.1rem;box-shadow:0 3px 16px rgba(245,197,24,.45);}
+.win-badge .dot{width:8px;height:8px;border-radius:50%;}
+.win-flags{position:relative;z-index:2;font-size:1.9rem;margin-bottom:.4rem;}
+.win-title{position:relative;z-index:2;font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,6.5vw,3.2rem);font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem;background:linear-gradient(135deg,var(--or),var(--jaune),var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 2.2s linear infinite;}
+.win-sub{position:relative;z-index:2;color:#cfe6ee;font-size:clamp(.92rem,2.4vw,1.05rem);max-width:520px;line-height:1.55;margin-bottom:1rem;}
+.win-car{position:relative;z-index:2;margin:.6rem auto;animation:podiumDrive .6s cubic-bezier(.18,.89,.32,1.6) both .2s;}
+.win-car svg{width:clamp(115px,26vw,175px);filter:drop-shadow(0 0 26px var(--day-glow));}
+@keyframes podiumDrive{from{transform:translateX(-150px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.win-stats{position:relative;z-index:2;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:1rem 0 1.2rem;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem 1.3rem;min-width:104px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:800;color:var(--or);}
+.stat-lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.stars-row{position:relative;z-index:2;font-size:2rem;margin-bottom:1.3rem;letter-spacing:.12em;color:var(--jaune);}
+.btn-replay{position:relative;z-index:2;font-family:'Orbitron',sans-serif;background:linear-gradient(135deg,var(--or),var(--jaune-dark));color:#1a1100;border:none;border-radius:var(--radius);font-size:clamp(.95rem,3vw,1.1rem);font-weight:800;padding:.9rem 2.4rem;cursor:pointer;letter-spacing:.05em;box-shadow:0 6px 28px rgba(245,197,24,.5);transition:transform .12s,box-shadow .12s;min-height:52px;-webkit-tap-highlight-color:transparent;}
+.btn-replay:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(245,197,24,.7);}
+.btn-replay:active{transform:scale(.97);}
+
+/* Logo Pazapa */
+.pazapa-footer{position:fixed;bottom:12px;left:16px;z-index:100;opacity:.7;pointer-events:none;font-size:.7rem;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+
+/* Responsive */
+@media(max-width:640px){
+  #screen-game{flex-direction:column;}
+  .col-circuit{flex:0 0 240px;max-width:100%;}
+  .col-questions{padding:1.1rem 1rem;}
+  .q-prompt{margin:.6rem 0 1.1rem;}
+  .choice-btn{font-size:clamp(.95rem,4vw,1.05rem);min-height:50px;}
+  .car-in-circuit svg{width:clamp(84px,26vw,124px);}
+  .road-edge-l,.road-edge-r{width:18px;}
+  .finish-line{left:18px;right:18px;}
+}
+</style>
+</head>
+<body>
+
+<audio id="engine-audio" loop preload="auto">
+  <source src="data:audio/mpeg;base64,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" type="audio/mpeg"/>
+</audio>
+
+<!-- ÉCRAN DÉPART -->
+<div class="screen active" id="screen-start">
+  <div class="start-badge">
+    <span class="dot" style="background:#f5c518"></span>
+    <span class="dot" style="background:#8dc63f"></span>
+    <span class="dot" style="background:#f5a623"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+  </div>
+  <div class="start-title">Course<br>des Souvenirs</div>
+  <div class="start-sub">Un po&egrave;te veut terminer son carnet de souvenirs avant le coucher du soleil. Compl&egrave;te chaque phrase au pass&eacute; compos&eacute; pour faire avancer la voiture jusqu&rsquo;&agrave; la ligne d&rsquo;arriv&eacute;e&nbsp;!</div>
+  <div class="start-info">&#127937; 10 questions &middot; Le pass&eacute; compos&eacute;</div>
+  <button class="btn-start" onclick="startCountdown()">&#9889; COMMENCER</button>
+</div>
+
+<!-- COMPTE À REBOURS -->
+<div class="screen" id="screen-countdown">
+  <div class="countdown-lights">
+    <div class="light" id="l1"></div><div class="light" id="l2"></div>
+    <div class="light" id="l3"></div><div class="light" id="l4"></div>
+    <div class="light" id="l5"></div>
+  </div>
+  <div class="countdown-num bleu-txt" id="countdown-num">3</div>
+</div>
+
+<!-- ÉCRAN JEU -->
+<div class="screen" id="screen-game">
+  <div class="col-circuit">
+    <div class="circuit-road"></div>
+    <div class="road-center"></div>
+    <div class="road-edge-l"></div>
+    <div class="road-edge-r"></div>
+    <div class="finish-line"></div>
+    <div class="finish-flag">&#127937;</div>
+    <div class="car-in-circuit" id="car-in-circuit">
+      <svg class="carbody" viewBox="0 0 220 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Voiture du po&egrave;te">
+<defs>
+<linearGradient id="cb" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#1f8fb3"/><stop offset=".5" stop-color="#6fd4f0"/><stop offset="1" stop-color="#15607a"/>
+</linearGradient>
+</defs>
+<rect x="30" y="320" width="160" height="22" rx="7" fill="#0d3a48"/>
+<rect x="40" y="314" width="140" height="11" rx="5" fill="#1a6e88"/>
+<rect x="12" y="250" width="42" height="70" rx="13" fill="#14181b"/>
+<rect x="166" y="250" width="42" height="70" rx="13" fill="#14181b"/>
+<rect x="18" y="260" width="30" height="50" rx="8" fill="#2c353a"/>
+<rect x="172" y="260" width="30" height="50" rx="8" fill="#2c353a"/>
+<rect x="16" y="104" width="38" height="60" rx="12" fill="#14181b"/>
+<rect x="166" y="104" width="38" height="60" rx="12" fill="#14181b"/>
+<rect x="22" y="113" width="26" height="42" rx="7" fill="#2c353a"/>
+<rect x="172" y="113" width="26" height="42" rx="7" fill="#2c353a"/>
+<path d="M110 22 C121 22 128 34 130 54 L137 130 C144 166 146 224 141 300 C139 320 81 320 79 300 C74 224 76 166 83 130 L90 54 C92 34 99 22 110 22 Z" fill="url(#cb)" stroke="#0d3a48" stroke-width="4"/>
+<path d="M110 22 C104 22 100 29 99 40 L121 40 C120 29 116 22 110 22 Z" fill="#9be6f7"/>
+<rect x="62" y="46" width="96" height="15" rx="7" fill="#0d3a48"/>
+<rect x="72" y="41" width="76" height="9" rx="4" fill="#2a93b6"/>
+<rect x="102" y="66" width="16" height="104" rx="6" fill="#f5c518"/>
+<ellipse cx="110" cy="192" rx="24" ry="36" fill="#0b2a35"/>
+<ellipse cx="110" cy="192" rx="15" ry="26" fill="#07212a"/>
+<circle cx="110" cy="270" r="20" fill="#ffffff"/>
+<text x="110" y="279" font-family="Arial,Helvetica,sans-serif" font-size="26" font-weight="700" fill="#15607a" text-anchor="middle">6</text>
+</svg>
+      <div class="exhaust"></div>
+    </div>
+    <div class="circuit-progress">
+      <div class="circuit-progress-fill" id="circuit-prog"></div>
+    </div>
+  </div>
+  <div class="col-questions">
+    <div class="hud-right">
+      <div class="hud-q-label" id="hud-q">Question 1/10</div>
+      <div class="hud-timer" id="hud-timer">00:00</div>
+      <button class="sound-btn" id="sound-btn" onclick="toggleSound()">&#128266;</button>
+    </div>
+    <div class="q-prompt" id="q-prompt"></div>
+    <div class="choices-list" id="choices-list"></div>
+    <div class="feedback-right" id="feedback-right"></div>
+  </div>
+</div>
+
+<!-- ÉCRAN VICTOIRE -->
+<div class="screen" id="screen-win">
+  <div class="confetti-c" id="confetti-c"></div>
+  <div class="win-badge">
+    <span class="dot" style="background:#f5c518"></span>
+    <span class="dot" style="background:#8dc63f"></span>
+    <span class="dot" style="background:#f5a623"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+  </div>
+  <div class="win-flags">&#127937;</div>
+  <div class="win-title" id="win-title">Carnet termin&eacute;&nbsp;!</div>
+  <div class="win-sub" id="win-sub"></div>
+  <div class="win-car"><svg class="carbody" viewBox="0 0 220 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Voiture du po&egrave;te">
+<defs>
+<linearGradient id="cb" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#1f8fb3"/><stop offset=".5" stop-color="#6fd4f0"/><stop offset="1" stop-color="#15607a"/>
+</linearGradient>
+</defs>
+<rect x="30" y="320" width="160" height="22" rx="7" fill="#0d3a48"/>
+<rect x="40" y="314" width="140" height="11" rx="5" fill="#1a6e88"/>
+<rect x="12" y="250" width="42" height="70" rx="13" fill="#14181b"/>
+<rect x="166" y="250" width="42" height="70" rx="13" fill="#14181b"/>
+<rect x="18" y="260" width="30" height="50" rx="8" fill="#2c353a"/>
+<rect x="172" y="260" width="30" height="50" rx="8" fill="#2c353a"/>
+<rect x="16" y="104" width="38" height="60" rx="12" fill="#14181b"/>
+<rect x="166" y="104" width="38" height="60" rx="12" fill="#14181b"/>
+<rect x="22" y="113" width="26" height="42" rx="7" fill="#2c353a"/>
+<rect x="172" y="113" width="26" height="42" rx="7" fill="#2c353a"/>
+<path d="M110 22 C121 22 128 34 130 54 L137 130 C144 166 146 224 141 300 C139 320 81 320 79 300 C74 224 76 166 83 130 L90 54 C92 34 99 22 110 22 Z" fill="url(#cb)" stroke="#0d3a48" stroke-width="4"/>
+<path d="M110 22 C104 22 100 29 99 40 L121 40 C120 29 116 22 110 22 Z" fill="#9be6f7"/>
+<rect x="62" y="46" width="96" height="15" rx="7" fill="#0d3a48"/>
+<rect x="72" y="41" width="76" height="9" rx="4" fill="#2a93b6"/>
+<rect x="102" y="66" width="16" height="104" rx="6" fill="#f5c518"/>
+<ellipse cx="110" cy="192" rx="24" ry="36" fill="#0b2a35"/>
+<ellipse cx="110" cy="192" rx="15" ry="26" fill="#07212a"/>
+<circle cx="110" cy="270" r="20" fill="#ffffff"/>
+<text x="110" y="279" font-family="Arial,Helvetica,sans-serif" font-size="26" font-weight="700" fill="#15607a" text-anchor="middle">6</text>
+</svg></div>
+  <div class="stars-row" id="win-stars">&#9733;&#9734;&#9734;</div>
+  <div class="win-stats">
+    <div class="stat-box"><div class="stat-val" id="stat-score">0/10</div><div class="stat-lbl">Score</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-progress">0%</div><div class="stat-lbl">Distance</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-temps">00:00</div><div class="stat-lbl">Temps</div></div>
+  </div>
+  <button class="btn-replay" onclick="replay()">&#10227; REJOUER</button>
+</div>
+
+<div class="pazapa-footer">Pazapa</div>
+
+<script>
+/* ════════════════════════════════════════════════
+   COURSE DES SOUVENIRS — Le passé composé (S3 J4)
+   10 phrases à trous · la voiture avance de 10% par bonne réponse.
+════════════════════════════════════════════════ */
+var QUESTIONS = [
+  { prompt:"Ce soir, le soleil", end:"derrière les collines dorées.", verb:"disparaître",
+    answer:"a disparu", wrong:["est disparu","a disparue"],
+    explain:"« Disparaître » se conjugue avec « avoir » : pas d'accord avec le sujet. → a disparu." },
+  { prompt:"Les nuages roses", end:"lentement dans le ciel.", verb:"glisser",
+    answer:"ont glissé", wrong:["sont glissés","ont glissés"],
+    explain:"Auxiliaire « avoir » : le participe ne s'accorde pas avec le sujet. → ont glissé." },
+  { prompt:"Une légère brise", end:"les hautes herbes du chemin.", verb:"caresser",
+    answer:"a caressé", wrong:["est caressée","a caressée"],
+    explain:"Auxiliaire « avoir », et le COD est placé après : pas d'accord. → a caressé." },
+  { prompt:"Les feuilles des arbres", end:"doucement sous le vent.", verb:"frémir",
+    answer:"ont frémi", wrong:["sont frémies","ont frémies"],
+    explain:"Auxiliaire « avoir » : pas d'accord avec le sujet. → ont frémi." },
+  { prompt:"Les premières étoiles", end:"dans l'obscurité naissante.", verb:"apparaître",
+    answer:"sont apparues", wrong:["sont apparus","ont apparu"],
+    explain:"« Apparaître » se conjugue ici avec « être » : accord avec le sujet (féminin pluriel). → sont apparues." },
+  { prompt:"Au bord du lac, les reflets du ciel", end:"sur l'eau calme.", verb:"danser",
+    answer:"ont dansé", wrong:["sont dansés","ont dansés"],
+    explain:"Auxiliaire « avoir » : pas d'accord avec le sujet. → ont dansé." },
+  { prompt:"Les collines", end:"peu à peu dans la lumière du crépuscule.", verb:"s'effacer",
+    answer:"se sont effacées", wrong:["se sont effacés","ont effacé"],
+    explain:"Verbe pronominal : auxiliaire « être », accord avec le sujet (féminin pluriel). → se sont effacées." },
+  { prompt:"La nuit", end:"silencieusement sur le paysage.", verb:"tomber",
+    answer:"est tombée", wrong:["a tombé","est tombé"],
+    explain:"« Tomber » se conjugue avec « être » : accord féminin singulier. → est tombée." },
+  { prompt:"Les derniers oiseaux", end:"vers leurs abris avant l'obscurité.", verb:"revenir",
+    answer:"sont revenus", wrong:["ont revenu","sont revenu"],
+    explain:"« Revenir » se conjugue avec « être » : accord masculin pluriel. → sont revenus." },
+  { prompt:"Devant ce spectacle, nous", end:"un profond sentiment de paix.", verb:"ressentir",
+    answer:"avons ressenti", wrong:["sommes ressentis","avons ressentis"],
+    explain:"Auxiliaire « avoir » : pas d'accord avec le sujet. → avons ressenti." }
+];
+
+var qIndex=0, score=0, progress=0, answered=false;
+var startTime=0, timerInt=null, soundOn=true;
+var engine=document.getElementById('engine-audio');
+
+function $(id){ return document.getElementById(id); }
+function show(id){ var s=document.querySelectorAll('.screen'); for(var i=0;i<s.length;i++) s[i].classList.remove('active'); $(id).classList.add('active'); }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+
+function startCountdown(){
+  show('screen-countdown');
+  if(soundOn){ try{ engine.volume=0.3; engine.play().catch(function(){}); }catch(e){} }
+  var lights=['l1','l2','l3','l4','l5'];
+  var num=$('countdown-num');
+  function step(n){
+    if(n>0){
+      num.textContent=n; num.className='countdown-num bleu-txt';
+      var on=5-(n*1); // lumières progressives
+      for(var k=0;k<lights.length;k++){ $(lights[k]).className='light'+(k< (3-n+2)?' on':''); }
+      setTimeout(function(){ step(n-1); },800);
+    } else {
+      num.textContent='GO !'; num.className='countdown-num vert-txt';
+      for(var k=0;k<lights.length;k++) $(lights[k]).className='light go';
+      setTimeout(startGame,750);
+    }
+  }
+  step(3);
+}
+
+function startGame(){
+  show('screen-game');
+  qIndex=0; score=0; progress=0;
+  startTime=Date.now();
+  if(timerInt) clearInterval(timerInt);
+  timerInt=setInterval(updateTimer,500);
+  updateTimer();
+  updateCar(false);
+  buildQuestion();
+}
+
+function buildQuestion(){
+  answered=false;
+  var q=QUESTIONS[qIndex];
+  $('hud-q').textContent='Question '+(qIndex+1)+'/10';
+  $('q-prompt').innerHTML = q.prompt+' <span class="blank">__________</span> '+q.end+' <span class="verb-hint">'+q.verb+'</span>';
+  var fb=$('feedback-right'); fb.className='feedback-right'; fb.innerHTML='';
+  var opts=shuffle([q.answer].concat(q.wrong));
+  var list=$('choices-list'); list.innerHTML='';
+  opts.forEach(function(opt){
+    var b=document.createElement('button');
+    b.className='choice-btn'; b.textContent=opt;
+    b.addEventListener('click',function(){ choose(opt,b); });
+    list.appendChild(b);
+  });
+}
+
+function choose(opt,btn){
+  if(answered) return;
+  answered=true;
+  var q=QUESTIONS[qIndex];
+  var correct=(opt===q.answer);
+  var btns=document.querySelectorAll('.choice-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].disabled=true;
+    if(btns[i].textContent===q.answer) btns[i].classList.add('correct-ans');
+  }
+  var fb=$('feedback-right');
+  if(correct){
+    score++;
+    progress=Math.min(100,progress+10);
+    updateCar(true);
+    fb.className='feedback-right show ok';
+    fb.innerHTML='&#9989; Bravo&nbsp;! La voiture avance vers la ligne d\'arriv&eacute;e.';
+    setTimeout(nextQuestion,1150);
+  } else {
+    btn.classList.add('wrong-ans');
+    brake();
+    fb.className='feedback-right show ko';
+    fb.innerHTML='&#10060; '+q.explain;
+    setTimeout(nextQuestion,2600);
+  }
+}
+
+function nextQuestion(){
+  qIndex++;
+  if(qIndex>=QUESTIONS.length){ endGame(); return; }
+  buildQuestion();
+}
+
+function updateCar(advance){
+  var col=document.querySelector('.col-circuit');
+  var h=col.clientHeight||400;
+  var startB=30, endB=Math.max(120,h-180);
+  var b=startB+(endB-startB)*(progress/100);
+  var car=$('car-in-circuit');
+  car.style.bottom=b+'px';
+  $('circuit-prog').style.width=progress+'%';
+  if(advance){
+    car.classList.add('zoom-effect');
+    setTimeout(function(){ car.classList.remove('zoom-effect'); },560);
+    if(soundOn && engine){ try{ engine.currentTime=0; engine.play().catch(function(){}); }catch(e){} }
+  }
+}
+
+function brake(){
+  var car=$('car-in-circuit');
+  car.classList.add('brake-effect');
+  setTimeout(function(){ car.classList.remove('brake-effect'); },480);
+}
+
+function updateTimer(){
+  var s=Math.floor((Date.now()-startTime)/1000);
+  var m=Math.floor(s/60), ss=s%60;
+  $('hud-timer').textContent=(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
+}
+
+function endGame(){
+  if(timerInt) clearInterval(timerInt);
+  if(engine){ try{ engine.pause(); }catch(e){} }
+  var perfect=(score===10);
+  $('win-title').innerHTML = perfect ? 'Carnet termin&eacute;&nbsp;!' : 'Course termin&eacute;e';
+  $('win-sub').innerHTML = perfect
+    ? 'Le po&egrave;te a compl&eacute;t&eacute; tout son carnet de souvenirs juste avant le coucher du soleil&nbsp;!'
+    : 'Le po&egrave;te a &eacute;crit une partie de ses souvenirs. Entra&icirc;ne-toi encore pour atteindre la ligne d\'arriv&eacute;e&nbsp;!';
+  $('stat-score').textContent=score+'/10';
+  var s=Math.floor((Date.now()-startTime)/1000);
+  var m=Math.floor(s/60), ss=s%60;
+  $('stat-temps').textContent=(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
+  $('stat-progress').textContent=progress+'%';
+  var stars = score>=9?3 : score>=7?2 : score>=5?1 : 0;
+  var str=''; for(var i=0;i<3;i++) str += (i<stars?'\u2605':'\u2606');
+  $('win-stars').textContent=str;
+  show('screen-win');
+  launchConfetti();
+}
+
+function launchConfetti(){
+  var c=$('confetti-c'); c.innerHTML='';
+  var colors=['#3ab5d8','#f5c518','#8dc63f','#ffffff','#ffd700'];
+  for(var i=0;i<60;i++){
+    var d=document.createElement('div'); d.className='conf';
+    d.style.left=(Math.random()*100)+'%';
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    d.style.animationDuration=(2+Math.random()*2)+'s';
+    d.style.animationDelay=(Math.random()*1.5)+'s';
+    c.appendChild(d);
+  }
+}
+
+function replay(){ show('screen-start'); }
+
+function toggleSound(){
+  soundOn=!soundOn;
+  $('sound-btn').innerHTML = soundOn ? '&#128266;' : '&#128263;';
+  if(engine){ if(soundOn){ try{ engine.play().catch(function(){}); }catch(e){} } else { try{ engine.pause(); }catch(e){} } }
+}
+</script>
+</body>
+</html>
