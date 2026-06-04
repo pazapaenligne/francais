@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa &ndash; Fran&ccedil;ais &ndash; S4J1 &ndash; Je m&rsquo;entra&icirc;ne &middot; Le calligramme</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:  #f5a623;
+      --day-dark:   #c47a10;
+      --day-light:  #fff5e0;
+      --day-border: #f5d080;
+      --day-glow:   rgba(245,166,35,.3);
+    }
+    :root {
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg); color:var(--text);
+      font-family:Arial,sans-serif;
+      min-height:100vh; display:flex; flex-direction:column;
+      align-items:center; padding:2rem 1rem 4rem;
+      position:relative; overflow-x:hidden;
+      letter-spacing:.02em; word-spacing:.06em;
+    }
+    body::before{
+      content:''; position:fixed; border-radius:50%; z-index:0;
+      opacity:.13; width:340px; height:340px;
+      background:var(--yellow); top:-80px; right:-80px;
+      pointer-events:none;
+    }
+    body::after{
+      content:''; position:fixed; border-radius:50%; z-index:0;
+      opacity:.13; width:260px; height:260px;
+      background:var(--day-color); bottom:-60px; left:-60px;
+      pointer-events:none;
+    }
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:180px;height:180px;background:var(--green);
+      bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:120px;height:120px;background:var(--pink);
+      top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.08em;
+      text-transform:uppercase;padding:.3rem .9rem;
+      border-radius:99px;margin-bottom:.5rem;
+    }
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;
+      font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+
+    /* Support calligramme */
+    .texte-support{
+      width:100%;max-width:720px;
+      background:var(--day-light);
+      border:2px solid var(--day-border);
+      border-left:5px solid var(--day-color);
+      border-radius:var(--radius);
+      padding:1.4rem 1.6rem;
+      margin-bottom:1.4rem;
+      position:relative;z-index:1;
+      font-size:.9rem;line-height:1.8;
+      box-shadow:0 2px 10px rgba(0,0,0,.05);
+    }
+    .ts-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem;}
+    .ts-titre{font-size:.9rem;font-weight:700;color:var(--day-dark);margin-bottom:.6rem;font-style:italic;}
+    .texte-support p{margin-bottom:.4rem;color:var(--text);}
+
+    /* Consigne */
+    .consigne-box{
+      width:100%;max-width:720px;margin-bottom:1.4rem;position:relative;z-index:1;
+      background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+      padding:1rem 1.4rem;display:flex;align-items:flex-start;gap:.75rem;
+    }
+    .consigne-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
+    .consigne-text{font-size:.9rem;line-height:1.8;color:var(--text);}
+
+    .card{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 2rem 1.6rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+
+    .pair-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:1.2rem;text-transform:uppercase;letter-spacing:.1em;}
+
+    .q-block{margin-bottom:1.4rem;}
+    .q-block + .q-block{
+      border-top:2px dashed var(--day-border);
+      padding-top:1.4rem;
+    }
+    .q-block-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;}
+    .q-badge{font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;
+      text-transform:uppercase;letter-spacing:.08em;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .q-text{font-size:.97rem;font-weight:700;color:var(--text);margin-bottom:.85rem;line-height:1.6;}
+
+    .options-list{display:flex;flex-direction:column;gap:.5rem;}
+    .option-btn{
+      display:flex;align-items:flex-start;gap:.75rem;
+      width:100%;text-align:left;
+      background:var(--bg);border:2px solid var(--border);border-radius:10px;
+      padding:.65rem 1rem;font-family:Arial,sans-serif;font-size:.9rem;
+      color:var(--text);cursor:pointer;
+      transition:border-color .15s,background .15s;
+      line-height:1.6;min-height:44px;
+    }
+    .option-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .option-btn.selected{border-color:var(--day-color);background:var(--day-light);}
+    .option-btn.correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .option-btn.wrong  {border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+    .option-btn.missed {border-color:var(--green);background:#f0faeb;color:#2f6e10;opacity:.75;}
+    .option-btn:disabled{cursor:default;}
+    .option-letter{
+      display:flex;align-items:center;justify-content:center;
+      min-width:26px;height:26px;border-radius:6px;
+      background:var(--border);font-family:'JetBrains Mono',monospace;
+      font-size:.78rem;font-weight:700;color:var(--muted);flex-shrink:0;margin-top:.05rem;
+    }
+    .option-btn.selected .option-letter{background:var(--day-color);color:#fff;}
+    .option-btn.correct  .option-letter{background:var(--green);color:#fff;}
+    .option-btn.wrong    .option-letter{background:var(--pink);color:#fff;}
+    .option-btn.missed   .option-letter{background:var(--green);color:#fff;}
+
+    .hint-box{margin-top:.75rem;background:#fffbeb;border:1.5px dashed var(--yellow);
+      border-radius:10px;padding:.75rem 1rem;font-size:.84rem;color:#7a6010;
+      display:none;line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+
+    .feedback{margin-top:.9rem;padding:.75rem 1rem;border-radius:10px;
+      font-size:.88rem;display:none;align-items:flex-start;gap:.6rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.2rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.25rem;line-height:1.8;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;margin-top:1.2rem;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;
+      font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;position:relative;z-index:2;}
+
+    .results{width:100%;max-width:720px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 1rem;
+      background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+      font-size:.84rem;line-height:1.6;}
+    .recap-item .eq{color:var(--day-dark);flex:1;}
+    .recap-item .ans-ok{color:var(--green);font-weight:700;font-size:.8rem;white-space:nowrap;}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .4s ease both;}
+    @media(max-width:600px){
+      .card{padding:1.3rem 1rem;}
+      .btn{font-size:.85rem;padding:.55rem 1rem;}
+      .texte-support{padding:1rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+    </div>
+    <div class="week-label">Semaine 4 &ndash; Jour 1</div>
+    <h1><span class="hl">Je m&rsquo;entra&icirc;ne</span></h1>
+    <p class="subtitle">6 questions &middot; Le calligramme &middot; La Tour Eiffel d&rsquo;Apollinaire</p>
+  </header>
+
+  <div class="texte-support" id="texte-support">
+    <div class="ts-label">Support</div>
+    <div class="ts-titre">La Tour Eiffel &mdash; Guillaume Apollinaire (calligramme)</div>
+    <p>Observe attentivement le calligramme avant de r&eacute;pondre&nbsp;: sa forme, ses mots, et le lien entre les deux.</p>
+  </div>
+
+  <div class="consigne-box" id="consigne-box">
+    <span style="font-size:1.1rem;flex-shrink:0;margin-top:.1rem;">&#9997;&#65039;</span>
+    <div>
+      <div class="consigne-label">Consigne</div>
+      <p class="consigne-text">Lis attentivement chaque question.<br>Pour chaque paire, choisis la bonne r&eacute;ponse puis la citation qui la justifie.</p>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-label">Paire 1 / 3</span>
+      <span id="prog-pct">0&nbsp;%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="score-row">
+    <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span>&nbsp;correctes</div>
+    <div class="chip wrong">  <div class="dot"></div><span id="count-ko">0</span>&nbsp;erreurs</div>
+    <div class="chip remaining"><div class="dot"></div><span id="count-rem">6</span>&nbsp;restantes</div>
+  </div>
+
+  <div class="card" id="ex-card">
+    <div class="card-stripe"></div>
+    <div class="pair-label" id="pair-label">Paire 1 / 3</div>
+
+    <div class="q-block" id="qblock-a">
+      <div class="q-block-header">
+        <span class="q-badge" id="badge-a">Compr&eacute;hension</span>
+      </div>
+      <div class="q-text" id="qtext-a"></div>
+      <div class="options-list" id="opts-a"></div>
+      <div class="hint-box"  id="hint-a"></div>
+      <div class="feedback"  id="fb-a">
+        <span class="feedback-icon" id="fbicon-a"></span>
+        <div><div id="fbmsg-a"></div><div class="feedback-detail" id="fbdet-a"></div></div>
+      </div>
+    </div>
+
+    <div class="q-block" id="qblock-b">
+      <div class="q-block-header">
+        <span class="q-badge" id="badge-b">Citation</span>
+      </div>
+      <div class="q-text" id="qtext-b"></div>
+      <div class="options-list" id="opts-b"></div>
+      <div class="hint-box"  id="hint-b"></div>
+      <div class="feedback"  id="fb-b">
+        <span class="feedback-icon" id="fbicon-b"></span>
+        <div><div id="fbmsg-b"></div><div class="feedback-detail" id="fbdet-b"></div></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-check" onclick="checkPair()">&#10003;&nbsp;Valider</button>
+      <button class="btn btn-ghost"   id="btn-hint-a" onclick="toggleHint('a')" style="display:none;">?&nbsp;Indice</button>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost"   id="btn-prev" onclick="prevPair()">&larr;&nbsp;Pr&eacute;c&eacute;dent</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextPair()" disabled>Suivant&nbsp;&rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-screen">
+    <div class="results-card">
+      <div class="logo-badge" style="margin-bottom:.5rem">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+        R&eacute;sultats
+      </div>
+      <div class="results-score"><span class="s-num" id="score-num">0</span>/6</div>
+      <div class="stars" id="stars-row"></div>
+      <div class="results-msg" id="results-msg"></div>
+      <div class="recap-list" id="recap-list"></div>
+      <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">
+        &#128260;&nbsp;Recommencer
+      </button>
+    </div>
+  </div>
+
+<script>
+/* ===================================================
+   PAIRES : chaque paire = [questionA, questionB]
+   ans : index 0-based de la bonne réponse
+=================================================== */
+var PAIRS = [
+  /* ── Paire 1 ── */
+  [
+    {
+      question: "De quel lieu célèbre est-il question dans le poème ?",
+      badge: "Compréhension",
+      options: [
+        "D'un village isolé à la campagne.",
+        "D'un quartier ancien peu fréquenté.",
+        "D'une région située au bord de la mer.",
+        "D'une ville connue dans le monde entier."
+      ],
+      ans: 3,
+      hint: null,
+      feedback_ko: null
+    },
+    {
+      question: "Quelle citation justifie le mieux ta réponse ?",
+      badge: "Citation",
+      options: [
+        "« O PARIS »",
+        "« TOUS LES JOURS »",
+        "« CETTE BOUCHE »",
+        "« LA LANGUE »"
+      ],
+      ans: 0,
+      hint: null,
+      feedback_ko: null
+    }
+  ],
+  /* ── Paire 2 ── */
+  [
+    {
+      question: "Quelle image de Paris est donnée dans ce poème ?",
+      badge: "Compréhension",
+      options: [
+        "Une ville bruyante et désordonnée.",
+        "Une ville admirée et mise en valeur.",
+        "Une ville triste et abandonnée.",
+        "Une ville dangereuse et inquiétante."
+      ],
+      ans: 1,
+      hint: null,
+      feedback_ko: null
+    },
+    {
+      question: "Quelle citation soutient le mieux cette interprétation ?",
+      badge: "Citation",
+      options: [
+        "« O PARIS »",
+        "« LA LANGUE ÉLOQUENTE »",
+        "« TOUS LES JOURS »",
+        "« CETTE BOUCHE »"
+      ],
+      ans: 1,
+      hint: null,
+      feedback_ko: null
+    }
+  ],
+  /* ── Paire 3 ── */
+  [
+    {
+      question: "La Tour Eiffel est présentée comme :",
+      badge: "Compréhension",
+      options: [
+        "Un symbole important de Paris.",
+        "Un bâtiment ordinaire de la ville.",
+        "Un monument oublié des habitants.",
+        "Un lieu éloigné du centre urbain."
+      ],
+      ans: 0,
+      hint: null,
+      feedback_ko: null
+    },
+    {
+      question: "Quel élément justifie le mieux cette réponse ?",
+      badge: "Citation",
+      options: [
+        "Le monument apparaît dans un récit.",
+        "Le monument est décrit avec précision.",
+        "Le monument occupe toute la page.",
+        "Le monument est comparé à un animal."
+      ],
+      ans: 2,
+      hint: null,
+      feedback_ko: null
+    }
+  ]
+];
+
+var TOTAL_PAIRS = PAIRS.length;
+var TOTAL_Q = TOTAL_PAIRS * 2;
+var current = 0;
+var userAnswers = PAIRS.map(function(){ return [null, null]; });
+var checked = false;
+var validatedPairs = [];
+
+function $(id){ return document.getElementById(id); }
+
+function buildOptions(containerId, qData, pairIdx, slot) {
+  var list = $(containerId);
+  list.innerHTML = "";
+  var answered = validatedPairs.indexOf(pairIdx) !== -1;
+  qData.options.forEach(function(opt, i) {
+    var btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.innerHTML = "<span class=\"option-letter\">" + String.fromCharCode(65+i) + "</span><span>" + opt + "</span>";
+    btn.disabled = answered;
+    if (answered) {
+      if (i === qData.ans && i === userAnswers[pairIdx][slot]) btn.className = "option-btn correct";
+      else if (i === qData.ans)                                btn.className = "option-btn missed";
+      else if (i === userAnswers[pairIdx][slot])               btn.className = "option-btn wrong";
+    } else if (userAnswers[pairIdx][slot] === i) {
+      btn.className = "option-btn selected";
+    }
+    btn.onclick = (function(idx){ return function(){ onSelect(pairIdx, slot, idx); }; })(i);
+    list.appendChild(btn);
+  });
+}
+
+function onSelect(pairIdx, slot, idx) {
+  if (validatedPairs.indexOf(pairIdx) !== -1) return;
+  var containerId = slot === 0 ? "opts-a" : "opts-b";
+  var btns = $(containerId).querySelectorAll(".option-btn");
+  btns.forEach(function(b, i) {
+    b.className = "option-btn" + (i === idx ? " selected" : "");
+  });
+  userAnswers[pairIdx][slot] = idx;
+  var bothSelected = userAnswers[current][0] !== null && userAnswers[current][1] !== null;
+  $("btn-check").disabled = !bothSelected;
+}
+
+function render() {
+  checked = false;
+  var pair = PAIRS[current];
+  var pairDone = validatedPairs.indexOf(current) !== -1;
+
+  $("pair-label").textContent = "Paire " + (current+1) + " / " + TOTAL_PAIRS;
+  $("badge-a").textContent = pair[0].badge;
+  $("badge-b").textContent = pair[1].badge;
+  $("qtext-a").textContent = pair[0].question;
+  $("qtext-b").textContent = pair[1].question;
+
+  buildOptions("opts-a", pair[0], current, 0);
+  buildOptions("opts-b", pair[1], current, 1);
+
+  var ha = $("hint-a");
+  ha.className = "hint-box";
+  ha.textContent = "";
+  $("btn-hint-a").style.display = pair[0].hint ? "inline-flex" : "none";
+
+  $("fb-a").className = "feedback";
+  $("fb-b").className = "feedback";
+
+  if (pairDone) {
+    showFeedbacks();
+    $("btn-check").disabled = true;
+    $("btn-hint-a").style.display = "none";
+    $("btn-next").disabled = false;
+  } else {
+    $("btn-check").disabled = !(userAnswers[current][0] !== null && userAnswers[current][1] !== null);
+    $("btn-next").disabled = true;
+  }
+
+  $("btn-prev").disabled = current === 0;
+  $("btn-next").textContent = (current === TOTAL_PAIRS - 1) ? "Voir les résultats →" : "Suivant →";
+  updateProgress();
+}
+
+function checkPair() {
+  if (checked) return;
+  checked = true;
+  $("btn-check").disabled = true;
+
+  var selA = userAnswers[current][0];
+  var selB = userAnswers[current][1];
+  if (selA === null || selB === null) { checked = false; $("btn-check").disabled = false; return; }
+
+  validatedPairs.push(current);
+
+  var pair = PAIRS[current];
+  ["a","b"].forEach(function(slot, si) {
+    var qData = pair[si];
+    var sel = userAnswers[current][si];
+    var btns = $(si === 0 ? "opts-a" : "opts-b").querySelectorAll(".option-btn");
+    btns.forEach(function(b, i) {
+      b.disabled = true;
+      if (i === qData.ans && i === sel)      b.className = "option-btn correct";
+      else if (i === qData.ans)              b.className = "option-btn missed";
+      else if (i === sel)                    b.className = "option-btn wrong";
+      else                                   b.className = "option-btn";
+    });
+  });
+
+  $("btn-hint-a").style.display = "none";
+  $("hint-a").className = "hint-box";
+  showFeedbacks();
+  $("btn-next").disabled = false;
+  updateProgress();
+}
+
+function showFeedbacks() {
+  var pair = PAIRS[current];
+  ["a","b"].forEach(function(slot, si) {
+    var qData = pair[si];
+    var sel = userAnswers[current][si];
+    var ok = sel === qData.ans;
+    var fb = $(si === 0 ? "fb-a" : "fb-b");
+    fb.className = "feedback show " + (ok ? "ok" : "ko");
+    $(si === 0 ? "fbicon-a" : "fbicon-b").textContent = ok ? "\u2705" : "\u274C";
+    if (ok) {
+      $(si === 0 ? "fbmsg-a" : "fbmsg-b").textContent = "Bravo ! Bonne réponse.";
+      $(si === 0 ? "fbdet-a" : "fbdet-b").textContent = "";
+    } else {
+      $(si === 0 ? "fbmsg-a" : "fbmsg-b").textContent = "Pas tout à fait…";
+      var detail = "La bonne réponse était : " + qData.options[qData.ans] + ".";
+      if (qData.feedback_ko) detail += " " + qData.feedback_ko;
+      $(si === 0 ? "fbdet-a" : "fbdet-b").textContent = detail;
+    }
+  });
+}
+
+function toggleHint(slot) {
+  var qData = PAIRS[current][0];
+  if (!qData.hint) return;
+  var hb = $("hint-a");
+  if (hb.classList.contains("show")) {
+    hb.className = "hint-box";
+  } else {
+    hb.textContent = "\u2753 Indice : " + qData.hint;
+    hb.className = "hint-box show";
+  }
+}
+
+function updateProgress() {
+  var okCount = 0, koCount = 0, answered = 0;
+  PAIRS.forEach(function(pair, pi) {
+    if (validatedPairs.indexOf(pi) !== -1) {
+      [0,1].forEach(function(si) {
+        answered++;
+        if (userAnswers[pi][si] === pair[si].ans) okCount++;
+        else koCount++;
+      });
+    }
+  });
+  var pct = Math.round((validatedPairs.length / TOTAL_PAIRS) * 100);
+  $("progress-bar").style.width = pct + "%";
+  $("prog-label").textContent = "Paire " + (current+1) + " / " + TOTAL_PAIRS;
+  $("prog-pct").textContent = pct + "\u00a0%";
+  $("count-ok").textContent = okCount;
+  $("count-ko").textContent = koCount;
+  $("count-rem").textContent = TOTAL_Q - answered;
+}
+
+function nextPair() {
+  if (current < TOTAL_PAIRS - 1) {
+    current++;
+    render();
+    window.scrollTo({top:0,behavior:"smooth"});
+  } else {
+    if (validatedPairs.indexOf(current) !== -1) {
+      showResults();
+    }
+  }
+}
+function prevPair() {
+  if (current > 0) { current--; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+}
+
+function showResults() {
+  $("ex-card").style.display = "none";
+  $("texte-support").style.display = "none";
+  $("consigne-box").style.display = "none";
+  $("results-screen").className = "results show";
+  var ok = 0;
+  PAIRS.forEach(function(pair, pi) {
+    [0,1].forEach(function(si) {
+      if (userAnswers[pi][si] === pair[si].ans) ok++;
+    });
+  });
+  $("score-num").textContent = ok;
+  var stars = ok >= 6 ? 5 : ok >= 5 ? 4 : ok >= 4 ? 3 : ok >= 2 ? 2 : 1;
+  $("stars-row").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5-stars);
+  var msgs = ["Continue à t'entraîner !", "Bon début !", "Pas mal !",
+    "Bien joué !", "Très bien !", "Excellent !", "Parfait ! Bravo !"];
+  $("results-msg").textContent = msgs[Math.min(ok, msgs.length-1)];
+
+  var list = $("recap-list");
+  list.innerHTML = "";
+  PAIRS.forEach(function(pair, pi) {
+    pair.forEach(function(q, si) {
+      var correct = userAnswers[pi][si] === q.ans;
+      var div = document.createElement("div");
+      div.className = "recap-item " + (correct ? "ok-item" : "ko-item");
+      var shortQ = q.question.length > 55 ? q.question.slice(0,55)+"\u2026" : q.question;
+      div.innerHTML = "<span>" + (correct ? "\u2705" : "\u274C") + "</span>"
+        + "<span class=\"eq\">" + shortQ + "</span>";
+      list.appendChild(div);
+    });
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart() {
+  userAnswers = PAIRS.map(function(){ return [null, null]; });
+  validatedPairs = [];
+  current = 0;
+  checked = false;
+  $("ex-card").style.display = "block";
+  $("texte-support").style.display = "block";
+  $("consigne-box").style.display = "flex";
+  $("results-screen").className = "results";
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  updateProgress();
+  render();
+});
+</script>
+</body>
+</html>
