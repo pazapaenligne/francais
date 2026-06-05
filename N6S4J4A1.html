@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S4 J4 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      /* Jeudi → bleu */
+      --day-color:#3ab5d8; --day-dark:#1a6e88; --day-dark2:#12536b;
+      --day-light:#e8f6fb; --day-border:#9dd4e8; --day-glow:rgba(58,181,216,.30);
+      --bg:#fffdf7; --surface:#ffffff; --surface2:#f3fafd; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-light:#eafaf0; --green-dark:#1f7a3d;
+      --orange:#f5a623; --orange-light:#fff5e0;
+      --red:#b94040; --red-light:#f7eded;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:18px; --radius-sm:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1rem 0.75rem 3rem;
+      overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    }
+    .wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:320px;height:320px;top:-110px;right:-110px;
+      background:radial-gradient(circle,rgba(245,197,24,.16),transparent 70%);}
+    .b2{width:260px;height:260px;bottom:-90px;left:-90px;
+      background:radial-gradient(circle,rgba(58,181,216,.18),transparent 70%);}
+    .b3{width:180px;height:180px;top:38%;right:-70px;
+      background:radial-gradient(circle,rgba(58,181,216,.12),transparent 70%);}
+    .b4{width:150px;height:150px;bottom:25%;left:-60px;
+      background:radial-gradient(circle,rgba(242,139,130,.14),transparent 70%);}
+
+    header{text-align:center;margin-bottom:1.3rem;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:var(--day-color);color:#fff;
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;
+      box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;
+    }
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:800;line-height:1.25;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .radar-bar{
+      display:flex;align-items:center;gap:.8rem;
+      background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.6rem 1rem;
+      margin-bottom:.9rem;box-shadow:0 2px 10px var(--day-glow);
+    }
+    .radar-icon{font-size:1.5rem;flex-shrink:0;}
+    .radar-info{flex:1;min-width:0;}
+    .radar-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+    .radar-progress-bg{background:#e3eef2;border-radius:99px;height:8px;overflow:hidden;}
+    .radar-progress-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;}
+    .radar-count{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;
+      color:var(--day-dark);white-space:nowrap;}
+
+    .phrase-counter{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;}
+    .phrase-dots{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .phrase-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s;flex-shrink:0;}
+    .phrase-dot.done-ok{background:var(--day-color);}
+    .phrase-dot.done-err{background:var(--red);}
+    .phrase-dot.active{background:var(--day-dark);box-shadow:0 0 0 3px var(--day-light);}
+    .phrase-num-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);white-space:nowrap;}
+
+    .card{
+      width:100%;background:var(--surface);
+      border:1.5px solid #e8e4d9;border-radius:var(--radius);
+      padding:1.4rem 1.2rem 1.4rem;box-shadow:0 8px 32px rgba(0,0,0,.07);
+      animation:fadeUp .35s ease both;position:relative;overflow:hidden;
+    }
+    .card-stripe{height:5px;border-radius:var(--radius) var(--radius) 0 0;margin:-1.4rem -1.2rem 1.2rem;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--day-color));}
+    .ex-num{font-size:.67rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.62rem;font-weight:700;padding:.14rem .55rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.85rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);white-space:nowrap;}
+    .theme-badge.t-clic{background:var(--orange-light);color:var(--orange);border-color:var(--orange);}
+    .theme-badge.t-err{background:var(--red-light);color:var(--red);border-color:var(--red);}
+
+    .obs-box{background:var(--surface2);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin-bottom:1rem;text-align:center;}
+    .obs-line{font-size:clamp(1.02rem,3.2vw,1.28rem);font-weight:700;color:var(--text);line-height:1.6;word-break:break-word;}
+
+    .question-text{font-size:clamp(.95rem,2.7vw,1.1rem);font-weight:700;color:var(--text);text-align:center;line-height:1.6;margin-bottom:1rem;word-break:break-word;}
+
+    .opt-list{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.9rem;}
+    .opt-btn{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;cursor:pointer;font-family:Arial,Helvetica,sans-serif;font-size:clamp(.9rem,2.5vw,1.02rem);font-weight:600;color:var(--text);line-height:1.45;min-height:48px;transition:transform .1s,border-color .14s,background .14s,box-shadow .14s;-webkit-tap-highlight-color:transparent;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:active:not(:disabled){transform:scale(.98);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;background:var(--surface);border:1.5px solid var(--day-border);color:var(--day-dark);transition:background .14s,color .14s,border-color .14s;}
+    .opt-btn.correct-o{background:var(--green-light);border-color:#22c55e;color:#137a36;box-shadow:0 2px 10px rgba(34,197,94,.18);}
+    .opt-btn.correct-o .opt-letter{background:#22c55e;color:#fff;border-color:#22c55e;}
+    .opt-btn.wrong-o{background:var(--red-light);border-color:var(--red);color:#7a1f1f;}
+    .opt-btn.wrong-o .opt-letter{background:var(--red);color:#fff;border-color:var(--red);}
+
+    .word-zone{background:var(--surface2);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin-bottom:1rem;text-align:center;min-height:74px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.3rem;}
+    .word-zone .guillemet{color:var(--muted);font-weight:400;font-size:clamp(1.05rem,3.5vw,1.3rem);}
+    .word-btn{display:inline-flex;align-items:center;font-family:Arial,Helvetica,sans-serif;font-size:clamp(1.02rem,3.3vw,1.25rem);font-weight:700;background:transparent;border:none;cursor:pointer;border-radius:8px;padding:.15rem .4rem;-webkit-tap-highlight-color:transparent;transition:background .12s,color .12s,transform .1s;min-height:44px;color:var(--text);line-height:1.5;}
+    .word-btn:hover:not(:disabled){background:var(--day-light);color:var(--day-dark);}
+    .word-btn:active:not(:disabled){transform:scale(.95);}
+    .word-btn.selected{background:var(--day-color);color:#fff;box-shadow:0 2px 8px var(--day-glow);}
+    .word-btn.correct-w{background:#22c55e;color:#fff;cursor:default;box-shadow:0 2px 8px rgba(34,197,94,.3);}
+    .word-btn.wrong-w{background:var(--red);color:#fff;cursor:default;text-decoration:line-through;}
+    .word-plain{font-size:clamp(1.02rem,3.3vw,1.25rem);font-weight:700;color:var(--text);display:inline-flex;align-items:center;min-height:44px;padding:.15rem .4rem;}
+
+    .step-hint{font-size:clamp(.85rem,2.4vw,.95rem);color:var(--day-dark);font-weight:700;text-align:center;margin-bottom:.75rem;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);padding:.5rem .85rem;word-break:break-word;display:none;}
+    .step-hint.show{display:block;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:.9rem;}
+    @media(max-width:479px){.btn-row.stack{flex-direction:column;}.btn-row.stack .btn{width:100%;justify-content:center;}}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;font-size:clamp(.9rem,2.5vw,1.05rem);font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .14s,opacity .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.95);}
+    .btn:disabled{opacity:.35;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-ok{background:var(--day-color);color:#fff;box-shadow:0 3px 14px var(--day-glow);flex:1;}
+    .btn-err{background:var(--red);color:#fff;box-shadow:0 3px 14px rgba(185,64,64,.28);flex:1;}
+    .btn-verify{background:var(--day-dark);color:#fff;box-shadow:0 3px 14px var(--day-glow);width:100%;justify-content:center;}
+    .btn-next{background:var(--day-dark);color:#fff;box-shadow:0 3px 14px var(--day-glow);width:100%;justify-content:center;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .feedback{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.88rem,2.4vw,.98rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;margin-bottom:.85rem;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7a1f1f;}
+    .fb-icon{font-size:1.3rem;flex-shrink:0;}
+    .fb-body{flex:1;min-width:0;}
+    .fb-title{font-weight:700;margin-bottom:.2rem;}
+    .fb-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);line-height:1.8;}
+
+    .end-screen{display:none;width:100%;animation:fadeUp .45s ease both;}
+    .end-screen.show{display:block;}
+    .end-card{background:var(--surface);border:1.5px solid #e8e4d9;border-radius:var(--radius);padding:2.2rem 1.5rem;box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center;}
+    .end-icon{font-size:3rem;margin-bottom:.6rem;display:block;}
+    .end-title{font-size:clamp(1.4rem,5vw,2.2rem);font-weight:800;color:var(--day-dark);margin-bottom:.5rem;word-break:break-word;}
+    .end-score-row{display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;margin:1rem 0 1.2rem;}
+    .end-badge{display:flex;flex-direction:column;align-items:center;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);padding:.65rem 1.2rem;min-width:90px;}
+    .end-badge-num{font-size:1.8rem;font-weight:800;color:var(--day-dark);}
+    .end-badge-lbl{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:.1rem;}
+    .end-msg{color:var(--muted);font-size:clamp(.9rem,2.5vw,1.02rem);margin-bottom:1.5rem;line-height:1.85;word-break:break-word;max-width:480px;margin-left:auto;margin-right:auto;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+    .pulse{animation:pulse .4s ease;}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div><div class="bul b2"></div><div class="bul b3"></div><div class="bul b4"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 4 – Jour 4</div>
+      <h1>J'observe et je teste · <span class="hl">L'imparfait</span></h1>
+      <p class="subtitle">Réactive tes souvenirs… et le temps du passé.</p>
+    </header>
+
+    <div class="radar-bar">
+      <span class="radar-icon">&#128270;</span>
+      <div class="radar-info">
+        <div class="radar-label">Observations réussies</div>
+        <div class="radar-progress-bg"><div class="radar-progress-fill" id="radar-fill"></div></div>
+      </div>
+      <div class="radar-count"><span id="radar-num">0</span> / <span id="radar-total">8</span></div>
+    </div>
+
+    <div class="phrase-counter">
+      <div class="phrase-dots" id="phrase-dots"></div>
+      <div class="phrase-num-label" id="phrase-num-label">Question 1 / 8</div>
+    </div>
+
+    <div class="card" id="ex-card">
+      <div class="card-stripe"></div>
+      <div class="ex-num">J'observe et je teste · Quiz</div>
+      <div class="theme-badge" id="theme-badge">Conjugaison · l'imparfait</div>
+
+      <div style="background:var(--surface2);border:1.5px solid var(--border);border-left:4px solid var(--day-color);border-radius:var(--radius-sm);padding:.7rem 1rem;margin-bottom:1rem;font-size:clamp(.88rem,2.4vw,.98rem);line-height:1.7;word-break:break-word;">
+        <strong style="color:var(--day-dark);">Observe bien !</strong>
+        Voici des souvenirs de vacances. Réactive ce que tu sais sur <b>l'imparfait</b>, le temps du passé.
+      </div>
+
+      <div class="obs-box" id="obs-box" style="display:none;"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="word-zone" id="word-zone" style="display:none;"></div>
+      <div class="step-hint" id="step-hint"></div>
+      <div class="opt-list" id="opt-list" style="display:none;"></div>
+
+      <div class="btn-row stack" id="row-erreur" style="display:none;">
+        <button class="btn btn-ok" id="btn-correct" onclick="erreurCorrecte()">&#10003; Phrase correcte</button>
+        <button class="btn btn-err" id="btn-erreur" onclick="erreurDetectee()">&#128680; Erreur détectée</button>
+      </div>
+
+      <div id="row-verify" style="display:none;">
+        <button class="btn btn-verify" id="btn-verify" onclick="verifierClic()">Vérifier ma sélection</button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <div class="fb-body"><div class="fb-title" id="fb-title"></div><div class="fb-detail" id="fb-detail"></div></div>
+      </div>
+
+      <div id="row-next" style="display:none;">
+        <button class="btn btn-next" id="btn-next-q" onclick="questionNext()">Question suivante &#8594;</button>
+      </div>
+
+      <div id="row-restart" style="display:none;margin-top:.5rem;">
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="recommencer()">&#8635; Recommencer depuis le début</button>
+      </div>
+    </div>
+
+    <div class="end-screen" id="end-screen">
+      <div class="end-card">
+        <div class="logo-badge" style="margin-bottom:.8rem;background:var(--day-color);color:#fff;">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#3ab5d8"></span>
+          <span class="logo-dot" style="background:#f5a623"></span>
+          Réactivation réussie !
+        </div>
+        <span class="end-icon">&#128270;</span>
+        <div class="end-title">Tu reconnais l'imparfait !</div>
+        <div class="end-score-row">
+          <div class="end-badge"><div class="end-badge-num" id="end-ok">0</div><div class="end-badge-lbl">observation(s) réussie(s)</div></div>
+          <div class="end-badge"><div class="end-badge-num" id="end-total">8</div><div class="end-badge-lbl">question(s) au total</div></div>
+        </div>
+        <div class="end-msg">
+          Tu as repéré l'imparfait, ses terminaisons et son rôle&nbsp;:
+          c'est le <strong>temps des souvenirs</strong>, des descriptions et des actions habituelles dans le passé.
+          Tu vas maintenant l'approfondir dans la leçon.
+        </div>
+        <button class="btn btn-ok" style="width:100%;justify-content:center;" onclick="recommencer()">&#8635; Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* type 'qcm' : observe(?) + question + options + correct
+   type 'clic': groupe + consigne + corrects(indices)
+   type 'erreur': groupe + ok(true si correct) + erreurIndex */
+var QUESTIONS = [
+  /* 1 — QCM : identifier l'imparfait (question imposée, placée en premier) */
+  {
+    type:'qcm',
+    question:"Quel verbe est à l'imparfait ?",
+    options:['marche','marchera','marchait','a marché'],
+    correct:2,
+    explication:"« marchait » est à l'imparfait (il/elle marchait). « marche » est au présent, « marchera » au futur, « a marché » au passé composé."
+  },
+  /* 2 — QCM : reconnaître le temps */
+  {
+    type:'qcm',
+    observe:['Chaque été, nous allions à la mer.'],
+    question:"À quel temps est le verbe « allions » ?",
+    options:['À l\'imparfait','Au présent','Au futur','Au passé composé'],
+    correct:0,
+    explication:"« allions » est à l'imparfait. « Chaque été » évoque une habitude passée : l'imparfait est le temps des souvenirs."
+  },
+  /* 3 — QCM : les terminaisons */
+  {
+    type:'qcm',
+    question:"À quelles terminaisons reconnaît-on l'imparfait ?",
+    options:[
+      '-e, -es, -e, -ons, -ez, -ent',
+      '-rai, -ras, -ra, -rons, -rez, -ront',
+      '-é, -ée, -és, -ées',
+      '-ais, -ais, -ait, -ions, -iez, -aient'
+    ],
+    correct:3,
+    explication:"À l'imparfait, tous les verbes prennent les mêmes terminaisons : -ais, -ais, -ait, -ions, -iez, -aient."
+  },
+  /* 4 — QCM : quelle phrase est à l'imparfait */
+  {
+    type:'qcm',
+    question:"Quelle phrase est à l'imparfait ?",
+    options:[
+      'Nous mangeons des glaces.',
+      'Nous mangions des glaces.',
+      'Nous mangerons des glaces.',
+      'Nous avons mangé des glaces.'
+    ],
+    correct:1,
+    explication:"« Nous mangions » est à l'imparfait (terminaison -ions). Les autres sont au présent, au futur et au passé composé."
+  },
+  /* 5 — CLIC : repérer le verbe à l'imparfait */
+  {
+    type:'clic',
+    groupe:'Avant je dormais dehors et maintenant je dors dedans',
+    consigne:"Clique sur le verbe qui est à l'imparfait, puis vérifie.",
+    corrects:[2],
+    explication:"« dormais » est à l'imparfait (je dormais : terminaison -ais). « dors » est au présent."
+  },
+  /* 6 — QCM : l'emploi de l'imparfait */
+  {
+    type:'qcm',
+    observe:['Le soir, nous regardions les étoiles en silence.'],
+    question:"Ici, à quoi sert l'imparfait ?",
+    options:[
+      'À donner un ordre',
+      'À annoncer ce qui va se passer demain',
+      'À décrire un souvenir, une scène du passé',
+      'À poser une question'
+    ],
+    correct:2,
+    explication:"L'imparfait sert à décrire et à raconter des souvenirs ou des habitudes du passé : c'est le temps des descriptions."
+  },
+  /* 7 — ERREUR : cohérence des temps */
+  {
+    type:'erreur',
+    groupe:"Quand j'étais petit je joue dehors",
+    ok:false,
+    erreurIndex:4,
+    explication:"« Quand j'étais petit » situe l'action dans le passé : il faut l'imparfait → « je jouais ». « joue » est au présent."
+  },
+  /* 8 — QCM : conclusion */
+  {
+    type:'qcm',
+    observe:['Tous les exemples précédents'],
+    question:"Quelle règle peux-tu deviner ?",
+    options:[
+      "L'imparfait sert à donner des ordres.",
+      "L'imparfait parle seulement du futur.",
+      "L'imparfait ne s'emploie qu'à l'oral.",
+      "L'imparfait raconte des souvenirs et des habitudes du passé."
+    ],
+    correct:3,
+    explication:"C'est le temps des souvenirs : l'imparfait décrit et raconte des actions passées, souvent habituelles ou qui durent. Tu viens de retrouver la règle avant la leçon !"
+  }
+];
+
+var TOTAL = QUESTIONS.length;
+var idx = 0, bonnes = 0, done = [];
+var selected = [];
+
+var FB_OK = [
+  'Bien vu ! Tu reconnais bien l\'imparfait.',
+  'Excellent ! Ton œil d\'observateur fonctionne.',
+  'Bien joué ! Tu observes avec attention.',
+  'Parfait ! Tes souvenirs de conjugaison reviennent.'
+];
+var FB_KO = [
+  'Observe encore. Regarde la terminaison du verbe.',
+  'Pas tout à fait. Demande-toi quand se passe l\'action.',
+  'Presque ! Repère le temps du verbe.'
+];
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+function $(id){ return document.getElementById(id); }
+
+function build(){
+  idx=0; bonnes=0; done=[];
+  $('ex-card').style.display='block';
+  $('end-screen').classList.remove('show');
+  $('radar-total').textContent=TOTAL;
+  $('end-total').textContent=TOTAL;
+  renderDots(); renderQuestion(); updateRadar();
+}
+
+function renderDots(){
+  var el=$('phrase-dots'); el.innerHTML='';
+  QUESTIONS.forEach(function(_,i){
+    var d=document.createElement('div');
+    d.className='phrase-dot'+(i===idx?' active':'');
+    if(i<done.length){ d.classList.remove('active'); d.classList.add(done[i]==='ok'?'done-ok':'done-err'); }
+    el.appendChild(d);
+  });
+  $('phrase-num-label').textContent='Question '+(idx+1)+' / '+TOTAL;
+}
+
+function renderQuestion(){
+  var q=QUESTIONS[idx];
+  selected=[];
+  $('feedback').className='feedback';
+  $('row-next').style.display='none';
+  $('row-restart').style.display='none';
+  $('row-erreur').style.display='none';
+  $('row-verify').style.display='none';
+  $('obs-box').style.display='none';
+  $('opt-list').style.display='none';
+  $('word-zone').style.display='none';
+  $('step-hint').className='step-hint';
+
+  var badge=$('theme-badge');
+  if(q.type==='clic'){ badge.className='theme-badge t-clic'; badge.textContent='Je clique sur le bon verbe'; }
+  else if(q.type==='erreur'){ badge.className='theme-badge t-err'; badge.textContent='Détecte l\'erreur'; }
+  else { badge.className='theme-badge'; badge.textContent='Conjugaison · l\'imparfait'; }
+
+  if(q.type==='qcm') renderQcm(q);
+  else if(q.type==='clic') renderClic(q);
+  else if(q.type==='erreur') renderErreur(q);
+}
+
+function renderQcm(q){
+  if(q.observe){
+    var obs=$('obs-box'); obs.style.display='block'; obs.innerHTML='';
+    var line=document.createElement('div'); line.className='obs-line'; line.textContent=q.observe[0];
+    obs.appendChild(line);
+  }
+  $('question-text').textContent=q.question;
+  var list=$('opt-list'); list.style.display='flex'; list.innerHTML='';
+  var L=['A','B','C','D','E','F'];
+  q.options.forEach(function(opt,oi){
+    var b=document.createElement('button'); b.className='opt-btn';
+    b.innerHTML='<span class="opt-letter">'+L[oi]+'</span><span>'+opt+'</span>';
+    b.addEventListener('click',function(){ checkQcm(oi,b); });
+    list.appendChild(b);
+  });
+}
+function checkQcm(oi,btn){
+  var q=QUESTIONS[idx];
+  var btns=$('opt-list').querySelectorAll('.opt-btn');
+  btns.forEach(function(b){ b.disabled=true; });
+  if(oi===q.correct){ btn.classList.add('correct-o'); bonnes++; done.push('ok'); showFeedback('ok','Bien vu !', rnd(FB_OK)+'\u00a0'+q.explication); }
+  else { btn.classList.add('wrong-o'); btns[q.correct].classList.add('correct-o'); done.push('ko'); showFeedback('ko','Observe encore.', rnd(FB_KO)+'\u00a0'+q.explication); }
+  renderDots(); updateRadar(); showNext();
+}
+
+function renderClic(q){
+  $('question-text').textContent=q.consigne;
+  var zone=$('word-zone'); zone.style.display='flex'; zone.innerHTML='';
+  var open=document.createElement('span'); open.className='guillemet'; open.textContent='\u00ab\u00a0'; zone.appendChild(open);
+  var words=q.groupe.split(' ');
+  words.forEach(function(w,wi){
+    var b=document.createElement('button'); b.className='word-btn'; b.textContent=w; b.dataset.wi=wi;
+    b.addEventListener('click',function(){ toggleWord(wi,b); });
+    zone.appendChild(b);
+    if(wi<words.length-1) zone.appendChild(document.createTextNode('\u00a0'));
+  });
+  var close=document.createElement('span'); close.className='guillemet'; close.textContent='\u00a0\u00bb'; zone.appendChild(close);
+  $('row-verify').style.display='block'; $('btn-verify').disabled=false;
+}
+function toggleWord(wi,btn){
+  var p=selected.indexOf(wi);
+  if(p===-1){ selected.push(wi); btn.classList.add('selected'); }
+  else { selected.splice(p,1); btn.classList.remove('selected'); }
+}
+function verifierClic(){
+  var q=QUESTIONS[idx];
+  $('btn-verify').disabled=true; $('row-verify').style.display='none';
+  var btns=$('word-zone').querySelectorAll('.word-btn');
+  btns.forEach(function(b){ b.disabled=true; });
+  var sel=selected.slice().sort().join(','), cor=q.corrects.slice().sort().join(',');
+  var exact=(sel===cor);
+  btns.forEach(function(b){
+    var wi=+b.dataset.wi;
+    var estCorrect=q.corrects.indexOf(wi)!==-1, estChoisi=selected.indexOf(wi)!==-1;
+    b.classList.remove('selected');
+    if(estCorrect) b.classList.add('correct-w');
+    else if(estChoisi) b.classList.add('wrong-w');
+  });
+  if(exact){ bonnes++; done.push('ok'); showFeedback('ok','Bien vu !', rnd(FB_OK)+'\u00a0'+q.explication); }
+  else { done.push('ko'); showFeedback('ko','Observe encore.', 'Le bon verbe est surligné en vert. '+q.explication); }
+  renderDots(); updateRadar(); showNext();
+}
+
+function renderErreur(q){
+  $('question-text').textContent='Cette phrase est-elle correcte ?';
+  var zone=$('word-zone'); zone.style.display='flex'; zone.innerHTML='';
+  var open=document.createElement('span'); open.className='guillemet'; open.textContent='\u00ab\u00a0'; zone.appendChild(open);
+  var words=q.groupe.split(' ');
+  words.forEach(function(w,wi){
+    var s=document.createElement('span'); s.className='word-plain'; s.textContent=w; zone.appendChild(s);
+    if(wi<words.length-1) zone.appendChild(document.createTextNode('\u00a0'));
+  });
+  var close=document.createElement('span'); close.className='guillemet'; close.textContent='\u00a0\u00bb'; zone.appendChild(close);
+  $('row-erreur').style.display='flex'; $('btn-correct').disabled=false; $('btn-erreur').disabled=false;
+}
+function erreurCorrecte(){
+  var q=QUESTIONS[idx];
+  $('btn-correct').disabled=true; $('btn-erreur').disabled=true; $('row-erreur').style.display='none';
+  if(q.ok){ bonnes++; done.push('ok'); showFeedback('ok','Bien vu !', rnd(FB_OK)+'\u00a0'+(q.explication||'')); }
+  else { done.push('ko'); showFeedback('ko','Observe encore.', 'Cette phrase contient pourtant une erreur. '+q.explication); }
+  renderDots(); updateRadar(); showNext();
+}
+function erreurDetectee(){
+  var q=QUESTIONS[idx];
+  $('btn-correct').disabled=true; $('btn-erreur').disabled=true; $('row-erreur').style.display='none';
+  if(q.ok){ done.push('ko'); showFeedback('ko','Observe encore.','Cette phrase est en réalité correcte. '+(q.explication||'')); renderDots(); updateRadar(); showNext(); return; }
+  $('step-hint').className='step-hint show';
+  $('step-hint').textContent='Clique maintenant sur le mot qui contient l\'erreur.';
+  var zone=$('word-zone'); zone.innerHTML='';
+  var open=document.createElement('span'); open.className='guillemet'; open.textContent='\u00ab\u00a0'; zone.appendChild(open);
+  var words=q.groupe.split(' ');
+  words.forEach(function(w,wi){
+    var b=document.createElement('button'); b.className='word-btn'; b.textContent=w; b.dataset.wi=wi;
+    b.addEventListener('click',function(){ erreurCheckMot(wi,b,words); });
+    zone.appendChild(b);
+    if(wi<words.length-1) zone.appendChild(document.createTextNode('\u00a0'));
+  });
+  var close=document.createElement('span'); close.className='guillemet'; close.textContent='\u00a0\u00bb'; zone.appendChild(close);
+}
+function erreurCheckMot(wi,btn,words){
+  var q=QUESTIONS[idx];
+  $('word-zone').querySelectorAll('.word-btn').forEach(function(b){ b.disabled=true; });
+  $('step-hint').className='step-hint';
+  if(wi===q.erreurIndex){ btn.classList.add('correct-w'); bonnes++; done.push('ok'); showFeedback('ok','Erreur trouvée !', rnd(FB_OK)+'\u00a0'+q.explication); }
+  else { btn.classList.add('wrong-w'); $('word-zone').querySelectorAll('.word-btn').forEach(function(b){ if(+b.dataset.wi===q.erreurIndex) b.classList.add('correct-w'); }); done.push('ko'); showFeedback('ko','Pas tout à fait.', 'Le mot fautif est « '+words[q.erreurIndex]+' ». '+q.explication); }
+  renderDots(); updateRadar(); showNext();
+}
+
+function showFeedback(cls,title,detail){
+  var icons={ok:'&#10003;',ko:'&#33;'};
+  $('feedback').className='feedback show '+cls;
+  $('fb-icon').innerHTML=icons[cls]||'&#128270;';
+  $('fb-title').textContent=title;
+  $('fb-detail').textContent=detail;
+}
+
+function showNext(){
+  var btn=$('btn-next-q');
+  if(idx<TOTAL-1){
+    btn.textContent='Question suivante \u2192';
+    btn.setAttribute('onclick','questionNext()');
+    $('row-next').style.display='block';
+  } else {
+    btn.textContent='Voir mes résultats \u2192';
+    btn.setAttribute('onclick','showEnd()');
+    $('row-next').style.display='block';
+  }
+}
+function questionNext(){ idx++; renderDots(); renderQuestion(); }
+function showEnd(){
+  $('ex-card').style.display='none';
+  $('end-screen').classList.add('show');
+  $('end-ok').textContent=bonnes; $('end-total').textContent=TOTAL;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function recommencer(){ build(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function updateRadar(){
+  $('radar-num').textContent=bonnes;
+  $('radar-fill').style.width=Math.round(bonnes/TOTAL*100)+'%';
+  $('radar-num').classList.remove('pulse'); void $('radar-num').offsetWidth; $('radar-num').classList.add('pulse');
+}
+
+build();
+</script>
+</body>
+</html>
