@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S4 J4 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8; --day-dark:#1a6e88; --day-dark2:#12536b;
+      --day-light:#e8f6fb; --day-border:#9dd4e8; --day-glow:rgba(58,181,216,.30);
+      --bg:#fffdf7; --surface:#fff; --surface2:#f3fafd; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-light:#eafaf0; --green-dark:#1f7a3d;
+      --orange:#f5a623; --orange-light:#fff5e0;
+      --red:#b94040; --red-light:#f7eded;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:18px; --radius-sm:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+    .wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:320px;height:320px;top:-110px;right:-110px;background:radial-gradient(circle,rgba(245,197,24,.16),transparent 70%);}
+    .b2{width:260px;height:260px;bottom:-90px;left:-90px;background:radial-gradient(circle,rgba(58,181,216,.18),transparent 70%);}
+    .b3{width:180px;height:180px;top:38%;right:-70px;background:radial-gradient(circle,rgba(58,181,216,.12),transparent 70%);}
+
+    header{text-align:center;margin-bottom:1.1rem;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--day-color);color:#fff;
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:800;line-height:1.25;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;font-family:'JetBrains Mono',monospace;}
+
+    .tabs{display:flex;gap:.4rem;margin-bottom:.9rem;}
+    .tab{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+      padding:.6rem .3rem;font-weight:700;font-size:clamp(.72rem,2.2vw,.86rem);color:var(--muted);cursor:pointer;
+      transition:.15s;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;line-height:1.2;}
+    .tab .tnum{font-family:'JetBrains Mono',monospace;font-size:.66rem;opacity:.8;}
+    .tab.active{background:var(--day-color);color:#fff;border-color:var(--day-color);box-shadow:0 3px 12px var(--day-glow);}
+    .tab.done{border-color:var(--green);color:var(--green-dark);}
+    .tab.active.done{background:var(--day-color);color:#fff;}
+
+    .card{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.4rem 1.2rem;box-shadow:0 8px 32px rgba(0,0,0,.07);animation:fadeUp .35s ease both;position:relative;overflow:hidden;}
+    .card-stripe{height:5px;border-radius:var(--radius) var(--radius) 0 0;margin:-1.4rem -1.2rem 1.1rem;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--day-color));}
+    .act-title{font-size:clamp(1.05rem,3vw,1.3rem);font-weight:800;color:var(--day-dark);margin-bottom:.35rem;word-break:break-word;}
+    .act-consigne{font-size:clamp(.88rem,2.4vw,.98rem);color:var(--text);line-height:1.7;margin-bottom:1.1rem;
+      background:var(--surface2);border:1.5px solid var(--border);border-left:4px solid var(--day-color);
+      border-radius:var(--radius-sm);padding:.7rem 1rem;word-break:break-word;}
+    .panel{display:none;} .panel.show{display:block;}
+
+    /* Activité 1 : relier */
+    .match-head{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
+      font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;padding:0 .2rem;}
+    .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.6rem;}
+    .col{display:flex;flex-direction:column;gap:.5rem;}
+    .m-pron{display:flex;align-items:center;justify-content:space-between;gap:.4rem;background:var(--surface2);
+      border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.6rem .7rem;cursor:pointer;
+      font-weight:700;font-size:clamp(.85rem,2.4vw,1rem);min-height:48px;transition:.13s;}
+    .m-pron .slot{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--day-dark);
+      background:var(--day-light);border:1.5px dashed var(--day-border);border-radius:8px;padding:.12rem .4rem;min-width:46px;text-align:center;}
+    .m-pron.sel{border-color:var(--day-color);background:var(--day-light);box-shadow:0 0 0 3px var(--day-light);}
+    .m-pron.ok{border-color:var(--green);background:var(--green-light);}
+    .m-pron.ok .slot{background:var(--green);color:#fff;border-style:solid;border-color:var(--green);}
+    .m-pron.ko{border-color:var(--red);background:var(--red-light);}
+    .m-pron.ko .slot{background:var(--red);color:#fff;border-style:solid;border-color:var(--red);}
+    .m-end{background:var(--surface);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+      padding:.6rem .7rem;cursor:pointer;font-family:'JetBrains Mono',monospace;font-weight:700;
+      font-size:clamp(.9rem,2.5vw,1.05rem);color:var(--day-dark);min-height:48px;display:flex;align-items:center;justify-content:center;transition:.13s;}
+    .m-end:hover:not(.used){background:var(--day-light);}
+    .m-end.used{opacity:.32;cursor:default;text-decoration:line-through;}
+    .pick-hint{text-align:center;font-size:.8rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.6rem;min-height:1.1rem;}
+
+    /* Activité 2 : enregistrement */
+    .rec-box{text-align:center;background:var(--surface2);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:1.3rem 1rem;margin-bottom:1rem;}
+    .rec-recite{font-size:clamp(1.25rem,5vw,1.7rem);font-weight:800;color:var(--day-dark);margin-bottom:1.1rem;line-height:1.35;}
+    .rec-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.6;}
+    .rec-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--red);margin-right:.4rem;vertical-align:middle;}
+    .rec-dot.blink{animation:blink 1s steps(2,start) infinite;}
+    @keyframes blink{50%{opacity:.2;}}
+    .rec-status{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);min-height:1.2rem;margin-top:.6rem;}
+    .rec-note{font-size:.78rem;color:var(--muted);margin-top:.8rem;line-height:1.6;}
+
+    /* Modal comparaison */
+    .modal-bg{position:fixed;inset:0;background:rgba(18,30,40,.55);display:none;align-items:center;justify-content:center;
+      z-index:50;padding:1.2rem;}
+    .modal-bg.show{display:flex;animation:fadeIn .2s ease;}
+    .modal{background:#fff;border-radius:var(--radius);max-width:430px;width:100%;padding:1.5rem 1.3rem;
+      box-shadow:0 18px 50px rgba(0,0,0,.3);animation:fadeUp .3s ease both;text-align:center;}
+    .modal h3{font-size:1.05rem;color:var(--day-dark);margin-bottom:.7rem;}
+    .modal .model{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1rem,3.2vw,1.25rem);
+      color:var(--day-dark);background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius-sm);padding:.8rem;margin-bottom:.9rem;letter-spacing:.04em;word-break:break-word;}
+    .modal audio{width:100%;margin-bottom:1rem;}
+    .modal .q{font-weight:700;margin-bottom:.7rem;font-size:.95rem;}
+    .modal-eval{display:flex;gap:.5rem;}
+
+    /* Activité 3 : compléter */
+    .item{display:flex;align-items:center;gap:.5rem;background:var(--surface2);border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);padding:.7rem .8rem;margin-bottom:.55rem;flex-wrap:wrap;}
+    .item .n{width:26px;height:26px;border-radius:50%;background:var(--day-light);color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .item .verb{font-size:clamp(1rem,3vw,1.18rem);font-weight:700;}
+    .item .verb .stem{color:var(--text);}
+    .end-input{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.95rem,2.8vw,1.1rem);
+      width:74px;text-align:center;border:none;border-bottom:2.5px dashed var(--day-color);background:var(--day-light);
+      color:var(--day-dark);border-radius:6px 6px 0 0;padding:.35rem .3rem;outline:none;}
+    .end-input:focus{background:#fff;box-shadow:0 0 0 2px rgba(58,181,216,.3);}
+    .end-input.ok{background:var(--green-light);color:var(--green-dark);border-bottom-color:var(--green);border-bottom-style:solid;}
+    .end-input.ko{background:var(--red-light);color:#7a1f1f;border-bottom-color:var(--red);border-bottom-style:solid;}
+    .item .res{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);}
+    .item .res b{color:var(--green-dark);}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+    @media(max-width:479px){.btn-row.stack{flex-direction:column;}.btn-row.stack .btn{width:100%;}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.2rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;min-height:2.9rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);} .btn:disabled{opacity:.4;cursor:default;transform:none!important;box-shadow:none!important;}
+    .btn-main{background:var(--day-dark);color:#fff;box-shadow:0 3px 14px var(--day-glow);flex:1;}
+    .btn-rec{background:var(--day-color);color:#fff;box-shadow:0 3px 14px var(--day-glow);flex:1;}
+    .btn-stop{background:var(--red);color:#fff;box-shadow:0 3px 14px rgba(185,64,64,.28);flex:1;}
+    .btn-play{background:var(--green);color:#fff;box-shadow:0 3px 14px rgba(34,197,94,.25);flex:1;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+    .btn-eval-ok{background:var(--green);color:#fff;flex:1;} .btn-eval-no{background:var(--orange);color:#fff;flex:1;}
+
+    .feedback{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.88rem,2.4vw,.98rem);display:none;
+      align-items:flex-start;gap:.6rem;line-height:1.7;margin-top:1rem;word-break:break-word;}
+    .feedback.show{display:flex;} .feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7a1f1f;}
+    .feedback.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+    .fb-icon{font-size:1.25rem;flex-shrink:0;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    /* Activité 4 : pièges */
+    .q4-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.85rem .9rem;margin-bottom:.7rem;}
+    .q4-q{font-weight:700;font-size:clamp(.9rem,2.5vw,1.02rem);margin-bottom:.6rem;line-height:1.5;word-break:break-word;}
+    .q4-opts{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .q4-opt{flex:1;min-width:88px;background:#fff;border:1.5px solid var(--day-border);border-radius:10px;padding:.6rem .5rem;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.9rem,2.6vw,1.05rem);color:var(--day-dark);
+      cursor:pointer;min-height:46px;transition:.13s;-webkit-tap-highlight-color:transparent;}
+    .q4-opt:hover:not(:disabled){background:var(--day-light);}
+    .q4-opt:active:not(:disabled){transform:scale(.97);}
+    .q4-opt:disabled{cursor:default;}
+    .q4-opt.ok{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
+    .q4-opt.ko{background:var(--red-light);border-color:var(--red);color:#7a1f1f;text-decoration:line-through;}
+    .q4-exp{margin-top:.55rem;font-size:.82rem;color:var(--text);background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:8px;padding:.5rem .6rem;line-height:1.6;display:none;word-break:break-word;}
+    .q4-exp.show{display:block;}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div><div class="bul b2"></div><div class="bul b3"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+        <span class="logo-dot" style="background:#f5a623"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 4 – Jour 4</div>
+      <h1>Je m'entraîne · <span class="hl">L'imparfait</span></h1>
+    </header>
+
+    <div class="tabs">
+      <div class="tab active" id="tab1" onclick="switchTab(1)"><span class="tnum">Act. 1</span><span>🎯 Relie</span></div>
+      <div class="tab" id="tab2" onclick="switchTab(2)"><span class="tnum">Act. 2</span><span>🎙️ Récite</span></div>
+      <div class="tab" id="tab3" onclick="switchTab(3)"><span class="tnum">Act. 3</span><span>✍️ Complète</span></div>
+      <div class="tab" id="tab4" onclick="switchTab(4)"><span class="tnum">Act. 4</span><span>⭐ Pièges</span></div>
+    </div>
+
+    <!-- ACTIVITÉ 1 -->
+    <div class="panel show" id="panel1">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">🎯 Relie le pronom à sa terminaison</div>
+        <div class="act-consigne">Touche un <b>pronom</b>, puis touche la <b>terminaison</b> de l'imparfait qui lui correspond. Quand tout est relié, clique sur <b>Vérifier</b>.</div>
+        <div class="match-head"><span>Pronom</span><span>Terminaison</span></div>
+        <div class="match-grid">
+          <div class="col" id="m-prons"></div>
+          <div class="col" id="m-ends"></div>
+        </div>
+        <div class="pick-hint" id="pick-hint">Touche d'abord un pronom.</div>
+        <div class="feedback" id="fb1"><span class="fb-icon" id="fb1-i"></span><div id="fb1-t"></div></div>
+        <div class="btn-row stack" id="row1">
+          <button class="btn btn-main" onclick="verifier1()">✔ Vérifier</button>
+          <button class="btn btn-ghost" onclick="resetAct1()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row stack" id="row1-next" style="display:none;">
+          <button class="btn btn-main" onclick="switchTab(2)">Passer à l'activité 2 →</button>
+          <button class="btn btn-ghost" onclick="resetAct1()">↺ Recommencer l'activité 1</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITÉ 2 -->
+    <div class="panel" id="panel2">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">🎙️ Le défi des terminaisons</div>
+        <div class="act-consigne">Récite à voix haute les terminaisons de l'imparfait <b>dans le bon ordre</b>, enregistre-toi, puis réécoute-toi pour te corriger.</div>
+        <div class="rec-box">
+          <div class="rec-recite">Récite de mémoire<br>les 6 terminaisons de l'imparfait<br>dans l'ordre.</div>
+          <div class="btn-row" id="rec-controls">
+            <button class="btn btn-rec" id="btn-rec" onclick="toggleRec()">🎙️ S'enregistrer</button>
+            <button class="btn btn-play" id="btn-play" onclick="openModal()">🔊 Réécouter</button>
+          </div>
+          <div class="rec-status" id="rec-status"></div>
+          <div class="rec-note" id="rec-note">🔇 Le micro ne fonctionne pas&nbsp;? Récite à voix haute, puis clique sur « Réécouter » pour comparer avec le modèle.</div>
+        </div>
+        <div class="btn-row stack">
+          <button class="btn btn-main" onclick="switchTab(3)">Passer à l'activité 3 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITÉ 3 -->
+    <div class="panel" id="panel3">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">✍️ Complète les verbes</div>
+        <div class="act-consigne">Écris <b>uniquement la terminaison</b> qui manque (par exemple&nbsp;: <i>ais</i>). Pense au pronom !</div>
+        <div id="items3"></div>
+        <div class="feedback" id="fb3"><span class="fb-icon" id="fb3-i"></span><div id="fb3-t"></div></div>
+        <div class="btn-row stack" id="row3">
+          <button class="btn btn-main" onclick="verifier3()">✔ Vérifier</button>
+          <button class="btn btn-ghost" onclick="resetAct3()">↺ Effacer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITÉ 4 -->
+    <div class="panel" id="panel4">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">⭐ Les verbes à pièges</div>
+        <div class="act-consigne">Certains verbes changent un peu d'orthographe à l'imparfait. Pour chaque phrase, choisis la <b>forme correctement écrite</b>.</div>
+        <div id="q4-list"></div>
+        <div class="feedback" id="fb4"><span class="fb-icon" id="fb4-i"></span><div id="fb4-t"></div></div>
+        <div class="btn-row stack" id="row4" style="display:none;">
+          <button class="btn btn-ghost" onclick="resetAct4()">↺ Recommencer l'activité 4</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL Activité 2 -->
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3>🔊 Compare ta récitation</h3>
+      <div class="model">-ais, -ais, -ait, -ions, -iez, -aient</div>
+      <audio id="modal-audio" controls></audio>
+      <div class="q">As-tu respecté l'ordre des terminaisons ?</div>
+      <div class="modal-eval">
+        <button class="btn btn-eval-ok" onclick="evalRec(true)">✅ Oui !</button>
+        <button class="btn btn-eval-no" onclick="evalRec(false)">🔁 Pas encore</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+
+/* ===== TABS ===== */
+function switchTab(n){
+  [1,2,3,4].forEach(function(i){
+    $('tab'+i).classList.toggle('active',i===n);
+    $('panel'+i).classList.toggle('show',i===n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function markDone(n){ $('tab'+n).classList.add('done'); }
+
+/* ===== ACTIVITÉ 1 : relier ===== */
+var PRON=[
+  {p:'Je',e:'-ais'},{p:'Tu',e:'-ais'},{p:'Il / Elle',e:'-ait'},
+  {p:'Nous',e:'-ions'},{p:'Vous',e:'-iez'},{p:'Ils / Elles',e:'-aient'}
+];
+var endTiles=[], assignTile=[], selPron=null, validated1=false;
+
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+function resetAct1(){
+  endTiles=shuffle(PRON.map(function(x){return x.e;})).map(function(t){return {t:t,used:false};});
+  assignTile=PRON.map(function(){return null;});
+  selPron=null; validated1=false;
+  $('fb1').className='feedback'; $('row1').style.display='flex'; $('row1-next').style.display='none';
+  renderAct1();
+}
+function renderAct1(){
+  var lp=$('m-prons'); lp.innerHTML='';
+  PRON.forEach(function(o,i){
+    var b=document.createElement('div'); b.className='m-pron';
+    if(selPron===i) b.classList.add('sel');
+    if(validated1){ var corr=(assignTile[i]!==null && endTiles[assignTile[i]].t===o.e); b.classList.add(corr?'ok':'ko'); }
+    var slot=(assignTile[i]!==null)?endTiles[assignTile[i]].t:'?';
+    b.innerHTML='<span>'+o.p+'</span><span class="slot">'+slot+'</span>';
+    b.onclick=function(){ pronClick(i); };
+    lp.appendChild(b);
+  });
+  var re=$('m-ends'); re.innerHTML='';
+  endTiles.forEach(function(o,ti){
+    var b=document.createElement('div'); b.className='m-end'+(o.used?' used':'');
+    b.textContent=o.t;
+    b.onclick=function(){ endClick(ti); };
+    re.appendChild(b);
+  });
+}
+function pronClick(i){
+  if(validated1) return;
+  if(assignTile[i]!==null){ endTiles[assignTile[i]].used=false; assignTile[i]=null; }
+  selPron=i;
+  $('pick-hint').textContent='Pronom sélectionné : touche sa terminaison →';
+  renderAct1();
+}
+function endClick(ti){
+  if(validated1) return;
+  if(endTiles[ti].used) return;
+  if(selPron===null){ $('pick-hint').textContent='Touche d\'abord un pronom à gauche.'; return; }
+  assignTile[selPron]=ti; endTiles[ti].used=true; selPron=null;
+  var reste=assignTile.filter(function(x){return x===null;}).length;
+  $('pick-hint').textContent=reste? ('Encore '+reste+' pronom(s) à relier.') : 'Tout est relié ! Clique sur Vérifier.';
+  renderAct1();
+}
+function verifier1(){
+  if(assignTile.some(function(x){return x===null;})){
+    showFb('fb1','info','✍️','Relie <b>tous les pronoms</b> avant de vérifier.');
+    return;
+  }
+  validated1=true; renderAct1();
+  var ok=0; PRON.forEach(function(o,i){ if(endTiles[assignTile[i]].t===o.e) ok++; });
+  if(ok===PRON.length){
+    showFb('fb1','ok','🎉','Parfait ! Les 6 terminaisons sont bien reliées : -ais, -ais, -ait, -ions, -iez, -aient.');
+    markDone(1);
+  } else {
+    showFb('fb1','ko','💡','Tu as '+ok+' / '+PRON.length+' bonnes liaisons. Les pronoms en rouge ne sont pas reliés à la bonne terminaison.');
+  }
+  $('row1').style.display='none'; $('row1-next').style.display='flex';
+}
+
+/* ===== ACTIVITÉ 2 : enregistrement ===== */
+var mediaRec=null, chunks=[], audioURL=null, recording=false, recAttempt=false, demoMode=false;
+function toggleRec(){
+  if(recording){ stopRec(); return; }
+  var noApi = !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia;
+  if(noApi || !window.isSecureContext){
+    $('rec-note').innerHTML='🧪 <b>Mode test</b> (l\'aperçu bloque le micro)&nbsp;: essaie <b>Arrêter</b> puis <b>Réécouter</b> pour voir le déroulé. Le vrai enregistrement de la voix marchera une fois le fichier téléchargé et ouvert dans un navigateur.';
+    startDemo(); return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    demoMode=false; chunks=[]; mediaRec=new MediaRecorder(stream);
+    mediaRec.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop=function(){
+      var blob=new Blob(chunks,{type:chunks[0]?chunks[0].type:'audio/webm'});
+      if(audioURL) URL.revokeObjectURL(audioURL);
+      audioURL=URL.createObjectURL(blob);
+      $('btn-play').disabled=false;
+      $('rec-status').textContent='✅ Enregistrement prêt — clique sur « Réécouter ».';
+      stream.getTracks().forEach(function(t){ t.stop(); });
+    };
+    mediaRec.start(); recording=true; recAttempt=true;
+    setRecUI(true);
+    $('rec-status').innerHTML='<span class="rec-dot blink"></span> Enregistrement en cours…';
+    $('rec-note').textContent='';
+  }).catch(function(err){
+    var msg;
+    if(err && (err.name==='NotAllowedError' || err.name==='SecurityError'))
+      msg='🎤 Le micro est bloqué. Clique sur l\'icône à gauche de la barre d\'adresse (cadenas / micro), choisis « Autoriser », puis réessaie.';
+    else if(err && err.name==='NotFoundError')
+      msg='🎤 Aucun micro détecté sur cet appareil.';
+    else
+      msg='🎧 L\'enregistrement n\'est pas disponible ici. Ouvre le fichier directement dans ton navigateur.';
+    $('rec-note').innerHTML=msg+'<br>🧪 <b>Mode test activé</b>&nbsp;: tu peux quand même essayer Arrêter puis Réécouter.';
+    startDemo();
+  });
+}
+function stopRec(){
+  recording=false; setRecUI(false); $('btn-rec').innerHTML='🎙️ Recommencer';
+  if(demoMode){
+    demoMode=false;
+    if(audioURL) URL.revokeObjectURL(audioURL);
+    audioURL=makeDemoWavURL();
+    $('btn-play').disabled=false;
+    $('rec-status').innerHTML='✅ <b>Démo prête</b> — clique sur « Réécouter » pour tester le pop-up.';
+    return;
+  }
+  if(mediaRec && mediaRec.state!=='inactive') mediaRec.stop();
+}
+function setRecUI(on){
+  var b=$('btn-rec');
+  if(on){ b.classList.remove('btn-rec'); b.classList.add('btn-stop'); b.innerHTML='⏹️ Arrêter'; }
+  else { b.classList.remove('btn-stop'); b.classList.add('btn-rec'); }
+}
+function startDemo(){
+  demoMode=true; recording=true; recAttempt=true;
+  setRecUI(true);
+  $('rec-status').innerHTML='<span class="rec-dot blink"></span> Enregistrement (mode test, sans micro)…';
+}
+function makeDemoWavURL(){
+  var sr=8000,dur=1.1,n=Math.floor(sr*dur),buf=new ArrayBuffer(44+n*2),dv=new DataView(buf);
+  function w(o,s){ for(var i=0;i<s.length;i++) dv.setUint8(o+i,s.charCodeAt(i)); }
+  w(0,'RIFF'); dv.setUint32(4,36+n*2,true); w(8,'WAVE'); w(12,'fmt '); dv.setUint32(16,16,true);
+  dv.setUint16(20,1,true); dv.setUint16(22,1,true); dv.setUint32(24,sr,true); dv.setUint32(28,sr*2,true);
+  dv.setUint16(32,2,true); dv.setUint16(34,16,true); w(36,'data'); dv.setUint32(40,n*2,true);
+  for(var i=0;i<n;i++){
+    var t=i/sr, f=(t<0.55?440:660), env=Math.min(1,Math.min(t*7,(dur-t)*7));
+    dv.setInt16(44+i*2, Math.sin(2*Math.PI*f*t)*0.32*env*32767, true);
+  }
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+function openModal(){
+  var a=$('modal-audio');
+  if(audioURL){ a.style.display='block'; a.src=audioURL; } else { a.style.display='none'; }
+  $('modal').classList.add('show');
+  if(audioURL){ a.currentTime=0; a.play().catch(function(){}); }
+}
+function evalRec(ok){
+  $('modal').classList.remove('show');
+  $('modal-audio').pause();
+  if(ok){ $('rec-status').textContent='🌟 Bravo, tu connais l\'ordre des terminaisons !'; markDone(2); }
+  else { $('rec-status').textContent='🔁 Pas grave ! Réécoute le modèle (dans la capsule vidéo à 1 min 09), puis réenregistre-toi.'; }
+}
+
+/* ===== ACTIVITÉ 3 : compléter ===== */
+var ITEMS=[
+  {pron:'Je',stem:'march',end:'ais'},
+  {pron:'Tu',stem:'march',end:'ais'},
+  {pron:'Il',stem:'march',end:'ait'},
+  {pron:'Nous',stem:'march',end:'ions'},
+  {pron:'Vous',stem:'march',end:'iez'},
+  {pron:'Ils',stem:'march',end:'aient'}
+];
+function buildAct3(){
+  var c=$('items3'); c.innerHTML='';
+  ITEMS.forEach(function(o,i){
+    var row=document.createElement('div'); row.className='item';
+    row.innerHTML=
+      '<span class="n">'+(i+1)+'</span>'+
+      '<span class="verb"><span class="stem">'+o.pron+' '+o.stem+'</span></span>';
+    var inp=document.createElement('input');
+    inp.className='end-input'; inp.id='end-'+i; inp.type='text';
+    inp.autocomplete='off'; inp.setAttribute('autocapitalize','off'); inp.spellcheck=false;
+    inp.placeholder='___';
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') verifier3(); });
+    var res=document.createElement('span'); res.className='res'; res.id='res-'+i;
+    row.querySelector('.verb').appendChild(inp);
+    row.appendChild(res);
+    c.appendChild(row);
+  });
+}
+function norm3(s){ return s.toLowerCase().trim().replace(/^[-\s]+/,'').replace(/\s+/g,''); }
+function verifier3(){
+  for(var i=0;i<ITEMS.length;i++){ if(!$('end-'+i).value.trim()){ showFb('fb3','info','✍️','Complète <b>toutes</b> les terminaisons avant de vérifier.'); return; } }
+  var ok=0;
+  ITEMS.forEach(function(o,i){
+    var inp=$('end-'+i); var v=norm3(inp.value); var res=$('res-'+i);
+    var good=(v===o.end || v===(o.stem+o.end));
+    inp.classList.remove('ok','ko'); inp.classList.add(good?'ok':'ko');
+    inp.readOnly=true;
+    if(good){ ok++; res.innerHTML='✓'; }
+    else { res.innerHTML='→ <b>'+o.end+'</b>'; }
+  });
+  if(ok===ITEMS.length){ showFb('fb3','ok','🎉','Sans faute ! Tu maîtrises les terminaisons de l\'imparfait : -ais, -ais, -ait, -ions, -iez, -aient.'); markDone(3); }
+  else { showFb('fb3','ko','💡','Tu as '+ok+' / '+ITEMS.length+' bonnes terminaisons. La bonne réponse est indiquée à droite des erreurs.'); }
+  $('row3').querySelector('.btn-main').textContent='✔ Vérifié';
+}
+function resetAct3(){
+  ITEMS.forEach(function(_,i){ var inp=$('end-'+i); inp.value=''; inp.readOnly=false; inp.classList.remove('ok','ko'); $('res-'+i).innerHTML=''; });
+  $('fb3').className='feedback';
+  $('row3').querySelector('.btn-main').textContent='✔ Vérifier';
+}
+
+/* ===== util ===== */
+function showFb(box,cls,icon,html){
+  $(box).className='feedback show '+cls;
+  $(box+'-i').textContent=icon;
+  $(box+'-t').innerHTML=html;
+}
+
+/* ===== ACTIVITÉ 4 : verbes à pièges ===== */
+var SPE=[
+  {q:'Verbe « lancer » — Je ____ le ballon.', opts:['lancais','lançais'], correct:1,
+   exp:'Devant <b>a</b>, le c prend une cédille pour garder le son « s » : <b>je lançais</b>.'},
+  {q:'Verbe « lancer » — Nous ____ le ballon.', opts:['lançions','lancions'], correct:1,
+   exp:'Devant <b>i</b>, pas besoin de cédille : <b>nous lancions</b>.'},
+  {q:'Verbe « nager » — Je ____ dans le lac.', opts:['nageais','nagais'], correct:0,
+   exp:'On garde le <b>e</b> devant <b>a</b> pour entendre le son « j » : <b>je nageais</b>.'},
+  {q:'Verbe « nager » — Nous ____ dans le lac.', opts:['nageions','nagions'], correct:1,
+   exp:'Devant <b>i</b>, le e n\'est plus utile : <b>nous nagions</b>.'},
+  {q:'Verbe « crier » — Nous ____ très fort.', opts:['crions','criions'], correct:1,
+   exp:'Deux <b>i</b> : le i du radical (cri-) + le i de la terminaison -ions → <b>nous criions</b>.'},
+  {q:'Verbe « crier » — Vous ____ très fort.', opts:['criiez','criez'], correct:0,
+   exp:'Deux <b>i</b> aussi : cri- + -iez → <b>vous criiez</b>.'}
+];
+var q4ans=0, q4correct=0;
+function buildAct4(){
+  q4ans=0; q4correct=0;
+  $('fb4').className='feedback'; $('row4').style.display='none';
+  var c=$('q4-list'); c.innerHTML='';
+  SPE.forEach(function(o,i){
+    var card=document.createElement('div'); card.className='q4-card'; card.dataset.answered='0';
+    var q=document.createElement('div'); q.className='q4-q'; q.innerHTML=(i+1)+'. '+o.q;
+    var opts=document.createElement('div'); opts.className='q4-opts';
+    o.opts.forEach(function(txt,oi){
+      var b=document.createElement('button'); b.className='q4-opt'; b.textContent=txt;
+      b.onclick=function(){ chooseQ4(i,oi,card); };
+      opts.appendChild(b);
+    });
+    var exp=document.createElement('div'); exp.className='q4-exp'; exp.id='q4exp-'+i; exp.innerHTML='💡 '+o.exp;
+    card.appendChild(q); card.appendChild(opts); card.appendChild(exp);
+    c.appendChild(card);
+  });
+}
+function chooseQ4(i,oi,card){
+  if(card.dataset.answered==='1') return;
+  card.dataset.answered='1';
+  var o=SPE[i];
+  card.querySelectorAll('.q4-opt').forEach(function(b,bi){
+    b.disabled=true;
+    if(bi===o.correct) b.classList.add('ok');
+    else if(bi===oi) b.classList.add('ko');
+  });
+  $('q4exp-'+i).classList.add('show');
+  if(oi===o.correct) q4correct++;
+  q4ans++;
+  if(q4ans===SPE.length){
+    var parfait=(q4correct===SPE.length);
+    showFb('fb4', parfait?'ok':'info', parfait?'🎉':'💡',
+      'Tu as '+q4correct+' / '+SPE.length+' bonnes orthographes. À retenir : <b>lançais</b> (ç devant a), <b>nageais</b> (e devant a), <b>criions / criiez</b> (deux i).');
+    markDone(4);
+    $('row4').style.display='flex';
+  }
+}
+function resetAct4(){ buildAct4(); }
+
+/* INIT */
+resetAct1();
+buildAct3();
+buildAct4();
+</script>
+</body>
+</html>
