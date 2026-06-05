@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Français 6e – Je m'entraîne – S4J2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;--day-border:#f9c0bb;--day-glow:rgba(185,64,64,.25);
+  --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;font-size:1rem;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+h1 .hl{color:var(--day-color);}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+.progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;width:0%;}
+
+.score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+.chip .dot{width:8px;height:8px;border-radius:50%;}
+.chip.correct .dot{background:var(--green);}
+.chip.wrong   .dot{background:var(--pink);}
+.chip.remaining .dot{background:var(--muted);}
+
+/* ── Card ── */
+.card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;display:none;}
+.card.active{display:block;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.phrase-box{background:var(--day-light);border:2px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:10px;padding:.85rem 1.1rem;margin-bottom:1rem;font-size:1rem;font-style:italic;color:var(--day-dark);line-height:1.7;}
+.q-text{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.6;}
+
+/* ── Séparateur entre les deux QCM ── */
+.qcm-sep{border:none;border-top:1.5px dashed var(--day-border);margin:1.1rem 0;}
+.justif-label{font-size:.82rem;font-weight:700;color:var(--day-dark);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;}
+.justif-label .j-badge{font-size:.6rem;font-weight:800;background:var(--day-color);color:#fff;border-radius:4px;padding:.1rem .45rem;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ── Boutons QCM communs ── */
+.choices{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.4rem;}
+.qcm-btn{display:flex;align-items:center;gap:.85rem;padding:.7rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);font-size:.95rem;color:var(--text);cursor:pointer;text-align:left;min-height:46px;transition:all .15s;-webkit-appearance:none;appearance:none;}
+.qcm-btn::before{content:'';width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .2s;}
+.qcm-btn:hover:not(:disabled):not(.sel){background:var(--day-light);border-color:var(--day-color);}
+.qcm-btn:hover:not(:disabled):not(.sel)::before{border-color:var(--day-color);}
+.qcm-btn.sel{background:var(--day-light);border-color:var(--day-color);}
+.qcm-btn.sel::before{background:var(--day-color);border-color:var(--day-color);}
+.qcm-btn.correct{background:#f0faeb;border-color:#b5e08a;color:#2f6e10;}
+.qcm-btn.correct::before{background:var(--green);border-color:var(--green);}
+.qcm-btn.wrong{background:#fff0ef;border-color:var(--pink);color:#c0392b;}
+.qcm-btn.wrong::before{background:var(--pink);border-color:var(--pink);}
+.qcm-btn.reveal{background:#f0faeb;border-color:#b5e08a;color:#2f6e10;}
+.qcm-btn.reveal::before{background:var(--green);border-color:var(--green);}
+.qcm-btn:disabled{cursor:default;opacity:.85;}
+
+/* ── Bouton Valider ── */
+.btn-valider{display:flex;align-items:center;gap:.5rem;width:100%;justify-content:center;padding:.7rem 1.4rem;border-radius:10px;background:var(--day-color);color:#fff;border:none;font-size:.95rem;font-weight:700;cursor:pointer;min-height:46px;margin-top:1.1rem;box-shadow:0 3px 10px var(--day-glow);transition:transform .12s,box-shadow .15s;}
+.btn-valider:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-valider:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none;}
+
+/* ── Feedback global ── */
+.feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.9rem;display:none;align-items:flex-start;gap:.7rem;line-height:1.7;}
+.feedback.show{display:flex;}
+.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.feedback-icon{font-size:1.3rem;flex-shrink:0;}
+
+/* ── Nav ── */
+.nav-row{display:flex;justify-content:flex-end;margin-top:1.1rem;}
+.btn-next{padding:.6rem 1.4rem;border-radius:10px;background:var(--day-color);color:#fff;border:none;font-size:.92rem;font-weight:700;cursor:pointer;min-height:44px;box-shadow:0 3px 10px var(--day-glow);transition:transform .12s;display:none;}
+.btn-next.show{display:inline-flex;align-items:center;gap:.4rem;}
+.btn-next:hover{transform:translateY(-1px);}
+
+/* ── Résultats ── */
+.results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+.results.show{display:block;animation:fadeUp .4s ease both;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;overflow:hidden;}
+.results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+.results-score .s-num{color:var(--day-color);}
+.stars{font-size:2rem;margin:.4rem 0 1rem;}
+.results-msg{color:var(--muted);font-size:.95rem;margin-bottom:1.8rem;font-family:'JetBrains Mono',monospace;}
+.recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+.recap-item{padding:.65rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;}
+.recap-item.ok-item{border-color:#b5e08a;}
+.recap-item.ko-item{border-color:#f9c0bb;}
+.recap-justif{font-size:.78rem;color:var(--muted);margin-top:.2rem;}
+.btn-restart{display:flex;align-items:center;gap:.4rem;padding:.65rem 1.6rem;border-radius:10px;background:var(--day-color);color:#fff;border:none;font-size:.95rem;font-weight:700;cursor:pointer;margin:0 auto;box-shadow:0 3px 10px var(--day-glow);transition:transform .12s;}
+.btn-restart:hover{transform:translateY(-1px);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:480px){.card{padding:1.4rem;}.qcm-btn{font-size:.9rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 2</div>
+  <h1>&#129504; <span class="hl">Je m&rsquo;entra&icirc;ne</span></h1>
+  <<p class="subtitle">8 questions &middot; Réponse + justification &middot; Phrases affirmatives, négatives &amp; exclamatives</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 / 8</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span>&nbsp;correcte(s)</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="count-ko">0</span>&nbsp;erreur(s)</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">8</span>&nbsp;restante(s)</div>
+</div>
+
+<div id="cards-zone"></div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="card-stripe" style="position:absolute;top:0;left:0;right:0;height:4px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));"></div>
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span> / 8</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn-restart" onclick="location.reload()">&#128260;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var QS = [
+  {
+    num:1, badge:"Type de phrase",
+    question:"Quelle est la forme de cette phrase\u00a0?",
+    phrase:"Je ne termine jamais mon travail en retard.",
+    choices:["A.\u00a0Affirmative","B.\u00a0Exclamative","C.\u00a0N\u00e9gative et exclamative","D.\u00a0N\u00e9gative"],
+    answer:3,
+    justifQ:"Quel indice t\u2019a permis de r\u00e9pondre\u00a0?",
+    justifChoices:["A.\u00a0La pr\u00e9sence du point d\u2019exclamation","B.\u00a0La locution \u00ab\u00a0ne\u00a0\u2026\u00a0jamais\u00a0\u00bb","C.\u00a0Le sujet de la phrase","D.\u00a0Le point final"],
+    justifAnswer:1,
+    fb_ok:"Exact\u00a0! La locution \u00ab\u00a0ne\u00a0\u2026\u00a0jamais\u00a0\u00bb encadre le verbe : c\u2019est la marque de la n\u00e9gation.",
+    fb_ko:"La bonne r\u00e9ponse est D. \u00ab\u00a0Ne\u00a0\u2026\u00a0jamais\u00a0\u00bb est une locution n\u00e9gative qui encadre le verbe."
+  },
+  {
+    num:2, badge:"Phrase exclamative",
+    question:"Quelle phrase est uniquement exclamative\u00a0?",
+    phrase:null,
+    choices:["A.\u00a0Comme cette montagne est impressionnante\u00a0!","B.\u00a0Je ne veux plus attendre\u00a0!","C.\u00a0Nous ne sortons jamais le soir.","D.\u00a0Le train arrive \u00e0 l\u2019heure."],
+    answer:0,
+    justifQ:"Pourquoi cette phrase est-elle uniquement exclamative\u00a0?",
+    justifChoices:["A.\u00a0Elle contient \u00ab\u00a0ne\u00a0\u2026\u00a0plus\u00a0\u00bb","B.\u00a0Elle a un point d\u2019exclamation et aucune n\u00e9gation","C.\u00a0Elle se termine par un point","D.\u00a0Le sujet est \u00ab\u00a0nous\u00a0\u00bb"],
+    justifAnswer:1,
+    fb_ok:"Exact\u00a0! Le point d\u2019exclamation exprime l\u2019\u00e9motion, et il n\u2019y a aucune locution n\u00e9gative.",
+    fb_ko:"La bonne r\u00e9ponse est A. Elle exprime une \u00e9motion (point d\u2019exclamation) sans aucun \u00e9l\u00e9ment n\u00e9gatif."
+  },
+  {
+    num:3, badge:"Phrase affirmative",
+    question:"Quelle phrase est uniquement affirmative\u00a0?",
+    phrase:null,
+    choices:["A.\u00a0Comme cette ville est magnifique\u00a0!","B.\u00a0Je ne visite jamais cette ville.","C.\u00a0Nous visitons une ville ancienne.","D.\u00a0Je ne visite jamais cette ville\u00a0!"],
+    answer:2,
+    justifQ:"Qu\u2019est-ce qui caract\u00e9rise une phrase affirmative\u00a0?",
+    justifChoices:["A.\u00a0Elle contient un point d\u2019exclamation","B.\u00a0Elle contient \u00ab\u00a0ne\u00a0\u2026\u00a0pas\u00a0\u00bb","C.\u00a0Elle donne une information sans n\u00e9gation ni exclamation","D.\u00a0Elle se termine par un point d\u2019interrogation"],
+    justifAnswer:2,
+    fb_ok:"Exact\u00a0! Une phrase affirmative donne une information simple, sans n\u00e9gation ni point d\u2019exclamation.",
+    fb_ko:"La bonne r\u00e9ponse est C. \u00ab\u00a0Nous visitons une ville ancienne.\u00a0\u00bb : pas de n\u00e9gation, pas d\u2019exclamation."
+  },
+  {
+    num:4, badge:"N\u00e9gative + exclamative",
+    question:"Quelle phrase est \u00e0 la fois n\u00e9gative et exclamative\u00a0?",
+    phrase:null,
+    choices:["A.\u00a0Comme ce jardin est agr\u00e9able\u00a0!","B.\u00a0Je n\u2019ai rien oubli\u00e9\u00a0!","C.\u00a0Nous travaillons s\u00e9rieusement.","D.\u00a0Je n\u2019oublie jamais mon cahier."],
+    answer:1,
+    justifQ:"Quels sont les deux \u00e9l\u00e9ments qui caract\u00e9risent cette phrase\u00a0?",
+    justifChoices:["A.\u00a0Un point d\u2019interrogation et un sujet","B.\u00a0La n\u00e9gation \u00ab\u00a0ne\u00a0\u2026\u00a0rien\u00a0\u00bb et le point d\u2019exclamation","C.\u00a0Un verbe au pass\u00e9 et un sujet","D.\u00a0Un point final et une n\u00e9gation"],
+    justifAnswer:1,
+    fb_ok:"Exact\u00a0! \u00ab\u00a0Ne\u00a0\u2026\u00a0rien\u00a0\u00bb (n\u00e9gation) et \u00ab\u00a0!\u00a0\u00bb (exclamation) sont tous les deux pr\u00e9sents.",
+    fb_ko:"La bonne r\u00e9ponse est B. Elle contient \u00ab\u00a0ne\u00a0\u2026\u00a0rien\u00a0\u00bb et \u00ab\u00a0!\u00a0\u00bb : les deux formes sont r\u00e9unies."
+  },
+  {
+    num:5, badge:"Locution n\u00e9gative",
+    question:"Quel groupe de mots forme une n\u00e9gation\u00a0?",
+    phrase:null,
+    choices:["A.\u00a0comme\u00a0\u2026\u00a0que","B.\u00a0tr\u00e8s\u00a0\u2026\u00a0bien","C.\u00a0ne\u00a0\u2026\u00a0rien","D.\u00a0dans\u00a0\u2026\u00a0la"],
+    answer:2,
+    justifQ:"Comment fonctionne cette locution n\u00e9gative\u00a0?",
+    justifChoices:["A.\u00a0Elle remplace le sujet","B.\u00a0Elle encadre le verbe pour nier l\u2019action","C.\u00a0Elle modifie l\u2019adjectif","D.\u00a0Elle indique le lieu"],
+    justifAnswer:1,
+    fb_ok:"Exact\u00a0! \u00ab\u00a0Ne\u00a0\u2026\u00a0rien\u00a0\u00bb encadre le verbe pour nier compl\u00e8tement l\u2019action.",
+    fb_ko:"La bonne r\u00e9ponse est C. \u00ab\u00a0Ne\u00a0\u2026\u00a0rien\u00a0\u00bb encadre le verbe et exprime la n\u00e9gation."
+  },
+  {
+    num:6, badge:"Phrase n\u00e9gative",
+    question:"Quel indice montre qu\u2019il s\u2019agit d\u2019une phrase n\u00e9gative\u00a0?",
+    phrase:"Je ne lis plus ce livre.",
+    choices:["A.\u00a0Le mot \u00ab\u00a0je\u00a0\u00bb","B.\u00a0Le point final","C.\u00a0Les mots \u00ab\u00a0ne\u00a0\u2026\u00a0plus\u00a0\u00bb","D.\u00a0Le mot \u00ab\u00a0livre\u00a0\u00bb"],
+    answer:2,
+    justifQ:"O\u00f9 se placent les mots de la n\u00e9gation dans cette phrase\u00a0?",
+    justifChoices:["A.\u00a0Avant et apr\u00e8s le sujet","B.\u00a0Avant et apr\u00e8s le verbe","C.\u00a0En d\u00e9but et fin de phrase","D.\u00a0Apr\u00e8s le compl\u00e9ment"],
+    justifAnswer:1,
+    fb_ok:"Exact\u00a0! \u00ab\u00a0Ne\u00a0\u2026\u00a0plus\u00a0\u00bb encadre le verbe \u00ab\u00a0lis\u00a0\u00bb : c\u2019est la marque de la n\u00e9gation.",
+    fb_ko:"La bonne r\u00e9ponse est C. \u00ab\u00a0Ne\u00a0\u2026\u00a0plus\u00a0\u00bb encadre le verbe et exprime la n\u00e9gation."
+  },
+  {
+    num:7, badge:"Phrase exclamative",
+    question:"Quelle phrase exprime clairement une \u00e9motion\u00a0?",
+    phrase:null,
+    choices:["A.\u00a0Nous rentrons \u00e0 la maison.","B.\u00a0Le cours commence maintenant.","C.\u00a0Ils rangent leurs affaires.","D.\u00a0Quelle magnifique d\u00e9couverte\u00a0!"],
+    answer:3,
+    justifQ:"Quel \u00e9l\u00e9ment montre qu\u2019il s\u2019agit d\u2019une phrase exclamative\u00a0?",
+    justifChoices:["A.\u00a0Le mot \u00ab\u00a0nous\u00a0\u00bb","B.\u00a0Le point final","C.\u00a0Le point d\u2019exclamation et le mot \u00ab\u00a0Quelle\u00a0\u00bb","D.\u00a0La pr\u00e9sence d\u2019un adverbe"],
+    justifAnswer:2,
+    fb_ok:"Exact\u00a0! \u00ab\u00a0Quelle\u00a0\u00bb + point d\u2019exclamation sont les marques de la phrase exclamative.",
+    fb_ko:"La bonne r\u00e9ponse est D. Le \u00ab\u00a0!\u00a0\u00bb et le mot \u00ab\u00a0Quelle\u00a0\u00bb indiquent une phrase exclamative."
+  },
+  {
+    num:8, badge:"Forme n\u00e9gative",
+    question:"Quel indice permet d\u2019identifier la forme de cette phrase\u00a0?",
+    phrase:"Elle n\u2019invite ni Sarah ni Amina.",
+    choices:["A.\u00a0La pr\u00e9sence de \u00ab\u00a0ni\u00a0\u2026\u00a0ni\u00a0\u00bb","B.\u00a0Le point d\u2019exclamation","C.\u00a0L\u2019ordre des mots","D.\u00a0Le sujet de la phrase"],
+    answer:0,
+    justifQ:"Quel est le r\u00f4le de \u00ab\u00a0ne\u00a0\u2026\u00a0ni\u00a0\u2026\u00a0ni\u00a0\u00bb\u00a0?",
+    justifChoices:["A.\u00a0C\u2019est une locution affirmative","B.\u00a0C\u2019est une locution n\u00e9gative double qui nie deux \u00e9l\u00e9ments","C.\u00a0C\u2019est une locution exclamative","D.\u00a0C\u2019est un d\u00e9terminant"],
+    justifAnswer:1,
+    fb_ok:"Exact\u00a0! \u00ab\u00a0Ne\u00a0\u2026\u00a0ni\u00a0\u2026\u00a0ni\u00a0\u00bb est une n\u00e9gation double : elle nie deux \u00e9l\u00e9ments en m\u00eame temps.",
+    fb_ko:"La bonne r\u00e9ponse est A. \u00ab\u00a0Ne\u00a0\u2026\u00a0ni\u00a0\u2026\u00a0ni\u00a0\u00bb est une locution n\u00e9gative double."
+  }
+];
+
+var TOTAL   = QS.length;
+var results = {};
+var current = 0;
+
+/* ══ Build cards ══ */
+var zone = document.getElementById("cards-zone");
+
+for (var i = 0; i < TOTAL; i++) {
+  (function(q, idx) {
+    var card = document.createElement("div");
+    card.className = "card" + (idx === 0 ? " active" : "");
+    card.id = "card_" + idx;
+
+    var phraseHtml = q.phrase
+      ? "<div class='phrase-box'>" + q.phrase + "</div>"
+      : "";
+
+    /* QCM réponse */
+    var chHtml = "<div class='choices' id='rep_" + idx + "'>";
+    for (var c = 0; c < q.choices.length; c++) {
+      chHtml += "<button type='button' class='qcm-btn' data-type='rep' data-cidx='" + c + "'>" + q.choices[c] + "</button>";
+    }
+    chHtml += "</div>";
+
+    /* QCM justification */
+    var jHtml = "<div class='choices' id='jus_" + idx + "'>";
+    for (var c = 0; c < q.justifChoices.length; c++) {
+      jHtml += "<button type='button' class='qcm-btn' data-type='jus' data-cidx='" + c + "'>" + q.justifChoices[c] + "</button>";
+    }
+    jHtml += "</div>";
+
+    card.innerHTML =
+      "<div class='card-stripe'></div>" +
+      "<div class='q-num'>Question " + q.num + " / " + TOTAL + "</div>" +
+      "<div class='theme-badge'>" + q.badge + "</div>" +
+      "<div class='q-text'>" + q.question + "</div>" +
+      phraseHtml +
+      chHtml +
+      "<hr class='qcm-sep'>" +
+      "<div class='justif-label'><span class='j-badge'>Justification</span>" + q.justifQ + "</div>" +
+      jHtml +
+      "<button type='button' class='btn-valider' id='btnval_" + idx + "' disabled onclick='valider(" + idx + ")'>&#10003;&nbsp;Valider mes deux r\u00e9ponses</button>" +
+      "<div class='feedback' id='fb_" + idx + "'>" +
+        "<span class='feedback-icon' id='fbi_" + idx + "'></span>" +
+        "<div><div id='fbm_" + idx + "'></div></div>" +
+      "</div>" +
+      "<div class='nav-row'>" +
+        "<button type='button' class='btn-next' id='nxt_" + idx + "' onclick='goNext(" + idx + ")'>" +
+          (idx < TOTAL-1 ? "Question suivante &rarr;" : "Voir mes r&eacute;sultats &#10003;") +
+        "</button>" +
+      "</div>";
+
+    zone.appendChild(card);
+
+    /* état local par carte */
+    var state = { rep: null, jus: null };
+
+    function tryUnlock() {
+      var btn = document.getElementById("btnval_" + idx);
+      btn.disabled = (state.rep === null || state.jus === null);
+    }
+
+    /* listeners QCM réponse */
+    var repDiv = document.getElementById("rep_" + idx);
+    var repBtns = repDiv.querySelectorAll(".qcm-btn");
+    for (var b = 0; b < repBtns.length; b++) {
+      repBtns[b].addEventListener("click", (function(btn) {
+        return function() {
+          if (results[idx] != null) return;
+          var all = repDiv.querySelectorAll(".qcm-btn");
+          for (var bi = 0; bi < all.length; bi++) all[bi].classList.remove("sel");
+          btn.classList.add("sel");
+          state.rep = parseInt(btn.getAttribute("data-cidx"));
+          tryUnlock();
+        };
+      })(repBtns[b]));
+    }
+
+    /* listeners QCM justification */
+    var jusDiv = document.getElementById("jus_" + idx);
+    var jusBtns = jusDiv.querySelectorAll(".qcm-btn");
+    for (var b = 0; b < jusBtns.length; b++) {
+      jusBtns[b].addEventListener("click", (function(btn) {
+        return function() {
+          if (results[idx] != null) return;
+          var all = jusDiv.querySelectorAll(".qcm-btn");
+          for (var bi = 0; bi < all.length; bi++) all[bi].classList.remove("sel");
+          btn.classList.add("sel");
+          state.jus = parseInt(btn.getAttribute("data-cidx"));
+          tryUnlock();
+        };
+      })(jusBtns[b]));
+    }
+
+    /* stocker state dans closure pour valider() */
+    card._state = state;
+
+  })(QS[i], i);
+}
+
+/* ══ Valider ══ */
+function valider(idx) {
+  if (results[idx] != null) return;
+  var card  = document.getElementById("card_" + idx);
+  var state = card._state;
+  var q     = QS[idx];
+
+  var repOk = (state.rep === q.answer);
+  var jusOk = (state.jus === q.justifAnswer);
+  results[idx] = { repOk: repOk, jusOk: jusOk };
+
+  /* Désactiver le bouton valider */
+  document.getElementById("btnval_" + idx).disabled = true;
+
+  /* Colorier QCM réponse */
+  var repDiv  = document.getElementById("rep_" + idx);
+  var repBtns = repDiv.querySelectorAll(".qcm-btn");
+  for (var bi = 0; bi < repBtns.length; bi++) {
+    repBtns[bi].disabled = true;
+    repBtns[bi].classList.remove("sel");
+    if (bi === state.rep) repBtns[bi].classList.add(repOk ? "correct" : "wrong");
+    if (!repOk && bi === q.answer) repBtns[bi].classList.add("reveal");
+  }
+
+  /* Colorier QCM justification */
+  var jusDiv  = document.getElementById("jus_" + idx);
+  var jusBtns = jusDiv.querySelectorAll(".qcm-btn");
+  for (var bi = 0; bi < jusBtns.length; bi++) {
+    jusBtns[bi].disabled = true;
+    jusBtns[bi].classList.remove("sel");
+    if (bi === state.jus) jusBtns[bi].classList.add(jusOk ? "correct" : "wrong");
+    if (!jusOk && bi === q.justifAnswer) jusBtns[bi].classList.add("reveal");
+  }
+
+  /* Feedback global */
+  var fb  = document.getElementById("fb_" + idx);
+  var allOk = repOk && jusOk;
+  fb.className = "feedback show " + (allOk ? "ok" : "ko");
+  document.getElementById("fbi_" + idx).textContent = allOk ? "\u2705" : (repOk ? "\uD83D\uDFE1" : "\u274C");
+  document.getElementById("fbm_" + idx).textContent = repOk ? q.fb_ok : q.fb_ko;
+
+  document.getElementById("nxt_" + idx).classList.add("show");
+  refreshUI();
+}
+
+/* ══ Navigation ══ */
+function goNext(idx) {
+  document.getElementById("card_" + idx).classList.remove("active");
+  var next = idx + 1;
+  if (next < TOTAL) {
+    current = next;
+    var nc = document.getElementById("card_" + next);
+    nc.classList.add("active");
+    nc.scrollIntoView({ behavior:"smooth", block:"start" });
+    document.getElementById("prog-label").textContent = "Question " + (next+1) + " / " + TOTAL;
+  } else {
+    showResults();
+  }
+}
+
+/* ══ UI ══ */
+function refreshUI() {
+  var ok=0, ko=0, done=0;
+  for (var k in results) {
+    done++;
+    if (results[k].repOk && results[k].jusOk) ok++; else ko++;
+  }
+  document.getElementById("count-ok").textContent  = ok;
+  document.getElementById("count-ko").textContent  = ko;
+  document.getElementById("count-rem").textContent = TOTAL - done;
+  var pct = Math.round(done / TOTAL * 100);
+  document.getElementById("progress-bar").style.width = pct + "%";
+  document.getElementById("prog-pct").textContent = pct + "\u00a0%";
+}
+
+/* ══ Résultats ══ */
+function showResults() {
+  var ok = 0;
+  for (var k in results) { if (results[k].repOk && results[k].jusOk) ok++; }
+  document.getElementById("score-num").textContent = ok;
+  var pct = Math.round(ok / TOTAL * 100);
+  var stars, msg;
+  if      (pct===100){ stars="\u2605\u2605\u2605\u2605\u2605"; msg="Parfait\u00a0! Tu ma\u00eetrises les trois formes de phrases."; }
+  else if (pct>= 75) { stars="\u2605\u2605\u2605\u2605\u2606"; msg="Tr\u00e8s bien\u00a0! Relis les feedbacks des erreurs."; }
+  else if (pct>= 50) { stars="\u2605\u2605\u2605\u2606\u2606"; msg="Bien\u00a0! Quelques formes \u00e0 retravailler."; }
+  else               { stars="\u2605\u2605\u2606\u2606\u2606"; msg="\u00c0 retravailler. Relis les explications et recommence."; }
+
+  document.getElementById("stars-row").textContent = stars;
+  document.getElementById("results-msg").textContent = msg;
+
+  var recap = "";
+  for (var i = 0; i < TOTAL; i++) {
+    var r = results[i];
+    var fullOk = r && r.repOk && r.jusOk;
+    var repOK  = r && r.repOk;
+    var jusOK  = r && r.jusOk;
+    recap += "<div class='recap-item " + (fullOk ? "ok-item" : "ko-item") + "'>" +
+      "<div>" +
+        "<strong>" + (repOK ? "✅" : "❌") + " Réponse — " + QS[i].badge + "</strong><br>" +
+        "<span style='font-size:.78rem;color:var(--muted)'>" + (jusOK ? "✅" : "❌") + " Justification " + (jusOK ? "correcte" : "incorrecte") + "</span>" +
+      "</div></div>";
+  }
+  document.getElementById("recap-list").innerHTML = recap;
+  document.getElementById("count-rem").textContent = 0;
+  document.getElementById("progress-bar").style.width = "100%";
+  document.getElementById("prog-pct").textContent = "100\u00a0%";
+  document.getElementById("results-screen").classList.add("show");
+  document.getElementById("results-screen").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+</script>
+</body>
+</html>
