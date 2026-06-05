@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S4 J5 · Dictée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5c518; --jour-fonce:#8a6000; --jour-clair:#fffbeb; --jour-pale:#f5e08a;
+  --day-glow:rgba(245,197,24,.35);
+  --bg:#fffdf7; --dark:#1a1f2e;
+  --vert:#22c55e; --rouge:#ef4444; --orange:#f5a623;
+  --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg); color:var(--txt);
+  min-height:100vh; overflow-x:hidden;
+  padding:16px 12px 50px; position:relative;
+}
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.5; z-index:0; pointer-events:none; }
+.b1{ width:200px;height:200px;background:#ffd84d;          top:-60px; right:-50px; }
+.b2{ width:240px;height:240px;background:var(--jour-pale); bottom:-80px; left:-70px; }
+.b3{ width:150px;height:150px;background:#9be7a5;          top:45%; right:-70px; }
+.b4{ width:130px;height:130px;background:#f9b8c5;          top:30%; left:-60px; }
+.wrap{ position:relative; z-index:1; max-width:640px; margin:0 auto; width:100%; }
+.header{ text-align:center; margin-bottom:18px; }
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--jour); color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px var(--day-glow); margin-bottom:10px;
+}
+.dots{ display:inline-flex; gap:3px; }
+.dots i{ width:7px;height:7px;border-radius:50%;background:#3a2c00;display:block; }
+.dots i:nth-child(2){ opacity:.6; } .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif; font-size:.75rem; letter-spacing:3px; color:var(--gris); text-transform:uppercase; margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.4rem,6vw,2.3rem); line-height:1.15; color:var(--txt); margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:clamp(.65rem,2.5vw,.82rem); letter-spacing:1.5px; color:var(--gris); margin-bottom:14px; word-break:break-word; }
+.badge-revision{
+  display:inline-block; background:var(--jour); color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.68rem,2.5vw,.82rem); letter-spacing:1px;
+  padding:9px 16px; border-radius:24px; text-align:center;
+  box-shadow:0 4px 14px var(--day-glow); animation:pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.05); box-shadow:0 6px 22px rgba(245,197,24,.7);} }
+.game{
+  background:var(--dark); border:2px solid var(--jour); border-radius:18px;
+  padding:16px 14px; margin-bottom:20px;
+  box-shadow:0 0 24px var(--day-glow), inset 0 0 40px rgba(0,0,0,.3);
+}
+.game-label{ font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:700; letter-spacing:2px; color:var(--jour); opacity:.85; margin-bottom:12px; }
+.note-display{ text-align:center; margin-bottom:14px; }
+.note-val{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2.4rem,10vw,4rem); line-height:1; color:var(--jour); text-shadow:0 0 20px var(--day-glow); }
+.note-label{ font-family:'JetBrains Mono',monospace; font-size:.65rem; letter-spacing:2px; color:rgba(255,255,255,.5); margin-top:4px; text-transform:uppercase; }
+.etoiles{ text-align:center; margin-bottom:14px; font-size:clamp(1.1rem,4vw,1.55rem); letter-spacing:clamp(3px,1.5vw,8px); }
+.star{ color:rgba(255,255,255,.22); transition:.3s; display:inline-block; }
+.star.on{ color:var(--jour); text-shadow:0 0 12px var(--jour); animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{transform:scale(0);} 60%{transform:scale(1.5);} 100%{transform:scale(1);} }
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span{ font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1px; color:var(--jour); opacity:.85; }
+.xp-head span:last-child{ font-size:.68rem; font-weight:700; opacity:1; }
+.xp-bar{ height:9px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; }
+.xp-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#ffe88a); box-shadow:0 0 10px var(--jour); border-radius:8px; transition:width .8s cubic-bezier(.22,1,.36,1); }
+.card{ background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08); animation:fadeUp .4s ease both; }
+@keyframes fadeUp{ from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+.rainbow{ height:6px; background:linear-gradient(90deg,#ff5e5e,#f5a623,var(--jour),#3ab5d8,#a884ff,#ff5e5e); background-size:300% 100%; animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{background-position:0% 0;} 100%{background-position:300% 0;} }
+.card-body{ padding:16px 14px 22px; }
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:8px; flex-wrap:wrap; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.85rem,3vw,1rem); letter-spacing:1px; color:var(--txt); }
+.type-badge{ font-family:'Orbitron',sans-serif; font-size:.58rem; font-weight:700; background:var(--jour-clair); color:var(--jour-fonce); padding:4px 9px; border-radius:14px; border:1px solid var(--jour-pale); }
+.player-zone{
+  background:var(--dark); border:2px solid var(--jour);
+  border-radius:16px; padding:16px 18px; margin-bottom:18px;
+  box-shadow:0 0 16px var(--day-glow);
+}
+.player-label{ font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:700; letter-spacing:2px; color:var(--jour); opacity:.75; text-transform:uppercase; margin-bottom:12px; }
+.player-controls{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.btn-play{
+  width:54px; height:54px; border-radius:50%;
+  background:var(--jour); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-size:1.4rem; box-shadow:0 0 14px var(--day-glow);
+  -webkit-tap-highlight-color:transparent; transition:.15s;
+}
+.btn-play:hover{ transform:scale(1.08); }
+.btn-play:active{ transform:scale(.95); }
+.audio-progress-wrap{ flex:1; min-width:120px; display:flex; flex-direction:column; gap:6px; }
+.audio-bar-track{
+  height:8px; background:rgba(255,255,255,.12); border-radius:8px;
+  cursor:pointer; position:relative; overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  padding:18px 0; margin:-18px 0; box-sizing:content-box;
+}
+.audio-bar-fill{ height:100%; width:0%; background:var(--jour); border-radius:8px; transition:width .2s linear; pointer-events:none; }
+.audio-time{ font-family:'JetBrains Mono',monospace; font-size:.65rem; color:rgba(255,255,255,.5); display:flex; justify-content:space-between; }
+.btn-speed{
+  font-family:'Orbitron',sans-serif; font-size:.68rem; font-weight:700;
+  padding:8px 12px; border-radius:8px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(245,197,24,.4);
+  color:var(--jour); cursor:pointer; min-height:44px;
+  -webkit-tap-highlight-color:transparent; transition:.15s;
+}
+.btn-speed:hover{ background:rgba(245,197,24,.15); }
+.replay-info{ font-family:'JetBrains Mono',monospace; font-size:.62rem; color:rgba(255,255,255,.45); text-align:center; margin-top:8px; letter-spacing:1px; }
+.consigne-box{
+  background:var(--jour-clair); border-left:4px solid var(--jour);
+  border-radius:0 10px 10px 0; padding:12px 14px; margin-bottom:18px;
+  font-size:clamp(.88rem,3vw,.98rem); color:#3a2c00; font-weight:600;
+  line-height:1.6; word-break:break-word;
+}
+.dictee-label{ font-size:clamp(.82rem,3vw,.92rem); font-weight:700; color:var(--txt); margin-bottom:8px; font-family:'JetBrains Mono',monospace; letter-spacing:1px; }
+.dictee-area{
+  width:100%; min-height:160px;
+  border:2.5px solid var(--jour-pale); border-radius:12px;
+  background:#fffdf7; padding:14px 16px;
+  font-size:clamp(1rem,3.5vw,1.15rem);
+  font-family:Arial,Helvetica,sans-serif;
+  line-height:1.8; color:var(--txt);
+  resize:vertical; outline:none;
+  transition:border .2s, box-shadow .2s;
+}
+.dictee-area:focus{ border-color:var(--jour); box-shadow:0 0 0 3px rgba(245,197,24,.2); }
+.dictee-area:disabled{ background:#f5f0e4; color:#777; cursor:not-allowed; }
+.char-count{ text-align:right; font-size:.72rem; color:var(--gris); margin-top:4px; font-family:'JetBrains Mono',monospace; }
+.resultat-zone{ display:none; margin-top:18px; }
+.resultat-zone.show{ display:block; animation:fadeUp .4s ease; }
+.texte-annote{
+  font-size:clamp(1rem,3.5vw,1.12rem); line-height:2.4;
+  word-break:break-word; margin-bottom:16px;
+  background:#fffdf7; border:2px solid #e8e2d4;
+  border-radius:12px; padding:14px 16px;
+}
+.mot-ok { color:#157f3a; font-weight:700; }
+.mot-err{ background:#fdeaea; color:#c0392b; font-weight:700; border-radius:4px; padding:1px 3px; text-decoration:underline wavy #ef4444; }
+.fautes-titre{ font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700; letter-spacing:1px; color:var(--txt); margin-bottom:10px; margin-top:16px; }
+.faute-item{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:10px; margin-bottom:8px; font-size:clamp(.82rem,3vw,.92rem); line-height:1.5; word-break:break-word; }
+.faute-item.imp-err  { background:#fff8e6; border-left:4px solid var(--jour); }
+.faute-item.acc-err  { background:#fdeaea; border-left:4px solid var(--rouge); }
+.faute-cat{ flex-shrink:0; font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700; letter-spacing:.5px; }
+.faute-txt{ flex:1; }
+.faute-pts{ flex-shrink:0; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.8rem; color:var(--rouge); }
+.note-result{
+  background:var(--dark); border:2px solid var(--jour);
+  border-radius:14px; padding:18px 16px; text-align:center;
+  margin-bottom:16px; box-shadow:0 0 16px var(--day-glow);
+}
+.note-result .nr-val{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2rem,9vw,3.5rem); color:var(--jour); text-shadow:0 0 20px var(--day-glow); line-height:1; }
+.note-result .nr-msg{ font-family:'Orbitron',sans-serif; font-size:clamp(.72rem,2.5vw,.85rem); color:rgba(255,255,255,.7); margin-top:8px; word-break:break-word; }
+.correction-complete{
+  background:var(--jour-clair); border:1px dashed var(--jour);
+  border-radius:12px; padding:14px 16px; margin-bottom:16px;
+  font-size:clamp(.88rem,3vw,.98rem); line-height:1.9;
+  color:#3a2c00; word-break:break-word;
+}
+.correction-complete .cc-titre{ font-family:'Orbitron',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:1px; margin-bottom:8px; color:var(--jour-fonce); }
+.correction-complete em{ font-style:normal; font-weight:700; color:var(--jour-fonce); text-decoration:underline; }
+.btns{ display:flex; gap:9px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.72rem,2.5vw,.82rem); letter-spacing:1px;
+  padding:12px 16px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff;
+  min-height:48px; -webkit-tap-highlight-color:transparent;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-rejouer{ background:var(--jour); color:#3a2c00; display:none; }
+.btn-rejouer.visible{ display:inline-flex; }
+.btn-valider:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-rejouer.visible:not(:disabled){ animation:neon-jour 1.4s ease-in-out infinite; }
+@keyframes neon-vert{ 0%,100%{box-shadow:0 0 6px rgba(34,197,94,.5);} 50%{box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-jour{ 0%,100%{box-shadow:0 0 6px rgba(245,197,24,.5);} 50%{box-shadow:0 0 18px rgba(245,197,24,.95);} }
+.btn:disabled{ background:#d8d8d8!important;color:#fff!important;cursor:not-allowed;animation:none!important;box-shadow:none!important; }
+@media(max-width:480px){ .btns{flex-direction:column;} .btn{width:100%;} }
+.feedback{ display:none; margin-top:14px; padding:13px 14px; border-radius:10px; font-weight:bold; font-size:clamp(.88rem,3vw,1rem); line-height:1.5; }
+.feedback.show{ display:block; animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok   { background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.moyen{ background:#fff8e6; color:#8a6000; border:1px solid #f5d080; }
+.feedback.ko   { background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+.xp-pop{ position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.5);font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.5rem;color:var(--jour);text-shadow:0 0 20px var(--jour),0 4px 10px rgba(0,0,0,.3);z-index:50;opacity:0;pointer-events:none; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.25);}70%{opacity:1;transform:translate(-50%,-80%) scale(1);}100%{opacity:0;transform:translate(-50%,-130%) scale(.9);} }
+@media(max-width:380px){ .game{padding:12px 10px;} .card-body{padding:12px 10px 16px;} .player-zone{padding:12px 12px;} .btn-play{width:46px;height:46px;font-size:1.2rem;} .player-controls{gap:8px;} .btn-speed{padding:8px 8px;font-size:.62rem;} }
+@media(max-width:480px){ .player-controls{flex-wrap:wrap;} .audio-progress-wrap{min-width:0;width:100%;order:3;} }
+</style>
+</head>
+<body>
+
+<div class="bulle b1"></div>
+<div class="bulle b2"></div>
+<div class="bulle b3"></div>
+<div class="bulle b4"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · FRANÇAIS · 6E
+    </div>
+    <div class="semaine">Semaine 4 – Jour 5</div>
+    <h1 class="titre">Je relève le <span class="accent">défi</span>&nbsp;!</h1>
+    <div class="sous-titre">Dictée · Accords singulier / pluriel &amp; imparfait</div>
+    <div class="badge-revision">DÉFI DICTÉE · S4 J5 · VENDREDI</div>
+  </div>
+
+  <div class="game">
+    <div class="game-label">DÉFI DICTÉE · 6E · NOTE SUR 10</div>
+    <div class="note-display">
+      <div class="note-val" id="note-val">— / 10</div>
+      <div class="note-label">Ta note</div>
+    </div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="xp-head"><span>XP PROGRESS</span><span id="xp-pct">0 %</span></div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+
+      <div class="card-head">
+        <div class="defi-num">DICTÉE 01</div>
+        <div class="type-badge">ACCORDS &amp; IMPARFAIT</div>
+      </div>
+
+      <div class="player-zone">
+        <div class="player-label">🎧 Dictée · Semaine 4 – Jour 5</div>
+        <div class="player-controls">
+          <button class="btn-play" id="btn-play" onclick="togglePlay()" aria-label="Lecture / Pause">▶</button>
+          <div class="audio-progress-wrap">
+            <div class="audio-bar-track" id="bar-track" onclick="seekAudio(event)">
+              <div class="audio-bar-fill" id="bar-fill"></div>
+            </div>
+            <div class="audio-time">
+              <span id="time-cur">0:00</span>
+              <span id="time-tot">0:00</span>
+            </div>
+          </div>
+          <button class="btn-speed" onclick="cycleSpeed()" id="btn-speed">× 1.0</button>
+        </div>
+        <div class="replay-info" id="replay-info">Écoutes : 0</div>
+      </div>
+
+      <div class="consigne-box">
+        ✏️ <strong>Consigne :</strong> Écoute la dictée, puis écris le texte ci-dessous.
+      </div>
+
+      <div class="dictee-label">📝 ÉCRIS TA DICTÉE ICI :</div>
+      <textarea class="dictee-area" id="dictee-area"
+        placeholder="Commence à écrire ici après avoir écouté la dictée…"
+        oninput="updateCharCount()"
+        rows="9"></textarea>
+      <div class="char-count" id="char-count">0 caractère(s)</div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" onclick="corriger()">✔ CORRIGER MA DICTÉE</button>
+        <button class="btn btn-rejouer" id="btn-rejouer" onclick="recommencer()">↺ RECOMMENCER</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+
+      <div class="resultat-zone" id="resultat-zone">
+
+        <div class="note-result">
+          <div class="nr-val" id="nr-val">— / 10</div>
+          <div class="nr-msg" id="nr-msg"></div>
+        </div>
+
+        <div class="texte-annote" id="texte-annote"></div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;font-size:.78rem;font-family:'JetBrains Mono',monospace;">
+          <span style="display:flex;align-items:center;gap:5px;">
+            <span style="background:#fdeaea;color:#c0392b;font-weight:700;border-radius:4px;padding:1px 6px;text-decoration:underline wavy #ef4444;">mot</span>
+            Faute comptabilisée (−1 pt)
+          </span>
+          <span style="display:flex;align-items:center;gap:5px;">
+            <span style="background:#fff8e6;color:#8a6000;font-weight:700;border-radius:4px;padding:1px 6px;">mot</span>
+            Faute signalée (non notée)
+          </span>
+        </div>
+        <div class="fautes-titre">📋 DÉTAIL DES POINTS PERDUS</div>
+        <div id="fautes-list"></div>
+
+        <div class="correction-complete">
+          <div class="cc-titre">✅ TEXTE CORRECT</div>
+          Les <em>jeunes</em> <em>explorateurs</em> <em>observaient</em> les <em>hautes</em> montagnes depuis le chemin.<br>
+          Les nuages <em>gris</em> ne <em>cachaient</em> pas complètement le paysage.<br>
+          Les vallées <em>semblaient</em> <em>calmes</em> et les arbres <em>étaient</em> <em>majestueux</em>.<br>
+          Quelques oiseaux <em>traversaient</em> lentement le ciel au-dessus des collines.<br>
+          Quelle vue magnifique sur ces sommets <em>lointains</em> !
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="xp-pop" id="xp-pop">+XP !</div>
+
+<audio id="audio-player" preload="auto">
+  <source src="audio/Dictée_n__4_J5S4_6e.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const TEXTE_CORRECT = "Les jeunes explorateurs observaient les hautes montagnes depuis le chemin. Les nuages gris ne cachaient pas complètement le paysage. Les vallées semblaient calmes et les arbres étaient majestueux. Quelques oiseaux traversaient lentement le ciel au-dessus des collines. Quelle vue magnifique sur ces sommets lointains !";
+
+// Mots cibles : imparfait (-aient) + accords pluriel
+// Chaque entrée : { forme normalisée, affichage, catégorie, explication }
+const CIBLES = [
+  // ── IMPARFAIT ──
+  { norm:'observaient',  aff:'observaient',  cat:'IMPARFAIT', classe:'imp-err', expl:'3e pers. pl. → terminaison <b>-aient</b>' },
+  { norm:'cachaient',    aff:'cachaient',    cat:'IMPARFAIT', classe:'imp-err', expl:'3e pers. pl. → terminaison <b>-aient</b>' },
+  { norm:'semblaient',   aff:'semblaient',   cat:'IMPARFAIT', classe:'imp-err', expl:'3e pers. pl. → terminaison <b>-aient</b>' },
+  { norm:'etaient',      aff:'étaient',      cat:'IMPARFAIT', classe:'imp-err', expl:'3e pers. pl. → terminaison <b>-aient</b>' },
+  { norm:'traversaient', aff:'traversaient', cat:'IMPARFAIT', classe:'imp-err', expl:'3e pers. pl. → terminaison <b>-aient</b>' },
+  // ── ACCORDS ──
+  { norm:'jeunes',       aff:'jeunes',       cat:'ACCORD',    classe:'acc-err', expl:'adjectif pl. → <b>-s</b>' },
+  { norm:'explorateurs', aff:'explorateurs', cat:'ACCORD',    classe:'acc-err', expl:'nom pl. masc. → <b>-s</b>' },
+  { norm:'hautes',       aff:'hautes',       cat:'ACCORD',    classe:'acc-err', expl:'adjectif fém. pl. → <b>-es</b>' },
+  { norm:'montagnes',    aff:'montagnes',    cat:'ACCORD',    classe:'acc-err', expl:'nom fém. pl. → <b>-s</b>' },
+  { norm:'gris',         aff:'gris',         cat:'ACCORD',    classe:'acc-err', expl:'adjectif pl. masc. → <b>-s</b> (invariable en genre)' },
+  { norm:'calmes',       aff:'calmes',       cat:'ACCORD',    classe:'acc-err', expl:'adjectif pl. → <b>-s</b>' },
+  { norm:'majestueux',   aff:'majestueux',   cat:'ACCORD',    classe:'acc-err', expl:'adjectif pl. masc. → <b>-eux</b> (invariable)' },
+  { norm:'collines',     aff:'collines',     cat:'ACCORD',    classe:'acc-err', expl:'nom fém. pl. → <b>-s</b>' },
+  { norm:'sommets',      aff:'sommets',      cat:'ACCORD',    classe:'acc-err', expl:'nom masc. pl. → <b>-s</b>' },
+  { norm:'lointains',    aff:'lointains',    cat:'ACCORD',    classe:'acc-err', expl:'adjectif pl. masc. → <b>-s</b>' },
+];
+
+// ── AUDIO ──
+const audio = document.getElementById('audio-player');
+let replayCount = 0, speedIdx = 1;
+const speeds = [0.75, 1.0, 1.25];
+
+audio.addEventListener('loadedmetadata', () => {
+  document.getElementById('time-tot').textContent = fmtTime(audio.duration);
+});
+audio.addEventListener('timeupdate', () => {
+  const pct = audio.duration ? (audio.currentTime / audio.duration * 100) : 0;
+  document.getElementById('bar-fill').style.width = pct + '%';
+  document.getElementById('time-cur').textContent = fmtTime(audio.currentTime);
+});
+audio.addEventListener('ended',  () => { document.getElementById('btn-play').textContent = '▶'; });
+audio.addEventListener('play',   () => { document.getElementById('btn-play').textContent = '⏸'; });
+audio.addEventListener('pause',  () => { document.getElementById('btn-play').textContent = '▶'; });
+
+function togglePlay(){
+  if(audio.paused){
+    audio.play();
+    replayCount++;
+    document.getElementById('replay-info').textContent = 'Écoutes : ' + replayCount;
+  } else { audio.pause(); }
+}
+function seekAudio(e){
+  const r = document.getElementById('bar-track').getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  if(audio.duration) audio.currentTime = ratio * audio.duration;
+}
+function cycleSpeed(){
+  speedIdx = (speedIdx + 1) % speeds.length;
+  audio.playbackRate = speeds[speedIdx];
+  document.getElementById('btn-speed').textContent = '× ' + speeds[speedIdx].toFixed(2).replace('.00','.0');
+}
+function fmtTime(s){
+  if(!s || isNaN(s)) return '0:00';
+  return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+}
+function updateCharCount(){
+  document.getElementById('char-count').textContent =
+    document.getElementById('dictee-area').value.length + ' caractère(s)';
+}
+
+// ── NORMALISATION ──
+function norm(s){
+  return s.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/['']/g," ")
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ").trim();
+}
+function tokens(txt){ return txt.split(/\s+/).filter(w=>w.length>0); }
+
+// ── CORRECTION ──
+function corriger(){
+  const eleve = document.getElementById('dictee-area').value.trim();
+  if(eleve.length < 10){
+    const fb = document.getElementById('feedback');
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '<b>Oups !</b> Écris au moins quelques mots avant de corriger.';
+    return;
+  }
+
+  document.getElementById('dictee-area').disabled = true;
+  document.getElementById('btn-valider').disabled  = true;
+  document.getElementById('btn-rejouer').classList.add('visible');
+
+  const eleveToks = tokens(norm(eleve));
+  let ptsPerdus = 0;
+  const fautesDetails = [];
+
+  CIBLES.forEach(c => {
+    if(!eleveToks.includes(c.norm)){
+      ptsPerdus++;
+      fautesDetails.push(c);
+    }
+  });
+
+  ptsPerdus = Math.min(ptsPerdus, 10);
+  const note = Math.max(0, 10 - ptsPerdus);
+
+  document.getElementById('note-val').textContent = note + ' / 10';
+  document.getElementById('nr-val').textContent   = note + ' / 10';
+  document.getElementById('xp-fill').style.width  = (note * 10) + '%';
+  document.getElementById('xp-pct').textContent   = (note * 10) + ' %';
+
+  // Étoiles
+  const nb = note >= 9 ? 5 : note >= 7 ? 4 : note >= 5 ? 3 : note >= 3 ? 2 : 1;
+  const et = document.getElementById('etoiles'); et.innerHTML = '';
+  for(let i=0;i<5;i++){
+    const s = document.createElement('span');
+    s.className = 'star' + (i < nb ? ' on' : '');
+    s.textContent = '★'; et.appendChild(s);
+  }
+
+  // Message
+  const msgs = [
+    [9,10,'// PARFAIT — accords et imparfait maîtrisés ! 🏆'],
+    [7, 8,'// TRÈS BIEN — presque sans faute !'],
+    [5, 6,'// BIEN — quelques accords à retravailler.'],
+    [3, 4,'// CONTINUE — révise les terminaisons -aient et les pluriels.'],
+    [0, 2,'// À RETRAVAILLER — reprends les règles d\'accord et l\'imparfait.'],
+  ];
+  const msg = msgs.find(([lo,hi]) => note >= lo && note <= hi) || msgs[msgs.length-1];
+  document.getElementById('nr-msg').textContent = msg[2];
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  if(note >= 8)      { fb.className='feedback ok show';    fb.innerHTML='<b>Excellente dictée !</b> Tu maîtrises bien les accords et l\'imparfait.'; }
+  else if(note >= 5) { fb.className='feedback moyen show'; fb.innerHTML='<b>Bon travail !</b> Note : <b>'+note+'/10</b>. Relis le détail ci-dessous.'; }
+  else               { fb.className='feedback ko show';    fb.innerHTML='<b>Note : '+note+'/10.</b> Révise les terminaisons de l\'imparfait (-aient) et les accords en nombre.'; }
+
+  // Texte annoté — seules les cibles sont colorées
+  const normesRef  = tokens(norm(TEXTE_CORRECT));
+  const motsRef    = TEXTE_CORRECT.split(/\s+/);
+  const ciblesSet  = new Set(CIBLES.map(c => c.norm));
+  const used       = new Array(eleveToks.length).fill(false);
+  const results    = [];
+
+  for(let i = 0; i < normesRef.length; i++){
+    const lo = Math.max(0, i-3), hi = Math.min(eleveToks.length-1, i+3);
+    let found = false;
+    for(let j = lo; j <= hi; j++){
+      if(!used[j] && eleveToks[j] === normesRef[i]){ used[j] = true; found = true; break; }
+    }
+    // Toutes les erreurs signalées, mais seules les cibles comptent en points
+    results.push({ mot: motsRef[i], ok: found, estCible: ciblesSet.has(normesRef[i]) });
+  }
+
+  const container = document.getElementById('texte-annote'); container.innerHTML = '';
+  results.forEach((r, i) => {
+    const sp = document.createElement('span');
+    if(!r.ok){
+      // Rouge pour toute faute détectée
+      sp.className = 'mot-err';
+      // Indication visuelle supplémentaire si ce mot ne retire PAS de points
+      if(!r.estCible){
+        sp.title = 'Faute signalée — non comptabilisée dans la note';
+        sp.style.textDecorationColor = '#f5a623';
+        sp.style.background = '#fff8e6';
+        sp.style.color = '#8a6000';
+      }
+    }
+    sp.textContent = r.mot;
+    container.appendChild(sp);
+    if(i < results.length - 1) container.appendChild(document.createTextNode(' '));
+  });
+
+  // Liste des fautes
+  const fl = document.getElementById('fautes-list'); fl.innerHTML = '';
+  if(fautesDetails.length === 0){
+    fl.innerHTML = '<div style="color:#157f3a;font-weight:700;padding:10px 0">🎉 Aucune faute détectée — bravo !</div>';
+  } else {
+    fautesDetails.forEach(f => {
+      const d = document.createElement('div');
+      d.className = 'faute-item ' + f.classe;
+      d.innerHTML = '<span class="faute-cat">'+f.cat+'</span>'
+        + '<span class="faute-txt"><b>'+f.aff+'</b><br><small style="opacity:.8">'+f.expl+'</small></span>'
+        + '<span class="faute-pts">−1pt</span>';
+      fl.appendChild(d);
+    });
+  }
+
+  if(note >= 7) fireXP(note);
+  document.getElementById('resultat-zone').classList.add('show');
+  setTimeout(() => document.getElementById('resultat-zone').scrollIntoView({behavior:'smooth',block:'start'}), 300);
+}
+
+function fireXP(note){
+  const p = document.getElementById('xp-pop');
+  p.textContent = '+' + (note >= 9 ? '100' : note >= 7 ? '75' : '50') + ' XP !';
+  p.classList.remove('go'); void p.offsetWidth; p.classList.add('go');
+}
+
+function recommencer(){
+  audio.pause(); audio.currentTime = 0; replayCount = 0;
+  document.getElementById('replay-info').textContent = 'Écoutes : 0';
+  document.getElementById('btn-play').textContent = '▶';
+  document.getElementById('dictee-area').value = '';
+  document.getElementById('dictee-area').disabled = false;
+  document.getElementById('char-count').textContent = '0 caractère(s)';
+  document.getElementById('btn-valider').disabled = false;
+  document.getElementById('btn-rejouer').classList.remove('visible');
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('resultat-zone').classList.remove('show');
+  document.getElementById('note-val').textContent = '— / 10';
+  document.getElementById('xp-fill').style.width = '0%';
+  document.getElementById('xp-pct').textContent = '0 %';
+  const et = document.getElementById('etoiles'); et.innerHTML = '';
+  for(let i=0;i<5;i++){
+    const s = document.createElement('span'); s.className='star'; s.textContent='★'; et.appendChild(s);
+  }
+}
+
+// Init étoiles vides
+(function(){
+  const et = document.getElementById('etoiles'); et.innerHTML = '';
+  for(let i=0;i<5;i++){
+    const s = document.createElement('span'); s.className='star'; s.textContent='★'; et.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
