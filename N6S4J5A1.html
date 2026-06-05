@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S4 J5 – 6e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      /* Vendredi → jaune */
+      --day-color:#f6b50a; --day-dark:#8a5e00; --day-dark2:#6e4a00;
+      --day-light:#fff7db; --day-border:#f0d575; --day-glow:rgba(246,181,10,.32);
+      --on-day:#5a3d00; /* texte foncé sur aplat jaune */
+      --bg:#fffdf7; --surface:#fff; --surface2:#fffae9; --border:#e8e4d9;
+      --yellow:#f6b50a; --green:#22c55e; --green-light:#eafaf0; --green-dark:#1f7a3d;
+      --orange:#f5a623; --red:#b94040; --red-light:#f7eded;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:18px; --radius-sm:12px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+    .wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+    .bul{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+    .b1{width:320px;height:320px;top:-110px;right:-110px;background:radial-gradient(circle,rgba(246,181,10,.18),transparent 70%);}
+    .b2{width:260px;height:260px;bottom:-90px;left:-90px;background:radial-gradient(circle,rgba(245,166,35,.16),transparent 70%);}
+    .b3{width:180px;height:180px;top:38%;right:-70px;background:radial-gradient(circle,rgba(246,181,10,.12),transparent 70%);}
+
+    header{text-align:center;margin-bottom:1.1rem;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--day-color);color:var(--on-day);
+      font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.3rem .95rem;border-radius:99px;margin-bottom:.5rem;box-shadow:0 3px 14px var(--day-glow);white-space:nowrap;}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:800;line-height:1.25;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.92rem);margin-top:.35rem;font-family:'JetBrains Mono',monospace;}
+
+    .tabs{display:flex;gap:.4rem;margin-bottom:.9rem;}
+    .tab{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+      padding:.6rem .3rem;font-weight:700;font-size:clamp(.72rem,2.2vw,.86rem);color:var(--muted);cursor:pointer;
+      transition:.15s;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;line-height:1.2;text-align:center;}
+    .tab .tnum{font-family:'JetBrains Mono',monospace;font-size:.66rem;opacity:.8;}
+    .tab.active{background:var(--day-color);color:var(--on-day);border-color:var(--day-color);box-shadow:0 3px 12px var(--day-glow);}
+    .tab.done{border-color:var(--green);color:var(--green-dark);}
+    .tab.active.done{background:var(--day-color);color:var(--on-day);}
+
+    .card{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.4rem 1.2rem;box-shadow:0 8px 32px rgba(0,0,0,.07);animation:fadeUp .35s ease both;position:relative;overflow:hidden;}
+    .card-stripe{height:5px;border-radius:var(--radius) var(--radius) 0 0;margin:-1.4rem -1.2rem 1.1rem;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),#ffd84d,var(--day-color));}
+    .act-title{font-size:clamp(1.05rem,3vw,1.3rem);font-weight:800;color:var(--day-dark);margin-bottom:.35rem;word-break:break-word;}
+    .act-consigne{font-size:clamp(.88rem,2.4vw,.98rem);color:var(--text);line-height:1.7;margin-bottom:1.1rem;
+      background:var(--surface2);border:1.5px solid var(--border);border-left:4px solid var(--day-color);
+      border-radius:var(--radius-sm);padding:.7rem 1rem;word-break:break-word;}
+    .panel{display:none;} .panel.show{display:block;}
+
+    .q-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.9rem .9rem;margin-bottom:.8rem;}
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:.3rem;}
+    .q-text{font-weight:700;font-size:clamp(.95rem,2.6vw,1.08rem);margin-bottom:.7rem;line-height:1.55;word-break:break-word;}
+    .q-text .blank{font-family:'JetBrains Mono',monospace;color:var(--day-dark);}
+    .opts{display:flex;flex-direction:column;gap:.5rem;}
+    .opt{display:flex;align-items:center;gap:.65rem;width:100%;text-align:left;background:#fff;border:1.5px solid var(--border);
+      border-radius:10px;padding:.65rem .8rem;cursor:pointer;font-family:Arial,Helvetica,sans-serif;
+      font-size:clamp(.88rem,2.4vw,1rem);font-weight:600;color:var(--text);line-height:1.45;min-height:46px;
+      transition:.13s;-webkit-tap-highlight-color:transparent;}
+    .opt:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt:active:not(:disabled){transform:scale(.985);}
+    .opt:disabled{cursor:default;}
+    .opt .lt{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;background:var(--surface);border:1.5px solid var(--day-border);color:var(--day-dark);transition:.13s;}
+    .opt.ok{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
+    .opt.ok .lt{background:var(--green);color:#fff;border-color:var(--green);}
+    .opt.ko{background:var(--red-light);border-color:var(--red);color:#7a1f1f;}
+    .opt.ko .lt{background:var(--red);color:#fff;border-color:var(--red);}
+    .exp{margin-top:.6rem;font-size:.82rem;color:var(--text);background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:8px;padding:.55rem .65rem;line-height:1.65;display:none;word-break:break-word;}
+    .exp.show{display:block;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+    @media(max-width:479px){.btn-row.stack{flex-direction:column;}.btn-row.stack .btn{width:100%;}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.2rem;border-radius:var(--radius-sm);
+      font-family:Arial,Helvetica,sans-serif;font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .14s,opacity .12s;min-height:2.9rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-main{background:var(--day-dark);color:#fff;box-shadow:0 3px 14px var(--day-glow);flex:1;}
+    .btn-final{background:#16a34a;color:#fff;box-shadow:0 3px 14px rgba(22,163,74,.3);flex:1;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+
+    .feedback{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.88rem,2.4vw,.98rem);display:none;
+      align-items:flex-start;gap:.6rem;line-height:1.7;margin-top:1rem;word-break:break-word;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+    .feedback.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+    .fb-icon{font-size:1.25rem;flex-shrink:0;}
+
+    /* écran final */
+    .end-screen{display:none;width:100%;animation:fadeUp .45s ease both;}
+    .end-screen.show{display:block;}
+    .end-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.4rem;box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center;position:relative;overflow:hidden;}
+    .end-icon{font-size:3rem;display:block;margin-bottom:.4rem;}
+    .end-title{font-size:clamp(1.4rem,5vw,2.1rem);font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .end-big{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(2.2rem,9vw,3.2rem);
+      color:var(--day-dark);margin:.4rem 0 .2rem;}
+    .end-stars{font-size:clamp(1.2rem,5vw,1.6rem);letter-spacing:.18em;color:var(--day-color);margin-bottom:1rem;}
+    .end-detail{display:flex;flex-direction:column;gap:.5rem;background:var(--surface2);border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);padding:.9rem 1rem;margin-bottom:1.1rem;text-align:left;}
+    .end-line{display:flex;justify-content:space-between;align-items:center;font-size:clamp(.85rem,2.4vw,.96rem);font-weight:600;}
+    .end-line .sc{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);}
+    .end-msg{color:var(--muted);font-size:clamp(.9rem,2.5vw,1rem);line-height:1.8;margin-bottom:1.3rem;max-width:480px;margin-left:auto;margin-right:auto;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="bul b1"></div><div class="bul b2"></div><div class="bul b3"></div>
+  <div class="wrap">
+
+    <header>
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#5a9e2e"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+        <span class="logo-dot" style="background:#f6b50a"></span>
+        Pazapa · Français · 6ème
+      </div>
+      <div class="week-label">Semaine 4 – Jour 5</div>
+      <h1>J'observe et je teste · <span class="hl"></span></h1>
+      <p class="subtitle">La phrase · l'imparfait · les accords</p>
+    </header>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" id="tab1" onclick="switchTab(1)"><span class="tnum">Act. 1</span><span>🔎 La phrase</span></div>
+      <div class="tab" id="tab2" onclick="switchTab(2)"><span class="tnum">Act. 2</span><span>✏️ Imparfait</span></div>
+      <div class="tab" id="tab3" onclick="switchTab(3)"><span class="tnum">Act. 3</span><span>✍️ Accords</span></div>
+    </div>
+
+    <div class="panel show" id="panel1">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">🔎 Identifier la forme de la phrase</div>
+        <div class="act-consigne">Lis chaque phrase et indique sa forme : <b>affirmative</b>, <b>négative</b> ou <b>exclamative</b>.</div>
+        <div id="list1"></div>
+        <div class="feedback" id="fb1"><span class="fb-icon" id="fb1-i"></span><div id="fb1-t"></div></div>
+        <div class="btn-row stack" id="row1" style="display:none;">
+          <button class="btn btn-main" onclick="switchTab(2)">Passer à l'activité 2 →</button>
+          <button class="btn btn-final" id="final1" style="display:none;" onclick="showFinal()">🏁 Voir mon résultat final →</button>
+          <button class="btn btn-ghost" onclick="resetAct(1)">↺ Recommencer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel2">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">✏️ Complète le verbe à l'imparfait</div>
+        <div class="act-consigne">Choisis la <b>terminaison</b> de l'imparfait qui convient au sujet de la phrase.</div>
+        <div id="list2"></div>
+        <div class="feedback" id="fb2"><span class="fb-icon" id="fb2-i"></span><div id="fb2-t"></div></div>
+        <div class="btn-row stack" id="row2" style="display:none;">
+          <button class="btn btn-main" onclick="switchTab(3)">Passer à l'activité 3 →</button>
+          <button class="btn btn-final" id="final2" style="display:none;" onclick="showFinal()">🏁 Voir mon résultat final →</button>
+          <button class="btn btn-ghost" onclick="resetAct(2)">↺ Recommencer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel3">
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="act-title">✍️ Choisis la phrase correctement écrite</div>
+        <div class="act-consigne">Une seule phrase respecte <b>tous les accords</b> du groupe nominal. Laquelle ?</div>
+        <div id="list3"></div>
+        <div class="feedback" id="fb3"><span class="fb-icon" id="fb3-i"></span><div id="fb3-t"></div></div>
+        <div class="btn-row stack" id="row3" style="display:none;">
+          <button class="btn btn-final" id="final3" style="display:none;" onclick="showFinal()">🏁 Voir mon résultat final →</button>
+          <button class="btn btn-ghost" onclick="resetAct(3)">↺ Recommencer l'activité 3</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉCRAN FINAL -->
+    <div class="end-screen" id="end-screen">
+      <div class="end-card">
+        <div class="card-stripe"></div>
+        <div class="logo-badge" style="margin-bottom:.8rem;">
+          <span class="logo-dot" style="background:#5a9e2e"></span>
+          <span class="logo-dot" style="background:#3ab5d8"></span>
+          <span class="logo-dot" style="background:#f6b50a"></span>
+          Bilan de la semaine
+        </div>
+        <span class="end-icon">🏆</span>
+        <div class="end-title">Révisions terminées !</div>
+        <div class="end-big" id="end-big">0 / 9</div>
+        <div class="end-stars" id="end-stars"></div>
+        <div class="end-detail">
+          <div class="end-line"><span>🔎 Activité 1 – La phrase</span><span class="sc" id="sc1">0 / 3</span></div>
+          <div class="end-line"><span>✏️ Activité 2 – L'imparfait</span><span class="sc" id="sc2">0 / 3</span></div>
+          <div class="end-line"><span>✍️ Activité 3 – Les accords</span><span class="sc" id="sc3">0 / 3</span></div>
+        </div>
+        <div class="end-msg" id="end-msg"></div>
+        <div class="btn-row stack">
+          <button class="btn btn-main" onclick="recommencerTout()">↺ Tout recommencer</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+var L=['A','B','C','D'];
+
+var ACTS={
+  1:{ qs:[
+    { q:'Les gardiens surveillaient les remparts du château.',
+      options:['Négative','Affirmative','Exclamative'], correct:1,
+      exp:'Phrase <b>affirmative</b> : elle déclare un fait, sans négation ni point d\'exclamation.' },
+    { q:'Les voyageurs ne traversaient pas la rivière.',
+      options:['Affirmative','Exclamative','Négative'], correct:2,
+      exp:'Phrase <b>négative</b> : « ne … pas » encadre le verbe.' },
+    { q:'Comme cette forêt était impressionnante !',
+      options:['Exclamative','Affirmative','Négative'], correct:0,
+      exp:'Phrase <b>exclamative</b> : « Comme … ! » exprime un sentiment et se termine par un point d\'exclamation.' }
+  ]},
+  2:{ qs:[
+    { q:'Les pêcheurs navigu<span class="blank">_____</span> près du rivage.',
+      options:['ait','aient','ions'], correct:1,
+      exp:'« Les pêcheurs » = ils → terminaison <b>-aient</b> : naviguaient.' },
+    { q:'Nous explor<span class="blank">_____</span> les grottes.',
+      options:['ais','iez','ions'], correct:2,
+      exp:'« Nous » → terminaison <b>-ions</b> : explorions.' },
+    { q:'Je regard<span class="blank">_____</span> la cascade.',
+      options:['ais','ait','ions'], correct:0,
+      exp:'« Je » → terminaison <b>-ais</b> : regardais.' }
+  ]},
+  3:{ qs:[
+    { q:'Quelle phrase est correctement écrite ?',
+      options:[
+        'Les ancienne forteresses dominaient la région.',
+        'Les anciennes forteresse dominaient la région.',
+        'Les anciennes forteresses dominaient la région.'
+      ], correct:2,
+      exp:'Dans le groupe nominal, tout s\'accorde : déterminant + nom + adjectif au pluriel → « les anciennes forteresses ».' },
+    { q:'Quelle phrase est correctement écrite ?',
+      options:[
+        'Plusieurs bateaux silencieux approchaient du port.',
+        'Plusieurs bateau silencieux approchaient du port.',
+        'Plusieurs bateaux silencieuse approchaient du port.'
+      ], correct:0,
+      exp:'« Plusieurs » entraîne le pluriel : « bateaux » (nom) et « silencieux » (adjectif, invariable en -x au pluriel).' },
+    { q:'Quelle phrase est correctement écrite ?',
+      options:[
+        'De longue routes poussiéreuses traversaient le désert.',
+        'De longues routes poussiéreuses traversaient le désert.',
+        'De longues route poussiéreuses traversaient le désert.'
+      ], correct:1,
+      exp:'« De longues routes poussiéreuses » : le nom et les adjectifs s\'accordent au féminin pluriel.' }
+  ]}
+};
+
+var answered={1:0,2:0,3:0}, correctCnt={1:0,2:0,3:0}, doneAct={1:false,2:false,3:false};
+
+function switchTab(n){
+  [1,2,3].forEach(function(i){
+    $('tab'+i).classList.toggle('active',i===n);
+    $('panel'+i).classList.toggle('show',i===n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildAct(n){
+  answered[n]=0; correctCnt[n]=0; doneAct[n]=false;
+  $('fb'+n).className='feedback'; $('row'+n).style.display='none';
+  $('final'+n).style.display='none';
+  $('tab'+n).classList.remove('done');
+  var c=$('list'+n); c.innerHTML='';
+  ACTS[n].qs.forEach(function(o,i){
+    var card=document.createElement('div'); card.className='q-card'; card.dataset.a='0';
+    var num=document.createElement('div'); num.className='q-num'; num.textContent='Question '+(i+1);
+    var q=document.createElement('div'); q.className='q-text'; q.innerHTML=o.q;
+    var opts=document.createElement('div'); opts.className='opts';
+    o.options.forEach(function(txt,oi){
+      var b=document.createElement('button'); b.className='opt';
+      b.innerHTML='<span class="lt">'+L[oi]+'</span><span>'+txt+'</span>';
+      b.onclick=function(){ chooseQ(n,i,oi,card); };
+      opts.appendChild(b);
+    });
+    var exp=document.createElement('div'); exp.className='exp'; exp.innerHTML='💡 '+o.exp;
+    card.appendChild(num); card.appendChild(q); card.appendChild(opts); card.appendChild(exp);
+    c.appendChild(card);
+  });
+}
+
+function chooseQ(n,i,oi,card){
+  if(card.dataset.a==='1') return;
+  card.dataset.a='1';
+  var o=ACTS[n].qs[i];
+  card.querySelectorAll('.opt').forEach(function(b,bi){
+    b.disabled=true;
+    if(bi===o.correct) b.classList.add('ok');
+    else if(bi===oi) b.classList.add('ko');
+  });
+  card.querySelector('.exp').classList.add('show');
+  if(oi===o.correct) correctCnt[n]++;
+  answered[n]++;
+  if(answered[n]===ACTS[n].qs.length) finishAct(n);
+}
+
+function finishAct(n){
+  doneAct[n]=true;
+  var tot=ACTS[n].qs.length, ok=correctCnt[n], parfait=(ok===tot);
+  showFb('fb'+n, parfait?'ok':'info', parfait?'🎉':'💡',
+    'Activité '+n+' : <b>'+ok+' / '+tot+'</b> bonne(s) réponse(s).');
+  $('tab'+n).classList.add('done');
+  $('row'+n).style.display='flex';
+  maybeFinal();
+}
+
+function maybeFinal(){
+  if(doneAct[1] && doneAct[2] && doneAct[3]){
+    [1,2,3].forEach(function(i){ $('final'+i).style.display='inline-flex'; });
+  }
+}
+
+function showFinal(){
+  var t1=correctCnt[1], t2=correctCnt[2], t3=correctCnt[3], total=t1+t2+t3;
+  $('sc1').textContent=t1+' / 3'; $('sc2').textContent=t2+' / 3'; $('sc3').textContent=t3+' / 3';
+  $('end-big').textContent=total+' / 9';
+  var stars=Math.max(1,Math.round(total/9*5)), s='';
+  for(var i=0;i<5;i++) s+=(i<stars)?'★':'☆';
+  $('end-stars').textContent=s;
+  $('end-msg').innerHTML=
+    total===9 ? 'Sans faute&nbsp;! Les trois notions de la semaine sont maîtrisées. Tu es fin prêt(e) pour le défi.' :
+    total>=6  ? 'Bon travail&nbsp;! Revois les explications des questions ratées, puis lance le défi.' :
+                'Continue&nbsp;: relis bien les explications de chaque activité avant de passer au défi.';
+  $('tabs').style.display='none';
+  [1,2,3].forEach(function(i){ $('panel'+i).classList.remove('show'); });
+  $('end-screen').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function recommencerTout(){
+  $('end-screen').classList.remove('show');
+  $('tabs').style.display='flex';
+  buildAct(1); buildAct(2); buildAct(3);
+  switchTab(1);
+}
+
+function resetAct(n){
+  buildAct(n);
+  [1,2,3].forEach(function(i){ $('final'+i).style.display='none'; });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showFb(box,cls,icon,html){
+  $(box).className='feedback show '+cls;
+  $(box+'-i').textContent=icon;
+  $(box+'-t').innerHTML=html;
+}
+
+/* INIT */
+buildAct(1); buildAct(2); buildAct(3);
+</script>
+</body>
+</html>
