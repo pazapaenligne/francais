@@ -156,6 +156,8 @@ body{
 .defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.85rem,3vw,1rem); letter-spacing:1px; color:var(--txt); white-space:nowrap; }
 .type-badges{ display:flex; gap:6px; flex-wrap:wrap; }
 .type-badge{ font-family:'Orbitron',sans-serif; font-size:.58rem; font-weight:700; background:var(--jour-clair); color:var(--jour-fonce); padding:4px 9px; border-radius:14px; border:1px solid var(--jour-pale); white-space:nowrap; }
+.chrono{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.72rem; background:var(--jour-clair); color:var(--jour-fonce); border:1px solid var(--jour-pale); border-radius:14px; padding:4px 10px; white-space:nowrap; }
+.chrono.low{ background:#fdeaea; color:#c0392b; border-color:#f5b5b5; animation:pulse 0.8s ease-in-out infinite; }
 .question-txt{ font-size:clamp(.95rem,3.5vw,1.12rem); font-weight:bold; color:var(--txt); margin-bottom:14px; line-height:1.5; word-break:break-word; }
 
 /* Choix QCM */
@@ -343,7 +345,10 @@ body{
     <div class="card-body">
       <div class="card-head">
         <div class="defi-num" id="card-defi-num">DÉFI 01</div>
-        <div class="type-badges"><div class="type-badge" id="type-badge">FRANÇAIS</div></div>
+        <div class="type-badges">
+          <span class="chrono" id="chrono">⏱ 30 s</span>
+          <div class="type-badge" id="type-badge">FRANÇAIS</div>
+        </div>
       </div>
       <div class="question-txt" id="question-txt"></div>
       <div id="phrase-zone"></div>
@@ -458,9 +463,42 @@ function placeBoat(){
 const LETTRES=['A','B','C','D','E','F'];
 let idx=0, reussis=0, erreurs=0, etat=[], selected=null, picks=[];
 
+/* ----- CHRONO : 30 s par défi ----- */
+const QUESTION_TIME=30;            /* secondes par question (réglable) */
+let timer=null, timeLeft=QUESTION_TIME;
+function showChrono(){
+  const c=$('chrono'); c.style.display='';
+  c.textContent='⏱ '+timeLeft+' s';
+  c.classList.toggle('low', timeLeft<=10);
+}
+function startTimer(){
+  stopTimer(); timeLeft=QUESTION_TIME; showChrono();
+  timer=setInterval(()=>{
+    timeLeft--;
+    if(timeLeft<=0){ timeLeft=0; showChrono(); stopTimer(); timeUp(); return; }
+    showChrono();
+  },1000);
+}
+function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+function manageTimer(){
+  const e=etat[idx];
+  if(!e.validated && !$('exo-card').classList.contains('hidden')){ startTimer(); }
+  else { stopTimer(); $('chrono').style.display='none'; }
+}
+/* Temps écoulé : on verrouille avec la sélection courante (ou échec si rien) */
+function timeUp(){
+  const e=etat[idx]; if(e.validated) return;
+  const ready=isReady();
+  const correct=ready && evaluate();
+  e.validated=true; e.correct=correct; e.timedout=true;
+  e.picked = ready ? currentPick() : (DEFIS[idx].type==='assoc' ? [] : (DEFIS[idx].type==='texte' ? '' : null));
+  if(correct){ reussis++; fireXP(); boost(); } else { erreurs++; }
+  render();
+}
+
 function resetState(){
-  idx=0; reussis=0; erreurs=0; selected=null;
-  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null }));
+  idx=0; reussis=0; erreurs=0; selected=null; stopTimer();
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, timedout:false }));
 }
 function buildStars(){
   const c=$('etoiles'); c.innerHTML='';
@@ -509,6 +547,7 @@ function render(){
   $('btn-retour').disabled=(idx===0);
   $('btn-indice').style.display=(d.indice && !e.validated ? '' : 'none');
   placeBoat();
+  manageTimer();
 }
 
 /* ---- QCM ---- */
@@ -622,9 +661,9 @@ function valider(){
 }
 
 function showFeedback(correct){
-  const fb=$('feedback');
-  if(correct){ fb.className='feedback ok show'; fb.innerHTML='<b>Bravo !</b> Ton bateau avance vers l\u2019île.'; }
-  else{ fb.className='feedback ko show'; fb.innerHTML='<b>Pas tout à fait.</b> Regarde la correction ci-dessous.'; }
+  const e=etat[idx], fb=$('feedback');
+  if(correct){ fb.className='feedback ok show'; fb.innerHTML = e.timedout ? '<b>Juste à temps !</b> Bonne réponse, ton bateau avance.' : '<b>Bravo !</b> Ton bateau avance vers l\u2019île.'; }
+  else{ fb.className='feedback ko show'; fb.innerHTML = e.timedout ? '<b>⏱ Temps écoulé !</b> Regarde la correction ci-dessous.' : '<b>Pas tout à fait.</b> Regarde la correction ci-dessous.'; }
 }
 function showCorrection(){
   const d=DEFIS[idx], c=$('correction'); c.className='correction show';
@@ -659,6 +698,7 @@ function newGame(){
 function beginDefis(){
   $('briefing').classList.add('hidden');
   $('exo-card').classList.remove('hidden');
+  manageTimer();                       /* lance le chrono du défi 1 */
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function accostage(){
@@ -675,6 +715,7 @@ function accostage(){
   }, 1350);
 }
 function showResults(){
+  stopTimer();
   accostage();
   $('exo-card').classList.add('hidden');
   const r=$('results-card'); r.classList.add('show');
