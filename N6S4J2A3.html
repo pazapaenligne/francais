@@ -89,6 +89,8 @@ body{
   mix-blend-mode:screen; opacity:.5; pointer-events:none; animation:glint 5s ease-in-out infinite; }
 @keyframes glint{ 0%,100%{ opacity:.3 } 50%{ opacity:.65 } }
 .scene.frozen .sea-glints{ animation:none; opacity:.35; }   /* mer figée à l'arrivée */
+.sound-btn{ position:absolute; top:8px; right:8px; z-index:7; width:34px; height:34px; border-radius:50%; border:none; background:rgba(7,28,48,.45); color:#fff; font-size:15px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; }
+.sound-btn:hover{ background:rgba(7,28,48,.7); }
 
 /* Île d'arrivée : reste PETITE pendant le jeu (ne grossit pas) */
 .destination{
@@ -302,6 +304,7 @@ body{
         <div class="boat-shadow"></div>
         <div class="splash" id="splash"></div>
       </div>
+      <button class="sound-btn" id="sound-btn" title="Couper / activer le son" aria-label="Son">🔊</button>
     </div>
 
     <!-- ÉTOILES -->
@@ -439,9 +442,78 @@ requestAnimationFrame(loop);
 
 /* Accélération momentanée de la mer (sensation de poussée) */
 function boost(){
-  targetMul=BOOST_MUL; boatWrap.classList.add('boost'); burstSplash();
+  targetMul=BOOST_MUL; boatWrap.classList.add('boost'); burstSplash(); waveSurge();
   setTimeout(()=>{ targetMul=1; boatWrap.classList.remove('boost'); }, BOOST_TIME);
 }
+
+/* ============================================================
+   AUDIO : vagues synthétisées (Web Audio, aucun fichier)
+   Chaque vague = montée (déferlante) -> crête avec écume (aigus)
+   -> reflux, à intervalle et intensité aléatoires.
+   ============================================================ */
+let audioCtx=null, masterGain=null, waveGain=null, waveFilter=null, waveTimer=null;
+let soundOn=true, audioReady=false;
+const VOL=0.6;
+function initAudio(){
+  if(audioReady) return; audioReady=true;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; audioCtx=new AC();
+    const sr=audioCtx.sampleRate, buf=audioCtx.createBuffer(1, sr*4, sr), d=buf.getChannelData(0);
+    /* bruit rose (plus naturel que le bruit blanc) */
+    let b0=0,b1=0,b2=0;
+    for(let i=0;i<d.length;i++){
+      const w=Math.random()*2-1;
+      b0=0.99765*b0+w*0.0990460; b1=0.96300*b1+w*0.2965164; b2=0.57000*b2+w*1.0526913;
+      d[i]=(b0+b1+b2+w*0.1848)*0.2;
+    }
+    const noise=audioCtx.createBufferSource(); noise.buffer=buf; noise.loop=true;
+    waveFilter=audioCtx.createBiquadFilter(); waveFilter.type='lowpass'; waveFilter.frequency.value=480; waveFilter.Q.value=0.6;
+    waveGain=audioCtx.createGain(); waveGain.gain.value=0.03;        /* fond très calme entre les vagues */
+    masterGain=audioCtx.createGain(); masterGain.gain.value = soundOn?VOL:0;
+    noise.connect(waveFilter); waveFilter.connect(waveGain); waveGain.connect(masterGain); masterGain.connect(audioCtx.destination);
+    noise.start();
+    scheduleWave();
+  }catch(e){ /* audio indisponible : on ignore */ }
+}
+/* programme une vague, puis la suivante (rythme irrégulier) */
+function scheduleWave(){
+  if(!audioCtx) return;
+  const t=audioCtx.currentTime;
+  const rise=1.1+Math.random()*1.2;        /* la vague approche */
+  const fall=2.2+Math.random()*1.8;        /* elle se retire */
+  const peak=0.20+Math.random()*0.22;      /* intensité */
+  const bright=1400+Math.random()*800;     /* écume (aigus) à la crête */
+  waveGain.gain.cancelScheduledValues(t);
+  waveGain.gain.setValueAtTime(Math.max(0.001,waveGain.gain.value), t);
+  waveGain.gain.linearRampToValueAtTime(peak, t+rise);
+  waveGain.gain.linearRampToValueAtTime(0.03, t+rise+fall);
+  waveFilter.frequency.cancelScheduledValues(t);
+  waveFilter.frequency.setValueAtTime(460, t);
+  waveFilter.frequency.linearRampToValueAtTime(bright, t+rise);     /* déferlante = plus d'aigus */
+  waveFilter.frequency.linearRampToValueAtTime(420, t+rise+fall);
+  const next=(rise+fall)+(0.5+Math.random()*2.2);
+  waveTimer=setTimeout(scheduleWave, next*1000);
+}
+function setSound(on){
+  soundOn=on;
+  if(on){ initAudio(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); if(masterGain) masterGain.gain.value=VOL; }
+  else { if(masterGain) masterGain.gain.value=0; }
+  const b=$('sound-btn'); if(b) b.textContent = on ? '🔊' : '🔇';
+}
+/* une vague plus forte à chaque bonne réponse */
+function waveSurge(){
+  if(!audioCtx||!soundOn||!waveGain) return;
+  const t=audioCtx.currentTime;
+  waveGain.gain.cancelScheduledValues(t);
+  waveGain.gain.setValueAtTime(Math.max(0.001,waveGain.gain.value), t);
+  waveGain.gain.linearRampToValueAtTime(0.5, t+0.3);
+  waveGain.gain.linearRampToValueAtTime(0.04, t+1.7);
+  waveFilter.frequency.cancelScheduledValues(t);
+  waveFilter.frequency.setValueAtTime(900, t);
+  waveFilter.frequency.linearRampToValueAtTime(2400, t+0.3);
+  waveFilter.frequency.linearRampToValueAtTime(440, t+1.7);
+}
+
 function burstSplash(){
   for(let i=0;i<10;i++){
     const d=document.createElement('i'); splashEl.appendChild(d);
@@ -698,6 +770,7 @@ function newGame(){
 function beginDefis(){
   $('briefing').classList.add('hidden');
   $('exo-card').classList.remove('hidden');
+  if(soundOn) setSound(true);          /* démarre la houle (geste utilisateur) */
   manageTimer();                       /* lance le chrono du défi 1 */
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -747,6 +820,7 @@ function rejouer(){
 }
 
 $('startBtn')  .addEventListener('click', beginDefis);
+$('sound-btn') .addEventListener('click', ()=> setSound(!soundOn));
 $('btn-valider').addEventListener('click', valider);
 $('btn-indice') .addEventListener('click', indice);
 $('btn-suivant').addEventListener('click', suivant);
