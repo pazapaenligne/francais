@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S4 J3 · Le manuscrit abîmé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Vert (plus foncé) */
+  --jour:#5a9e2e; --jour-fonce:#2f6810; --jour-clair:#eef7e4; --jour-pale:#9fc977;
+  --day-glow:rgba(90,158,46,.40);
+  --bg:#fffdf7; --dark:#1a1f2e; --dark-2:#232a3d;
+  --vert:#22c55e; --vert-neon:#4ade80;
+  --rouge:#ef4444; --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg); color:var(--txt);
+  min-height:100vh; overflow-x:hidden;
+  padding:16px 12px 50px; position:relative;
+}
+
+/* ── BULLES ── */
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.5; z-index:0; pointer-events:none; }
+.b1{ width:200px;height:200px;background:#ffd84d;          top:-60px; right:-50px; }
+.b2{ width:240px;height:240px;background:var(--jour-pale); bottom:-80px; left:-70px; }
+.b3{ width:150px;height:150px;background:#9be7a5;          top:45%; right:-70px; }
+.b4{ width:130px;height:130px;background:#f9b8c5;          top:30%; left:-60px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; width:100%; }
+
+/* ── HEADER ── */
+.header{ text-align:center; margin-bottom:18px; }
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--jour); color:#fff;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px var(--day-glow); margin-bottom:10px;
+  white-space:nowrap; max-width:100%;
+}
+.dots{ display:inline-flex; gap:3px; }
+.dots i{ width:7px; height:7px; border-radius:50%; background:#fff; display:block; }
+.dots i:nth-child(2){ opacity:.6; } .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif; font-size:.75rem; letter-spacing:3px; color:var(--gris); text-transform:uppercase; margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.4rem,6vw,2.3rem); line-height:1.15; color:var(--txt); margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:clamp(.65rem,2.5vw,.82rem); letter-spacing:1.5px; color:var(--gris); margin-bottom:14px; word-break:break-word; }
+.badge-revision{
+  display:inline-block; background:var(--jour); color:#fff;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.68rem,2.5vw,.82rem); letter-spacing:1px;
+  padding:9px 16px; border-radius:24px; word-break:break-word; text-align:center;
+  box-shadow:0 4px 14px var(--day-glow); animation:pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{transform:scale(1); box-shadow:0 4px 14px var(--day-glow);} 50%{transform:scale(1.05); box-shadow:0 6px 22px rgba(90,158,46,.7);} }
+
+/* ── GAME PANEL ── */
+.game{
+  background:var(--dark); border:2px solid var(--jour); border-radius:18px;
+  padding:16px 14px; margin-bottom:20px;
+  box-shadow:0 0 24px var(--day-glow), inset 0 0 40px rgba(0,0,0,.3);
+}
+.game-label{ font-family:'JetBrains Mono',monospace; font-size:.62rem; font-weight:700; letter-spacing:2px; color:var(--vert-neon); opacity:.9; margin-bottom:10px; }
+.etoiles{ text-align:center; margin-bottom:14px; font-size:clamp(1.1rem,4vw,1.55rem); letter-spacing:clamp(3px,1.5vw,8px); }
+.star{ color:rgba(255,255,255,.22); transition:.3s; display:inline-block; }
+.star.on{ color:var(--vert-neon); text-shadow:0 0 12px var(--vert-neon); animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{transform:scale(0);} 60%{transform:scale(1.5);} 100%{transform:scale(1);} }
+
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.score-col{ background:var(--dark-2); border:1px solid rgba(255,255,255,.07); border-radius:12px; padding:10px 4px; text-align:center; }
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.8rem,7vw,2.6rem); line-height:1; }
+.reussis .score-num{ color:var(--vert-neon); text-shadow:0 0 10px rgba(74,222,128,.6); }
+.restants .score-num{ color:#ffd84d; text-shadow:0 0 10px rgba(255,216,77,.5); }
+.erreurs  .score-num{ color:var(--rouge); text-shadow:0 0 10px rgba(239,68,68,.5); }
+.score-lbl{ font-family:'JetBrains Mono',monospace; font-size:.55rem; letter-spacing:1px; color:rgba(255,255,255,.5); margin-top:5px; text-transform:uppercase; }
+
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span{ font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1px; color:var(--vert-neon); opacity:.9; }
+.xp-head span:last-child{ font-size:.68rem; font-weight:700; opacity:1; }
+.xp-bar{ height:9px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; }
+.xp-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#9be08a); box-shadow:0 0 10px var(--jour); border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+.defi-count{ text-align:center; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:.82rem; font-weight:700; letter-spacing:2px; color:#fff; }
+.defi-count b{ color:var(--vert-neon); }
+
+/* ── CARD ── */
+.card{ background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08); animation:fadeUp .4s ease both; }
+@keyframes fadeUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
+.rainbow{ height:6px; background:linear-gradient(90deg,#ff5e5e,#f5a623,var(--jour),#3ab5d8,#a884ff,#ff5e5e); background-size:300% 100%; animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{background-position:0% 0;} 100%{background-position:300% 0;} }
+.card-body{ padding:16px 12px 20px; }
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px; flex-wrap:wrap; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.85rem,3vw,1rem); letter-spacing:1px; color:var(--txt); white-space:nowrap; }
+.type-badge{ font-family:'Orbitron',sans-serif; font-size:.58rem; font-weight:700; background:var(--jour-clair); color:var(--jour-fonce); padding:4px 9px; border-radius:14px; border:1px solid var(--jour-pale); white-space:nowrap; }
+
+/* ── CONSIGNE ── */
+.consigne-box{
+  background:var(--jour-clair); border-left:4px solid var(--jour);
+  border-radius:0 10px 10px 0; padding:12px 14px; margin-bottom:18px;
+  font-size:clamp(.88rem,3vw,.98rem); color:#1a3d00; font-weight:600;
+  line-height:1.6; word-break:break-word;
+}
+.consigne-box b{ color:var(--jour-fonce); }
+
+/* ── MÉMO ASTUCE ── */
+.memo-box{
+  display:none;
+  background:#fffbe6; border:2px solid #f5c518;
+  border-radius:12px; padding:14px 16px; margin-bottom:16px;
+  font-size:clamp(.82rem,3vw,.92rem); color:#6b4800; line-height:1.7;
+  word-break:break-word;
+}
+.memo-box.show{ display:block; animation:pop .35s ease; }
+.memo-box strong, .memo-box b{ color:#8a6000; }
+.memo-title{ font-family:'Orbitron',sans-serif; font-size:.68rem; font-weight:700; letter-spacing:1px; margin-bottom:8px; color:#8a6000; }
+
+/* ── TEXTE MANUSCRIT ── */
+.manuscrit-label{ font-size:clamp(.78rem,2.5vw,.88rem); font-weight:700; color:var(--txt); margin-bottom:8px; }
+.texte-zone{
+  background:#fbf4e2; border:2px solid #e3d4a8; border-radius:12px;
+  padding:16px 16px; margin-bottom:8px;
+  font-size:clamp(.98rem,3.6vw,1.14rem); line-height:2.2;
+  color:#3a2f1a; word-break:break-word;
+  box-shadow:inset 0 0 22px rgba(180,150,80,.12);
+}
+.ligne{ margin-bottom:4px; }
+.mot{
+  cursor:pointer; border-radius:5px; padding:1px 3px; transition:.13s;
+  -webkit-tap-highlight-color:transparent;
+}
+.mot:hover{ background:#fff0bf; }
+.mot.selected{ background:#ffe08a; box-shadow:0 0 0 2px #e0a800; }
+.mot.found{ background:#cdeeb0; color:#1f6b14; font-weight:700; cursor:default; box-shadow:0 0 0 1px var(--jour-pale); }
+.hint-clic{ font-size:.8rem; color:var(--gris); margin:0 0 16px; }
+
+/* ── BOITE DE CORRECTION ── */
+.correction-box{
+  display:none; margin-bottom:16px; padding:14px;
+  border-radius:12px; background:var(--jour-clair); border:2px solid var(--jour-pale);
+}
+.correction-box.show{ display:block; animation:pop .3s ease; }
+.cb-prompt{ font-size:clamp(.86rem,3vw,.96rem); font-weight:700; color:#1a3d00; margin-bottom:10px; line-height:1.5; }
+.cb-prompt b{ color:var(--jour-fonce); font-family:'JetBrains Mono',monospace; }
+.cb-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.cb-input{
+  flex:1; min-width:140px; font-family:'JetBrains Mono',monospace;
+  font-size:1rem; padding:10px 12px; border:2px solid var(--jour);
+  border-radius:9px; min-height:46px; color:var(--txt); background:#fff;
+}
+.cb-input:focus{ outline:none; box-shadow:0 0 0 3px rgba(90,158,46,.3); }
+
+/* ── BOUTONS ── */
+.btns{ display:flex; gap:9px; flex-wrap:wrap; margin:6px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:clamp(.72rem,2.5vw,.82rem); letter-spacing:1px;
+  padding:12px 16px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff;
+  min-height:48px; -webkit-tap-highlight-color:transparent;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn:active{ transform:scale(.96); }
+.btn-corriger{ background:var(--vert); }
+.btn-annuler { background:#888; }
+.btn-indice  { background:#3ab5d8; }
+.btn-effacer { background:#888; }
+.btn-terminer{ background:var(--jour); }
+
+.btn-corriger:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled)  { animation:neon-bleu 1.4s ease-in-out infinite; }
+.btn-terminer:not(:disabled){ animation:neon-jour 1.4s ease-in-out infinite; }
+.btn-terminer.ready{ background:var(--vert); animation:neon-vert 1.1s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{box-shadow:0 0 6px rgba(34,197,94,.5);} 50%{box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{box-shadow:0 0 6px rgba(90,158,46,.5);} 50%{box-shadow:0 0 18px rgba(90,158,46,.95);} }
+
+.btn:disabled{ background:#d8d8d8 !important; color:#fff !important; cursor:not-allowed; animation:none !important; box-shadow:none !important; }
+
+@media(max-width:480px){ .btns{ flex-direction:column; } .btns .btn{ width:100%; } }
+
+/* Feedback */
+.feedback{ display:none; margin-top:14px; padding:13px 14px; border-radius:10px; font-weight:bold; font-size:clamp(.88rem,3vw,1rem); line-height:1.5; word-break:break-word; }
+.feedback.show{ display:block; animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok   { background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko   { background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+.feedback.moyen{ background:#fff8e6; color:#8a6000; border:1px solid #f5d080; }
+
+/* +XP */
+.xp-pop{ position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5); font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem; color:var(--vert-neon); text-shadow:0 0 20px var(--vert-neon),0 4px 10px rgba(0,0,0,.3); z-index:50; opacity:0; pointer-events:none; white-space:nowrap; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{opacity:0;transform:translate(-50%,-50%) scale(.4);} 25%{opacity:1;transform:translate(-50%,-50%) scale(1.2);} 70%{opacity:1;transform:translate(-50%,-80%) scale(1);} 100%{opacity:0;transform:translate(-50%,-130%) scale(.9);} }
+
+/* ── RÉSULTATS ── */
+.results{ display:none; }
+.results.show{ display:block; animation:fadeUp .5s ease; }
+.mission{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(1.1rem,5vw,1.7rem); text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px; }
+.big-score{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2rem,9vw,3.4rem); text-align:center; color:var(--jour); text-shadow:0 0 16px var(--day-glow); margin:8px 0; }
+.res-stars{ text-align:center; font-size:clamp(1.2rem,5vw,1.7rem); letter-spacing:4px; color:var(--jour); margin-bottom:8px; }
+.gg{ text-align:center; font-family:'Orbitron',sans-serif; font-size:clamp(.78rem,2.5vw,.88rem); color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:18px; word-break:break-word; }
+.recap{ background:#f0faeb; border-radius:12px; padding:12px 14px; margin-bottom:18px; }
+.recap-item{ display:flex; justify-content:space-between; align-items:flex-start; padding:9px 4px; border-bottom:1px solid #c8e8a0; font-size:clamp(.78rem,2.5vw,.86rem); gap:10px; }
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; word-break:break-word; line-height:1.5; }
+.recap-item .eq b{ color:var(--jour-fonce); font-family:'JetBrains Mono',monospace; }
+.recap-item .st{ font-size:1rem; flex-shrink:0; }
+.btn-rejouer{ display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.88rem,3vw,1rem); letter-spacing:1px; padding:14px; border:none; border-radius:12px; color:#fff; background:var(--jour); cursor:pointer; min-height:48px; -webkit-tap-highlight-color:transparent; animation:neon-jour 1.4s ease-in-out infinite; }
+.btn-rejouer:active{ transform:scale(.97); }
+
+@media(max-width:380px){
+  .game{ padding:12px 10px; }
+  .card-body{ padding:12px 10px 16px; }
+  .score-col{ padding:8px 2px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bulle b1"></div>
+<div class="bulle b2"></div>
+<div class="bulle b3"></div>
+<div class="bulle b4"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · FRANÇAIS · 6E
+    </div>
+    <div class="semaine">Semaine 4 – Jour 3</div>
+    <h1 class="titre">Je relève le <span class="accent">défi</span>&nbsp;!</h1>
+    <div class="sous-titre">Le manuscrit abîmé &middot; 5 erreurs à trouver</div>
+    <div class="badge-revision">📜 MISSION · RESTAURE LE MANUSCRIT</div>
+  </div>
+
+  <!-- GAME PANEL -->
+  <div class="game">
+    <div class="game-label">DÉFI · ACCORD DU GROUPE NOMINAL · PLURIEL · 6E</div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="scoreboard">
+      <div class="score-col reussis"><div class="score-num" id="sc-ok">0</div><div class="score-lbl">Trouvées</div></div>
+      <div class="score-col restants"><div class="score-num" id="sc-rest">5</div><div class="score-lbl">Restantes</div></div>
+      <div class="score-col erreurs"><div class="score-num" id="sc-err">0</div><div class="score-lbl">Fautes</div></div>
+    </div>
+    <div class="xp-head"><span>RESTAURATION</span><span id="xp-pct">0 %</span></div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="defi-count">📜 ERREURS TROUVÉES : <b><span id="found-n">0</span> / 5</b></div>
+  </div>
+
+  <!-- CARD -->
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+
+      <div class="card-head">
+        <div class="defi-num">LE MANUSCRIT ABÎMÉ</div>
+        <div class="type-badge">CHASSE AUX ERREURS</div>
+      </div>
+
+      <div class="consigne-box">
+        📜 Les archivistes ont retrouvé un ancien manuscrit, mais <b>5 erreurs d'accord</b> s'y sont glissées.
+        Clique sur un mot que tu crois faux, puis <b>écris sa correction</b>. Restaure le document !
+      </div>
+
+      <div class="memo-box" id="memo-box">
+        <div class="memo-title">💡 ASTUCE</div>
+        <div id="memo-content">
+          Vérifie chaque <b>groupe nominal</b> : le déterminant, le nom et l'adjectif doivent s'accorder.
+          Si le déterminant est au pluriel (<b>les, des, plusieurs, de…</b>), le nom et l'adjectif aussi.
+          Pense aussi au <b>genre</b> : un nom féminin entraîne un adjectif au féminin.
+          Et le participe après « étaient / sont » s'accorde avec le sujet.
+        </div>
+      </div>
+
+      <div class="manuscrit-label">📖 Le manuscrit :</div>
+      <div class="texte-zone" id="texte-zone"></div>
+      <p class="hint-clic">👆 Clique sur un mot mal accordé, puis tape la bonne orthographe.</p>
+
+      <!-- BOITE DE CORRECTION -->
+      <div class="correction-box" id="correction-box">
+        <div class="cb-prompt">Mot choisi : <b id="cb-mot"></b> — écris la bonne orthographe :</div>
+        <div class="cb-row">
+          <input type="text" class="cb-input" id="cb-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ta correction…">
+          <button class="btn btn-corriger" onclick="corriger()">✔ CORRIGER</button>
+          <button class="btn btn-annuler" onclick="annuler()">✕ ANNULER</button>
+        </div>
+      </div>
+
+      <!-- BOUTONS -->
+      <div class="btns">
+        <button class="btn btn-indice" id="btn-indice" onclick="astuce()">💡 ASTUCE</button>
+        <button class="btn btn-effacer" id="btn-recommencer" onclick="recommencer()">↺ RECOMMENCER</button>
+        <button class="btn btn-terminer" id="btn-terminer" onclick="terminer()">📜 TERMINER</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div class="card results" id="results-card" style="margin-top:20px;">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission" id="res-mission">// MANUSCRIT RESTAURÉ</div>
+      <div class="big-score" id="res-score">0 / 5</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg"></div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" onclick="rejouer()">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="xp-pop" id="xp-pop">✓ TROUVÉE !</div>
+
+<script>
+/*
+  Texte du manuscrit. Chaque mot = un token.
+  err:true + fix:"..." => mot fautif et sa correction.
+  p:"..." => ponctuation collée après le mot (non cliquable).
+  5 erreurs : conservé→conservés, manuscrit→manuscrits,
+  ancien→anciennes, document→documents, lointain→lointains.
+*/
+const TEXTE = [
+  [ {w:"Dans"},{w:"la"},{w:"grande"},{w:"bibliothèque"},{w:"étaient"},
+    {w:"conservé",err:true,fix:"conservés"},{w:"de"},{w:"précieux"},
+    {w:"manuscrit",err:true,fix:"manuscrits",p:"."} ],
+  [ {w:"Les"},{w:"ancien",err:true,fix:"anciennes"},{w:"cartes"},{w:"reposaient"},
+    {w:"dans"},{w:"des"},{w:"coffres"},{w:"fermés",p:"."} ],
+  [ {w:"Plusieurs"},{w:"document",err:true,fix:"documents"},{w:"rares"},{w:"racontaient"},
+    {w:"des"},{w:"voyages"},{w:"lointain",err:true,fix:"lointains",p:"."} ],
+  [ {w:"Dans"},{w:"une"},{w:"salle"},{w:"voisine",p:","},{w:"des"},{w:"livres"},
+    {w:"anciens"},{w:"étaient"},{w:"soigneusement"},{w:"rangés",p:"."} ],
+  [ {w:"Les"},{w:"chercheurs"},{w:"consultaient"},{w:"ces"},{w:"trésors"},
+    {w:"précieux"},{w:"avec"},{w:"beaucoup"},{w:"d'attention",p:"."} ]
+];
+
+const TOTAL = 5;
+const $ = id => document.getElementById(id);
+
+let found = 0, fautes = 0;
+let foundSet = {};        // "li-ci" -> true
+let selectedKey = null;
+
+function norm(s){ return s.toLowerCase().trim().replace(/\s+/g,' ').replace(/[.,;:!?]+$/,''); }
+
+/* étoiles */
+function buildStars(){
+  const c=$('etoiles'); c.innerHTML='';
+  for(let i=0;i<TOTAL;i++){ const s=document.createElement('span'); s.className='star'; s.textContent='★'; c.appendChild(s); }
+}
+
+function updateScore(){
+  $('sc-ok').textContent=found;
+  $('sc-rest').textContent=TOTAL-found;
+  $('sc-err').textContent=fautes;
+  $('found-n').textContent=found;
+  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<found));
+  const pct=Math.round((found/TOTAL)*100);
+  $('xp-fill').style.width=pct+'%'; $('xp-pct').textContent=pct+' %';
+}
+
+function renderTexte(){
+  const z=$('texte-zone'); z.innerHTML='';
+  TEXTE.forEach((line,li)=>{
+    const p=document.createElement('div'); p.className='ligne';
+    line.forEach((tok,ci)=>{
+      const key=li+'-'+ci;
+      const span=document.createElement('span'); span.className='mot';
+      if(foundSet[key]){ span.classList.add('found'); span.textContent=tok.fix; }
+      else {
+        span.textContent=tok.w;
+        if(selectedKey===key) span.classList.add('selected');
+        span.addEventListener('click',()=>selectMot(li,ci));
+      }
+      p.appendChild(span);
+      if(tok.p) p.appendChild(document.createTextNode(tok.p));
+      p.appendChild(document.createTextNode(' '));
+    });
+    z.appendChild(p);
+  });
+}
+
+function selectMot(li,ci){
+  const key=li+'-'+ci;
+  if(foundSet[key]) return;
+  selectedKey=key;
+  const tok=TEXTE[li][ci];
+  $('cb-mot').textContent='« '+tok.w+' »';
+  $('cb-input').value='';
+  $('correction-box').className='correction-box show';
+  renderTexte();
+  setTimeout(()=>$('cb-input').focus(),50);
+}
+
+function annuler(){
+  selectedKey=null;
+  $('correction-box').className='correction-box';
+  renderTexte();
+}
+
+function corriger(){
+  if(selectedKey===null) return;
+  const parts=selectedKey.split('-'); const li=+parts[0], ci=+parts[1];
+  const tok=TEXTE[li][ci];
+  const val=$('cb-input').value;
+  if(!val.trim()) return;
+
+  if(tok.err){
+    if(norm(val)===norm(tok.fix)){
+      foundSet[selectedKey]=true; found++;
+      showFeedback('ok','<b>Erreur corrigée !</b> « '+tok.w+' » → <b>'+tok.fix+'</b>.');
+      fireXP();
+      selectedKey=null;
+      $('correction-box').className='correction-box';
+      renderTexte(); updateScore();
+      if(found===TOTAL) missionComplete();
+    } else {
+      fautes++; updateScore();
+      showFeedback('moyen','<b>Bonne cible !</b> Tu as repéré un mot mal accordé, mais « '+val.trim()+' » n\'est pas la bonne orthographe. Réessaie.');
+      $('cb-input').focus(); $('cb-input').select();
+    }
+  } else {
+    fautes++; updateScore();
+    showFeedback('ko','<b>« '+tok.w+' »</b> est en réalité déjà correct. Cherche ailleurs dans le texte !');
+    selectedKey=null;
+    $('correction-box').className='correction-box';
+    renderTexte();
+  }
+}
+
+function showFeedback(type,html){
+  const fb=$('feedback'); fb.className='feedback show '+type; fb.innerHTML=html;
+}
+
+function fireXP(){
+  const p=$('xp-pop'); p.classList.remove('go'); void p.offsetWidth; p.classList.add('go');
+}
+
+function missionComplete(){
+  showFeedback('ok','🎉 <b>Manuscrit restauré !</b> Tu as retrouvé les 5 erreurs. Clique sur « VOIR LES RÉSULTATS ».');
+  const b=$('btn-terminer'); b.textContent='✔ VOIR LES RÉSULTATS'; b.classList.add('ready');
+}
+
+function astuce(){ $('memo-box').className='memo-box show'; }
+
+function recommencer(){
+  found=0; fautes=0; foundSet={}; selectedKey=null;
+  $('correction-box').className='correction-box';
+  $('feedback').className='feedback';
+  $('memo-box').className='memo-box';
+  const b=$('btn-terminer'); b.textContent='📜 TERMINER'; b.classList.remove('ready');
+  renderTexte(); updateScore();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function terminer(){ showResults(); }
+
+function showResults(){
+  $('exo-card').style.display='none';
+  $('results-card').classList.add('show');
+  $('res-score').textContent=found+' / '+TOTAL;
+  let stars=''; for(let i=0;i<TOTAL;i++) stars+=(i<found)?'★':'☆';
+  $('res-stars').textContent=stars;
+  $('res-mission').textContent = (found===TOTAL) ? '// MANUSCRIT RESTAURÉ' : '// MISSION TERMINÉE';
+  const r=found/TOTAL;
+  $('res-msg').textContent=
+    found===TOTAL ?'// PARFAIT — toutes les erreurs corrigées !':
+    r>=.6         ?'// BIEN JOUÉ — encore quelques mots à vérifier.':
+    found>0       ?'// CONTINUE — relis chaque groupe nominal.':
+                   '// À RETRAVAILLER — pense à accorder dét. + nom + adjectif.';
+
+  // Recap : les 5 erreurs avec leur correction
+  let html='';
+  TEXTE.forEach((line,li)=>{
+    line.forEach((tok,ci)=>{
+      if(tok.err){
+        const ok=!!foundSet[li+'-'+ci];
+        html+='<div class="recap-item"><span class="eq">'+tok.w+' → <b>'+tok.fix+'</b></span><span class="st">'+(ok?'✓':'✗')+'</span></div>';
+      }
+    });
+  });
+  $('res-recap').innerHTML=html;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function rejouer(){
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display='';
+  recommencer();
+}
+
+/* Entrée clavier = corriger */
+document.addEventListener('DOMContentLoaded',function(){
+  $('cb-input').addEventListener('keydown',function(e){ if(e.key==='Enter') corriger(); });
+});
+
+/* INIT */
+buildStars();
+renderTexte();
+updateScore();
+</script>
+</body>
+</html>
