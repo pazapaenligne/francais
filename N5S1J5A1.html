@@ -1,303 +1,492 @@
-<div class="bubble1"> </div>
-<div class="bubble2"> </div>
-<div class="bubble3"> </div>
-<div class="bubble4"> </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'explore – S1 J5 – 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5c518;--day-dark:#8a6000;--day-dark2:#5a3e00;
+  --day-light:#fff8d6;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.35);
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#fffbeb;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --blue:#3ab5d8;--blue-light:#e8f6fb;--blue-dark:#1a6e88;
+  --red:#b94040;--red-light:#f7eded;
+  --orange:#f5a623;
+  --text:#1a1d23;--muted:#8a8f9a;
+  --radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;}
+.wrap{width:100%;max-width:680px;}
+
+.bubble1{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:280px;height:280px;top:-90px;right:-90px;
+  background:radial-gradient(circle,rgba(245,197,24,.16),transparent 70%);}
+.bubble2{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:220px;height:220px;bottom:-70px;left:-70px;
+  background:radial-gradient(circle,rgba(245,166,35,.10),transparent 70%);}
+.bubble3{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:140px;height:140px;top:40%;left:-55px;
+  background:radial-gradient(circle,rgba(141,198,63,.08),transparent 70%);}
+.bubble4{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:110px;height:110px;bottom:18%;right:-45px;
+  background:radial-gradient(circle,rgba(242,139,130,.08),transparent 70%);}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:#f5c518;border-radius:50px;padding:6px 16px;
+  box-shadow:0 2px 10px rgba(245,197,24,.45);margin-bottom:.5rem;}
+.logo-badge span{font-family:monospace;font-size:14px;font-weight:800;color:#000;letter-spacing:.5px;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted);
+  margin-bottom:.5rem;font-weight:600;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.25;word-break:break-word;}
+h1 .hl{color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.85rem;margin-top:.35rem;
+  font-family:'JetBrains Mono',monospace;}
+
+/* BANDE DÉGRADÉ */
+.week-stripe{height:5px;border-radius:4px;
+  background:linear-gradient(90deg,#b94040,#8dc63f,#3ab5d8,#f5c518);
+  margin-bottom:1.5rem;position:relative;z-index:1;}
+
+/* SECTION */
+.section{margin-bottom:1.6rem;position:relative;z-index:1;}
+.section-card{background:var(--surface);border:1.5px solid #e0ddd5;
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+.sec-header{padding:1rem 1.3rem .75rem;display:flex;align-items:center;gap:.75rem;
+  border-bottom:1.5px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.sec-num{width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.85rem;
+  color:#fff;flex-shrink:0;}
+.sec-title{font-size:clamp(1rem,3vw,1.2rem);font-weight:900;color:#1a1d23;flex:1;line-height:1.3;}
+.sec-chevron{color:var(--muted);font-size:.9rem;transition:transform .25s;flex-shrink:0;}
+.sec-header.open .sec-chevron{transform:rotate(180deg);}
+.sec-body{padding:0 1.3rem 1.3rem;display:none;}
+.sec-body.open{display:block;animation:fadeUp .25s ease both;}
+
+/* STRIPE colorée par section */
+.s1 .sec-header{background:linear-gradient(135deg,#fff5e0,#ffffff);}
+.s1 .sec-num{background:var(--orange);}
+.s2 .sec-header{background:linear-gradient(135deg,#f0faeb,#ffffff);}
+.s2 .sec-num{background:var(--green);}
+.s3 .sec-header{background:linear-gradient(135deg,#e8f6fb,#ffffff);}
+.s3 .sec-num{background:var(--blue);}
+.s4 .sec-header{background:linear-gradient(135deg,#fffbeb,#ffffff);}
+.s4 .sec-num{background:var(--day-dark);}
+
+/* TABLEAU */
+.fiche-table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:clamp(.85rem,2.4vw,.97rem);}
+.fiche-table th{background:#f5e08a;color:#3a2800;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;
+  letter-spacing:.07em;padding:.5rem .65rem;text-align:left;
+  border-bottom:2px solid var(--day-border);}
+.fiche-table td{padding:.5rem .65rem;border-bottom:1px solid var(--border);
+  vertical-align:top;line-height:1.65;}
+.fiche-table tr:last-child td{border-bottom:none;}
+.fiche-table .bold{font-weight:800;color:#3a2800;
+  font-family:'JetBrains Mono',monospace;}
+.fiche-table .ex{color:var(--muted);font-style:italic;font-size:.88rem;}
+
+/* PHRASE EXEMPLE */
+.exemple{background:#fffde8;border:2px solid #d97706;
+  border-left:4px solid var(--day);border-radius:var(--radius-sm);
+  padding:.8rem 1rem;margin:.8rem 0;font-size:clamp(.92rem,2.6vw,1.05rem);
+  font-family:'JetBrains Mono',monospace;color:var(--day-dark2);line-height:1.9;
+  word-break:break-word;}
+.exemple .label{font-size:.65rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;
+  display:block;font-family:'JetBrains Mono',monospace;}
+.tag{display:inline-block;font-size:.72rem;font-weight:800;
+  padding:.15rem .6rem;border-radius:99px;margin-left:.4rem;
+  font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.tag-nom{background:#f5a623;color:#fff;border:none;font-weight:800;}
+.tag-det{background:#8dc63f;color:#fff;border:none;font-weight:800;}
+.tag-adj{background:#3ab5d8;color:#fff;border:none;font-weight:800;}
+.tag-v  {background:#b94040;color:#fff;border:none;font-weight:800;}
+.tag-pro{background:#7c3aed;color:#fff;border:none;font-weight:800;}
+.tag-adv{background:#ca8a04;color:#fff;border:none;font-weight:800;}
+.tag-pre{background:#16a34a;color:#fff;border:none;font-weight:800;}
+
+/* ACCORDS */
+.accord-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:.5rem;margin:.8rem 0;}
+.accord-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem .75rem;text-align:center;}
+.accord-word{font-size:1rem;font-weight:900;color:#3a2800;
+  font-family:'JetBrains Mono',monospace;}
+.accord-info{font-size:.72rem;color:var(--muted);margin-top:.2rem;
+  font-family:'JetBrains Mono',monospace;}
+
+/* CONJUGAISON */
+.conj-section{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.8rem 0;}
+@media(max-width:480px){.conj-section{grid-template-columns:1fr 1fr;}}
+.conj-box{background:#ffffff;border:2px solid #e6c200;
+  border-radius:var(--radius-sm);padding:.7rem .85rem;}
+.conj-titre{font-size:.72rem;font-weight:800;color:#3a2800;
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:.45rem;
+  font-family:'JetBrains Mono',monospace;}
+.conj-verbe{font-size:.82rem;font-weight:600;color:var(--muted);
+  margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;}
+.conj-forms{font-size:clamp(.82rem,2.3vw,.9rem);color:var(--text);
+  line-height:1.85;font-family:'JetBrains Mono',monospace;}
+.conj-forms .term{color:#b45309;font-weight:900;}
+.conj-box-full{grid-column:1/-1;}
+
+/* COULEURS */
+.couleur-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:.8rem 0;}
+.couleur-row{display:flex;flex-direction:column;gap:.3rem;
+  background:#ffffff;border:2px solid #e6c200;
+  border-radius:var(--radius-sm);padding:.6rem .85rem;}
+.couleur-row .sing{color:#7a6000;font-size:.88rem;font-family:'JetBrains Mono',monospace;}
+.couleur-row .plur{color:#3a2800;font-weight:800;font-size:.88rem;font-family:'JetBrains Mono',monospace;
+  background:#fef3c7;border-radius:4px;padding:.1rem .35rem;display:inline-block;}
+
+/* ASTUCE */
+.astuce{background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:1rem 1.1rem;margin:.8rem 0;}
+.astuce-title{font-size:.72rem;font-weight:800;color:var(--day-dark);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;
+  font-family:'JetBrains Mono',monospace;}
+.astuce p{font-size:clamp(.88rem,2.4vw,.97rem);color:var(--text);
+  line-height:1.8;margin:0 0 .4rem;}
+.astuce p:last-child{margin:0;}
+.astuce .arrow{color:var(--day-dark);font-weight:800;}
+
+/* RETENIR */
+.retenir{background:var(--green-light);border:1.5px solid var(--green);
+  border-radius:var(--radius-sm);padding:.75rem 1rem;margin:.6rem 0;
+  font-size:clamp(.88rem,2.4vw,.97rem);color:var(--green-dark);line-height:1.8;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:500px){.sec-body{padding:0 1rem 1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="bubble3"></div><div class="bubble4"></div>
 <div class="wrap">
-  <header>
-    <div class="logo-badge"><span
-        style="color: #e8002d; font-size: 14px;">●</span> <span
-        style="color: #8dc63f; font-size: 14px;">●</span> <span
-        style="color: #3ab5d8; font-size: 14px;">●</span>  Pazapa · Français ·
-      5ème</div>
-    <div class="week-label">Semaine 1 – Jour 5 — J’explore</div>
-    <h1>J'explore ! · <span class="hl">Semaine 1</span></h1>
-    <p class="subtitle">Clique sur chaque section pour la déplier.</p>
-  </header>
-  <div class="week-stripe"> </div>
-  <!-- ══ SECTION 1 : MOTS VARIABLES ══ -->
-  <div class="section">
-    <div class="section-card s1">
-      <div class="sec-header">
-        <div class="sec-num">1</div>
-        <div class="sec-title">Les mots variables et invariables</div>
-        <div id="chev1" class="sec-chevron">▼</div>
-      </div>
-      <div id="body1" class="sec-body open">
-        <p
-          style="margin: .8rem 0 .5rem; font-size: .95rem; color: var(--text); line-height: 1.75;">
-          Les mots variables <strong>changent de forme</strong> selon le genre,
-          le nombre ou la personne. Les mots invariables <strong>gardent
-            toujours la même forme</strong>.</p>
-        <p
-          style="font-size: .78rem; font-weight: bold; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin: .8rem 0 .3rem; font-family: 'JetBrains Mono',monospace;">
-          Mots variables</p>
-        <table class="fiche-table">
-          <thead>
-            <tr>
-              <th>Classe</th>
-              <th>Exemple</th>
-              <th>Rôle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="bold">Nom</td>
-              <td class="ex">voyageur</td>
-              <td>désigne une personne, un lieu, un objet ou une idée</td>
-            </tr>
-            <tr>
-              <td class="bold">Déterminant</td>
-              <td class="ex">le, une, des</td>
-              <td>accompagne le nom</td>
-            </tr>
-            <tr>
-              <td class="bold">Adjectif</td>
-              <td class="ex">calme, rouge</td>
-              <td>donne des précisions sur le nom</td>
-            </tr>
-            <tr>
-              <td class="bold">Pronom</td>
-              <td class="ex">je, tu, il, nous</td>
-              <td>remplace un nom</td>
-            </tr>
-            <tr>
-              <td class="bold">Verbe</td>
-              <td class="ex">marcher, finir</td>
-              <td>exprime une action ou un état</td>
-            </tr>
-          </tbody>
-        </table>
-        <p
-          style="font-size: .78rem; font-weight: bold; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin: .8rem 0 .3rem; font-family: 'JetBrains Mono',monospace;">
-          Mots invariables utiles</p>
-        <table class="fiche-table">
-          <thead>
-            <tr>
-              <th>Classe</th>
-              <th>Exemple</th>
-              <th>Rôle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="bold">Adverbe</td>
-              <td class="ex">vite, doucement</td>
-              <td>précise le sens d'un verbe ou d'un adjectif</td>
-            </tr>
-            <tr>
-              <td class="bold">Préposition</td>
-              <td class="ex">à, de, dans, sur</td>
-              <td>introduit un complément</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="exemple"><span class="label">Exemple — Sans famille</span>
-          <strong style="font-size: clamp(1rem,2.8vw,1.1rem);">Le jeune voyageur
-            avance lentement sur le chemin.</strong><br><span
-            style="font-size: .88rem; line-height: 2.2;"> Le<span
-              class="tag tag-det">déterminant</span> jeune<span
-              class="tag tag-adj">adjectif</span> voyageur<span
-              class="tag tag-nom">nom</span> avance<span
-              class="tag tag-v">verbe</span> lentement<span
-              class="tag tag-adv">adverbe</span> sur<span
-              class="tag tag-pre">préposition</span> </span></div>
-        <div class="retenir">✅ Les mots variables changent : <em>voyageur →
-            voyageurs</em>, <em>blanc → blanche</em>.<br>✅ Les mots invariables
-          ne changent jamais : <em>vite, avec, dans</em>.</div>
-      </div>
-    </div>
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span>&nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me</span>
   </div>
-  <!-- ══ SECTION 2 : GROUPE NOMINAL ══ -->
-  <div class="section">
-    <div class="section-card s2">
-      <div class="sec-header">
-        <div class="sec-num">2</div>
-        <div class="sec-title">Le groupe nominal et les accords</div>
-        <div id="chev2" class="sec-chevron">▼</div>
-      </div>
-      <div id="body2" class="sec-body">
-        <p
-          style="margin: .8rem 0; font-size: .95rem; color: var(--text); line-height: 1.75;">
-          Dans un groupe nominal, le <strong style="color: #3d7a10;">nom
-            noyau</strong> est le mot principal. Le déterminant et les adjectifs
-          s’accordent avec lui en <strong>genre</strong> et en
-          <strong>nombre</strong>.</p>
-        <div class="exemple"><span class="label">Exemple</span> les grandes
-          maisons blanches</div>
-        <div class="accord-grid">
-          <div class="accord-cell">
-            <div class="accord-word">les</div>
-            <div class="accord-info">féminin pluriel<br>déterminant</div>
-          </div>
-          <div class="accord-cell"
-            style="border-color: #8dc63f; background: #f0faeb;">
-            <div class="accord-word" style="color: #3d7a10;">maisons ✦</div>
-            <div class="accord-info">nom noyau<br>féminin pluriel</div>
-          </div>
-          <div class="accord-cell">
-            <div class="accord-word">grandes</div>
-            <div class="accord-info">féminin pluriel<br>adjectif</div>
-          </div>
-          <div class="accord-cell">
-            <div class="accord-word">blanches</div>
-            <div class="accord-info">féminin pluriel<br>adjectif</div>
-          </div>
-        </div>
-        <div class="retenir">✅ Le déterminant s’accorde avec le nom.<br>✅
-          L’adjectif s’accorde avec le nom.</div>
-        <p
-          style="font-size: .78rem; font-weight: bold; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin: .8rem 0 .3rem; font-family: 'JetBrains Mono',monospace;">
-          Adjectifs de couleur simples</p>
-        <div class="couleur-grid">
-          <div class="couleur-row"><span class="sing">une cape rouge</span><span
-              class="plur">des capes rouges</span></div>
-          <div class="couleur-row"><span class="sing">un manteau
-              noir</span><span class="plur">des manteaux noirs</span></div>
-          <div class="couleur-row"><span class="sing">une pierre
-              grise</span><span class="plur">des pierres grises</span></div>
-          <div class="couleur-row"><span class="sing">un drapeau
-              bleu</span><span class="plur">des drapeaux bleus</span></div>
-        </div>
-        <div class="retenir">⚠️ Les adjectifs de couleur simples suivent les
-          mêmes règles que les autres adjectifs.</div>
-      </div>
-    </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 5 &mdash; J&rsquo;explore</div>
+  <h1>&#128269;&nbsp;J&rsquo;explore &middot; <span class="hl">Fiche récapitulative</span></h1>
+  <p class="subtitle">Clique sur chaque section pour la d&eacute;plier.</p>
+</header>
+
+<div class="week-stripe"></div>
+
+<!-- ══ SECTION 1 : MOTS VARIABLES ══ -->
+<div class="section">
+<div class="section-card s1">
+  <div class="sec-header" onclick="toggle(1)">
+    <div class="sec-num">1</div>
+    <div class="sec-title">Les mots variables et invariables</div>
+    <div class="sec-chevron" id="chev1">&#9660;</div>
   </div>
-  <!-- ══ SECTION 3 : PRÉSENT INDICATIF ══ -->
-  <div class="section">
-    <div class="section-card s3">
-      <div class="sec-header">
-        <div class="sec-num">3</div>
-        <div class="sec-title">Le présent de l’indicatif</div>
-        <div id="chev3" class="sec-chevron">▼</div>
-      </div>
-      <div id="body3" class="sec-body">
-        <p
-          style="margin: .8rem 0; font-size: .95rem; color: var(--text); line-height: 1.75;">
-          Le présent exprime une action qui se déroule
-          <strong>maintenant</strong>. Les terminaisons varient selon le groupe
-          du verbe.</p>
-        <div class="conj-section"><!-- 1er groupe -->
-          <div class="conj-box">
-            <div class="conj-titre" style="color: #c47a10;">1<sup>er</sup>
-              groupe — verbes en -er</div>
-            <div class="conj-verbe">marcher</div>
-            <div class="conj-forms">je march<span class="term">e</span><br>tu
-              march<span class="term">es</span><br>il march<span
-                class="term">e</span><br>nous march<span
-                class="term">ons</span><br>vous march<span
-                class="term">ez</span><br>ils march<span class="term">ent</span>
-            </div>
-          </div>
-          <!-- 2e groupe -->
-          <div class="conj-box">
-            <div class="conj-titre" style="color: #3d7a10;">2<sup>e</sup> groupe
-              — verbes en -ir (-issant)</div>
-            <div class="conj-verbe">grandir</div>
-            <div class="conj-forms">je grand<span class="term">is</span><br>tu
-              grand<span class="term">is</span><br>il grand<span
-                class="term">it</span><br>nous grand<span
-                class="term">issons</span><br>vous grand<span
-                class="term">issez</span><br>ils grand<span
-                class="term">issent</span></div>
-          </div>
-          <!-- 3e groupe : prendre + aller -->
-          <div class="conj-box">
-            <div class="conj-titre" style="color: #1a6e88;">3<sup>e</sup> groupe
-              — prendre</div>
-            <div class="conj-forms">je pren<span class="term">ds</span><br>tu
-              pren<span class="term">ds</span><br>il pren<span
-                class="term">d</span><br>nous pren<span
-                class="term">ons</span><br>vous pren<span
-                class="term">ez</span><br>ils prenn<span class="term">ent</span>
-            </div>
-          </div>
-          <!-- faire -->
-          <div class="conj-box">
-            <div class="conj-titre" style="color: #1a6e88;">3<sup>e</sup> groupe
-              — faire</div>
-            <div class="conj-forms">je fai<span class="term">s</span><br>tu
-              fai<span class="term">s</span><br>il fai<span
-                class="term">t</span><br>nous fais<span
-                class="term">ons</span><br>vous fai<span
-                class="term">tes</span><br>ils fon<span class="term">t</span>
-            </div>
-          </div>
-          <!-- dire -->
-          <div class="conj-box">
-            <div class="conj-titre" style="color: #1a6e88;">3<sup>e</sup> groupe
-              — dire</div>
-            <div class="conj-forms">je di<span class="term">s</span><br>tu
-              di<span class="term">s</span><br>il di<span
-                class="term">t</span><br>nous dis<span
-                class="term">ons</span><br>vous di<span
-                class="term">tes</span><br>ils dis<span class="term">ent</span>
-            </div>
-          </div>
-          <!-- aller -->
-          <div class="conj-box">
-            <div class="conj-titre" style="color: #1a6e88;">3<sup>e</sup> groupe
-              — aller</div>
-            <div class="conj-forms">je vai<span class="term">s</span><br>tu
-              va<span class="term">s</span><br>il va<br>nous all<span
-                class="term">ons</span><br>vous all<span
-                class="term">ez</span><br>ils von<span class="term">t</span>
-            </div>
-          </div>
-        </div>
-        <div class="retenir">✅ 1<sup>er</sup> groupe : -e, -es, -e, -ons, -ez,
-          -ent<br>✅ 2<sup>e</sup> groupe : -is, -is, -it, -issons, -issez,
-          -issent<br>✅ 3<sup>e</sup> groupe : verbes irréguliers — à apprendre
-          par cœur.</div>
-      </div>
+  <div class="sec-body open" id="body1">
+
+    <p style="margin:.8rem 0 .5rem;font-size:.95rem;color:var(--text);line-height:1.75;">
+      Les mots variables <strong>changent de forme</strong> selon le genre, le nombre ou la personne.
+      Les mots invariables <strong>gardent toujours la même forme</strong>.
+    </p>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.07em;margin:.8rem 0 .3rem;font-family:'JetBrains Mono',monospace;">
+      Mots variables</p>
+    <table class="fiche-table">
+      <thead><tr><th>Classe</th><th>Exemple</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr><td class="bold">Nom</td><td class="ex">voyageur</td><td>désigne une personne, un lieu, un objet ou une idée</td></tr>
+        <tr><td class="bold">Déterminant</td><td class="ex">le, une, des</td><td>accompagne le nom</td></tr>
+        <tr><td class="bold">Adjectif</td><td class="ex">calme, rouge</td><td>donne des précisions sur le nom</td></tr>
+        <tr><td class="bold">Pronom</td><td class="ex">je, tu, il, nous</td><td>remplace un nom</td></tr>
+        <tr><td class="bold">Verbe</td><td class="ex">marcher, finir</td><td>exprime une action ou un état</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.07em;margin:.8rem 0 .3rem;font-family:'JetBrains Mono',monospace;">
+      Mots invariables utiles</p>
+    <table class="fiche-table">
+      <thead><tr><th>Classe</th><th>Exemple</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr><td class="bold">Adverbe</td><td class="ex">vite, doucement</td><td>précise le sens d'un verbe ou d'un adjectif</td></tr>
+        <tr><td class="bold">Préposition</td><td class="ex">à, de, dans, sur</td><td>introduit un complément</td></tr>
+      </tbody>
+    </table>
+
+    <div class="exemple">
+      <span class="label">Exemple — Sans famille</span>
+      <strong style="font-size:clamp(1rem,2.8vw,1.1rem);display:block;margin-bottom:.75rem;">Le jeune voyageur avance lentement sur le chemin.</strong>
+      <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:.85rem;">
+        <tr style="border-bottom:1px solid #f5e08a;">
+          <td style="padding:.3rem .5rem;font-weight:700;color:#1a1d23;">Le</td>
+          <td style="padding:.3rem .5rem;"><span class="tag tag-det">déterminant</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #f5e08a;">
+          <td style="padding:.3rem .5rem;font-weight:700;color:#1a1d23;">jeune</td>
+          <td style="padding:.3rem .5rem;"><span class="tag tag-adj">adjectif</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #f5e08a;">
+          <td style="padding:.3rem .5rem;font-weight:700;color:#1a1d23;">voyageur</td>
+          <td style="padding:.3rem .5rem;"><span class="tag tag-nom">nom</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #f5e08a;">
+          <td style="padding:.3rem .5rem;font-weight:700;color:#1a1d23;">avance</td>
+          <td style="padding:.3rem .5rem;"><span class="tag tag-v">verbe</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid #f5e08a;">
+          <td style="padding:.3rem .5rem;font-weight:700;color:#1a1d23;">lentement</td>
+          <td style="padding:.3rem .5rem;"><span class="tag tag-adv">adverbe</span></td>
+        </tr>
+        <tr>
+          <td style="padding:.3rem .5rem;font-weight:700;color:#1a1d23;">sur</td>
+          <td style="padding:.3rem .5rem;"><span class="tag tag-pre">préposition</span></td>
+        </tr>
+      </table>
     </div>
-  </div>
-  <!-- ══ SECTION 4 : ASTUCE DU VOYAGEUR ══ -->
-  <div class="section">
-    <div class="section-card s4">
-      <div class="sec-header">
-        <div class="sec-num">4</div>
-        <div class="sec-title">L’astuce du voyageur</div>
-        <div id="chev4" class="sec-chevron">▼</div>
-      </div>
-      <div id="body4" class="sec-body">
-        <div class="astuce" style="margin-top: .8rem;">
-          <div class="astuce-title">🎯 Avant d’écrire, pose-toi ces questions
-          </div>
-          <p><span class="arrow">➤</span> Quel est le <strong>nom noyau</strong>
-            du groupe nominal ?</p>
-          <p><span class="arrow">➤</span> Le déterminant et les adjectifs
-            sont-ils bien <strong>accordés</strong> ?</p>
-          <p><span class="arrow">➤</span> Quel est le <strong>sujet du
-              verbe</strong> ?</p>
-          <p><span class="arrow">➤</span> Quelle est la <strong>bonne
-              terminaison</strong> du présent ?</p>
-        </div>
-        <div class="exemple"><span class="label">Exemple complet — Sans
-            famille</span> <strong>Le vieil homme</strong> <em>prit</em> ma
-          main.<br><span style="font-size: .82rem; color: var(--muted);"> nom
-            noyau : <strong style="color: #8a6000;">homme</strong> (masc. sing.)
-            → déterminant <em>Le</em> et adjectif <em>vieil</em> au masculin
-            singulier. </span></div>
-        <div class="retenir"
-          style="background: #fef3c7; border-color: #d97706; color: #3a2800;">
-          🔍 Un accord oublié ou une terminaison incorrecte peut modifier le
-          sens de la phrase.</div>
-      </div>
+
+    <div class="retenir">
+      ✅ Les mots variables changent&nbsp;: <em>voyageur → voyageurs</em>, <em>blanc → blanche</em>.<br>
+      ✅ Les mots invariables ne changent jamais&nbsp;: <em>vite, avec, dans</em>.
     </div>
+
   </div>
 </div>
+</div>
+
+<!-- ══ SECTION 2 : GROUPE NOMINAL ══ -->
+<div class="section">
+<div class="section-card s2">
+  <div class="sec-header" onclick="toggle(2)">
+    <div class="sec-num">2</div>
+    <div class="sec-title">Le groupe nominal et les accords</div>
+    <div class="sec-chevron" id="chev2">&#9660;</div>
+  </div>
+  <div class="sec-body" id="body2">
+
+    <p style="margin:.8rem 0;font-size:.95rem;color:var(--text);line-height:1.75;">
+      Dans un groupe nominal, le <strong style="color:#3d7a10;">nom noyau</strong> est le mot principal.
+      Le déterminant et les adjectifs s&rsquo;accordent avec lui en <strong>genre</strong> et en <strong>nombre</strong>.
+    </p>
+
+    <div class="exemple">
+      <span class="label">Exemple</span>
+      les grandes maisons blanches
+    </div>
+
+    <div class="accord-grid">
+      <div class="accord-cell">
+        <div class="accord-word">les</div>
+        <div class="accord-info">féminin pluriel<br>déterminant</div>
+      </div>
+      <div class="accord-cell" style="border-color:#8dc63f;background:#f0faeb;">
+        <div class="accord-word" style="color:#3d7a10;">maisons ✦</div>
+        <div class="accord-info">nom noyau<br>féminin pluriel</div>
+      </div>
+      <div class="accord-cell">
+        <div class="accord-word">grandes</div>
+        <div class="accord-info">féminin pluriel<br>adjectif</div>
+      </div>
+      <div class="accord-cell">
+        <div class="accord-word">blanches</div>
+        <div class="accord-info">féminin pluriel<br>adjectif</div>
+      </div>
+    </div>
+
+    <div class="retenir">
+      ✅ Le déterminant s&rsquo;accorde avec le nom.<br>
+      ✅ L&rsquo;adjectif s&rsquo;accorde avec le nom.
+    </div>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.07em;margin:.8rem 0 .3rem;font-family:'JetBrains Mono',monospace;">
+      Adjectifs de couleur simples</p>
+
+    <div class="couleur-grid">
+      <div class="couleur-row"><span class="sing">une cape rouge</span><span class="plur">des capes rouges</span></div>
+      <div class="couleur-row"><span class="sing">un manteau noir</span><span class="plur">des manteaux noirs</span></div>
+      <div class="couleur-row"><span class="sing">une pierre grise</span><span class="plur">des pierres grises</span></div>
+      <div class="couleur-row"><span class="sing">un drapeau bleu</span><span class="plur">des drapeaux bleus</span></div>
+    </div>
+
+    <div class="retenir">
+      &#9888;&#65039; Les adjectifs de couleur simples suivent les mêmes règles que les autres adjectifs.
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ══ SECTION 3 : PRÉSENT INDICATIF ══ -->
+<div class="section">
+<div class="section-card s3">
+  <div class="sec-header" onclick="toggle(3)">
+    <div class="sec-num">3</div>
+    <div class="sec-title">Le présent de l&rsquo;indicatif</div>
+    <div class="sec-chevron" id="chev3">&#9660;</div>
+  </div>
+  <div class="sec-body" id="body3">
+
+    <p style="margin:.8rem 0;font-size:.95rem;color:var(--text);line-height:1.75;">
+      Le présent exprime une action qui se déroule <strong>maintenant</strong>.
+      Les terminaisons varient selon le groupe du verbe.
+    </p>
+
+    <div class="conj-section">
+
+      <!-- 1er groupe -->
+      <div class="conj-box">
+        <div class="conj-titre" style="color:#c47a10;">1<sup>er</sup> groupe — verbes en -er</div>
+        <div class="conj-verbe">marcher</div>
+        <div class="conj-forms">
+          je march<span class="term">e</span><br>
+          tu march<span class="term">es</span><br>
+          il march<span class="term">e</span><br>
+          nous march<span class="term">ons</span><br>
+          vous march<span class="term">ez</span><br>
+          ils march<span class="term">ent</span>
+        </div>
+      </div>
+
+      <!-- 2e groupe -->
+      <div class="conj-box">
+        <div class="conj-titre" style="color:#3d7a10;">2<sup>e</sup> groupe — verbes en -ir (-issant)</div>
+        <div class="conj-verbe">grandir</div>
+        <div class="conj-forms">
+          je grand<span class="term">is</span><br>
+          tu grand<span class="term">is</span><br>
+          il grand<span class="term">it</span><br>
+          nous grand<span class="term">issons</span><br>
+          vous grand<span class="term">issez</span><br>
+          ils grand<span class="term">issent</span>
+        </div>
+      </div>
+
+      <!-- 3e groupe : prendre + aller -->
+      <div class="conj-box">
+        <div class="conj-titre" style="color:#1a6e88;">3<sup>e</sup> groupe — prendre</div>
+        <div class="conj-forms">
+          je pren<span class="term">ds</span><br>
+          tu pren<span class="term">ds</span><br>
+          il pren<span class="term">d</span><br>
+          nous pren<span class="term">ons</span><br>
+          vous pren<span class="term">ez</span><br>
+          ils prenn<span class="term">ent</span>
+        </div>
+      </div>
+
+      <!-- faire -->
+      <div class="conj-box">
+        <div class="conj-titre" style="color:#1a6e88;">3<sup>e</sup> groupe — faire</div>
+        <div class="conj-forms">
+          je fai<span class="term">s</span><br>
+          tu fai<span class="term">s</span><br>
+          il fai<span class="term">t</span><br>
+          nous fais<span class="term">ons</span><br>
+          vous fai<span class="term">tes</span><br>
+          ils fon<span class="term">t</span>
+        </div>
+      </div>
+
+      <!-- dire -->
+      <div class="conj-box">
+        <div class="conj-titre" style="color:#1a6e88;">3<sup>e</sup> groupe — dire</div>
+        <div class="conj-forms">
+          je di<span class="term">s</span><br>
+          tu di<span class="term">s</span><br>
+          il di<span class="term">t</span><br>
+          nous dis<span class="term">ons</span><br>
+          vous di<span class="term">tes</span><br>
+          ils dis<span class="term">ent</span>
+        </div>
+      </div>
+
+      <!-- aller -->
+      <div class="conj-box">
+        <div class="conj-titre" style="color:#1a6e88;">3<sup>e</sup> groupe — aller</div>
+        <div class="conj-forms">
+          je vai<span class="term">s</span><br>
+          tu va<span class="term">s</span><br>
+          il va<br>
+          nous all<span class="term">ons</span><br>
+          vous all<span class="term">ez</span><br>
+          ils von<span class="term">t</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="retenir">
+      ✅ 1<sup>er</sup> groupe : -e, -es, -e, -ons, -ez, -ent<br>
+      ✅ 2<sup>e</sup> groupe : -is, -is, -it, -issons, -issez, -issent<br>
+      ✅ 3<sup>e</sup> groupe : verbes irréguliers — à apprendre par c&oelig;ur.
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ══ SECTION 4 : ASTUCE DU VOYAGEUR ══ -->
+<div class="section">
+<div class="section-card s4">
+  <div class="sec-header" onclick="toggle(4)">
+    <div class="sec-num">4</div>
+    <div class="sec-title">L&rsquo;astuce du voyageur</div>
+    <div class="sec-chevron" id="chev4">&#9660;</div>
+  </div>
+  <div class="sec-body" id="body4">
+
+    <div class="astuce" style="margin-top:.8rem;">
+      <div class="astuce-title">&#127919;&nbsp;Avant d&rsquo;écrire, pose-toi ces questions</div>
+      <p><span class="arrow">&#10148;</span>&nbsp;Quel est le <strong>nom noyau</strong> du groupe nominal&nbsp;?</p>
+      <p><span class="arrow">&#10148;</span>&nbsp;Le déterminant et les adjectifs sont-ils bien <strong>accordés</strong>&nbsp;?</p>
+      <p><span class="arrow">&#10148;</span>&nbsp;Quel est le <strong>sujet du verbe</strong>&nbsp;?</p>
+      <p><span class="arrow">&#10148;</span>&nbsp;Quelle est la <strong>bonne terminaison</strong> du présent&nbsp;?</p>
+    </div>
+
+    <div class="exemple">
+      <span class="label">Exemple complet — Sans famille</span>
+      <strong>Le vieil homme</strong> <em>prit</em> ma main.<br>
+      <span style="font-size:.82rem;color:var(--muted);">
+        nom noyau : <strong style="color:#8a6000;">homme</strong> (masc. sing.)
+        → déterminant <em>Le</em> et adjectif <em>vieil</em> au masculin singulier.
+      </span>
+    </div>
+
+    <div class="retenir" style="background:#fef3c7;border-color:#d97706;color:#3a2800;">
+      &#128269;&nbsp;Un accord oublié ou une terminaison incorrecte peut modifier le sens de la phrase.
+    </div>
+
+  </div>
+</div>
+</div>
+
+</div>
 <script>
-  function toggle(n) {
-    var body = document.getElementById('body' + n);
-    var chev = document.getElementById('chev' + n);
-    var header = chev.parentElement;
-    var open = body.classList.contains('open');
-    body.classList.toggle('open', !open);
-    header.classList.toggle('open', !open);
-  }
-  // Ouvrir section 1 par défaut
-  document.getElementById('sec-header-1');
-  document.querySelector('#body1').classList.add('open');
-  document.querySelector('.s1 .sec-header').classList.add('open');
+function toggle(n){
+  var body=document.getElementById('body'+n);
+  var chev=document.getElementById('chev'+n);
+  var header=chev.parentElement;
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  header.classList.toggle('open',!open);
+}
+// Ouvrir section 1 par défaut
+document.getElementById('sec-header-1');
+document.querySelector('#body1').classList.add('open');
+document.querySelector('.s1 .sec-header').classList.add('open');
 </script>
+</body>
+</html>
