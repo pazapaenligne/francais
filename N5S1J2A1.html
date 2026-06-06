@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S1 J2 – 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#b94040; --day-dark:#7a1f1f; --day-dark2:#4a0f0f;
+  --day-light:#f7eded; --day-border:#e8b0b0; --day-glow:rgba(185,64,64,.25);
+  --bg:#ffffff; --surface:#ffffff; --surface2:#fafafa; --border:#e8e4d9;
+  --yellow:#f5c518; --green:#8dc63f; --green-light:#f0faeb; --green-dark:#3d7a10;
+  --pink:#f28b82; --pink-light:#fff0ef; --pink-dark:#c0392b;
+  --orange:#f5a623; --blue:#3ab5d8;
+  --text:#1a1d23; --muted:#8a8f9a;
+  --radius:16px; --radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem 0.75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+}
+.wrap{width:100%;max-width:680px;}
+
+/* BULLES */
+.bubble1{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:280px;height:280px;top:-90px;right:-90px;
+  background:radial-gradient(circle,rgba(185,64,64,.13),transparent 70%);}
+.bubble2{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:220px;height:220px;bottom:-70px;left:-70px;
+  background:radial-gradient(circle,rgba(245,197,24,.10),transparent 70%);}
+.bubble3{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:140px;height:140px;top:40%;left:-55px;
+  background:radial-gradient(circle,rgba(58,181,216,.08),transparent 70%);}
+.bubble4{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:110px;height:110px;bottom:18%;right:-45px;
+  background:radial-gradient(circle,rgba(141,198,63,.08),transparent 70%);}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--yellow);
+  color:#000;font-size:.74rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  padding:.28rem .9rem;border-radius:99px;margin-bottom:.5rem;
+  box-shadow:0 2px 10px rgba(245,197,24,.35);white-space:nowrap;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.45rem;}
+h1{font-size:clamp(1.2rem,4.5vw,1.9rem);font-weight:800;line-height:1.3;word-break:break-word;}
+h1 .hl{color:var(--day-dark);}
+
+/* PHRASE VEDETTE */
+.phrase-star{
+  text-align:center;background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1.5rem;
+  position:relative;z-index:1;
+}
+.phrase-star .label{font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+.phrase-star .sentence{font-size:clamp(1.1rem,3.5vw,1.5rem);font-weight:800;
+  color:var(--day-dark);letter-spacing:.02em;}
+
+/* CARD EXERCICE */
+.ex-section{position:relative;z-index:1;margin-bottom:2rem;}
+.ex-card{background:var(--surface);border:1.5px solid #e0ddd5;
+  border-radius:var(--radius);padding:1.4rem 1.3rem 1.3rem;
+  box-shadow:0 6px 28px rgba(0,0,0,.07);animation:fadeUp .35s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink),var(--blue));}
+.ex-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;
+  color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-block;font-size:.63rem;font-weight:800;
+  padding:.15rem .6rem;border-radius:99px;text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:.75rem;
+  background:var(--day-light);color:var(--day-dark);
+  border:1.5px solid var(--day-border);white-space:nowrap;}
+.consigne{background:var(--surface2);border:1.5px solid var(--border);
+  border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+  padding:.75rem 1rem;margin-bottom:1.2rem;
+  font-size:clamp(.88rem,2.5vw,.97rem);color:var(--text);line-height:1.75;}
+.consigne strong{color:var(--day-dark);}
+
+/* PAIRES */
+.pairs-grid{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1rem;}
+.pair-row{display:flex;align-items:stretch;gap:.5rem;}
+.pair-left{
+  background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem .9rem;
+  font-size:clamp(.95rem,2.8vw,1.08rem);font-weight:800;
+  color:var(--day-dark);min-width:110px;text-align:center;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;flex-shrink:0;
+  white-space:nowrap;
+}
+.pair-arrow{display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:1.1rem;flex-shrink:0;padding:0 .2rem;}
+.pair-select{
+  flex:1;padding:.6rem .75rem;border-radius:var(--radius-sm);
+  border:2px solid var(--border);background:var(--surface);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);color:var(--text);
+  cursor:pointer;outline:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8f9a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;
+  padding-right:2rem;
+  transition:border-color .13s;
+}
+.pair-select:focus{border-color:var(--day-color);}
+.pair-select.correct{border-color:var(--green);background-color:var(--green-light);color:var(--green-dark);}
+.pair-select.wrong  {border-color:var(--pink);background-color:var(--pink-light);color:var(--pink-dark);}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem;}
+@media(max-width:479px){.btn-row{flex-direction:column;}.btn-row .btn{width:100%;justify-content:center;}}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .14s,opacity .12s;
+  min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+/* FEEDBACK */
+.feedback{margin-top:1rem;padding:.85rem 1rem;border-radius:var(--radius-sm);
+  font-size:clamp(.87rem,2.5vw,.97rem);display:none;
+  align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;}
+.feedback.show{display:flex;}
+.feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#856404;}
+.feedback.ko{background:var(--pink-light);border:1.5px solid var(--pink);color:var(--pink-dark);}
+.fb-icon{font-size:1.3rem;flex-shrink:0;}
+.fb-title{font-weight:800;margin-bottom:.2rem;}
+.fb-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--text);margin-top:.2rem;line-height:1.85;}
+
+/* SCORE MINI */
+.score-mini{display:flex;gap:.5rem;margin-bottom:.9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;
+  border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:500px){.ex-card{padding:1.2rem 1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="bubble3"></div><div class="bubble4"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#f5a623"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 2 &mdash; J&rsquo;observe et je teste</div>
+  <h1>Classes et <span class="hl">fonctions grammaticales</span></h1>
+</header>
+
+<!-- PHRASE VEDETTE -->
+<div class="phrase-star" style="position:relative;z-index:1;">
+  <div class="label">Phrase &agrave; analyser</div>
+  <div class="sentence">Le vieil homme prit ma main.</div>
+</div>
+
+<!-- ══ EXERCICE 1 ══════════════════════════════════════════ -->
+<div class="ex-section">
+  <div class="ex-card" style="position:relative;">
+    <div class="card-stripe"></div>
+    <div class="ex-num">Exercice 1 / 2</div>
+    <div class="theme-badge">Classes grammaticales</div>
+    <div class="consigne">
+      <strong>Associe chaque mot &agrave; sa classe grammaticale.</strong><br>
+      Pour chaque mot de la phrase, s&eacute;lectionne la bonne classe dans la liste d&eacute;roulante.
+    </div>
+
+    <div class="score-mini" id="chips1">
+      <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="ok1">0</span>&nbsp;correct(s)</div>
+      <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="ko1">0</span>&nbsp;erreur(s)</div>
+    </div>
+
+    <div class="pairs-grid" id="pairs1"></div>
+
+    <div class="feedback" id="fb1">
+      <span class="fb-icon" id="fbi1"></span>
+      <div><div class="fb-title" id="fbt1"></div>
+      <div class="fb-detail" id="fbd1"></div></div>
+    </div>
+
+    <div class="btn-row" id="row1a">
+      <button class="btn btn-primary" onclick="verif1()">&#10003;&nbsp;V&eacute;rifier</button>
+      <button class="btn btn-ghost" onclick="reset1()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="btn-row" id="row1b" style="display:none;">
+      <button class="btn btn-ghost" onclick="reset1()">&#8635;&nbsp;Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EXERCICE 2 ══════════════════════════════════════════ -->
+<div class="ex-section">
+  <div class="ex-card" style="position:relative;">
+    <div class="card-stripe"></div>
+    <div class="ex-num">Exercice 2 / 2</div>
+    <div class="theme-badge">Fonctions grammaticales</div>
+    <div class="consigne">
+      <strong>Associe chaque classe grammaticale &agrave; sa fonction.</strong><br>
+      Pour chaque classe, s&eacute;lectionne la description qui correspond &agrave; son r&ocirc;le dans la phrase.
+    </div>
+
+    <div class="score-mini" id="chips2">
+      <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="ok2">0</span>&nbsp;correct(s)</div>
+      <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="ko2">0</span>&nbsp;erreur(s)</div>
+    </div>
+
+    <div class="pairs-grid" id="pairs2"></div>
+
+    <div class="feedback" id="fb2">
+      <span class="fb-icon" id="fbi2"></span>
+      <div><div class="fb-title" id="fbt2"></div>
+      <div class="fb-detail" id="fbd2"></div></div>
+    </div>
+
+    <div class="btn-row" id="row2a">
+      <button class="btn btn-primary" onclick="verif2()">&#10003;&nbsp;V&eacute;rifier</button>
+      <button class="btn btn-ghost" onclick="reset2()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="btn-row" id="row2b" style="display:none;">
+      <button class="btn btn-ghost" onclick="reset2()">&#8635;&nbsp;Recommencer</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+<script>
+/* ══ DONNÉES ══════════════════════════════════════════════
+   EXERCICE 1 : mot → classe grammaticale
+   Phrase : Le vieil homme prit ma main.
+═══════════════════════════════════════════════════════ */
+var EX1 = [
+  { mot:'Le',    rep:'D\u00e9terminant' },
+  { mot:'vieil', rep:'Adjectif' },
+  { mot:'homme', rep:'Nom' },
+  { mot:'prit',  rep:'Verbe' },
+  { mot:'ma',    rep:'D\u00e9terminant' },
+  { mot:'main',  rep:'Nom' }
+];
+var OPTS1 = ['— Choisir —','D\u00e9terminant','Nom','Verbe','Adjectif'];
+
+/* Explications pour le feedback ex1 */
+var EXP1 = {
+  'Le'   : '&laquo;&nbsp;Le&nbsp;&raquo; est un <b>d\u00e9terminant</b> article d\u00e9fini masculin singulier.',
+  'vieil': '&laquo;&nbsp;Vieil&nbsp;&raquo; est un <b>adjectif qualificatif</b> qui qualifie &laquo;&nbsp;homme&nbsp;&raquo;.',
+  'homme': '&laquo;&nbsp;Homme&nbsp;&raquo; est un <b>nom commun</b>, noyau du sujet.',
+  'prit' : '&laquo;&nbsp;Prit&nbsp;&raquo; est un <b>verbe</b> conjugu\u00e9 (pass\u00e9 simple, 3\u1d49 pers. sing.).',
+  'ma'   : '&laquo;&nbsp;Ma&nbsp;&raquo; est un <b>d\u00e9terminant</b> possessif f\u00e9minin singulier.',
+  'main' : '&laquo;&nbsp;Main&nbsp;&raquo; est un <b>nom commun</b>, noyau du COD.'
+};
+
+/* ══ DONNÉES ══════════════════════════════════════════════
+   EXERCICE 2 : classe grammaticale → fonction / rôle
+   (Programmes collège Éduscol)
+═══════════════════════════════════════════════════════ */
+var EX2 = [
+  {
+    classe: 'D\u00e9terminant',
+    rep: 'Introduit le nom ; indique son genre et son nombre.'
+  },
+  {
+    classe: 'Nom',
+    rep: 'Désigne un être, une chose, un lieu, une idée…'
+  },
+  {
+    classe: 'Adjectif',
+    rep: 'Décrit le nom et apporte des précisions sur lui ; s’accorde en genre et en nombre avec lui.'
+  },
+  {
+    classe: 'Verbe',
+    rep: 'Exprime une action ou un \u00e9tat ; noyau du pr\u00e9dicat ; re\u00e7oit les marques de temps et de personne.'
+  }
+];
+
+var OPTS2 = [
+  '— Choisir —',
+  'Introduit le nom\u00a0; indique son genre et son nombre.',
+  'Désigne un être, une chose, un lieu, une idée…',
+  'Décrit le nom et apporte des précisions sur lui ; s’accorde en genre et en nombre avec lui.',
+  'Exprime une action ou un \u00e9tat\u00a0; noyau du pr\u00e9dicat\u00a0; re\u00e7oit les marques de temps et de personne.'
+];
+
+var EXP2 = {
+  'D\u00e9terminant': 'Le <b>d\u00e9terminant</b> introduit le nom et indique son genre et son nombre. Ex.\u00a0: &laquo;&nbsp;Le&nbsp;&raquo; (masc. sing.), &laquo;&nbsp;ma&nbsp;&raquo; (f\u00e9m. sing.).',
+  'Nom'          : 'Le <b>nom</b> d\u00e9signe un \u00eatre, une chose ou une id\u00e9e. Dans la phrase, &laquo;&nbsp;homme&nbsp;&raquo; est sujet et &laquo;&nbsp;main&nbsp;&raquo; est COD.',
+  'Adjectif'     : 'L\u2019<b>adjectif</b> qualifie le nom et s\u2019accorde avec lui. &laquo;&nbsp;Vieil&nbsp;&raquo; qualifie &laquo;&nbsp;homme&nbsp;&raquo; (masc. sing.).',
+  'Verbe'        : 'Le <b>verbe</b> est le noyau du pr\u00e9dicat. Il exprime l\u2019action (&laquo;&nbsp;prit&nbsp;&raquo;) et s\u2019accorde avec le sujet en personne et en nombre.'
+};
+
+function $(id){ return document.getElementById(id); }
+
+/* ══ CONSTRUCTION DES PAIRES ════════════════════════════ */
+function buildPairs(data, opts, gridId){
+  var grid = $(gridId); grid.innerHTML = '';
+  // Mélanger les options (sauf le placeholder)
+  var shuffled = shuffle(opts.slice(1));
+  data.forEach(function(item, i){
+    var row = document.createElement('div'); row.className = 'pair-row';
+    var left = document.createElement('div'); left.className = 'pair-left';
+    left.textContent = item.mot || item.classe;
+    var arr = document.createElement('div'); arr.className = 'pair-arrow';
+    arr.textContent = '\u2192';
+    var sel = document.createElement('select'); sel.className = 'pair-select';
+    sel.id = gridId + '-sel-' + i;
+    // Option vide
+    var ph = document.createElement('option');
+    ph.textContent = opts[0]; ph.value = ''; sel.appendChild(ph);
+    // Options mélangées
+    shuffled.forEach(function(o){
+      var opt = document.createElement('option'); opt.textContent = o; opt.value = o;
+      sel.appendChild(opt);
+    });
+    row.appendChild(left); row.appendChild(arr); row.appendChild(sel);
+    grid.appendChild(row);
+  });
+}
+
+function shuffle(a){ var b=a.slice(); for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;} return b; }
+
+/* ══ VÉRIFICATION EX1 ═══════════════════════════════════ */
+function verif1(){
+  var ok=0, ko=0, missing=0;
+  var details = [];
+  EX1.forEach(function(item, i){
+    var sel = $('pairs1-sel-'+i);
+    var val = sel.value;
+    if(!val){ missing++; sel.classList.add('wrong'); return; }
+    if(val === item.rep){
+      sel.classList.add('correct'); sel.disabled=true; ok++;
+    } else {
+      sel.classList.add('wrong'); sel.disabled=true; ko++;
+      details.push(EXP1[item.mot]);
+    }
+  });
+  $('ok1').textContent = ok; $('ko1').textContent = ko;
+  var fb=$('fb1');
+  var pct = ok/EX1.length*100;
+  var cls = pct>=100?'ok':pct>=50?'mid':'ko';
+  fb.className = 'feedback show '+cls;
+  $('fbi1').textContent = pct>=100?'\u2705':pct>=50?'\u2192':'\u274c';
+  $('fbt1').textContent = pct>=100?'Parfait\u00a0!':pct>=50?'Bien\u00a0!':'Observe encore.';
+  var det = ok+' / '+EX1.length+' bonnes r\u00e9ponses.';
+  if(details.length) det += '<br>' + details.join('<br>');
+  if(ok===EX1.length) det = 'Tu identifies correctement toutes les classes grammaticales de la phrase.';
+  $('fbd1').innerHTML = det;
+  $('row1a').style.display='none'; $('row1b').style.display='flex';
+}
+
+function reset1(){
+  EX1.forEach(function(_,i){
+    var sel=$('pairs1-sel-'+i);
+    sel.className='pair-select'; sel.disabled=false; sel.value='';
+  });
+  $('ok1').textContent='0'; $('ko1').textContent='0';
+  $('fb1').className='feedback';
+  $('row1a').style.display='flex'; $('row1b').style.display='none';
+  buildPairs(EX1, OPTS1, 'pairs1');
+}
+
+/* ══ VÉRIFICATION EX2 ═══════════════════════════════════ */
+function verif2(){
+  var ok=0, ko=0;
+  var details=[];
+  EX2.forEach(function(item,i){
+    var sel=$('pairs2-sel-'+i);
+    var val=sel.value;
+    if(!val){ ko++; sel.classList.add('wrong'); return; }
+    // Comparer en nettoyant les espaces insécables
+    var clean=function(s){ return s.replace(/\u00a0/g,' ').trim(); };
+    if(clean(val)===clean(item.rep)){
+      sel.classList.add('correct'); sel.disabled=true; ok++;
+    } else {
+      sel.classList.add('wrong'); sel.disabled=true; ko++;
+      details.push(EXP2[item.classe]);
+    }
+  });
+  $('ok2').textContent=ok; $('ko2').textContent=ko;
+  var fb=$('fb2');
+  var pct=ok/EX2.length*100;
+  var cls=pct>=100?'ok':pct>=50?'mid':'ko';
+  fb.className='feedback show '+cls;
+  $('fbi2').textContent=pct>=100?'\u2705':pct>=50?'\u2192':'\u274c';
+  $('fbt2').textContent=pct>=100?'Excellent\u00a0!':pct>=50?'Bon travail\u00a0!':'\u00c0 retravailler.';
+  var det=ok+' / '+EX2.length+' bonnes r\u00e9ponses.';
+  if(details.length) det+='<br>'+details.join('<br>');
+  if(ok===EX2.length) det='Tu ma\u00eetrises bien le r\u00f4le de chaque classe grammaticale.';
+  $('fbd2').innerHTML=det;
+  $('row2a').style.display='none'; $('row2b').style.display='flex';
+}
+
+function reset2(){
+  EX2.forEach(function(_,i){
+    var sel=$('pairs2-sel-'+i);
+    sel.className='pair-select'; sel.disabled=false; sel.value='';
+  });
+  $('ok2').textContent='0'; $('ko2').textContent='0';
+  $('fb2').className='feedback';
+  $('row2a').style.display='flex'; $('row2b').style.display='none';
+  buildPairs(EX2, OPTS2, 'pairs2');
+}
+
+/* ══ INIT ════════════════════════════════════════════════ */
+buildPairs(EX1, OPTS1, 'pairs1');
+buildPairs(EX2, OPTS2, 'pairs2');
+</script>
+</body>
+</html>
