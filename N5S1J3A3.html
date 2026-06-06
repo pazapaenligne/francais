@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 5e S1 J3 · Réécriture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#8dc63f;--jour-fonce:#3d7a10;--jour-clair:#f0faeb;--jour-pale:#b5e08a;
+  --day-glow:rgba(141,198,63,.35);
+  --bg:#fffdf7;--dark:#1a1f2e;
+  --vert:#22c55e;--rouge:#ef4444;--orange:#f5a623;
+  --txt:#2b2b2b;--gris:#8b8b8b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;padding:16px 12px 60px;position:relative;}
+.bulle{position:fixed;border-radius:50%;filter:blur(6px);opacity:.5;z-index:0;pointer-events:none;}
+.b1{width:200px;height:200px;background:#ffd84d;top:-60px;right:-50px;}
+.b2{width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px;}
+.b3{width:150px;height:150px;background:#9be7a5;top:45%;right:-70px;}
+.b4{width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px;}
+.wrap{position:relative;z-index:1;max-width:660px;margin:0 auto;width:100%;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:18px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;color:#3a2c00;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px rgba(245,197,24,.4);margin-bottom:10px;}
+.dots{display:inline-flex;gap:3px;}
+.dots i{width:7px;height:7px;border-radius:50%;background:#3a2c00;display:block;}
+.dots i:nth-child(2){opacity:.6;}.dots i:nth-child(3){opacity:.3;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:3px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.3rem);line-height:1.15;color:var(--txt);margin-bottom:6px;}
+.titre .accent{color:var(--jour);}
+.sous-titre{font-family:'Orbitron',sans-serif;font-size:clamp(.65rem,2.5vw,.82rem);letter-spacing:1.5px;color:var(--gris);margin-bottom:14px;}
+.badge-revision{display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.82rem);letter-spacing:1px;padding:9px 16px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);box-shadow:0 6px 22px rgba(141,198,63,.7);}}
+
+/* GAME PANEL */
+.game{background:var(--dark);border:2px solid var(--jour);border-radius:18px;padding:16px 14px;margin-bottom:20px;box-shadow:0 0 24px var(--day-glow),inset 0 0 40px rgba(0,0,0,.3);}
+.game-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:2px;color:var(--jour);opacity:.85;margin-bottom:12px;}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.score-cell{text-align:center;}
+.score-val{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.8rem,7vw,2.8rem);line-height:1;}
+.score-val.ok{color:var(--vert);text-shadow:0 0 14px rgba(34,197,94,.6);}
+.score-val.note{color:var(--jour);text-shadow:0 0 14px var(--day-glow);}
+.score-val.ko{color:var(--rouge);text-shadow:0 0 14px rgba(239,68,68,.6);}
+.score-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1.5px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:2px;}
+.etoiles{text-align:center;margin-bottom:14px;font-size:clamp(1.1rem,4vw,1.55rem);letter-spacing:clamp(3px,1.5vw,8px);}
+.star{color:rgba(255,255,255,.22);transition:.3s;display:inline-block;}
+.star.on{color:var(--jour);text-shadow:0 0 12px var(--jour);animation:popstar .5s cubic-bezier(.18,.89,.32,1.6);}
+@keyframes popstar{0%{transform:scale(0);}60%{transform:scale(1.5);}100%{transform:scale(1);}}
+.xp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.xp-head span{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--jour);opacity:.85;}
+.xp-head span:last-child{font-size:.68rem;font-weight:700;opacity:1;}
+.xp-bar{height:9px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;}
+.xp-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#d4f08a);box-shadow:0 0 10px var(--jour);border-radius:8px;transition:width .8s cubic-bezier(.22,1,.36,1);}
+.defi-counter{font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:2px;color:var(--jour);text-align:center;margin-top:8px;opacity:.8;}
+
+/* CARD */
+.card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);margin-bottom:16px;animation:fadeUp .4s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.rainbow{height:6px;background:linear-gradient(90deg,#ff5e5e,#f5a623,var(--jour),#3ab5d8,#a884ff,#ff5e5e);background-size:300% 100%;animation:slide 4s linear infinite;}
+@keyframes slide{0%{background-position:0% 0;}100%{background-position:300% 0;}}
+.card-body{padding:18px 16px 22px;}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap;}
+.act-num{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.85rem,3vw,1rem);letter-spacing:1px;color:var(--txt);}
+.type-badge{font-family:'Orbitron',sans-serif;font-size:.58rem;font-weight:700;background:var(--jour-clair);color:var(--jour-fonce);padding:4px 9px;border-radius:14px;border:1px solid var(--jour-pale);}
+.consigne-box{background:var(--jour-clair);border-left:4px solid var(--jour);border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:16px;font-size:.92rem;color:var(--jour-fonce);line-height:1.7;}
+
+/* Texte original */
+.original-box{background:var(--dark);border:2px solid var(--jour);border-radius:12px;padding:14px 18px;margin-bottom:20px;box-shadow:0 0 12px var(--day-glow);}
+.original-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:2px;color:var(--jour);opacity:.75;margin-bottom:10px;text-transform:uppercase;}
+.original-line{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,3vw,1rem);color:rgba(255,255,255,.85);line-height:2;margin-bottom:2px;}
+.original-line .hl{color:var(--jour);font-weight:700;}
+
+/* Section phrase à réécrire */
+.phrase-section{margin-bottom:22px;}
+.phrase-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.phrase-label{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;}
+.phrase-pts{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;background:var(--jour);color:#fff;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.phrase-divider{height:1.5px;background:var(--jour-pale);flex:1;}
+
+/* Ligne de réécriture */
+.rewrite-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px;line-height:2.4;margin-bottom:8px;font-size:clamp(.95rem,3vw,1.05rem);}
+.fixed-word{font-family:'JetBrains Mono',monospace;color:var(--txt);font-weight:500;}
+.word-input{
+  font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,3vw,1rem);
+  border:none;border-bottom:2.5px solid var(--jour-pale);
+  background:transparent;outline:none;color:var(--txt);
+  text-align:center;transition:border-color .2s;
+  padding:2px 6px;
+  width:auto;
+  min-width:60px;
+  /* Taille calculée sur le placeholder */
+  size:1;
+}
+.word-input:focus{border-color:var(--jour);}
+.word-input.correct{border-color:var(--vert);color:var(--jour-fonce);font-weight:700;}
+.word-input.wrong{border-color:var(--rouge);color:var(--rouge);background:#fff5f5;border-radius:4px;padding:2px 6px;}
+.word-input:disabled{cursor:not-allowed;}
+
+/* Correction inline */
+.inline-correction{font-size:.78rem;color:var(--rouge);font-family:'JetBrains Mono',monospace;margin-left:4px;display:none;}
+.inline-correction.show{display:inline;}
+
+/* Feedback phrase */
+.phrase-feedback{display:none;margin-top:6px;padding:8px 12px;border-radius:8px;font-size:.85rem;font-weight:700;}
+.phrase-feedback.show{display:block;}
+.phrase-feedback.ok{background:#e7faec;color:#157f3a;border:1px solid #9be7a5;}
+.phrase-feedback.partiel{background:#fff8e6;color:#8a6000;border:1px solid #f5d080;}
+.phrase-feedback.ko{background:#fdeaea;color:#c0392b;border:1px solid #f5b5b5;}
+
+/* Boutons */
+.btns{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 4px;}
+.btn{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.72rem,2.5vw,.82rem);letter-spacing:1px;padding:12px 16px;border:none;border-radius:10px;cursor:pointer;transition:transform .12s;color:#fff;min-height:48px;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:active{transform:scale(.96);}
+.btn-valider{background:var(--vert);}
+.btn-reset{background:transparent;color:var(--gris);border:1.5px solid #d8d4c8;}
+.btn-valider:not(:disabled){animation:neon-vert 1.4s ease-in-out infinite;}
+@keyframes neon-vert{0%,100%{box-shadow:0 0 6px rgba(34,197,94,.5);}50%{box-shadow:0 0 18px rgba(34,197,94,.95);}}
+.btn:disabled{background:#d8d8d8!important;color:#fff!important;cursor:not-allowed;animation:none!important;box-shadow:none!important;}
+@media(max-width:480px){.btns{flex-direction:column;}.btn{width:100%;}}
+
+/* Correction complète */
+.correction-block{display:none;margin-top:14px;background:var(--jour-clair);border-left:4px solid var(--jour);border-radius:0 10px 10px 0;padding:12px 16px;}
+.correction-block.show{display:block;}
+.correction-block .cb-title{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);margin-bottom:8px;}
+.correction-block .cb-line{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--jour-fonce);line-height:2;}
+.correction-block .cb-line strong{color:var(--jour-fonce);text-decoration:underline;}
+
+/* Barème */
+.bareme-box{background:#fafafa;border:1.5px solid #e8e4d9;border-radius:12px;padding:12px 16px;margin-bottom:18px;}
+.bareme-title{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1px;color:var(--gris);margin-bottom:10px;text-transform:uppercase;}
+.bareme-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0ebe0;font-size:.85rem;}
+.bareme-row:last-child{border-bottom:none;}
+.bareme-pts{font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700;color:var(--jour-fonce);}
+
+/* XP pop */
+.xp-pop{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.5);font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.5rem;color:var(--jour);text-shadow:0 0 20px var(--jour),0 4px 10px rgba(0,0,0,.3);z-index:50;opacity:0;pointer-events:none;}
+.xp-pop.go{animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes xpfly{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.25);}70%{opacity:1;transform:translate(-50%,-80%) scale(1);}100%{opacity:0;transform:translate(-50%,-130%) scale(.9);}}
+
+/* Résultats */
+.results-screen{display:none;}
+.results-screen.show{display:block;animation:fadeUp .4s ease;}
+.results-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);}
+.results-inner{padding:24px 18px;}
+.results-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.2rem,5vw,1.8rem);color:var(--jour);text-align:center;margin-bottom:6px;}
+.results-score-big{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(3rem,12vw,5rem);color:var(--jour);text-align:center;line-height:1;text-shadow:0 0 20px var(--day-glow);}
+.results-msg{font-family:'Orbitron',sans-serif;font-size:clamp(.72rem,2.5vw,.88rem);color:var(--gris);text-align:center;margin:10px 0 20px;letter-spacing:1px;}
+.recap-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.recap-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:.82rem;border:1.5px solid #e8e4d9;background:#fafafa;}
+.recap-item.ok-item{border-color:#b5e08a;background:#f0faeb;}
+.recap-item.ko-item{border-color:#f9c0bb;background:#fff0ef;}
+.recap-item.part-item{border-color:#f5d080;background:#fff8e6;}
+@media(max-width:380px){.game{padding:12px 10px;}.card-body{padding:12px 10px 18px;}}
+</style>
+</head>
+<body>
+<div class="bulle b1"></div><div class="bulle b2"></div>
+<div class="bulle b3"></div><div class="bulle b4"></div>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 5E</div>
+    <div class="semaine">Semaine 1 – Jour 3</div>
+    <h1 class="titre">Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">Le défi ultime · Réécriture &amp; accords</div>
+    <div class="badge-revision">▶ DÉFI RÉÉCRITURE · S1 J3 · MERCREDI</div>
+  </div>
+
+  <!-- GAME PANEL -->
+  <div class="game">
+    <div class="game-label">▶ DÉFI RÉÉCRITURE · 5E · TRANSFORMATIONS</div>
+    <div class="score-grid">
+      <div class="score-cell"><div class="score-val ok" id="count-ok">0</div><div class="score-lbl">Réussis</div></div>
+      <div class="score-cell"><div class="score-val note" id="note-val">—</div><div class="score-lbl">Note / 10</div></div>
+      <div class="score-cell"><div class="score-val ko" id="count-ko">0</div><div class="score-lbl">Erreurs</div></div>
+    </div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="xp-head"><span>XP PROGRESS</span><span id="xp-pct">0 %</span></div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="defi-counter" id="score-label">0 / 10 points</div>
+  </div>
+
+  <!-- CARD PRINCIPALE -->
+  <div class="card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+
+      <div class="card-head">
+        <div class="act-num">DÉFI ULTIME</div>
+        <div class="type-badge">RÉÉCRITURE</div>
+      </div>
+
+      <div class="consigne-box">
+        Réécris ce texte comme si Rémi voyageait avec <strong>deux voyageuses</strong> au lieu de Vitalis.<br>
+        <strong>Transforme tous les mots qui changent.</strong>
+      </div>
+
+      <!-- TEXTE ORIGINAL -->
+      <div class="original-box">
+        <div class="original-label">Texte original</div>
+        <div class="original-line">Un vieil homme marchait devant moi.</div>
+        <div class="original-line">Son long manteau noir flottait dans le vent.</div>
+        <div class="original-line">Son regard calme me rassurait.</div>
+      </div>
+
+      <!-- BARÈME -->
+      <div class="bareme-box">
+        <div class="bareme-title">Barème</div>
+        <div class="bareme-row"><span>Phrase 1 — 3 transformations</span><span class="bareme-pts">3 pts</span></div>
+        <div class="bareme-row"><span>Phrase 2 — 4 transformations</span><span class="bareme-pts">4 pts</span></div>
+        <div class="bareme-row"><span>Phrase 3 — 3 transformations</span><span class="bareme-pts">3 pts</span></div>
+      </div>
+
+      <!-- ═══ PHRASE 1 ═══ -->
+      <div class="phrase-section">
+        <div class="phrase-header">
+          <div class="phrase-label">Phrase 1</div>
+          <div class="phrase-divider"></div>
+          <div class="phrase-pts">3 pts</div>
+        </div>
+        <div class="rewrite-line">
+          <input class="word-input" id="p1w1" data-answer="deux" placeholder="?">
+          <input class="word-input" id="p1w2" data-answer="vieilles" placeholder="?">
+          <input class="word-input" id="p1w3" data-answer="femmes" placeholder="?">
+          <span class="fixed-word">marchaient devant moi.</span>
+        </div>
+        <div class="phrase-feedback" id="fb1"></div>
+      </div>
+
+      <!-- ═══ PHRASE 2 ═══ -->
+      <div class="phrase-section">
+        <div class="phrase-header">
+          <div class="phrase-label">Phrase 2</div>
+          <div class="phrase-divider"></div>
+          <div class="phrase-pts">4 pts</div>
+        </div>
+        <div class="rewrite-line">
+          <input class="word-input" id="p2w1" data-answer="leurs" placeholder="?">
+          <input class="word-input" id="p2w2" data-answer="longs" placeholder="?">
+          <input class="word-input" id="p2w3" data-answer="manteaux" placeholder="?">
+          <input class="word-input" id="p2w4" data-answer="noirs" placeholder="?">
+          <span class="fixed-word">flottaient dans le vent.</span>
+        </div>
+        <div class="phrase-feedback" id="fb2"></div>
+      </div>
+
+      <!-- ═══ PHRASE 3 ═══ -->
+      <div class="phrase-section">
+        <div class="phrase-header">
+          <div class="phrase-label">Phrase 3</div>
+          <div class="phrase-divider"></div>
+          <div class="phrase-pts">3 pts</div>
+        </div>
+        <div class="rewrite-line">
+          <input class="word-input" id="p3w1" data-answer="leurs" placeholder="?">
+          <input class="word-input" id="p3w2" data-answer="regards" placeholder="?">
+          <input class="word-input" id="p3w3" data-answer="calmes" placeholder="?">
+          <span class="fixed-word">me rassuraient.</span>
+        </div>
+        <div class="phrase-feedback" id="fb3"></div>
+      </div>
+
+      <!-- BOUTONS -->
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" onclick="corriger()">✔ CORRIGER</button>
+        <button class="btn btn-reset" onclick="resetAll()">↺ Effacer</button>
+      </div>
+
+      <!-- CORRECTION COMPLÈTE — cachée avant validation -->
+      <div class="correction-block" id="correction-block" style="display:none;">
+        <div class="cb-title">Texte correct</div>
+        <div class="cb-line"><strong>Deux vieilles femmes</strong> marchaient devant moi.</div>
+        <div class="cb-line"><strong>Leurs longs manteaux noirs</strong> flottaient dans le vent.</div>
+        <div class="cb-line"><strong>Leurs regards calmes</strong> me rassuraient.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOUTON RÉSULTATS -->
+  <div style="text-align:center;margin:4px 0 20px;">
+    <button class="btn btn-valider" id="btn-resultats" onclick="showResults()" style="margin:0 auto;display:none;">
+      VOIR MA NOTE
+    </button>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div class="results-screen" id="results-screen">
+    <div class="results-card">
+      <div class="rainbow"></div>
+      <div class="results-inner">
+        <div class="results-title">// MISSION ACCOMPLIE</div>
+        <div class="results-score-big" id="score-final">0<span style="font-size:40%;opacity:.6">/10</span></div>
+        <div class="etoiles" id="stars-final" style="margin:10px 0 6px;"></div>
+        <div class="results-msg" id="results-msg"></div>
+        <div class="recap-list" id="recap-list"></div>
+        <button class="btn btn-valider" onclick="restart()" style="margin:0 auto;display:flex;width:fit-content;">↺ RECOMMENCER</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="xp-pop" id="xp-pop">+XP !</div>
+
+<script>
+// ── Données ──
+// Phrase 1 : 4 champs (deux/vieilles/femmes/marchaient)
+// Phrase 2 : 5 champs mais 3 pts (leurs/longs/manteaux ciblés + noirs/flottaient)
+//   Barème phrase 2 : leurs=1, manteaux=1, flottaient=1  (longs et noirs sont bonus)
+// En réalité on note sur TOUS les champs corrects ramenés au barème
+// Barème réel : P1=4pts (4 champs), P2=3pts (5 champs→3 pts cibles), P3=3pts (4 champs→3 pts cibles)
+// Pour simplifier et être juste pédagogiquement :
+//   P1 : deux(1) vieilles(1) femmes(1) marchaient(1) = 4/4
+//   P2 : leurs(1) manteaux(1) flottaient(1) = 3pts ; longs et noirs = bonus non comptés séparément
+//   P3 : leurs(1) regards(1) rassuraient(1) = 3pts ; calmes = bonus
+
+var PHRASES = [
+  {
+    id:1, pts:3,
+    fields:["p1w1","p1w2","p1w3"],
+    scored:[true,true,true],
+    label:"Phrase 1"
+  },
+  {
+    id:2, pts:4,
+    fields:["p2w1","p2w2","p2w3","p2w4"],
+    scored:[true,true,true,true],
+    label:"Phrase 2"
+  },
+  {
+    id:3, pts:3,
+    fields:["p3w1","p3w2","p3w3"],
+    scored:[true,true,true],
+    label:"Phrase 3"
+  }
+];
+
+var done = false;
+var phraseScores = {1:0,2:0,3:0};
+
+// Auto-taille les inputs selon leur placeholder
+(function(){
+  document.querySelectorAll('.word-input').forEach(function(inp){
+    var len = inp.placeholder.length;
+    inp.style.width = Math.max(len * 11 + 16, 60) + 'px';
+    inp.addEventListener('input', function(){
+      var l = Math.max(inp.value.length, inp.placeholder.length);
+      inp.style.width = Math.max(l * 11 + 16, 60) + 'px';
+    });
+  });
+})();
+
+function norm(s){ return s.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+
+(function(){
+  var et=document.getElementById("etoiles"); et.innerHTML="";
+  for(var i=0;i<5;i++){var s=document.createElement("span");s.className="star";s.textContent="★";et.appendChild(s);}
+})();
+
+function corriger(){
+  if(done) return;
+  done = true;
+  document.getElementById("btn-valider").disabled = true;
+
+  var totalOk=0, totalPts=0;
+
+  PHRASES.forEach(function(p){
+    var ok=0, possible=0;
+    p.fields.forEach(function(fid, idx){
+      var inp = document.getElementById(fid);
+      var correct = norm(inp.value) === norm(inp.dataset.answer);
+      inp.className = "word-input " + (correct?"correct":"wrong");
+      inp.disabled = true;
+      if(p.scored[idx]){
+        possible++;
+        if(correct) ok++;
+      } else {
+        // champ bonus : correct = vert, wrong = rouge mais pas de point
+        // déjà stylé, juste pas compté
+      }
+    });
+
+    // Score ramené au barème de la phrase
+    var ptsGagnes = ok; // 1 pt par champ scoré correct
+    phraseScores[p.id] = ptsGagnes;
+    totalOk += ptsGagnes;
+    totalPts += p.pts;
+
+    var fb = document.getElementById("fb"+p.id);
+    fb.className = "phrase-feedback show " + (ok===possible?"ok":ok>0?"partiel":"ko");
+    fb.innerHTML = ok===possible
+      ? "<b>Parfait !</b> "+ptsGagnes+"/"+p.pts+" pt"+(p.pts>1?"s":"")+" — toutes les transformations sont correctes !"
+      : "<b>"+ptsGagnes+"/"+p.pts+" pt"+(p.pts>1?"s":"")+".</b> Relis les mots en rouge dans la correction.";
+  });
+
+  var note = totalOk; // /10
+  updateGlobal(note, totalOk, 10-totalOk);
+
+  // Correction complète
+  document.getElementById("correction-block").style.display = "block";
+
+  // Bouton résultats
+  var br = document.getElementById("btn-resultats");
+  br.style.display = "inline-flex";
+  br.style.animation = "neon-vert 1.4s ease-in-out infinite";
+
+  // XP
+  if(note >= 7){
+    var p=document.getElementById("xp-pop");
+    p.textContent = note>=9?"+100 XP !":"+75 XP !";
+    p.classList.remove("go"); void p.offsetWidth; p.classList.add("go");
+  }
+}
+
+function updateGlobal(note, ok, ko){
+  var pct = Math.round(note/10*100);
+  document.getElementById("xp-fill").style.width = pct+"%";
+  document.getElementById("xp-pct").textContent = pct+" %";
+  document.getElementById("count-ok").textContent = ok;
+  document.getElementById("count-ko").textContent = ko;
+  document.getElementById("note-val").textContent = note;
+  document.getElementById("score-label").textContent = ok+" / 10 points";
+  var nb = note>=9?5:note>=7?4:note>=5?3:note>=3?2:1;
+  var et = document.getElementById("etoiles");
+  Array.from(et.children).forEach(function(s,i){ if(i<nb) s.classList.add("on"); });
+}
+
+function resetAll(){
+  if(done) return;
+  PHRASES.forEach(function(p){
+    p.fields.forEach(function(fid){
+      var inp=document.getElementById(fid);
+      inp.value=""; inp.className="word-input";
+    });
+    document.getElementById("fb"+p.id).className="phrase-feedback";
+  });
+}
+
+function showResults(){
+  document.getElementById("btn-resultats").style.display="none";
+  document.getElementById("results-screen").classList.add("show");
+  var note = parseInt(document.getElementById("note-val").textContent)||0;
+  document.getElementById("score-final").innerHTML = note+'<span style="font-size:40%;opacity:.6">/10</span>';
+  var nb=note>=9?5:note>=7?4:note>=5?3:note>=3?2:1;
+  var et=document.getElementById("stars-final"); et.innerHTML="";
+  for(var i=0;i<5;i++){var s=document.createElement("span");s.className="star"+(i<nb?" on":"");s.textContent="★";et.appendChild(s);}
+  var msgs=["// À retravailler…","// Bon début !","// Pas mal !","// Bien joué !","// Très bien !","// GG — validé ! 🏆"];
+  document.getElementById("results-msg").textContent=msgs[note<=2?0:note<=4?1:note<=5?2:note<=6?3:note<=8?4:5];
+  var list=document.getElementById("recap-list"); list.innerHTML="";
+  PHRASES.forEach(function(p){
+    var ok=phraseScores[p.id], max=p.pts;
+    var cls=ok===max?"ok-item":ok>0?"part-item":"ko-item";
+    var div=document.createElement("div"); div.className="recap-item "+cls;
+    div.innerHTML="<span>"+(ok===max?"✅":ok>0?"⚡":"❌")+"</span>"
+      +"<span style='flex:1'>"+p.label+"</span>"
+      +"<span style='font-family:JetBrains Mono,monospace;font-weight:700'>"+ok+"/"+max+" pt"+(max>1?"s":"")+"</span>";
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){ location.reload(); }
+</script>
+</body>
+</html>
