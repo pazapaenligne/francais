@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S1 J3 – 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#8dc63f; --day-dark:#3d7a10; --day-dark2:#2a5209;
+  --day-light:#f0faeb; --day-border:#b5e08a; --day-glow:rgba(141,198,63,.28);
+  --bg:#ffffff; --surface:#ffffff; --surface2:#fafafa; --border:#e8e4d9;
+  --yellow:#f5c518; --green:#8dc63f; --green-light:#f0faeb; --green-dark:#3d7a10;
+  --pink:#f28b82; --pink-light:#fff0ef; --pink-dark:#c0392b;
+  --orange:#f5a623; --blue:#3ab5d8;
+  --text:#1a1d23; --muted:#8a8f9a;
+  --radius:16px; --radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:660px;}
+
+.bubble1{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:280px;height:280px;top:-90px;right:-90px;
+  background:radial-gradient(circle,rgba(141,198,63,.14),transparent 70%);}
+.bubble2{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:220px;height:220px;bottom:-70px;left:-70px;
+  background:radial-gradient(circle,rgba(245,197,24,.10),transparent 70%);}
+.bubble3{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:140px;height:140px;top:40%;left:-55px;
+  background:radial-gradient(circle,rgba(58,181,216,.08),transparent 70%);}
+.bubble4{position:fixed;border-radius:50%;z-index:0;pointer-events:none;
+  width:110px;height:110px;bottom:18%;right:-45px;
+  background:radial-gradient(circle,rgba(242,139,130,.08),transparent 70%);}
+
+header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:#f5c518;border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.35);margin-bottom:.5rem;}
+.logo-badge span{font-family:monospace;font-size:13px;font-weight:800;color:#000;letter-spacing:.5px;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.5rem;}
+h1{font-size:clamp(1.25rem,4.5vw,1.9rem);font-weight:800;line-height:1.3;word-break:break-word;}
+h1 .hl{color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:clamp(.78rem,2.5vw,.9rem);margin-top:.3rem;
+  font-family:'JetBrains Mono',monospace;}
+
+/* PROGRESS */
+.prog-wrap{width:100%;margin-bottom:.9rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day),var(--yellow));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;
+  border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* CARD */
+.card{width:100%;background:var(--surface);border:1.5px solid #e0ddd5;
+  border-radius:var(--radius);padding:1.5rem 1.3rem 1.3rem;
+  position:relative;z-index:1;box-shadow:0 6px 28px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day),var(--yellow),var(--orange),var(--pink));}
+.ex-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;
+  color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-block;font-size:.63rem;font-weight:800;padding:.15rem .6rem;
+  border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);white-space:nowrap;}
+
+/* OBSERVE BOX */
+.observe-box{background:var(--day-light);border:2px solid var(--day-border);
+  border-left:4px solid var(--day);border-radius:var(--radius-sm);
+  padding:.8rem 1.1rem;margin-bottom:1rem;font-size:clamp(1.1rem,3.5vw,1.3rem);
+  font-weight:800;color:var(--day-dark);font-family:'JetBrains Mono',monospace;
+  word-break:break-word;}
+.observe-label{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace;}
+
+/* QUESTION */
+.q-text{font-size:clamp(.9rem,2.5vw,1rem);font-weight:700;color:var(--text);
+  margin-bottom:.9rem;line-height:1.65;}
+
+/* CHOIX COCHER */
+.checkboxes{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.8rem;}
+.check-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;
+  border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface2);
+  cursor:pointer;transition:border-color .12s,background .12s;
+  font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+  font-weight:600;-webkit-tap-highlight-color:transparent;min-height:44px;}
+.check-item:hover{border-color:var(--day);background:var(--day-light);}
+.check-item.selected{border-color:var(--day);background:var(--day-light);color:var(--day-dark);}
+.check-item.correct-c{border-color:var(--green);background:var(--green-light);color:var(--day-dark);}
+.check-item.wrong-c{border-color:var(--pink);background:var(--pink-light);color:var(--pink-dark);}
+.check-item:disabled,.check-item[aria-disabled="true"]{cursor:default;pointer-events:none;}
+.check-box{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);
+  background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;transition:background .12s,border-color .12s;}
+.check-item.selected .check-box{background:var(--day);border-color:var(--day);color:#fff;}
+.check-item.correct-c .check-box{background:var(--green);border-color:var(--green);color:#fff;}
+.check-item.wrong-c .check-box{background:var(--pink);border-color:var(--pink);color:#fff;}
+
+/* MOTS CLIQUABLES */
+.clickable-phrase{font-size:clamp(1.1rem,3.5vw,1.3rem);font-weight:800;
+  font-family:'JetBrains Mono',monospace;line-height:2.2;word-break:break-word;}
+.w-click{display:inline;cursor:pointer;padding:3px 5px;border-radius:5px;
+  transition:background .12s,color .12s;-webkit-tap-highlight-color:transparent;
+  color:var(--day-dark);}
+.w-click:hover{background:var(--day-border);}
+.w-click.selected{background:var(--day);color:#fff;}
+.w-click.correct-w{background:var(--green-light);border:1.5px solid var(--green);color:var(--day-dark);}
+.w-click.wrong-w{background:var(--pink-light);border:1.5px solid var(--pink);color:var(--pink-dark);}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem;}
+@media(max-width:479px){.btn-row{flex-direction:column;}.btn-row .btn{width:100%;justify-content:center;}}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .14s;min-height:2.8rem;
+  -webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;}
+.btn-primary{background:var(--day);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day);color:var(--text);}
+
+/* FEEDBACK */
+.feedback{margin-top:1rem;padding:.85rem 1rem;border-radius:var(--radius-sm);
+  font-size:clamp(.87rem,2.5vw,.97rem);display:none;
+  align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;}
+.feedback.show{display:flex;}
+.feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--day-dark);}
+.feedback.ko{background:var(--pink-light);border:1.5px solid var(--pink);color:var(--pink-dark);}
+.fb-icon{font-size:1.3rem;flex-shrink:0;}
+.fb-title{font-weight:800;margin-bottom:.2rem;}
+.fb-det{font-size:.84rem;color:var(--text);margin-top:.2rem;line-height:1.85;}
+
+/* RESULTATS */
+.results{display:none;width:100%;position:relative;z-index:1;animation:fadeUp .4s ease both;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:2rem 1.4rem;box-shadow:0 6px 28px rgba(0,0,0,.07);text-align:center;position:relative;}
+.results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day),var(--yellow),var(--orange),var(--pink));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+  margin:.6rem 0 .3rem;color:var(--day-dark);}
+.stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.1em;}
+.r-msg{color:var(--muted);font-size:clamp(.88rem,2.5vw,1rem);
+  margin-bottom:1rem;line-height:1.8;word-break:break-word;}
+.decouverte{background:var(--day-light);border:2px solid var(--day-border);
+  border-left:4px solid var(--day);border-radius:var(--radius-sm);
+  padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;
+  font-size:clamp(.88rem,2.5vw,.97rem);color:var(--day-dark2);line-height:1.8;}
+.decouverte strong{color:var(--day-dark);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:500px){.card{padding:1.2rem 1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="bubble3"></div><div class="bubble4"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span>&nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me</span>
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 3</div>
+  <h1>&#128269; J&rsquo;observe et je teste &middot;<br>
+    <span class="hl">Le groupe nominal</span></h1>
+  <p class="subtitle">Mène l&rsquo;enquête et découvre la règle toi-même !</p>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">Activité 1 / 5</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span>&nbsp;réussi(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">4</span>&nbsp;restant(s)</div>
+</div>
+
+<!-- CARD -->
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="ex-num" id="ex-num">Activité 1 / 5</div>
+  <div class="theme-badge" id="ex-badge">Le chef du groupe</div>
+  <div class="observe-label">Observe</div>
+  <div class="observe-box" id="observe-box"></div>
+  <div class="q-text" id="q-text"></div>
+  <div id="q-body"></div>
+  <div class="feedback" id="feedback">
+    <span class="fb-icon" id="fb-icon"></span>
+    <div><div class="fb-title" id="fb-title"></div>
+    <div class="fb-det" id="fb-det"></div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-verif" onclick="verifier()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-ghost"   id="btn-next"  onclick="nextAct()" style="display:none;">Suivant &#8594;</button>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="display:inline-block;background:#f5c518;border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.35);margin-bottom:.6rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:800;color:#000;letter-spacing:.5px;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/4</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="r-msg" id="r-msg"></div>
+    <div class="decouverte">
+      <strong>&#128269; Ce que tu viens de découvrir</strong><br><br>
+      Dans un groupe nominal, le <strong>nom</strong> est le mot central. Les autres mots — déterminant, adjectif — s'adaptent à lui en genre et en nombre.<br><br>
+      Cette règle a un nom… tu le découvriras dans la prochaine étape !
+    </div>
+    <button class="btn btn-primary" onclick="restart()" style="width:100%;justify-content:center;">
+      &#8635;&nbsp;Recommencer
+    </button>
+  </div>
+</div>
+
+</div>
+<script>
+/* ══ DONNÉES ════════════════════════════════════════════
+   5 activités d'observation inductive
+   Niveau 5e — groupe nominal — accords
+═══════════════════════════════════════════════════════ */
+var ACTS = [
+  /* 1 — Cherche le chef (coches multiples) */
+  {
+    badge:   'Le chef du groupe',
+    observe: 'les hautes falaises rocheuses',
+    q:       'Si <strong>falaises</strong> devient <strong>falaise</strong>, quels autres mots changeraient probablement ?',
+    type:    'check',
+    opts:    ['le déterminant <em>les</em>', 'l\'adjectif <em>hautes</em>', 'l\'adjectif <em>rocheuses</em>'],
+    ans:     [0,1,2],
+    fbOk:    'Bravo ! Tu as remarqué que TOUS les mots semblent dépendre du nom <em>falaise</em>. Continue l\'enquête : le nom pourrait bien être le chef du groupe nominal.',
+    fbKo:    'Observe bien : <em>les, hautes, rocheuses</em> sont tous au féminin pluriel comme <em>falaises</em>. Si le nom change, ils changent aussi !'
+  },
+  /* 2 — Transformation mystérieuse (coches) */
+  {
+    badge:   'Transformation mystérieuse',
+    observe: 'un sentier étroit',
+    q:       'Si <strong>sentier</strong> (masculin) est remplacé par <strong>route</strong> (féminin), quels mots du groupe devraient probablement changer ?',
+    type:    'check',
+    opts:    ['le déterminant <em>un</em>', 'l\'adjectif <em>étroit</em>'],
+    ans:     [0,1],
+    fbOk:    'Bien vu ! <em>Sentier</em> était masculin, <em>route</em> est féminin. Tu as donc dû mettre un déterminant féminin <em>(une)</em> et un adjectif féminin <em>(étroite)</em>.',
+    fbKo:    'Souviens-toi : quand le nom change de genre, le déterminant et l\'adjectif doivent s\'adapter. <em>Un → une</em>, <em>étroit → étroite</em>.'
+  },
+  /* 3 — Écris ta réponse (saisie libre) */
+  {
+    badge:   'À toi d\'écrire !',
+    observe: 'le vieux moulin abandonné',
+    q:       'Si <strong>moulin</strong> était remplacé par <strong>maison</strong>, récris le groupe nominal en entier avec les bons accords.',
+    type:    'write',
+    placeholder: 'Écris le groupe nominal ici…',
+    answer:  'la vieille maison abandonnée',
+    keywords: ['vieille','abandonnée','maison'],
+    fbOk:    'Parfait ! <em>La vieille maison abandonnée</em> — tous les mots s\'accordent au féminin singulier avec le nom.',
+    fbKo:    'La bonne réponse est : <strong>la vieille maison abandonnée</strong>. Le déterminant, les adjectifs et le nom s\'accordent tous au féminin singulier.'
+  },
+  /* 4 — Clique sur le chef (mot cliquable) */
+  {
+    badge:   'Clique sur le chef',
+    observe: 'de belles fleurs sauvages',
+    q:       'Clique sur le mot qui te semble être le <strong>chef</strong> du groupe — celui qui dicte la forme des autres.',
+    type:    'click',
+    words:   ['de', 'belles', 'fleurs', 'sauvages'],
+    ans:     2,
+    fbOk:    'Tu commences à sentir que le nom <em>fleurs</em> attire les autres mots autour de lui. C\'est lui le chef !',
+    fbKo:    'Le chef, c\'est <em>fleurs</em> ! C\'est le nom. Les autres mots s\'accordent avec lui : <em>belles</em> et <em>sauvages</em> sont féminins pluriels à cause de lui.'
+  }
+];
+
+var current = 0, scores = 0, checked = false;
+var userSel  = [];  // pour check ou click
+
+function $(id){ return document.getElementById(id); }
+
+/* ══ RENDU ═════════════════════════════════════════════ */
+function renderAct(){
+  var a = current < ACTS.length ? ACTS[current] : null;
+  if(!a) return;
+  checked = false; userSel = [];
+  $('ex-num').textContent  = 'Activité ' + (current+1) + ' / ' + ACTS.length;
+  $('ex-badge').textContent = a.badge;
+  $('observe-box').innerHTML = a.observe;
+  $('q-text').innerHTML  = a.q;
+  $('feedback').className = 'feedback';
+  $('btn-verif').style.display = 'inline-flex';
+  $('btn-verif').disabled = (a.type === 'click'); // activer seulement après clic
+  $('btn-next').style.display  = 'none';
+  updateProg();
+
+  var qbody = $('q-body'); qbody.innerHTML = '';
+
+  if(a.type === 'check'){
+    $('btn-verif').disabled = false;
+    var div = document.createElement('div'); div.className = 'checkboxes';
+    a.opts.forEach(function(opt, i){
+      var item = document.createElement('div');
+      item.className = 'check-item';
+      item.innerHTML = '<div class="check-box"></div><span>' + opt + '</span>';
+      item.addEventListener('click', function(){
+        if(checked) return;
+        var idx = userSel.indexOf(i);
+        if(idx === -1){ userSel.push(i); item.classList.add('selected'); item.querySelector('.check-box').textContent = '✓'; }
+        else          { userSel.splice(idx,1); item.classList.remove('selected'); item.querySelector('.check-box').textContent = ''; }
+      });
+      div.appendChild(item);
+    });
+    qbody.appendChild(div);
+
+  } else if(a.type === 'write'){
+    $('btn-verif').disabled = false;
+    var inp = document.createElement('textarea');
+    inp.id = 'write-input';
+    inp.placeholder = a.placeholder || 'Écris ta réponse ici…';
+    inp.style.cssText = 'width:100%;min-height:70px;padding:.7rem .9rem;border-radius:10px;border:2px solid #e8e4d9;font-family:Arial,Helvetica,sans-serif;font-size:1rem;color:#1a1d23;background:#fafafa;resize:vertical;margin-bottom:.5rem;box-sizing:border-box;outline:none;';
+    inp.addEventListener('input', function(){ $('btn-verif').disabled = inp.value.trim().length < 2; });
+    qbody.appendChild(inp);
+    $('btn-verif').disabled = true;
+
+  } else if(a.type === 'click'){
+    var phrase = document.createElement('div'); phrase.className = 'clickable-phrase';
+    a.words.forEach(function(w, i){
+      var sp = document.createElement('span'); sp.className = 'w-click'; sp.textContent = w;
+      sp.addEventListener('click', function(){
+        if(checked) return;
+        phrase.querySelectorAll('.w-click').forEach(function(s){ s.classList.remove('selected'); });
+        sp.classList.add('selected');
+        userSel = [i];
+        $('btn-verif').disabled = false;
+      });
+      phrase.appendChild(sp);
+      if(i < a.words.length - 1) phrase.appendChild(document.createTextNode(' '));
+    });
+    qbody.appendChild(phrase);
+  }
+}
+
+/* ══ VÉRIFIER ════════════════════════════════════════ */
+function verifier(){
+  if(checked) return;
+  var a = ACTS[current];
+  checked = true;
+  $('btn-verif').disabled = true;
+
+  var ok = false;
+
+  if(a.type === 'check'){
+    var sortedSel = userSel.slice().sort().toString();
+    var sortedAns = a.ans.slice().sort().toString();
+    ok = sortedSel === sortedAns;
+    var items = $('q-body').querySelectorAll('.check-item');
+    items.forEach(function(item, i){
+      item.setAttribute('aria-disabled','true');
+      if(a.ans.indexOf(i) !== -1) item.classList.add('correct-c');
+      else if(userSel.indexOf(i) !== -1) item.classList.add('wrong-c');
+    });
+
+  } else if(a.type === 'write'){
+    var inp = document.getElementById('write-input');
+    var val = inp ? inp.value.trim().toLowerCase() : '';
+    // Vérifier si les mots-clés sont présents
+    var found = a.keywords.filter(function(k){ return val.indexOf(k.toLowerCase()) !== -1; });
+    ok = found.length >= a.keywords.length;
+    if(inp){ inp.disabled = true;
+      inp.style.borderColor = ok ? '#8dc63f' : '#f28b82';
+      inp.style.background  = ok ? '#f0faeb' : '#fff0ef';
+    }
+
+  } else if(a.type === 'click'){
+    ok = userSel[0] === a.ans;
+    var spans = $('q-body').querySelectorAll('.w-click');
+    spans.forEach(function(sp, i){
+      if(i === a.ans) sp.classList.add('correct-w');
+      else if(userSel[0] === i) sp.classList.add('wrong-w');
+      sp.style.pointerEvents = 'none';
+    });
+  }
+
+  if(ok) scores++;
+
+  var fb = $('feedback');
+  fb.className = 'feedback show ' + (ok ? 'ok' : 'ko');
+  $('fb-icon').textContent = ok ? '✅' : '❌';
+  $('fb-title').textContent = ok ? 'Bien observé !' : 'Regarde encore…';
+  $('fb-det').innerHTML = ok ? a.fbOk : a.fbKo;
+
+  $('btn-next').style.display = 'inline-flex';
+  $('btn-next').textContent = current < ACTS.length - 1 ? 'Suivant →' : '🏁 Résultats';
+  updateChips();
+}
+
+/* ══ NAVIGATION ══════════════════════════════════════ */
+function nextAct(){
+  current++;
+  if(current < ACTS.length){ renderAct(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else showResults();
+}
+
+function updateProg(){
+  var pct = Math.round(current / ACTS.length * 100);
+  $('prog-fill').style.width = pct + '%';
+  $('prog-label').textContent = 'Activité ' + (current+1) + ' / ' + ACTS.length;
+  $('prog-pct').textContent   = pct + '\u00a0%';
+}
+function updateChips(){
+  $('cnt-ok').textContent  = scores;
+  $('cnt-rem').textContent = ACTS.length - current - 1;
+}
+
+/* ══ RÉSULTATS ════════════════════════════════════════ */
+function showResults(){
+  $('ex-card').style.display = 'none';
+  $('results-screen').classList.add('show');
+  $('r-score').textContent = scores;
+  var s = scores >= 4?5 : scores >= 3?4 : scores >= 2?3 : scores >= 1?2 : 1;
+  $('r-stars').textContent = '⭐'.repeat(s) + '☆'.repeat(5-s);
+  var msgs = [
+    'Relis attentivement les observations et recommence.',
+    'Tu commences à voir les indices. Continue !',
+    'Bonne intuition ! Tu perçois les liens entre les mots.',
+    'Très bien ! Tu as l\'œil pour les accords.',
+    'Excellent ! Tu as découvert l\'essentiel par toi-même.'
+  ];
+  $('r-msg').textContent = msgs[s-1];
+  $('prog-fill').style.width = '100%';
+  $('cnt-rem').textContent = '0';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){
+  current = 0; scores = 0; checked = false; userSel = [];
+  $('ex-card').style.display = 'block';
+  $('results-screen').classList.remove('show');
+  renderAct();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+renderAct();
+</script>
+</body>
+</html>
