@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'explore – S2 J1 – 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5200;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+  --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;--orange:#f5a623;
+  --text:#1a1d23;--muted:#555860;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+  background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+  background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+  color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+h1 .hl{color:var(--day-color);}
+
+.progress-wrap{width:100%;max-width:680px;margin-bottom:1rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+  border-radius:99px;transition:width .5s ease;}
+.score-row{display:flex;gap:.5rem;margin-bottom:1.2rem;flex-wrap:wrap;
+  justify-content:center;position:relative;z-index:1;width:100%;max-width:680px;}
+.chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+  font-size:.75rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;color:var(--text);}
+.chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);
+  border-radius:var(--radius);padding:1.4rem 1rem 1.2rem;
+  position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+.q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--text);
+  margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+  border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);white-space:nowrap;}
+
+.questions-box{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-left:4px solid var(--day-color);border-radius:10px;
+  padding:.75rem .85rem;margin-bottom:1rem;font-size:.82rem;
+  font-family:'JetBrains Mono',monospace;color:var(--text);line-height:1.9;word-break:break-word;}
+.questions-box strong{color:var(--text);display:block;margin-bottom:.4rem;}
+.questions-box ol{padding-left:1.2rem;margin:.3rem 0 0;}
+.questions-box ol li{padding:.1rem 0;line-height:1.7;color:var(--text);}
+
+.q-text{font-size:.9rem;color:var(--text);margin-bottom:.9rem;line-height:1.7;}
+.sel-count-row{display:flex;align-items:center;gap:.6rem;font-family:'JetBrains Mono',monospace;
+  font-size:.8rem;color:var(--text);margin-bottom:.8rem;}
+.sel-count-badge{background:var(--day-light);color:var(--day-dark);font-weight:700;
+  padding:.15rem .55rem;border-radius:99px;border:1.5px solid var(--day-border);font-size:.85rem;}
+
+.text-zone{background:var(--bg);border:2px solid var(--border);border-radius:12px;
+  padding:.9rem 1rem;margin-bottom:.9rem;
+  line-height:2.4;font-size:.97rem;position:relative;z-index:2;word-break:break-word;color:var(--text);}
+.txt-label{display:block;font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;}
+.w{display:inline;cursor:pointer;border-radius:4px;padding:2px 3px;
+  transition:background .13s,color .13s;-webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;color:var(--text);}
+.w:hover{background:var(--day-light);color:var(--day-dark);}
+.w.sel{background:var(--day-color);color:#fff;font-weight:700;border-radius:5px;box-shadow:0 2px 8px var(--day-glow);}
+.w.ok-w{background:#d4edda;color:#1a4d0d;border:1.5px solid var(--green);font-weight:700;border-radius:5px;}
+.w.ko-w{background:#ffe0de;color:#8b1a1a;border:1.5px solid var(--pink);font-weight:700;border-radius:5px;text-decoration:line-through;}
+.w.miss-w{background:#fff3cd;color:#5a3e00;border:1.5px solid var(--yellow);font-weight:700;border-radius:5px;}
+.dial{font-style:italic;color:#555860;}
+
+.legende{display:none;gap:.6rem;flex-wrap:wrap;font-size:.75rem;color:var(--text);
+  margin-bottom:1rem;align-items:center;font-family:'JetBrains Mono',monospace;}
+.legende.show{display:flex;}
+.leg-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;display:inline-block;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;margin-top:.8rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+  font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .15s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.38;cursor:default;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+.btn-sol{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+.btn-sol:hover:not(:disabled){background:var(--day-light);}
+
+.feedback{margin-top:1rem;padding:.75rem .9rem;border-radius:10px;font-size:.9rem;
+  display:none;align-items:flex-start;gap:.6rem;line-height:1.7;word-break:break-word;}
+.feedback.show{display:flex;}
+.feedback.ok {background:#f0faeb;border:1.5px solid var(--green);color:#1a4d0d;}
+.feedback.ko {background:#fff0ef;border:1.5px solid var(--pink);color:#8b1a1a;}
+.feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#5a3e00;}
+.feedback-icon{font-size:1.3rem;flex-shrink:0;line-height:1;}
+.feedback-detail{font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.3rem;line-height:1.7;}
+
+.results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;margin-top:1.5rem;}
+.results.show{display:block;animation:fadeUp .4s ease both;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+.results-score .s-num{color:var(--day-color);}
+.stars{font-size:1.8rem;margin:.4rem 0 1rem;letter-spacing:.2rem;}
+.results-msg{color:var(--text);font-size:.95rem;margin-bottom:1.5rem;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){
+  .card{padding:1.1rem .85rem 1rem;}
+  .btn{font-size:.85rem;padding:.6rem .9rem;}
+  .btn-row{flex-direction:column;}.btn{width:100%;}
+  .text-zone{font-size:.9rem;line-height:2.2;}
+}
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#f5a623"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 2 &ndash; Jour 1</div>
+  <h1>J&rsquo;explore &middot; <span class="hl">Perceval</span></h1>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 6 citations trouv&eacute;es</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="count-ok">0</span>&nbsp;correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="count-ko">0</span>&nbsp;erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#aaa"></div><span id="count-rem">6</span>&nbsp;restant(s)</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="q-num">Exercice &mdash; Lecture active</div>
+  <div class="theme-badge">Retrouver les citations</div>
+
+  <div class="questions-box">
+    <strong>Clique sur les citations qui r&eacute;pondent &agrave; ces questions&nbsp;:</strong>
+    <ol>
+      <li>Pourquoi la m&egrave;re de Perceval l&rsquo;a-t-elle tenu &eacute;loign&eacute; du monde de la chevalerie&nbsp;?</li>
+      <li>Quels &eacute;l&eacute;ments montrent que la nature est pleine de vie au d&eacute;but du r&eacute;cit&nbsp;?</li>
+      <li>Quel objet Perceval saisit-il en premier lorsqu&rsquo;il rencontre le chevalier&nbsp;?</li>
+      <li>Quelle phrase montre que Perceval ne conna&icirc;t pas la fonction de la lance&nbsp;?</li>
+      <li>Quelle phrase montre que Perceval est &eacute;merveill&eacute; par ce qu&rsquo;il d&eacute;couvre&nbsp;?</li>
+      <li>Qui a donn&eacute; son &eacute;quipement au chevalier&nbsp;?</li>
+    </ol>
+    <p style="margin-top:.5rem;font-size:.75rem;opacity:.85;">Clique sur le groupe de mots exact en un seul clic.</p>
+  </div>
+
+  <p class="q-text">Lis l&rsquo;extrait, puis <strong>clique sur les citations qui r&eacute;pondent aux questions</strong> pour les surligner.</p>
+
+  <div class="sel-count-row">
+    S&eacute;lectionn&eacute;s&nbsp;: <span class="sel-count-badge" id="sel-count">0</span>
+  </div>
+
+  <div class="text-zone">
+    <span class="txt-label">Perceval ou le Conte du Graal &mdash; Chr&eacute;tien de Troyes (vers 1180, adapt&eacute;)</span>
+    <div id="text-container"></div>
+  </div>
+
+  <div class="legende" id="legende">
+    <span class="leg-dot" style="background:#d4edda;border:1.5px solid #8dc63f;"></span>&nbsp;Correct&emsp;
+    <span class="leg-dot" style="background:#ffe0de;border:1.5px solid #f28b82;"></span>&nbsp;Incorrect&emsp;
+    <span class="leg-dot" style="background:#fff3cd;border:1.5px solid #f5c518;"></span>&nbsp;Manqu&eacute;
+  </div>
+
+  <div class="btn-row" id="row1">
+    <button class="btn btn-primary" id="btn-verif" onclick="verifier()">&#10003;&nbsp;V&eacute;rifier</button>
+    <button class="btn btn-ghost" onclick="effacer()">&#10005;&nbsp;Effacer</button>
+  </div>
+  <div class="btn-row" id="row2" style="display:none;">
+    <button class="btn btn-primary" onclick="recommencer()">Recommencer</button>
+    <button class="btn btn-sol" onclick="afficherSolution()">Voir la solution</button>
+  </div>
+
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <div>
+      <div id="fb-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-detail"></div>
+    </div>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/6</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <button class="btn btn-primary" onclick="recommencer()" style="margin:0 auto;display:flex;">Recommencer</button>
+  </div>
+</div>
+
+<script>
+var TOTAL_ANS = 6;
+var clickEls  = [];
+var checked   = false;
+
+function buildText(){
+  var container = document.getElementById('text-container');
+  container.innerHTML = '';
+  clickEls = [];
+
+  function spanW(txt, isAns){
+    var s = document.createElement('span');
+    s.textContent = txt;
+    s.className = 'w';
+    s.dataset.ans = isAns ? '1' : '0';
+    var tapped = false;
+    s.addEventListener('touchend', function(e){
+      e.preventDefault();
+      if(!tapped){ tapped=true; toggle(s); setTimeout(function(){ tapped=false; },300); }
+    });
+    s.addEventListener('click', function(){
+      if(!('ontouchstart' in window)) toggle(s);
+    });
+    clickEls.push({el:s, ans:isAns});
+    return s;
+  }
+
+  function addWords(txt){
+    /* Découpe un texte en tokens (mots + espaces/ponctuation) tous cliquables */
+    var tokens = txt.split(/(?<=\s)|(?=\s)/);
+    tokens.forEach(function(tok){
+      if(tok.trim() === ''){
+        container.appendChild(document.createTextNode(tok));
+      } else {
+        container.appendChild(spanW(tok, false));
+      }
+    });
+  }
+
+  function addAns(txt){
+    container.appendChild(spanW(txt, true));
+  }
+
+  function addDial(txt){
+    /* Les dialogues sont en italique mais aussi cliquables */
+    var tokens = txt.split(/(?<=\s)|(?=\s)/);
+    tokens.forEach(function(tok){
+      if(tok.trim() === ''){
+        container.appendChild(document.createTextNode(tok));
+      } else {
+        var s = spanW(tok, false);
+        s.style.fontStyle = 'italic';
+        s.style.color = '#555860';
+        container.appendChild(s);
+      }
+    });
+  }
+
+  function br(){ container.appendChild(document.createElement('br')); }
+
+  /* ══ INTRODUCTION ══ */
+  addWords('Perceval a été élevé à l’écart du monde de la chevalerie. En effet, ');
+  addAns('sa mère, craignant qu’il ne devienne chevalier comme son père et ses frères morts au combat');
+  addWords(', lui a caché son nom et ses origines.');
+  br(); br();
+
+  /* ══ PARAGRAPHE 1 ══ */
+  addWords('C’était à la saison où les arbres fleurissent où les bois et les prés reverdissent ; ');
+  addAns('les oiseaux, chacun dans son langage, chantent doucement au matin et la nature entière est en joie');
+  addWords('.');
+  br(); br();
+
+  /* ══ PARAGRAPHE 2 ══ */
+  addWords('Ce jour-là, le fils de la Dame Veuve de la Forêt Déserte se leva ; il eut vite fait de seller son cheval de chasse et de prendre trois javelots. Ainsi équipé, il sortit du manoir de sa mère et pensa qu’il irait voir ses paysans, qui semaient ses avoines.');
+  br(); br();
+
+  /* ══ PARAGRAPHE 3 ══ */
+  addWords('Il entra dans la forêt : l’air était si doux, le chant des oiseaux si joyeux que son cœur tressaillit de joie… Et voilà que, tout à coup, il entendit venir à travers la forêt cinq chevaliers équipés de toutes leurs armes ; quand il les vit sortir du bois, quand il vit les lances et les écus, les hauberts étincelants, les heaumes brillants, quand il vit scintiller au soleil toutes ces couleurs magnifiques, le vermeil et l’azur, l’or et l’argent, ');
+  addAns('il fut émerveillé');
+  addWords('.');
+  br(); br();
+
+  /* ══ DIALOGUE 1 ══ */
+  addWords('Le chevalier s’approcha de lui pour l’interroger :');
+  br();
+  addDial('— As-tu vu aujourd’hui sur cette lande cinq chevaliers et trois jeunes filles ?');
+  br(); br();
+
+  /* ══ DIALOGUE 2 — Lance ══ */
+  addWords('Mais le jeune homme s’intéressait à tout autre chose. ');
+  addAns('Il tendit la main vers la lance du chevalier et la prit');
+  addWords(' :');
+  br();
+  addDial('— Cher seigneur, vous qui vous appelez « chevalier », quel est cet objet que vous tenez ?');
+  br();
+  addDial('— Me voilà bien avancé ! Je voulais te poser des questions, et c’est toi qui m’interroges ! Je te le dirai pourtant : c’est ma lance.');
+  br();
+  addDial('— ');
+  addAns('Voulez-vous dire qu’on la lance, comme je le fais avec mes javelots ?');
+  br();
+  addDial('— Mais non ! Tu es bien sot, mon garçon. On en frappe son adversaire de près.');
+  br(); br();
+
+  /* ══ DIALOGUE 3 — Écu ══ */
+  addWords('Le jeune homme saisit alors le bord de l’écu :');
+  br();
+  addDial('— Et cela, qu’est-ce que c’est ? À quoi cela sert-il ?');
+  br();
+  addDial('— Tu te moques de moi, avec tes questions. Je te répondrai cependant, car tu me plais. Ce que je porte est un écu. Et il m’est bien utile : il me protège fidèlement de tous les coups qu’on me porte.');
+  br(); br();
+
+  /* ══ DIALOGUE 4 — Haubert ══ */
+  addDial('— Dites-moi donc, cher seigneur, quel est ce vêtement ?');
+  br();
+  addDial('— Tu ne le sais pas ? C’est mon haubert, et il est lourd comme fer.');
+  br();
+  addDial('— Il est donc en fer ?');
+  br();
+  addDial('— Tu le vois bien.');
+  br();
+  addDial('— Il est très beau, mais à qui sert-il ?');
+  br();
+  addDial('— C’est facile à expliquer : si tu voulais lancer contre moi une flèche ou un javelot, tu ne pourrais me faire aucun mal.');
+  br(); br();
+
+  /* ══ DIALOGUE 5 — Roi Arthur ══ */
+  addDial('— Qui vous a donc équipé de la sorte ?');
+  br();
+  addDial('— Je vais te le dire : ');
+  addAns('c’est le roi Arthur qui m’a donné tout cet équipement');
+  addWords(', il y a cinq jours, quand il m’a en personne adoubé.');
+}
+
+function toggle(s){
+  if(checked) return;
+  s.classList.toggle('sel');
+  updateLive();
+}
+
+function updateLive(){
+  var selEls = document.querySelectorAll('.w.sel');
+  document.getElementById('sel-count').textContent = selEls.length;
+  var ok = [].filter.call(selEls, function(el){ return el.dataset.ans==='1'; }).length;
+  var pct = Math.round(ok / TOTAL_ANS * 100);
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = ok+' / '+TOTAL_ANS+' citations trouv\u00e9es';
+  document.getElementById('prog-pct').textContent = pct+'\u00a0%';
+  var ko = [].filter.call(selEls, function(el){ return el.dataset.ans==='0'; }).length;
+  document.getElementById('count-ok').textContent  = ok;
+  document.getElementById('count-ko').textContent  = ko;
+  document.getElementById('count-rem').textContent = TOTAL_ANS - ok;
+}
+
+function verifier(){
+  if(checked) return;
+  checked = true;
+  document.getElementById('btn-verif').disabled = true;
+  var correct=0, incorrect=0, missed=0;
+  clickEls.forEach(function(item){
+    var sel = item.el.classList.contains('sel');
+    item.el.classList.remove('sel');
+    if(sel && item.ans)       { item.el.classList.add('ok-w');   correct++;   }
+    else if(sel && !item.ans) { item.el.classList.add('ko-w');   incorrect++; }
+    else if(!sel && item.ans) { item.el.classList.add('miss-w'); missed++;    }
+  });
+  document.getElementById('row1').style.display = 'none';
+  document.getElementById('row2').style.display = 'flex';
+  document.getElementById('legende').classList.add('show');
+
+  var score = correct;
+  var pct   = Math.round(score / TOTAL_ANS * 100);
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = score+' / '+TOTAL_ANS+' citations trouv\u00e9es';
+  document.getElementById('prog-pct').textContent   = pct+'\u00a0%';
+  document.getElementById('count-ok').textContent   = correct;
+  document.getElementById('count-ko').textContent   = incorrect;
+  document.getElementById('count-rem').textContent  = missed;
+
+  showFeedback(score, incorrect, missed);
+  document.getElementById('results-screen').classList.add('show');
+}
+
+function showFeedback(score, incorrect, missed){
+  var cls, ico, titre, texte;
+  if(score >= 6){
+    cls='ok';  ico='&#10003;'; titre='Parfait\u00a0!';
+    texte='Tu as retrouv\u00e9 toutes les citations du texte.';
+  } else if(score >= 4){
+    cls='mid'; ico='\u2191'; titre='Tr\u00e8s bien\u00a0!';
+    texte='Tu identifies bien la plupart des citations importantes.';
+  } else if(score >= 2){
+    cls='mid'; ico='\u2192'; titre='Continue\u00a0!';
+    texte='Relis les questions et cherche chaque r\u00e9ponse dans le texte, paragraphe par paragraphe.';
+  } else {
+    cls='ko'; ico='!'; titre='\u00c0 retravailler\u00a0!';
+    texte='Relis attentivement le texte en gardant les questions sous les yeux.';
+  }
+  var fb = document.getElementById('feedback');
+  fb.className = 'feedback show '+cls;
+  document.getElementById('fb-icon').innerHTML  = ico;
+  document.getElementById('fb-msg').textContent = titre;
+  var det = texte;
+  if(incorrect > 0) det += '<br>'+incorrect+'\u00a0s\u00e9lection(s) incorrecte(s) \u2014 barr\u00e9e(s) en rouge.';
+  if(missed    > 0) det += '<br>'+missed+'\u00a0citation(s) manqu\u00e9e(s) \u2014 surlign\u00e9e(s) en jaune dans le texte.';
+  document.getElementById('fb-detail').innerHTML = det;
+
+  var stars = score>=6?5 : score>=5?4 : score>=3?3 : score>=2?2 : 1;
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('stars-row').textContent = '\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msgs = [
+    '\u00c0 retravailler \u2014 relis le texte\u00a0!',
+    '\u00c0 retravailler \u2014 relis le texte\u00a0!',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait \u2014 sans faute\u00a0!'
+  ];
+  document.getElementById('results-msg').textContent = msgs[Math.min(score, msgs.length-1)];
+}
+
+function effacer(){
+  document.querySelectorAll('.w.sel').forEach(function(el){ el.classList.remove('sel'); });
+  updateLive();
+}
+
+function recommencer(){
+  checked = false;
+  document.getElementById('btn-verif').disabled = false;
+  clickEls.forEach(function(item){ item.el.className='w'; });
+  document.getElementById('row1').style.display = 'flex';
+  document.getElementById('row2').style.display = 'none';
+  document.getElementById('legende').classList.remove('show');
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('results-screen').classList.remove('show');
+  document.getElementById('sel-count').textContent    = '0';
+  document.getElementById('progress-bar').style.width = '0%';
+  document.getElementById('prog-label').textContent   = '0 / '+TOTAL_ANS+' citations trouv\u00e9es';
+  document.getElementById('prog-pct').textContent     = '0\u00a0%';
+  document.getElementById('count-ok').textContent     = '0';
+  document.getElementById('count-ko').textContent     = '0';
+  document.getElementById('count-rem').textContent    = TOTAL_ANS;
+}
+
+function afficherSolution(){
+  clickEls.forEach(function(item){
+    item.el.className = 'w';
+    if(item.ans) item.el.classList.add('ok-w');
+  });
+}
+
+buildText();
+</script>
+</body>
+</html>
