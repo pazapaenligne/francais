@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S1 J5 – 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5c518;--day-dark:#8a6000;--day-dark2:#5a3e00;
+  --day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.35);
+  --bg:#ffffff;--surface:#ffffff;--surface2:#fffbeb;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --orange:#f5a623;--blue:#3ab5d8;
+  --text:#1a1d23;--muted:#8a8f9a;
+  --radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:660px;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;pointer-events:none;width:280px;height:280px;top:-90px;right:-90px;background:radial-gradient(circle,rgba(245,197,24,.16),transparent 70%);}
+.bubble2{position:fixed;border-radius:50%;z-index:0;pointer-events:none;width:220px;height:220px;bottom:-70px;left:-70px;background:radial-gradient(circle,rgba(245,166,35,.10),transparent 70%);}
+.bubble3{position:fixed;border-radius:50%;z-index:0;pointer-events:none;width:140px;height:140px;top:40%;left:-55px;background:radial-gradient(circle,rgba(141,198,63,.08),transparent 70%);}
+.bubble4{position:fixed;border-radius:50%;z-index:0;pointer-events:none;width:110px;height:110px;bottom:18%;right:-45px;background:radial-gradient(circle,rgba(242,139,130,.08),transparent 70%);}
+
+header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:#f5c518;border-radius:50px;padding:6px 16px;box-shadow:0 2px 10px rgba(245,197,24,.45);margin-bottom:.5rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;font-weight:600;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.2;word-break:break-word;}
+h1 .hl{color:var(--day-dark);}
+
+.prog-wrap{width:100%;margin-bottom:.8rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day),var(--orange));border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+.card{width:100%;background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);padding:1.5rem 1.3rem 1.3rem;position:relative;z-index:1;box-shadow:0 6px 28px rgba(0,0,0,.07);animation:fadeUp .35s ease both;margin-bottom:1.6rem;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day),var(--orange),var(--green),var(--blue));}
+.ex-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-block;font-size:.63rem;font-weight:800;padding:.15rem .6rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);white-space:nowrap;}
+.observe-box{background:var(--day-light);border:2px solid var(--day-border);border-left:4px solid var(--day);border-radius:var(--radius-sm);padding:.8rem 1.1rem;margin-bottom:1rem;font-size:clamp(1rem,2.8vw,1.12rem);font-weight:700;color:var(--day-dark2);font-family:'JetBrains Mono',monospace;line-height:1.8;word-break:break-word;}
+.observe-label{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;display:block;}
+.q-text{font-size:clamp(.9rem,2.5vw,1rem);font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.65;}
+
+/* QCM */
+.choices{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem;}
+.choice-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:clamp(.9rem,2.5vw,1rem);font-weight:600;padding:.65rem 1rem;cursor:pointer;transition:background .12s,border-color .12s;min-height:46px;-webkit-tap-highlight-color:transparent;font-family:Arial,Helvetica,sans-serif;text-align:left;display:flex;align-items:center;gap:.65rem;word-break:break-word;}
+.choice-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day);}
+.choice-btn:disabled{cursor:default;}
+.choice-letter{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;font-family:'JetBrains Mono',monospace;background:var(--border);color:var(--text);transition:background .12s,color .12s;min-width:26px;}
+.choice-btn.selected .choice-letter{background:var(--day);color:#000;}
+.choice-btn.correct-ans{border-color:var(--green)!important;background:var(--green-light)!important;color:var(--green-dark)!important;}
+.choice-btn.correct-ans .choice-letter{background:var(--green);color:#fff;}
+.choice-btn.wrong-ans{border-color:var(--pink)!important;background:var(--pink-light)!important;color:var(--pink-dark)!important;}
+.choice-btn.wrong-ans .choice-letter{background:var(--pink);color:#fff;}
+
+/* SAISIE COURTE */
+.short-inputs{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem;}
+.short-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.short-label{font-size:.9rem;color:var(--text);font-weight:600;flex:1;line-height:1.6;}
+.short-inp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;padding:.4rem .7rem;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--surface2);color:var(--day-dark);outline:none;min-height:40px;transition:border-color .13s;width:90px;text-align:center;}
+.short-inp:focus{border-color:var(--day);}
+.short-inp.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+.short-inp.ko{border-color:var(--pink);background:var(--pink-light);color:var(--pink-dark);}
+.short-res{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);flex-shrink:0;}
+.short-res b{color:var(--green-dark);}
+
+/* DRAG ACT6 */
+.drag-bank{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;padding:.65rem;background:var(--surface2);border:1.5px dashed var(--border);border-radius:var(--radius-sm);min-height:48px;}
+.drag-chip{background:var(--day-light);border:2px solid var(--day-border);border-radius:8px;padding:.35rem .8rem;font-size:.9rem;font-weight:700;color:var(--day-dark2);cursor:grab;user-select:none;-webkit-user-select:none;font-family:'JetBrains Mono',monospace;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.drag-chip:active{cursor:grabbing;}
+.drag-chip.chip-ok{background:#d4edda;border-color:var(--green);color:var(--green-dark);cursor:default;}
+.drag-chip.chip-ko{background:#ffe0de;border-color:var(--pink);color:var(--pink-dark);cursor:default;}
+.cols5{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-bottom:.5rem;}
+@media(max-width:500px){.cols5{grid-template-columns:1fr 1fr;}}
+.col-box{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:.4rem .3rem;min-height:60px;}
+.col-title{font-size:.65rem;font-weight:800;color:var(--day-dark);text-align:center;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em;font-family:'JetBrains Mono',monospace;}
+.col-drop{min-height:36px;display:flex;flex-wrap:wrap;gap:.2rem;justify-content:center;align-items:flex-start;padding:.1rem;}
+.col-drop .drag-chip{font-size:.72rem;padding:.25rem .45rem;}
+.col-box.drag-over{border-color:var(--day);background:var(--day-light);}
+
+/* WRITE */
+.write-inp{width:100%;padding:.55rem .75rem;border-radius:var(--radius-sm);border:2px solid var(--border);font-family:Arial,Helvetica,sans-serif;font-size:1rem;color:var(--text);background:var(--surface2);outline:none;min-height:44px;transition:border-color .13s;margin-bottom:.4rem;}
+.write-inp:focus{border-color:var(--day);}
+.write-inp.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+.write-inp.ko{border-color:var(--pink);background:var(--pink-light);color:var(--pink-dark);}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.9rem;}
+@media(max-width:479px){.btn-row{flex-direction:column;}.btn-row .btn{width:100%;justify-content:center;}}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;transition:transform .12s,box-shadow .14s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;}
+.btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day);color:var(--text);}
+.btn-next{background:var(--day);color:#000;box-shadow:0 3px 12px var(--day-glow);display:none;}
+.btn-next:hover:not(:disabled){transform:translateY(-1px);}
+
+/* FEEDBACK */
+.feedback{margin-top:1rem;padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.87rem,2.5vw,.97rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.75;word-break:break-word;}
+.feedback.show{display:flex;}
+.feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.feedback.ko{background:var(--pink-light);border:1.5px solid var(--pink);color:var(--pink-dark);}
+.fb-icon{font-size:1.3rem;flex-shrink:0;}
+.fb-title{font-weight:800;margin-bottom:.2rem;}
+.fb-det{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text);margin-top:.2rem;line-height:1.85;}
+
+/* RÉSULTATS */
+.results{display:none;width:100%;position:relative;z-index:1;animation:fadeUp .4s ease both;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);padding:2rem 1.4rem;box-shadow:0 6px 28px rgba(0,0,0,.07);text-align:center;position:relative;}
+.results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day),var(--orange),var(--green),var(--blue));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;margin:.6rem 0 .3rem;color:var(--day-dark);}
+.stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.1em;}
+.r-msg{color:var(--muted);font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.4rem;}
+.recap-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .9rem;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.recap-item.ok-r{border-color:#b5e08a;}
+.recap-item.ko-r{border-color:#f9c0bb;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:500px){.card{padding:1.2rem 1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div><div class="bubble3"></div><div class="bubble4"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:14px;font-weight:800;color:#000;letter-spacing:.5px;">&nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me</span>
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 5</div>
+  <h1>&#128269;&nbsp;J&rsquo;observe et je teste</h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">Question 1 / 5</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span>&nbsp;correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span>&nbsp;erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">6</span>&nbsp;restant(s)</div>
+</div>
+
+<!-- ACT 1 -->
+<div class="card" id="card1">
+  <div class="card-stripe"></div>
+  <div class="ex-num">Activité 1 / 6</div>
+  <div class="theme-badge">Classement</div>
+  <div class="observe-box"><span class="observe-label">Observe</span>Il traverse parfois de vieilles forêts sombres.</div>
+  <div class="q-text">Classe chaque mot dans la bonne colonne.</div>
+  <div class="drag-bank" id="bank1"></div>
+  <div class="cols5" id="cols1" style="grid-template-columns:repeat(7,1fr);gap:.35rem;"></div>
+  <div class="feedback" id="fb1"><span class="fb-icon" id="fbi1"></span><div><div class="fb-title" id="fbt1"></div><div class="fb-det" id="fbd1"></div></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="vbtn1" onclick="verif1drag()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-next" id="nxt1" onclick="scrollToCard(2)">Suivant &#8594;</button>
+    <button class="btn btn-ghost" onclick="reset1drag()">&#8635;</button>
+  </div>
+</div>
+<!-- ACT 2 -->
+<div class="card" id="card2">
+  <div class="card-stripe"></div>
+  <div class="ex-num">Activité 2 / 6</div>
+  <div class="theme-badge">Le mot imposteur</div>
+  <div class="observe-box"><span class="observe-label">Observe</span>Les hautes murailles grises protègent la citadelle.</div>
+  <div class="q-text">Quel mot ne fait <strong>PAS</strong> partie du groupe nominal sujet&nbsp;?</div>
+  <div class="choices" id="ch2"></div>
+  <div class="feedback" id="fb2"><span class="fb-icon" id="fbi2"></span><div><div class="fb-title" id="fbt2"></div><div class="fb-det" id="fbd2"></div></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="vbtn2" onclick="verifQCM(2)">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-next" id="nxt2" onclick="scrollToCard(3)">Suivant &#8594;</button>
+    <button class="btn btn-ghost" onclick="resetQCM(2)">&#8635;</button>
+  </div>
+</div>
+
+<!-- ACT 3 -->
+<div class="card" id="card3">
+  <div class="card-stripe"></div>
+  <div class="ex-num">Activité 3 / 6</div>
+  <div class="theme-badge">Qui commande ?</div>
+  <div class="observe-box"><span class="observe-label">Observe</span>ces immenses tours blanches</div>
+  <div class="q-text">Réécris ce groupe nominal en remplaçant <strong>tours</strong> par <strong>tour</strong>. Quels mots changent&nbsp;?</div>
+  <input class="write-inp" id="wi3" type="text" placeholder="Écris le groupe au singulier…" autocomplete="off" autocapitalize="off" spellcheck="false"/>
+  <div id="popup3" style="display:none;background:#fffbeb;border:2px solid #f5c518;border-radius:10px;padding:.85rem 1rem;margin-top:.8rem;font-size:.95rem;line-height:1.75;color:#5a3e00;">
+    <strong>&#128161; Tous les mots ont chang&#233;&nbsp;!</strong><br>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:.85rem;">
+      ces &#8594; <strong>cette</strong> &nbsp;|&nbsp; immenses &#8594; <strong>immense</strong> &nbsp;|&nbsp; blanches &#8594; <strong>blanche</strong><br>
+      Le nom <em>tour</em> est le chef du groupe&nbsp;: tous les autres mots s&#8217;accordent avec lui.
+    </span>
+  </div>
+  <div class="feedback" id="fb3"><span class="fb-icon" id="fbi3"></span><div><div class="fb-title" id="fbt3"></div><div class="fb-det" id="fbd3"></div></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="vbtn3" onclick="verif3()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-next" id="nxt3" onclick="scrollToCard(4)">Suivant &#8594;</button>
+    <button class="btn btn-ghost" onclick="resetWrite(3)">&#8635;</button>
+  </div>
+</div>
+
+<!-- ACT 4 -->
+<div class="card" id="card4">
+  <div class="card-stripe"></div>
+  <div class="ex-num">Activité 4 / 6</div>
+  <div class="theme-badge">Double enquête</div>
+  <div class="observe-box"><span class="observe-label">Observe</span>Nous choisissons souvent les chemins escarpés.</div>
+  <div class="q-text">Sélectionne les bonnes informations sur cette phrase.</div>
+  <div class="short-inputs">
+    <div class="short-row">
+      <span class="short-label">Le verbe est conjugué à la&nbsp;:</span>
+      <select class="short-inp" id="s4a" style="width:auto;min-width:170px;padding:.4rem .6rem;">
+        <option value="">— Choisir —</option>
+        <option value="1s">1re personne du singulier</option>
+        <option value="2s">2e personne du singulier</option>
+        <option value="3s">3e personne du singulier</option>
+        <option value="1p">1re personne du pluriel</option>
+        <option value="2p">2e personne du pluriel</option>
+        <option value="3p">3e personne du pluriel</option>
+      </select>
+      <span class="short-res" id="sr4a"></span>
+    </div>
+    <div class="short-row">
+      <span class="short-label">Le verbe appartient au&nbsp;:</span>
+      <select class="short-inp" id="s4b" style="width:auto;min-width:130px;padding:.4rem .6rem;">
+        <option value="">— Choisir —</option>
+        <option value="1">1er groupe</option>
+        <option value="2">2e groupe</option>
+        <option value="3">3e groupe</option>
+      </select>
+      <span class="short-res" id="sr4b"></span>
+    </div>
+    <div class="short-row">
+      <span class="short-label">Le nom noyau du GN objet est&nbsp;:</span>
+      <select class="short-inp" id="s4c" style="width:auto;min-width:130px;padding:.4rem .6rem;">
+        <option value="">— Choisir —</option>
+        <option value="souvent">souvent</option>
+        <option value="chemins">chemins</option>
+        <option value="escarpés">escarpés</option>
+        <option value="nous">nous</option>
+      </select>
+      <span class="short-res" id="sr4c"></span>
+    </div>
+  </div>
+  <div class="feedback" id="fb4"><span class="fb-icon" id="fbi4"></span><div><div class="fb-title" id="fbt4"></div><div class="fb-det" id="fbd4"></div></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="vbtn4" onclick="verif4()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-next" id="nxt4" onclick="scrollToCard(5)">Suivant &#8594;</button>
+    <button class="btn btn-ghost" onclick="reset4()">&#8635;</button>
+  </div>
+</div>
+
+<!-- ACT 5 -->
+<div class="card" id="card5">
+  <div class="card-stripe"></div>
+  <div class="ex-num">Activité 5 / 6</div>
+  <div class="theme-badge">Cherche l'erreur</div>
+  <div class="q-text">Un seul groupe nominal est entièrement correct. Lequel&nbsp;?</div>
+  <div class="choices" id="ch5"></div>
+  <div class="feedback" id="fb5"><span class="fb-icon" id="fbi5"></span><div><div class="fb-title" id="fbt5"></div><div class="fb-det" id="fbd5"></div></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="vbtn5" onclick="verifQCM(5)">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-next" id="nxt5" onclick="scrollToCard(6)">Suivant &#8594;</button>
+    <button class="btn btn-ghost" onclick="resetQCM(5)">&#8635;</button>
+  </div>
+</div>
+
+<!-- ACT 6 -->
+<div class="card" id="card6">
+  <div class="card-stripe"></div>
+  <div class="ex-num">Activité 6 / 6</div>
+  <div class="theme-badge">Relie les terminaisons</div>
+  <div class="q-text">Écris la terminaison correcte au présent pour chaque pronom (1<sup>er</sup> et 2<sup>e</sup> groupe).</div>
+  <div id="match6-area"></div>
+  <div class="feedback" id="fb6"><span class="fb-icon" id="fbi6"></span><div><div class="fb-title" id="fbt6"></div><div class="fb-det" id="fbd6"></div></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="vbtn6" onclick="verif6match()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-next" id="nxt6" onclick="showResults()" style="background:var(--green);color:#fff;">Résultats &#127942;</button>
+    <button class="btn btn-ghost" onclick="reset6match()">&#8635;</button>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="display:inline-block;background:#f5c518;border-radius:50px;padding:6px 16px;box-shadow:0 2px 10px rgba(245,197,24,.45);margin-bottom:.6rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:800;color:#000;letter-spacing:.5px;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/6</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="r-msg" id="r-msg"></div>
+    <div class="recap" id="r-recap"></div>
+    <button class="btn btn-primary" onclick="restartAll()" style="width:100%;justify-content:center;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var scores = new Array(6).fill(null);
+var done   = new Array(6).fill(false);
+var dragSrc = null;
+
+/* QCM DATA */
+var QCM = {
+  1: {
+    opts: [
+      'D\u00e9terminant – Adjectif – Nom – Verbe – Adverbe – D\u00e9terminant – Nom',
+      'D\u00e9terminant – Nom – Adjectif – Verbe – D\u00e9terminant – Adverbe – Nom',
+      'Adjectif – D\u00e9terminant – Nom – Adverbe – Verbe – D\u00e9terminant – Nom'
+    ],
+    ans: 0,
+    fbOk: 'Exact\u00a0! Les → d\u00e9t., vieilles → adj., tours → nom, dominent → verbe, lentement → adverbe, les → d\u00e9t., vall\u00e9es → nom.',
+    fbKo: 'La bonne structure est A\u00a0: D\u00e9terminant – Adjectif – Nom – Verbe – Adverbe – D\u00e9terminant – Nom.'
+  },
+  2: {
+    opts: ['Les','hautes','murailles','grises','prot\u00e8gent'],
+    ans: 4,
+    fbOk: 'Exact\u00a0! <em>Prot\u00e8gent</em> est le verbe\u00a0: il ne fait pas partie du GN sujet.',
+    fbKo: 'La bonne r\u00e9ponse est <em>prot\u00e8gent</em>\u00a0: c\u2019est le verbe. Le GN sujet est \u00ab\u00a0les hautes murailles grises\u00a0\u00bb.'
+  },
+  7: {
+    opts: ['font','faisons','faisent','fait'],
+    ans: 0,
+    fbOk: 'Exact\u00a0! <em>R\u00e9mi et Vitalis</em> = ils \u2192 3e personne du pluriel \u2192 <strong>font</strong>.',
+    fbKo: 'La bonne r\u00e9ponse est <em>font</em>. <em>R\u00e9mi et Vitalis</em> = ils, 3e pers. pluriel. <em>Faire</em> est irr\u00e9gulier\u00a0: ils font (pas \u00ab\u00a0faisent\u00a0\u00bb).'
+  },
+  5: {
+    opts: ['ces ancien remparts gris','cette ancienne forteresse grise','ces anciennes forteresse grises','cette ancien forteresse grise'],
+    ans: 1,
+    fbOk: 'Bravo\u00a0! <em>Cette ancienne forteresse grise</em>\u00a0: tous les mots sont au f\u00e9minin singulier.',
+    fbKo: 'La bonne r\u00e9ponse est B. Dans A\u00a0: <em>ancien</em> devrait \u00eatre <em>anciens</em>. Dans C\u00a0: <em>forteresse</em> devrait \u00eatre <em>forteresses</em>. Dans D\u00a0: <em>ancien</em> devrait \u00eatre <em>ancienne</em>.'
+  }
+};
+
+/* ACT 6 DRAG */
+var WORDS1 = [
+  {w:'Il',        cat:5},
+  {w:'traverse',  cat:3},
+  {w:'parfois',   cat:4},
+  {w:'de',        cat:6},
+  {w:'vieilles',  cat:2},
+  {w:'forêts',    cat:1},
+  {w:'sombres',   cat:2}
+];
+
+var CATS6 = ['D\u00e9terminant','Nom','Adjectif','Verbe','Adverbe'];
+var CATS1 = ['D\u00e9terminant','Nom','Adjectif','Verbe','Adverbe','Pronom','Pr\u00e9position'];
+
+function shuffle(a){ var b=a.slice(); for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;} return b; }
+
+
+function build1drag(){
+  var bank=$('bank1'); bank.innerHTML='';
+  shuffle(WORDS1).forEach(function(v){ bank.appendChild(makeChip1(v.w)); });
+  var grid=$('cols1'); grid.innerHTML='';
+  CATS1.forEach(function(cat,ci){
+    var box=document.createElement('div'); box.className='col-box'; box.dataset.col=ci;
+    var title=document.createElement('div'); title.className='col-title'; title.textContent=cat;
+    var drop=document.createElement('div'); drop.className='col-drop'; drop.id='drop1_'+ci; drop.dataset.col=ci;
+    drop.addEventListener('dragover',function(e){ e.preventDefault(); box.classList.add('drag-over'); });
+    drop.addEventListener('dragleave',function(){ box.classList.remove('drag-over'); });
+    drop.addEventListener('drop',function(e){
+      e.preventDefault(); box.classList.remove('drag-over');
+      if(dragSrc&&!done[0]) doDropAct1(dragSrc,drop);
+    });
+    drop.addEventListener('touchend',function(e){
+      if(!dragSrc||done[0]) return;
+      var t=e.changedTouches[0];
+      var el=document.elementFromPoint(t.clientX,t.clientY);
+      var target=el?el.closest('.col-drop'):null;
+      if(target) doDropAct1(dragSrc,target);
+      dragSrc=null;
+    });
+    box.appendChild(title); box.appendChild(drop); grid.appendChild(box);
+  });
+}
+function makeChip1(w){
+  var chip=document.createElement('div'); chip.className='drag-chip'; chip.textContent=w; chip.dataset.word=w;
+  chip.draggable=true;
+  chip.addEventListener('dragstart',function(e){ dragSrc=chip; e.dataTransfer.effectAllowed='move'; });
+  chip.addEventListener('touchstart',function(){ dragSrc=chip; },{passive:true});
+  return chip;
+}
+function doDropAct1(chip,drop){
+  if(chip.parentElement) chip.parentElement.removeChild(chip);
+  drop.appendChild(chip); dragSrc=null;
+}
+function verif1drag(){
+  if(done[0]) return;
+  done[0]=true; $('vbtn1').disabled=true;
+  var ok=0;
+  $('cols1').querySelectorAll('.drag-chip').forEach(function(chip){
+    var w=chip.dataset.word;
+    var d=WORDS1.find(function(v){ return v.w===w; });
+    var placed=parseInt(chip.parentElement.dataset.col);
+    chip.draggable=false;
+    if(placed===d.cat){ chip.classList.add('chip-ok'); ok++; }
+    else { chip.classList.add('chip-ko'); }
+  });
+  scores[0]=ok>=5?1:0;
+  showFb(1,ok>=5,ok>=5?'Excellent !':ok>=3?'Bien !':'Observe encore.',
+    ok+' / '+WORDS1.length+' mots bien classés. Pronom : Il. Verbe : traverse. Adverbe : parfois. Préposition : de. Adjectifs : vieilles, sombres. Nom : forêts.');
+  $('nxt1').style.display='inline-flex';
+  updateGlobal();
+  if(allDone()) setTimeout(showResults,500);
+}
+function reset1drag(){
+  done[0]=false; scores[0]=null; $('vbtn1').disabled=false;
+  $('fb1').className='feedback'; $('nxt1').style.display='none';
+  build1drag(); updateGlobal();
+}
+/* BUILD QCM */
+function buildQCM(n){
+  var d=QCM[n]; var c=$('ch'+n); c.innerHTML='';
+  var letters=['A','B','C','D','E'];
+  d.opts.forEach(function(opt,i){
+    var btn=document.createElement('button'); btn.className='choice-btn';
+    btn.innerHTML='<span class="choice-letter">'+letters[i]+'</span><span>'+opt+'</span>';
+    btn.addEventListener('click',function(){
+      if(done[n-1]) return;
+      c.querySelectorAll('.choice-btn').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+    });
+    c.appendChild(btn);
+  });
+}
+
+function verifQCM(n){
+  if(done[n-1]) return;
+  var d=QCM[n];
+  var btns=$('ch'+n).querySelectorAll('.choice-btn');
+  var sel=-1;
+  btns.forEach(function(b,i){ if(b.classList.contains('selected')) sel=i; });
+  if(sel<0){ return; }
+  done[n-1]=true; $('vbtn'+n).disabled=true;
+  var ok=(sel===d.ans);
+  btns.forEach(function(b,i){
+    b.disabled=true; b.classList.remove('selected');
+    if(i===d.ans) b.classList.add('correct-ans');
+    else if(i===sel&&!ok) b.classList.add('wrong-ans');
+  });
+  scores[n-1]=ok?1:0;
+  showFb(n,ok,ok?'Bravo\u00a0!':'Pas tout \u00e0 fait.',ok?d.fbOk:d.fbKo);
+  $('nxt'+n).style.display='inline-flex';
+  updateGlobal();
+  if(allDone()) setTimeout(showResults,500);
+}
+
+function resetQCM(n){
+  done[n-1]=false; scores[n-1]=null; $('vbtn'+n).disabled=false;
+  $('fb'+n).className='feedback'; $('nxt'+n).style.display='none';
+  buildQCM(n); updateGlobal();
+}
+
+/* WRITE */
+function verif3(){
+  if(done[2]) return;
+  var inp=$('wi3'); var v=inp.value.trim().toLowerCase();
+  if(!v) return;
+  done[2]=true; $('vbtn3').disabled=true; inp.readOnly=true;
+  var ok=v.indexOf('cette')!==-1||v.indexOf('immense')!==-1||v.indexOf('blanche')!==-1||v.indexOf('tour')!==-1;
+  scores[2]=ok?1:0;
+  inp.classList.add(ok?'ok':'ko');
+  $('popup3').style.display='block';
+  showFb(3,ok,ok?'Bien observé !':'Regarde la correction ci-dessous.',ok?'Tu as bien repréré les mots qui changent.':'La correction est affichée ci-dessus.');
+  $('nxt3').style.display='inline-flex';
+  updateGlobal();
+  if(allDone()) setTimeout(showResults,500);
+}
+
+
+
+function verifWrite(n, keywords, corrections){
+  if(done[n-1]) return;
+  var inp=$('wi'+n); var v=inp.value.trim().toLowerCase();
+  if(!v) return;
+  done[n-1]=true; $('vbtn'+n).disabled=true; inp.readOnly=true;
+  var found=keywords.filter(function(k){ return v.indexOf(k.toLowerCase())!==-1; });
+  var ok=found.length>0;
+  scores[n-1]=ok?1:0;
+  inp.classList.add(ok?'ok':'ko');
+  showFb(n,ok,ok?'Bien observ\u00e9\u00a0!':'Observe encore\u2026',ok?'Ta r\u00e9ponse est dans la bonne direction.':corrections[0]);
+  $('nxt'+n).style.display='inline-flex';
+  updateGlobal();
+  if(allDone()) setTimeout(showResults,500);
+}
+
+function resetWrite(n){
+  done[n-1]=false; scores[n-1]=null; $('vbtn'+n).disabled=false;
+  var inp=$('wi'+n); inp.value=''; inp.readOnly=false; inp.classList.remove('ok','ko');
+  $('fb'+n).className='feedback'; $('nxt'+n).style.display='none';
+  updateGlobal();
+}
+
+/* ACT 4 */
+function verif4(){
+  if(done[3]) return;
+  var a=$('s4a').value; var b=$('s4b').value; var cc=$('s4c').value;
+  if(!a||!b||!cc) return;
+  done[3]=true; $('vbtn4').disabled=true;
+  [$('s4a'),$('s4b'),$('s4c')].forEach(function(sel){ sel.disabled=true; });
+  var okA=(a==='1p');
+  var okB=(b==='2');
+  var okC=(cc==='chemins');
+  $('s4a').classList.add(okA?'ok':'ko'); $('sr4a').innerHTML=okA?'✓':'→ <b>1re pers. pluriel</b>';
+  $('s4b').classList.add(okB?'ok':'ko'); $('sr4b').innerHTML=okB?'✓':'→ <b>2e groupe</b>';
+  $('s4c').classList.add(okC?'ok':'ko'); $('sr4c').innerHTML=okC?'✓':'→ <b>chemins</b>';
+  var ok=okA&&okB&&okC;
+  scores[3]=ok?1:0;
+  showFb(4,ok,ok?'Parfait !':'Observe encore.',ok?'Les 3 réponses sont correctes.':'<em>choisissons</em> : 1re pers. pluriel, 2e groupe (-issons). Nom noyau du GN objet : <em>chemins</em>.');
+  $('nxt4').style.display='inline-flex';
+  updateGlobal();
+  if(allDone()) setTimeout(showResults,500);
+}
+
+function reset4(){
+  done[3]=false; scores[3]=null; $('vbtn4').disabled=false;
+  ['s4a','s4b','s4c'].forEach(function(id){ var sel=$(id); sel.value=''; sel.disabled=false; sel.classList.remove('ok','ko'); });
+  ['sr4a','sr4b','sr4c'].forEach(function(id){ $(id).innerHTML=''; });
+  $('fb4').className='feedback'; $('nxt4').style.display='none';
+  updateGlobal();
+}
+
+/* ACT 6 DRAG */
+
+
+
+function showFb(n,ok,title,det){
+  var fb=$('fb'+n); fb.className='feedback show '+(ok?'ok':'ko');
+  $('fbi'+n).textContent=ok?'\u2705':'\u274c';
+  $('fbt'+n).textContent=title;
+  $('fbd'+n).innerHTML=det;
+}
+
+function scrollToCard(n){
+  var card=$('card'+n);
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function allDone(){ return done.every(function(d){ return d; }); }
+
+function updateGlobal(){
+  var ok=0,ko=0,rem=0;
+  scores.forEach(function(s){ if(s===1)ok++; else if(s===0)ko++; else rem++; });
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
+  var done_count=5-rem;
+  var pct=Math.round(done_count/6*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=done_count+' / 6 questions';
+  $('prog-pct').textContent=pct+'\u00a0%';
+}
+
+function showResults(){
+  var total=scores.reduce(function(a,b){ return a+(b||0); },0);
+  $('r-score').textContent=total;
+  var s=total>=6?5:total>=5?4:total>=3?3:total>=2?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=['Continue\u00a0\u2014 reprends la fiche r\u00e9cap et r\u00e9essaie\u00a0!',
+    'Tu progresses\u00a0! Quelques notions \u00e0 revoir.',
+    'Pas mal\u00a0\u2014 tu ma\u00eetrises l\u2019essentiel.',
+    'Tr\u00e8s bien\u00a0! La semaine est bien assimil\u00e9e.',
+    'Parfait\u00a0! Tu ma\u00eetrises toutes les notions de la semaine.'];
+  $('r-msg').textContent=msgs[s-1];
+  var recap=$('r-recap'); recap.innerHTML='';
+  var labels=['Classement','Mot imposteur','Qui commande ?','Double enquête','Cherche l’erreur','Terminaisons'];
+  labels.forEach(function(lbl,i){
+    var ok2=scores[i]===1;
+    var d=document.createElement('div'); d.className='recap-item '+(ok2?'ok-r':'ko-r');
+    d.innerHTML='<span>'+(ok2?'\u2705':'\u274c')+'</span><span style="flex:1;color:#8a8f9a;">Act.'+(i+1)+'\u00a0\u2014 '+lbl+'</span><span style="color:#8a6000;font-weight:700;">'+(ok2?'Correct':'\u00c0 revoir')+'</span>';
+    recap.appendChild(d);
+  });
+  $('results-screen').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartAll(){
+  scores=new Array(6).fill(null); done=new Array(6).fill(false);
+  $('results-screen').classList.remove('show');
+  reset1drag(); [2,5].forEach(function(n){ resetQCM(n); });
+  resetWrite(3); reset4(); reset6match();
+  $('popup3').style.display='none';
+  updateGlobal(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+/* ACT 6 : SAISIE TERMINAISONS */
+var MATCH6=[
+  {pron:'je',        t1:'-e',      t2:'-is'},
+  {pron:'tu',        t1:'-es',     t2:'-is'},
+  {pron:'il / elle', t1:'-e',      t2:'-it'},
+  {pron:'nous',      t1:'-ons',    t2:'-issons'},
+  {pron:'vous',      t1:'-ez',     t2:'-issez'},
+  {pron:'ils / elles',t1:'-ent',    t2:'-issent'}
+];
+
+function build6match(){
+  var area=$('match6-area'); area.innerHTML='';
+  var head=document.createElement('div');
+  head.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.5rem;';
+  head.innerHTML='<div style="font-family:monospace;font-size:.7rem;color:#8a8f9a;text-transform:uppercase;text-align:center;">Pronom</div>'
+    +'<div style="font-family:monospace;font-size:.7rem;color:#c47a10;font-weight:800;text-transform:uppercase;text-align:center;">1er groupe</div>'
+    +'<div style="font-family:monospace;font-size:.7rem;color:#3d7a10;font-weight:800;text-transform:uppercase;text-align:center;">2e groupe</div>';
+  area.appendChild(head);
+  MATCH6.forEach(function(row,i){
+    var rowDiv=document.createElement('div');
+    rowDiv.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.45rem;align-items:center;';
+    var p=document.createElement('div');
+    p.style.cssText='background:#fffbeb;border:1.5px solid #f5e08a;border-radius:8px;padding:.45rem .5rem;font-family:monospace;font-weight:700;font-size:.9rem;color:#5a3e00;text-align:center;';
+    p.textContent=row.pron;
+    var i1=document.createElement('input'); i1.id='m6i1_'+i; i1.type='text';
+    i1.placeholder='- - -'; i1.autocomplete='off'; i1.setAttribute('autocapitalize','off'); i1.spellcheck=false;
+    i1.style.cssText='width:100%;padding:.4rem .5rem;border-radius:8px;border:2px solid #f5d080;background:#fff5e0;font-family:monospace;font-weight:700;font-size:.9rem;color:#c47a10;text-align:center;outline:none;min-height:38px;box-sizing:border-box;';
+    i1.addEventListener('keydown',function(e){ if(e.key==='Enter') verif6match(); });
+    var i2=document.createElement('input'); i2.id='m6i2_'+i; i2.type='text';
+    i2.placeholder='- - -'; i2.autocomplete='off'; i2.setAttribute('autocapitalize','off'); i2.spellcheck=false;
+    i2.style.cssText='width:100%;padding:.4rem .5rem;border-radius:8px;border:2px solid #b5e08a;background:#f0faeb;font-family:monospace;font-weight:700;font-size:.9rem;color:#3d7a10;text-align:center;outline:none;min-height:38px;box-sizing:border-box;';
+    i2.addEventListener('keydown',function(e){ if(e.key==='Enter') verif6match(); });
+    rowDiv.appendChild(p); rowDiv.appendChild(i1); rowDiv.appendChild(i2);
+    area.appendChild(rowDiv);
+  });
+}
+
+function verif6match(){
+  if(done[5]) return;
+  done[5]=true; $('vbtn6').disabled=true;
+  var ok=0;
+  MATCH6.forEach(function(row,i){
+    var i1=$('m6i1_'+i); var i2=$('m6i2_'+i);
+    var v1=i1?i1.value.trim().toLowerCase().replace(/^[\s-]*/,'').replace(/[\s]*$/,''):'';
+    var v2=i2?i2.value.trim().toLowerCase().replace(/^[\s-]*/,'').replace(/[\s]*$/,''):'';
+    var exp1=row.t1.replace('-',''); var exp2=row.t2.replace('-','');
+    var ok1=(v1===exp1||v1===row.t1||('-'+v1)===row.t1);
+    var ok2=(v2===exp2||v2===row.t2||('-'+v2)===row.t2);
+    if(i1){ i1.readOnly=true; i1.style.borderColor=ok1?'#8dc63f':'#f28b82'; i1.style.background=ok1?'#d4edda':'#ffe0de'; if(!ok1) i1.value=i1.value+' → '+row.t1; }
+    if(i2){ i2.readOnly=true; i2.style.borderColor=ok2?'#8dc63f':'#f28b82'; i2.style.background=ok2?'#d4edda':'#ffe0de'; if(!ok2) i2.value=i2.value+' → '+row.t2; }
+    if(ok1&&ok2) ok++;
+  });
+  scores[5]=ok>=5?1:0;
+  showFb(6,ok>=5,ok>=5?'Parfait !':ok>=3?'Bien !':'À retravailler.',
+    ok+' / 6 lignes correctes. 1er groupe : -e,-es,-e,-ons,-ez,-ent. 2e groupe : -is,-is,-it,-issons,-issez,-issent.');
+  $('nxt6').style.display='inline-flex';
+  updateGlobal();
+  if(allDone()) setTimeout(showResults,500);
+}
+
+function reset6match(){
+  done[5]=false; scores[5]=null; $('vbtn6').disabled=false;
+  $('fb6').className='feedback'; $('nxt6').style.display='none';
+  build6match(); updateGlobal();
+}
+
+/* INIT */
+build1drag(); buildQCM(2); buildQCM(5); build6match();
+</script>
+</body>
+</html>
