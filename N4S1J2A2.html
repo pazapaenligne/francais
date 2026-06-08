@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission d'analyse – 4e S1 J2 · Phrase simple et complexe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#e63950; --jour-fonce:#9c1a2e; --jour-clair:#fdedf0; --jour-pale:#f5a3b0;
+  --day-glow:rgba(230,57,80,.32);
+  --bg:#fffdf7; --dark:#1a1f2e;
+  --vert:#22c55e; --rouge:#ef4444; --orange:#f5a623;
+  --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--txt); min-height:100vh; overflow-x:hidden; padding:16px 12px 60px; position:relative; }
+.bulle{ position:fixed; border-radius:50%; filter:blur(6px); opacity:.5; z-index:0; pointer-events:none; }
+.b1{ width:200px;height:200px;background:#ffd84d;top:-60px;right:-50px; }
+.b2{ width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px; }
+.b3{ width:150px;height:150px;background:#9be7a5;top:45%;right:-70px; }
+.b4{ width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px; }
+.wrap{ position:relative; z-index:1; max-width:660px; margin:0 auto; }
+
+.header{ text-align:center; margin-bottom:18px; }
+.logo-badge{ display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px var(--day-glow);margin-bottom:10px; }
+.dots{ display:inline-flex;gap:3px; }
+.dots i{ width:7px;height:7px;border-radius:50%;background:#fff;display:block; }
+.dots i:nth-child(2){ opacity:.6; } .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:3px;color:var(--gris);text-transform:uppercase;margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,5.5vw,2.1rem);line-height:1.15;color:var(--txt);margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif;font-size:clamp(.65rem,2.5vw,.82rem);letter-spacing:1.5px;color:var(--gris);margin-bottom:14px; }
+.badge-revision{ display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.82rem);letter-spacing:1px;padding:9px 16px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);animation:pulse 1.8s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);box-shadow:0 6px 22px rgba(230,57,80,.7);} }
+
+.game{ background:var(--dark);border:2px solid var(--jour);border-radius:18px;padding:16px 14px;margin-bottom:20px;box-shadow:0 0 24px var(--day-glow),inset 0 0 40px rgba(0,0,0,.3); }
+.game-label{ font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:2px;color:var(--jour);opacity:.85;margin-bottom:12px; }
+.note-display{ text-align:center;margin-bottom:12px; }
+.note-val{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.4rem,10vw,4rem);line-height:1;color:var(--jour);text-shadow:0 0 20px var(--day-glow); }
+.note-label{ font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.5);margin-top:4px;text-transform:uppercase; }
+.score-etapes{ display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
+.sc-bloc{ background:rgba(255,255,255,.05);border:1px solid rgba(230,57,80,.2);border-radius:12px;padding:8px 4px;text-align:center; }
+.sc-bloc .scb-val{ font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.6rem);line-height:1;color:var(--jour); }
+.sc-bloc .scb-lbl{ font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.8px;color:rgba(255,255,255,.45);margin-top:4px;text-transform:uppercase;line-height:1.3; }
+.etoiles{ text-align:center;margin-bottom:14px;font-size:clamp(1.1rem,4vw,1.55rem);letter-spacing:clamp(3px,1.5vw,8px); }
+.star{ color:rgba(255,255,255,.22);transition:.3s;display:inline-block; }
+.star.on{ color:var(--jour);text-shadow:0 0 12px var(--jour);animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{transform:scale(0);} 60%{transform:scale(1.5);} 100%{transform:scale(1);} }
+.xp-head{ display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+.xp-head span{ font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--jour);opacity:.85; }
+.xp-head span:last-child{ font-size:.68rem;font-weight:700;opacity:1; }
+.xp-bar{ height:9px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden; }
+.xp-fill{ height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f9aab8);box-shadow:0 0 10px var(--jour);border-radius:8px;transition:width .8s cubic-bezier(.22,1,.36,1); }
+
+.card{ background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);margin-bottom:16px;animation:fadeUp .4s ease both; }
+@keyframes fadeUp{ from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+.rainbow{ height:6px;background:linear-gradient(90deg,#ff5e5e,var(--jour),#f5a623,#3ab5d8,#a884ff,#ff5e5e);background-size:300% 100%;animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{background-position:0%;} 100%{background-position:300%;} }
+.card-body{ padding:16px 14px 22px; }
+.card-head{ display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap; }
+.defi-num{ font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.85rem,3vw,1rem);letter-spacing:1px;color:var(--txt); }
+.type-badge{ font-family:'Orbitron',sans-serif;font-size:.58rem;font-weight:700;background:var(--jour-clair);color:var(--jour-fonce);padding:4px 9px;border-radius:14px;border:1px solid var(--jour-pale); }
+
+.texte-source{ background:var(--dark);border:2px solid var(--jour);border-radius:14px;padding:14px 16px;margin-bottom:20px;box-shadow:inset 0 0 30px rgba(0,0,0,.3); }
+.ts-label{ font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--jour);margin-bottom:10px; }
+.ts-phrases{ display:flex;flex-direction:column;gap:10px; }
+.ts-phrase{ font-size:clamp(.88rem,3vw,.98rem);color:#e8e6dd;line-height:1.7;padding:8px 10px;border-radius:8px;border-left:3px solid rgba(230,57,80,.4); }
+.ts-phrase .ph-num{ font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;color:var(--jour);letter-spacing:1px;display:block;margin-bottom:3px; }
+
+.section-title{ font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,3vw,.96rem);letter-spacing:1px;color:var(--jour-fonce);margin:22px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--jour-pale); }
+.consigne-box{ background:var(--jour-clair);border-left:4px solid var(--jour);border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:16px;font-size:clamp(.88rem,3vw,.96rem);color:var(--jour-fonce);font-weight:600;line-height:1.6; }
+
+/* ÉTAPE 1 */
+.ph-row{ display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0e8e0;flex-wrap:wrap; }
+.ph-row:last-child{ border-bottom:none; }
+.ph-txt{ flex:1;font-size:clamp(.86rem,3vw,.96rem);color:var(--txt);line-height:1.6;font-style:italic;min-width:0; }
+.sc-btns{ display:flex;gap:6px;flex-shrink:0; }
+.sc-btn{ padding:7px 12px;border:2px solid #e0d4c8;border-radius:8px;background:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.5px;cursor:pointer;transition:.15s;white-space:nowrap;min-height:38px;-webkit-tap-highlight-color:transparent; }
+.sc-btn:hover{ border-color:var(--jour);background:var(--jour-clair); }
+.sc-btn.selected{ border-color:var(--jour);background:var(--jour-clair);color:var(--jour-fonce); }
+.sc-btn.correct{ border-color:#22c55e!important;background:#e7faec!important;color:#157f3a!important; }
+.sc-btn.wrong  { border-color:#ef4444!important;background:#fdeaea!important;color:#c0392b!important; }
+.sc-btn[disabled]{ cursor:default; }
+
+/* ÉTAPE 2 */
+.rep-block{ background:#fffdf7;border:2px solid var(--jour-pale);border-radius:12px;padding:13px 14px;margin-bottom:12px; }
+.rep-ph{ font-size:clamp(.86rem,3vw,.96rem);font-style:italic;color:var(--txt);margin-bottom:12px;line-height:1.6;border-left:3px solid var(--jour-pale);padding-left:10px; }
+.rep-ph .ph-lbl{ font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;color:var(--jour);display:block;margin-bottom:3px; }
+.rep-row{ display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px; }
+.rep-label{ font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--gris);letter-spacing:.5px;min-width:110px; }
+.rep-opts{ display:flex;gap:6px;flex-wrap:wrap; }
+.rep-btn{ padding:6px 11px;border:2px solid #e0d4c8;border-radius:8px;background:#fff;font-family:Arial,sans-serif;font-size:clamp(.8rem,2.8vw,.9rem);cursor:pointer;transition:.15s;min-height:36px;-webkit-tap-highlight-color:transparent; }
+.rep-btn:hover{ border-color:var(--jour);background:var(--jour-clair); }
+.rep-btn.selected{ border-color:var(--jour);background:var(--jour-clair);font-weight:700;color:var(--jour-fonce); }
+.rep-btn.correct{ border-color:#22c55e!important;background:#e7faec!important;color:#157f3a!important; }
+.rep-btn.wrong  { border-color:#ef4444!important;background:#fdeaea!important;color:#c0392b!important; }
+.rep-btn[disabled]{ cursor:default; }
+/* Saisie mot liaison */
+.mot-input{ font-family:Arial,sans-serif;font-size:clamp(.86rem,3vw,.96rem);font-weight:700;padding:6px 10px;border:2px solid var(--jour-pale);border-radius:8px;background:#fffdf7;color:var(--txt);outline:none;width:120px;transition:border-color .15s; }
+.mot-input:focus{ border-color:var(--jour);background:var(--jour-clair); }
+.mot-input:disabled{ cursor:not-allowed;background:#f2ece5; }
+.mot-input.ok { border-color:#22c55e;background:#e7faec;color:#157f3a; }
+.mot-input.err{ border-color:#ef4444;background:#fdeaea;color:#c0392b; }
+.corr-mot{ display:none;font-size:.74rem;font-weight:700;color:#c0392b;font-family:'JetBrains Mono',monospace;margin-left:6px; }
+.corr-mot.show{ display:inline; }
+
+/* ÉTAPE 3 */
+.sub-block{ display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0e8e0;flex-wrap:wrap; }
+.sub-block:last-child{ border-bottom:none; }
+.sub-txt{ flex:1;font-size:clamp(.86rem,3vw,.96rem);font-style:italic;color:var(--txt);line-height:1.6;min-width:0; }
+.sub-opts{ display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0; }
+.sub-btn{ padding:6px 11px;border:2px solid #e0d4c8;border-radius:8px;background:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.5px;cursor:pointer;transition:.15s;min-height:36px;-webkit-tap-highlight-color:transparent; }
+.sub-btn:hover{ border-color:var(--jour);background:var(--jour-clair); }
+.sub-btn.selected{ border-color:var(--jour);background:var(--jour-clair);color:var(--jour-fonce); }
+.sub-btn.correct{ border-color:#22c55e!important;background:#e7faec!important;color:#157f3a!important; }
+.sub-btn.wrong  { border-color:#ef4444!important;background:#fdeaea!important;color:#c0392b!important; }
+.sub-btn.missed { border-color:#22c55e!important;background:#e7faec!important;opacity:.7; }
+.sub-btn[disabled]{ cursor:default; }
+
+/* ÉTAPE 4 — saisie libre */
+.bilan-zone{ display:flex;flex-direction:column;gap:14px; }
+.bilan-ligne{ font-size:clamp(.9rem,3vw,1.02rem);line-height:2.2;color:var(--txt); }
+.bilan-input{ display:inline-block;border:none;border-bottom:2.5px solid var(--jour);background:transparent;outline:none;font-family:Arial,sans-serif;font-size:clamp(.88rem,3vw,.98rem);font-weight:700;color:var(--txt);padding:1px 4px;min-width:80px;text-align:center;vertical-align:baseline;transition:border-color .15s;-webkit-tap-highlight-color:transparent; }
+.bilan-input:focus{ border-bottom-color:var(--jour-fonce);background:var(--jour-clair);border-radius:4px 4px 0 0; }
+.bilan-input:disabled{ cursor:not-allowed; }
+.bilan-input.ok { border-bottom-color:#22c55e;color:#157f3a; }
+.bilan-input.err{ border-bottom-color:#ef4444;color:#c0392b;background:#fdeaea;border-radius:4px 4px 0 0; }
+.bilan-corr{ display:none;font-size:.74rem;font-weight:700;color:#c0392b;font-family:'JetBrains Mono',monospace; }
+.bilan-corr.show{ display:inline; }
+
+/* BOUTONS */
+.btns{ display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 4px; }
+.btn{ font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.72rem,2.5vw,.82rem);letter-spacing:1px;padding:12px 18px;border:none;border-radius:10px;cursor:pointer;transition:transform .12s;color:#fff;min-height:48px;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center;gap:6px; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-rejouer{ background:var(--jour);color:#fff;display:none; }
+.btn-rejouer.visible{ display:inline-flex; }
+.btn-valider:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-rejouer.visible:not(:disabled){ animation:neon-jour 1.4s ease-in-out infinite; }
+@keyframes neon-vert{ 0%,100%{box-shadow:0 0 6px rgba(34,197,94,.5);} 50%{box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-jour{ 0%,100%{box-shadow:0 0 6px rgba(230,57,80,.5);} 50%{box-shadow:0 0 18px rgba(230,57,80,.95);} }
+.btn:disabled{ background:#d8d8d8!important;color:#fff!important;cursor:not-allowed;animation:none!important;box-shadow:none!important; }
+@media(max-width:480px){ .btns{flex-direction:column;} .btn{width:100%;} }
+.feedback-global{ display:none;margin-top:14px;padding:13px 14px;border-radius:10px;font-weight:bold;font-size:clamp(.88rem,3vw,1rem);line-height:1.5; }
+.feedback-global.show{ display:block;animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback-global.ok   { background:#e7faec;color:#157f3a;border:1px solid #9be7a5; }
+.feedback-global.moyen{ background:#fff8e6;color:#8a6000;border:1px solid #f5d080; }
+.feedback-global.ko   { background:#fdeaea;color:#c0392b;border:1px solid #f5b5b5; }
+.resultat-zone{ display:none;margin-top:18px; }
+.resultat-zone.show{ display:block;animation:fadeUp .4s ease; }
+.xp-pop{ position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.5);font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.5rem;color:var(--jour);text-shadow:0 0 20px var(--jour);z-index:50;opacity:0;pointer-events:none; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.25);}70%{opacity:1;transform:translate(-50%,-80%) scale(1);}100%{opacity:0;transform:translate(-50%,-130%) scale(.9);} }
+@media(max-width:380px){ .game{padding:12px 10px;} .card-body{padding:12px 10px 16px;} }
+</style>
+</head>
+<body>
+<div class="bulle b1"></div><div class="bulle b2"></div><div class="bulle b3"></div><div class="bulle b4"></div>
+<div class="wrap">
+
+<div class="header">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 4E</div>
+  <div class="semaine">Semaine 1 – Jour 2</div>
+  <h1 class="titre">Mission d'<span class="accent">analyse</span> guidée</h1>
+  <div class="sous-titre">Phrase simple et phrase complexe</div>
+  <div class="badge-revision">STRUCTURE · LIENS · SUBORDONNÉES</div>
+</div>
+
+<div class="game">
+  <div class="game-label">MISSION ANALYSE · 4E · NOTE SUR 10</div>
+  <div class="note-display">
+    <div class="note-val" id="note-val">— / 10</div>
+    <div class="note-label">Ta note (étapes 1 à 3)</div>
+  </div>
+  <div class="score-etapes">
+    <div class="sc-bloc"><div class="scb-val" id="sc-e1">— / 4</div><div class="scb-lbl">Étape 1<br>Structure</div></div>
+    <div class="sc-bloc"><div class="scb-val" id="sc-e2">— / 3</div><div class="scb-lbl">Étape 2<br>Repérage</div></div>
+    <div class="sc-bloc"><div class="scb-val" id="sc-e3">— / 3</div><div class="scb-lbl">Étape 3<br>Nature</div></div>
+  </div>
+  <div class="etoiles" id="etoiles"></div>
+  <div class="xp-head"><span>XP PROGRESS</span><span id="xp-pct">0 %</span></div>
+  <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+</div>
+
+<div class="card">
+  <div class="rainbow"></div>
+  <div class="card-body">
+    <div class="card-head">
+      <div class="type-badge">PHRASE SIMPLE &amp; COMPLEXE</div>
+    </div>
+
+    <!-- TEXTE -->
+    <div class="texte-source">
+      <div class="ts-label">TEXTE D'OBSERVATION</div>
+      <div class="ts-phrases">
+        <div class="ts-phrase"><span class="ph-num">P1</span>Le matin se levait sur la vallée encore endormie.</div>
+        <div class="ts-phrase"><span class="ph-num">P2</span>Une brume légère glissait entre les arbres, qui semblaient immobiles sous la lumière pâle.</div>
+        <div class="ts-phrase"><span class="ph-num">P3</span>Le marcheur avançait lentement, car le sentier disparaissait sous les herbes hautes.</div>
+        <div class="ts-phrase"><span class="ph-num">P4</span>Lorsque le soleil perça les nuages, la nature sembla reprendre vie.</div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 1 -->
+    <div class="section-title">ÉTAPE 1 — Identifier la structure</div>
+    <div class="consigne-box"><strong>Consigne&nbsp;:</strong> Pour chaque phrase, clique sur <b>SIMPLE</b> ou <b>COMPLEXE</b>.</div>
+    <div id="etape1-zone"></div>
+
+    <!-- ÉTAPE 2 -->
+    <div class="section-title">ÉTAPE 2 — Repérer les liens</div>
+    <div class="consigne-box"><strong>Consigne&nbsp;:</strong> Pour chaque phrase complexe, écris le mot de liaison, choisis le nombre de verbes conjugués et la nature du lien.</div>
+    <div id="etape2-zone"></div>
+
+    <!-- ÉTAPE 3 -->
+    <div class="section-title">ÉTAPE 3 — Nature des subordonnées</div>
+    <div class="consigne-box"><strong>Consigne&nbsp;:</strong> Quelle est la nature de chaque proposition subordonnée&nbsp;?</div>
+    <div id="etape3-zone"></div>
+
+    <!-- ÉTAPE 4 -->
+    <div class="section-title">ÉTAPE 4 — Bilan <span style="font-size:.7rem;font-weight:400;color:var(--gris);">(non noté)</span></div>
+    <div class="consigne-box"><strong>Consigne&nbsp;:</strong> Complète ces phrases pour retenir l'essentiel de ce que tu viens d'analyser.</div>
+    <div class="bilan-zone" id="bilan-zone"></div>
+
+    <div class="btns">
+      <button class="btn btn-valider" id="btn-valider" onclick="valider()">CORRIGER MA MISSION</button>
+      <button class="btn btn-rejouer" id="btn-rejouer" onclick="recommencer()">↺ RECOMMENCER</button>
+    </div>
+    <div class="feedback-global" id="feedback-global"></div>
+    <div class="resultat-zone" id="resultat-zone">
+      <div style="font-family:'Orbitron',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:1px;color:var(--txt);margin-bottom:10px;">CORRIGÉ COMPLET</div>
+      <div id="corrige-zone" style="font-size:clamp(.84rem,3vw,.94rem);line-height:2;color:var(--txt);background:#fffdf7;border:2px solid #e8e2d4;border-radius:12px;padding:14px 16px;"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="xp-pop" id="xp-pop">+XP !</div>
+
+<script>
+const PHRASES = [
+  { id:'P1', txt:'Le matin se levait sur la vallée encore endormie.', simple:true },
+  { id:'P2', txt:'Une brume légère glissait entre les arbres, qui semblaient immobiles sous la lumière pâle.', simple:false },
+  { id:'P3', txt:'Le marcheur avançait lentement, car le sentier disparaissait sous les herbes hautes.', simple:false },
+  { id:'P4', txt:'Lorsque le soleil perça les nuages, la nature sembla reprendre vie.', simple:false },
+];
+
+const REP_DATA = [
+  { ph:'P2', txt:'Une brume légère glissait entre les arbres, qui semblaient immobiles sous la lumière pâle.',
+    mot:'qui', verbes:{opts:['1','2','3'],ans:'2'}, lien:{opts:['coordination','subordination'],ans:'subordination'} },
+  { ph:'P3', txt:'Le marcheur avançait lentement, car le sentier disparaissait sous les herbes hautes.',
+    mot:'car', verbes:{opts:['1','2','3'],ans:'2'}, lien:{opts:['coordination','subordination'],ans:'subordination'} },
+  { ph:'P4', txt:'Lorsque le soleil perça les nuages, la nature sembla reprendre vie.',
+    mot:'lorsque', verbes:{opts:['1','2','3'],ans:'2'}, lien:{opts:['coordination','subordination'],ans:'subordination'} },
+];
+
+const SUB_DATA = [
+  { txt:'… qui semblaient immobiles …', opts:['relative','cause','temps'], ans:'relative',
+    expl:'« qui » est un pronom relatif → proposition subordonnée relative (elle décrit les arbres).' },
+  { txt:'… car le sentier disparaissait …', opts:['cause','temps','opposition'], ans:'cause',
+    expl:'« car » exprime la raison pour laquelle le marcheur avance lentement → subordonnée de cause.' },
+  { txt:'Lorsque le soleil perça les nuages…', opts:['temps','cause','condition'], ans:'temps',
+    expl:'« lorsque » indique le moment → subordonnée de temps.' },
+];
+
+// Étape 4 — bilan saisie libre
+const BILAN_DATA = [
+  { avant:'Une phrase ', trou:'b0', apres:' ne contient qu\'un seul verbe conjugué.', ans:'simple',
+    expl:'simple' },
+  { avant:'Une phrase ', trou:'b1', apres:' contient au moins deux verbes conjugués, reliés par un mot de liaison.', ans:'complexe',
+    expl:'complexe' },
+  { avant:'Les propositions subordonnées permettent d\'', trou:'b2', apres:' le récit en ajoutant des informations précises.', ans:'enrichir',
+    expl:'enrichir' },
+  { avant:'Le mot « ', trou:'b3', apres:' » relie une proposition subordonnée relative à son antécédent.', ans:'qui',
+    expl:'qui' },
+  { avant:'Le mot « ', trou:'b4', apres:' » introduit une subordonnée de cause.', ans:'car',
+    expl:'car' },
+  { avant:'Le mot « ', trou:'b5', apres:' » introduit une subordonnée de temps.', ans:'lorsque',
+    expl:'lorsque' },
+];
+
+let e1Sel   = new Array(PHRASES.length).fill(null);
+let e2Sel   = REP_DATA.map(() => ({mot:'', verbe:null, lien:null}));
+let e3Sel   = new Array(SUB_DATA.length).fill(null);
+let verifFait = false;
+
+function norm(s){
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[''«»]/g,'').replace(/[^a-z]/g,'').trim();
+}
+
+/* ── ÉTAPE 1 ── */
+function buildE1(){
+  const z = document.getElementById('etape1-zone'); z.innerHTML='';
+  e1Sel = new Array(PHRASES.length).fill(null);
+  PHRASES.forEach((ph,i) => {
+    const row = document.createElement('div'); row.className='ph-row';
+    const txt = document.createElement('div'); txt.className='ph-txt';
+    txt.innerHTML='<b style="font-family:\'JetBrains Mono\',monospace;font-size:.65rem;color:var(--jour);">'+ph.id+'</b> '+ph.txt;
+    row.appendChild(txt);
+    const btns = document.createElement('div'); btns.className='sc-btns';
+    [['SIMPLE',true],['COMPLEXE',false]].forEach(([lbl,val]) => {
+      const btn = document.createElement('button'); btn.className='sc-btn'; btn.textContent=lbl;
+      btn.addEventListener('click', () => {
+        if(verifFait) return;
+        btns.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected'); e1Sel[i]=val;
+      });
+      btns.appendChild(btn);
+    });
+    row.appendChild(btns); z.appendChild(row);
+  });
+}
+
+/* ── ÉTAPE 2 ── */
+function buildE2(){
+  const z = document.getElementById('etape2-zone'); z.innerHTML='';
+  e2Sel = REP_DATA.map(() => ({mot:'', verbe:null, lien:null}));
+  REP_DATA.forEach((rd,ri) => {
+    const block = document.createElement('div'); block.className='rep-block';
+    const ph = document.createElement('div'); ph.className='rep-ph';
+    ph.innerHTML='<span class="ph-lbl">'+rd.ph+'</span>'+rd.txt;
+    block.appendChild(ph);
+
+    // Mot de liaison — saisie libre
+    const r1 = document.createElement('div'); r1.className='rep-row';
+    const l1 = document.createElement('div'); l1.className='rep-label'; l1.textContent='Mot de liaison'; r1.appendChild(l1);
+    const inp = document.createElement('input'); inp.type='text'; inp.className='mot-input'; inp.id='e2-mot-inp-'+ri;
+    inp.autocomplete='off'; inp.autocorrect='off'; inp.autocapitalize='off'; inp.spellcheck=false;
+    inp.placeholder='…'; inp.addEventListener('keydown', ev=>{ if(ev.key==='Enter') ev.preventDefault(); });
+    inp.addEventListener('input', () => { e2Sel[ri].mot = inp.value.trim(); });
+    const corrSpan = document.createElement('span'); corrSpan.className='corr-mot'; corrSpan.id='corr-mot-'+ri;
+    r1.appendChild(inp); r1.appendChild(corrSpan); block.appendChild(r1);
+
+    // Nb verbes
+    const r2 = document.createElement('div'); r2.className='rep-row';
+    const l2 = document.createElement('div'); l2.className='rep-label'; l2.textContent='Nb de verbes'; r2.appendChild(l2);
+    const o2 = document.createElement('div'); o2.className='rep-opts'; o2.id='e2-verb-'+ri;
+    rd.verbes.opts.forEach(opt => {
+      const btn = document.createElement('button'); btn.className='rep-btn'; btn.textContent=opt;
+      btn.addEventListener('click', () => {
+        if(verifFait) return;
+        o2.querySelectorAll('.rep-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected'); e2Sel[ri].verbe=opt;
+      });
+      o2.appendChild(btn);
+    });
+    r2.appendChild(o2); block.appendChild(r2);
+
+    // Nature du lien
+    const r3 = document.createElement('div'); r3.className='rep-row';
+    const l3 = document.createElement('div'); l3.className='rep-label'; l3.textContent='Nature du lien'; r3.appendChild(l3);
+    const o3 = document.createElement('div'); o3.className='rep-opts'; o3.id='e2-lien-'+ri;
+    rd.lien.opts.forEach(opt => {
+      const btn = document.createElement('button'); btn.className='rep-btn'; btn.textContent=opt;
+      btn.addEventListener('click', () => {
+        if(verifFait) return;
+        o3.querySelectorAll('.rep-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected'); e2Sel[ri].lien=opt;
+      });
+      o3.appendChild(btn);
+    });
+    r3.appendChild(o3); block.appendChild(r3);
+    z.appendChild(block);
+  });
+}
+
+/* ── ÉTAPE 3 ── */
+function buildE3(){
+  const z = document.getElementById('etape3-zone'); z.innerHTML='';
+  e3Sel = new Array(SUB_DATA.length).fill(null);
+  SUB_DATA.forEach((sd,si) => {
+    const row = document.createElement('div'); row.className='sub-block';
+    const txt = document.createElement('div'); txt.className='sub-txt'; txt.textContent=sd.txt; row.appendChild(txt);
+    const opts = document.createElement('div'); opts.className='sub-opts'; opts.id='e3-'+si;
+    sd.opts.forEach(opt => {
+      const btn = document.createElement('button'); btn.className='sub-btn'; btn.textContent=opt.toUpperCase();
+      btn.setAttribute('data-val',opt);
+      btn.addEventListener('click', () => {
+        if(verifFait) return;
+        opts.querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected'); e3Sel[si]=opt;
+      });
+      opts.appendChild(btn);
+    });
+    row.appendChild(opts); z.appendChild(row);
+  });
+}
+
+/* ── ÉTAPE 4 ── */
+let bilanInputs = [];
+function buildE4(){
+  const z = document.getElementById('bilan-zone'); z.innerHTML=''; bilanInputs=[];
+  BILAN_DATA.forEach((bl,bi) => {
+    const div = document.createElement('div'); div.className='bilan-ligne';
+    div.appendChild(document.createTextNode(bl.avant));
+    const inp = document.createElement('input'); inp.type='text'; inp.className='bilan-input';
+    inp.id='bl-'+bi; inp.autocomplete='off'; inp.autocorrect='off'; inp.autocapitalize='off'; inp.spellcheck=false;
+    inp.style.width = Math.max(80, bl.ans.length*13)+'px';
+    inp.addEventListener('keydown', ev=>{
+      if(ev.key==='Enter'){ ev.preventDefault();
+        if(bi+1<bilanInputs.length) bilanInputs[bi+1].focus();
+        else document.getElementById('btn-valider').focus();
+      }
+    });
+    div.appendChild(inp);
+    const cs = document.createElement('span'); cs.className='bilan-corr'; cs.id='bl-corr-'+bi;
+    div.appendChild(cs);
+    div.appendChild(document.createTextNode(bl.apres));
+    z.appendChild(div);
+    bilanInputs.push(inp);
+  });
+}
+
+/* ── CORRECTION ── */
+function valider(){
+  if(verifFait) return;
+  verifFait = true;
+  document.getElementById('btn-valider').disabled = true;
+  document.getElementById('btn-rejouer').classList.add('visible');
+
+  // Étape 1
+  let sc1=0;
+  PHRASES.forEach((ph,i) => {
+    const btns = document.getElementById('etape1-zone').querySelectorAll('.ph-row')[i].querySelectorAll('.sc-btn');
+    btns.forEach(btn => {
+      btn.setAttribute('disabled','');
+      const val = btn.textContent==='SIMPLE';
+      if(val===ph.simple && e1Sel[i]===val) btn.classList.add('correct');
+      else if(val===ph.simple)              btn.classList.add('correct');
+      else if(e1Sel[i]===val)              btn.classList.add('wrong');
+    });
+    if(e1Sel[i]===ph.simple) sc1++;
+  });
+
+  // Étape 2
+  let sc2=0;
+  REP_DATA.forEach((rd,ri) => {
+    const motOk  = norm(e2Sel[ri].mot) === norm(rd.mot);
+    const verbOk = e2Sel[ri].verbe === rd.verbes.ans;
+    const lienOk = e2Sel[ri].lien  === rd.lien.ans;
+    if(motOk && verbOk && lienOk) sc2++;
+
+    // Mot liaison
+    const inp = document.getElementById('e2-mot-inp-'+ri);
+    inp.disabled=true; inp.classList.add(motOk?'ok':'err');
+    if(!motOk){
+      const cs = document.getElementById('corr-mot-'+ri);
+      cs.textContent='\u00a0\u2192\u00a0'+rd.mot; cs.classList.add('show');
+    }
+    colorBtns('e2-verb-'+ri, e2Sel[ri].verbe, rd.verbes.ans);
+    colorBtns('e2-lien-'+ri, e2Sel[ri].lien,  rd.lien.ans);
+  });
+
+  // Étape 3
+  let sc3=0;
+  SUB_DATA.forEach((sd,si) => {
+    const btns = document.getElementById('e3-'+si).querySelectorAll('.sub-btn');
+    btns.forEach(btn => {
+      btn.setAttribute('disabled','');
+      const val=btn.getAttribute('data-val');
+      if(val===sd.ans && e3Sel[si]===val) btn.classList.add('correct');
+      else if(val===sd.ans)               btn.classList.add('missed');
+      else if(val===e3Sel[si])            btn.classList.add('wrong');
+    });
+    if(e3Sel[si]===sd.ans) sc3++;
+    else {
+      const row=document.getElementById('etape3-zone').querySelectorAll('.sub-block')[si];
+      const d=document.createElement('div');
+      d.style.cssText='font-size:.78rem;color:#c0392b;margin-top:6px;font-style:italic;flex-basis:100%;';
+      d.textContent=sd.expl; row.appendChild(d);
+    }
+  });
+
+  // Étape 4 — non notée, juste corrigée
+  BILAN_DATA.forEach((bl,bi) => {
+    const inp=document.getElementById('bl-'+bi); inp.disabled=true;
+    const ok=norm(inp.value)===norm(bl.ans);
+    inp.classList.add(ok?'ok':'err');
+    if(!ok){
+      const cs=document.getElementById('bl-corr-'+bi);
+      cs.textContent='\u00a0\u2192\u00a0'+bl.ans; cs.classList.add('show');
+    }
+  });
+
+  const total=sc1+sc2+sc3;
+  document.getElementById('sc-e1').textContent=sc1+' / 4';
+  document.getElementById('sc-e2').textContent=sc2+' / 3';
+  document.getElementById('sc-e3').textContent=sc3+' / 3';
+  document.getElementById('note-val').textContent=total+' / 10';
+  document.getElementById('xp-fill').style.width=(total*10)+'%';
+  document.getElementById('xp-pct').textContent=(total*10)+' %';
+
+  const nbEt=total>=9?5:total>=7?4:total>=5?3:total>=3?2:1;
+  const et=document.getElementById('etoiles'); et.innerHTML='';
+  for(let i=0;i<5;i++){
+    const s=document.createElement('span');
+    s.className='star'+(i<nbEt?' on':''); s.textContent='★'; et.appendChild(s);
+  }
+
+  const fg=document.getElementById('feedback-global');
+  if(total===10)    { fg.className='feedback-global ok show';    fg.textContent='Parfait\u00a0! Tu identifies avec précision la structure des phrases et la nature des subordonnées.'; }
+  else if(total>=7) { fg.className='feedback-global ok show';    fg.textContent='Très bien\u00a0! '+total+'/10. Relis les corrections pour consolider les points manquants.'; }
+  else if(total>=5) { fg.className='feedback-global moyen show'; fg.textContent='Bon travail\u00a0! '+total+'/10. Les explications en rouge t\'aideront à progresser.'; }
+  else              { fg.className='feedback-global ko show';    fg.textContent=total+'/10. Rappel\u00a0: phrase simple = 1 verbe conjugué\u00a0; phrase complexe = 2 verbes ou plus.'; }
+
+  document.getElementById('corrige-zone').innerHTML=
+    '<b>Étape 1\u00a0:</b> P1 = simple · P2, P3, P4 = complexes<br>'
+   +'<b>Étape 2\u00a0:</b> P2 → <i>qui</i> / 2 verbes / subordination · P3 → <i>car</i> / 2 verbes / subordination · P4 → <i>lorsque</i> / 2 verbes / subordination<br>'
+   +'<b>Étape 3\u00a0:</b> <i>qui</i> = relative · <i>car</i> = cause · <i>lorsque</i> = temps';
+  document.getElementById('resultat-zone').classList.add('show');
+
+  if(total>=7){ const p=document.getElementById('xp-pop'); p.textContent='+'+(total===10?'100':'75')+' XP\u00a0!'; p.classList.remove('go'); void p.offsetWidth; p.classList.add('go'); }
+  setTimeout(()=>document.getElementById('feedback-global').scrollIntoView({behavior:'smooth',block:'nearest'}),300);
+}
+
+function colorBtns(id,sel,ans){
+  const c=document.getElementById(id); if(!c) return;
+  c.querySelectorAll('.rep-btn').forEach(btn=>{
+    btn.setAttribute('disabled','');
+    const val=btn.textContent;
+    if(val===ans && sel===val) btn.classList.add('correct');
+    else if(val===ans)         btn.classList.add('correct');
+    else if(val===sel)         btn.classList.add('wrong');
+  });
+  c.querySelectorAll('.rep-btn.correct.wrong').forEach(b=>b.classList.remove('wrong'));
+}
+
+function recommencer(){
+  verifFait=false;
+  document.getElementById('btn-valider').disabled=false;
+  document.getElementById('btn-rejouer').classList.remove('visible');
+  document.getElementById('feedback-global').className='feedback-global';
+  document.getElementById('note-val').textContent='— / 10';
+  ['sc-e1','sc-e2','sc-e3'].forEach((id,i)=>document.getElementById(id).textContent='— / '+[4,3,3][i]);
+  document.getElementById('xp-fill').style.width='0%';
+  document.getElementById('xp-pct').textContent='0 %';
+  document.getElementById('resultat-zone').classList.remove('show');
+  const et=document.getElementById('etoiles'); et.innerHTML='';
+  for(let i=0;i<5;i++){const s=document.createElement('span');s.className='star';s.textContent='★';et.appendChild(s);}
+  buildE1(); buildE2(); buildE3(); buildE4();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildE1(); buildE2(); buildE3(); buildE4();
+(function(){
+  const et=document.getElementById('etoiles'); et.innerHTML='';
+  for(let i=0;i<5;i++){const s=document.createElement('span');s.className='star';s.textContent='★';et.appendChild(s);}
+})();
+</script>
+</body>
+</html>
