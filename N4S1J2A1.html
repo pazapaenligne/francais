@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Français 4e – J'observe et je teste – S1J2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --day-color:#b94040; --day-dark:#7a1f1f; --day-light:#f7eded;
+  --day-border:#f9c0bb; --day-glow:rgba(185,64,64,.22);
+  --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+  --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+  --pink:#f28b82; --orange:#f5a623;
+  --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;font-size:1rem;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+h1 .hl{color:var(--day-color);}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+.progress-wrap{width:100%;max-width:700px;margin-bottom:1.2rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));border-radius:99px;transition:width .5s ease;width:0%;}
+
+.score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+.chip .dot{width:8px;height:8px;border-radius:50%;}
+.chip.correct .dot{background:var(--green);}
+.chip.wrong   .dot{background:var(--pink);}
+.chip.remaining .dot{background:var(--muted);}
+
+/* Card */
+.card{width:100%;max-width:700px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.4rem;animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--yellow),var(--pink));}
+.theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.act-title{font-size:1.05rem;font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+.consigne{font-size:.9rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.7;font-family:'JetBrains Mono',monospace;}
+
+/* Question */
+.q-item{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--border);}
+.q-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.q-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+.q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:8px;padding:.7rem 1.1rem;font-size:1rem;color:var(--day-dark);margin-bottom:.9rem;line-height:1.7;font-style:italic;}
+
+/* Bloc type simple/complexe */
+.bloc-label{font-size:.75rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);margin-bottom:.45rem;display:flex;align-items:center;gap:.4rem;}
+.bloc-label .bl-num{background:var(--day-color);color:#fff;font-size:.6rem;font-weight:800;border-radius:4px;padding:.1rem .45rem;letter-spacing:.06em;text-transform:uppercase;}
+.type-opts{display:flex;gap:.55rem;margin-bottom:.9rem;}
+.type-btn{flex:1;padding:.6rem .5rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);font-size:.95rem;font-weight:800;color:var(--text);cursor:pointer;min-height:44px;transition:all .15s;-webkit-appearance:none;appearance:none;text-align:center;}
+.type-btn:hover:not(:disabled):not(.sel){background:var(--day-light);border-color:var(--day-color);}
+.type-btn.sel{background:var(--day-light);border-color:var(--day-color);color:var(--day-dark);}
+.type-btn.correct{background:var(--green);color:#fff;border-color:#3d7a10;}
+.type-btn.wrong  {background:var(--day-color);color:#fff;border-color:var(--day-dark);}
+.type-btn.reveal {background:var(--green);color:#fff;border-color:#3d7a10;}
+.type-btn:disabled{cursor:default;opacity:.85;}
+
+/* Bloc justification */
+.just-opts{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.6rem;}
+.just-btn{display:flex;align-items:center;gap:.8rem;padding:.65rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);font-size:.92rem;color:var(--text);cursor:pointer;text-align:left;min-height:46px;transition:all .15s;-webkit-appearance:none;appearance:none;}
+.just-btn::before{content:'';width:15px;height:15px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .2s;}
+.just-btn:hover:not(:disabled):not(.sel){background:var(--day-light);border-color:var(--day-color);}
+.just-btn:hover:not(:disabled):not(.sel)::before{border-color:var(--day-color);}
+.just-btn.sel{background:var(--day-light);border-color:var(--day-color);}
+.just-btn.sel::before{background:var(--day-color);border-color:var(--day-color);}
+.just-btn.correct{background:#f0faeb;border-color:#b5e08a;color:#2f6e10;}
+.just-btn.correct::before{background:var(--green);border-color:var(--green);}
+.just-btn.wrong  {background:#fff0ef;border-color:var(--day-border);color:var(--day-dark);}
+.just-btn.wrong::before{background:var(--day-color);border-color:var(--day-dark);}
+.just-btn.reveal {background:#f0faeb;border-color:#b5e08a;color:#2f6e10;}
+.just-btn.reveal::before{background:var(--green);border-color:var(--green);}
+.just-btn:disabled{cursor:default;opacity:.85;}
+
+/* Feedback */
+.q-fb{margin-top:.6rem;padding:.7rem 1rem;border-radius:10px;font-size:.88rem;line-height:1.65;display:none;}
+.q-fb.show{display:block;}
+.q-fb.ok{background:#f0faeb;border:1.5px solid #b5e08a;color:#2f6e10;}
+.q-fb.ko{background:#fff0ef;border:1.5px solid var(--day-border);color:var(--day-dark);}
+.q-fb.partial{background:#fffbeb;border:1.5px solid var(--yellow);color:#78530a;}
+
+/* Indice */
+.indice-box{background:var(--day-light);border:1.5px dashed var(--day-border);border-radius:8px;padding:.55rem .9rem;margin-bottom:.7rem;font-size:.82rem;color:var(--day-dark);font-family:'JetBrains Mono',monospace;line-height:1.6;}
+.indice-box .ind-icon{margin-right:.3rem;}
+
+/* Boutons */
+.btn-valider{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;max-width:700px;padding:.75rem 1.4rem;border-radius:10px;background:var(--day-color);color:#fff;border:none;font-size:.97rem;font-weight:800;cursor:pointer;min-height:48px;box-shadow:0 3px 10px var(--day-glow);transition:transform .12s,box-shadow .15s;position:relative;z-index:1;}
+.btn-valider:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-valider:disabled{opacity:.35;cursor:default;transform:none;}
+.btn-restart{display:none;width:100%;max-width:700px;align-items:center;justify-content:center;gap:.5rem;padding:.65rem 1.4rem;border-radius:10px;background:#fff;color:var(--day-dark);border:2px solid var(--day-color);font-size:.95rem;font-weight:700;cursor:pointer;min-height:46px;margin-top:.6rem;position:relative;z-index:1;}
+.btn-restart.show{display:flex;}
+
+/* Résultats */
+.results{width:100%;max-width:700px;display:none;position:relative;z-index:1;margin-top:.5rem;}
+.results.show{display:block;animation:fadeUp .4s ease both;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;overflow:hidden;text-align:center;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--yellow),var(--pink));}
+.res-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .3rem;}
+.res-score .s-num{color:var(--day-color);}
+.stars{font-size:2rem;margin:.3rem 0 .9rem;}
+.res-msg{color:var(--muted);font-size:.95rem;margin-bottom:1.8rem;font-family:'JetBrains Mono',monospace;}
+.recap-list{text-align:left;display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.8rem;}
+.recap-item{padding:.6rem .9rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:.84rem;line-height:1.7;}
+.recap-item.ok-item{border-color:#b5e08a;}
+.recap-item.ko-item{border-color:#f9c0bb;}
+.recap-item.partial-item{border-color:var(--yellow);}
+.ri-pts{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-top:.15rem;}
+.btn-final-restart{display:flex;align-items:center;gap:.4rem;padding:.65rem 1.6rem;border-radius:10px;background:var(--day-color);color:#fff;border:none;font-size:.95rem;font-weight:700;cursor:pointer;margin:0 auto;box-shadow:0 3px 10px var(--day-glow);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:500px){.card{padding:1.3rem 1rem;}.type-opts{gap:.4rem;}.just-btn{font-size:.88rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4e
+  </div>
+  <div class="week-label">Semaine 1 – Jour 2 · J'observe et je teste</div>
+  <h1>✨ <span class="hl">Phrase simple / phrase complexe</span></h1>
+  <p class="subtitle">5 phrases · Type + justification · /20</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="progLabel">0 / 10 points</span>
+    <span id="progPct">0 %</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progFill"></div></div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="cOk">0</span> correct(s)</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="cKo">0</span> erreur(s)</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cRem">10</span> restant(s)</div>
+</div>
+
+<div class="card" style="animation-delay:.1s">
+  <div class="card-stripe"></div>
+  <div class="theme-badge">J'observe et je teste · Phrase simple / complexe</div>
+  <div class="act-title">Lis chaque phrase et réponds aux deux questions.</div>
+  <div class="consigne">Pour chaque phrase : indique si elle est simple ou complexe, puis choisis la justification correcte.</div>
+  <div id="qContainer"></div>
+</div>
+
+<button class="btn-valider" id="btnValider" disabled>✓ Valider mes réponses</button>
+<button class="btn-restart" id="btnRestart">↺ Recommencer</button>
+
+<div class="results" id="resultsScreen">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="res-score"><span class="s-num" id="scoreNum">0</span><span style="color:var(--muted);font-size:2rem"> / 20</span></div>
+    <div class="stars" id="starsRow"></div>
+    <div class="res-msg" id="resMsg"></div>
+    <div class="recap-list" id="recapList"></div>
+    <button class="btn-final-restart" onclick="location.reload()">↺ Recommencer</button>
+  </div>
+</div>
+
+<script>
+var isDone = false;
+var TOTAL = 10;
+
+var QS = [
+  {
+    phrase: "Le silence s'installait dans la maison endormie.",
+    type: "Simple",
+    indice: null,
+    justifChoices: [
+      "Elle contient une seule proposition avec un seul verbe conjugué.",
+      "Elle est reliée par la conjonction « et ».",
+      "Elle contient une subordonnée relative."
+    ],
+    justifAnswer: 0,
+    fb_ok: "Exactement ! Un seul verbe conjugué (« s'installait ») = une seule proposition = phrase simple.",
+    fb_type_ko: "Attention : compte le nombre de verbes conjugués. Un seul verbe → phrase simple.",
+    fb_just_ko: "La justification correcte est : une seule proposition, un seul verbe conjugué (« s'installait »)."
+  },
+  {
+    phrase: "La pluie tombait sur les pavés et le vent sifflait dans les ruelles étroites.",
+    type: "Complexe",
+    indice: "Compte les verbes conjugués dans cette phrase.",
+    justifChoices: [
+      "Elle ne contient qu'un seul verbe conjugué.",
+      "Deux propositions sont reliées par la conjonction de coordination « et ».",
+      "Elle contient une subordonnée temporelle introduite par « lorsque »."
+    ],
+    justifAnswer: 1,
+    fb_ok: "Bravo ! Deux propositions juxtaposées par « et » (tombait / sifflait) → phrase complexe par coordination.",
+    fb_type_ko: "Il y a deux verbes conjugués : « tombait » et « sifflait ». Deux propositions = phrase complexe.",
+    fb_just_ko: "La bonne justification : deux propositions coordonnées par « et » (pas de subordonnée ici)."
+  },
+  {
+    phrase: "Lorsque la nuit descendit, la ville sembla disparaître dans l'ombre.",
+    type: "Complexe",
+    indice: "Repère le mot qui introduit la première partie de la phrase.",
+    justifChoices: [
+      "Elle contient une subordonnée temporelle introduite par « lorsque ».",
+      "Elle est formée de deux propositions reliées par « et ».",
+      "Elle ne contient qu'un seul verbe conjugué."
+    ],
+    justifAnswer: 0,
+    fb_ok: "Parfait ! « Lorsque » introduit une subordonnée temporelle → phrase complexe par subordination.",
+    fb_type_ko: "Le mot « lorsque » introduit une proposition subordonnée : c'est donc une phrase complexe.",
+    fb_just_ko: "La bonne justification : subordonnée temporelle introduite par « lorsque »."
+  },
+  {
+    phrase: "Le voyageur s'arrêta un instant au bord du chemin.",
+    type: "Simple",
+    indice: null,
+    justifChoices: [
+      "Elle contient une subordonnée relative introduite par « qui ».",
+      "Deux propositions sont reliées par « mais ».",
+      "Elle contient une seule proposition avec un seul verbe conjugué."
+    ],
+    justifAnswer: 2,
+    fb_ok: "Bien vu ! Un seul verbe conjugué (« s'arrêta »), une seule proposition → phrase simple.",
+    fb_type_ko: "Un seul verbe conjugué = une seule proposition = phrase simple.",
+    fb_just_ko: "La justification correcte : une seule proposition, un seul verbe conjugué (« s'arrêta »)."
+  },
+  {
+    phrase: "Les enfants observaient le paysage qui défilait derrière la vitre du train.",
+    type: "Complexe",
+    indice: "Repère le pronom relatif dans cette phrase.",
+    justifChoices: [
+      "Elle contient deux propositions reliées par la conjonction « et ».",
+      "Elle contient une subordonnée relative introduite par « qui ».",
+      "Elle ne contient qu'un seul verbe conjugué."
+    ],
+    justifAnswer: 1,
+    fb_ok: "Excellent ! « qui défilait » est une proposition subordonnée relative → phrase complexe par subordination.",
+    fb_type_ko: "Il y a deux verbes : « observaient » et « défilait ». Le mot « qui » introduit une subordonnée relative.",
+    fb_just_ko: "La bonne justification : subordonnée relative introduite par le pronom « qui »."
+  }
+];
+
+/* État */
+var state = QS.map(function() { return { type: null, just: null }; });
+
+/* ══ BUILD ══ */
+var cont = document.getElementById("qContainer");
+for (var i = 0; i < QS.length; i++) {
+  (function(q, idx) {
+    var div = document.createElement("div");
+    div.className = "q-item";
+
+    /* Numéro */
+    var num = document.createElement("div");
+    num.className = "q-num";
+    num.textContent = "Phrase " + (idx+1) + " / " + QS.length;
+    div.appendChild(num);
+
+    /* Phrase */
+    var ph = document.createElement("div");
+    ph.className = "q-phrase";
+    ph.textContent = q.phrase;
+    div.appendChild(ph);
+
+    /* Indice conditionnel */
+    if (q.indice) {
+      var ind = document.createElement("div");
+      ind.className = "indice-box";
+      ind.innerHTML = "<span class='ind-icon'>💡</span>" + q.indice;
+      div.appendChild(ind);
+    }
+
+    /* ── Bloc 1 : Type ── */
+    var lb1 = document.createElement("div");
+    lb1.className = "bloc-label";
+    lb1.innerHTML = "<span class='bl-num'>1</span> Cette phrase est…";
+    div.appendChild(lb1);
+
+    var typeOpts = document.createElement("div");
+    typeOpts.className = "type-opts";
+    typeOpts.id = "type_" + idx;
+    ["Simple","Complexe"].forEach(function(val) {
+      var b = document.createElement("button");
+      b.setAttribute("type","button");
+      b.className = "type-btn";
+      b.textContent = val;
+      b.addEventListener("click", function() {
+        if (isDone) return;
+        typeOpts.querySelectorAll(".type-btn").forEach(function(x){ x.classList.remove("sel"); });
+        b.classList.add("sel");
+        state[idx].type = val;
+        checkVerif();
+      });
+      typeOpts.appendChild(b);
+    });
+    div.appendChild(typeOpts);
+
+    /* ── Bloc 2 : Justification ── */
+    var lb2 = document.createElement("div");
+    lb2.className = "bloc-label";
+    lb2.innerHTML = "<span class='bl-num'>2</span> Parce que…";
+    div.appendChild(lb2);
+
+    var justOpts = document.createElement("div");
+    justOpts.className = "just-opts";
+    justOpts.id = "just_" + idx;
+    q.justifChoices.forEach(function(txt, cidx) {
+      var b = document.createElement("button");
+      b.setAttribute("type","button");
+      b.className = "just-btn";
+      b.setAttribute("data-cidx", cidx);
+      b.textContent = txt;
+      b.addEventListener("click", function() {
+        if (isDone) return;
+        justOpts.querySelectorAll(".just-btn").forEach(function(x){ x.classList.remove("sel"); });
+        b.classList.add("sel");
+        state[idx].just = cidx;
+        checkVerif();
+      });
+      justOpts.appendChild(b);
+    });
+    div.appendChild(justOpts);
+
+    /* Feedback */
+    var fb = document.createElement("div");
+    fb.className = "q-fb";
+    fb.id = "fb_" + idx;
+    div.appendChild(fb);
+
+    cont.appendChild(div);
+  })(QS[i], i);
+}
+
+/* ══ VÉRIF BOUTON ══ */
+function checkVerif() {
+  var ready = state.every(function(s){ return s.type !== null && s.just !== null; });
+  document.getElementById("btnValider").disabled = !ready;
+}
+
+/* ══ VALIDER ══ */
+document.getElementById("btnValider").addEventListener("click", function() {
+  if (isDone) return;
+  isDone = true;
+  this.disabled = true;
+  document.getElementById("btnRestart").classList.add("show");
+
+  var totalOk = 0, totalKo = 0;
+  var recapHtml = "";
+
+  for (var i = 0; i < QS.length; i++) {
+    var q = QS[i];
+    var s = state[i];
+    var typeOk = (s.type === q.type);
+    var justOk = (s.just === q.justifAnswer);
+    var pts = (typeOk ? 1 : 0) + (justOk ? 1 : 0);
+    totalOk += pts;
+    totalKo += (2 - pts);
+
+    /* Colorier type */
+    var typeBtns = document.getElementById("type_" + i).querySelectorAll(".type-btn");
+    typeBtns.forEach(function(b) {
+      b.disabled = true;
+      b.classList.remove("sel");
+      if (b.textContent === s.type)  b.classList.add(typeOk ? "correct" : "wrong");
+      if (!typeOk && b.textContent === q.type) b.classList.add("reveal");
+    });
+
+    /* Colorier justification */
+    var justBtns = document.getElementById("just_" + i).querySelectorAll(".just-btn");
+    justBtns.forEach(function(b) {
+      b.disabled = true;
+      b.classList.remove("sel");
+      var cidx = parseInt(b.getAttribute("data-cidx"));
+      if (cidx === s.just)              b.classList.add(justOk ? "correct" : "wrong");
+      if (!justOk && cidx === q.justifAnswer) b.classList.add("reveal");
+    });
+
+    /* Feedback */
+    var fb = document.getElementById("fb_" + i);
+    if (typeOk && justOk) {
+      fb.className = "q-fb show ok";
+      fb.textContent = "✅ " + q.fb_ok;
+    } else if (typeOk && !justOk) {
+      fb.className = "q-fb show partial";
+      fb.textContent = "🟡 Le type est correct, mais la justification est inexacte. " + q.fb_just_ko;
+    } else if (!typeOk && justOk) {
+      fb.className = "q-fb show ko";
+      fb.textContent = "❌ " + q.fb_type_ko;
+    } else {
+      fb.className = "q-fb show ko";
+      fb.textContent = "❌ " + q.fb_type_ko + " " + q.fb_just_ko;
+    }
+
+    /* Récap */
+    var cls = pts === 2 ? "ok-item" : pts === 1 ? "partial-item" : "ko-item";
+    var icon = pts === 2 ? "✅" : pts === 1 ? "🟡" : "❌";
+    recapHtml += "<div class='recap-item " + cls + "'>"
+      + "<div><strong>" + icon + " Phrase " + (i+1) + "</strong> — "
+      + q.type
+      + "<div class='ri-pts'>" + pts + " / 2 point(s) · "
+      + (typeOk ? "Type ✅" : "Type ❌") + " · "
+      + (justOk ? "Justification ✅" : "Justification ❌")
+      + "</div></div></div>";
+  }
+
+  /* Chips + barre */
+  document.getElementById("cOk").textContent  = totalOk;
+  document.getElementById("cKo").textContent  = totalKo;
+  document.getElementById("cRem").textContent = 0;
+  var pct = Math.round(totalOk / TOTAL * 100);
+  var sur20 = Math.round(totalOk / TOTAL * 20);
+  document.getElementById("progFill").style.width = pct + "%";
+  document.getElementById("progLabel").textContent = totalOk + " / " + TOTAL + " pts — Note\u00a0: " + sur20 + " / 20";
+  document.getElementById("progPct").textContent   = pct + " %";
+
+  /* Résultats */
+  var stars, msg;
+  if      (pct===100){ stars="★★★★★"; msg="Parfait\u00a0! Tu distingues avec précision phrase simple et complexe."; }
+  else if (pct>=80)  { stars="★★★★☆"; msg="Très bien\u00a0! Quelques justifications à affiner."; }
+  else if (pct>=60)  { stars="★★★☆☆"; msg="Bien\u00a0! Relis les feedbacks pour consolider ta méthode."; }
+  else if (pct>=40)  { stars="★★☆☆☆"; msg="Tu progresses\u00a0! Compte bien les verbes conjugués."; }
+  else               { stars="★☆☆☆☆"; msg="À retravailler. Rappel\u00a0: 1 verbe = phrase simple ; 2 verbes ou plus = phrase complexe."; }
+
+  document.getElementById("scoreNum").textContent = sur20;
+  document.getElementById("starsRow").textContent = stars;
+  document.getElementById("resMsg").textContent   = msg;
+  document.getElementById("recapList").innerHTML  = recapHtml;
+  document.getElementById("resultsScreen").classList.add("show");
+  document.getElementById("resultsScreen").scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+document.getElementById("btnRestart").addEventListener("click", function(){ location.reload(); });
+</script>
+</body>
+</html>
