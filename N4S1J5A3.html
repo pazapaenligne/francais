@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Musée du Réalisme – S1 J5 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5c518;--day-dark:#8a6000;--day-dark2:#3a2c00;
+  --day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.35);
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#fffdf0;--border:#e8e4d9;
+  --green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --text:#1a1d23;--muted:#8a8f9a;
+  --radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;}
+.wrap{width:100%;max-width:700px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+  width:320px;height:320px;background:var(--day);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--day);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.5rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.3rem;}
+h1{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* ══ BLOC MUSÉE ══ */
+.musee-block{position:relative;z-index:1;border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 10px 40px rgba(0,0,0,.25);margin-bottom:.5rem;}
+/* Bandeau intro */
+.musee-intro{background:#1e1608;border-bottom:2px solid #c9a44a;padding:.85rem 1.3rem;}
+.musee-intro-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  color:#c9a44a;text-transform:uppercase;letter-spacing:.18em;margin-bottom:.3rem;}
+.musee-intro-text{font-size:.87rem;color:#d4c89a;line-height:1.65;}
+/* SVG */
+.musee-svg-wrap{background:#1a1206;line-height:0;}
+#musee{width:100%;height:auto;display:block;}
+/* Zone description */
+.musee-desc{background:#16100a;border-top:1px solid #3a2c10;padding:.7rem 1.2rem;
+  min-height:52px;display:flex;align-items:center;gap:.8rem;
+  transition:opacity .4s ease;opacity:.4;}
+.musee-desc.active{opacity:1;}
+.musee-desc-emoji{font-size:1.5rem;flex-shrink:0;line-height:1;}
+.musee-desc-content{}
+.musee-desc-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;
+  color:#c9a44a;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.12rem;}
+.musee-desc-text{font-size:.83rem;color:#ccc0a0;line-height:1.6;font-style:italic;}
+
+/* ══ CSS VITRINES ══ */
+.vit{transition:opacity .1s;}
+.vit-canvas{transition:fill .6s ease;}
+.vit-spot{opacity:0;transition:opacity .8s ease;}
+.vit.lit .vit-spot{opacity:1;}
+.vit-art{opacity:0;transform-box:fill-box;transform-origin:center;
+  transform:scale(.4) rotate(-6deg);
+  transition:opacity .55s ease,transform .65s cubic-bezier(.25,1.5,.4,1);}
+.vit.lit .vit-art{opacity:1;transform:scale(1) rotate(0deg);}
+.vit-qmark{transition:opacity .3s ease;}
+.vit.lit .vit-qmark{opacity:0;}
+.vit-plaque{transition:fill .5s ease;}
+.vit.lit .vit-plaque{fill:#c9a44a;}
+.vit-plabel{opacity:0;transition:opacity .55s ease;}
+.vit.lit .vit-plabel{opacity:1;}
+.vit-catbadge{opacity:0;transition:opacity .55s ease;}
+.vit.lit .vit-catbadge{opacity:1;}
+
+/* ══ SCORE ══ */
+.score-bar{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:.8rem;position:relative;z-index:1;flex-wrap:wrap;gap:.5rem;}
+.score-pill{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+  padding:.28rem .85rem;border-radius:99px;border:1.5px solid var(--day-border);
+  background:var(--surface);color:var(--day-dark);}
+
+/* ══ CARTE QUESTION ══ */
+.qcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);margin-bottom:1rem;
+  position:relative;z-index:1;animation:fadeUp .3s ease both;}
+.stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.qbody{padding:1rem 1.2rem 0;}
+.qtarget{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem;}
+.tbadge{display:inline-block;font-size:.62rem;font-weight:800;padding:.12rem .55rem;
+  border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.65rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.verb{font-family:'JetBrains Mono',monospace;font-size:clamp(1.3rem,5vw,1.75rem);
+  font-weight:900;color:var(--day-dark);text-align:center;
+  padding:.8rem;background:var(--day-light);border-radius:var(--radius-sm);
+  margin-bottom:.8rem;border:2px solid var(--day-border);letter-spacing:.04em;}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.8rem;}
+@media(max-width:380px){.choices{grid-template-columns:1fr;}}
+.cbtn{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:clamp(.9rem,2.4vw,.97rem);font-weight:700;padding:.65rem 1rem;
+  cursor:pointer;min-height:46px;font-family:Arial,Helvetica,sans-serif;
+  transition:background .12s,border-color .12s,transform .1s;-webkit-tap-highlight-color:transparent;}
+.cbtn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.cbtn:disabled{cursor:default;}
+.cbtn.ok{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .35s ease;}
+.cbtn.ko{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .4s ease;}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.04);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.fline{font-size:.87rem;font-weight:700;padding:.45rem .8rem;border-radius:var(--radius-sm);
+  margin:.2rem 1.2rem .75rem;display:none;line-height:1.6;}
+.fline.show{display:block;}
+.fline.ok{background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);}
+.fline.ko{background:var(--pink-light);color:var(--pink-dark);border:1.5px solid var(--pink-dark);}
+.hint{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);
+  padding:.65rem 1rem;font-size:.84rem;color:var(--day-dark2);
+  line-height:1.75;display:none;margin:.2rem 1.2rem .75rem;}
+.hint.show{display:block;animation:fadeUp .3s ease;}
+.btn-next-row{display:flex;justify-content:flex-end;margin:.2rem 1.2rem .8rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;
+  border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.4vw,.95rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-p:hover{transform:translateY(-1px);}
+
+/* ══ RÉSULTATS ══ */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:2rem 1.4rem;box-shadow:0 6px 24px rgba(0,0,0,.07);text-align:center;position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.2rem);font-weight:900;line-height:1;margin:.6rem 0 .3rem;color:var(--day-dark);}
+.stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.1em;}
+.rmsg{color:var(--muted);font-size:clamp(.88rem,2.4vw,1rem);margin-bottom:1.2rem;line-height:1.8;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 1 – Jour 5</div>
+  <h1>Je m'entraîne · <span class="hl">Musée du Réalisme</span></h1>
+</header>
+
+<!-- Bloc musée complet -->
+<div class="musee-block">
+  <!-- Intro -->
+  <div class="musee-intro">
+    <div class="musee-intro-title">&#127775;&nbsp;Bienvenue au Musée du Réalisme</div>
+    <div class="musee-intro-text">Chaque bonne réponse dévoile un objet lié au mouvement réaliste du XIXe siècle. Sauras-tu identifier tous les temps verbaux pour inaugurer l'exposition complète ?</div>
+  </div>
+  <!-- SVG musée -->
+  <div class="musee-svg-wrap">
+    <svg id="musee" viewBox="0 0 680 310" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <!-- Description objet -->
+  <div class="musee-desc" id="desc-zone">
+    <span class="musee-desc-emoji" id="desc-emoji">&#127775;</span>
+    <div class="musee-desc-content">
+      <div class="musee-desc-label" id="desc-label">En attente de la première bonne réponse…</div>
+      <div class="musee-desc-text" id="desc-text">Identifie le temps verbal pour illuminer la première vitrine.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Score -->
+<div class="score-bar">
+  <span class="score-pill" id="pill-score">&#127774;&nbsp;0 / 10 vitrines</span>
+  <span class="score-pill" id="pill-q">Question 1 / 10</span>
+</div>
+
+<!-- Carte question -->
+<div class="qcard" id="qcard">
+  <div class="stripe"></div>
+  <div class="qbody">
+    <div class="qtarget" id="qtarget">Vitrine 1 / 10</div>
+    <div class="tbadge">&#128336;&nbsp;Identifie le temps verbal</div>
+    <div class="verb" id="verb-display"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+  <div class="fline" id="fline"></div>
+  <div class="hint" id="hint">
+    &#128161;&nbsp;<strong>Rappel :</strong> Imparfait → <em>-ais, -ait, -ions, -iez, -aient</em>. Passé simple (1er gr.) → <em>-a, -ai, -as, -âmes, -âtes, -èrent</em>.
+  </div>
+  <div class="btn-next-row">
+    <button class="btn btn-p" id="btn-next" style="display:none;" onclick="goNext()">Suivant &#8594;</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--day);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.6rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/10</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <button class="btn btn-p" onclick="restartAll()" style="margin-top:.4rem;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+var QUESTIONS = [
+  {verb:"il \u00e9crivait",    ans:"imp", fbKo:"<em>\u00c9crivait</em> se termine en <em>-ait</em>\u00a0: c\u2019est l\u2019imparfait."},
+  {verb:"elle courut",         ans:"ps",  fbKo:"<em>Courut</em> est le pass\u00e9 simple de \u00ab\u00a0courir\u00a0\u00bb (3e groupe)."},
+  {verb:"nous dormions",       ans:"imp", fbKo:"<em>Dormions</em> se termine en <em>-ions</em>\u00a0: c\u2019est l\u2019imparfait."},
+  {verb:"ils prirent",         ans:"ps",  fbKo:"<em>Prirent</em> est le pass\u00e9 simple de \u00ab\u00a0prendre\u00a0\u00bb (3e groupe)."},
+  {verb:"tu pleurais",         ans:"imp", fbKo:"<em>Pleurais</em> se termine en <em>-ais</em>\u00a0: c\u2019est l\u2019imparfait."},
+  {verb:"il vint",             ans:"ps",  fbKo:"<em>Vint</em> est le pass\u00e9 simple de \u00ab\u00a0venir\u00a0\u00bb (3e groupe)."},
+  {verb:"vous \u00e9tiez",     ans:"imp", fbKo:"<em>\u00c9tiez</em> est l\u2019imparfait du verbe \u00ab\u00a0\u00eatre\u00a0\u00bb (terminaison <em>-iez</em>)."},
+  {verb:"elles partirent",     ans:"ps",  fbKo:"<em>Partirent</em> est le pass\u00e9 simple de \u00ab\u00a0partir\u00a0\u00bb (3e groupe)."},
+  {verb:"je voyais",           ans:"imp", fbKo:"<em>Voyais</em> se termine en <em>-ais</em>\u00a0: c\u2019est l\u2019imparfait."},
+  {verb:"il tomba",            ans:"ps",  fbKo:"<em>Tomba</em> se termine en <em>-a</em>\u00a0: pass\u00e9 simple du 1er groupe."}
+];
+
+var OEUVRES = [
+  {emoji:"&#129689;", label:"La pi\u00e8ce",      desc:"L\u2019argent et les ambitions sociales sont au c\u0153ur de Balzac \u2014 dettes, h\u00e9ritages, ascension sociale."},
+  {emoji:"&#128196;", label:"Le contrat",          desc:"Mariages, successions, propri\u00e9t\u00e9s\u00a0: les actes notari\u00e9s sont omnipr\u00e9sents dans les romans r\u00e9alistes."},
+  {emoji:"&#128240;", label:"Le journal",          desc:"La presse populaire du XIXe si\u00e8cle refl\u00e8te la soci\u00e9t\u00e9 et nourrit les romans r\u00e9alistes."},
+  {emoji:"&#128642;", label:"La locomotive",       desc:"Symbole du progr\u00e8s industriel \u2014 centrale dans <em>La B\u00eate humaine</em> d\u2019\u00c9mile Zola."},
+  {emoji:"&#9881;&#65039;",label:"La machine",     desc:"L\u2019industrialisation transforme la vie ouvri\u00e8re au XIXe si\u00e8cle \u2014 th\u00e8me majeur chez Zola."},
+  {emoji:"&#129529;", label:"La bobine",           desc:"Le travail f\u00e9minin dans les manufactures \u2014 th\u00e8me central du r\u00e9alisme social."},
+  {emoji:"&#128211;", label:"Le carnet",           desc:"L\u2019auteur r\u00e9aliste observe et note le r\u00e9el comme un enqu\u00eateur avant d\u2019\u00e9crire."},
+  {emoji:"&#127968;", label:"La maison",           desc:"La maison bourgeoise incarne les valeurs et les hypocrisies de la classe moyenne au XIXe si\u00e8cle."},
+  {emoji:"&#129695;", label:"Le taudis",           desc:"Les conditions de vie r\u00e9elles des classes populaires, d\u00e9crites sans fard dans les romans r\u00e9alistes."},
+  {emoji:"&#127978;", label:"L\u2019enseigne",     desc:"Les boutiques et le commerce de quartier\u00a0: le r\u00e9alisme met en sc\u00e8ne la vie quotidienne de la rue."}
+];
+
+var curQ=0, score=0, busy=false;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initAudio(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){
+  if(!actx) return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.14,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02);
+}
+function sndReveal(){ initAudio(); beep(680,1020,0.22,'sine',0.13); }
+function sndOk(){ initAudio(); beep(440,660,0.08,'sine',0.15); setTimeout(function(){ beep(660,880,0.16,'sine',0.12); },90); }
+function sndKo(){ initAudio(); beep(280,160,0.22,'sawtooth',0.13); }
+function sndFin(){ initAudio(); beep(523,659,0.2,'sine',0.14); setTimeout(function(){ beep(659,880,0.26,'sine',0.13); },120); setTimeout(function(){ beep(880,1046,0.3,'sine',0.11); },280); }
+
+/* ══ MUSÉE SVG ══ */
+function buildMusee(){
+  var N=10, COLS=5;
+  var W=680, H=310;
+  var padX=18, padY=20, gapX=10, gapY=12;
+  var fw=Math.floor((W - 2*padX - (COLS-1)*gapX) / COLS);  /* ~108px */
+  var fh=Math.floor((H - 2*padY - gapY - 34) / 2);          /* ~100px */
+
+  var s='<defs>'
+    /* Mur : bois foncé chaud */
+    +'<linearGradient id="gwall" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="#3c2a10"/><stop offset="0.6" stop-color="#261806"/><stop offset="1" stop-color="#1a1004"/>'
+    +'</linearGradient>'
+    /* Parquet */
+    +'<linearGradient id="gfloor" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="#c8b060"/><stop offset="1" stop-color="#a89040"/>'
+    +'</linearGradient>'
+    /* Spot imparfait : blanc-bleu froid */
+    +'<radialGradient id="gspimp" cx="50%" cy="0%" r="80%" fx="50%" fy="0%">'
+    +'<stop offset="0%" stop-color="#cce8ff" stop-opacity="1"/>'
+    +'<stop offset="55%" stop-color="#88c4f0" stop-opacity=".35"/>'
+    +'<stop offset="100%" stop-color="#88c4f0" stop-opacity="0"/>'
+    +'</radialGradient>'
+    /* Spot passé simple : or chaud */
+    +'<radialGradient id="gspps" cx="50%" cy="0%" r="80%" fx="50%" fy="0%">'
+    +'<stop offset="0%" stop-color="#ffe89a" stop-opacity="1"/>'
+    +'<stop offset="55%" stop-color="#f0c040" stop-opacity=".35"/>'
+    +'<stop offset="100%" stop-color="#f0c040" stop-opacity="0"/>'
+    +'</radialGradient>'
+    +'</defs>';
+
+  /* Fond mur */
+  s+='<rect width="'+W+'" height="'+H+'" fill="url(#gwall)"/>';
+  /* Moulure haute */
+  s+='<rect x="0" y="0" width="'+W+'" height="7" fill="#c9a44a" opacity="0.4"/>';
+  /* Lambris bas */
+  var floorY = H - 34;
+  s+='<rect x="0" y="'+(floorY-4)+'" width="'+W+'" height="4" fill="#c9a44a" opacity="0.5"/>';
+  s+='<rect x="0" y="'+floorY+'" width="'+W+'" height="34" fill="url(#gfloor)"/>';
+  /* Lames parquet */
+  for(var vx=0; vx<W; vx+=38){
+    s+='<line x1="'+vx+'" y1="'+floorY+'" x2="'+(vx-9)+'" y2="'+H+'" stroke="#00000018" stroke-width="1.5"/>';
+  }
+  /* Cimaise dorée entre rangées */
+  var cimY = padY + fh + gapY/2;
+  s+='<rect x="10" y="'+(cimY-2)+'" width="'+(W-20)+'" height="4" rx="2" fill="#c9a44a" opacity="0.4"/>';
+  /* Titre musée */
+  s+='<rect x="'+(W/2-90)+'" y="8" width="180" height="13" rx="3" fill="#c9a44a" opacity="0.15"/>';
+  s+='<text x="'+(W/2)+'" y="17.5" text-anchor="middle" font-family="Arial" font-size="7.5" font-weight="800" fill="#e8cc80" letter-spacing="2.5" opacity="0.85">MUSÉE DU RÉALISME</text>';
+
+  for(var i=0; i<N; i++){
+    var row = Math.floor(i/COLS), col = i%COLS;
+    var fx = padX + col*(fw+gapX);
+    var fy = padY + row*(fh+gapY);
+    var cx = fx + fw/2;
+    var cy = fy + fh/2;
+    var isImp = (QUESTIONS[i].ans === "imp");
+    var bCol  = isImp ? "#3ab5d8" : "#f5c518";
+    var spId  = isImp ? "gspimp"  : "gspps";
+    var catLbl= isImp ? "IMP"     : "PS";
+    var catBg = isImp ? "#1a6e88" : "#8a6000";
+
+    s += '<g class="vit" id="fr'+i+'">';
+    /* Spot lumineux : ellipse depuis le haut du cadre */
+    s += '<ellipse class="vit-spot" cx="'+cx+'" cy="'+fy+'" rx="'+(fw*0.75)+'" ry="'+(fh*0.9)+'" fill="url(#'+spId+')"/>';
+    /* Ombre portée */
+    s += '<rect x="'+(fx+4)+'" y="'+(fy+4)+'" width="'+fw+'" height="'+fh+'" rx="4" fill="#000" opacity="0.4"/>';
+    /* Cadre bois */
+    s += '<rect x="'+(fx-8)+'" y="'+(fy-8)+'" width="'+(fw+16)+'" height="'+(fh+16)+'" rx="5" fill="#2c1a08"/>';
+    /* Moulure cadre */
+    s += '<rect x="'+(fx-5)+'" y="'+(fy-5)+'" width="'+(fw+10)+'" height="'+(fh+10)+'" rx="4" fill="none" stroke="#7a5a20" stroke-width="2.5"/>';
+    /* Canvas */
+    s += '<rect class="vit-canvas" x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" rx="3" fill="#1c1408"/>';
+    /* Bordure catégorie */
+    s += '<rect x="'+(fx-2)+'" y="'+(fy-2)+'" width="'+(fw+4)+'" height="'+(fh+4)+'" rx="4" fill="none" stroke="'+bCol+'" stroke-width="3" opacity="0.9"/>';
+    /* ? */
+    s += '<text class="vit-qmark" x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-family="Georgia,serif" font-size="30" font-weight="700" fill="#6a5030">?</text>';
+    /* Emoji */
+    s += '<text class="vit-art" x="'+cx+'" y="'+(cy+11)+'" text-anchor="middle" font-size="32">'+OEUVRES[i].emoji+'</text>';
+    /* Plaque */
+    s += '<rect class="vit-plaque" x="'+(cx-30)+'" y="'+(fy+fh+5)+'" width="60" height="16" rx="3" fill="#3a2c10"/>';
+    s += '<text class="vit-plabel" x="'+cx+'" y="'+(fy+fh+15)+'" text-anchor="middle" font-family="Arial" font-size="9" font-weight="700" fill="#ffe8a0">'+OEUVRES[i].label+'</text>';
+    /* Badge IMP/PS */
+    s += '<rect class="vit-catbadge" x="'+fx+'" y="'+fy+'" width="24" height="13" rx="3" fill="'+catBg+'"/>';
+    s += '<text class="vit-catbadge" x="'+(fx+12)+'" y="'+(fy+9.5)+'" text-anchor="middle" font-family="Arial" font-size="7.5" font-weight="900" fill="#fff">'+catLbl+'</text>';
+    s += '</g>';
+  }
+  $('musee').innerHTML = s;
+}
+
+function renderMusee(){
+  for(var i=0; i<10; i++){
+    var fr=$('fr'+i); if(!fr) continue;
+    fr.classList.toggle('lit', i < score);
+  }
+}
+
+/* ══ QUESTIONS ══ */
+function loadQ(){
+  busy=false;
+  if(curQ >= QUESTIONS.length){ showResults(); return; }
+  var q = QUESTIONS[curQ];
+  $('qtarget').textContent = 'Vitrine '+(curQ+1)+' / 10';
+  $('pill-q').textContent  = 'Question '+(curQ+1)+' / 10';
+  $('verb-display').textContent = q.verb;
+  $('fline').className = 'fline';
+  $('hint').classList.remove('show');
+  $('btn-next').style.display = 'none';
+  var ch = $('choices'); ch.innerHTML = '';
+  [{label:'&#128336;&nbsp;Imparfait', val:'imp'},
+   {label:'&#9889;&nbsp;Passé simple', val:'ps'}
+  ].forEach(function(opt){
+    var btn = document.createElement('button');
+    btn.className = 'cbtn'; btn.innerHTML = opt.label; btn.dataset.val = opt.val;
+    btn.addEventListener('click', function(){ if(!busy) answer(opt.val, btn, q); });
+    ch.appendChild(btn);
+  });
+}
+
+function answer(val, btn, q){
+  if(busy) return; busy = true;
+  initAudio();
+  $('choices').querySelectorAll('.cbtn').forEach(function(b){ b.disabled=true; });
+  var ok = (val === q.ans);
+  btn.classList.add(ok ? 'ok' : 'ko');
+  if(!ok) $('choices').querySelectorAll('.cbtn').forEach(function(b){ if(b.dataset.val===q.ans) b.classList.add('ok'); });
+  var fl = $('fline');
+  if(ok){
+    fl.className = 'fline show ok';
+    fl.innerHTML = '&#x2705;&nbsp;Exact\u00a0! <em>'+q.verb+'</em> est bien '+(q.ans==='imp'?'\u00e0 l\u2019imparfait.':'au pass\u00e9 simple.');
+    sndReveal(); sndOk();
+    score++;
+    renderMusee();
+    /* Afficher description objet */
+    var oe = OEUVRES[curQ];
+    var dz=$('desc-zone'); if(dz) dz.classList.add('active');
+    var de=$('desc-emoji'); if(de) de.innerHTML=oe.emoji;
+    var dl=$('desc-label'); if(dl) dl.textContent=oe.label;
+    var dt=$('desc-text');  if(dt) dt.innerHTML=oe.desc;
+  } else {
+    fl.className = 'fline show ko'; fl.innerHTML = '&#x274C;&nbsp;'+q.fbKo;
+    sndKo(); $('hint').classList.add('show');
+  }
+  $('pill-score').textContent = '\uD83C\uDF7E\u00A0'+score+' / 10 vitrines';
+  $('btn-next').style.display = 'inline-flex';
+}
+
+function goNext(){
+  curQ++;
+  var qc=$('qcard'); if(qc) qc.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(function(){ loadQ(); }, 250);
+}
+
+function showResults(){
+  if(score===10) sndFin();
+  $('r-score').textContent = score;
+  var s = score>=10?5:score>=8?4:score>=6?3:score>=4?2:1;
+  $('r-stars').textContent = '\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=['À retravailler\u00a0— reprends les capsules\u00a0!','Quelques temps à consolider.','Pas mal\u00a0! Tu progresses.','Très bien\u00a0!','Parfait\u00a0— le Musée du Réalisme est inauguré\u00a0!'];
+  $('r-msg').textContent = msgs[s-1];
+  $('results-screen').classList.add('show');
+  setTimeout(function(){ var rs=$('results-screen'); if(rs) rs.scrollIntoView({behavior:'smooth',block:'start'}); },200);
+}
+
+function restartAll(){
+  curQ=0; score=0; busy=false;
+  $('results-screen').classList.remove('show');
+  $('pill-score').textContent='\uD83C\uDF7E\u00A00 / 10 vitrines';
+  var dz=$('desc-zone'); if(dz) dz.classList.remove('active');
+  var dl=$('desc-label'); if(dl) dl.textContent='En attente de la première bonne réponse\u2026';
+  var dt=$('desc-text');  if(dt) dt.textContent='Identifie le temps verbal pour illuminer la première vitrine.';
+  var de=$('desc-emoji'); if(de) de.innerHTML='&#127775;';
+  renderMusee(); loadQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',initAudio,{once:true});
+buildMusee(); renderMusee(); loadQ();
+</script>
+</body>
+</html>
