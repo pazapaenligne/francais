@@ -48,20 +48,28 @@ h1 .hl{color:var(--day-dark);}
 .musee-svg-wrap{background:#1a1206;line-height:0;}
 #musee{width:100%;height:auto;display:block;}
 /* Zone description */
-.musee-desc{background:#16100a;border-top:1px solid #3a2c10;padding:.7rem 1.2rem;
-  min-height:52px;display:flex;align-items:center;gap:.8rem;
-  transition:opacity .4s ease;opacity:.4;}
+.musee-desc{background:#16100a;border-top:2px solid #c9a44a;padding:.9rem 1.2rem;
+  transition:opacity .4s ease;opacity:.3;}
 .musee-desc.active{opacity:1;}
-.musee-desc-emoji{font-size:1.5rem;flex-shrink:0;line-height:1;}
+.musee-desc.active .musee-desc-inner{animation:descPulse .6s ease;}
+@keyframes descPulse{
+  0%{transform:scale(1);box-shadow:0 0 18px rgba(201,164,74,.25);}
+  40%{transform:scale(1.02);box-shadow:0 0 32px rgba(201,164,74,.6);}
+  100%{transform:scale(1);box-shadow:0 0 18px rgba(201,164,74,.25);}
+}
+.musee-desc-inner{display:flex;align-items:center;gap:.9rem;
+  background:#241808;border:2px solid #c9a44a;border-radius:10px;
+  padding:.85rem 1.1rem;box-shadow:0 0 18px rgba(201,164,74,.25);}
+.musee-desc-emoji{font-size:2rem;flex-shrink:0;line-height:1;}
 .musee-desc-content{}
-.musee-desc-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;
-  color:#c9a44a;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.12rem;}
-.musee-desc-text{font-size:.83rem;color:#ccc0a0;line-height:1.6;font-style:italic;}
+.musee-desc-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:900;
+  color:#f0cc60;text-transform:uppercase;letter-spacing:.15em;margin-bottom:.25rem;}
+.musee-desc-text{font-size:1rem;color:#e8d8b0;line-height:1.65;font-style:italic;font-weight:500;}
 
 /* ══ CSS VITRINES ══ */
 .vit{transition:opacity .1s;}
-.vit-canvas{transition:fill .6s ease;}
-.vit-spot{opacity:0;transition:opacity .8s ease;}
+.vit-canvas{transition:fill .5s ease;}
+.vit-spot{opacity:0;transition:opacity .7s ease;}
 .vit.lit .vit-spot{opacity:1;}
 .vit-art{opacity:0;transform-box:fill-box;transform-origin:center;
   transform:scale(.4) rotate(-6deg);
@@ -173,10 +181,12 @@ h1 .hl{color:var(--day-dark);}
   </div>
   <!-- Description objet -->
   <div class="musee-desc" id="desc-zone">
-    <span class="musee-desc-emoji" id="desc-emoji">&#127775;</span>
-    <div class="musee-desc-content">
-      <div class="musee-desc-label" id="desc-label">En attente de la première bonne réponse…</div>
-      <div class="musee-desc-text" id="desc-text">Identifie le temps verbal pour illuminer la première vitrine.</div>
+    <div class="musee-desc-inner">
+      <span class="musee-desc-emoji" id="desc-emoji">&#127775;</span>
+      <div class="musee-desc-content">
+        <div class="musee-desc-label" id="desc-label">En attente de la première bonne réponse…</div>
+        <div class="musee-desc-text" id="desc-text">Identifie le temps verbal pour illuminer la première vitrine.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -285,17 +295,17 @@ function buildMusee(){
     +'<linearGradient id="gfloor" x1="0" y1="0" x2="0" y2="1">'
     +'<stop offset="0" stop-color="#c8b060"/><stop offset="1" stop-color="#a89040"/>'
     +'</linearGradient>'
-    /* Spot imparfait : blanc-bleu froid */
-    +'<radialGradient id="gspimp" cx="50%" cy="0%" r="80%" fx="50%" fy="0%">'
-    +'<stop offset="0%" stop-color="#cce8ff" stop-opacity="1"/>'
-    +'<stop offset="55%" stop-color="#88c4f0" stop-opacity=".35"/>'
-    +'<stop offset="100%" stop-color="#88c4f0" stop-opacity="0"/>'
+    /* Canvas éclairé imparfait : centre bleu-blanc */
+    +'<radialGradient id="gcvimp" cx="50%" cy="40%" r="55%">'
+    +'<stop offset="0%" stop-color="#ddf0ff" stop-opacity="1"/>'
+    +'<stop offset="60%" stop-color="#3a7aaa" stop-opacity=".25"/>'
+    +'<stop offset="100%" stop-color="#1a3a55" stop-opacity="0"/>'
     +'</radialGradient>'
-    /* Spot passé simple : or chaud */
-    +'<radialGradient id="gspps" cx="50%" cy="0%" r="80%" fx="50%" fy="0%">'
-    +'<stop offset="0%" stop-color="#ffe89a" stop-opacity="1"/>'
-    +'<stop offset="55%" stop-color="#f0c040" stop-opacity=".35"/>'
-    +'<stop offset="100%" stop-color="#f0c040" stop-opacity="0"/>'
+    /* Canvas éclairé passé simple : centre or */
+    +'<radialGradient id="gcvps" cx="50%" cy="40%" r="55%">'
+    +'<stop offset="0%" stop-color="#fff5cc" stop-opacity="1"/>'
+    +'<stop offset="60%" stop-color="#c9a030" stop-opacity=".25"/>'
+    +'<stop offset="100%" stop-color="#5a3a00" stop-opacity="0"/>'
     +'</radialGradient>'
     +'</defs>';
 
@@ -326,21 +336,23 @@ function buildMusee(){
     var cy = fy + fh/2;
     var isImp = (QUESTIONS[i].ans === "imp");
     var bCol  = isImp ? "#3ab5d8" : "#f5c518";
-    var spId  = isImp ? "gspimp"  : "gspps";
+    var spId  = isImp ? "gcvimp"  : "gcvps";
     var catLbl= isImp ? "IMP"     : "PS";
     var catBg = isImp ? "#1a6e88" : "#8a6000";
 
     s += '<g class="vit" id="fr'+i+'">';
-    /* Spot lumineux : ellipse depuis le haut du cadre */
-    s += '<ellipse class="vit-spot" cx="'+cx+'" cy="'+fy+'" rx="'+(fw*0.75)+'" ry="'+(fh*0.9)+'" fill="url(#'+spId+')"/>';
+    /* Triangle projecteur discret depuis le plafond */
+    s += '<polygon class="vit-spot" points="'+cx+','+(fy-12)+' '+(fx+4)+','+(fy+fh)+' '+(fx+fw-4)+','+(fy+fh)+'" fill="'+( isImp ? '#a0d8f8' : '#f5d87a' )+'" opacity="0"/>';
     /* Ombre portée */
     s += '<rect x="'+(fx+4)+'" y="'+(fy+4)+'" width="'+fw+'" height="'+fh+'" rx="4" fill="#000" opacity="0.4"/>';
     /* Cadre bois */
     s += '<rect x="'+(fx-8)+'" y="'+(fy-8)+'" width="'+(fw+16)+'" height="'+(fh+16)+'" rx="5" fill="#2c1a08"/>';
     /* Moulure cadre */
     s += '<rect x="'+(fx-5)+'" y="'+(fy-5)+'" width="'+(fw+10)+'" height="'+(fh+10)+'" rx="4" fill="none" stroke="#7a5a20" stroke-width="2.5"/>';
-    /* Canvas */
+    /* Canvas fond sombre */
     s += '<rect class="vit-canvas" x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" rx="3" fill="#1c1408"/>';
+    /* Lueur centrale sur canvas (par-dessus fond, sous objet) */
+    s += '<rect class="vit-spot" x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" rx="3" fill="url(#'+spId+')" opacity="0"/>';
     /* Bordure catégorie */
     s += '<rect x="'+(fx-2)+'" y="'+(fy-2)+'" width="'+(fw+4)+'" height="'+(fh+4)+'" rx="4" fill="none" stroke="'+bCol+'" stroke-width="3" opacity="0.9"/>';
     /* ? */
@@ -403,7 +415,12 @@ function answer(val, btn, q){
     renderMusee();
     /* Afficher description objet */
     var oe = OEUVRES[curQ];
-    var dz=$('desc-zone'); if(dz) dz.classList.add('active');
+    var dz=$('desc-zone');
+    if(dz){
+      dz.classList.remove('active');
+      void dz.offsetWidth;
+      dz.classList.add('active');
+    }
     var de=$('desc-emoji'); if(de) de.innerHTML=oe.emoji;
     var dl=$('desc-label'); if(dl) dl.textContent=oe.label;
     var dt=$('desc-text');  if(dt) dt.innerHTML=oe.desc;
