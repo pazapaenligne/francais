@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S2 J5 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5c518;--day-dark:#8a6000;--day-dark2:#3a2c00;
+  --day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.35);
+  --day-color:#f5c518;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffdf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--blue-dark:#1a6e88;--blue-light:#e8f6fb;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:720px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1.1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.3rem;}
+h1{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* Barre progression */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.73rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* Card */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 24px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.card-body{padding:1.1rem 1.2rem 0;}
+.theme-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.68rem;font-weight:800;
+  padding:.18rem .65rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.65rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.act-title{font-size:clamp(1rem,3vw,1.15rem);font-weight:900;color:var(--text);margin-bottom:.25rem;}
+.act-consigne{font-size:.87rem;color:var(--muted);margin-bottom:.9rem;line-height:1.6;}
+
+/* Pool de cartes */
+.pool{display:flex;flex-wrap:wrap;gap:.5rem;padding:.75rem;min-height:52px;
+  background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:var(--radius-sm);
+  margin-bottom:.9rem;transition:background .15s,border-color .15s;}
+.pool.drag-over{background:var(--day-light);border-color:var(--day-dark);}
+
+/* Colonnes tri */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.8rem;}
+@media(max-width:500px){.cols{grid-template-columns:1fr;}}
+.col-zone{border-radius:var(--radius-sm);overflow:hidden;}
+.col-head{padding:.5rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  font-weight:900;text-transform:uppercase;letter-spacing:.07em;text-align:center;}
+.col-pron .col-head{background:var(--blue-dark);color:#fff;}
+.col-det  .col-head{background:var(--day-dark);color:#fff;}
+.col-body{min-height:100px;padding:.5rem;display:flex;flex-wrap:wrap;gap:.45rem;
+  align-content:flex-start;background:var(--surface2);border:1.5px solid var(--border);
+  border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  transition:background .15s,border-color .15s;}
+.col-body.drag-over{background:var(--day-light);border-color:var(--day-dark);}
+
+/* Cartes verbales */
+.vcard{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;
+  padding:.38rem .8rem;font-size:.87rem;font-weight:700;cursor:grab;
+  user-select:none;-webkit-user-select:none;touch-action:none;
+  transition:transform .1s,box-shadow .1s,border-color .15s;white-space:nowrap;}
+.vcard:active{cursor:grabbing;}
+.vcard.dragging{opacity:.4;transform:scale(.95);}
+.vcard.ghost{opacity:.3;border-style:dashed;}
+.vcard .hl{color:var(--day-dark);text-decoration:underline;text-decoration-style:dotted;font-weight:900;}
+.vcard.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);cursor:default;}
+.vcard.ko{border-color:var(--pink-dark);background:var(--pink-light);color:var(--pink-dark);
+  animation:wShake .35s ease;cursor:default;}
+@keyframes wShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+/* Indice */
+.hint{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);
+  padding:.65rem .9rem;font-size:.84rem;color:var(--day-dark2);
+  line-height:1.75;display:none;margin-bottom:.7rem;}
+.hint.show{display:block;animation:fadeUp .3s ease;}
+
+/* Feedback global */
+.fb-global{padding:.8rem 1rem;border-radius:var(--radius-sm);font-size:.9rem;
+  display:none;line-height:1.8;margin:.2rem 1.2rem .7rem;}
+.fb-global.show{display:block;animation:fadeUp .3s ease;}
+.fb-global.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-global.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-global.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+
+/* Boutons */
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.2rem 1.2rem 0;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.4vw,.95rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* Résultats */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.07);text-align:center;position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.score-big{font-size:clamp(2.5rem,9vw,3.8rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day-dark);}
+.stars{font-size:1.7rem;margin:.35rem 0 .7rem;letter-spacing:.1em;}
+.rmsg{color:var(--muted);font-size:clamp(.87rem,2.4vw,.98rem);margin-bottom:1rem;line-height:1.8;}
+.rappel{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  padding:.75rem 1rem;text-align:left;font-size:.85rem;line-height:1.9;margin-bottom:1.1rem;color:var(--day-dark2);}
+.rappel strong{color:var(--day-dark);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card-body{padding:.9rem .9rem 0;}.btn-row{margin:.2rem .9rem 0;}
+  .fb-global{margin:.2rem .9rem .7rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 2 – Jour 5</div>
+  <h1>Je m'entraîne · <span class="hl">Leur / leurs — tri</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 11 occurrences</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">11</span> restant(s)</div>
+</div>
+
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="theme-badge">&#127993;&nbsp;Activité 1 — Glisser-déposer</div>
+    <div class="act-title">Leur ou leurs — pronom ou déterminant&nbsp;?</div>
+    <div class="act-consigne">Glisse chaque occurrence soulignée dans la bonne colonne. La phrase 8 contient deux occurrences distinctes.</div>
+
+    <!-- Pool -->
+    <div class="pool" id="pool"
+      ondragover="onDragOver(event,'pool')" ondragleave="onDragLeave('pool')" ondrop="onDrop(event,'pool')">
+    </div>
+
+    <!-- Colonnes -->
+    <div class="cols">
+      <div class="col-zone col-pron">
+        <div class="col-head">&#8596;&nbsp;Pronom invariable</div>
+        <div class="col-body" id="zone-pron"
+          ondragover="onDragOver(event,'zone-pron')" ondragleave="onDragLeave('zone-pron')" ondrop="onDrop(event,'zone-pron')"></div>
+      </div>
+      <div class="col-zone col-det">
+        <div class="col-head">&#128218;&nbsp;Déterminant possessif</div>
+        <div class="col-body" id="zone-det"
+          ondragover="onDragOver(event,'zone-det')" ondragleave="onDragLeave('zone-det')" ondrop="onDrop(event,'zone-det')"></div>
+      </div>
+    </div>
+
+    <div class="hint" id="hint1">
+      &#128161;&nbsp;<strong>Astuce :</strong> Remplace par <em>à eux</em> : si ça fonctionne → pronom invariable. Sinon → déterminant qui s'accorde avec le nom qui suit.
+    </div>
+  </div>
+  <div class="fb-global" id="fb1"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-verif1" onclick="verif1()" disabled>&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-g" onclick="reset1()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--yellow);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.55rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/11</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="rappel">
+      <strong>&#128161;&nbsp;À retenir :</strong><br>
+      <strong>leur</strong> (pronom, invariable) = remplace <em>à eux / à elles</em> — jamais suivi d'un nom.<br>
+      <strong>leur(s)</strong> (déterminant) = précède un nom et s'accorde : <em>leur avis</em> (sing.), <em>leurs avis</em> (plur.).<br>
+      <em>Test rapide :</em> « à eux » fonctionne → pronom. Sinon → déterminant.
+    </div>
+    <button class="btn btn-p" onclick="reset1()" style="width:100%;justify-content:center;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+/* ══ DONNÉES : 11 occurrences ══ */
+var ITEMS = [
+  {id:0,  phrase:'«\u00a0Le conseil <u>leur</u> a soumis une proposition.\u00a0»', cat:'pron'},
+  {id:1,  phrase:'«\u00a0<u>Leurs</u> engagements doivent être respectés.\u00a0»', cat:'det'},
+  {id:2,  phrase:'«\u00a0On <u>leur</u> a accordé le droit de répondre.\u00a0»', cat:'pron'},
+  {id:3,  phrase:'«\u00a0<u>Leur</u> position sur ce sujet est claire.\u00a0»', cat:'det'},
+  {id:4,  phrase:'«\u00a0Les membres ont défendu <u>leurs</u> intérêts.\u00a0»', cat:'det'},
+  {id:5,  phrase:'«\u00a0Le jury <u>leur</u> a attribué la première place.\u00a0»', cat:'pron'},
+  {id:6,  phrase:'«\u00a0<u>Leur</u> discours a convaincu l’assemblée.\u00a0»', cat:'det'},
+  {id:7,  phrase:'«\u00a0On <u>leur</u> a reproché… (1re occurrence)\u00a0»', cat:'pron'},
+  {id:8,  phrase:'«\u00a0…<u>leur</u> manque de rigueur. (2e occurrence)\u00a0»', cat:'det'},
+  {id:9,  phrase:'«\u00a0<u>Leurs</u> propositions méritent d’être étudiées.\u00a0»', cat:'det'},
+  {id:10, phrase:'«\u00a0La direction <u>leur</u> a transmis ses directives.\u00a0»', cat:'pron'}
+];
+
+var draggingId=null, verified=false, errCount=0;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){ if(actx) return; try{ actx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){
+  if(!actx) return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02);
+}
+function sndOk(){ initA(); beep(440,660,0.08,'sine',0.15); setTimeout(function(){ beep(660,880,0.15,'sine',0.12); },90); }
+function sndKo(){ initA(); beep(280,160,0.22,'sawtooth',0.12); }
+function sndFin(){ initA(); beep(523,659,0.2,'sine',0.14); setTimeout(function(){ beep(659,880,0.25,'sine',0.12); },120); }
+
+/* ══ MÉLANGE ══ */
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+
+/* ══ BUILD CARTES ══ */
+function buildCards(){
+  var pool=$('pool'); pool.innerHTML='';
+  $('zone-pron').innerHTML=''; $('zone-det').innerHTML='';
+  shuffle(ITEMS.map(function(item){return item.id;})).forEach(function(id){
+    pool.appendChild(makeCard(id));
+  });
+}
+
+function makeCard(id){
+  var item=ITEMS[id];
+  var card=document.createElement('div');
+  card.className='vcard'; card.id='vc-'+id; card.dataset.id=id;
+  card.innerHTML=item.phrase;
+  card.draggable=true;
+  card.addEventListener('dragstart',function(e){ onDragStart(e,id); });
+  card.addEventListener('dragend',function(){ onDragEnd(id); });
+  card.addEventListener('touchstart',function(e){ onTouchStart(e,id); },{passive:false});
+  return card;
+}
+
+/* ══ DRAG DESKTOP ══ */
+function onDragStart(e,id){
+  if(verified) return;
+  draggingId=id; e.dataTransfer.effectAllowed='move';
+  setTimeout(function(){ var c=$('vc-'+id); if(c) c.classList.add('dragging'); },0);
+}
+function onDragEnd(id){ var c=$('vc-'+id); if(c) c.classList.remove('dragging'); }
+function onDragOver(e,zoneId){ e.preventDefault(); var z=$(zoneId); if(z) z.classList.add('drag-over'); }
+function onDragLeave(zoneId){ var z=$(zoneId); if(z) z.classList.remove('drag-over'); }
+function onDrop(e,zoneId){
+  e.preventDefault(); var z=$(zoneId); if(z) z.classList.remove('drag-over');
+  if(draggingId===null||verified) return;
+  var card=$('vc-'+draggingId); if(!card) return;
+  z.appendChild(card); draggingId=null; checkCanVerif();
+}
+
+/* ══ TOUCH ══ */
+var touchCard=null, touchClone=null, touchOffX=0, touchOffY=0;
+function onTouchStart(e,id){
+  if(verified) return;
+  var card=$('vc-'+id); if(!card) return;
+  touchCard=card;
+  var r=card.getBoundingClientRect();
+  touchOffX=e.touches[0].clientX-r.left; touchOffY=e.touches[0].clientY-r.top;
+  touchClone=card.cloneNode(true); touchClone.id='';
+  touchClone.style.cssText='position:fixed;z-index:9999;opacity:.85;pointer-events:none;width:'+r.width+'px;font-size:.87rem;font-family:Arial,sans-serif;background:#fff;border:1.5px solid #e8e4d9;border-radius:8px;padding:.38rem .8rem;font-weight:700;';
+  document.body.appendChild(touchClone);
+  card.classList.add('ghost'); e.preventDefault();
+}
+function onTouchMove(e){
+  if(!touchClone) return;
+  var t=e.touches[0];
+  touchClone.style.left=(t.clientX-touchOffX)+'px';
+  touchClone.style.top=(t.clientY-touchOffY)+'px';
+  e.preventDefault();
+}
+function onTouchEnd(e){
+  if(!touchClone||!touchCard) return;
+  var t=e.changedTouches[0];
+  var zones=['pool','zone-pron','zone-det'];
+  var dropped=false;
+  zones.forEach(function(zid){
+    var z=$(zid); if(!z) return;
+    var r=z.getBoundingClientRect();
+    if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+      z.appendChild(touchCard); dropped=true;
+    }
+  });
+  touchCard.classList.remove('ghost');
+  document.body.removeChild(touchClone);
+  touchClone=null; touchCard=null;
+  checkCanVerif();
+}
+document.addEventListener('touchmove',onTouchMove,{passive:false});
+document.addEventListener('touchend',onTouchEnd);
+
+/* ══ VÉRIFIER ══ */
+function checkCanVerif(){
+  var inPool=$('pool').children.length;
+  $('btn-verif1').disabled=(inPool>0||verified);
+}
+
+function verif1(){
+  if(verified) return; verified=true;
+  $('btn-verif1').disabled=true;
+  var ok=0, ko=0;
+  ITEMS.forEach(function(item){
+    var card=$('vc-'+item.id); if(!card) return;
+    var inPron=$('zone-pron').contains(card);
+    var inDet=$('zone-det').contains(card);
+    var correct=(item.cat==='pron'&&inPron)||(item.cat==='det'&&inDet);
+    card.classList.remove('ok','ko');
+    card.classList.add(correct?'ok':'ko');
+    if(correct) ok++; else ko++;
+  });
+  errCount++;
+  /* Indice après 1re erreur */
+  if(ko>0 && errCount>=1) $('hint1').classList.add('show');
+  var total=11;
+  var fb=$('fb1');
+  if(ko===0){
+    fb.className='fb-global show ok'; fb.innerHTML='&#11088;&nbsp;Parfait\u00a0! '+ok+'/'+total+' — tu distingues parfaitement pronom et déterminant.'; sndFin();
+    setTimeout(showResults, 900);
+  } else {
+    fb.className='fb-global show '+(ok>=8?'mid':'ko');
+    fb.innerHTML='&#128161;&nbsp;'+ok+'/'+total+'\u00a0— '+(ko===1?'1 erreur':''+ko+' erreurs')+'. Les occurrences en rouge sont à corriger. Réessaie\u00a0!';
+    sndKo();
+  }
+  updateGlobal(ok, ko, 0);
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function updateGlobal(ok, ko, rem){
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
+  var pct=Math.round((ok+ko)/11*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=(ok+ko)+' / 11 occurrences';
+  $('prog-pct').textContent=pct+' %';
+}
+
+function showResults(){
+  var ok=ITEMS.filter(function(item){
+    var card=$('vc-'+item.id); if(!card) return false;
+    var inPron=$('zone-pron').contains(card);
+    var inDet=$('zone-det').contains(card);
+    return (item.cat==='pron'&&inPron)||(item.cat==='det'&&inDet);
+  }).length;
+  $('r-score').textContent=ok;
+  var s=ok>=11?5:ok>=9?4:ok>=7?3:ok>=5?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=['\u00c0 retravailler — lis le rappel ci-dessous.','Quelques erreurs à analyser.','Pas mal\u00a0! Tu progresses.','Très bien\u00a0!','Parfait\u00a0— maîtrise totale\u00a0!'];
+  $('r-msg').textContent=msgs[s-1];
+  $('results-screen').classList.add('show');
+  setTimeout(function(){ $('results-screen').scrollIntoView({behavior:'smooth',block:'start'}); },200);
+}
+
+function reset1(){
+  verified=false; $('fb1').className='fb-global'; $('hint1').classList.remove('show');
+  $('results-screen').classList.remove('show');
+  $('btn-verif1').disabled=true;
+  buildCards(); updateGlobal(0,0,11);
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildCards(); updateGlobal(0,0,11);
+</script>
+</body>
+</html>
