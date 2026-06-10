@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S2 J4 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#3ab5d8; --day-dark:#1a6e88;
+      --day-light:#e8f6fb; --day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.28);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+      width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:170px;height:170px;
+      background:var(--green);bottom:110px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:110px;height:110px;
+      background:var(--pink);top:190px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.85rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+    /* Progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.4rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;width:100%;max-width:720px;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;
+      white-space:nowrap;color:var(--text);}
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:#aaa;}
+    /* Card */
+    .card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.5rem 1.2rem 1.3rem;
+      position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;margin-bottom:1.2rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--yellow),var(--day-dark));}
+    .act-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .act-title{font-size:1.12rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;line-height:1.3;}
+    .consigne{font-size:.95rem;color:var(--text);margin-bottom:1.1rem;line-height:1.7;}
+    /* Phrases A1 */
+    .phrase-block{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+      padding:.7rem .9rem;margin-bottom:.6rem;font-size:.97rem;line-height:1.8;color:var(--text);}
+    .phrase-block .num{font-family:'JetBrains Mono',monospace;font-size:.75rem;
+      color:var(--day-dark);font-weight:700;margin-right:.3rem;}
+    .verb-input{border:2px solid var(--day-border);border-radius:7px;
+      padding:.25rem .5rem;font-size:.95rem;font-family:Arial,sans-serif;color:var(--text);
+      background:var(--surface);outline:none;transition:border-color .15s,background .15s;
+      min-width:120px;min-height:2.8rem;vertical-align:middle;}
+    .verb-input:focus{border-color:var(--day-color);}
+    .verb-input:disabled{cursor:default;}
+    .verb-input.ok-inp{background:#d4edda;border-color:var(--green);color:#1a4d0d;font-weight:700;}
+    .verb-input.ko-inp{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;}
+    .inline-fb{font-size:.78rem;font-family:'JetBrains Mono',monospace;
+      margin-left:.4rem;display:none;vertical-align:middle;}
+    .inline-fb.show{display:inline;}
+    .inline-fb.ok-fb{color:#1a4d0d;}
+    .inline-fb.ko-fb{color:#8b1a1a;}
+    /* Association A2 */
+    .assoc-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem .7rem;
+      align-items:center;margin-bottom:.8rem;}
+    .phrase-pill{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
+      padding:.5rem .75rem;font-size:.88rem;line-height:1.5;cursor:pointer;
+      transition:border-color .15s,background .15s,color .15s;-webkit-user-select:none;user-select:none;
+      -webkit-tap-highlight-color:transparent;}
+    .phrase-pill:hover{border-color:var(--day-color);background:var(--day-light);}
+    .phrase-pill.linked{background:#e8f6fb;border-color:var(--day-color);color:var(--day-dark);font-style:italic;}
+    .phrase-pill.active{border-color:var(--day-dark);background:var(--day-color);
+      color:#fff;font-weight:700;box-shadow:0 0 0 2px var(--day-dark);}
+    .phrase-pill.ok-pill{background:#d4edda;border-color:var(--green);color:#1a4d0d;font-weight:700;cursor:default;}
+    .phrase-pill.ko-pill{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;cursor:default;}
+    .arrow-col{text-align:center;font-size:1.1rem;color:var(--muted);}
+    .emploi-pill{background:var(--day-light);border:2px solid var(--day-border);border-radius:8px;
+      padding:.5rem .75rem;font-size:.88rem;font-weight:700;color:var(--day-dark);
+      cursor:pointer;text-align:center;transition:border-color .15s,background .15s;
+      -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
+    .emploi-pill:hover{border-color:var(--day-dark);background:#d0edf7;}
+    .emploi-pill.active{border-color:var(--day-dark);background:var(--day-color);color:#fff;
+      box-shadow:0 0 0 2px var(--day-dark);}
+    .emploi-pill.ok-epill{background:#d4edda;border-color:var(--green);color:#1a4d0d;cursor:default;}
+    .emploi-pill.ko-epill{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;cursor:default;}
+    .assoc-fb{font-size:.75rem;font-family:'JetBrains Mono',monospace;margin-top:.15rem;
+      display:none;line-height:1.4;}
+    .assoc-fb.show{display:block;}
+    .assoc-fb.ok-fb{color:#1a4d0d;}
+    .assoc-fb.ko-fb{color:#8b1a1a;}
+    /* Indice */
+    .indice-box{background:#fffbeb;border:1.5px solid var(--yellow);border-radius:10px;
+      padding:.65rem .9rem;margin-bottom:.9rem;font-size:.85rem;line-height:1.7;
+      color:#5a3e00;display:none;}
+    .indice-box.show{display:block;}
+    /* Boutons */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+    .btn-sol{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+    .btn-sol:hover:not(:disabled){background:var(--day-light);}
+    /* Feedback */
+    .feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;
+      display:none;align-items:flex-start;gap:.6rem;line-height:1.7;}
+    .feedback.show{display:flex;}
+    .feedback.ok {background:#f0faeb;border:1.5px solid var(--green);color:#1a4d0d;}
+    .feedback.ko {background:#fff0ef;border:1.5px solid var(--pink);color:#8b1a1a;}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#5a3e00;}
+    .feedback-icon{font-size:1.3rem;flex-shrink:0;line-height:1;}
+    .feedback-detail{font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.3rem;line-height:1.7;}
+    .feedback.ok  .feedback-detail{color:#1a4d0d;}
+    .feedback.ko  .feedback-detail{color:#8b1a1a;}
+    .feedback.mid .feedback-detail{color:#5a3e00;}
+    /* Résultats */
+    .results{width:100%;max-width:720px;text-align:center;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 1rem;letter-spacing:.2rem;}
+    .results-msg{color:var(--text);font-size:.95rem;margin-bottom:1.5rem;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:560px){
+      .assoc-grid{grid-template-columns:1fr;gap:.4rem;}
+      .arrow-col{display:none;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4ème
+  </div>
+  <div class="week-label">Semaine 2 – Jour 4</div>
+  <h1>Je m'entraîne · <span class="hl">Le conditionnel présent</span></h1>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 15 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="cnt-ok">0</span> corrects</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cnt-rem">15</span> restants</div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ACTIVITÉ 1 — Conjuguer
+═══════════════════════════════════ -->
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="act-label">Activité 1 / 2</div>
+  <div class="theme-badge">Conjugaison ✏️</div>
+  <div class="act-title">Conjuguer au conditionnel présent</div>
+  <p class="consigne">Écris la forme correcte du verbe entre parenthèses au conditionnel présent.</p>
+
+  <div id="phrases-a1"></div>
+
+  <div class="btn-row" id="a1-row1">
+    <button class="btn btn-primary" id="a1-btn-verif" onclick="verifierA1()">✓ Vérifier</button>
+    <button class="btn btn-ghost" onclick="resetA1()">✕ Effacer</button>
+  </div>
+  <div class="btn-row" id="a1-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetA1()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solA1()">Voir la solution</button>
+  </div>
+  <div class="feedback" id="fb-a1">
+    <span class="feedback-icon" id="fb-a1-icon"></span>
+    <div>
+      <div id="fb-a1-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-a1-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ACTIVITÉ 2 — Identifier l'emploi
+═══════════════════════════════════ -->
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="act-label">Activité 2 / 2</div>
+  <div class="theme-badge">Emplois 🔍</div>
+  <div class="act-title">Identifier l'emploi du conditionnel</div>
+  <p class="consigne">Clique sur une phrase, puis sur l'emploi correspondant pour les associer.</p>
+
+  <div class="indice-box" id="indice-a2">
+    💡 <strong>Méthode :</strong> repère la structure de la phrase.<br>
+    « Si + imparfait » → hypothèse.<br>
+    Formule de demande polie → politesse.<br>
+    « Selon / d'après / il paraîtrait » → fait non confirmé.
+  </div>
+
+  <div id="assoc-container"></div>
+
+  <div class="btn-row" id="a2-row1">
+    <button class="btn btn-primary" id="a2-btn-verif" onclick="verifierA2()">✓ Vérifier</button>
+    <button class="btn btn-ghost" onclick="resetA2()">✕ Effacer</button>
+  </div>
+  <div class="btn-row" id="a2-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetA2()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solA2()">Voir la solution</button>
+  </div>
+  <div class="feedback" id="fb-a2">
+    <span class="feedback-icon" id="fb-a2-icon"></span>
+    <div>
+      <div id="fb-a2-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-a2-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/15</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <button class="btn btn-primary" onclick="resetAll()" style="margin:0 auto;display:flex;">Recommencer tout</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   DONNÉES
+════════════════════════════════════════ */
+var TOTAL = 15;
+var doneA1 = false;
+var doneA2 = false;
+var scoreA1 = 0;
+var scoreA2 = 0;
+
+/* Activité 1 — 9 champs (phrase 7 a 2 verbes) */
+var PHRASES = [
+  {
+    id: 'p1',
+    avant: 'Si nous partions tôt, nous ',
+    apres: ' à l\'heure.',
+    verbe: '(arriver)',
+    champs: [
+      { id: 'p1a', solutions: ['arriverions'] }
+    ]
+  },
+  {
+    id: 'p2',
+    avant: 'Elle ',
+    apres: ' t\'aider si tu le lui demandais.',
+    verbe: '(pouvoir)',
+    champs: [
+      { id: 'p2a', solutions: ['pourrait'] }
+    ]
+  },
+  {
+    id: 'p3',
+    avant: '',
+    apres: '-vous la gentillesse de patienter ?',
+    verbe: '(Avoir)',
+    champs: [
+      { id: 'p3a', solutions: ['auriez', 'Auriez'] }
+    ]
+  },
+  {
+    id: 'p4',
+    avant: 'Ils ',
+    apres: ' de leur mieux dans cette situation.',
+    verbe: '(faire)',
+    champs: [
+      { id: 'p4a', solutions: ['feraient'] }
+    ]
+  },
+  {
+    id: 'p5',
+    avant: 'Je ',
+    apres: ' vous soumettre une proposition.',
+    verbe: '(vouloir)',
+    champs: [
+      { id: 'p5a', solutions: ['voudrais'] }
+    ]
+  },
+  {
+    id: 'p6',
+    avant: 'Si tu étudiais, tu ',
+    apres: ' de meilleures notes.',
+    verbe: '(obtenir)',
+    champs: [
+      { id: 'p6a', solutions: ['obtiendrais'] }
+    ]
+  },
+  {
+    id: 'p7',
+    avant: 'On ',
+    milieu: ' qu\'il ',
+    apres: ' impliqué dans l\'affaire.',
+    verbe1: '(dire)',
+    verbe2: '(être)',
+    champs: [
+      { id: 'p7a', solutions: ['dirait'] },
+      { id: 'p7b', solutions: ['serait'] }
+    ]
+  },
+  {
+    id: 'p8',
+    avant: 'Nous ',
+    apres: ' partir avant la nuit.',
+    verbe: '(devoir)',
+    champs: [
+      { id: 'p8a', solutions: ['devrions'] }
+    ]
+  }
+];
+
+/* Activité 2 — 6 associations */
+var EMPLOIS_LIST = ['Hypothèse', 'Politesse', 'Fait non confirmé'];
+
+var ASSOCS_BASE = [
+  { id: 'a1', phrase: '« Si tu révisais, tu comprendrais mieux le cours. »', emploi: 'Hypothèse' },
+  { id: 'a2', phrase: '« Sauriez-vous où se trouve la bibliothèque ? »',     emploi: 'Politesse' },
+  { id: 'a3', phrase: '« Le rapport contiendrait des informations confidentielles. »', emploi: 'Fait non confirmé' },
+  { id: 'a4', phrase: '« Si nous avions plus de temps, nous lirions davantage. »',    emploi: 'Hypothèse' },
+  { id: 'a5', phrase: '« Je souhaiterais obtenir un rendez-vous. »',          emploi: 'Politesse' },
+  { id: 'a6', phrase: '« L\'accusé aurait agi seul, selon les enquêteurs. »', emploi: 'Fait non confirmé' }
+];
+
+var assocs = []; /* copie mélangée */
+var selPhrase = null;
+var selEmploi  = null;
+var userAnswers = {}; /* id → emploi choisi */
+var erreurCount = 0; /* compteur erreurs A2 pour indice */
+
+/* ════════════════════════════════════════
+   NORMALISATION
+════════════════════════════════════════ */
+function norm(s){
+  return s.trim().toLowerCase()
+    .replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e')
+    .replace(/[îï]/g,'i').replace(/[ôö]/g,'o')
+    .replace(/[ùûü]/g,'u').replace(/ç/g,'c');
+}
+
+/* ════════════════════════════════════════
+   UTILITAIRES
+════════════════════════════════════════ */
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=a[i]; a[i]=a[j]; a[j]=tmp;
+  }
+  return a;
+}
+
+function showFeedback(id, cls, ico, msg, det){
+  var fb = document.getElementById(id);
+  fb.className = 'feedback show ' + cls;
+  document.getElementById(id+'-icon').innerHTML = ico;
+  document.getElementById(id+'-msg').textContent = msg;
+  document.getElementById(id+'-detail').innerHTML = det;
+}
+
+/* ════════════════════════════════════════
+   ACTIVITÉ 1 — BUILD
+════════════════════════════════════════ */
+function buildA1(){
+  var container = document.getElementById('phrases-a1');
+  container.innerHTML = '';
+
+  PHRASES.forEach(function(ph, idx){
+    var div = document.createElement('div');
+    div.className = 'phrase-block';
+    div.id = 'ph-' + ph.id;
+
+    var num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = (idx+1) + '.';
+    div.appendChild(num);
+
+    if(ph.id === 'p7'){
+      /* Phrase 7 : deux verbes */
+      div.appendChild(document.createTextNode(ph.avant));
+      div.appendChild(makeInput(ph.champs[0].id));
+      var fbA = makeFb(ph.champs[0].id);
+      div.appendChild(document.createTextNode(' '));
+      div.appendChild(document.createTextNode(ph.verbe1 + ' '));
+      div.appendChild(document.createTextNode(ph.milieu));
+      div.appendChild(makeInput(ph.champs[1].id));
+      var fbB = makeFb(ph.champs[1].id);
+      div.appendChild(document.createTextNode(' '));
+      div.appendChild(document.createTextNode(ph.verbe2 + ' '));
+      div.appendChild(document.createTextNode(ph.apres));
+      div.appendChild(fbA);
+      div.appendChild(fbB);
+    } else {
+      div.appendChild(document.createTextNode(ph.avant));
+      div.appendChild(makeInput(ph.champs[0].id));
+      var fb = makeFb(ph.champs[0].id);
+      div.appendChild(document.createTextNode(' '));
+      div.appendChild(document.createTextNode(ph.verbe + ' '));
+      div.appendChild(document.createTextNode(ph.apres));
+      div.appendChild(fb);
+    }
+
+    container.appendChild(div);
+  });
+}
+
+function makeInput(id){
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'verb-input';
+  inp.id = id;
+  inp.setAttribute('autocomplete','off');
+  inp.setAttribute('autocorrect','off');
+  inp.setAttribute('autocapitalize','off');
+  inp.setAttribute('spellcheck','false');
+  return inp;
+}
+
+function makeFb(id){
+  var span = document.createElement('span');
+  span.className = 'inline-fb';
+  span.id = 'fb-inp-' + id;
+  return span;
+}
+
+/* ════════════════════════════════════════
+   ACTIVITÉ 1 — VÉRIFIER
+════════════════════════════════════════ */
+function verifierA1(){
+  if(doneA1) return;
+  /* Bloquer si un champ est vide */
+  var vide = false;
+  PHRASES.forEach(function(ph){
+    ph.champs.forEach(function(champ){
+      if(!document.getElementById(champ.id).value.trim()) vide = true;
+    });
+  });
+  if(vide){
+    var fb = document.getElementById('fb-a1');
+    fb.className = 'feedback show mid';
+    document.getElementById('fb-a1-icon').textContent = '!';
+    document.getElementById('fb-a1-msg').textContent = 'Complète toutes les cases avant de vérifier.';
+    document.getElementById('fb-a1-detail').textContent = '';
+    return;
+  }
+  doneA1 = true;
+  document.getElementById('a1-btn-verif').disabled = true;
+
+  var ok = 0;
+  var ko = 0;
+
+  PHRASES.forEach(function(ph){
+    ph.champs.forEach(function(champ){
+      var inp = document.getElementById(champ.id);
+      inp.disabled = true;
+      var fb = document.getElementById('fb-inp-' + champ.id);
+      var correct = champ.solutions.some(function(sol){
+        return norm(inp.value) === norm(sol);
+      });
+      if(correct){
+        inp.classList.add('ok-inp');
+        fb.className = 'inline-fb show ok-fb';
+        fb.textContent = '✓';
+        ok++;
+      } else {
+        inp.classList.add('ko-inp');
+        fb.className = 'inline-fb show ko-fb';
+        fb.textContent = '→ ' + champ.solutions[0];
+        ko++;
+      }
+    });
+  });
+
+  scoreA1 = ok;
+  var pct = ok / 9 * 100;
+  var cls, ico, msg;
+  if(pct >= 89)     { cls='ok';  ico='✓'; msg='Excellent ! Toutes les formes sont maîtrisées.'; }
+  else if(pct >= 56){ cls='mid'; ico='↑'; msg='Bon travail ! Consulte les corrections en rouge.'; }
+  else if(pct >= 33){ cls='mid'; ico='→'; msg='Continue ! Revois les formes irrégulières.'; }
+  else              { cls='ko';  ico='!'; msg='À retravailler : relis la leçon sur le conditionnel.'; }
+
+  showFeedback('fb-a1', cls, ico, msg, ok + ' / 9 formes correctes.');
+  document.getElementById('a1-row1').style.display = 'none';
+  document.getElementById('a1-row2').style.display = 'flex';
+  updateGlobal();
+}
+
+function solA1(){
+  PHRASES.forEach(function(ph){
+    ph.champs.forEach(function(champ){
+      var inp = document.getElementById(champ.id);
+      inp.value = champ.solutions[0];
+      inp.classList.remove('ko-inp');
+      inp.classList.add('ok-inp');
+      var fb = document.getElementById('fb-inp-' + champ.id);
+      fb.className = 'inline-fb show ok-fb';
+      fb.textContent = '✓';
+    });
+  });
+}
+
+function resetA1(){
+  doneA1 = false; scoreA1 = 0;
+  buildA1();
+  document.getElementById('a1-btn-verif').disabled = false;
+  document.getElementById('a1-row1').style.display = 'flex';
+  document.getElementById('a1-row2').style.display = 'none';
+  document.getElementById('fb-a1').className = 'feedback';
+  updateGlobal();
+}
+
+/* ════════════════════════════════════════
+   ACTIVITÉ 2 — BUILD
+════════════════════════════════════════ */
+function buildA2(){
+  assocs = shuffle(ASSOCS_BASE);
+  userAnswers = {};
+  selPhrase = null;
+  selEmploi  = null;
+  erreurCount = 0;
+  document.getElementById('indice-a2').className = 'indice-box';
+
+  var container = document.getElementById('assoc-container');
+  container.innerHTML = '';
+
+  assocs.forEach(function(item){
+    /* Ligne : phrase — flèche — emplois */
+    var row = document.createElement('div');
+    row.style.cssText = 'margin-bottom:.7rem;';
+
+    /* Phrase */
+    var pill = document.createElement('div');
+    pill.className = 'phrase-pill';
+    pill.id = 'pp-' + item.id;
+    pill.textContent = item.phrase;
+    pill.addEventListener('click', function(){ clickPhrase(item.id); });
+    row.appendChild(pill);
+
+    /* Feedback de la ligne */
+    var fb = document.createElement('div');
+    fb.className = 'assoc-fb';
+    fb.id = 'fb-assoc-' + item.id;
+    row.appendChild(fb);
+
+    container.appendChild(row);
+  });
+
+  /* Emplois — boutons fixes (non mélangés pour lisibilité) */
+  var emploiWrap = document.createElement('div');
+  emploiWrap.style.cssText = 'display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0;';
+  emploiWrap.id = 'emploi-wrap';
+  EMPLOIS_LIST.forEach(function(emp){
+    var btn = document.createElement('div');
+    btn.className = 'emploi-pill';
+    btn.id = 'ep-' + emp.replace(/\s+/g,'-');
+    btn.textContent = emp;
+    btn.addEventListener('click', function(){ clickEmploi(emp); });
+    emploiWrap.appendChild(btn);
+  });
+  container.appendChild(emploiWrap);
+}
+
+function clickPhrase(id){
+  if(doneA2) return;
+  /* Désélectionner le précédent */
+  if(selPhrase){
+    var prev = document.getElementById('pp-' + selPhrase);
+    if(prev) prev.classList.remove('active');
+  }
+  if(selPhrase === id){
+    selPhrase = null;
+  } else {
+    selPhrase = id;
+    document.getElementById('pp-' + id).classList.add('active');
+    /* Si un emploi déjà sélectionné → associer immédiatement */
+    if(selEmploi) doAssociation();
+  }
+}
+
+function clickEmploi(emp){
+  if(doneA2) return;
+  /* Désélectionner le précédent */
+  if(selEmploi){
+    var prevEl = document.getElementById('ep-' + selEmploi.replace(/\s+/g,'-'));
+    if(prevEl) prevEl.classList.remove('active');
+  }
+  if(selEmploi === emp){
+    selEmploi = null;
+  } else {
+    selEmploi = emp;
+    document.getElementById('ep-' + emp.replace(/\s+/g,'-')).classList.add('active');
+    /* Si une phrase déjà sélectionnée → associer immédiatement */
+    if(selPhrase) doAssociation();
+  }
+}
+
+function doAssociation(){
+  userAnswers[selPhrase] = selEmploi;
+  /* Feedback visuel immédiat sur la phrase */
+  var pill = document.getElementById('pp-' + selPhrase);
+  /* Retrouver le texte original de la phrase */
+  var orig = '';
+  for(var k=0;k<assocs.length;k++){ if(assocs[k].id===selPhrase){ orig=assocs[k].phrase; break; } }
+  pill.classList.remove('active');
+  pill.classList.add('linked');
+  pill.textContent = orig + ' → ' + selEmploi;
+  /* Désélectionner emploi */
+  var empEl = document.getElementById('ep-' + selEmploi.replace(/\s+/g,'-'));
+  if(empEl) empEl.classList.remove('active');
+  selPhrase = null;
+  selEmploi = null;
+}
+
+/* ════════════════════════════════════════
+   ACTIVITÉ 2 — VÉRIFIER
+════════════════════════════════════════ */
+function verifierA2(){
+  if(doneA2) return;
+  /* Bloquer si toutes les phrases ne sont pas associées */
+  var manquantes = assocs.filter(function(item){ return !userAnswers[item.id]; });
+  if(manquantes.length > 0){
+    var fb = document.getElementById('fb-a2');
+    fb.className = 'feedback show mid';
+    document.getElementById('fb-a2-icon').textContent = '!';
+    document.getElementById('fb-a2-msg').textContent = 'Associe toutes les phrases avant de vérifier.';
+    document.getElementById('fb-a2-detail').textContent = manquantes.length + ' phrase(s) non associée(s).';
+    return;
+  }
+  doneA2 = true;
+  document.getElementById('a2-btn-verif').disabled = true;
+
+  var ok = 0; var ko = 0;
+
+  assocs.forEach(function(item){
+    var pill = document.getElementById('pp-' + item.id);
+    var fb   = document.getElementById('fb-assoc-' + item.id);
+    var given = userAnswers[item.id] || '';
+    pill.classList.remove('active');
+    if(given === item.emploi){
+      pill.className = 'phrase-pill ok-pill';
+      pill.textContent = item.phrase + ' → ' + item.emploi;
+      fb.className = 'assoc-fb show ok-fb';
+      fb.textContent = '✓ Correct.';
+      ok++;
+    } else {
+      pill.className = 'phrase-pill ko-pill';
+      pill.textContent = item.phrase + (given ? ' → ' + given : ' → non associée');
+      fb.className = 'assoc-fb show ko-fb';
+      fb.textContent = '→ ' + item.emploi + '.';
+      ko++;
+    }
+  });
+
+  /* Désactiver emplois */
+  EMPLOIS_LIST.forEach(function(emp){
+    var el = document.getElementById('ep-' + emp.replace(/\s+/g,'-'));
+    if(el){ el.classList.remove('active'); el.style.pointerEvents='none'; el.style.opacity='.5'; }
+  });
+
+  scoreA2 = ok;
+  erreurCount += ko;
+  if(erreurCount >= 2) document.getElementById('indice-a2').classList.add('show');
+
+  var pct = ok / 6 * 100;
+  var cls, ico, msg;
+  if(pct >= 100)    { cls='ok';  ico='✓'; msg='Parfait ! Tous les emplois sont bien identifiés.'; }
+  else if(pct >= 67){ cls='mid'; ico='↑'; msg='Bon travail ! Quelques emplois à revoir.'; }
+  else if(pct >= 33){ cls='mid'; ico='→'; msg='Continue ! Relis l\'indice et réessaie.'; }
+  else              { cls='ko';  ico='!'; msg='À retravailler : utilise l\'indice pour t\'aider.'; }
+
+  showFeedback('fb-a2', cls, ico, msg, ok + ' / 6 associations correctes.');
+  document.getElementById('a2-row1').style.display = 'none';
+  document.getElementById('a2-row2').style.display = 'flex';
+  updateGlobal();
+}
+
+function solA2(){
+  assocs.forEach(function(item){
+    var pill = document.getElementById('pp-' + item.id);
+    pill.className = 'phrase-pill ok-pill';
+    pill.textContent = item.phrase + ' → ' + item.emploi;
+    var fb = document.getElementById('fb-assoc-' + item.id);
+    fb.className = 'assoc-fb show ok-fb';
+    fb.textContent = '✓ Correct.';
+  });
+  document.getElementById('indice-a2').classList.add('show');
+}
+
+function resetA2(){
+  doneA2 = false; scoreA2 = 0;
+  buildA2();
+  document.getElementById('a2-btn-verif').disabled = false;
+  document.getElementById('a2-row1').style.display = 'flex';
+  document.getElementById('a2-row2').style.display = 'none';
+  document.getElementById('fb-a2').className = 'feedback';
+  updateGlobal();
+}
+
+/* ════════════════════════════════════════
+   GLOBAL
+════════════════════════════════════════ */
+function updateGlobal(){
+  var ok  = scoreA1 + scoreA2;
+  var ko  = (doneA1 ? 9  - scoreA1 : 0) + (doneA2 ? 6  - scoreA2 : 0);
+  var rem = (doneA1 ? 0 : 9) + (doneA2 ? 0 : 6);
+  var pct = Math.round(ok / TOTAL * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = ok + ' / ' + TOTAL + ' points';
+  document.getElementById('prog-pct').textContent = pct + ' %';
+  document.getElementById('cnt-ok').textContent  = ok;
+  document.getElementById('cnt-ko').textContent  = ko;
+  document.getElementById('cnt-rem').textContent = rem;
+  if(doneA1 && doneA2) afficherResultats(ok);
+}
+
+function afficherResultats(score){
+  document.getElementById('results-screen').classList.add('show');
+  document.getElementById('score-num').textContent = score;
+  var pct = score / TOTAL * 100;
+  var stars = pct>=93?5 : pct>=73?4 : pct>=53?3 : pct>=33?2 : 1;
+  document.getElementById('stars-row').textContent = '⭐'.repeat(stars) + '✦'.repeat(5-stars);
+  var msgs = [
+    'À retravailler — relis la leçon !',
+    'À retravailler — relis la leçon !',
+    'À retravailler — relis la leçon !',
+    'À retravailler — relis la leçon !',
+    'À retravailler — relis la leçon !',
+    'Courage — tu progresses !',
+    'Courage — tu progresses !',
+    'Pas mal — continue !',
+    'Pas mal — continue !',
+    'Bien joué !',
+    'Bien joué !',
+    'Très bien !',
+    'Très bien !',
+    'Très bien !',
+    'Très bien !',
+    'Parfait — mission accomplie !'
+  ];
+  document.getElementById('results-msg').textContent = msgs[Math.min(score, msgs.length-1)];
+}
+
+function resetAll(){
+  document.getElementById('results-screen').classList.remove('show');
+  resetA1(); resetA2();
+}
+
+/* Init */
+buildA1();
+buildA2();
+</script>
+</body>
+</html>
