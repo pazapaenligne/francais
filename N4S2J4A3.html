@@ -138,8 +138,8 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
 .texte-audit{ background:var(--dark);border:1px solid #4a2030;border-radius:12px;padding:16px 18px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;font-size:clamp(.85rem,3vw,.96rem);line-height:2.4;color:#f0d0d8; }
 .phrase-audit{ display:block;margin-bottom:8px;cursor:default; }
 .phrase-audit:last-child{ margin-bottom:0; }
-.mot-cliquable{ cursor:pointer;border-bottom:1px dashed rgba(230,57,80,.4);transition:background .15s,color .15s;border-radius:2px;padding:0 2px; }
-.mot-cliquable:hover{ background:rgba(230,57,80,.18);color:#ffb0b8; }
+.mot-cliquable{ cursor:pointer;transition:background .15s,color .15s;border-radius:3px;padding:1px 3px; }
+.mot-cliquable:hover{ background:rgba(58,181,216,.15);color:#a8e0f0; }
 .mot-cliquable.detecte{ background:rgba(58,181,216,.2);color:#7de8ff;border-bottom:2px solid var(--jour);cursor:default; }
 .mot-cliquable.recale-mot{ background:rgba(230,57,80,.25);color:#ff9bab;border-bottom:2px solid var(--rouge);animation:shake .4s; }
 .mot-cliquable.correct-final{ background:rgba(58,181,216,.2);color:#7de8ff;border-bottom:2px solid var(--jour);cursor:default; }
@@ -191,8 +191,7 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
 
 <!-- ════ PHASE 1 — BRIEFING ════ -->
 <div id="phase1" class="phase1">
-
-  <!-- Scène salle d'examen -->
+  <div class="exam-scene">
     <svg id="examSvg" viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
       <!-- Fond salle -->
       <rect width="700" height="380" fill="#0d1f2d"/>
@@ -322,7 +321,7 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
         </div>
         <div class="ep-item ep2">
           <span class="ep-num">EP. 2</span>
-          <span><b>Audit linguistique</b> (débloquée après l'épreuve 1) — Repère les 4 erreurs de conditionnel dans le texte du jury en cliquant directement sur les mots fautifs.</span>
+          <span><b>Audit linguistique</b> (débloquée après l'épreuve 1) — Repère les 3 erreurs de conditionnel dans le texte du jury. Clique sur le mot incorrect dans chaque phrase.</span>
         </div>
       </div>
       <button class="btn-entrer" onclick="entrerSalle()">⌨️ ENTRER DANS LA SALLE D'EXAMEN</button>
@@ -363,7 +362,10 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
       <div class="ep-header">
         <span class="ep-badge ep2-badge">ÉPREUVE 2 · Audit linguistique</span>
       </div>
-      <div class="ep2-progress">Erreurs détectées&nbsp;: <span id="errDetectees">0</span> / 4</div>
+      <div style="background:var(--rouge-pale);border:1.5px solid #f5a3b0;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:clamp(.84rem,3vw,.94rem);color:var(--rouge-fonce);font-weight:600;line-height:1.5;">
+        Ce texte contient <b>3 erreurs de conditionnel</b>. Cliquez sur les mots incorrects pour les signaler. Attention&nbsp;: tous les mots sont cliquables, y compris les formes correctes.
+      </div>
+      <div class="ep2-progress">Erreurs détectées&nbsp;: <span id="errDetectees">0</span> / 3</div>
       <div class="texte-audit" id="texteAudit"></div>
       <button class="btn-valider-ep2" id="btnValiderEp2" onclick="validerEp2()">SOUMETTRE L'AUDIT AU JURY</button>
       <div class="corr2-zone" id="corr2Zone"></div>
@@ -414,29 +416,33 @@ const EP1 = [
 // Chaque phrase : tableau de tokens { t: texte, err: bool, id: identifiant unique }
 // 4 erreurs à détecter (id: 'e1','e2','e3','e4'), reste = corrects ou neutres
 const EP2_PHRASES = [
-  { id:'p1', tokens:[
-    {t:"Si tu travaillais sérieusement, tu "},{t:"réussiras",err:true,eid:'e1'},{t:" ton année."}
-  ], note:"« réussiras » → réussirais (hypothèse : si + imparfait → conditionnel)" },
-  { id:'p2', tokens:[
-    {t:"Le directeur a annoncé que les résultats "},{t:"seraient affichés",correct:true},{t:" lundi."}
-  ], note:"✓ Correct : discours indirect → conditionnel." },
-  { id:'p3', tokens:[
-    {t:""},{t:"Pourriez-vous",correct:true},{t:" me transmettre ce document ?"}
-  ], note:"✓ Correct : politesse → conditionnel." },
-  { id:'p4', tokens:[
-    {t:"Selon les témoins, l'incident "},{t:"se produira",err:true,eid:'e2'},{t:" en fin d'après-midi."}
-  ], note:"« se produira » → se produirait (fait rapporté non confirmé → conditionnel)" },
-  { id:'p5', tokens:[
-    {t:"Elle "},{t:"aimerait",correct:true},{t:" obtenir une explication claire."}
-  ], note:"✓ Correct : désir atténué → conditionnel." },
-  { id:'p6', tokens:[
-    {t:"Si nous partions maintenant, nous "},{t:"éviterons",err:true,eid:'e3'},{t:" les embouteillages."}
-  ], note:"« éviterons » → éviterions (hypothèse : si + imparfait → conditionnel)" }
+  { id:'p1',
+    words:["Si","tu","travaillais","sérieusement,","tu","réussiras","ton","année."],
+    errs:{5:{eid:'e1'}},
+    note:"<b>réussiras</b> ❌ → <b>réussirais</b> ✓ — Quand la condition est exprimée avec <em>si + imparfait</em>, la principale doit être au conditionnel." },
+  { id:'p2',
+    words:["Le","directeur","a","annoncé","que","les","résultats","seraient","affichés","lundi."],
+    errs:{},
+    note:"<b>seraient affichés</b> ✓ — Correct&nbsp;: au discours indirect, on met le verbe au conditionnel pour rapporter des paroles." },
+  { id:'p3',
+    words:["Pourriez-vous","me","transmettre","ce","document","?"],
+    errs:{},
+    note:"<b>Pourriez-vous</b> ✓ — Correct&nbsp;: le conditionnel s'emploie pour formuler une demande polie." },
+  { id:'p4',
+    words:["Selon","les","témoins,","l'incident","se","produira","en","fin","d'après-midi."],
+    errs:{5:{eid:'e2'}},
+    note:"<b>se produira</b> ❌ → <b>se produirait</b> ✓ — Selon les témoins = fait non confirmé&nbsp;: on emploie le conditionnel (conditionnel journalistique)." },
+  { id:'p5',
+    words:["Elle","aimerait","obtenir","une","explication","claire."],
+    errs:{},
+    note:"<b>aimerait</b> ✓ — Correct&nbsp;: le conditionnel exprime ici un souhait formulé avec politesse." },
+  { id:'p6',
+    words:["Si","nous","partions","maintenant,","nous","éviterons","les","embouteillages."],
+    errs:{5:{eid:'e3'}},
+    note:"<b>éviterons</b> ❌ → <b>éviterions</b> ✓ — Même règle&nbsp;: <em>si + imparfait</em> dans la subordonnée → conditionnel dans la principale." }
 ];
 // Erreurs attendues : e1, e2, e3 (3 erreurs dans le texte — la 4e est piégée ci-dessous)
-// Note : le sujet dit 4 erreurs, mais le corrigé n'en contient que 3.
-// Je marque 3 erreurs réelles + j'adapte le score sur 3 pour l'épreuve 2.
-// (À confirmer avec la prof — noté /3 pour l'instant, ramené à /4 avec bonus si 3/3)
+
 const NB_ERR = 3; // erreurs réelles dans le texte
 
 let score1=0, score2=0;
@@ -565,38 +571,47 @@ function buildEp2(){
   EP2_PHRASES.forEach((p)=>{
     const phrase=document.createElement('span');
     phrase.className='phrase-audit';
-    p.tokens.forEach(tok=>{
-      if(tok.err){
-        const span=document.createElement('span');
-        span.className='mot-cliquable';
-        span.textContent=tok.t;
-        span.dataset.eid=tok.eid;
-        span.addEventListener('click',()=>clickerMot(span,tok.eid));
-        phrase.appendChild(span);
+    p.words.forEach((w,wi)=>{
+      const isErr = p.errs[wi];
+      const span=document.createElement('span');
+      span.className='mot-cliquable';
+      span.textContent=w;
+      if(isErr){
+        span.dataset.eid=isErr.eid;
+        span.dataset.pid=p.id;
       } else {
-        const span=document.createElement('span');
-        span.textContent=tok.t;
-        if(tok.correct) span.style.opacity='.85';
-        phrase.appendChild(span);
+        span.dataset.pid=p.id;
+        span.dataset.neutral='1';
       }
+      span.addEventListener('click',()=>clickerMot(span, isErr?isErr.eid:null, p.id));
+      phrase.appendChild(span);
+      // espace entre mots
+      phrase.appendChild(document.createTextNode(' '));
     });
-    // Tampon de phrase (correct/incorrect)
-    const tp=document.createElement('span');
-    tp.className='phrase-tampon'; tp.id='phtampon_'+p.id;
-    phrase.appendChild(tp);
     div.appendChild(phrase);
+    div.appendChild(document.createElement('br'));
   });
 }
 
-function clickerMot(span, eid){
+function clickerMot(span, eid, pid){
   if(ep2Done) return;
-  if(errDetectees.has(eid)) return;
-  errDetectees.add(eid);
-  span.className='mot-cliquable detecte';
-  $('errDetectees').textContent=errDetectees.size;
-  beepOk();
-  if(errDetectees.size>=NB_ERR){
-    setTimeout(()=>{ $('btnValiderEp2').className='btn-valider-ep2 visible'; },300);
+  if(span.dataset.locked) return;
+  if(eid){
+    // bonne détection
+    if(errDetectees.has(eid)) return;
+    errDetectees.add(eid);
+    span.className='mot-cliquable detecte';
+    span.dataset.locked='1';
+    $('errDetectees').textContent=errDetectees.size;
+    beepOk();
+    if(errDetectees.size>=NB_ERR){
+      setTimeout(()=>{ $('btnValiderEp2').className='btn-valider-ep2 visible'; },300);
+    }
+  } else {
+    // mauvais clic : mot neutre
+    span.className='mot-cliquable recale-mot';
+    beepErr();
+    setTimeout(()=>{ span.className='mot-cliquable'; },600);
   }
 }
 
@@ -608,11 +623,10 @@ function validerEp2(){
   score2=errDetectees.size; // 0-3
   // Montrer les erreurs manquées en or
   EP2_PHRASES.forEach(p=>{
-    p.tokens.forEach(tok=>{
-      if(tok.err && !errDetectees.has(tok.eid)){
-        // Trouver le span correspondant
+    Object.values(p.errs).forEach(e=>{
+      if(!errDetectees.has(e.eid)){
         const spans=$('texteAudit').querySelectorAll('.mot-cliquable');
-        spans.forEach(sp=>{ if(sp.dataset.eid===tok.eid) sp.className='mot-cliquable erreur-manquee'; });
+        spans.forEach(sp=>{ if(sp.dataset.eid===e.eid) sp.className='mot-cliquable erreur-manquee'; });
       }
     });
   });
@@ -620,13 +634,12 @@ function validerEp2(){
   const zone=$('corr2Zone');
   EP2_PHRASES.forEach(p=>{
     const c=document.createElement('div');
-    c.className='corr-item';
-    const hasErr=p.tokens.some(t=>t.err);
+    const hasErr=Object.keys(p.errs).length>0;
     if(hasErr){
-      const eid=p.tokens.find(t=>t.err).eid;
+      const eid=Object.values(p.errs)[0].eid;
       const trouve=errDetectees.has(eid);
       c.className='corr-item '+(trouve?'corr-ok':'corr-ko');
-      c.innerHTML=(trouve?'✅ Bien détecté':'❌ Manqué')+' — '+p.note;
+      c.innerHTML=(trouve?'✅ <b>Bien détecté</b>':'❌ <b>Erreur manquée</b>')+' — '+p.note;
     } else {
       c.className='corr-item corr-ok';
       c.innerHTML='✅ '+p.note;
@@ -656,7 +669,7 @@ function afficherVerdict(){
     badge.textContent='📋 BADGE — Attaché(e) de Presse confirmé(e)';
   } else {
     tampon.textContent='RECALÉ(E)'; tampon.className='verdict-tampon recale-final';
-    msg.innerHTML='<b>Continue&nbsp;!</b> Retourne à «&nbsp;Je m\'entraîne&nbsp;» pour renforcer tes bases. La prochaine session d\'examen t\'attend.';
+    msg.innerHTML='<b>Continue&nbsp;!</b> Retourne à «&nbsp;J\'explore&nbsp;» pour renforcer tes bases. La prochaine session d\'examen t\'attend.';
     badge.textContent='📝 Nouvelle session requise';
   }
   const v=$('verdict'); v.className='verdict show';
