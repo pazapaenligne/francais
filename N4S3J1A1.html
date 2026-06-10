@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S3 J1 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5200;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+  --day-color:#f5a623;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffbf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--blue-dark:#1a6e88;--blue-light:#e8f6fb;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:720px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.3rem;}
+h1{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* Progression */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.73rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* Chrono */
+.chrono{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
+  text-align:center;margin-bottom:.8rem;position:relative;z-index:1;}
+.chrono span{color:var(--day-dark);font-weight:700;}
+
+/* Référentiel */
+.ref-card{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);padding:0;overflow:hidden;
+  box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:1rem;position:relative;z-index:1;
+  animation:fadeUp .35s ease both;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.ref-head{padding:.8rem 1.1rem 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:.5rem;user-select:none;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.12em;}
+.ref-toggle{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+  display:flex;align-items:center;gap:.3rem;white-space:nowrap;}
+.ref-toggle .arr{display:inline-block;transition:transform .3s;}
+.ref-toggle .arr.open{transform:rotate(180deg);}
+.ref-body{overflow:hidden;max-height:0;transition:max-height .4s ease,padding .3s ease;}
+.ref-body.open{max-height:600px;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;padding:.8rem 1rem 1rem;}
+@media(max-width:480px){.ref-grid{grid-template-columns:1fr;}}
+.ref-item{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem .85rem;cursor:pointer;
+  transition:border-color .15s,background .15s,transform .1s;
+  -webkit-tap-highlight-color:transparent;}
+.ref-item:hover{background:var(--day-light);border-color:var(--day-dark);}
+.ref-item.active-target{background:var(--day-light);border-color:var(--day-dark);
+  box-shadow:0 0 0 3px var(--day-glow);
+  animation:refPulse 1.4s ease-in-out infinite;}
+@keyframes refPulse{
+  0%,100%{box-shadow:0 0 0 3px var(--day-glow);}
+  50%{box-shadow:0 0 0 6px rgba(245,166,35,.18);}
+}
+.ref-item-title{font-size:.85rem;font-weight:800;color:var(--day-dark);margin-bottom:.2rem;}
+.ref-item-desc{font-size:.78rem;color:var(--muted);line-height:1.55;font-style:italic;}
+
+/* Extraits */
+.extraits-zone{position:relative;z-index:1;}
+.extrait-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:0;overflow:hidden;margin-bottom:.65rem;
+  box-shadow:0 3px 14px rgba(0,0,0,.06);
+  animation:fadeUp .35s ease both;transition:border-color .2s,box-shadow .2s,transform .15s;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.extrait-card:hover:not(.done){border-color:var(--day-dark);transform:translateY(-1px);}
+.extrait-card.selected{
+  border-color:#1a6e88 !important;
+  border-width:3px !important;
+  background:#d4f0fa !important;
+  box-shadow:0 0 0 5px rgba(58,181,216,.35), 0 6px 24px rgba(26,110,136,.18) !important;
+  transform:scale(1.018) !important;}
+.extrait-card.done{cursor:default;transform:none!important;}
+.extrait-card.placed{background:#eef8fb;border-color:#3ab5d8;border-width:2px;}
+.extrait-card.placed .ext-stripe{background:linear-gradient(90deg,#1a6e88,#3ab5d8,#9dd4e8);height:4px;}
+.extrait-card.placed .badge{background:#1a6e88;color:#fff;border-color:#1a6e88;}
+.extrait-card.ok{border-color:var(--green);box-shadow:0 0 0 2px rgba(141,198,63,.3);}
+.extrait-card.ko{border-color:var(--pink-dark);box-shadow:0 0 0 2px rgba(192,57,43,.2);}
+.ext-stripe{height:3px;}
+.extrait-card.ok .ext-stripe{background:var(--green);}
+.extrait-card.ko .ext-stripe{background:var(--pink-dark);}
+.extrait-card:not(.ok):not(.ko) .ext-stripe{background:var(--border);}
+.extrait-card.selected .ext-stripe{background:linear-gradient(90deg,#1a6e88,#3ab5d8,#9dd4e8) !important;height:5px;}
+.ext-body{padding:.85rem 1rem;}
+.ext-label{font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;
+  display:flex;align-items:center;gap:.4rem;}
+.ext-label .badge{font-size:.7rem;font-weight:900;width:22px;height:22px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.extrait-card.selected .badge{background:#1a6e88 !important;color:#fff !important;
+  border-color:#1a6e88 !important;box-shadow:0 2px 8px rgba(26,110,136,.5);}
+.extrait-card.ok .badge{background:var(--green);color:#fff;border-color:var(--green);}
+.extrait-card.ko .badge{background:var(--pink-dark);color:#fff;border-color:var(--pink-dark);}
+.ext-text{font-size:clamp(.9rem,2.5vw,.97rem);color:var(--text);line-height:1.75;
+  font-style:italic;transition:color .15s;}
+.extrait-card.selected .ext-text{color:#1a3e55;}
+.ext-assoc{font-size:.83rem;font-weight:700;margin-top:.55rem;display:none;line-height:1.5;}
+.extrait-card.placed .ext-assoc{display:block;color:#1a6e88;}
+.extrait-card.ok .ext-assoc{display:block;color:var(--green-dark);}
+.extrait-card.ko .ext-assoc{display:block;color:var(--pink-dark);}
+.ext-fb{font-size:.8rem;color:var(--pink-dark);margin-top:.4rem;
+  line-height:1.6;display:none;font-style:normal;}
+.extrait-card.ko .ext-fb{display:block;}
+
+/* Consigne */
+.consigne-bar{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.85rem;color:var(--day-dark2);
+  margin-bottom:.8rem;text-align:center;font-weight:600;position:relative;z-index:1;
+  animation:fadeUp .3s ease both;}
+
+/* Feedback global + boutons */
+.fb-global{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:.92rem;
+  display:none;line-height:1.8;margin-bottom:.8rem;position:relative;z-index:1;}
+.fb-global.show{display:block;animation:fadeUp .3s ease;}
+.fb-global.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-global.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-global.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;position:relative;z-index:1;margin-bottom:.8rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.4vw,.95rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* Résultats */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.07);text-align:center;position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.score-big{font-size:clamp(2.5rem,9vw,3.8rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day-dark);}
+.stars{font-size:1.8rem;margin:.35rem 0 .7rem;letter-spacing:.1em;}
+.chrono-final{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted);margin-bottom:.7rem;}
+.rmsg{color:var(--muted);font-size:clamp(.87rem,2.4vw,.98rem);margin-bottom:1.1rem;line-height:1.8;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.2rem;}
+.recap-item{display:flex;align-items:flex-start;gap:.55rem;padding:.45rem .85rem;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:.8rem;}
+.recap-item.ok-r{border-color:var(--day-border);}
+.recap-item.ko-r{border-color:#f9c0bb;}
+.recap-item .ri-letter{font-family:'JetBrains Mono',monospace;font-weight:900;
+  min-width:20px;color:var(--day-dark);}
+.recap-item .ri-assoc{color:var(--muted);flex:1;line-height:1.5;}
+.recap-item .ri-result{font-weight:700;white-space:nowrap;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.ref-grid{padding:.6rem .8rem .8rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 3 – Jour 1</div>
+  <h1>J'observe et je teste · <span class="hl">Le romantisme</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 6 extraits</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">6</span> restant(s)</div>
+</div>
+<div class="chrono">&#9201;&nbsp;Temps&nbsp;: <span id="chrono">0:00</span></div>
+
+<!-- Référentiel -->
+<div class="ref-card">
+  <div class="ref-stripe"></div>
+  <div class="ref-head" style="cursor:default;">
+    <span class="ref-title">&#128218;&nbsp;Référentiel — 4 caractéristiques du romantisme</span>
+    
+  </div>
+  <div class="ref-body open" id="ref-body" style="max-height:none;overflow:visible;">
+    <div class="ref-grid" id="ref-grid">
+      <!-- injecté par JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Consigne -->
+<div class="consigne-bar" id="consigne-bar">
+  &#128073;&nbsp;Clique sur un extrait, puis sur la caractéristique qui lui correspond.
+</div>
+
+<!-- Extraits -->
+<div class="extraits-zone" id="extraits-zone">
+  <!-- injecté par JS -->
+</div>
+
+<!-- Feedback + boutons -->
+<div class="fb-global" id="fb-global"></div>
+<div class="btn-row" id="btn-row" style="display:none;">
+  <button class="btn btn-p" id="btn-verif" onclick="verifier()">&#10003;&nbsp;Vérifier</button>
+  <button class="btn btn-g" onclick="reset()">&#8635;&nbsp;Réessayer</button>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--yellow);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.55rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/6</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="chrono-final" id="r-chrono"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="recap" id="r-recap"></div>
+    <button class="btn btn-p" onclick="reset()" style="width:100%;justify-content:center;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+/* ══ DONNÉES ══ */
+var CARAC = [
+  {id:'sent', title:"L\u2019expression des sentiments int\u00e9rieurs",
+   desc:"Le personnage exprime ouvertement ses \u00e9motions : m\u00e9lancolie, d\u00e9sespoir, amour, solitude."},
+  {id:'nat',  title:"La nature miroir de l\u2019\u00e2me",
+   desc:"Les paysages (temp\u00eate, nuit, ruines, for\u00eat) refl\u00e8tent les \u00e9tats d\u2019\u00e2me du personnage."},
+  {id:'rej',  title:"Le rejet du monde r\u00e9el",
+   desc:"Le personnage aspire \u00e0 un id\u00e9al inaccessible, r\u00eave d\u2019un ailleurs ou d\u2019un monde meilleur."},
+  {id:'sol',  title:"Le h\u00e9ros solitaire et incompris",
+   desc:"Le personnage se sent seul, diff\u00e9rent des autres, en marge de la soci\u00e9t\u00e9."}
+];
+
+var EXTRAITS = [
+  {id:'A', ans:'nat',
+   text:"\u00ab\u00a0Il s\u2019arr\u00eata au bord de la falaise et contempla la mer d\u00e9cha\u00een\u00e9e. Les vagues rugissaient comme autant de voix qui auraient exprim\u00e9 sa propre fureur int\u00e9rieure.\u00a0\u00bb",
+   fbKo:"Observe le lien entre la mer d\u00e9cha\u00een\u00e9e et la fureur du personnage\u00a0: la nature traduit son \u00e9tat int\u00e9rieur."},
+  {id:'B', ans:'sol',
+   text:"\u00ab\u00a0Nul ne le comprenait. Il errait parmi les hommes comme un \u00e9tranger dans sa propre ville, portant en lui un poids que personne ne semblait pouvoir soulager.\u00a0\u00bb",
+   fbKo:"Le personnage se sent \u00e9tranger parmi les hommes\u00a0: c\u2019est la figure du h\u00e9ros solitaire et incompris."},
+  {id:'C', ans:'rej',
+   text:"\u00ab\u00a0Oh\u00a0! comme il aurait voulu fuir ce monde \u00e9troit et mesquin, s\u2019\u00e9lancer vers des horizons inconnus o\u00f9 tout serait beau, pur et libre\u00a0!\u00a0\u00bb",
+   fbKo:"Le personnage r\u00eave de fuir un monde jug\u00e9 m\u00e9diocre\u00a0: c\u2019est le rejet du monde r\u00e9el."},
+  {id:'D', ans:'sent',
+   text:"\u00ab\u00a0Des larmes coulaient sur ses joues sans qu\u2019il cherch\u00e2t \u00e0 les retenir. Il n\u2019avait plus honte de pleurer\u00a0: ses larmes disaient ce que les mots ne pouvaient exprimer.\u00a0\u00bb",
+   fbKo:"Le personnage exprime ses \u00e9motions sans retenue\u00a0: c\u2019est l\u2019expression des sentiments int\u00e9rieurs."},
+  {id:'E', ans:'nat',
+   text:"\u00ab\u00a0La lune se cachait derri\u00e8re un nuage \u00e9pais, comme si elle avait voulu refuser sa lumi\u00e8re \u00e0 celui qui souffrait en silence au pied du vieux ch\u00eane.\u00a0\u00bb",
+   fbKo:"La lune refuse sa lumi\u00e8re \u00e0 celui qui souffre\u00a0: la nature accompagne l\u2019\u00e9tat d\u2019\u00e2me du personnage."},
+  {id:'F', ans:'rej',
+   text:"\u00ab\u00a0Il r\u00eavait d\u2019un pays o\u00f9 les hommes vivaient en paix, o\u00f9 la beaut\u00e9 ne serait pas condamn\u00e9e \u00e0 mourir, o\u00f9 l\u2019\u00e2me pourrait enfin s\u2019\u00e9panouir sans entraves.\u00a0\u00bb",
+   fbKo:"Le personnage aspire \u00e0 un monde id\u00e9al inaccessible\u00a0: c\u2019est le rejet du monde r\u00e9el."}
+];
+
+/* ══ ÉTAT ══ */
+var selected=null;   /* id extrait sélectionné */
+var assoc={};        /* {extrait_id: carac_id} */
+var verified=false;
+var chronoSec=0, chronoInt=null;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){ if(actx) return; try{ actx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){
+  if(!actx) return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02);
+}
+function sndAssoc(){ initA(); beep(520,680,0.1,'sine',0.12); }
+function sndOk(){ initA(); beep(440,660,0.08,'sine',0.15); setTimeout(function(){ beep(660,880,0.15,'sine',0.12); },90); }
+function sndKo(){ initA(); beep(280,160,0.22,'sawtooth',0.12); }
+function sndFin(){ initA(); beep(523,659,0.2,'sine',0.14); setTimeout(function(){ beep(659,880,0.25,'sine',0.12); },120); }
+
+/* ══ CHRONO ══ */
+function startChrono(){
+  chronoInt=setInterval(function(){
+    chronoSec++;
+    var m=Math.floor(chronoSec/60), s=chronoSec%60;
+    $('chrono').textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+function stopChrono(){ clearInterval(chronoInt); }
+function formatTime(sec){
+  var m=Math.floor(sec/60), s=sec%60;
+  return m+'\u00a0min\u00a0'+(s<10?'0':'')+s+'\u00a0s';
+}
+
+/* ══ BUILD ══ */
+function buildRef(){
+  var grid=$('ref-grid'); grid.innerHTML='';
+  CARAC.forEach(function(c){
+    var div=document.createElement('div'); div.className='ref-item'; div.id='ri-'+c.id;
+    div.innerHTML='<div class="ref-item-title">'+c.title+'</div>'
+      +'<div class="ref-item-desc">'+c.desc+'</div>';
+    div.addEventListener('click',function(e){ e.stopPropagation(); if(!verified) onCaracClick(c.id); });
+    grid.appendChild(div);
+  });
+}
+
+function buildExtraits(){
+  var zone=$('extraits-zone'); zone.innerHTML='';
+  /* Mélanger l'ordre d'affichage */
+  var order=shuffle(EXTRAITS.map(function(e){return e.id;}));
+  order.forEach(function(id,idx){
+    var e=EXTRAITS.find(function(x){return x.id===id;});
+    var card=document.createElement('div');
+    card.className='extrait-card'; card.id='ec-'+e.id;
+    card.style.animationDelay=(idx*0.06)+'s';
+    card.innerHTML=
+      '<div class="ext-stripe"></div>'
+      +'<div class="ext-body">'
+        +'<div class="ext-label">'
+          +'<span class="badge">'+e.id+'</span>'
+          +'<span>Extrait</span>'
+        +'</div>'
+        +'<div class="ext-text">'+e.text+'</div>'
+        +'<div class="ext-assoc" id="ea-'+e.id+'"></div>'
+        +'<div class="ext-fb" id="ef-'+e.id+'"></div>'
+      +'</div>';
+    card.addEventListener('click',function(){ if(!verified) onExtraitClick(e.id); });
+    zone.appendChild(card);
+  });
+}
+
+/* ══ INTERACTIONS ══ */
+function onExtraitClick(eid){
+  if(verified) return;
+  /* Désélectionner l'ancien */
+  if(selected!==null){
+    var old=$('ec-'+selected);
+    if(old) old.classList.remove('selected');
+  }
+  /* Si on reclique sur le même → désélectionner */
+  if(selected===eid){ selected=null; updateConsigne(); return; }
+  selected=eid;
+  var card=$('ec-'+eid); if(card) card.classList.add('selected');
+  updateConsigne();
+}
+
+function onCaracClick(cid){
+  if(verified||selected===null) return;
+  /* Associer */
+  assoc[selected]=cid;
+  /* Mettre à jour l'affichage de l'extrait */
+  var card=$('ec-'+selected); if(card){ card.classList.remove('selected'); card.classList.add('placed'); }
+  var assocEl=$('ea-'+selected);
+  if(assocEl){
+    var carac=CARAC.find(function(c){return c.id===cid;});
+    assocEl.innerHTML='&#8594;&#160;<strong>'+carac.title+'</strong>';
+  }
+  sndAssoc();
+  selected=null;
+  /* Désactiver l'effet actif sur les caractéristiques */
+  document.querySelectorAll('.ref-item').forEach(function(r){ r.classList.remove('active-target'); });
+  updateConsigne();
+  updateGlobal();
+  /* Montrer le bouton Vérifier quand tout est associé */
+  if(Object.keys(assoc).length===6){
+    $('btn-row').style.display='flex';
+    $('btn-verif').disabled=false;
+    updateConsigne('all');
+  }
+}
+
+function updateConsigne(state){
+  var bar=$('consigne-bar');
+  if(state==='all'){
+    bar.innerHTML='&#10003;&nbsp;Toutes les associations sont faites — clique sur <strong>Vérifier</strong>.';
+    bar.style.background='var(--green-light)'; bar.style.borderColor='var(--green)'; bar.style.color='var(--green-dark)';
+  } else if(selected!==null){
+    bar.innerHTML='&#128070;&nbsp;Maintenant clique sur la caractéristique qui correspond à l\u2019extrait <strong>'+selected+'</strong>.';
+    bar.style.background='var(--day-light)'; bar.style.borderColor='var(--day-dark)'; bar.style.color='var(--day-dark2)';
+    /* Activer le ref */
+    document.querySelectorAll('.ref-item').forEach(function(r){ r.classList.add('active-target'); });
+  } else {
+    bar.innerHTML='&#128073;&nbsp;Clique sur un extrait, puis sur la caract\u00e9ristique qui lui correspond.';
+    bar.style.background='var(--day-light)'; bar.style.borderColor='var(--day-border)'; bar.style.color='var(--day-dark2)';
+    document.querySelectorAll('.ref-item').forEach(function(r){ r.classList.remove('active-target'); });
+  }
+}
+
+/* ══ VÉRIFICATION ══ */
+function verifier(){
+  if(verified) return; verified=true;
+  stopChrono();
+  $('btn-verif').disabled=true;
+  var ok=0, ko=0;
+  EXTRAITS.forEach(function(e){
+    var card=$('ec-'+e.id); if(!card) return;
+    var chosen=assoc[e.id];
+    var correct=(chosen===e.ans);
+    card.classList.remove('selected','placed');
+    card.classList.add('done', correct?'ok':'ko');
+    var assocEl=$('ea-'+e.id);
+    var carac=CARAC.find(function(c){return c.id===e.ans;});
+    if(correct){
+      ok++;
+      if(assocEl) assocEl.innerHTML='&#10003;&nbsp;'+carac.title;
+    } else {
+      ko++;
+      if(assocEl) assocEl.innerHTML='&#10007;&nbsp;Correct\u00a0: '+carac.title;
+      var fbEl=$('ef-'+e.id); if(fbEl){ fbEl.textContent=e.fbKo; }
+    }
+  });
+  updateGlobal();
+  var fb=$('fb-global');
+  if(ko===0){
+    fb.className='fb-global show ok'; fb.innerHTML='&#11088;&nbsp;Parfait\u00a0! '+ok+'/6 — tu ma\u00eetrises les quatre caract\u00e9ristiques du romantisme\u00a0!'; sndFin();
+    setTimeout(showResults, 900);
+  } else {
+    fb.className='fb-global show '+(ok>=4?'mid':'ko');
+    fb.innerHTML='&#128161;&nbsp;'+ok+'/6\u00a0— '+(ko===1?'1 extrait mal class\u00e9':''+ko+' extraits mal class\u00e9s')+'. Lis les explications en rouge puis r\u00e9essaie\u00a0!';
+    sndKo();
+  }
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var done=Object.keys(assoc).length;
+  var ok=verified?EXTRAITS.filter(function(e){return assoc[e.id]===e.ans;}).length:0;
+  var ko=verified?EXTRAITS.filter(function(e){return assoc[e.id]&&assoc[e.id]!==e.ans;}).length:0;
+  var rem=6-done;
+  $('cnt-ok').textContent=verified?ok:done;
+  $('cnt-ko').textContent=verified?ko:0;
+  $('cnt-rem').textContent=verified?0:rem;
+  var pct=Math.round(done/6*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=done+' / 6 extraits';
+  $('prog-pct').textContent=pct+'%';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  var ok=EXTRAITS.filter(function(e){return assoc[e.id]===e.ans;}).length;
+  $('r-score').textContent=ok;
+  var s=ok>=6?5:ok>=5?4:ok>=4?3:ok>=2?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  $('r-chrono').textContent='&#9201;\u00a0Temps\u00a0: '+formatTime(chronoSec);
+  var msgs=[
+    '\u00c0 retravailler\u00a0\u2014 relis la fiche le\u00e7on.',
+    'Quelques caract\u00e9ristiques \u00e0 revoir.',
+    'Pas mal\u00a0! Tu commences \u00e0 rep\u00e9rer les indices.',
+    'Tr\u00e8s bien\u00a0! Encore un effort.',
+    'Parfait\u00a0\u2014 le romantisme n\u2019a plus de secrets\u00a0!'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  var recap=$('r-recap'); recap.innerHTML='';
+  EXTRAITS.forEach(function(e){
+    var ok2=(assoc[e.id]===e.ans);
+    var carac=CARAC.find(function(c){return c.id===e.ans;});
+    var chosen=CARAC.find(function(c){return c.id===assoc[e.id];});
+    var d=document.createElement('div'); d.className='recap-item '+(ok2?'ok-r':'ko-r');
+    d.innerHTML='<span class="ri-letter">'+e.id+'</span>'
+      +'<span class="ri-assoc">'+(ok2?carac.title:'<span style="text-decoration:line-through;color:#ccc;">'+(chosen?chosen.title:'—')+'</span> \u2192 '+carac.title)+'</span>'
+      +'<span class="ri-result">'+(ok2?'<span style="color:var(--green-dark)">&#10003;</span>':'<span style="color:var(--pink-dark)">&#10007;</span>')+'</span>';
+    recap.appendChild(d);
+  });
+  $('results-screen').classList.add('show');
+  setTimeout(function(){ $('results-screen').scrollIntoView({behavior:'smooth',block:'start'}); },200);
+}
+
+/* ══ RESET ══ */
+function reset(){
+  verified=false; assoc={}; selected=null; chronoSec=0;
+  stopChrono();
+  $('chrono').textContent='0:00';
+  $('fb-global').className='fb-global';
+  $('btn-row').style.display='none';
+  $('results-screen').classList.remove('show');
+  buildRef(); buildExtraits(); updateGlobal(); updateConsigne();
+  startChrono();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ TOGGLE REF ══ */
+function toggleRef(){
+  var body=$('ref-body'), arr=$('ref-arr'), lbl=$('ref-lbl');
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  arr.classList.toggle('open',!open);
+  lbl.textContent=open?'Afficher':'Masquer';
+}
+
+/* ══ UTILS ══ */
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildRef(); buildExtraits(); updateGlobal(); updateConsigne(); startChrono();
+</script>
+</body>
+</html>
