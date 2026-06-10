@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S2 J5 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#3ab5d8; --day-dark:#1a6e88;
+      --day-light:#e8f6fb; --day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.28);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+      width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:170px;height:170px;
+      background:var(--green);bottom:110px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:110px;height:110px;
+      background:var(--pink);top:190px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.85rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.4rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;width:100%;max-width:720px;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;
+      white-space:nowrap;color:var(--text);}
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:#aaa;}
+
+    .card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.5rem 1.2rem 1.3rem;
+      position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;margin-bottom:1.2rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--yellow),var(--day-dark));}
+    .act-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .act-title{font-size:1.12rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;line-height:1.3;}
+    .consigne{font-size:.95rem;color:var(--text);margin-bottom:1.1rem;line-height:1.7;}
+
+    /* Encadrés observation */
+    .obs-encadre{border-radius:12px;padding:1rem 1.1rem;margin-bottom:.8rem;}
+    .obs-encadre.bleu{background:var(--day-light);border:2px solid var(--day-border);}
+    .obs-encadre.vert{background:#f0faeb;border:2px solid #b5e08a;}
+    .obs-encadre-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin-bottom:.8rem;}
+    .obs-encadre.bleu .obs-encadre-title{color:var(--day-dark);}
+    .obs-encadre.vert .obs-encadre-title{color:#3d7a10;}
+    .obs-item{background:var(--surface);border-radius:8px;padding:.6rem .85rem;
+      margin-bottom:.5rem;font-size:.93rem;line-height:1.7;}
+    .obs-item:last-child{margin-bottom:0;}
+    .obs-phrase{color:var(--text);font-style:italic;}
+    .obs-analyse{font-size:.82rem;font-family:'JetBrains Mono',monospace;
+      margin-top:.3rem;color:var(--muted);}
+    .obs-analyse strong{color:var(--day-dark);}
+    .obs-encadre.vert .obs-analyse strong{color:#3d7a10;}
+    .obs-tag{display:inline-block;font-size:.68rem;font-weight:700;padding:.1rem .5rem;
+      border-radius:4px;margin-left:.4rem;vertical-align:middle;}
+    .tag-bleu{background:var(--day-light);color:var(--day-dark);border:1px solid var(--day-border);}
+    .tag-vert{background:#f0faeb;color:#3d7a10;border:1px solid #b5e08a;}
+
+    /* Quiz */
+    .q-block{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;
+      padding:.9rem 1rem;margin-bottom:.8rem;transition:border-color .2s;}
+    .q-block.done-ok{border-color:var(--green);}
+    .q-block.done-ko{border-color:var(--pink);}
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
+    .q-text{font-size:.97rem;color:var(--text);margin-bottom:.8rem;line-height:1.6;font-weight:600;}
+    .opt-list{display:flex;flex-direction:column;gap:.4rem;}
+    .opt-btn{display:flex;align-items:flex-start;gap:.7rem;padding:.55rem .8rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.92rem;font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;text-align:left;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn.sel-opt{border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;
+      color:var(--day-dark);flex-shrink:0;margin-top:.1rem;}
+    .opt-btn.ok-opt{background:#d4edda;border-color:var(--green);color:#1a4d0d;}
+    .opt-btn.ok-opt .opt-letter{color:#1a4d0d;}
+    .opt-btn.ko-opt{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;}
+    .opt-btn.ko-opt .opt-letter{color:#8b1a1a;}
+    .q-feedback{font-size:.82rem;font-family:'JetBrains Mono',monospace;
+      margin-top:.5rem;padding:.45rem .7rem;border-radius:8px;display:none;line-height:1.6;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ko-fb{background:#fff0ef;border:1px solid var(--pink);color:#8b1a1a;}
+
+    /* Séparateur quiz */
+    .quiz-sep{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.12em;margin:1rem 0 .6rem;
+      display:flex;align-items:center;gap:.6rem;}
+    .quiz-sep::before,.quiz-sep::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+    .btn-sol{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+    .btn-sol:hover:not(:disabled){background:var(--day-light);}
+
+    .feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;
+      display:none;align-items:flex-start;gap:.6rem;line-height:1.7;}
+    .feedback.show{display:flex;}
+    .feedback.ok {background:#f0faeb;border:1.5px solid var(--green);color:#1a4d0d;}
+    .feedback.ko {background:#fff0ef;border:1.5px solid var(--pink);color:#8b1a1a;}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#5a3e00;}
+    .feedback-icon{font-size:1.3rem;flex-shrink:0;line-height:1;}
+    .feedback-detail{font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.3rem;line-height:1.7;}
+    .feedback.ok  .feedback-detail{color:#1a4d0d;}
+    .feedback.ko  .feedback-detail{color:#8b1a1a;}
+    .feedback.mid .feedback-detail{color:#5a3e00;}
+
+    .results{width:100%;max-width:720px;text-align:center;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 1rem;letter-spacing:.2rem;}
+    .results-msg{color:var(--text);font-size:.95rem;margin-bottom:1.5rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:520px){
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4ème
+  </div>
+  <div class="week-label">Semaine 2 – Jour 5</div>
+  <h1>J'observe et je teste · <span class="hl">Révision</span></h1>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 6 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="cnt-ok">0</span> corrects</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cnt-rem">6</span> restants</div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PHASE 1 — OBSERVATION
+═══════════════════════════════════ -->
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="act-label">Phase 1 / 2</div>
+  <div class="theme-badge">Observation 🔍</div>
+  <div class="act-title">Observe les exemples avant de répondre</div>
+  <p class="consigne">Analyse chaque phrase et son explication. Ces repères t'aideront pour le quiz.</p>
+
+  <!-- Encadré 1 : leur / leurs -->
+  <div class="obs-encadre bleu">
+    <div class="obs-encadre-title">leur / leurs</div>
+
+    <div class="obs-item">
+      <div class="obs-phrase">« Les délégués ont transmis leur rapport. »</div>
+      <div class="obs-analyse"><strong>leur</strong> = déterminant possessif
+        <span class="obs-tag tag-bleu">singulier</span> — un seul rapport.</div>
+    </div>
+
+    <div class="obs-item">
+      <div class="obs-phrase">« On leur a demandé de prendre la parole. »</div>
+      <div class="obs-analyse"><strong>leur</strong> = pronom personnel invariable
+        <span class="obs-tag tag-bleu">= à eux</span> — placé avant un verbe, jamais de -s.</div>
+    </div>
+
+    <div class="obs-item">
+      <div class="obs-phrase">« Leurs arguments étaient solides. »</div>
+      <div class="obs-analyse"><strong>leurs</strong> = déterminant possessif
+        <span class="obs-tag tag-bleu">pluriel</span> — plusieurs arguments.</div>
+    </div>
+  </div>
+
+  <!-- Encadré 2 : conditionnel -->
+  <div class="obs-encadre vert">
+    <div class="obs-encadre-title">Conditionnel présent</div>
+
+    <div class="obs-item">
+      <div class="obs-phrase">« Si tu révisais, tu comprendrais mieux. »</div>
+      <div class="obs-analyse"><strong>Hypothèse</strong>
+        <span class="obs-tag tag-vert">si + imparfait → conditionnel</span></div>
+    </div>
+
+    <div class="obs-item">
+      <div class="obs-phrase">« Auriez-vous l'obligeance de patienter ? »</div>
+      <div class="obs-analyse"><strong>Politesse</strong>
+        <span class="obs-tag tag-vert">formule de demande</span></div>
+    </div>
+
+    <div class="obs-item">
+      <div class="obs-phrase">« Le témoin aurait reconnu les faits. »</div>
+      <div class="obs-analyse"><strong>Fait non confirmé</strong>
+        <span class="obs-tag tag-vert">information non vérifiée</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PHASE 2 — QUIZ
+═══════════════════════════════════ -->
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="act-label">Phase 2 / 2</div>
+  <div class="theme-badge">Quiz ⚡</div>
+  <div class="act-title">Quiz de réactivation</div>
+  <p class="consigne">Réponds à chaque question. Le feedback n'apparaît qu'en cas d'erreur.</p>
+
+  <!-- Questions leur/leurs -->
+  <div class="quiz-sep">leur / leurs — 3 questions</div>
+  <div id="quiz-leur"></div>
+
+  <!-- Questions conditionnel -->
+  <div class="quiz-sep">Conditionnel présent — 3 questions</div>
+  <div id="quiz-cond"></div>
+
+  <div class="btn-row" id="quiz-row1">
+    <button class="btn btn-primary" id="quiz-btn-verif" onclick="verifierQuiz()">✓ Vérifier</button>
+    <button class="btn btn-ghost" onclick="resetQuiz()">✕ Effacer</button>
+  </div>
+  <div class="btn-row" id="quiz-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetQuiz()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solQuiz()">Voir la solution</button>
+  </div>
+  <div class="feedback" id="fb-quiz">
+    <span class="feedback-icon" id="fb-quiz-icon"></span>
+    <div>
+      <div id="fb-quiz-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-quiz-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/6</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <button class="btn btn-primary" onclick="resetQuiz()" style="margin:0 auto;display:flex;">Recommencer</button>
+  </div>
+</div>
+
+<script>
+var TOTAL = 6;
+var doneQuiz = false;
+var scoreQuiz = 0;
+var userAnswers = {};
+
+var QS_LEUR = [
+  {
+    id: 'q1',
+    texte: 'Dans « On leur a confié une mission importante. », leur est :',
+    opts: [
+      { lettre: 'A', texte: 'Un déterminant possessif.', ok: false,
+        fb: 'Un déterminant accompagne toujours un nom. Ici, leur précède un verbe : c\'est un pronom !' },
+      { lettre: 'B', texte: 'Un pronom personnel invariable.', ok: true, fb: '' },
+      { lettre: 'C', texte: 'Un adjectif qualificatif.', ok: false,
+        fb: '' }
+    ]
+  },
+  {
+    id: 'q2',
+    texte: 'Dans « Leurs conclusions étaient convaincantes. », leurs est :',
+    opts: [
+      { lettre: 'A', texte: 'Un pronom invariable.', ok: false,
+        fb: 'Le pronom leur ne prend jamais de -s. Ici, leurs accompagne le nom conclusions : c\'est un déterminant !' },
+      { lettre: 'B', texte: 'Un déterminant possessif pluriel.', ok: true, fb: '' },
+      { lettre: 'C', texte: 'Un adverbe.', ok: false, fb: '' }
+    ]
+  },
+  {
+    id: 'q3',
+    texte: 'Laquelle de ces phrases est correcte ?',
+    opts: [
+      { lettre: 'A', texte: 'On leurs a présenté le projet.', ok: false,
+        fb: 'Le pronom leur est invariable : il ne prend jamais de -s !' },
+      { lettre: 'B', texte: 'On leur a présenté le projet.', ok: true, fb: '' },
+      { lettre: 'C', texte: 'On leur a présenté leurs projet.', ok: false,
+        fb: 'Projet est singulier ici : on écrit leur projet, sans -s.' }
+    ]
+  }
+];
+
+var QS_COND = [
+  {
+    id: 'q4',
+    texte: 'Comment forme-t-on le conditionnel présent ?',
+    opts: [
+      { lettre: 'A', texte: 'Radical du futur + terminaisons de l\'imparfait.', ok: true, fb: '' },
+      { lettre: 'B', texte: 'Infinitif + terminaisons du présent.', ok: false,
+        fb: 'Ce sont les terminaisons de l\'imparfait que l\'on ajoute, pas celles du présent !' },
+      { lettre: 'C', texte: 'Radical de l\'imparfait + terminaisons du futur.', ok: false,
+        fb: 'Attention : le radical est celui du futur, pas de l\'imparfait.' }
+    ]
+  },
+  {
+    id: 'q5',
+    texte: 'Dans « Si les citoyens s\'engageaient, la société irait mieux. », le conditionnel exprime :',
+    opts: [
+      { lettre: 'A', texte: 'Une politesse.', ok: false,
+        fb: 'Le conditionnel de politesse ne s\'emploie pas avec une proposition en « si ».' },
+      { lettre: 'B', texte: 'Un fait non confirmé.', ok: false,
+        fb: 'La structure « si + imparfait » indique une hypothèse, pas un fait rapporté.' },
+      { lettre: 'C', texte: 'Une hypothèse.', ok: true, fb: '' }
+    ]
+  },
+  {
+    id: 'q6',
+    texte: 'Laquelle de ces formes est au conditionnel présent ?',
+    opts: [
+      { lettre: 'A', texte: 'Nous prenions.', ok: false,
+        fb: 'C\'est l\'imparfait de l\'indicatif !' },
+      { lettre: 'B', texte: 'Nous prendrions.', ok: true, fb: '' },
+      { lettre: 'C', texte: 'Nous prendrons.', ok: false,
+        fb: 'C\'est le futur simple de l\'indicatif.' }
+    ]
+  }
+];
+
+var ALL_QS = QS_LEUR.concat(QS_COND);
+
+function buildQuiz(){
+  userAnswers = {};
+  doneQuiz = false;
+  scoreQuiz = 0;
+  renderQS('quiz-leur', QS_LEUR);
+  renderQS('quiz-cond', QS_COND);
+}
+
+function renderQS(containerId, qs){
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  qs.forEach(function(q, qi){
+    var block = document.createElement('div');
+    block.className = 'q-block';
+    block.id = 'qb-' + q.id;
+
+    var num = document.createElement('div');
+    num.className = 'q-num';
+    num.textContent = 'Question ' + (qi + 1);
+    block.appendChild(num);
+
+    var txt = document.createElement('div');
+    txt.className = 'q-text';
+    txt.textContent = q.texte;
+    block.appendChild(txt);
+
+    var optList = document.createElement('div');
+    optList.className = 'opt-list';
+    q.opts.forEach(function(opt){
+      var btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.id = 'ob-' + q.id + '-' + opt.lettre;
+      btn.innerHTML = '<span class="opt-letter">' + opt.lettre + '.</span><span>' + opt.texte + '</span>';
+      btn.addEventListener('click', function(){ selOpt(q.id, opt.lettre); });
+      optList.appendChild(btn);
+    });
+    block.appendChild(optList);
+
+    var fb = document.createElement('div');
+    fb.className = 'q-feedback';
+    fb.id = 'qfb-' + q.id;
+    block.appendChild(fb);
+
+    container.appendChild(block);
+  });
+}
+
+function selOpt(qid, lettre){
+  if(doneQuiz) return;
+  var q = ALL_QS.find(function(x){ return x.id === qid; });
+  q.opts.forEach(function(opt){
+    var btn = document.getElementById('ob-' + qid + '-' + opt.lettre);
+    btn.classList.remove('sel-opt');
+  });
+  userAnswers[qid] = lettre;
+  document.getElementById('ob-' + qid + '-' + lettre).classList.add('sel-opt');
+}
+
+function verifierQuiz(){
+  if(doneQuiz) return;
+  var manquantes = ALL_QS.filter(function(q){ return !userAnswers[q.id]; });
+  if(manquantes.length > 0){
+    var fb = document.getElementById('fb-quiz');
+    fb.className = 'feedback show mid';
+    document.getElementById('fb-quiz-icon').textContent = '!';
+    document.getElementById('fb-quiz-msg').textContent = 'Réponds à toutes les questions avant de vérifier.';
+    document.getElementById('fb-quiz-detail').textContent = manquantes.length + ' question(s) sans réponse.';
+    return;
+  }
+  doneQuiz = true;
+  document.getElementById('quiz-btn-verif').disabled = true;
+  var ok = 0;
+
+  ALL_QS.forEach(function(q){
+    var choix = userAnswers[q.id];
+    var correct = q.opts.find(function(o){ return o.ok; });
+    var block = document.getElementById('qb-' + q.id);
+    var qfb = document.getElementById('qfb-' + q.id);
+
+    q.opts.forEach(function(opt){
+      var btn = document.getElementById('ob-' + q.id + '-' + opt.lettre);
+      btn.disabled = true;
+      btn.classList.remove('sel-opt');
+      if(opt.ok){ btn.classList.add('ok-opt'); }
+      else if(opt.lettre === choix){ btn.classList.add('ko-opt'); }
+    });
+
+    if(choix === correct.lettre){
+      block.classList.add('done-ok');
+      ok++;
+    } else {
+      block.classList.add('done-ko');
+      var mauvaise = q.opts.find(function(o){ return o.lettre === choix; });
+      if(mauvaise && mauvaise.fb){
+        qfb.className = 'q-feedback show ko-fb';
+        qfb.textContent = mauvaise.fb;
+      }
+    }
+  });
+
+  scoreQuiz = ok;
+  var pct = ok / TOTAL * 100;
+  var cls, ico, msg;
+  if(pct === 100)   { cls='ok';  ico='✓'; msg='Parfait ! Toutes les réponses sont exactes.'; }
+  else if(pct >= 67){ cls='mid'; ico='↑'; msg='Bon travail ! Consulte les corrections en rouge.'; }
+  else if(pct >= 34){ cls='mid'; ico='→'; msg='Continue ! Relis les encadrés d\'observation.'; }
+  else              { cls='ko';  ico='!'; msg='À retravailler : reprends la phase d\'observation.'; }
+
+  var fb = document.getElementById('fb-quiz');
+  fb.className = 'feedback show ' + cls;
+  document.getElementById('fb-quiz-icon').textContent = ico;
+  document.getElementById('fb-quiz-msg').textContent = msg;
+  document.getElementById('fb-quiz-detail').textContent = ok + ' / 6 bonnes réponses.';
+
+  document.getElementById('quiz-row1').style.display = 'none';
+  document.getElementById('quiz-row2').style.display = 'flex';
+  updateGlobal();
+}
+
+function solQuiz(){
+  ALL_QS.forEach(function(q){
+    q.opts.forEach(function(opt){
+      var btn = document.getElementById('ob-' + q.id + '-' + opt.lettre);
+      btn.classList.remove('ko-opt','sel-opt');
+      if(opt.ok) btn.classList.add('ok-opt');
+    });
+    document.getElementById('qb-' + q.id).classList.remove('done-ko');
+    document.getElementById('qb-' + q.id).classList.add('done-ok');
+  });
+}
+
+function resetQuiz(){
+  document.getElementById('results-screen').classList.remove('show');
+  buildQuiz();
+  document.getElementById('quiz-btn-verif').disabled = false;
+  document.getElementById('quiz-row1').style.display = 'flex';
+  document.getElementById('quiz-row2').style.display = 'none';
+  document.getElementById('fb-quiz').className = 'feedback';
+  doneQuiz = false; scoreQuiz = 0; userAnswers = {};
+  updateGlobal();
+}
+
+function updateGlobal(){
+  var ok  = scoreQuiz;
+  var ko  = doneQuiz ? TOTAL - scoreQuiz : 0;
+  var rem = doneQuiz ? 0 : TOTAL;
+  var pct = Math.round(ok / TOTAL * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = ok + ' / ' + TOTAL + ' points';
+  document.getElementById('prog-pct').textContent = pct + ' %';
+  document.getElementById('cnt-ok').textContent  = ok;
+  document.getElementById('cnt-ko').textContent  = ko;
+  document.getElementById('cnt-rem').textContent = rem;
+  if(doneQuiz) afficherResultats(ok);
+}
+
+function afficherResultats(score){
+  document.getElementById('results-screen').classList.add('show');
+  document.getElementById('score-num').textContent = score;
+  var pct = score / TOTAL * 100;
+  var stars = pct === 100 ? 5 : pct >= 84 ? 4 : pct >= 67 ? 3 : pct >= 34 ? 2 : 1;
+  document.getElementById('stars-row').textContent = '⭐'.repeat(stars) + '✦'.repeat(5 - stars);
+  var msgs = [
+    'À retravailler — reprends la fiche astuce !',
+    'À retravailler — reprends la fiche astuce !',
+    'Courage — tu progresses !',
+    'Pas mal — continue !',
+    'Bien joué !',
+    'Très bien !',
+    'Parfait — zéro faute !'
+  ];
+  document.getElementById('results-msg').textContent = msgs[Math.min(score, msgs.length - 1)];
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
