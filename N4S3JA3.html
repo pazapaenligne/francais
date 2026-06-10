@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labo Linguistique – Le verbe – 4e S3 J2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#e63950; --jour-fonce:#9c1a2e; --jour-clair:#fdedf0; --jour-pale:#f5a3b0;
+  --day-glow:rgba(230,57,80,.35);
+  --bg:#fffdf7;
+  --term:#0a0f0a; --term2:#0d140d; --term3:#111a11;
+  --grn:#00e676; --grn-dim:#00c853; --grn-pale:rgba(0,230,118,.12);
+  --cyan:#00e5ff; --cyan-pale:rgba(0,229,255,.12);
+  --warn:#ffab00; --err:#ef5350;
+  --vert-ok:#22c55e; --vert-bg:#e7faec;
+  --rouge-err:#ef4444; --rouge-bg:#fdeaea;
+  --or:#f5c518; --or-pale:#fffbeb;
+  --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:16px 12px 60px;overflow-x:hidden;position:relative;}
+.bulle{position:fixed;border-radius:50%;filter:blur(6px);opacity:.45;z-index:0;pointer-events:none;}
+.b1{width:200px;height:200px;background:#ffd84d;top:-60px;right:-50px;}
+.b2{width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px;}
+.b3{width:150px;height:150px;background:#9be7a5;top:45%;right:-70px;}
+.b4{width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px;}
+.wrap{max-width:1100px;margin:0 auto;position:relative;z-index:1;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* ── HEADER ── */
+.header{text-align:center;margin-bottom:16px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px var(--day-glow);margin-bottom:10px;}
+.dots{display:inline-flex;gap:3px;}
+.dots i{width:7px;height:7px;border-radius:50%;background:#fff;display:block;}
+.dots i:nth-child(2){opacity:.6;}.dots i:nth-child(3){opacity:.3;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:3px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.2rem,5vw,1.9rem);line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour);}
+.badge-theme{display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.82rem);letter-spacing:1px;padding:9px 20px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);animation:pulse 1.8s ease-in-out infinite;}
+
+/* ══════════════════════════════════
+   PHASE 1 — TERMINAL BRIEFING
+══════════════════════════════════ */
+.phase1{animation:fadeUp .4s ease;}
+.terminal{background:var(--term);border:1px solid #1a2a1a;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px #0d1a0d, 0 20px 60px rgba(0,0,0,.8), inset 0 0 80px rgba(0,0,0,.4);margin-bottom:20px;}
+/* Barre titre terminal */
+.term-bar{background:#1a2a1a;padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #0d1a0d;}
+.term-dots{display:flex;gap:6px;}
+.term-dot{width:12px;height:12px;border-radius:50%;}
+.term-dot.r{background:#ef5350;} .term-dot.y{background:#ffab00;} .term-dot.g{background:#00e676;}
+.term-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(0,230,118,.5);letter-spacing:2px;margin-left:8px;}
+/* Corps terminal */
+.term-body{padding:24px 22px 28px;min-height:320px;position:relative;}
+/* Scanlines overlay */
+.term-body::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0px,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px);pointer-events:none;z-index:1;}
+/* Phosphor glow */
+.term-body::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(0,230,118,.04) 0%,transparent 70%);pointer-events:none;z-index:1;}
+.term-line{font-family:'JetBrains Mono',monospace;font-size:clamp(.78rem,2.2vw,.9rem);line-height:1.9;position:relative;z-index:2;}
+.t-prompt{color:var(--grn-dim);} .t-cmd{color:var(--grn);}
+.t-comment{color:rgba(0,230,118,.45);} .t-warn{color:var(--warn);}
+.t-data{color:var(--cyan);} .t-ok{color:var(--grn);font-weight:600;}
+.t-err{color:var(--err);} .t-white{color:rgba(255,255,255,.85);}
+.t-dim{color:rgba(255,255,255,.35);}
+.t-separator{color:rgba(0,230,118,.2);display:block;margin:4px 0;}
+/* Curseur clignotant */
+.cursor{display:inline-block;width:9px;height:1.1em;background:var(--grn);vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px;}
+/* Ligne de saisie */
+.term-input-line{display:flex;align-items:center;gap:8px;margin-top:20px;position:relative;z-index:2;}
+/* Bouton lancer dans le terminal */
+.btn-lancer-term{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.82rem,2.5vw,.94rem);letter-spacing:1px;padding:14px 24px;border:2px solid var(--grn);border-radius:8px;background:transparent;color:var(--grn);cursor:pointer;transition:background .2s,color .2s;margin-top:20px;display:block;position:relative;z-index:2;}
+.btn-lancer-term:hover{background:var(--grn-pale);color:#fff;}
+.btn-lancer-term::before{content:'> ';color:var(--grn-dim);}
+
+/* ══════════════════════════════════
+   PHASE 2 — INTERFACE LABO
+══════════════════════════════════ */
+.phase2{display:none;}
+.phase2.active{display:block;animation:fadeUp .4s ease;}
+.layout{display:grid;grid-template-columns:1fr 1.4fr;gap:22px;align-items:start;}
+@media(max-width:800px){.layout{grid-template-columns:1fr;}}
+@media(min-width:801px){.col-texte{position:sticky;top:16px;}}
+
+/* HUD */
+.hud-bar{background:var(--term);border:1px solid #1a2a1a;border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;font-family:'JetBrains Mono',monospace;}
+.hud-item{display:flex;flex-direction:column;gap:2px;}
+.hud-val{font-size:clamp(.95rem,3.5vw,1.3rem);font-weight:700;color:var(--grn);}
+.hud-lbl{font-size:.58rem;letter-spacing:1px;color:rgba(0,230,118,.4);text-transform:uppercase;}
+.hud-sep{width:1px;height:34px;background:rgba(0,230,118,.15);}
+
+/* Terminal texte source */
+.texte-terminal{background:var(--term);border:1px solid #1a2a1a;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px #0d1a0d,0 10px 30px rgba(0,0,0,.5);}
+.tterm-bar{background:#1a2a1a;padding:8px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #0d1a0d;}
+.tterm-dots{display:flex;gap:5px;}
+.tterm-dot{width:10px;height:10px;border-radius:50%;}
+.tterm-dot.r{background:#ef5350;opacity:.6;}.tterm-dot.y{background:#ffab00;opacity:.6;}.tterm-dot.g{background:#00e676;opacity:.6;}
+.tterm-title{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:rgba(0,230,118,.45);letter-spacing:1.5px;margin-left:6px;}
+.tterm-body{padding:16px 18px;position:relative;}
+.tterm-body::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);pointer-events:none;}
+.corpus-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:rgba(0,229,255,.5);letter-spacing:2px;margin-bottom:10px;}
+.corpus-text{font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,2.3vw,.92rem);line-height:1.9;color:rgba(255,255,255,.7);position:relative;z-index:1;}
+.corpus-text .vb{color:var(--cyan);font-weight:700;}
+.corpus-text .vb-done{color:var(--grn);font-weight:700;transition:color .5s;}
+.corpus-text .vb-current{color:var(--warn);font-weight:700;text-shadow:0 0 8px rgba(255,171,0,.6);}
+
+/* Chrono */
+.chrono-term{background:var(--term2);border:1px solid #1a3020;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.chrono-val-t{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.5rem,6vw,2.2rem);color:var(--err);text-shadow:0 0 16px rgba(239,83,80,.6);animation:cpulse 1s ease-in-out infinite;}
+@keyframes cpulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+.chrono-lbl-t{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.3);letter-spacing:1px;}
+
+/* Cartes analyse */
+.verbe-card{background:#fff;border:2px solid var(--jour-pale);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.07);animation:slideIn .35s ease;}
+.verbe-stripe{height:5px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#ff8fab,var(--jour-fonce));background-size:300% 100%;animation:slide 4s linear infinite;}
+@keyframes slide{0%{background-position:0%;}100%{background-position:300%;}}
+.verbe-body{padding:16px 14px 20px;}
+.verbe-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--gris);letter-spacing:1px;margin-bottom:6px;}
+.verbe-mot{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,5vw,1.8rem);color:var(--jour);text-shadow:0 0 14px var(--day-glow);margin-bottom:4px;}
+.verbe-ctx{font-style:italic;font-size:clamp(.84rem,2.8vw,.94rem);color:var(--gris);margin-bottom:16px;line-height:1.5;}
+.sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+@media(max-width:400px){.sel-grid{grid-template-columns:1fr;}}
+.sel-block{display:flex;flex-direction:column;gap:4px;}
+.sel-block.full{grid-column:1/-1;}
+.sel-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;color:var(--jour-fonce);letter-spacing:1px;text-transform:uppercase;}
+.sel-drop{font-family:Arial,sans-serif;font-size:clamp(.88rem,3vw,.98rem);font-weight:600;padding:10px 12px;border:2px solid #e8e2d4;border-radius:10px;background:#fff;color:var(--txt);cursor:pointer;outline:none;width:100%;transition:border-color .15s;}
+.sel-drop:focus{border-color:var(--jour);}
+.sel-drop.correct{border-color:var(--vert-ok);background:var(--vert-bg);color:#157f3a;}
+.sel-drop.wrong{border-color:var(--rouge-err);background:var(--rouge-bg);color:var(--rouge-err);}
+.sel-drop:disabled{cursor:default;opacity:.85;}
+.verbe-fb{min-height:0;font-size:clamp(.84rem,2.8vw,.94rem);line-height:1.6;margin-top:12px;padding:10px 12px;border-radius:8px;display:none;}
+.verbe-fb.show{display:block;animation:fadeUp .3s ease;}
+.verbe-fb.ok{background:var(--vert-bg);border:1px solid #9be7a5;color:#157f3a;font-weight:700;}
+.verbe-fb.no{background:var(--jour-clair);border:1px solid var(--jour-pale);color:var(--jour-fonce);}
+.btn-valider{width:100%;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:1px;padding:13px;border:none;border-radius:10px;background:var(--jour);color:#fff;cursor:pointer;min-height:48px;margin-top:14px;transition:transform .12s;box-shadow:0 3px 12px var(--day-glow);}
+.btn-valider:hover:not(:disabled){transform:translateY(-2px);}
+.btn-valider:disabled{background:#d8d8d8;box-shadow:none;cursor:not-allowed;}
+.btn-suivant{display:none;width:100%;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:1px;padding:13px;border:none;border-radius:10px;background:var(--jour-fonce);color:#fff;cursor:pointer;min-height:48px;margin-top:10px;transition:transform .12s;}
+.btn-suivant.visible{display:block;animation:fadeUp .3s ease;}
+.btn-suivant:hover{transform:translateY(-2px);}
+
+/* QCM */
+.qcm-card{background:#fff;border:2px solid #9dd4e8;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.07);animation:slideIn .35s ease;}
+.qcm-stripe{height:5px;background:linear-gradient(90deg,#1a6e88,#3ab5d8,#9dd4e8,#1a6e88);background-size:300% 100%;animation:slide 4s linear infinite;}
+.qcm-body{padding:16px 14px 20px;}
+.ep-badge{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:1.5px;padding:5px 12px;border-radius:14px;display:inline-block;margin-bottom:12px;}
+.ep2-badge{background:#e8f6fb;color:#1a6e88;border:1px solid #9dd4e8;}
+.ep3-badge{background:var(--or-pale);color:#7a5000;border:1px solid #f5d070;}
+.qcm-citation{background:#e8f6fb;border-left:4px solid #1a6e88;border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:12px;font-style:italic;font-size:clamp(.92rem,3vw,1.02rem);color:#0d3d4d;line-height:1.65;}
+.qcm-texte{font-size:clamp(.95rem,3.2vw,1.05rem);font-weight:700;line-height:1.5;margin-bottom:12px;}
+.opts{display:grid;grid-template-columns:1fr;gap:8px;}
+.opt{display:flex;align-items:flex-start;gap:9px;background:#fff;border:1.5px solid #e8e2d4;border-radius:10px;padding:11px 13px;font-size:clamp(.88rem,3vw,.98rem);text-align:left;cursor:pointer;transition:transform .1s,background .15s;line-height:1.45;width:100%;font-family:inherit;}
+.opt:hover:not([disabled]){background:#e8f6fb;border-color:#3ab5d8;transform:translateY(-1px);}
+.opt[disabled]{cursor:default;}
+.opt .lettre{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:#d0eaf5;color:#1a6e88;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.6rem;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.opt.correct{background:var(--vert-bg);border-color:var(--vert-ok);}
+.opt.correct .lettre{background:var(--vert-ok);color:#fff;}
+.opt.wrong{background:var(--rouge-bg);border-color:var(--rouge-err);animation:shake .4s;}
+.opt.wrong .lettre{background:var(--rouge-err);color:#fff;}
+@keyframes shake{25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+.qcm-fb{min-height:0;font-size:clamp(.86rem,3vw,.96rem);line-height:1.6;margin-top:12px;padding:10px 12px;border-radius:8px;display:none;}
+.qcm-fb.show{display:block;animation:fadeUp .3s ease;}
+.qcm-fb.ok{background:var(--vert-bg);border:1px solid #9be7a5;color:#157f3a;font-weight:700;}
+.qcm-fb.no{background:#e8f6fb;border:1px solid #9dd4e8;color:#1a6e88;}
+
+/* Tableau */
+.tableau-card{background:#fff;border:2px solid #f5d070;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.07);animation:fadeUp .4s ease;}
+.tableau-stripe{height:5px;background:linear-gradient(90deg,#7a5000,var(--or),#ffe08a,#7a5000);background-size:300% 100%;animation:slide 4s linear infinite;}
+.tableau-body{padding:16px 14px 20px;overflow-x:auto;}
+.t-consigne{font-size:clamp(.88rem,3vw,.98rem);color:var(--txt);line-height:1.6;margin-bottom:14px;}
+table{width:100%;border-collapse:collapse;font-size:clamp(.78rem,2.5vw,.9rem);}
+th{background:var(--or-pale);color:#7a5000;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.65rem;letter-spacing:.8px;text-transform:uppercase;padding:9px 8px;text-align:left;border:1px solid #f5d070;}
+td{padding:7px 8px;border:1px solid #e8e2d4;vertical-align:middle;}
+tr:nth-child(even) td{background:#fffbf0;}
+.td-verbe{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--jour-fonce);font-size:.88rem;}
+.td-sel{font-size:clamp(.78rem,2.5vw,.88rem);padding:6px 8px;border:1.5px solid #e8e2d4;border-radius:6px;background:#fff;cursor:pointer;outline:none;width:100%;min-width:80px;}
+.td-sel:focus{border-color:var(--or);}
+.td-sel.correct{border-color:var(--vert-ok);background:var(--vert-bg);color:#157f3a;}
+.td-sel.wrong{border-color:var(--rouge-err);background:var(--rouge-bg);color:var(--rouge-err);}
+.td-sel:disabled{cursor:default;opacity:.85;}
+
+/* Verdict */
+.verdict{display:none;margin-top:18px;animation:fadeUp .5s ease;}
+.verdict.show{display:block;}
+.verdict-card{background:#fff;border:2px solid var(--jour);border-radius:18px;padding:28px 22px;box-shadow:0 14px 40px rgba(0,0,0,.08);text-align:center;position:relative;overflow:hidden;}
+.verdict-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#ff8fab,var(--jour-fonce));}
+.verdict-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,4vw,1.5rem);letter-spacing:2px;padding:10px 22px;border-radius:10px;border:3.5px solid;display:inline-block;margin-bottom:14px;transform:rotate(-3deg);animation:stampPop .6s cubic-bezier(.3,1.6,.5,1);}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-3deg);}100%{opacity:1;transform:scale(1) rotate(-3deg);}}
+.verdict-tampon.ok{color:var(--vert-ok);border-color:var(--vert-ok);}
+.verdict-tampon.moyen{color:#b36200;border-color:var(--or);}
+.verdict-tampon.ko{color:var(--rouge-err);border-color:var(--rouge-err);}
+.verdict-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);line-height:1;color:var(--jour-fonce);margin:.4rem 0 .3rem;}
+.verdict-et{font-size:1.7rem;letter-spacing:.1em;margin:.3rem 0 .8rem;}
+.verdict-msg{font-size:clamp(.9rem,3vw,1.05rem);line-height:1.75;color:var(--txt);margin-bottom:18px;}
+.badge-final{display:inline-flex;align-items:center;gap:8px;background:var(--or-pale);border:2px solid var(--or);border-radius:12px;padding:10px 18px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.7rem,2.5vw,.86rem);color:#7a5000;margin-bottom:16px;}
+.btn-rejouer{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;padding:12px 22px;border:none;border-radius:10px;background:var(--jour-fonce);color:#fff;cursor:pointer;min-height:46px;}
+.btn-rejouer:hover{background:var(--jour);}
+/* Rapport terminal final */
+.rapport-terminal{ background:var(--term);border:1px solid #1a2a1a;border-radius:14px;overflow:hidden;
+  box-shadow:0 0 0 1px #0d1a0d,0 20px 60px rgba(0,0,0,.8);margin-top:18px;display:none; }
+.rapport-terminal.show{ display:block;animation:fadeUp .5s ease; }
+.rapport-body{ padding:20px 22px;min-height:60px; }
+.rapport-line{ font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,2.5vw,.92rem);
+  line-height:2;position:relative;z-index:2; }
+
+/* Saisie libre CO/attribut */
+.co-input{ font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,3vw,.98rem);font-weight:600;
+  padding:10px 12px;border:2px solid #e8e2d4;border-radius:10px;background:#fff;color:var(--txt);
+  outline:none;width:100%;transition:border-color .15s; }
+.co-input:focus{ border-color:var(--jour); }
+.co-input.correct{ border-color:var(--vert-ok);background:var(--vert-bg);color:#157f3a; }
+.co-input.wrong{ border-color:var(--rouge-err);background:var(--rouge-bg);color:var(--rouge-err); }
+.co-input:disabled{ cursor:not-allowed;opacity:.85; }
+
+
+/* Flash étoile */
+#starFlash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:5rem;z-index:999;pointer-events:none;opacity:0;}
+#starFlash.show{animation:starPop 1s ease forwards;}
+@keyframes starPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.2);}35%{opacity:1;transform:translate(-50%,-50%) scale(1.5);}70%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+</style>
+</head>
+<body>
+<div class="bulle b1"></div><div class="bulle b2"></div><div class="bulle b3"></div><div class="bulle b4"></div>
+<div class="wrap">
+
+<div class="header">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 4E</div>
+  <div class="semaine">Semaine 3 – Jour 2</div>
+  <h1 class="titre">Labo d'<span class="accent">analyse</span></h1>
+  <div class="badge-theme">LE VERBE · 3 ÉTAPES · NOTE /10</div>
+</div>
+
+<!-- ════ PHASE 1 — TERMINAL BRIEFING ════ -->
+<div id="phase1" class="phase1">
+  <div class="terminal">
+    <div class="term-bar">
+      <div class="term-dots">
+        <div class="term-dot r"></div>
+        <div class="term-dot y"></div>
+        <div class="term-dot g"></div>
+      </div>
+      <div class="term-title">LABO-LINGUISTIQUE-v4.2 — SESSION ANALYSTE</div>
+    </div>
+    <div class="term-body" id="termBody">
+      <div id="termLines"></div>
+      <div class="term-input-line" id="termInput" style="display:none;">
+        <button class="btn-lancer-term" onclick="lancerLabo()">ENTRER DANS LE LABO</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PHASE 2 — INTERFACE LABO ════ -->
+<div id="phase2" class="phase2">
+  <div class="hud-bar">
+    <div class="hud-item"><div class="hud-val" id="hudScore">0</div><div class="hud-lbl">/ 15 pts</div></div>
+    <div class="hud-sep"></div>
+    <div class="hud-item"><div class="hud-val" id="hudNote">—</div><div class="hud-lbl">Note /10</div></div>
+    <div class="hud-sep"></div>
+    <div class="hud-item"><div class="hud-val" id="hudEt" style="font-size:.9rem;">Étape 1</div><div class="hud-lbl">En cours</div></div>
+  </div>
+  <!-- Barre de progression + étoiles -->
+  <div style="margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gris);margin-bottom:4px;">
+      <span id="progLabel">0 / 3 étapes</span><span id="progPct">0 %</span>
+    </div>
+    <div style="background:#e8e2d4;border-radius:99px;height:7px;overflow:hidden;">
+      <div id="progFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.5rem;margin-bottom:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;border:1.5px solid #e8e2d4;background:#fff;font-weight:600;">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--vert-ok);flex-shrink:0;"></div><span id="cntOk">0</span> correct(s)
+    </div>
+    <div style="display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;border:1.5px solid #e8e2d4;background:#fff;font-weight:600;">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--rouge-err);flex-shrink:0;"></div><span id="cntKo">0</span> erreur(s)
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="col-texte">
+      <div class="texte-terminal">
+        <div class="tterm-bar">
+          <div class="tterm-dots"><div class="tterm-dot r"></div><div class="tterm-dot y"></div><div class="tterm-dot g"></div></div>
+          <div class="tterm-title">CORPUS · FICHIER CHARGÉ · READ-ONLY</div>
+        </div>
+        <div class="tterm-body">
+          <div class="corpus-label">&gt; corpus.txt — chargé — 11 lignes</div>
+          <div class="corpus-text" id="corpusText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-analyse">
+      <div id="chronoZone"></div>
+      <div id="analysePanel"></div>
+      <div class="verdict" id="verdict">
+        <div class="verdict-card">
+          <div class="verdict-tampon" id="verdictTampon"></div>
+          <div class="verdict-note"><span id="verdictNote">0</span>/10</div>
+          <div class="verdict-et" id="verdictEt"></div>
+          <div class="verdict-msg" id="verdictMsg"></div>
+          <div class="badge-final" id="badgeFinal"></div>
+          <button class="btn-rejouer" onclick="recommencer()">↺ Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rapport terminal final -->
+  <div class="rapport-terminal" id="rapportTerminal">
+    <div class="term-bar">
+      <div class="term-dots"><div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div></div>
+      <div class="term-title">RAPPORT FINAL — SESSION TERMINÉE</div>
+    </div>
+    <div class="rapport-body" id="rapportBody"></div>
+  </div>
+
+</div>
+
+<div id="starFlash">⭐</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   LABO LINGUISTIQUE · Le verbe · 4e S3 J2
+   ════════════════════════════════════════ */
+
+const VERBES = [
+  { mot:'quittait',   contexte:"Karim quittait son village à l'aube.",       nature:'action', constr:'TD',  co:'son village' },
+  { mot:'traversait', contexte:"Il traversait les champs encore humides.",    nature:'action', constr:'TD',  co:'les champs' },
+  { mot:'respirait',  contexte:"Il respirait l'air frais de la montagne.",   nature:'action', constr:'TD',  co:"l'air frais de la montagne" },
+  { mot:'devenait',   contexte:"Le sentier devenait plus escarpé.",           nature:'état',   constr:'—',   co:'plus escarpé' },
+  { mot:'songeait',   contexte:"Il songeait à ses études, à l'avenir.",      nature:'action', constr:'TI',  co:"à ses études, à l'avenir" },
+  { mot:'semblait',   contexte:"Le silence semblait total.",                  nature:'état',   constr:'—',   co:'total' },
+  { mot:'chantaient', contexte:"Les oiseaux chantaient au loin.",             nature:'action', constr:'INT', co:'—' },
+  { mot:'soufflait',  contexte:"Le vent soufflait doucement.",                nature:'action', constr:'INT', co:'—' },
+  { mot:'regardait',  contexte:"Karim regardait ce paysage.",                 nature:'action', constr:'TD',  co:'ce paysage' },
+  { mot:'restait',    contexte:"il restait convaincu.",                       nature:'état',   constr:'—',   co:'convaincu' }
+];
+
+const CORPUS_TOKENS = [
+  {t:"Chaque matin, Karim "},{v:0},{t:" son village à l'aube."},{t:'\n'},
+  {t:"Il "},{v:1},{t:" les champs encore humides de rosée"},{t:'\n'},
+  {t:"et "},{v:2},{t:" l'air frais de la montagne."},{t:'\n'},
+  {t:"Le sentier "},{v:3},{t:" plus escarpé à mesure qu'il avançait."},{t:'\n'},
+  {t:"Il "},{v:4},{t:" parfois à ses études, à l'avenir qui l'attendait."},{t:'\n'},
+  {t:"Le silence "},{v:5},{t:" total dans ces instants-là."},{t:'\n'},
+  {t:"Pourtant, les oiseaux "},{v:6},{t:" au loin,"},{t:'\n'},
+  {t:"et le vent "},{v:7},{t:" doucement entre les arbres."},{t:'\n'},
+  {t:"Karim "},{v:8},{t:" ce paysage avec une admiration sincère :"},{t:'\n'},
+  {t:"il "},{v:9},{t:" convaincu que rien ne valait"},{t:'\n'},
+  {t:"la beauté simple de sa terre natale."}
+];
+
+const QCM = [
+  { num:'Q1', citation:"Le sentier devenait plus escarpé à mesure qu'il avançait.",
+    texte:"Quel est le rôle de « plus escarpé » dans cette phrase ?",
+    opts:["C'est un complément circonstanciel de manière.","C'est un attribut du sujet relié par un verbe d'état.","C'est un complément d'objet direct."],
+    ans:1,
+    fbOk:"Exact ! « devenait » est un verbe d'état ; « plus escarpé » qualifie le sujet « le sentier » : c'est un attribut du sujet.",
+    fbErr:["Un CCM répond à « comment ? ». Ici, « plus escarpé » qualifie le sujet via le verbe d'état « devenait » : c'est un attribut.",null,"Le COD répond à « quoi ? » sans préposition. « Plus escarpé » ne désigne pas un objet de l'action : c'est un attribut."]
+  },
+  { num:'Q2', citation:"il restait convaincu",
+    texte:"Peut-on remplacer « restait » par « semblait » sans changer le sens grammatical ?",
+    opts:["Non, car « rester » est toujours un verbe d'action.","Oui, car « semblait » et « restait » sont tous deux des verbes d'état pouvant introduire un attribut.","Non, car « convaincu » est un COD, pas un attribut."],
+    ans:1,
+    fbOk:"Exact ! Les deux sont des verbes d'état qui introduisent un attribut du sujet.",
+    fbErr:["« Rester » peut être verbe d'état (rester calme) ou d'action (rester à la maison). Ici, c'est un verbe d'état.",null,"Un COD répond à « quoi ? ». « Convaincu » qualifie le sujet « il » : c'est un attribut du sujet."]
+  }
+];
+
+const TABLEAU = [
+  {verbe:'quittait',   nature:'action', constr:'TD',  co:'son village'},
+  {verbe:'traversait', nature:'action', constr:'TD',  co:'les champs'},
+  {verbe:'respirait',  nature:'action', constr:'TD',  co:"l'air frais"},
+  {verbe:'devenait',   nature:'état',   constr:'—',   co:'plus escarpé'},
+  {verbe:'songeait',   nature:'action', constr:'TI',  co:'à ses études'},
+  {verbe:'semblait',   nature:'état',   constr:'—',   co:'total'},
+  {verbe:'soufflait',  nature:'action', constr:'INT', co:'—'},
+  {verbe:'regardait',  nature:'action', constr:'TD',  co:'ce paysage'},
+  {verbe:'restait',    nature:'état',   constr:'—',   co:'convaincu'}
+];
+
+/* ── ÉTAT ── */
+let etape=1, verbeCourant=0, scoreEt1=0, scoreEt2=0, scoreEt3=0;
+let verifFaits={}, chronoTimer=null, chronoSec=180, qcmCourant=0;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ════════════════════
+   PHASE 1 — TERMINAL
+════════════════════ */
+const SCRIPT_LINES = [
+  {cls:'t-dim',    txt:'─────────────────────────────────────────────'},
+  {cls:'t-ok',     txt:'LABORATOIRE DE LINGUISTIQUE — ACCÈS RESTREINT'},
+  {cls:'t-dim',    txt:'─────────────────────────────────────────────'},
+  {cls:'t-comment',txt:'// Initialisation session analyste junior...'},
+  {cls:'t-data',   txt:'> AUTH: OK  |  NIVEAU: 4E  |  MODULE: VERBE'},
+  {cls:'t-dim',    txt:''},
+  {cls:'t-white',  txt:'Le laboratoire vient de recevoir un corpus'},
+  {cls:'t-white',  txt:"d'analyse urgent. Dix verbes ont été extraits"},
+  {cls:'t-white',  txt:"d'un texte littéraire et attendent leur"},
+  {cls:'t-white',  txt:'classification complète.'},
+  {cls:'t-dim',    txt:''},
+  {cls:'t-warn',   txt:'> ÉTAPE 1 : 3 minutes — chrono actif'},
+  {cls:'t-data',   txt:'> ÉTAPE 2 : analyse grammaticale — sans chrono'},
+  {cls:'t-data',   txt:'> ÉTAPE 3 : tableau de synthèse — sans chrono'},
+  {cls:'t-dim',    txt:''},
+  {cls:'t-white',  txt:'Résultats insuffisants = dossier renvoyé.'},
+  {cls:'t-ok',     txt:'Résultats excellents = LINGUISTE CERTIFIÉ(E).'},
+  {cls:'t-dim',    txt:''},
+  {cls:'t-comment',txt:'// Le corpus est prêt. Le labo t\'attend.'},
+  {cls:'t-dim',    txt:'─────────────────────────────────────────────'},
+];
+
+let lineIdx=0, charIdx=0, typeTimer=null;
+function typeLine(){
+  const cont=$('termLines');
+  if(lineIdx>=SCRIPT_LINES.length){
+    $('termInput').style.display='flex';
+    return;
+  }
+  const l=SCRIPT_LINES[lineIdx];
+  let el=document.getElementById('tl'+lineIdx);
+  if(!el){
+    el=document.createElement('div');
+    el.className='term-line '+l.cls;
+    el.id='tl'+lineIdx;
+    cont.appendChild(el);
+  }
+  if(charIdx<l.txt.length){
+    el.textContent=l.txt.substring(0,charIdx+1);
+    if(charIdx===l.txt.length-1){el.innerHTML+='';}
+    charIdx++;
+    typeTimer=setTimeout(typeLine, l.txt.length===0?0:18);
+  } else {
+    lineIdx++; charIdx=0;
+    typeTimer=setTimeout(typeLine, l.txt.length===0?30:60);
+  }
+}
+
+function lancerLabo(){
+  clearTimeout(typeTimer);
+  $('phase1').style.display='none';
+  $('phase2').classList.add('active');
+  buildCorpus();
+  buildEtape1();
+  initA();
+}
+
+/* ── CORPUS ── */
+function buildCorpus(){
+  const el=$('corpusText'); let html='';
+  CORPUS_TOKENS.forEach(tok=>{
+    if(tok.t!==undefined){ if(tok.t==='\n') html+='<br>'; else html+=esc(tok.t); }
+    else if(tok.v!==undefined) html+='<span class="vb" id="tv'+tok.v+'">'+esc(VERBES[tok.v].mot)+'</span>';
+  });
+  el.innerHTML=html;
+}
+function majCorpus(idx,done){
+  const el=$('tv'+idx); if(!el) return;
+  el.className=done?'vb-done':'vb-current';
+}
+
+/* ════════════════════
+   ÉTAPE 1 — VERBES
+════════════════════ */
+function buildEtape1(){
+  $('hudEt').textContent='Étape 1';
+  // Chrono
+  const cz=$('chronoZone');
+  cz.innerHTML='<div class="chrono-term"><div><div class="chrono-val-t" id="chronoNum">3:00</div></div>'
+    +'<div><div class="chrono-lbl-t">CHRONO — ÉTAPE 1</div><div class="chrono-lbl-t" style="margin-top:2px;">3 minutes pour analyser les 10 verbes</div></div></div>';
+  startChrono();
+  afficherVerbe(0);
+}
+
+function startChrono(){
+  chronoSec=180; updateChrono();
+  chronoTimer=setInterval(()=>{ chronoSec--; updateChrono(); if(chronoSec<=0){clearInterval(chronoTimer);finChrono();} },1000);
+}
+function updateChrono(){
+  const el=$('chronoNum'); if(!el) return;
+  const m=Math.floor(chronoSec/60),s=chronoSec%60;
+  el.textContent=m+':'+(s<10?'0':'')+s;
+}
+function finChrono(){ for(let i=verbeCourant;i<VERBES.length;i++) if(!verifFaits['v'+i]) verifFaits['v'+i]=false; passerEtape2(); }
+
+function afficherVerbe(idx){
+  verbeCourant=idx; majCorpus(idx,false);
+  if(idx>0) majCorpus(idx-1,true);
+  const panel=$('analysePanel');
+  const old=document.getElementById('verbeCard'); if(old) old.remove();
+  const v=VERBES[idx];
+
+
+
+  const card=document.createElement('div'); card.className='verbe-card'; card.id='verbeCard';
+  let html='<div class="verbe-stripe"></div><div class="verbe-body">';
+  html+='<div class="verbe-num">Verbe '+(idx+1)+' / '+VERBES.length+'</div>';
+  html+='<div class="verbe-mot">'+esc(v.mot)+'</div>';
+  html+='<div class="verbe-ctx">'+esc(v.contexte)+'</div>';
+  html+='<div class="sel-grid">';
+  html+='<div class="sel-block"><div class="sel-lbl">Nature</div>'
+    +'<select class="sel-drop" id="selNat'+idx+'"><option value="">Choisir…</option>'
+    +'<option value="action">action</option><option value="état">état</option>'
+    +'</select></div>';
+  html+='<div class="sel-block"><div class="sel-lbl">Construction</div>'
+    +'<select class="sel-drop" id="selConstr'+idx+'">'
+    +'<option value="">Choisir…</option>'
+    +'<option value="TD">TD — Transitif direct</option>'
+    +'<option value="TI">TI — Transitif indirect</option>'
+    +'<option value="INT">INT — Intransitif</option>'
+    +'<option value="—">— (verbe d\'état)</option>'
+    +'</select></div>';
+  const coLbl='COD / COI / Attribut du sujet';
+  const coPlaceholder='Ex. : son village, total, à ses études…';
+  html+='<div class="sel-block full"><div class="sel-lbl">'+coLbl+'</div>'
+    +'<input type="text" class="co-input" id="selCo'+idx+'" placeholder="'+coPlaceholder+'" autocomplete="off" autocorrect="off" spellcheck="false"'
+    +' onkeydown="if(event.key===\'Enter\'){event.preventDefault();$(\' btnVal'+idx+'\').click();}">'
+    +'</div></div>';
+  html+='<div class="verbe-fb" id="vfb'+idx+'"></div>';
+  html+='<button class="btn-valider" id="btnVal'+idx+'" onclick="validerVerbe('+idx+')">ANALYSER</button>';
+  html+='<button class="btn-suivant" id="btnSuiv'+idx+'" onclick="verbeSuivant('+idx+')">Verbe suivant →</button>';
+  html+='</div>';
+  card.innerHTML=html; panel.appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* Normalisation réponse CO — tolérant accents, espaces, apostrophes, tirets */
+function normCo(s){
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[’‘']/g,"'")
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function validerVerbe(idx){
+  if(verifFaits['v'+idx]) return; verifFaits['v'+idx]=true;
+  $('btnVal'+idx).disabled=true;
+  const v=VERBES[idx];
+  const nat=$('selNat'+idx)?.value, constr=$('selConstr'+idx)?.value;
+  const coRaw=$('selCo'+idx)?.value||'';
+  const okN=nat===v.nature, okC=constr===v.constr;
+  const okCo=normCo(coRaw)===normCo(v.co);
+  const ok=okN&&okC&&okCo;
+  const sn=$('selNat'+idx); if(sn){sn.disabled=true;sn.className='sel-drop '+(okN?'correct':'wrong');}
+  const sc=$('selConstr'+idx); if(sc&&v.nature!=='état'){sc.disabled=true;sc.className='sel-drop '+(okC?'correct':'wrong');}
+  const sco=$('selCo'+idx); if(sco){sco.disabled=true;sco.className='co-input '+(okCo?'correct':'wrong');}
+  const fb=$('vfb'+idx);
+  if(ok){
+    scoreEt1++; fb.innerHTML='✅ Parfait ! Nature : <b>'+v.nature+'</b> · Construction : <b>'+v.constr+'</b> · <b>'+v.co+'</b>';
+    fb.className='verbe-fb ok show'; beepOk();
+  } else {
+    let msg='❌ ';
+    if(!okN) msg+='Nature : <b>'+v.nature+'</b>. ';
+    if(!okC) msg+='Construction : <b>'+(v.nature==='état'?'— (verbe d\'état)':v.constr)+'</b>. ';
+    if(!okCo) msg+=(v.nature==='état'?'Attribut : ':'CO : ')+'<b>'+v.co+'</b>.';
+    fb.innerHTML=msg; fb.className='verbe-fb no show'; beepErr();
+  }
+  $('btnSuiv'+idx).className='btn-suivant visible'; updateScore();
+}
+
+function verbeSuivant(idx){
+  majCorpus(idx,true);
+  if(idx+1<VERBES.length) afficherVerbe(idx+1);
+  else { clearInterval(chronoTimer); VERBES.forEach((_,i)=>majCorpus(i,true)); passerEtape2(); }
+}
+
+/* ════════════════════
+   ÉTAPE 2 — QCM
+════════════════════ */
+function passerEtape2(){
+  etape=2; $('hudEt').textContent='Étape 2'; updateScore();
+  const cz=$('chronoZone'); cz.innerHTML='';
+  const old=document.getElementById('verbeCard'); if(old) old.remove();
+  afficherQcm(0);
+}
+
+function afficherQcm(idx){
+  qcmCourant=idx;
+  const panel=$('analysePanel');
+  const old=document.getElementById('qcmCard'); if(old) old.remove();
+  const q=QCM[idx];
+  const card=document.createElement('div'); card.className='qcm-card'; card.id='qcmCard';
+  let html='<div class="qcm-stripe"></div><div class="qcm-body">';
+  html+='<span class="ep-badge ep2-badge">Étape 2 · Analyse</span>';
+  html+='<div class="verbe-num">'+q.num+' / '+QCM.length+'</div>';
+  html+='<div class="qcm-citation">'+esc(q.citation)+'</div>';
+  html+='<div class="qcm-texte">'+esc(q.texte)+'</div>';
+  html+='<div class="opts">';
+  ['A','B','C'].forEach((l,i)=>{
+    html+='<button class="opt" id="opt_q'+idx+'_'+i+'" onclick="repondreQcm('+idx+','+i+')">'
+      +'<span class="lettre">'+l+'</span><span>'+esc(q.opts[i])+'</span></button>';
+  });
+  html+='</div><div class="qcm-fb" id="qfb'+idx+'"></div>';
+  html+='<button class="btn-suivant" id="btnSuivQ'+idx+'" onclick="'+(idx+1<QCM.length?'afficherQcm('+(idx+1)+')':'passerEtape3()')+'">'+
+    (idx+1<QCM.length?'Question suivante →':'Passer à la synthèse →')+'</button>';
+  html+='</div>';
+  card.innerHTML=html; panel.appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function repondreQcm(qIdx,choix){
+  if(verifFaits['q'+qIdx]) return; verifFaits['q'+qIdx]=true;
+  const q=QCM[qIdx]; const ok=choix===q.ans;
+  if(ok) scoreEt2++;
+  ['A','B','C'].forEach((_,i)=>{const b=$('opt_q'+qIdx+'_'+i);if(b)b.setAttribute('disabled','');});
+  $('opt_q'+qIdx+'_'+choix).className='opt '+(ok?'correct':'wrong');
+  if(!ok) $('opt_q'+qIdx+'_'+q.ans).className='opt correct';
+  const fb=$('qfb'+qIdx);
+  if(ok){fb.innerHTML='✅ '+q.fbOk;fb.className='qcm-fb ok show';beepOk();}
+  else{fb.innerHTML='❌ '+(q.fbErr[choix]||q.fbOk);fb.className='qcm-fb no show';beepErr();}
+  $('btnSuivQ'+qIdx).className='btn-suivant visible'; updateScore();
+}
+
+/* ════════════════════
+   ÉTAPE 3 — TABLEAU
+════════════════════ */
+function passerEtape3(){
+  etape=3; $('hudEt').textContent='Étape 3'; updateScore();
+  const old=document.getElementById('qcmCard');if(old)old.remove();
+  const panel=$('analysePanel');
+  const card=document.createElement('div');card.className='tableau-card';card.id='tableauCard';
+  const natO='<option value="">…</option><option value="action">action</option><option value="état">état</option>';
+  const conO='<option value="">…</option><option value="TD">TD — Transitif direct</option><option value="TI">TI — Transitif indirect</option><option value="INT">INT — Intransitif</option><option value="—">— (verbe d\'état)</option>';
+  const coO=null; // saisie libre
+  let html='<div class="tableau-stripe"></div><div class="tableau-body">';
+  html+='<span class="ep-badge ep3-badge">Étape 3 · Synthèse</span>';
+  html+='<div class="t-consigne">Complète le tableau récapitulatif des neuf verbes analysés.</div>';
+  html+='<table><thead><tr><th>Verbe</th><th>Nature</th><th>Construction</th><th>CO / Attribut</th></tr></thead><tbody>';
+  TABLEAU.forEach((row,i)=>{
+    html+='<tr><td class="td-verbe">'+row.verbe+'</td>'
+      +'<td><select class="td-sel" id="tn'+i+'">'+natO+'</select></td>'
+      +'<td><select class="td-sel" id="tc'+i+'">'+conO+'</select></td>'
+      +'<td><input type="text" class="co-input" id="tco'+i+'" placeholder="Saisir…" autocomplete="off" autocorrect="off" spellcheck="false" style="font-size:.82rem;"></td></tr>';
+  });
+  html+='</tbody></table>';
+  html+='<div class="verbe-fb" id="tfb" style="margin-top:12px;"></div>';
+  html+='<button class="btn-valider" id="btnValTab" onclick="validerTableau()" style="margin-top:14px;">VALIDER LE TABLEAU</button>';
+  html+='</div>';
+  card.innerHTML=html; panel.appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function validerTableau(){
+  if(verifFaits['tableau']) return; verifFaits['tableau']=true;
+  $('btnValTab').disabled=true; scoreEt3=0;
+  TABLEAU.forEach((row,i)=>{
+    const n=$('tn'+i)?.value,c=$('tc'+i)?.value;
+    const co=$('tco'+i)?.value||'';
+    const ok=n===row.nature&&c===row.constr&&normCo(co)===normCo(row.co);
+    if(ok) scoreEt3++;
+    [$('tn'+i),$('tc'+i),$('tco'+i)].forEach(s=>{if(s)s.disabled=true;});
+    $('tn'+i).className='td-sel '+(n===row.nature?'correct':'wrong');
+    $('tc'+i).className='td-sel '+(c===row.constr?'correct':'wrong');
+    $('tco'+i).className='co-input '+(normCo(co)===normCo(row.co)?'correct':'wrong');
+  });
+  const fb=$('tfb');
+  fb.innerHTML=scoreEt3===TABLEAU.length?'✅ Tableau parfait !':'Score : '+scoreEt3+' / '+TABLEAU.length+'.';
+  fb.className='verbe-fb '+(scoreEt3>=7?'ok':'no')+' show';
+  updateScore(); if(scoreEt3>=7)beepOk();else beepErr();
+  setTimeout(afficherVerdict,1400);
+}
+
+function updateScore(){
+  const t=scoreEt1+scoreEt2+scoreEt3;
+  const n=Math.min(10,Math.round(t/15*10));
+  $('hudScore').textContent=t;
+  $('hudNote').textContent=(n%1===0?n:n.toFixed(1));
+  // Progression étapes
+  const etDone=(etape>1?1:0)+(etape>2?1:0)+(etape>3?1:0);
+  const pf=$('progFill'); if(pf) pf.style.width=Math.round(etDone/3*100)+'%';
+  const pl=$('progLabel'); if(pl) pl.textContent=etDone+' / 3 étapes';
+  const pp=$('progPct'); if(pp) pp.textContent=Math.round(etDone/3*100)+' %';
+  // Chips
+  const co=$('cntOk'); if(co) co.textContent=t;
+  const ck=$('cntKo'); if(ck) ck.textContent=(scoreEt1===0&&scoreEt2===0&&scoreEt3===0)?0:Math.max(0,15-t);
+}
+
+function afficherVerdict(){
+  const t=scoreEt1+scoreEt2+scoreEt3;
+  const note=Math.min(10,Math.round(t/15*10));
+  const pct=Math.round(t/15*100);
+  $('verdictNote').textContent=note%1===0?note:note.toFixed(1);
+  const nb=pct>=90?5:pct>=70?4:pct>=50?3:pct>=30?2:1;
+  $('verdictEt').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  const tp=$('verdictTampon');
+  if(pct>=90){tp.textContent='CERTIFIÉ(E)';tp.className='verdict-tampon ok';$('verdictMsg').innerHTML='<b>Excellent !</b> Tu maîtrises l\'analyse du verbe. Tu es prêt(e) pour l\'évaluation.';$('badgeFinal').textContent='LINGUISTE CERTIFIÉ(E) · NIVEAU 4E';beepFinal(true);}
+  else if(pct>=70){tp.textContent='VALIDÉ(E)';tp.className='verdict-tampon moyen';$('verdictMsg').innerHTML='<b>Très bien !</b> Relis les points en rouge pour consolider les dernières nuances.';$('badgeFinal').textContent='ANALYSTE CONFIRMÉ(E) · NIVEAU 4E';beepFinal(true);}
+  else{tp.textContent='EN COURS';tp.className='verdict-tampon ko';$('verdictMsg').innerHTML='<b>Continue !</b> Retourne sur « Je m\'entraîne » pour renforcer tes acquis avant de réessayer.';$('badgeFinal').textContent='APPRENTI(E) ANALYSTE · NIVEAU 4E';beepFinal(false);}
+  $('verdict').className='verdict show';
+  setTimeout(()=>$('verdict').scrollIntoView({behavior:'smooth',block:'start'}),300);
+  setTimeout(()=>afficherRapport(pct,note),1200);
+}
+
+function afficherRapport(pct,note){
+  const el=document.getElementById('rapportTerminal');
+  const body=document.getElementById('rapportBody');
+  if(!el||!body) return;
+  el.className='rapport-terminal show';
+  const statut=pct>=90?'LINGUISTE CERTIFIÉ(E)':pct>=70?'ANALYSTE CONFIRMÉ(E)':'APPRENTI(E) ANALYSTE';
+  const lines=[
+    {cls:'t-dim', t:'─────────────────────────────────────────────'},
+    {cls:'t-ok',  t:'RAPPORT D\'ANALYSE — LABORATOIRE LINGUISTIQUE'},
+    {cls:'t-dim', t:'─────────────────────────────────────────────'},
+    {cls:'t-comment', t:'// Récapitulatif de session'},
+    {cls:'t-data', t:'> Étape 1 — Verbes : '+scoreEt1+' / 10'},
+    {cls:'t-data', t:'> Étape 2 — Analyse : '+scoreEt2+' / 2'},
+    {cls:'t-data', t:'> Étape 3 — Synthèse : '+scoreEt3+' / 3'},
+    {cls:'t-dim',  t:''},
+    {cls:'t-warn', t:'> Score total : '+(scoreEt1+scoreEt2+scoreEt3)+' / 15'},
+    {cls:'t-ok',   t:'> Note finale : '+(note%1===0?note:note.toFixed(1))+' / 10'},
+    {cls:'t-dim',  t:''},
+    {cls:pct>=70?'t-ok':'t-err', t:'> STATUT : '+statut},
+    {cls:'t-dim', t:'─────────────────────────────────────────────'},
+    {cls:'t-comment', t:'// Fin de session — merci pour ton travail.'},
+  ];
+  body.innerHTML='';
+  lines.forEach((l,i)=>{
+    setTimeout(()=>{
+      const d=document.createElement('div');
+      d.className='rapport-line '+l.cls;
+      d.textContent=l.t;
+      body.appendChild(d);
+      if(i===lines.length-1) el.scrollIntoView({behavior:'smooth',block:'start'});
+    }, i*80);
+  });
+}
+
+function recommencer(){
+  clearInterval(chronoTimer); etape=1; verbeCourant=0; scoreEt1=0; scoreEt2=0; scoreEt3=0; verifFaits={}; qcmCourant=0;
+  $('verdict').className='verdict'; const rt=document.getElementById('rapportTerminal'); if(rt) rt.className='rapport-terminal'; $('analysePanel').innerHTML=''; $('chronoZone').innerHTML='';
+  $('hudScore').textContent='0'; $('hudNote').textContent='—'; $('hudEt').textContent='Étape 1';
+  $('phase2').classList.remove('active'); $('phase1').style.display='block';
+  // Réinitialiser le terminal
+  $('termLines').innerHTML=''; $('termInput').style.display='none';
+  lineIdx=0; charIdx=0; typeTimer=null;
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(()=>typeLine(),400);
+}
+
+/* ── AUDIO ── */
+let actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){if(!actx)return;const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.12,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);}
+function beepOk(){initA();beep(880,1047,.06,'square',.08);setTimeout(()=>beep(1047,1318,.12,'sine',.11),70);setTimeout(()=>beep(1318,1047,.1,'sine',.07),180);const s=$('starFlash');s.classList.remove('show');void s.offsetWidth;s.classList.add('show');setTimeout(()=>s.classList.remove('show'),1000);}
+function beepErr(){initA();beep(220,80,.25,'sawtooth',.10);}
+function beepFinal(ok){initA();if(ok){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,f,.2,'triangle',.14),i*150));}else{beep(200,80,.4,'sawtooth',.12);}}
+document.addEventListener('pointerdown',initA,{once:true});
+
+/* INIT */
+typeLine();
+</script>
+</body>
+</html>
