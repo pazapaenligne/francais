@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S2 J2 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5200;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+  --day-color:#f5a623;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#fffbf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --text:#1a1d23;--muted:#8a8f9a;
+  --radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:680px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+  width:260px;height:260px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:180px;height:180px;
+  background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:120px;height:120px;
+  background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.5rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.1rem,4vw,1.75rem);font-weight:900;line-height:1.25;}
+h1 .hl{color:var(--day-dark);}
+
+.prog-wrap{width:100%;margin-bottom:.8rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* Card */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.2rem;box-shadow:0 6px 28px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.card-body{padding:1.2rem 1.3rem 0;}
+.q-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:800;
+  padding:.2rem .7rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.7rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.q-consigne{font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.65;}
+
+/* Phrase avec trou */
+.phrase-box{background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.9rem 1.2rem;margin-bottom:1rem;
+  font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+  line-height:1.8;text-align:center;}
+.trou{display:inline-block;min-width:64px;border-bottom:3px solid var(--day-dark);
+  margin:0 .2rem;color:var(--day-dark);font-family:'JetBrains Mono',monospace;
+  font-size:1.1rem;font-weight:900;text-align:center;letter-spacing:.05em;
+  transition:color .2s,border-color .2s;}
+.trou.ok{color:var(--green-dark);border-color:var(--green);}
+.trou.ko{color:var(--pink-dark);border-color:var(--pink-dark);}
+
+/* Boutons leur / leurs */
+.choix-row{display:flex;gap:.7rem;justify-content:center;margin-bottom:.8rem;}
+.choix-btn{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace;font-size:clamp(1rem,3vw,1.15rem);font-weight:900;
+  padding:.65rem 2rem;cursor:pointer;min-height:2.8rem;
+  transition:background .12s,border-color .12s,transform .1s;
+  -webkit-tap-highlight-color:transparent;letter-spacing:.04em;}
+.choix-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.choix-btn.sel{background:var(--day-light);border-color:var(--day-dark);color:var(--day-dark);}
+.choix-btn.ok{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .3s ease;}
+.choix-btn.ko{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .4s ease;}
+.choix-btn:disabled{cursor:default;opacity:.85;}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.06);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* Indice grammatical */
+.hint-box{background:var(--blue-light,#e8f6fb);border:1.5px solid #3ab5d8;
+  border-left:4px solid #1a6e88;border-radius:var(--radius-sm);
+  padding:.65rem 1rem;font-size:.84rem;color:#1a6e88;
+  line-height:1.75;margin-bottom:.9rem;}
+.hint-box strong{color:#1a3e55;}
+
+/* Feedback */
+.feedback{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.87rem,2.4vw,.97rem);
+  display:none;line-height:1.8;margin:0 1.3rem .8rem;}
+.feedback.show{display:block;animation:fadeUp .3s ease;}
+.feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.feedback.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+
+/* Boutons */
+.btn-row{display:flex;gap:.55rem;flex-wrap:wrap;margin:0 1.3rem .2rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .14s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 12px var(--day-glow);flex:1;}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);}
+.btn-next-row{display:none;justify-content:flex-end;margin:.6rem 1.3rem .2rem;}
+.btn-next-row.show{display:flex;}
+
+/* Résultats */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:2rem 1.4rem;box-shadow:0 6px 28px rgba(0,0,0,.07);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.score-big{font-size:clamp(2.6rem,9vw,4rem);font-weight:900;line-height:1;
+  margin:.6rem 0 .3rem;color:var(--day-dark);}
+.stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.1em;}
+.rmsg{color:var(--muted);font-size:clamp(.88rem,2.4vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.rappel{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  padding:.8rem 1rem;text-align:left;font-size:.87rem;line-height:1.9;margin-bottom:1.2rem;color:var(--day-dark2);}
+.rappel strong{color:var(--day-dark);}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.4rem;}
+.recap-item{display:flex;align-items:center;gap:.6rem;padding:.45rem .85rem;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.recap-item.ok-r{border-color:var(--day-border);}
+.recap-item.ko-r{border-color:#f9c0bb;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:500px){.card-body{padding:1rem 1rem 0;}.btn-row{margin:0 1rem .2rem;}
+  .feedback{margin:0 1rem .8rem;}.btn-next-row{margin:.6rem 1rem .2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 2 – Jour 2</div>
+  <h1>J'observe et je teste · <span class="hl">Leur ou leurs&nbsp;?</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 5 phrases</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">5</span> restant(s)</div>
+</div>
+
+<div class="card" id="main-card">
+  <div class="card-stripe"></div>
+  <div class="card-body" id="card-body"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-verif" onclick="verifQ()" disabled>&#10003;&nbsp;Vérifier</button>
+  </div>
+  <div class="btn-next-row" id="btn-next-row">
+    <button class="btn btn-primary" style="max-width:190px;" onclick="goNext()">Suivant &#8594;</button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--yellow);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px var(--day-glow);margin-bottom:.6rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/5</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="rappel">
+      <strong>&#128161;&nbsp;À retenir :</strong><br>
+      <strong>leur</strong> (sans s) = pronom personnel COI, invariable — il remplace « à eux / à elles ».<br>
+      <strong>leurs</strong> (avec s) = adjectif possessif, s'accorde avec le nom qu'il détermine (toujours pluriel).<br>
+      <em>Astuce :</em> si on peut remplacer par « lui », c'est <strong>leur</strong> sans s.
+    </div>
+    <div class="recap" id="r-recap"></div>
+    <button class="btn btn-primary" onclick="restartAll()" style="width:100%;justify-content:center;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+var QS = [
+  {
+    avant:"Les élèves ont oublié",
+    apres:"carnets dans la salle.",
+    ans:"leurs",
+    type:"adj",
+    hint:"Le mot complète un <strong>nom pluriel</strong> (\u00ab\u00a0carnets\u00a0\u00bb). Demande-toi\u00a0: est-ce un adjectif possessif ou un pronom&nbsp;?",
+    fbOk:"Exact\u00a0! \u00ab\u00a0<strong>Leurs</strong> carnets\u00a0\u00bb\u00a0: <em>leurs</em> est un <strong>adjectif possessif</strong> qui s\u2019accorde avec le nom \u00ab\u00a0carnets\u00a0\u00bb (pluriel). On peut le remplacer par \u00ab\u00a0mes/ses carnets\u00a0\u00bb.",
+    fbKo:"La bonne r\u00e9ponse est <strong>leurs</strong>. \u00ab\u00a0Leurs carnets\u00a0\u00bb\u00a0: <em>leurs</em> est un adjectif possessif qui d\u00e9termine un nom pluriel. Il prend un \u00ab\u00a0s\u00a0\u00bb car il s\u2019accorde.",
+    label:"Phrase 1"
+  },
+  {
+    avant:"Le professeur",
+    apres:"explique la consigne.",
+    ans:"leur",
+    type:"pron",
+    hint:"Le professeur explique \u00ab\u00a0\u00e0 qui\u00a0\u00bb ? Essaie de remplacer par \u00ab\u00a0lui\u00a0\u00bb\u00a0: si \u00e7a marche, c\u2019est un pronom.",
+    fbOk:"Exact\u00a0! \u00ab\u00a0<strong>Leur</strong> explique\u00a0\u00bb\u00a0: <em>leur</em> est un <strong>pronom personnel COI</strong> (il explique \u2018\u00e0 eux\u2019). Il est invariable, sans \u00ab\u00a0s\u00a0\u00bb.",
+    fbKo:"La bonne r\u00e9ponse est <strong>leur</strong> (sans s). C\u2019est un pronom personnel COI qui signifie \u00ab\u00a0\u00e0 eux / \u00e0 elles\u00a0\u00bb. On peut le remplacer par \u00ab\u00a0lui\u00a0\u00bb\u00a0: le professeur lui explique.",
+    label:"Phrase 2"
+  },
+  {
+    avant:"Les journalistes relisent",
+    apres:"articles avant publication.",
+    ans:"leurs",
+    type:"adj",
+    hint:"Le mot est plac\u00e9 devant le nom \u00ab\u00a0articles\u00a0\u00bb. Est-ce qu\u2019il d\u00e9termine ce nom ou remplace un groupe nominal&nbsp;?",
+    fbOk:"Exact\u00a0! \u00ab\u00a0<strong>Leurs</strong> articles\u00a0\u00bb\u00a0: <em>leurs</em> est un <strong>adjectif possessif</strong> devant un nom pluriel. Il s\u2019accorde avec \u00ab\u00a0articles\u00a0\u00bb.",
+    fbKo:"La bonne r\u00e9ponse est <strong>leurs</strong>. Plac\u00e9 devant un nom pluriel (\u00ab\u00a0articles\u00a0\u00bb), <em>leurs</em> est un adjectif possessif qui s\u2019accorde.",
+    label:"Phrase 3"
+  },
+  {
+    avant:"Je",
+    apres:"ai demand\u00e9 de corriger leur texte.",
+    ans:"leur",
+    type:"pron",
+    hint:"J\u2019ai demand\u00e9 \u00ab\u00a0\u00e0 qui\u00a0\u00bb de corriger ? Essaie de remplacer par \u00ab\u00a0lui\u00a0\u00bb.",
+    fbOk:"Exact\u00a0! \u00ab\u00a0Je <strong>leur</strong> ai demand\u00e9\u00a0\u00bb\u00a0: <em>leur</em> est un <strong>pronom personnel COI</strong> invariable (\u00ab\u00a0\u00e0 eux\u00a0\u00bb). Il n\u2019est jamais suivi d\u2019un nom.",
+    fbKo:"La bonne r\u00e9ponse est <strong>leur</strong> (sans s). C\u2019est un pronom COI\u00a0: \u00ab\u00a0j\u2019ai demand\u00e9 \u00e0 eux\u00a0\u00bb. Il ne s\u2019accorde jamais.",
+    label:"Phrase 4"
+  },
+  {
+    avant:"Les parents f\u00e9licitent",
+    apres:"enfants.",
+    ans:"leurs",
+    type:"adj",
+    hint:"Le mot est devant le nom \u00ab\u00a0enfants\u00a0\u00bb. Quel type de mot peut d\u00e9terminer un nom&nbsp;?",
+    fbOk:"Exact\u00a0! \u00ab\u00a0<strong>Leurs</strong> enfants\u00a0\u00bb\u00a0: <em>leurs</em> est un <strong>adjectif possessif</strong> qui s\u2019accorde avec le nom pluriel \u00ab\u00a0enfants\u00a0\u00bb.",
+    fbKo:"La bonne r\u00e9ponse est <strong>leurs</strong>. Devant un nom pluriel (\u00ab\u00a0enfants\u00a0\u00bb), on emploie l\u2019adjectif possessif <em>leurs</em> avec un \u00ab\u00a0s\u00a0\u00bb.",
+    label:"Phrase 5"
+  }
+];
+
+var curQ=0, score=0, answered=false, sel=null;
+var scores=[];
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){ if(actx) return; try{ actx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){
+  if(!actx) return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02);
+}
+function sndOk(){ initA(); beep(440,660,0.08,'sine',0.15); setTimeout(function(){ beep(660,880,0.15,'sine',0.12); },90); }
+function sndKo(){ initA(); beep(280,160,0.22,'sawtooth',0.12); }
+function sndFin(){ initA(); beep(523,659,0.2,'sine',0.14); setTimeout(function(){ beep(659,880,0.26,'sine',0.12); },120); }
+
+/* ══ RENDU ══ */
+function renderQ(){
+  answered=false; sel=null;
+  $('feedback').className='feedback';
+  $('btn-verif').disabled=true;
+  $('btn-next-row').className='btn-next-row';
+
+  var q=QS[curQ];
+  var typeLabel = q.type==='adj'
+    ? '&#128221;&nbsp;Adjectif possessif ou pronom&nbsp;?'
+    : '&#128221;&nbsp;Adjectif possessif ou pronom&nbsp;?';
+
+  var html='';
+  html+='<div class="q-num">Phrase '+(curQ+1)+' / 5</div>';
+  html+='<div class="theme-badge">'+typeLabel+'</div>';
+  html+='<div class="q-consigne">Choisis <strong>leur</strong> ou <strong>leurs</strong> pour compléter la phrase.</div>';
+
+  /* Phrase avec trou */
+  html+='<div class="phrase-box">'
+    +q.avant+'&nbsp;<span class="trou" id="trou">___</span>&nbsp;'+q.apres
+    +'</div>';
+
+  /* Indice */
+  html+='<div class="hint-box">&#128161;&nbsp;'+q.hint+'</div>';
+
+  /* Boutons */
+  html+='<div class="choix-row">'
+    +'<button class="choix-btn" id="btn-leur" onclick="onChoix(\'leur\',this)">leur</button>'
+    +'<button class="choix-btn" id="btn-leurs" onclick="onChoix(\'leurs\',this)">leurs</button>'
+    +'</div>';
+
+  $('card-body').innerHTML=html;
+}
+
+function onChoix(val, btn){
+  if(answered) return;
+  sel=val;
+  /* Visuels sélection */
+  ['btn-leur','btn-leurs'].forEach(function(id){
+    var b=$(id); if(b){ b.classList.remove('sel'); }
+  });
+  btn.classList.add('sel');
+  /* Mettre à jour le trou */
+  var trou=$('trou'); if(trou) trou.textContent=val;
+  $('btn-verif').disabled=false;
+}
+
+/* ══ VÉRIFICATION ══ */
+function verifQ(){
+  if(answered||!sel) return;
+  answered=true;
+  $('btn-verif').disabled=true;
+  var q=QS[curQ];
+  var ok=(sel===q.ans);
+  scores.push(ok?1:0);
+  if(ok) score++;
+
+  /* Visuels trou */
+  var trou=$('trou');
+  if(trou){ trou.textContent=ok?sel:sel+' ✗'; trou.className='trou '+(ok?'ok':'ko'); }
+
+  /* Visuels boutons */
+  ['leur','leurs'].forEach(function(val){
+    var btn=$(val==='leur'?'btn-leur':'btn-leurs'); if(!btn) return;
+    btn.disabled=true; btn.classList.remove('sel');
+    if(val===q.ans) btn.classList.add('ok');
+    else if(val===sel&&!ok) btn.classList.add('ko');
+  });
+
+  var fb=$('feedback');
+  if(ok){
+    fb.className='feedback show ok'; fb.innerHTML='&#11088;&nbsp;'+q.fbOk; sndOk();
+  } else {
+    fb.className='feedback show ko'; fb.innerHTML='&#10006;&nbsp;'+q.fbKo; sndKo();
+  }
+
+  updateGlobal();
+  $('btn-next-row').className='btn-next-row show';
+  setTimeout(function(){ fb.scrollIntoView({behavior:'smooth',block:'nearest'}); },100);
+}
+
+/* ══ SUIVANT ══ */
+function goNext(){
+  curQ++;
+  $('btn-next-row').className='btn-next-row';
+  $('main-card').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(function(){
+    if(curQ>=QS.length) showResults();
+    else renderQ();
+  },300);
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var ok=scores.reduce(function(a,b){return a+b;},0);
+  var ko=scores.filter(function(s){return s===0;}).length;
+  var rem=5-scores.length;
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
+  var pct=Math.round(scores.length/5*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scores.length+' / 5 phrases';
+  $('prog-pct').textContent=pct+' %';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  if(score>=5) sndFin();
+  $('r-score').textContent=score;
+  var s=score>=5?5:score>=4?4:score>=3?3:score>=2?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=[
+    '\u00c0 retravailler\u00a0\u2014 lis le rappel ci-dessous attentivement.',
+    'Des erreurs \u00e0 analyser\u00a0: lis le rappel.',
+    'Pas mal\u00a0! Tu commences \u00e0 distinguer les deux formes.',
+    'Tr\u00e8s bien\u00a0! Encore un petit effort.',
+    'Parfait\u00a0\u2014 tu ma\u00eetrises leur et leurs&nbsp;!'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  var recap=$('r-recap'); recap.innerHTML='';
+  QS.forEach(function(q,i){
+    var ok2=(scores[i]===1);
+    var d=document.createElement('div'); d.className='recap-item '+(ok2?'ok-r':'ko-r');
+    d.innerHTML='<span>'+(ok2?'&#10003;':'&#10007;')+'</span>'
+      +'<span style="flex:1;color:#8a8f9a;">'+q.label+'</span>'
+      +'<span style="color:var(--day-dark);font-weight:800;font-family:\'JetBrains Mono\',monospace;">'
+      +(ok2?q.ans:'<span style="text-decoration:line-through;color:var(--pink-dark);margin-right:.3rem;">'+(scores[i]===0?'???':'')+'</span>'+q.ans)
+      +'</span>';
+    recap.appendChild(d);
+  });
+  $('results-screen').classList.add('show');
+  setTimeout(function(){
+    var rs=$('results-screen'); if(rs) rs.scrollIntoView({behavior:'smooth',block:'start'});
+  },200);
+}
+
+/* ══ RECOMMENCER ══ */
+function restartAll(){
+  curQ=0; score=0; answered=false; sel=null; scores=[];
+  $('results-screen').classList.remove('show');
+  updateGlobal(); renderQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+renderQ(); updateGlobal();
+</script>
+</body>
+</html>
