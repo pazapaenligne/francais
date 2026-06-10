@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S2 J2 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#b94040; --day-dark:#7a1f1f;
+      --day-light:#f7eded; --day-border:#e8b0b0;
+      --day-glow:rgba(185,64,64,.25);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+      width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:170px;height:170px;
+      background:var(--green);bottom:110px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:110px;height:110px;
+      background:var(--pink);top:190px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.85rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    /* Barre progression globale */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.4rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;width:100%;max-width:720px;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;
+      white-space:nowrap;color:var(--text);}
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:#aaa;}
+
+    /* Card */
+    .card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.5rem 1.2rem 1.3rem;
+      position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;margin-bottom:1.2rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--yellow),var(--day-dark));}
+    .mission-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .mission-title{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;line-height:1.3;}
+    .objectif-box{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.6rem .85rem;margin-bottom:1rem;font-size:.88rem;color:var(--text);line-height:1.7;}
+    .objectif-box strong{color:var(--day-dark);}
+    .consigne{font-size:.95rem;color:var(--text);margin-bottom:1rem;line-height:1.7;}
+
+    /* Phrases */
+    .phrase-list{list-style:none;margin-bottom:1.1rem;}
+    .phrase-list li{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+      padding:.6rem .9rem;margin-bottom:.5rem;font-size:.95rem;line-height:1.6;color:var(--text);}
+    .phrase-list li strong{font-family:'JetBrains Mono',monospace;color:var(--day-dark);margin-right:.3rem;}
+
+    /* QCM boutons */
+    .qcm-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;}
+    .qcm-btn{padding:.5rem 1.1rem;border-radius:8px;border:2px solid var(--border);
+      background:var(--surface);font-size:.92rem;font-weight:700;cursor:pointer;
+      font-family:Arial,sans-serif;color:var(--text);transition:all .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .qcm-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .qcm-btn.selected{background:var(--day-color);color:#fff;border-color:var(--day-color);}
+    .qcm-btn.ok-btn{background:#d4edda;color:#1a4d0d;border-color:var(--green);}
+    .qcm-btn.ko-btn{background:#ffe0de;color:#8b1a1a;border-color:var(--pink);text-decoration:line-through;}
+    .qcm-btn:disabled{cursor:default;opacity:.75;}
+
+    /* Saisie libre */
+    .q-label{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.4rem;margin-top:.7rem;}
+    .free-input{width:100%;border:2px solid var(--border);border-radius:10px;
+      padding:.6rem .8rem;font-size:.95rem;font-family:Arial,sans-serif;color:var(--text);
+      background:var(--bg);resize:vertical;min-height:2.8rem;
+      transition:border-color .15s;outline:none;}
+    .free-input:focus{border-color:var(--day-color);}
+    .free-input:disabled{background:#f0ede8;color:var(--muted);}
+
+    /* Tableau M2 */
+    .m2-phrase-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;
+      padding:.85rem 1rem;margin-bottom:1rem;}
+    .m2-phrase-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .m2-phrase-text{font-size:.97rem;color:var(--text);margin-bottom:.7rem;line-height:1.6;
+      background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:.5rem .75rem;}
+    .m2-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;}
+    .m2-field label{display:block;font-size:.72rem;font-weight:700;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.25rem;}
+    .m2-field input{width:100%;border:2px solid var(--border);border-radius:8px;
+      padding:.45rem .6rem;font-size:.88rem;font-family:Arial,sans-serif;color:var(--text);
+      background:var(--surface);outline:none;transition:border-color .15s;min-height:2.8rem;}
+    .m2-field input:focus{border-color:var(--day-color);}
+    .m2-field input:disabled{background:#f0ede8;color:var(--muted);}
+    .m2-field input.ok-field{background:#d4edda;border-color:var(--green);color:#1a4d0d;font-weight:700;}
+    .m2-field input.ko-field{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;}
+
+    .qcm-col{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.8rem;}
+    .qcm-col-btn{text-align:left;white-space:normal;line-height:1.5;padding:.55rem .9rem;}
+    .field-fb{font-size:.75rem;font-family:'JetBrains Mono',monospace;margin-top:.2rem;
+      display:none;line-height:1.5;}
+    .field-fb.show{display:block;}
+    .field-fb.ok-fb{color:#1a4d0d;}
+    .field-fb.ko-fb{color:#8b1a1a;}
+
+    /* À retenir */
+    .retenir-box{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.7rem .9rem;margin-top:.8rem;font-size:.88rem;line-height:1.8;color:var(--text);}
+    .retenir-box strong{color:var(--day-dark);display:block;margin-bottom:.3rem;}
+
+    /* Boutons action */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:2;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+    .btn-sol{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+    .btn-sol:hover:not(:disabled){background:var(--day-light);}
+
+    /* Feedback global mission */
+    .feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;
+      display:none;align-items:flex-start;gap:.6rem;line-height:1.7;}
+    .feedback.show{display:flex;}
+    .feedback.ok {background:#f0faeb;border:1.5px solid var(--green);color:#1a4d0d;}
+    .feedback.ko {background:#fff0ef;border:1.5px solid var(--pink);color:#8b1a1a;}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#5a3e00;}
+    .feedback-icon{font-size:1.3rem;flex-shrink:0;line-height:1;}
+    .feedback-detail{font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.3rem;line-height:1.7;}
+    .feedback.ok  .feedback-detail{color:#1a4d0d;}
+    .feedback.ko  .feedback-detail{color:#8b1a1a;}
+    .feedback.mid .feedback-detail{color:#5a3e00;}
+
+    /* Résultats */
+    .results{width:100%;max-width:720px;text-align:center;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 1rem;letter-spacing:.2rem;}
+    .results-msg{color:var(--text);font-size:.95rem;margin-bottom:1.5rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:520px){
+      .m2-fields{grid-template-columns:1fr;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+      .qcm-row{gap:.4rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 2 &ndash; Jour 2</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">La PSR</span></h1>
+</header>
+
+<!-- Barre progression globale -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 14 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="cnt-ok">0</span>&nbsp;corrects</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="cnt-ko">0</span>&nbsp;erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cnt-rem">14</span>&nbsp;restants</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MISSION 1
+═══════════════════════════════════════ -->
+<div class="card" id="card-m1">
+  <div class="card-stripe"></div>
+  <div class="mission-label">Mission 1 / 2</div>
+  <div class="theme-badge">L&rsquo;intrus grammatical &nbsp;🧩</div>
+  <div class="mission-title">🧩 Mission 1 : L&rsquo;intrus grammatical</div>
+
+  <div class="objectif-box">
+    <strong>Objectif&nbsp;:</strong> distinguer une proposition subordonn&eacute;e relative d&rsquo;une autre proposition subordonn&eacute;e.
+  </div>
+
+  <p class="consigne">Parmi les phrases suivantes, trouve l&rsquo;intrus&nbsp;: la phrase qui <strong>ne contient pas</strong> de proposition subordonn&eacute;e relative.</p>
+
+  <ul class="phrase-list">
+    <li><strong>A.</strong> Le documentaire que nous avons vu hier &eacute;tait &eacute;mouvant.</li>
+    <li><strong>B.</strong> J&rsquo;esp&egrave;re que tu viendras demain.</li>
+    <li><strong>C.</strong> L&rsquo;homme qui est revenu a perdu sa place.</li>
+    <li><strong>D.</strong> Voici la maison o&ugrave; habite ma cousine.</li>
+  </ul>
+
+  <!-- Q1 : QCM -->
+  <div class="q-label">1. Quelle phrase est l&rsquo;intrus&nbsp;?</div>
+  <div class="qcm-row" id="qcm-row">
+    <button class="qcm-btn" id="btn-A" onclick="selectQCM('A')">A</button>
+    <button class="qcm-btn" id="btn-B" onclick="selectQCM('B')">B</button>
+    <button class="qcm-btn" id="btn-C" onclick="selectQCM('C')">C</button>
+    <button class="qcm-btn" id="btn-D" onclick="selectQCM('D')">D</button>
+  </div>
+
+  <!-- Q2 : QCM -->
+  <div class="q-label">2. Pourquoi la phrase B est-elle l&rsquo;intrus&nbsp;?</div>
+  <div class="qcm-col" id="qcm2-row">
+    <button class="qcm-btn qcm-col-btn" id="btn2-1" onclick="selectQCM2('1')">Parce qu&rsquo;elle ne contient pas de verbe conjugu&eacute;.</button>
+    <button class="qcm-btn qcm-col-btn" id="btn2-2" onclick="selectQCM2('2')">Parce que &laquo;&nbsp;que&nbsp;&raquo; introduit une compl&eacute;tive et non une relative&nbsp;: elle compl&egrave;te le verbe, pas un nom.</button>
+    <button class="qcm-btn qcm-col-btn" id="btn2-3" onclick="selectQCM2('3')">Parce que la proposition subordonn&eacute;e est plac&eacute;e en d&eacute;but de phrase.</button>
+    <button class="qcm-btn qcm-col-btn" id="btn2-4" onclick="selectQCM2('4')">Parce qu&rsquo;elle ne contient pas de pronom relatif visible.</button>
+  </div>
+
+  <div class="btn-row" id="m1-row1">
+    <button class="btn btn-primary" id="m1-btn-verif" onclick="verifierM1()">&#10003;&nbsp;V&eacute;rifier</button>
+    <button class="btn btn-ghost" onclick="resetM1()">&#10005;&nbsp;Effacer</button>
+  </div>
+  <div class="btn-row" id="m1-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetM1()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solM1()">Voir la solution</button>
+  </div>
+
+  <div class="feedback" id="fb-m1">
+    <span class="feedback-icon" id="fb-m1-icon"></span>
+    <div>
+      <div id="fb-m1-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-m1-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MISSION 2
+═══════════════════════════════════════ -->
+<div class="card" id="card-m2">
+  <div class="card-stripe"></div>
+  <div class="mission-label">Mission 2 / 2</div>
+  <div class="theme-badge">Repérer la PSR &nbsp;🎯</div>
+  <div class="mission-title">🎯 Mission 2 : Repérer la PSR et son fonctionnement</div>
+
+  <div class="objectif-box">
+    <strong>Objectif&nbsp;:</strong> identifier la PSR, l&rsquo;ant&eacute;c&eacute;dent et le pronom relatif.
+  </div>
+
+  <p class="consigne">Pour chaque phrase : repère la PSR, donne l&rsquo;ant&eacute;c&eacute;dent et indique le pronom relatif.</p>
+
+  <!-- Phrase A -->
+  <div class="m2-phrase-card">
+    <div class="m2-phrase-label">Phrase A</div>
+    <div class="m2-phrase-text">Le cahier que j&rsquo;ai perdu est retrouv&eacute;.</div>
+    <div class="m2-fields">
+      <div class="m2-field">
+        <label>PSR</label>
+        <input type="text" id="a-psr" placeholder="la PSR..."/>
+        <div class="field-fb" id="fb-a-psr"></div>
+      </div>
+      <div class="m2-field">
+        <label>Ant&eacute;c&eacute;dent</label>
+        <input type="text" id="a-ant" placeholder="l'antécédent..."/>
+        <div class="field-fb" id="fb-a-ant"></div>
+      </div>
+      <div class="m2-field">
+        <label>Pronom relatif</label>
+        <input type="text" id="a-pr" placeholder="le pronom..."/>
+        <div class="field-fb" id="fb-a-pr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phrase B -->
+  <div class="m2-phrase-card">
+    <div class="m2-phrase-label">Phrase B</div>
+    <div class="m2-phrase-text">Les &eacute;l&egrave;ves qui r&eacute;ussissent sont motiv&eacute;s.</div>
+    <div class="m2-fields">
+      <div class="m2-field">
+        <label>PSR</label>
+        <input type="text" id="b-psr" placeholder="la PSR..."/>
+        <div class="field-fb" id="fb-b-psr"></div>
+      </div>
+      <div class="m2-field">
+        <label>Ant&eacute;c&eacute;dent</label>
+        <input type="text" id="b-ant" placeholder="l'antécédent..."/>
+        <div class="field-fb" id="fb-b-ant"></div>
+      </div>
+      <div class="m2-field">
+        <label>Pronom relatif</label>
+        <input type="text" id="b-pr" placeholder="le pronom..."/>
+        <div class="field-fb" id="fb-b-pr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phrase C -->
+  <div class="m2-phrase-card">
+    <div class="m2-phrase-label">Phrase C</div>
+    <div class="m2-phrase-text">La ville o&ugrave; je suis n&eacute; est grande.</div>
+    <div class="m2-fields">
+      <div class="m2-field">
+        <label>PSR</label>
+        <input type="text" id="c-psr" placeholder="la PSR..."/>
+        <div class="field-fb" id="fb-c-psr"></div>
+      </div>
+      <div class="m2-field">
+        <label>Ant&eacute;c&eacute;dent</label>
+        <input type="text" id="c-ant" placeholder="l'antécédent..."/>
+        <div class="field-fb" id="fb-c-ant"></div>
+      </div>
+      <div class="m2-field">
+        <label>Pronom relatif</label>
+        <input type="text" id="c-pr" placeholder="le pronom..."/>
+        <div class="field-fb" id="fb-c-pr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phrase D -->
+  <div class="m2-phrase-card">
+    <div class="m2-phrase-label">Phrase D</div>
+    <div class="m2-phrase-text">Le livre dont je parle est int&eacute;ressant.</div>
+    <div class="m2-fields">
+      <div class="m2-field">
+        <label>PSR</label>
+        <input type="text" id="d-psr" placeholder="la PSR..."/>
+        <div class="field-fb" id="fb-d-psr"></div>
+      </div>
+      <div class="m2-field">
+        <label>Ant&eacute;c&eacute;dent</label>
+        <input type="text" id="d-ant" placeholder="l'antécédent..."/>
+        <div class="field-fb" id="fb-d-ant"></div>
+      </div>
+      <div class="m2-field">
+        <label>Pronom relatif</label>
+        <input type="text" id="d-pr" placeholder="le pronom..."/>
+        <div class="field-fb" id="fb-d-pr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- À retenir -->
+  <div class="retenir-box">
+    <strong>🔍 À retenir</strong>
+    ► La PSR compl&egrave;te un nom.<br/>
+    ► Elle commence par un pronom relatif.<br/>
+    ► Elle peut &ecirc;tre supprim&eacute;e sans casser la phrase principale.
+  </div>
+
+  <div class="btn-row" id="m2-row1">
+    <button class="btn btn-primary" id="m2-btn-verif" onclick="verifierM2()">&#10003;&nbsp;V&eacute;rifier</button>
+    <button class="btn btn-ghost" onclick="resetM2()">&#10005;&nbsp;Effacer</button>
+  </div>
+  <div class="btn-row" id="m2-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetM2()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solM2()">Voir la solution</button>
+  </div>
+
+  <div class="feedback" id="fb-m2">
+    <span class="feedback-icon" id="fb-m2-icon"></span>
+    <div>
+      <div id="fb-m2-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-m2-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Résultats globaux -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/14</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <button class="btn btn-primary" onclick="resetAll()" style="margin:0 auto;display:flex;">Recommencer tout</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   ÉTAT GLOBAL
+═══════════════════════════════════════════ */
+var doneM1 = false;
+var doneM2 = false;
+var scoreM1 = 0;
+var scoreM2 = 0;
+var selectedQCM = '';
+var selectedQCM2 = '';
+
+/* ═══════════════════════════════════════════
+   NORMALISATION
+═══════════════════════════════════════════ */
+function norm(s){
+  return s.trim().toLowerCase()
+    .replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e')
+    .replace(/[îï]/g,'i').replace(/[ôö]/g,'o')
+    .replace(/[ùûü]/g,'u').replace(/ç/g,'c')
+    .replace(/['']/g,"'").replace(/\s+/g,' ');
+}
+
+/* ═══════════════════════════════════════════
+   CORRIGES
+═══════════════════════════════════════════ */
+var M2 = {
+  a:{ psr:['que j\'ai perdu',"que j'ai perdu"], ant:['le cahier'], pr:['que'] },
+  b:{ psr:['qui reussissent','qui réussissent'], ant:['les eleves','les élèves'], pr:['qui'] },
+  c:{ psr:['ou je suis ne','où je suis né'], ant:['la ville'], pr:['ou','où'] },
+  d:{ psr:['dont je parle'], ant:['le livre'], pr:['dont'] }
+};
+
+function checkField(val, accepted){
+  var n = norm(val);
+  for(var i=0;i<accepted.length;i++){
+    if(n===norm(accepted[i])) return true;
+  }
+  return false;
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESSION GLOBALE
+═══════════════════════════════════════════ */
+function updateGlobal(){
+  var total = 14;
+  var ok = scoreM1 + scoreM2;
+  var pct = Math.round(ok/total*100);
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = ok+' / '+total+' points';
+  document.getElementById('prog-pct').textContent = pct+'\u00a0%';
+  var ko = (doneM1?2-scoreM1:0)+(doneM2?12-scoreM2:0);
+  var rem = (doneM1?0:2)+(doneM2?0:12);
+  document.getElementById('cnt-ok').textContent  = ok;
+  document.getElementById('cnt-ko').textContent  = ko;
+  document.getElementById('cnt-rem').textContent = rem;
+  if(doneM1 && doneM2){
+    afficherResultats(ok, total);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   MISSION 1
+═══════════════════════════════════════════ */
+function selectQCM(choice){
+  if(doneM1) return;
+  selectedQCM = choice;
+  ['A','B','C','D'].forEach(function(l){
+    var b = document.getElementById('btn-'+l);
+    b.classList.toggle('selected', l===choice);
+  });
+}
+
+function selectQCM2(choice){
+  if(doneM1) return;
+  selectedQCM2 = choice;
+  ['1','2','3','4'].forEach(function(n){
+    var b = document.getElementById('btn2-'+n);
+    b.classList.toggle('selected', n===choice);
+  });
+}
+
+function verifierM1(){
+  if(doneM1) return;
+  doneM1 = true;
+  document.getElementById('m1-btn-verif').disabled = true;
+  ['A','B','C','D'].forEach(function(l){
+    document.getElementById('btn-'+l).disabled = true;
+  });
+  ['1','2','3','4'].forEach(function(n){
+    document.getElementById('btn2-'+n).disabled = true;
+  });
+
+  var q1ok = selectedQCM === 'B';
+  var q2ok = selectedQCM2 === '2';
+  scoreM1 = (q1ok ? 1 : 0) + (q2ok ? 1 : 0);
+
+  /* Colorer QCM Q1 */
+  ['A','B','C','D'].forEach(function(l){
+    var b = document.getElementById('btn-'+l);
+    if(l==='B'){ b.classList.add('ok-btn'); }
+    else if(l===selectedQCM && !q1ok){ b.classList.add('ko-btn'); }
+  });
+
+  /* Colorer QCM Q2 */
+  ['1','2','3','4'].forEach(function(n){
+    var b = document.getElementById('btn2-'+n);
+    if(n==='2'){ b.classList.add('ok-btn'); }
+    else if(n===selectedQCM2 && !q2ok){ b.classList.add('ko-btn'); }
+  });
+
+  /* Construire feedback */
+  var fbParts = [];
+  if(!q1ok){
+    var expl = {
+      'A':'La phrase A contient bien une PSR\u00a0: \u00ab\u00a0que nous avons vu hier\u00a0\u00bb compl\u00e8te le nom \u00ab\u00a0documentaire\u00a0\u00bb.',
+      'C':'La phrase C contient bien une PSR\u00a0: \u00ab\u00a0qui est revenu\u00a0\u00bb compl\u00e8te le nom \u00ab\u00a0homme\u00a0\u00bb.',
+      'D':'La phrase D contient bien une PSR\u00a0: \u00ab\u00a0o\u00f9 habite ma cousine\u00a0\u00bb compl\u00e8te le nom \u00ab\u00a0maison\u00a0\u00bb.'
+    };
+    if(selectedQCM && expl[selectedQCM]) fbParts.push(expl[selectedQCM]);
+    fbParts.push('\u2705 Q1\u00a0\u2014 Bonne r\u00e9ponse\u00a0: <strong>B</strong>. Dans cette phrase, la proposition compl\u00e8te le verbe esp\u00e8re, pas un nom.');
+  }
+  if(!q2ok){
+    var expl2 = {
+      '1':'\u00ab\u00a0que tu viendras demain\u00a0\u00bb contient bien un verbe conjugu\u00e9 (\u00ab\u00a0viendras\u00a0\u00bb).',
+      '3':'La position de la proposition n\u2019est pas le crit\u00e8re qui d\u00e9finit une compl\u00e9tive ou une relative.',
+      '4':'\u00ab\u00a0que\u00a0\u00bb est bien visible dans la phrase B, mais il fonctionne ici comme conjonction de subordination, pas comme pronom relatif.'
+    };
+    if(selectedQCM2 && expl2[selectedQCM2]) fbParts.push(expl2[selectedQCM2]);
+    fbParts.push('\u2705 Q2\u00a0\u2014 Bonne r\u00e9ponse\u00a0: \u00ab\u00a0que\u00a0\u00bb introduit une <strong>compl\u00e9tive</strong> (compl\u00e8te le verbe esp\u00e8re), pas une relative (qui compl\u00e8terait un nom).');
+  }
+
+  var cls = scoreM1===2 ? 'ok' : scoreM1===1 ? 'mid' : 'ko';
+  var ico = scoreM1===2 ? '&#10003;' : scoreM1===1 ? '\u2191' : '!';
+  var msg = scoreM1===2 ? 'Parfait\u00a0! Tu ma\u00eettrises la distinction.' : scoreM1===1 ? 'Presque\u00a0! Un point \u00e0 affiner.' : 'Relis le corrig\u00e9 et r\u00e9essaie\u00a0!';
+
+  showFeedback('fb-m1', cls, ico, msg, fbParts.join('<br>'));
+  document.getElementById('m1-row1').style.display = 'none';
+  document.getElementById('m1-row2').style.display = 'flex';
+  updateGlobal();
+}
+
+function solM1(){
+  document.getElementById('btn-B').classList.remove('selected');
+  document.getElementById('btn-B').classList.add('ok-btn');
+  document.getElementById('btn2-2').classList.remove('selected');
+  document.getElementById('btn2-2').classList.add('ok-btn');
+}
+
+function resetM1(){
+  doneM1 = false; scoreM1 = 0; selectedQCM = ''; selectedQCM2 = '';
+  ['A','B','C','D'].forEach(function(l){
+    var b = document.getElementById('btn-'+l);
+    b.className = 'qcm-btn'; b.disabled = false;
+  });
+  ['1','2','3','4'].forEach(function(n){
+    var b = document.getElementById('btn2-'+n);
+    b.className = 'qcm-btn qcm-col-btn'; b.disabled = false;
+  });
+  document.getElementById('m1-btn-verif').disabled = false;
+  document.getElementById('m1-row1').style.display = 'flex';
+  document.getElementById('m1-row2').style.display = 'none';
+  document.getElementById('fb-m1').className = 'feedback';
+  updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   MISSION 2
+═══════════════════════════════════════════ */
+var M2_FIELDS = [
+  {id:'a-psr', key:'a', sub:'psr', label:'PSR de A'},
+  {id:'a-ant', key:'a', sub:'ant', label:'Ant\u00e9c\u00e9dent de A'},
+  {id:'a-pr',  key:'a', sub:'pr',  label:'Pronom relatif de A'},
+  {id:'b-psr', key:'b', sub:'psr', label:'PSR de B'},
+  {id:'b-ant', key:'b', sub:'ant', label:'Ant\u00e9c\u00e9dent de B'},
+  {id:'b-pr',  key:'b', sub:'pr',  label:'Pronom relatif de B'},
+  {id:'c-psr', key:'c', sub:'psr', label:'PSR de C'},
+  {id:'c-ant', key:'c', sub:'ant', label:'Ant\u00e9c\u00e9dent de C'},
+  {id:'c-pr',  key:'c', sub:'pr',  label:'Pronom relatif de C'},
+  {id:'d-psr', key:'d', sub:'psr', label:'PSR de D'},
+  {id:'d-ant', key:'d', sub:'ant', label:'Ant\u00e9c\u00e9dent de D'},
+  {id:'d-pr',  key:'d', sub:'pr',  label:'Pronom relatif de D'}
+];
+
+var CORRIGES_DISPLAY = {
+  a:{ psr:'que j\u2019ai perdu', ant:'le cahier', pr:'que' },
+  b:{ psr:'qui r\u00e9ussissent', ant:'les \u00e9l\u00e8ves', pr:'qui' },
+  c:{ psr:'o\u00f9 je suis n\u00e9', ant:'la ville', pr:'o\u00f9' },
+  d:{ psr:'dont je parle', ant:'le livre', pr:'dont' }
+};
+
+function verifierM2(){
+  if(doneM2) return;
+  doneM2 = true;
+  document.getElementById('m2-btn-verif').disabled = true;
+  var ok=0, ko=0;
+  M2_FIELDS.forEach(function(f){
+    var inp = document.getElementById(f.id);
+    var fbEl = document.getElementById('fb-'+f.id);
+    inp.disabled = true;
+    var correct = checkField(inp.value, M2[f.key][f.sub]);
+    var corr = CORRIGES_DISPLAY[f.key][f.sub];
+    if(correct){
+      inp.classList.add('ok-field');
+      fbEl.className = 'field-fb show ok-fb';
+      fbEl.textContent = '\u2713 Correct.';
+      ok++;
+    } else {
+      inp.classList.add('ko-field');
+      fbEl.className = 'field-fb show ko-fb';
+      fbEl.textContent = '\u2192 R\u00e9ponse attendue\u00a0: ' + corr;
+      ko++;
+    }
+  });
+  scoreM2 = ok;
+  var pct = ok/12*100;
+  var cls, ico, msg;
+  if(pct>=92)     { cls='ok';  ico='&#10003;'; msg='Parfait\u00a0! Toutes les PSR sont identifi\u00e9es.'; }
+  else if(pct>=58){ cls='mid'; ico='\u2191';   msg='Bon travail\u00a0! Consulte les corrections en rouge.'; }
+  else if(pct>=25){ cls='mid'; ico='\u2192';   msg='Tu progresseras ! V\u00e9rifie bien chaque champ.'; }
+  else            { cls='ko';  ico='!';         msg='\u00c0 retravailler\u00a0: relis la le\u00e7on et r\u00e9essaie.'; }
+  showFeedback('fb-m2', cls, ico, msg, ok+' / 12 champs corrects.');
+  document.getElementById('m2-row1').style.display = 'none';
+  document.getElementById('m2-row2').style.display = 'flex';
+  updateGlobal();
+}
+
+function solM2(){
+  M2_FIELDS.forEach(function(f){
+    var inp = document.getElementById(f.id);
+    inp.value = CORRIGES_DISPLAY[f.key][f.sub];
+    inp.classList.remove('ko-field');
+    inp.classList.add('ok-field');
+  });
+}
+
+function resetM2(){
+  doneM2 = false; scoreM2 = 0;
+  M2_FIELDS.forEach(function(f){
+    var inp = document.getElementById(f.id);
+    inp.value=''; inp.disabled=false;
+    inp.className='';
+    var fbEl = document.getElementById('fb-'+f.id);
+    fbEl.className='field-fb'; fbEl.textContent='';
+  });
+  document.getElementById('m2-btn-verif').disabled = false;
+  document.getElementById('m2-row1').style.display = 'flex';
+  document.getElementById('m2-row2').style.display = 'none';
+  document.getElementById('fb-m2').className = 'feedback';
+  updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   HELPER FEEDBACK
+═══════════════════════════════════════════ */
+function showFeedback(id, cls, ico, msg, detail){
+  var fb = document.getElementById(id);
+  fb.className = 'feedback show '+cls;
+  document.getElementById(id+'-icon').innerHTML = ico;
+  document.getElementById(id+'-msg').textContent = msg;
+  var det = document.getElementById(id+'-detail');
+  det.innerHTML = detail;
+}
+
+/* ═══════════════════════════════════════════
+   RÉSULTATS GLOBAUX
+═══════════════════════════════════════════ */
+function afficherResultats(score, total){
+  var rs = document.getElementById('results-screen');
+  rs.classList.add('show');
+  document.getElementById('score-num').textContent = score;
+  var pct = score/total*100;
+  var stars = pct>=93?5 : pct>=71?4 : pct>=50?3 : pct>=29?2 : 1;
+  document.getElementById('stars-row').textContent = '\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msgs = [
+    '\u00c0 retravailler\u00a0\u2014 revois la le\u00e7on\u00a0!',
+    '\u00c0 retravailler\u00a0\u2014 revois la le\u00e7on\u00a0!',
+    '\u00c0 retravailler\u00a0\u2014 revois la le\u00e7on\u00a0!',
+    '\u00c0 retravailler\u00a0\u2014 revois la le\u00e7on\u00a0!',
+    'Courage\u00a0\u2014 tu progresses\u00a0!',
+    'Courage\u00a0\u2014 tu progresses\u00a0!',
+    'Pas mal\u00a0\u2014 continue\u00a0!',
+    'Pas mal\u00a0\u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait\u00a0\u2014 mission accomplie\u00a0!'
+  ];
+  document.getElementById('results-msg').textContent = msgs[Math.min(score, msgs.length-1)];
+}
+
+function resetAll(){
+  document.getElementById('results-screen').classList.remove('show');
+  resetM1(); resetM2();
+}
+</script>
+</body>
+</html>
