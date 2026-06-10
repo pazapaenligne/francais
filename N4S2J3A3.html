@@ -714,29 +714,20 @@ function suivant(){
 }
 
 /* ── FINIR ── */
+let noteSur10Finale = 0;
 function finir(){
   stopChrono();
   $('mainCard').style.display='none';
   const totalBrut=scoresParPhrase.reduce((a,b)=>a+(b?.ptsBruts||0),0);
   const note=Math.round(totalBrut/SCORE_MAX_BRUT*100)/10;
-  const noteSur10=Math.min(10,Math.round(note*10)/10);
-  // Tampon
-  setTimeout(()=>{
-    const allOk=noteSur10>=8;
-    const stamp=$('stamp'); if(stamp) stamp.classList.toggle('on', allOk);
-    const stampFail=$('stamp-fail'); if(stampFail) stampFail.classList.toggle('on', !allOk);
-    playTampon();
-  }, 800);
-  // Bonus
+  noteSur10Finale=Math.min(10,Math.round(note*10)/10);
+  // Bonus seulement — tampon et résultats viendront après validerBonus
   $('bonusCard').style.display='block';
   setTimeout(()=>$('bonusCard').scrollIntoView({behavior:'smooth',block:'start'}),400);
-  // Laisser le temps de lire le tampon + le feedback avant les résultats
-  setTimeout(()=>showResults(noteSur10), 5000);
 }
 
 function showResults(note){
   $('r-score').textContent=note%1===0?note:note.toFixed(1);
-  // Afficher le temps
   const timeEl=document.getElementById('r-time');
   if(timeEl) timeEl.textContent='⏱️ Temps : '+fmtChrono();
   const st=note>=9?5:note>=7?4:note>=5?3:note>=3?2:1;
@@ -753,7 +744,28 @@ function showResults(note){
     recap.appendChild(d);
   });
   $('resultsScreen').classList.add('show');
+  setTimeout(()=>$('resultsScreen').scrollIntoView({behavior:'smooth',block:'start'}),300);
   updateGlobal();
+}
+
+/* ── BONUS ── */
+function validerBonus(){
+  if(!$('bonusInput').value.trim()){
+    $('bonusInput').style.borderColor='var(--rouge)'; return;
+  }
+  $('bonusReponse').classList.add('show');
+  document.querySelector('.bonus-valider').disabled=true;
+  // Tampon + son après lecture de la réponse modèle
+  setTimeout(()=>{
+    const allOk=noteSur10Finale>=8;
+    const stamp=$('stamp'); if(stamp) stamp.classList.toggle('on', allOk);
+    const stampFail=$('stamp-fail'); if(stampFail) stampFail.classList.toggle('on', !allOk);
+    playTampon();
+    const board=document.getElementById('board');
+    if(board) board.scrollIntoView({behavior:'smooth',block:'center'});
+  }, 600);
+  // Résultats 3s après (temps de voir le tampon)
+  setTimeout(()=>showResults(noteSur10Finale), 3500);
 }
 
 /* ── BONUS ── */
