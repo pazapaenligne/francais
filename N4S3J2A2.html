@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S3 J2 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#b94040;--day-dark:#7a1f1f;--day-dark2:#4a1010;
+  --day-light:#f7eded;--day-border:#e8b0b0;--day-glow:rgba(185,64,64,.25);
+  --day-color:#b94040;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#fdf7f7;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--blue-dark:#1a6e88;--blue-light:#e8f6fb;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:760px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--day);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--blue);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.4rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.3rem;}
+h1{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* Progression */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.73rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* Référentiel */
+.ref{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;
+  box-shadow:0 3px 14px rgba(0,0,0,.06);position:relative;z-index:1;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.ref-head{padding:.85rem 1.2rem;background:var(--day-light);}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.12em;}
+.ref-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;padding:.8rem 1.1rem 1rem;}
+@media(max-width:580px){.ref-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:360px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.75rem .9rem;}
+.ref-cell-title{font-size:.92rem;font-weight:900;margin-bottom:.35rem;}
+.ref-cell-desc{font-size:.82rem;color:var(--muted);line-height:1.6;}
+
+/* ══ CARD ══ */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.card-body{padding:1.1rem 1.2rem 0;}
+.act-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.68rem;font-weight:800;
+  padding:.18rem .65rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.6rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.act-title{font-size:clamp(1rem,3vw,1.1rem);font-weight:900;color:var(--text);margin-bottom:.2rem;}
+.act-consigne{font-size:.87rem;color:var(--muted);margin-bottom:.85rem;line-height:1.6;}
+
+/* ══ ACT1 : DRAG-DROP ══ */
+.pool{display:flex;flex-wrap:wrap;gap:.45rem;padding:.65rem;min-height:48px;
+  background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:var(--radius-sm);
+  margin-bottom:.85rem;transition:background .15s,border-color .15s;}
+.pool.drag-over{background:var(--day-light);border-color:var(--day-dark);}
+.cols4{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.7rem;}
+@media(max-width:600px){.cols4{grid-template-columns:1fr 1fr;}}
+@media(max-width:380px){.cols4{grid-template-columns:1fr;}}
+.col4{border-radius:var(--radius-sm);overflow:hidden;}
+.col4-head{padding:.45rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  font-weight:900;text-transform:uppercase;letter-spacing:.06em;text-align:center;}
+.col-etat  .col4-head{background:#1a6e88;color:#fff;}
+.col-td    .col4-head{background:#3d7a10;color:#fff;}
+.col-ti    .col4-head{background:#8a5200;color:#fff;}
+.col-int   .col4-head{background:#7a1f1f;color:#fff;}
+.col4-body{min-height:80px;padding:.4rem;display:flex;flex-direction:column;gap:.35rem;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  transition:background .15s,border-color .15s;}
+.col4-body.drag-over{background:var(--day-light);border-color:var(--day-dark);}
+
+/* Cartes phrases */
+.pcard{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;
+  padding:.38rem .7rem;font-size:.84rem;font-weight:600;cursor:grab;
+  user-select:none;-webkit-user-select:none;touch-action:none;line-height:1.5;
+  transition:border-color .15s,background .15s,transform .1s;}
+.pcard .num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);
+  font-weight:700;margin-right:.3rem;}
+.pcard:active{cursor:grabbing;}
+.pcard.dragging{opacity:.4;}
+.pcard.ghost{opacity:.3;border-style:dashed;}
+.pcard.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);cursor:default;}
+.pcard.ko{border-color:var(--pink-dark);background:var(--pink-light);color:var(--pink-dark);
+  animation:wShake .35s ease;cursor:default;}
+.pcard-fb{font-size:.75rem;color:var(--pink-dark);margin-top:.25rem;display:none;line-height:1.5;
+  font-style:italic;font-weight:400;}
+.pcard.ko .pcard-fb{display:block;}
+@keyframes wShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+/* ══ ACT2 ══ */
+.q2-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:.75rem .9rem;margin-bottom:.55rem;transition:border-color .2s;}
+.q2-item.ok{border-color:var(--green);background:var(--green-light);}
+.q2-item.ko{border-color:var(--pink-dark);background:var(--pink-light);}
+.q2-num{font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.35rem;}
+.q2-phrase{font-size:clamp(.9rem,2.4vw,.97rem);font-weight:700;color:var(--text);
+  line-height:1.7;margin-bottom:.5rem;font-style:italic;}
+.q2-selects{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+@media(max-width:440px){.q2-selects{grid-template-columns:1fr;}}
+.q2-label{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.2rem;}
+.q2-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:.45rem .7rem;font-size:.88rem;font-family:Arial,sans-serif;
+  color:var(--text);font-weight:600;cursor:pointer;min-height:40px;width:100%;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a1f1f' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;padding-right:2rem;
+  transition:border-color .15s;}
+.q2-sel:focus{outline:none;border-color:var(--day-dark);box-shadow:0 0 0 3px var(--day-glow);}
+.q2-sel.ok{border-color:var(--green);background-color:var(--green-light);color:var(--green-dark);}
+.q2-sel.ko{border-color:var(--pink-dark);background-color:var(--pink-light);color:var(--pink-dark);}
+.q2-sel:disabled{cursor:default;opacity:.85;}
+.q2-fb{font-size:.78rem;color:var(--pink-dark);margin-top:.35rem;display:none;line-height:1.6;font-style:italic;}
+.q2-item.ko .q2-fb{display:block;}
+.q2-expl{font-size:.78rem;color:var(--green-dark);margin-top:.3rem;display:none;line-height:1.6;}
+.q2-item.ok .q2-expl{display:block;}
+
+/* Feedback global + boutons */
+.fb-g{padding:.8rem 1rem;border-radius:var(--radius-sm);font-size:.9rem;
+  display:none;line-height:1.8;margin:.2rem 1.2rem .7rem;}
+.fb-g.show{display:block;animation:fadeUp .3s ease;}
+.fb-g.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-g.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-g.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.2rem 1.2rem 0;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.4vw,.95rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* Résultats */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.07);text-align:center;
+  position:relative;overflow:hidden;margin-bottom:1rem;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.score-big{font-size:clamp(2.4rem,8vw,3.6rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day-dark);}
+.stars{font-size:1.7rem;margin:.35rem 0 .7rem;letter-spacing:.1em;}
+.rmsg{color:var(--muted);font-size:clamp(.87rem,2.4vw,.98rem);margin-bottom:1rem;line-height:1.8;}
+.rappel{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;text-align:left;font-size:.83rem;line-height:1.85;margin-bottom:1rem;color:var(--day-dark2);}
+.rappel strong{color:var(--day-dark);}
+
+/* Verrou Act2 */
+.locked{opacity:.5;filter:grayscale(.4);}
+.locked select,.locked button{pointer-events:none;}
+.unlock-banner{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.85rem;color:var(--day-dark2);
+  text-align:center;margin-bottom:.5rem;font-weight:600;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card-body{padding:.9rem .9rem 0;}.btn-row{margin:.2rem .9rem 0;}
+  .fb-g{margin:.2rem .9rem .7rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 3 – Jour 2</div>
+  <h1>Je m'entraîne · <span class="hl">Les verbes</span></h1>
+</header>
+
+<!-- Progression globale -->
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 28 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> point(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">28</span> restant(s)</div>
+</div>
+
+<!-- Référentiel permanent -->
+<div class="ref">
+  <div class="ref-stripe"></div>
+  <div class="ref-head">
+    <div class="ref-title">&#128218;&nbsp;Référentiel — Les quatre types de verbes</div>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-title" style="color:#1a6e88;">Verbe d'état</div>
+      <div class="ref-cell-desc">être, paraître, sembler, devenir, rester, avoir l'air, passer pour → suivi d'un <em>attribut du sujet</em>.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-title" style="color:#3d7a10;">Transitif direct (TD)</div>
+      <div class="ref-cell-desc">verbe + COD <em>sans préposition</em>. Test : « quoi ? » ou « qui ? » après le verbe.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-title" style="color:#8a5200;">Transitif indirect (TI)</div>
+      <div class="ref-cell-desc">verbe + COI <em>avec préposition</em> (à, de…). Test : « à qui ? », « de quoi ? »</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-title" style="color:#7a1f1f;">Intransitif (INT)</div>
+      <div class="ref-cell-desc">verbe <em>sans complément d'objet</em>. Les CC (lieu, temps…) ne comptent pas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ACT 1 ══ -->
+<div class="card" id="card1">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#127993;&nbsp;Activité 1 / 2</div>
+    <div class="act-title">Classe les phrases dans la bonne colonne.</div>
+    <div class="act-consigne">Glisse chaque phrase dans la colonne qui correspond au type de son verbe principal.</div>
+    <div class="pool" id="pool1"
+      ondragover="onDragOver(event,'pool1')" ondragleave="onDragLeave('pool1')" ondrop="onDrop(event,'pool1')"></div>
+    <div class="cols4">
+      <div class="col4 col-etat">
+        <div class="col4-head">Verbe d'état</div>
+        <div class="col4-body" id="z-etat"
+          ondragover="onDragOver(event,'z-etat')" ondragleave="onDragLeave('z-etat')" ondrop="onDrop(event,'z-etat')"></div>
+      </div>
+      <div class="col4 col-td">
+        <div class="col4-head">TD</div>
+        <div class="col4-body" id="z-td"
+          ondragover="onDragOver(event,'z-td')" ondragleave="onDragLeave('z-td')" ondrop="onDrop(event,'z-td')"></div>
+      </div>
+      <div class="col4 col-ti">
+        <div class="col4-head">TI</div>
+        <div class="col4-body" id="z-ti"
+          ondragover="onDragOver(event,'z-ti')" ondragleave="onDragLeave('z-ti')" ondrop="onDrop(event,'z-ti')"></div>
+      </div>
+      <div class="col4 col-int">
+        <div class="col4-head">Intransitif</div>
+        <div class="col4-body" id="z-int"
+          ondragover="onDragOver(event,'z-int')" ondragleave="onDragLeave('z-int')" ondrop="onDrop(event,'z-int')"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fb-g" id="fb1"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v1" onclick="verif1()" disabled>&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-g" onclick="reset1()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+
+<!-- ══ ACT 2 ══ -->
+<div class="card" id="card2">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#9889;&nbsp;Activité 2 / 2</div>
+    <div class="act-title">Identifie la nature du verbe et nomme le complément.</div>
+    <div class="act-consigne">Pour chaque phrase : choisis la nature du verbe, puis nomme le complément ou l'attribut.</div>
+    <div id="list2"></div>
+  </div>
+  <div class="fb-g" id="fb2"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v2" onclick="verif2()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-g" onclick="reset2()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--yellow);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.55rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/28</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="rappel">
+      <strong>&#128161;&nbsp;À retenir :</strong> Pour analyser un verbe, observe toujours ce qui le suit : un <strong>attribut</strong> (verbe d'état), un <strong>COD sans préposition</strong> (TD), un <strong>COI avec préposition</strong> (TI), ou <strong>rien</strong> (intransitif).
+    </div>
+    <button class="btn btn-p" onclick="resetAll()" style="width:100%;justify-content:center;">&#8635;&nbsp;Tout recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+/* ══ DONNÉES ACT1 ══ */
+var D1 = [
+  {id:1,  ph:'Le paysage semble d\u00e9sert.',               cat:'etat', fb:'Repère l\u2019attribut du sujet : il qualifie le sujet via un verbe d\u2019état (être, sembler, paraître, rester, devenir\u2026).'},
+  {id:2,  ph:'Le randonneur gravit la montagne.',             cat:'td',   fb:'Pose la question \u00ab\u00a0quoi\u00a0?\u00a0\u00bb après le verbe, sans préposition. Si tu trouves une réponse : c\u2019est un COD.'},
+  {id:3,  ph:'Elle réfléchit à cette proposition.',           cat:'ti',   fb:'Cherche une préposition (\u00e0, de\u2026) après le verbe. Si elle est là, c\u2019est un COI : le verbe est transitif indirect.'},
+  {id:4,  ph:'Le soleil brille intensément.',                 cat:'int',  fb:'Vérifie qu\u2019il n\u2019y a ni COD ni COI après le verbe. Les compléments circonstanciels (lieu, temps, manière) ne comptent pas.'},
+  {id:5,  ph:'Ils restent silencieux face à la nouvelle.',    cat:'etat', fb:'Repère l\u2019attribut du sujet : il qualifie le sujet via un verbe d\u2019état (être, sembler, paraître, rester, devenir\u2026).'},
+  {id:6,  ph:'Le chercheur publie ses résultats.',            cat:'td',   fb:'Pose la question \u00ab\u00a0quoi\u00a0?\u00a0\u00bb après le verbe, sans préposition. Si tu trouves une réponse : c\u2019est un COD.'},
+  {id:7,  ph:'Le directeur répond aux questions.',            cat:'ti',   fb:'Cherche une préposition (\u00e0, de\u2026) après le verbe. Si elle est là, c\u2019est un COI : le verbe est transitif indirect.'},
+  {id:8,  ph:'La tempête éclate soudainement.',               cat:'int',  fb:'Vérifie qu\u2019il n\u2019y a ni COD ni COI après le verbe. Les compléments circonstanciels (lieu, temps, manière) ne comptent pas.'},
+  {id:9,  ph:'Ce projet paraît ambitieux.',                   cat:'etat', fb:'Repère l\u2019attribut du sujet : il qualifie le sujet via un verbe d\u2019état (être, sembler, paraître, rester, devenir\u2026).'},
+  {id:10, ph:'Le guide conduit les visiteurs.',               cat:'td',   fb:'Pose la question \u00ab\u00a0quoi\u00a0?\u00a0\u00bb après le verbe, sans préposition. Si tu trouves une réponse : c\u2019est un COD.'},
+  {id:11, ph:'Il se plaint de la situation.',                 cat:'ti',   fb:'Cherche une préposition (\u00e0, de\u2026) après le verbe. Si elle est là, c\u2019est un COI : le verbe est transitif indirect.'},
+  {id:12, ph:'Les oiseaux migrent chaque automne.',           cat:'int',  fb:'Vérifie qu\u2019il n\u2019y a ni COD ni COI après le verbe. Les compléments circonstanciels (lieu, temps, manière) ne comptent pas.'}
+];
+
+/* ══ DONNÉES ACT2 ══ */
+var D2 = [
+  {id:1, ph:'La forêt devient dense à mesure qu\u2019on avance.', nat:'etat', compl:'dense',              expl:'Attribut du sujet : \u00ab\u00a0dense\u00a0\u00bb qualifie \u00ab\u00a0la forêt\u00a0\u00bb via le verbe d\u2019état \u00ab\u00a0devenir\u00a0\u00bb.'},
+  {id:2, ph:'Le scientifique analyse les données.',              nat:'td',   compl:'les donn\u00e9es',    expl:'COD : \u00ab\u00a0les données\u00a0\u00bb répond à \u00ab\u00a0analyser quoi\u00a0?\u00a0\u00bb sans préposition.'},
+  {id:3, ph:'Elle s\u2019intéresse aux sciences naturelles.',    nat:'ti',   compl:'aux sciences naturelles', expl:'COI : \u00ab\u00a0aux sciences naturelles\u00a0\u00bb avec la préposition \u00ab\u00a0à\u00a0\u00bb.'},
+  {id:4, ph:'Le torrent rugit dans la vallée.',                  nat:'int',  compl:'aucun',              expl:'\u00ab\u00a0Dans la vallée\u00a0\u00bb est un CC de lieu, pas un CO : le verbe est intransitif.'},
+  {id:5, ph:'Ce témoignage semble peu fiable.',                  nat:'etat', compl:'peu fiable',         expl:'Attribut du sujet : \u00ab\u00a0peu fiable\u00a0\u00bb qualifie \u00ab\u00a0ce témoignage\u00a0\u00bb via \u00ab\u00a0sembler\u00a0\u00bb.'},
+  {id:6, ph:'Le menuisier fabrique des meubles solides.',        nat:'td',   compl:'des meubles solides', expl:'COD : \u00ab\u00a0des meubles solides\u00a0\u00bb répond à \u00ab\u00a0fabriquer quoi\u00a0?\u00a0\u00bb.'},
+  {id:7, ph:'Ils renoncent à leur projet initial.',              nat:'ti',   compl:'\u00e0 leur projet initial', expl:'COI : \u00ab\u00a0à leur projet initial\u00a0\u00bb avec la préposition \u00ab\u00a0à\u00a0\u00bb.'},
+  {id:8, ph:'La neige tombe depuis ce matin.',                   nat:'int',  compl:'aucun',              expl:'\u00ab\u00a0Depuis ce matin\u00a0\u00bb est un CC de temps, pas un CO : le verbe est intransitif.'}
+];
+var COMPL_OPTS = {
+  1: ['la forêt','dense','à mesure que'],
+  2: ['le scientifique','analyse','les données'],
+  3: ['s’intéresse','aux sciences naturelles','elle'],
+  4: ['le torrent','aucun','dans la vallée'],
+  5: ['semble','ce témoignage','peu fiable'],
+  6: ['le menuisier','des meubles solides','fabrique'],
+  7: ['ils','à leur projet initial','renoncent'],
+  8: ['depuis ce matin','la neige','aucun']
+};
+
+/* ══ ÉTAT ══ */
+var sc1=0, sc2=0, v1=false, v2=false;
+var draggingId=null;
+var errCount1=0;
+var TOTAL=28;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){ if(actx) return; try{ actx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){
+  if(!actx) return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02);
+}
+function sndPlace(){ initA(); beep(480,600,0.08,'sine',0.1); }
+function sndOk(){ initA(); beep(440,660,0.08,'sine',0.15); setTimeout(function(){ beep(660,880,0.15,'sine',0.12); },90); }
+function sndKo(){ initA(); beep(280,160,0.22,'sawtooth',0.12); }
+function sndUnlock(){ initA(); beep(523,659,0.18,'sine',0.13); setTimeout(function(){ beep(659,784,0.2,'sine',0.11); },160); }
+function sndFin(){ initA(); beep(523,659,0.2,'sine',0.14); setTimeout(function(){ beep(659,880,0.25,'sine',0.12); },120); }
+
+/* ══ DRAG DESKTOP ══ */
+function onDragStart(e,id){
+  if(v1) return; draggingId=id; e.dataTransfer.effectAllowed='move';
+  setTimeout(function(){ var c=$('pc-'+id); if(c) c.classList.add('dragging'); },0);
+}
+function onDragEnd(id){ var c=$('pc-'+id); if(c) c.classList.remove('dragging'); }
+function onDragOver(e,zid){ e.preventDefault(); var z=$(zid); if(z) z.classList.add('drag-over'); }
+function onDragLeave(zid){ var z=$(zid); if(z) z.classList.remove('drag-over'); }
+function onDrop(e,zid){
+  e.preventDefault(); var z=$(zid); if(z) z.classList.remove('drag-over');
+  if(draggingId===null||v1) return;
+  var card=$('pc-'+draggingId); if(!card) return;
+  z.appendChild(card); sndPlace(); draggingId=null; checkCanVerif1();
+}
+
+/* ══ TOUCH ══ */
+var tCard=null, tClone=null, tOx=0, tOy=0;
+function onTouchStart(e,id){
+  if(v1) return; var card=$('pc-'+id); if(!card) return;
+  tCard=card; var r=card.getBoundingClientRect();
+  tOx=e.touches[0].clientX-r.left; tOy=e.touches[0].clientY-r.top;
+  tClone=card.cloneNode(true); tClone.id='';
+  tClone.style.cssText='position:fixed;z-index:9999;opacity:.85;pointer-events:none;width:'+r.width+'px;font-family:Arial,sans-serif;font-size:.84rem;font-weight:600;background:#fff;border:1.5px solid #e8e4d9;border-radius:8px;padding:.38rem .7rem;line-height:1.5;';
+  document.body.appendChild(tClone); card.classList.add('ghost'); e.preventDefault();
+}
+function onTouchMove(e){
+  if(!tClone) return;
+  tClone.style.left=(e.touches[0].clientX-tOx)+'px';
+  tClone.style.top=(e.touches[0].clientY-tOy)+'px'; e.preventDefault();
+}
+function onTouchEnd(e){
+  if(!tClone||!tCard) return;
+  var t=e.changedTouches[0];
+  ['pool1','z-etat','z-td','z-ti','z-int'].forEach(function(zid){
+    var z=$(zid); if(!z) return;
+    var r=z.getBoundingClientRect();
+    if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+      z.appendChild(tCard); sndPlace();
+    }
+  });
+  tCard.classList.remove('ghost');
+  document.body.removeChild(tClone); tClone=null; tCard=null; checkCanVerif1();
+}
+document.addEventListener('touchmove',onTouchMove,{passive:false});
+document.addEventListener('touchend',onTouchEnd);
+
+/* ══ SHUFFLE ══ */
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+
+/* ══ BUILD ACT1 ══ */
+function buildAct1(){
+  var pool=$('pool1'); pool.innerHTML='';
+  ['z-etat','z-td','z-ti','z-int'].forEach(function(id){ $(id).innerHTML=''; });
+  shuffle(D1.map(function(d){return d.id;})).forEach(function(id){
+    pool.appendChild(makeCard1(id));
+  });
+}
+function makeCard1(id){
+  var d=D1.find(function(x){return x.id===id;});
+  var card=document.createElement('div'); card.className='pcard'; card.id='pc-'+id;
+  card.dataset.id=id; card.draggable=true;
+  card.innerHTML='<span class="num">'+id+'.</span>'+d.ph+'<div class="pcard-fb">'+d.fb+'</div>';
+  card.addEventListener('dragstart',function(e){ onDragStart(e,id); });
+  card.addEventListener('dragend',function(){ onDragEnd(id); });
+  card.addEventListener('touchstart',function(e){ onTouchStart(e,id); },{passive:false});
+  return card;
+}
+function checkCanVerif1(){
+  $('btn-v1').disabled=($('pool1').children.length>0||v1);
+}
+
+/* ══ VÉRIF ACT1 ══ */
+function verif1(){
+  if(v1) return; v1=true; $('btn-v1').disabled=true;
+  errCount1++; sc1=0; var ko=0;
+  D1.forEach(function(d){
+    var card=$('pc-'+d.id); if(!card) return;
+    var z={'etat':$('z-etat'),'td':$('z-td'),'ti':$('z-ti'),'int':$('z-int')}[d.cat];
+    var ok=z&&z.contains(card);
+    card.classList.add(ok?'ok':'ko'); if(ok) sc1++; else ko++;
+  });
+  updateGlobal();
+  var fb=$('fb1');
+  if(ko===0){
+    fb.className='fb-g show ok'; fb.innerHTML='&#11088;&nbsp;Parfait\u00a0! 12/12 — excellent travail\u00a0!'; sndOk();
+    unlockAct2();
+  } else {
+    fb.className='fb-g show '+(sc1>=9?'mid':'ko');
+    fb.innerHTML='&#128161;&nbsp;'+sc1+'/12\u00a0— '+(ko===1?'1 phrase':''+ko+' phrases')+' \u00e0 corriger. Lis les indications en rouge, puis réessaie\u00a0!';
+    sndKo(); v1=false; $('btn-v1').disabled=false;
+    
+  }
+}
+
+function unlockAct2(){
+  /* Act2 toujours accessible */
+  
+}
+
+function reset1(){
+  v1=false; sc1=0; errCount1=0; $('fb1').className='fb-g'; $('btn-v1').disabled=true;
+  buildAct1(); updateGlobal();
+}
+
+/* ══ BUILD ACT2 ══ */
+function buildAct2(){
+  var list=$('list2'); list.innerHTML='';
+  var NAT_OPTS=['Verbe d\'état','Transitif direct (TD)','Transitif indirect (TI)','Intransitif (INT)'];
+  D2.forEach(function(d){
+    var div=document.createElement('div'); div.className='q2-item'; div.id='q2-'+d.id;
+    var cops=shuffle(COMPL_OPTS[d.id]);
+    var coptsHtml='<option value="">— Choisir —</option>';
+    cops.forEach(function(o){ coptsHtml+='<option value="'+o+'">'+o+'</option>'; });
+    var shuffledNat=shuffle(NAT_OPTS);
+    div.innerHTML='<div class="q2-num">Phrase '+d.id+' / 8</div>'
+      +'<div class="q2-phrase">'+d.ph+'</div>'
+      +'<div class="q2-selects">'
+        +'<div><div class="q2-label">&#128204;&nbsp;Nature du verbe</div>'
+          +'<select class="q2-sel" id="s2n-'+d.id+'"><option value="">— Choisir —</option>'
+          +shuffledNat.map(function(o){return '<option value="'+o+'">'+o+'</option>';}).join('')
+          +'</select></div>'
+        +'<div><div class="q2-label">&#128204;&nbsp;Complément ou attribut</div>'
+          +'<select class="q2-sel" id="s2c-'+d.id+'">'+coptsHtml+'</select></div>'
+      +'</div>'
+      +'<div class="q2-fb" id="q2fb-'+d.id+'">Pour justifier ton choix, nomme toujours le complément ou l\u2019attribut que tu as repéré dans la phrase. Un verbe s\u2019analyse toujours en contexte, jamais de manière isolée.</div>'
+      +'<div class="q2-expl" id="q2ex-'+d.id+'">&#10003;&nbsp;'+d.expl+'</div>';
+    list.appendChild(div);
+  });
+}
+
+/* ══ VÉRIF ACT2 ══ */
+function getNatKey(val){
+  if(val.indexOf('état')>=0) return 'etat';
+  if(val.indexOf('direct')>=0||val.indexOf('TD')>=0) return 'td';
+  if(val.indexOf('indirect')>=0||val.indexOf('TI')>=0) return 'ti';
+  if(val.indexOf('Intransitif')>=0||val.indexOf('INT')>=0) return 'int';
+  return '';
+}
+function verif2(){
+  if(v2) return; v2=true; sc2=0; var ko=0;
+  $('btn-v2').disabled=true;
+  D2.forEach(function(d){
+    var sn=$('s2n-'+d.id), sc=$('s2c-'+d.id); if(!sn||!sc) return;
+    sn.disabled=true; sc.disabled=true;
+    var okN=(getNatKey(sn.value)===d.nat);
+    var okC=(sc.value===d.compl);
+    if(okN) sc2++; else ko++;
+    if(okC) sc2++; else ko++;
+    sn.className='q2-sel '+(okN?'ok':'ko');
+    sc.className='q2-sel '+(okC?'ok':'ko');
+    var item=$('q2-'+d.id);
+    if(item) item.className='q2-item '+((okN&&okC)?'ok':'ko');
+  });
+  updateGlobal();
+  var fb=$('fb2');
+  if(ko===0){
+    fb.className='fb-g show ok'; fb.innerHTML='&#11088;&nbsp;Parfait\u00a0! 16/16 — analyse impeccable\u00a0!'; sndFin();
+    setTimeout(showResults, 800);
+  } else {
+    var pts=sc2;
+    fb.className='fb-g show '+(pts>=12?'mid':'ko');
+    fb.innerHTML='&#128161;&nbsp;'+pts+'/16\u00a0— '+ko+(ko===1?' réponse':' réponses')+' \u00e0 revoir. Analyse les indications en rouge\u00a0!';
+    sndKo(); v2=false; $('btn-v2').disabled=false;
+  }
+}
+
+function reset2(){
+  v2=false; sc2=0; $('fb2').className='fb-g'; $('btn-v2').disabled=false;
+  buildAct2(); updateGlobal();
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var ok=sc1+sc2;
+  var rem=TOTAL-ok;
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=0; $('cnt-rem').textContent=rem;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';
+  $('prog-pct').textContent=pct+' %';
+}
+
+function showResults(){
+  var tot=sc1+sc2;
+  $('r-score').textContent=tot;
+  var s=tot>=26?5:tot>=22?4:tot>=16?3:tot>=10?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=['\u00c0 retravailler\u2014 relis le référentiel.','Des notions à consolider.','Pas mal\u00a0! Tu progresses.','Très bien\u00a0!','Parfait\u00a0— mission accomplie\u00a0!'];
+  $('r-msg').textContent=msgs[s-1];
+  $('results-screen').classList.add('show');
+  setTimeout(function(){ $('results-screen').scrollIntoView({behavior:'smooth',block:'start'}); },200);
+}
+
+function resetAll(){
+  sc1=0; sc2=0; v1=false; v2=false; errCount1=0;
+  $('results-screen').classList.remove('show');
+  $('fb1').className='fb-g'; $('fb2').className='fb-g';
+  
+  buildAct1(); buildAct2(); updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildAct1(); buildAct2(); updateGlobal();
+</script>
+</body>
+</html>
