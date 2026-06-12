@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S3 J3 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#8dc63f;--day-dark:#3d7a10;--day-dark2:#1e4a00;
+  --day-light:#f0faeb;--day-border:#b5e08a;--day-glow:rgba(141,198,63,.25);
+  --day-color:#8dc63f;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#f6fbf2;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--blue-dark:#1a6e88;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:720px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--day);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--blue);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* Progression */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.8rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* Chrono */
+.chrono-bar{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
+  text-align:center;margin-bottom:.8rem;position:relative;z-index:1;}
+.chrono-bar span{color:var(--day-dark);font-weight:700;}
+
+/* ══ RÉFÉRENTIEL ══ */
+.ref-block{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:.75rem;
+  box-shadow:0 3px 12px rgba(0,0,0,.06);position:relative;z-index:1;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#b5e08a,var(--day-dark));}
+.ref-inner{padding:1.1rem 1.3rem;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.9rem;}
+
+/* Tableau terminaisons */
+.table-wrap{overflow-x:auto;margin-bottom:.9rem;border-radius:var(--radius-sm);
+  border:1.5px solid var(--day-border);}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:420px;}
+thead th{background:var(--day-dark);color:#fff;padding:.55rem .8rem;text-align:left;
+  font-weight:800;font-size:.82rem;white-space:nowrap;}
+tbody tr:nth-child(even){background:var(--surface2);}
+tbody tr:nth-child(odd){background:var(--surface);}
+tbody td{padding:.5rem .8rem;color:var(--text);line-height:1.55;vertical-align:top;border-top:1px solid var(--day-border);}
+td:first-child{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--day-dark);
+  white-space:nowrap;font-size:.88rem;}
+td:nth-child(2){font-size:.88rem;color:var(--muted);white-space:nowrap;}
+td:nth-child(3){font-size:.88rem;font-style:italic;}
+
+/* Méthode clé */
+.methode{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);
+  padding:.85rem 1rem;line-height:1.75;}
+.methode-title{font-size:.85rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+.methode-body{font-size:.9rem;color:var(--text);line-height:1.75;}
+.methode-body .arrow{color:var(--day-dark);font-weight:800;}
+.methode-ex{background:var(--surface);border:1px solid var(--day-border);border-radius:8px;
+  padding:.5rem .8rem;margin-top:.55rem;font-size:.88rem;font-style:italic;color:var(--text);line-height:1.65;}
+.methode-ex .ok{color:var(--green-dark);font-weight:800;}
+
+/* ══ CARTE QCM ══ */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#b5e08a,var(--day-dark));}
+.card-body{padding:1.1rem 1.2rem 0;}
+.q-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:800;
+  padding:.18rem .65rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.65rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.q-text{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);
+  margin-bottom:.85rem;line-height:1.7;}
+.q-text .hl{color:var(--day-dark);font-style:italic;}
+
+/* Options */
+.opts{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.7rem 1.1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s,transform .1s;
+  -webkit-tap-highlight-color:transparent;
+  font-family:Arial,sans-serif;text-align:left;
+  display:flex;align-items:flex-start;gap:.6rem;line-height:1.5;word-break:break-word;}
+.opt:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt:disabled{cursor:default;}
+.opt-letter{width:26px;height:26px;border-radius:50%;flex-shrink:0;min-width:26px;
+  display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--border);color:var(--text);margin-top:1px;}
+.opt.correct{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .3s ease;}
+.opt.correct .opt-letter{background:var(--green);color:#fff;}
+.opt.wrong{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .4s ease;}
+.opt.wrong .opt-letter{background:var(--pink-dark);color:#fff;}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.03);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+/* Feedback */
+.feedback{padding:.75rem .95rem;border-radius:var(--radius-sm);
+  font-size:clamp(.9rem,2.5vw,1rem);display:none;line-height:1.75;
+  margin:.4rem 1.2rem .6rem;word-break:break-word;}
+.feedback.show{display:block;animation:fadeUp .25s ease;}
+.feedback.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+
+/* Bouton suivant */
+.btn-next-wrap{display:none;justify-content:flex-end;margin:.2rem 1.2rem .2rem;}
+.btn-next-wrap.show{display:flex;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+
+/* Résultats */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.07);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#b5e08a,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.6rem 0 .3rem;color:var(--day-dark);}
+.stars{font-size:1.9rem;margin:.4rem 0 .7rem;letter-spacing:.1em;}
+.chrono-final{font-family:'JetBrains Mono',monospace;font-size:.83rem;color:var(--muted);margin-bottom:.65rem;}
+.rmsg{color:var(--muted);font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.35rem;margin-bottom:1.2rem;}
+.recap-item{display:flex;align-items:center;gap:.55rem;padding:.42rem .8rem;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.recap-item.ok-r{border-color:var(--day-border);}
+.recap-item.ko-r{border-color:#f9c0bb;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card-body{padding:.9rem .9rem 0;}
+  .feedback{margin:.4rem .9rem .6rem;}.btn-next-wrap{margin:.2rem .9rem .2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 3 – Jour 3</div>
+  <h1>J'observe et je teste · <span class="hl">Terminaisons en [e]</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 6 questions</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">6</span> restant(s)</div>
+</div>
+<div class="chrono-bar">&#9201;&nbsp;Temps&nbsp;: <span id="chrono">0:00</span></div>
+
+<!-- Référentiel : tableau -->
+<div class="ref-block">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-title">&#128218;&nbsp;Tableau des terminaisons en [e]</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Terminaison</th><th>Forme</th><th>Exemple</th></tr></thead>
+        <tbody>
+          <tr><td>-er</td><td>Infinitif</td><td>«&nbsp;Il faut avancer.&nbsp;»</td></tr>
+          <tr><td>-é / -ée</td><td>Participe passé</td><td>«&nbsp;Elle a terminé son travail.&nbsp;» — «&nbsp;La lettre est postée.&nbsp;»</td></tr>
+          <tr><td>-ez</td><td>2<sup>e</sup> pers. pl.</td><td>«&nbsp;Vous travaillez sérieusement.&nbsp;»</td></tr>
+          <tr><td>-ais / -ait / -aient</td><td>Imparfait</td><td>«&nbsp;Il marchait lentement.&nbsp;» — «&nbsp;Ils parlaient entre eux.&nbsp;»</td></tr>
+          <tr><td>-e / -es / -ent</td><td>Présent indicatif</td><td>«&nbsp;Elle parle doucement.&nbsp;» — «&nbsp;Ils arrivent ce soir.&nbsp;»</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Méthode clé -->
+    <div class="methode">
+      <div class="methode-title">&#128273;&nbsp;Méthode clé : ne pas confondre -er et -é</div>
+      <div class="methode-body">
+        <span class="arrow">&#8594;</span>&nbsp;Remplace le verbe par un verbe du 3<sup>e</sup> groupe (<em>prendre / pris</em>, <em>vendre / vendu</em>).<br>
+        <span class="arrow">&#8594;</span>&nbsp;Si <em>prendre</em> convient &rarr; infinitif (<strong>-er</strong>).<br>
+        <span class="arrow">&#8594;</span>&nbsp;Si <em>pris</em> convient &rarr; participe passé (<strong>-é</strong>).
+      </div>
+      <div class="methode-ex">
+        «&nbsp;Il faut (marcher / marché).&nbsp;» &rarr; «&nbsp;Il faut prendre.&nbsp;» <span class="ok">&#10003;</span> &rarr; <strong>marcher</strong> (infinitif).<br>
+        «&nbsp;Il a (marcher / marché) vite.&nbsp;» &rarr; «&nbsp;Il a pris.&nbsp;» <span class="ok">&#10003;</span> &rarr; <strong>marché</strong> (participe passé).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Carte QCM -->
+<div class="card" id="main-card">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="q-num" id="q-num">Question 1 / 6</div>
+    <div class="theme-badge">&#128270;&nbsp;Identifie la bonne terminaison</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="opts" id="opts"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="btn-next-wrap" id="btn-next-wrap">
+    <button class="btn btn-p" onclick="goNext()">Suivant &#8594;</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--yellow);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.55rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/6</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="chrono-final" id="r-chrono"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="recap" id="r-recap"></div>
+    <button class="btn btn-p" onclick="restartAll()" style="width:100%;justify-content:center;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+var QS = [
+  {
+    q: 'Dans <span class="hl">\u00ab\u00a0Vous devez (travaillez\u00a0/ travailler) davantage.\u00a0\u00bb</span>, quelle est la forme correcte\u00a0?',
+    opts: ['Travaillez.', 'Travailler.'],
+    ans: 1,
+    fbKo: [
+      '\u00ab\u00a0Travaillez\u00a0\u00bb est la 2e personne du pluriel du pr\u00e9sent. Ici, le verbe suit \u00ab\u00a0devez\u00a0\u00bb\u00a0: il faut un infinitif. Teste avec \u00ab\u00a0prendre\u00a0\u00bb\u00a0: \u00ab\u00a0vous devez prendre\u00a0\u00bb \u2713\u00a0\u2192 travailler.',
+      null
+    ],
+    label: 'Q1 \u2014 devez'
+  },
+  {
+    q: 'Dans <span class="hl">\u00ab\u00a0Elle a (ranger\u00a0/ rang\u00e9) sa chambre.\u00a0\u00bb</span>, quelle est la forme correcte\u00a0?',
+    opts: ['Ranger.', 'Rang\u00e9.'],
+    ans: 1,
+    fbKo: [
+      'Apr\u00e8s un auxiliaire (a, est, avait\u2026), on utilise le participe pass\u00e9. Teste\u00a0: \u00ab\u00a0elle a pris\u00a0\u00bb \u2713\u00a0\u2192 rang\u00e9.',
+      null
+    ],
+    label: 'Q2 \u2014 a ranger/rang\u00e9'
+  },
+  {
+    q: 'Laquelle de ces phrases contient une erreur\u00a0?',
+    opts: [
+      '\u00ab\u00a0Il faut ranger ces affaires.\u00a0\u00bb',
+      '\u00ab\u00a0Elle a terminer son expos\u00e9.\u00a0\u00bb',
+      '\u00ab\u00a0Vous avancez bien dans ce travail.\u00a0\u00bb'
+    ],
+    ans: 1,
+    fbKo: [
+      'Cette phrase est correcte\u00a0: \u00ab\u00a0ranger\u00a0\u00bb est bien un infinitif apr\u00e8s \u00ab\u00a0faut\u00a0\u00bb.',
+      null,
+      'Cette phrase est correcte\u00a0: \u00ab\u00a0avancez\u00a0\u00bb est la 2e personne du pluriel du pr\u00e9sent.'
+    ],
+    fbOkExtra: 'Apr\u00e8s l\u2019auxiliaire \u00ab\u00a0a\u00a0\u00bb, il faut le participe pass\u00e9\u00a0: \u00ab\u00a0termin\u00e9\u00a0\u00bb, pas l\u2019infinitif \u00ab\u00a0terminer\u00a0\u00bb.',
+    label: 'Q3 \u2014 erreur'
+  },
+  {
+    q: 'Dans <span class="hl">\u00ab\u00a0Le rapport (\u00e9t\u00e9\u00a0/ a \u00e9t\u00e9) valid\u00e9 hier.\u00a0\u00bb</span>, quelle est la forme correcte\u00a0?',
+    opts: ['\u00c9t\u00e9.', 'A \u00e9t\u00e9.'],
+    ans: 1,
+    fbKo: [
+      '\u00ab\u00a0\u00c9t\u00e9\u00a0\u00bb seul ne peut pas constituer un pr\u00e9dicat complet. Il faut l\u2019auxiliaire \u00ab\u00a0a\u00a0\u00bb\u00a0: \u00ab\u00a0a \u00e9t\u00e9\u00a0\u00bb forme le pass\u00e9 compos\u00e9 du verbe \u00eatre.',
+      null
+    ],
+    label: 'Q4 \u2014 \u00e9t\u00e9/a \u00e9t\u00e9'
+  },
+  {
+    q: 'Comment distinguer -ez et -er\u00a0?',
+    opts: [
+      '-ez s\u2019entend diff\u00e9remment de -er \u00e0 l\u2019oral.',
+      '-ez correspond \u00e0 la 2e personne du pluriel\u00a0; -er est l\u2019infinitif, souvent apr\u00e8s un autre verbe.',
+      '-ez ne s\u2019utilise qu\u2019\u00e0 l\u2019imp\u00e9ratif.'
+    ],
+    ans: 1,
+    fbKo: [
+      '\u00c0 l\u2019oral, -ez et -er se prononcent de la m\u00eame fa\u00e7on\u00a0: c\u2019est pourquoi il faut apprendre \u00e0 les distinguer \u00e0 l\u2019\u00e9crit.',
+      null,
+      '-ez s\u2019emploie aussi au pr\u00e9sent de l\u2019indicatif (vous parlez) et au futur (vous parlerez). Ce n\u2019est pas uniquement une forme d\u2019imp\u00e9ratif.'
+    ],
+    label: 'Q5 \u2014 -ez vs -er'
+  },
+  {
+    q: 'Dans <span class="hl">\u00ab\u00a0Les r\u00e9sultats (annonc\u00e9s\u00a0/ annoncer) hier sont encourageants.\u00a0\u00bb</span>, quelle forme convient\u00a0?',
+    opts: ['Annoncer.', 'Annonc\u00e9s.'],
+    ans: 1,
+    fbKo: [
+      '\u00ab\u00a0Annoncer\u00a0\u00bb est un infinitif. Ici, le mot qualifie \u00ab\u00a0les r\u00e9sultats\u00a0\u00bb\u00a0: c\u2019est un participe pass\u00e9 employ\u00e9 comme adjectif, accord\u00e9 au masculin pluriel \u2192 annonc\u00e9s.',
+      null
+    ],
+    label: 'Q6 \u2014 annonc\u00e9s'
+  }
+];
+
+var curQ=0, score=0, done=new Array(6).fill(false), scoreByQ=new Array(6).fill(false);
+var chronoSec=0, chronoInt=null;
+var LETTERS=['A','B','C'];
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){ if(actx) return; try{ actx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){
+  if(!actx) return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02);
+}
+function sndOk(){ initA(); beep(440,660,0.08,'sine',0.15); setTimeout(function(){ beep(660,880,0.15,'sine',0.12); },90); }
+function sndKo(){ initA(); beep(280,160,0.22,'sawtooth',0.12); }
+function sndFin(){ initA(); beep(523,659,0.2,'sine',0.14); setTimeout(function(){ beep(659,880,0.25,'sine',0.12); },120); }
+
+/* ══ CHRONO ══ */
+function startChrono(){
+  chronoInt=setInterval(function(){
+    chronoSec++;
+    var m=Math.floor(chronoSec/60), s=chronoSec%60;
+    $('chrono').textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+function stopChrono(){ clearInterval(chronoInt); }
+function fmtTime(s){ var m=Math.floor(s/60),sec=s%60; return m+'\u00a0min\u00a0'+(sec<10?'0':'')+sec+'\u00a0s'; }
+
+/* ══ LOAD QUESTION ══ */
+function loadQ(){
+  if(curQ>=QS.length){ showResults(); return; }
+  var q=QS[curQ];
+  $('q-num').textContent='Question '+(curQ+1)+' / 6';
+  $('q-text').innerHTML=q.q;
+  $('feedback').className='feedback';
+  $('btn-next-wrap').className='btn-next-wrap';
+  var opts=$('opts'); opts.innerHTML='';
+  q.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML='<span class="opt-letter">'+LETTERS[i]+'</span><span>'+txt+'</span>';
+    btn.addEventListener('click',function(){
+      if(done[curQ]) return;
+      answer(i, btn, q);
+    });
+    opts.appendChild(btn);
+  });
+}
+
+/* ══ RÉPONSE ══ */
+function answer(idx, btn, q){
+  if(done[curQ]) return; done[curQ]=true;
+  $('opts').querySelectorAll('.opt').forEach(function(b){ b.disabled=true; });
+  var ok=(idx===q.ans);
+  scoreByQ[curQ]=ok;
+  if(ok) score++;
+  btn.classList.add(ok?'correct':'wrong');
+  if(!ok) $('opts').querySelectorAll('.opt')[q.ans].classList.add('correct');
+  var fb=$('feedback');
+  if(ok){
+    /* Q3 : feedback pédagogique même si bonne réponse */
+    if(q.fbOkExtra){
+      fb.className='feedback show ok';
+      fb.innerHTML='&#10003;&nbsp;Exact\u00a0! '+q.fbOkExtra;
+    } else {
+      fb.className='feedback show ok';
+      fb.innerHTML='&#10003;&nbsp;Exact\u00a0!';
+    }
+    sndOk();
+  } else {
+    var msg=q.fbKo[idx];
+    if(msg){ fb.className='feedback show ko'; fb.innerHTML='&#10006;&nbsp;'+msg; }
+    sndKo();
+  }
+  updateGlobal();
+  $('btn-next-wrap').className='btn-next-wrap show';
+  setTimeout(function(){ fb.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
+}
+
+/* ══ SUIVANT ══ */
+function goNext(){
+  curQ++;
+  $('main-card').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(function(){ loadQ(); },280);
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var answered=done.filter(Boolean).length;
+  var ok=score, ko=answered-ok, rem=6-answered;
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
+  var pct=Math.round(answered/6*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=answered+' / 6 questions';
+  $('prog-pct').textContent=pct+'%';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  stopChrono();
+  if(score===6) sndFin();
+  $('r-score').textContent=score;
+  var s=score>=6?5:score>=5?4:score>=4?3:score>=2?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  $('r-chrono').innerHTML='&#9201;\u00a0Temps\u00a0: '+fmtTime(chronoSec);
+  var msgs=[
+    '\u00c0 retravailler\u00a0\u2014 relis le tableau de r\u00e9f\u00e9rence.',
+    'Des terminaisons \u00e0 consolider.',
+    'Pas mal\u00a0! Tu progresses.',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait\u00a0\u2014 les terminaisons en [e] n\u2019ont plus de secrets\u00a0!'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  var recap=$('r-recap'); recap.innerHTML='';
+  QS.forEach(function(q,i){
+    var ok2=scoreByQ[i];
+    var dv=document.createElement('div'); dv.className='recap-item '+(ok2?'ok-r':'ko-r');
+    dv.innerHTML='<span>'+(ok2?'&#10003;':'&#10007;')+'</span>'
+      +'<span style="flex:1;color:#8a8f9a;">'+q.label+'</span>'
+      +'<span style="color:var(--day-dark);font-weight:700;">'+(ok2?'1':'0')+'/1</span>';
+    recap.appendChild(dv);
+  });
+  $('results-screen').classList.add('show');
+  setTimeout(function(){ $('results-screen').scrollIntoView({behavior:'smooth',block:'start'}); },200);
+}
+
+/* ══ RECOMMENCER ══ */
+function restartAll(){
+  curQ=0; score=0; done=new Array(6).fill(false); scoreByQ=new Array(6).fill(false); chronoSec=0;
+  stopChrono(); $('chrono').textContent='0:00';
+  $('results-screen').classList.remove('show');
+  updateGlobal(); loadQ(); startChrono();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+loadQ(); updateGlobal(); startChrono();
+</script>
+</body>
+</html>
