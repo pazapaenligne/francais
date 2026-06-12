@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S4 J1 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623; --day-dark:#c47a10;
+      --day-light:#fff5e0; --day-border:#f5d080;
+      --day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.2rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;width:100%;max-width:720px;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;
+      white-space:nowrap;color:var(--text);}
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:#aaa;}
+
+    /* layout 2 colonnes */
+    .main-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+      width:100%;max-width:720px;position:relative;z-index:1;}
+
+    /* colonne gauche : texte + référentiel */
+    .col-left{display:flex;flex-direction:column;gap:1rem;
+      position:sticky;top:1rem;align-self:start;max-height:calc(100vh - 2rem);overflow-y:auto;}
+
+    /* référentiel */
+    .referentiel{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.1rem;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.7rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--yellow));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.6rem;}
+    .ref-item{font-size:.8rem;color:var(--text);line-height:1.6;
+      padding:.15rem 0;border-bottom:1px solid var(--border);}
+    .ref-item:last-child{border-bottom:none;}
+    .ref-item strong{color:var(--day-dark);}
+
+    /* zone texte poème */
+    .text-zone{background:var(--bg);border:2px solid var(--border);border-radius:12px;
+      padding:.85rem 1rem;}
+    .txt-label{display:block;font-family:'JetBrains Mono',monospace;font-size:.62rem;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem;}
+    .vers-line{display:flex;align-items:baseline;gap:.5rem;line-height:2.2;font-size:.88rem;}
+    .vers-num{font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);
+      width:1.4rem;text-align:right;flex-shrink:0;user-select:none;}
+    .vers-txt{flex:1;color:var(--text);}
+    .poeme-source{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);
+      margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--border);}
+
+    /* colonne droite : questions */
+    .col-right{display:flex;flex-direction:column;gap:1rem;}
+
+    /* card question */
+    .card{background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.2rem 1rem 1rem;
+      position:relative;box-shadow:0 4px 20px rgba(245,166,35,.14);
+      animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+    .card.locked{opacity:.45;pointer-events:none;filter:grayscale(.4);}
+
+    .dq-label{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
+    .niveau-badge{display:inline-block;font-size:.62rem;font-weight:700;padding:.12rem .5rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;
+      background:var(--day-dark);color:#fff;border:1.5px solid var(--day-dark);}
+
+    /* sous-question */
+    .sq-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem;
+      opacity:.85;}
+    .sq-texte{font-size:.92rem;font-weight:700;color:var(--text);
+      line-height:1.55;margin-bottom:.7rem;}
+
+    /* options */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.6rem;}
+    .opt-btn{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem .7rem;
+      border-radius:8px;border:2px solid var(--day-border);background:var(--surface);
+      font-size:.88rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn.sel-opt{border-color:var(--day-color);background:var(--day-light);font-weight:700;}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.75rem;
+      color:var(--day-dark);flex-shrink:0;margin-top:.1rem;}
+    .opt-btn.ok-opt{background:#d4edda;border-color:var(--green);color:#1a4d0d;}
+    .opt-btn.ok-opt .opt-letter{color:#1a4d0d;}
+    .opt-btn.ko-opt{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;}
+    .opt-btn.ko-opt .opt-letter{color:#8b1a1a;}
+
+    /* feedback inline */
+    .sq-fb{font-size:.78rem;font-family:'JetBrains Mono',monospace;
+      margin-top:.35rem;padding:.4rem .65rem;border-radius:8px;display:none;line-height:1.55;}
+    .sq-fb.show{display:block;}
+    .sq-fb.ko-fb{background:#fff0ef;border:1px solid var(--pink);color:#8b1a1a;}
+    .sq-fb.ok-fb{background:#f0faeb;border:1px solid var(--green);color:#1a4d0d;}
+
+    /* séparateur A→B */
+    .sq-sep{border:none;border-top:1.5px dashed var(--day-border);margin:.7rem 0;}
+
+    /* sous-question B masquée */
+    .sq-b{display:none;}
+    .sq-b.show{display:block;}
+
+    /* boutons */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+      padding:.55rem 1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.88rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+
+    /* résultats */
+    .results{width:100%;max-width:720px;text-align:center;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.2rem;}
+    .results-msg{color:var(--text);font-size:.95rem;margin-bottom:.8rem;line-height:1.7;}
+    .badge-deblocage{display:inline-block;background:#d4edda;color:#1a4d0d;
+      border:2px solid var(--green);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;}
+    .badge-manque{display:inline-block;background:#fff0ef;color:#8b1a1a;
+      border:2px solid var(--pink);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:600px){
+      .main-layout{grid-template-columns:1fr;}
+      .text-zone{max-height:260px;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 1</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">Compr&eacute;hension du po&egrave;me</span></h1>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 10 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+<div class="score-row">
+  <div class="chip correct">  <div class="dot"></div><span id="cnt-ok">0</span>&nbsp;corrects</div>
+  <div class="chip wrong">    <div class="dot"></div><span id="cnt-ko">0</span>&nbsp;erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cnt-rem">10</span>&nbsp;restants</div>
+</div>
+
+<div class="main-layout">
+
+  <!-- COLONNE GAUCHE -->
+  <div class="col-left">
+
+    <!-- Référentiel -->
+    <div class="referentiel">
+      <div class="ref-stripe"></div>
+      <div class="ref-titre">&#128214; Rep&egrave;res</div>
+      <div class="ref-item"><strong>R&eacute;ponse litt&eacute;rale&nbsp;:</strong> l&rsquo;information est &eacute;crite clairement dans le texte.</div>
+      <div class="ref-item"><strong>R&eacute;ponse inf&eacute;rentielle&nbsp;:</strong> l&rsquo;information se d&eacute;duit &agrave; partir d&rsquo;indices du texte.</div>
+      <div class="ref-item"><strong>Citation justificative&nbsp;:</strong> extrait exact du texte, qui prouve la r&eacute;ponse donn&eacute;e.</div>
+    </div>
+
+    <!-- Texte -->
+    <div class="text-zone">
+      <span class="txt-label">Lorsque l&rsquo;enfant para&icirc;t &mdash; Victor Hugo, Les Contemplations, 1856</span>
+      <div class="vers-line"><span class="vers-num">1</span><span class="vers-txt">Lorsque l&rsquo;enfant para&icirc;t, le cercle de famille</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Applaudit &agrave; grands cris.</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Son doux regard qui brille</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Fait briller tous les yeux,</span></div>
+      <div class="vers-line"><span class="vers-num">5</span><span class="vers-txt">Et les plus tristes fronts, les plus souill&eacute;s peut-&ecirc;tre,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Se d&eacute;rident soudain &agrave; voir l&rsquo;enfant para&icirc;tre,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Innocent et joyeux.</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Soit que juin ait verdi mon seuil, ou que novembre</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Fasse autour d&rsquo;un grand feu vacillant dans la chambre</span></div>
+      <div class="vers-line"><span class="vers-num">10</span><span class="vers-txt">Les chaises se toucher,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Quand l&rsquo;enfant vient, la joie arrive et nous &eacute;claire.</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Voyez-vous, nos enfants nous sont bien n&eacute;cessaires,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Seigneur, quand on a vu dans sa vie, un matin,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Au milieu des ennuis, des peines, des mis&egrave;res,</span></div>
+      <div class="vers-line"><span class="vers-num">15</span><span class="vers-txt">Et de l&rsquo;ombre que fait sur nous notre destin,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Apparut une enfant, cette ch&egrave;re et sacr&eacute;e,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Petit &ecirc;tre joyeux, [&hellip;]</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Quand on a vu, seize ans, de cet autre soi-m&ecirc;me</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Cro&icirc;tre la gr&acirc;ce aimable et la douce raison,</span></div>
+      <div class="vers-line"><span class="vers-num">20</span><span class="vers-txt">Lorsqu&rsquo;on a reconnu que cet enfant qu&rsquo;on aime</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Fait le jour dans notre &acirc;me et notre maison,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Que c&rsquo;est la seule joie ici-bas qui persiste</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">De tout ce qu&rsquo;on r&ecirc;va,</span></div>
+      <div class="vers-line"><span class="vers-num"></span><span class="vers-txt">Consid&eacute;rez que c&rsquo;est une chose bien triste</span></div>
+      <div class="vers-line"><span class="vers-num">25</span><span class="vers-txt">De le voir qui s&rsquo;en va&nbsp;!</span></div>
+      <div class="poeme-source">Villequier, 4 septembre 1847 &mdash; V. Hugo, Les Contemplations, 1856.</div>
+    </div>
+
+  </div><!-- /col-left -->
+
+  <!-- COLONNE DROITE : questions générées par JS -->
+  <div class="col-right" id="col-right"></div>
+
+</div><!-- /main-layout -->
+
+<!-- RÉSULTATS -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/10</div>
+    <div class="stars" id="stars-row"></div>
+    <div id="badge-deblocage"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <button class="btn btn-primary" onclick="resetTout()" style="margin:0 auto;display:flex;">Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DONNÉES — 5 doubles questions
+═══════════════════════════════════════════ */
+var DQ = [
+  {
+    id:'dq1', niveau:'Litt\u00e9ral',
+    qA:{
+      texte:'Que fait le cercle de famille lorsque l\u2019enfant para\u00eet\u00a0?',
+      opts:[
+        {txt:'Il se tait et observe l\u2019enfant avec tendresse.', ok:false},
+        {txt:'Il applaudit et manifeste sa joie bruyamment.', ok:true},
+        {txt:'Il se rassemble en silence autour de l\u2019enfant.', ok:false}
+      ],
+      fb_ko:'Relis attentivement\u00a0: que fait le cercle de famille\u00a0?'
+    },
+    qB:{
+      texte:'Quelle citation du texte justifie ta r\u00e9ponse\u00a0?',
+      opts:[
+        {txt:'\u00ab\u00a0Son doux regard qui brille / Fait briller tous les yeux\u00a0\u00bb', ok:false},
+        {txt:'\u00ab\u00a0Applaudit \u00e0 grands cris.\u00a0\u00bb', ok:true},
+        {txt:'\u00ab\u00a0Se d\u00e9rident soudain \u00e0 voir l\u2019enfant para\u00eetre\u00a0\u00bb', ok:false}
+      ],
+      fb_ko:'Tu as bien compris, mais la citation choisie ne prouve pas directement ta r\u00e9ponse. Cherche le vers qui montre la r\u00e9action de la famille.'
+    }
+  },
+  {
+    id:'dq2', niveau:'Litt\u00e9ral',
+    qA:{
+      texte:'Quel effet la pr\u00e9sence de l\u2019enfant produit-elle sur les personnes les plus tristes\u00a0?',
+      opts:[
+        {txt:'Elle les plonge dans une m\u00e9lancolie plus profonde.', ok:false},
+        {txt:'Elle les rend indiff\u00e9rents \u00e0 leur propre tristesse.', ok:false},
+        {txt:'Elle efface leur tristesse et les fait sourire.', ok:true}
+      ],
+      fb_ko:'Relis les vers\u00a05 \u00e0 7. Que se passe-t-il sur le visage des personnes tristes quand elles voient l\u2019enfant\u00a0?'
+    },
+    qB:{
+      texte:'Quelle citation du texte justifie ta r\u00e9ponse\u00a0?',
+      opts:[
+        {txt:'\u00ab\u00a0Quand l\u2019enfant vient, la joie arrive et nous \u00e9claire.\u00a0\u00bb', ok:false},
+        {txt:'\u00ab\u00a0Et les plus tristes fronts, les plus souill\u00e9s peut-\u00eatre, / Se d\u00e9rident soudain \u00e0 voir l\u2019enfant para\u00eetre\u00a0\u00bb', ok:true},
+        {txt:'\u00ab\u00a0Innocent et joyeux.\u00a0\u00bb', ok:false}
+      ],
+      fb_ko:'Tu as bien r\u00e9pondu, mais la citation choisie n\u2019est pas celle qui montre directement cet effet. Cherche les vers qui d\u00e9crivent ce qui arrive aux fronts tristes.'
+    }
+  },
+  {
+    id:'dq3', niveau:'Inf\u00e9rentiel',
+    qA:{
+      texte:'Pourquoi le po\u00e8te \u00e9voque-t-il \u00e0 la fois \u00ab\u00a0juin\u00a0\u00bb et \u00ab\u00a0novembre\u00a0\u00bb (vers\u00a08-10)\u00a0?',
+      opts:[
+        {txt:'Pour d\u00e9crire les deux saisons pr\u00e9f\u00e9r\u00e9es de l\u2019enfant.', ok:false},
+        {txt:'Pour montrer que la joie apport\u00e9e par l\u2019enfant est pr\u00e9sente en toutes circonstances, quelle que soit la saison.', ok:true},
+        {txt:'Pour indiquer que l\u2019histoire se d\u00e9roule sur deux ann\u00e9es.', ok:false}
+      ],
+      fb_ko:'Ces deux mois ne sont pas l\u00e0 pour raconter un \u00e9v\u00e9nement pr\u00e9cis. Demande-toi ce qu\u2019ils repr\u00e9sentent ensemble\u00a0: deux saisons oppos\u00e9es\u2026 Qu\u2019est-ce que cela sugg\u00e8re\u00a0?'
+    },
+    qB:{
+      texte:'Quelle citation du texte justifie ta r\u00e9ponse\u00a0?',
+      opts:[
+        {txt:'\u00ab\u00a0Petit \u00eatre joyeux\u00a0\u00bb', ok:false},
+        {txt:'\u00ab\u00a0Soit que juin ait verdi mon seuil, ou que novembre / Fasse autour d\u2019un grand feu vacillant dans la chambre / Les chaises se toucher\u00a0\u00bb', ok:true},
+        {txt:'\u00ab\u00a0Quand l\u2019enfant vient, la joie arrive et nous \u00e9claire.\u00a0\u00bb', ok:false}
+      ],
+      fb_ko:'Ta r\u00e9ponse est juste, mais la citation que tu as choisie ne contient pas les deux mois dont parle la question. Cherche le passage qui les mentionne tous les deux.'
+    }
+  },
+  {
+    id:'dq4', niveau:'Inf\u00e9rentiel avanc\u00e9',
+    qA:{
+      texte:'Comment le po\u00e8te exprime-t-il l\u2019importance de l\u2019enfant dans la vie du foyer (vers\u00a020-23)\u00a0?',
+      opts:[
+        {txt:'Il dit que l\u2019enfant est une distraction parmi d\u2019autres.', ok:false},
+        {txt:'Il dit que l\u2019enfant repr\u00e9sente la seule joie v\u00e9ritablement durable de l\u2019existence.', ok:true},
+        {txt:'Il dit que l\u2019enfant est une source de fiert\u00e9 sociale.', ok:false}
+      ],
+      fb_ko:'Relis les vers\u00a020 \u00e0 23. Le po\u00e8te dit que la joie apport\u00e9e par l\u2019enfant est \u00ab\u00a0la seule\u00a0\u00bb \u00e0 faire quelque chose. Qu\u2019est-ce que cela r\u00e9v\u00e8le sur son importance\u00a0?'
+    },
+    qB:{
+      texte:'Quelle citation du texte justifie ta r\u00e9ponse\u00a0?',
+      opts:[
+        {txt:'\u00ab\u00a0Cro\u00eetre la gr\u00e2ce aimable et la douce raison\u00a0\u00bb', ok:false},
+        {txt:'\u00ab\u00a0Fait le jour dans notre \u00e2me et notre maison\u00a0\u00bb', ok:false},
+        {txt:'\u00ab\u00a0Que c\u2019est la seule joie ici-bas qui persiste / De tout ce qu\u2019on r\u00eava\u00a0\u00bb', ok:true}
+      ],
+      fb_ko:'Tu as bien compris, mais le mot \u00ab\u00a0seule\u00a0\u00bb est la cl\u00e9 de ta r\u00e9ponse. Cherche la citation qui contient ce mot et ce qu\u2019il affirme sur la joie de l\u2019enfant.'
+    }
+  },
+  {
+    id:'dq5', niveau:'Sens global',
+    qA:{
+      texte:'Quelle est la tonalit\u00e9 dominante de la conclusion du po\u00e8me (vers\u00a024-25)\u00a0?',
+      opts:[
+        {txt:'Une tonalit\u00e9 apais\u00e9e\u00a0: le po\u00e8te accepte la s\u00e9paration.', ok:false},
+        {txt:'Une tonalit\u00e9 joyeuse\u00a0: le d\u00e9part de l\u2019enfant est v\u00e9cu comme une lib\u00e9ration.', ok:false},
+        {txt:'Une tonalit\u00e9 douloureuse\u00a0: le po\u00e8te exprime le d\u00e9chirement caus\u00e9 par la perte de l\u2019enfant.', ok:true}
+      ],
+      fb_ko:'Relis les deux derniers vers avec attention. Quel mot fort dit explicitement ce que ressent le po\u00e8te face au d\u00e9part de l\u2019enfant\u00a0?'
+    },
+    qB:{
+      texte:'Quelle citation du texte justifie ta r\u00e9ponse\u00a0?',
+      opts:[
+        {txt:'\u00ab\u00a0nos enfants nous sont bien n\u00e9cessaires\u00a0\u00bb', ok:false},
+        {txt:'\u00ab\u00a0Consid\u00e9rez que c\u2019est une chose bien triste / De le voir qui s\u2019en va\u00a0!\u00a0\u00bb', ok:true},
+        {txt:'\u00ab\u00a0Lorsque l\u2019enfant para\u00eet, le cercle de famille / Applaudit \u00e0 grands cris.\u00a0\u00bb', ok:false}
+      ],
+      fb_ko:'Tu as bien identifi\u00e9 la tonalit\u00e9. Mais la citation que tu as choisie vient du d\u00e9but du po\u00e8me, pas de la conclusion. La preuve de ta r\u00e9ponse se trouve dans les derniers vers.'
+    }
+  }
+];
+
+/* ═══════════════════════════════════════════
+   ÉTAT GLOBAL
+═══════════════════════════════════════════ */
+var TOTAL = 10;
+var scoreOk = 0;
+var scoreKo = 0;
+var doneDQ  = {}; /* dqId → {a:bool|null, b:bool|null} */
+DQ.forEach(function(dq){ doneDQ[dq.id]={a:null,b:null}; });
+
+/* ═══════════════════════════════════════════
+   BUILD
+═══════════════════════════════════════════ */
+function shuffle(arr){ return arr.slice().sort(function(){ return Math.random()-.5; }); }
+var LETTRES = ['A','B','C','D'];
+
+function buildCard(dq, idx){
+  var card = document.createElement('div');
+  card.className = 'card'+(idx>0?' locked':'');
+  card.id = 'card-'+dq.id;
+
+  var stripe = document.createElement('div');
+  stripe.className = 'card-stripe';
+  card.appendChild(stripe);
+
+  var lbl = document.createElement('div');
+  lbl.className = 'dq-label';
+  lbl.textContent = 'Question '+(idx+1)+' / 5';
+  card.appendChild(lbl);
+
+  var niv = document.createElement('div');
+  niv.className = 'niveau-badge';
+  niv.textContent = dq.niveau;
+  card.appendChild(niv);
+
+  /* ── Sous-question A ── */
+  card.appendChild(buildSQ(dq, 'a', idx));
+
+  /* ── Séparateur ── */
+  var sep = document.createElement('hr');
+  sep.className = 'sq-sep';
+  card.appendChild(sep);
+
+  /* ── Sous-question B (masquée) ── */
+  var sqB = buildSQ(dq, 'b', idx);
+  sqB.classList.add('sq-b');
+  sqB.id = 'sqb-'+dq.id;
+  card.appendChild(sqB);
+
+  return card;
+}
+
+function buildSQ(dq, part, dqIdx){
+  var q = part==='a' ? dq.qA : dq.qB;
+  var wrap = document.createElement('div');
+
+  var lbl = document.createElement('div');
+  lbl.className = 'sq-label';
+  lbl.textContent = part==='a' ? 'Question '+(dqIdx+1) : 'Justification '+(dqIdx+1);
+  wrap.appendChild(lbl);
+
+  var txt = document.createElement('div');
+  txt.className = 'sq-texte';
+  txt.textContent = q.texte;
+  wrap.appendChild(txt);
+
+  var opts = document.createElement('div');
+  opts.className = 'opts';
+  var shuffled = shuffle(q.opts);
+  shuffled.forEach(function(opt, oi){
+    var btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.id = 'opt-'+dq.id+'-'+part+'-'+oi;
+    btn.dataset.ok = opt.ok ? '1' : '0';
+    btn.innerHTML = '<span class="opt-letter">'+LETTRES[oi]+'.</span><span>'+opt.txt+'</span>';
+    btn.addEventListener('click', function(){ selOpt(dq.id, part, btn, shuffled, dqIdx); });
+    opts.appendChild(btn);
+  });
+  wrap.appendChild(opts);
+
+  var fb = document.createElement('div');
+  fb.className = 'sq-fb';
+  fb.id = 'fb-'+dq.id+'-'+part;
+  wrap.appendChild(fb);
+
+  /* Boutons vérif/réessayer — seulement pour A en premier, B ensuite */
+  if(part==='a'){
+    var btnRow = document.createElement('div');
+    btnRow.className = 'btn-row';
+    btnRow.id = 'btnrow-'+dq.id+'-a';
+    var bv = document.createElement('button');
+    bv.className='btn btn-primary'; bv.id='bverif-'+dq.id+'-a';
+    bv.textContent='\u2713\u00a0V\u00e9rifier';
+    bv.addEventListener('click', function(){ verifA(dq.id, dqIdx); });
+    var br2 = document.createElement('button');
+    br2.className='btn btn-ghost';
+    br2.textContent='\u21ba\u00a0R\u00e9essayer';
+    br2.addEventListener('click', function(){ resetSQ(dq.id,'a',shuffled,dqIdx); });
+    btnRow.appendChild(bv); btnRow.appendChild(br2);
+    wrap.appendChild(btnRow);
+  } else {
+    var btnRow2 = document.createElement('div');
+    btnRow2.className = 'btn-row';
+    btnRow2.id = 'btnrow-'+dq.id+'-b';
+    var bv2 = document.createElement('button');
+    bv2.className='btn btn-primary'; bv2.id='bverif-'+dq.id+'-b';
+    bv2.textContent='\u2713\u00a0V\u00e9rifier';
+    bv2.addEventListener('click', function(){ verifB(dq.id, dqIdx); });
+    var br3 = document.createElement('button');
+    br3.className='btn btn-ghost';
+    br3.textContent='\u21ba\u00a0R\u00e9essayer';
+    br3.addEventListener('click', function(){ resetSQ(dq.id,'b',shuffled,dqIdx); });
+    btnRow2.appendChild(bv2); btnRow2.appendChild(br3);
+    wrap.appendChild(btnRow2);
+  }
+
+  return wrap;
+}
+
+/* ═══════════════════════════════════════════
+   INTERACTIONS
+═══════════════════════════════════════════ */
+function getSelBtn(dqId, part){
+  var container = document.getElementById('card-'+dqId);
+  var btns = container.querySelectorAll('.opt-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.id.indexOf('-'+part+'-')>-1 && b.classList.contains('sel-opt')) return b;
+  }
+  return null;
+}
+
+function selOpt(dqId, part, btn, shuffled, dqIdx){
+  /* désélectionner les autres du même part */
+  var card = document.getElementById('card-'+dqId);
+  var btns = card.querySelectorAll('.opt-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.id.indexOf('-'+part+'-')>-1) b.classList.remove('sel-opt');
+  }
+  btn.classList.add('sel-opt');
+}
+
+function verifA(dqId, dqIdx){
+  if(doneDQ[dqId].a!==null) return;
+  var sel = getSelBtn(dqId,'a');
+  if(!sel){
+    showFB(dqId,'a','mid','Choisis une r\u00e9ponse avant de v\u00e9rifier.');
+    return;
+  }
+  var ok = sel.dataset.ok==='1';
+  doneDQ[dqId].a = ok;
+  colorOpts(dqId,'a');
+  document.getElementById('bverif-'+dqId+'-a').disabled=true;
+  var fb = document.getElementById('fb-'+dqId+'-a');
+  if(ok){
+    fb.className='sq-fb show ok-fb';
+    fb.textContent='\u2713 Correct\u00a0!';
+    scoreOk++;
+  } else {
+    fb.className='sq-fb show ko-fb';
+    fb.textContent=DQ[dqIdx].qA.fb_ko;
+    scoreKo++;
+  }
+  /* Afficher B */
+  document.getElementById('sqb-'+dqId).classList.add('show');
+  updateGlobal();
+}
+
+function verifB(dqId, dqIdx){
+  if(doneDQ[dqId].b!==null) return;
+  var sel = getSelBtn(dqId,'b');
+  if(!sel){
+    showFB(dqId,'b','mid','Choisis une citation avant de v\u00e9rifier.');
+    return;
+  }
+  var ok = sel.dataset.ok==='1';
+  doneDQ[dqId].b = ok;
+  colorOpts(dqId,'b');
+  document.getElementById('bverif-'+dqId+'-b').disabled=true;
+  var fb = document.getElementById('fb-'+dqId+'-b');
+  if(ok){
+    fb.className='sq-fb show ok-fb';
+    fb.textContent='\u2713 Bonne citation\u00a0!';
+    scoreOk++;
+  } else {
+    fb.className='sq-fb show ko-fb';
+    fb.textContent=DQ[dqIdx].qB.fb_ko;
+    scoreKo++;
+  }
+  /* Débloquer DQ suivante */
+  if(dqIdx+1<DQ.length){
+    var nextCard = document.getElementById('card-'+DQ[dqIdx+1].id);
+    nextCard.classList.remove('locked');
+  }
+  updateGlobal();
+  /* Résultats si dernière DQ */
+  if(dqIdx===DQ.length-1) afficherResultats();
+}
+
+function colorOpts(dqId, part){
+  var card = document.getElementById('card-'+dqId);
+  var btns = card.querySelectorAll('.opt-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.id.indexOf('-'+part+'-')<0) continue;
+    b.disabled=true;
+    b.classList.remove('sel-opt');
+    if(b.dataset.ok==='1')            b.classList.add('ok-opt');
+    else if(b.classList.contains('sel-opt')||b===getSelBtn(dqId,part)){/* déjà géré */}
+  }
+  /* marquer ko sur le sélectionné si faux */
+  var sel = document.querySelector('#card-'+dqId+' .opt-btn.sel-opt');
+  if(sel && sel.id.indexOf('-'+part+'-')>-1 && sel.dataset.ok==='0') sel.classList.add('ko-opt');
+}
+
+function showFB(dqId, part, cls, msg){
+  var fb = document.getElementById('fb-'+dqId+'-'+part);
+  fb.className='sq-fb show '+(cls==='mid'?'ko-fb':cls+'-fb');
+  fb.textContent=msg;
+}
+
+function resetSQ(dqId, part, shuffled, dqIdx){
+  /* Réinitialise seulement si non encore validé */
+  if(doneDQ[dqId][part]!==null) return;
+  var card = document.getElementById('card-'+dqId);
+  var btns = card.querySelectorAll('.opt-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i];
+    if(b.id.indexOf('-'+part+'-')<0) continue;
+    b.classList.remove('sel-opt','ok-opt','ko-opt');
+    b.disabled=false;
+  }
+  var fb = document.getElementById('fb-'+dqId+'-'+part);
+  fb.className='sq-fb';
+  fb.textContent='';
+  document.getElementById('bverif-'+dqId+'-'+part).disabled=false;
+}
+
+/* ═══════════════════════════════════════════
+   SCORE GLOBAL
+═══════════════════════════════════════════ */
+function updateGlobal(){
+  var done = scoreOk+scoreKo;
+  var pct = Math.round(scoreOk/TOTAL*100);
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=scoreOk+' / '+TOTAL+' points';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('cnt-ok').textContent=scoreOk;
+  document.getElementById('cnt-ko').textContent=scoreKo;
+  document.getElementById('cnt-rem').textContent=TOTAL-done;
+}
+
+/* ═══════════════════════════════════════════
+   RÉSULTATS FINAUX
+═══════════════════════════════════════════ */
+function afficherResultats(){
+  document.getElementById('results-screen').classList.add('show');
+  document.getElementById('score-num').textContent=scoreOk;
+  var stars=scoreOk>=9?5:scoreOk>=7?4:scoreOk>=5?3:scoreOk>=3?2:1;
+  document.getElementById('stars-row').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge=document.getElementById('badge-deblocage');
+  if(scoreOk>=7){
+    badge.innerHTML='<div class="badge-deblocage">\u2713 Score suffisant \u2014 tu peux passer \u00e0 l\u2019\u00e9tape suivante\u00a0!</div>';
+  } else {
+    badge.innerHTML='<div class="badge-manque">Score insuffisant ('+scoreOk+'/10). Il faut au moins 7/10 pour continuer. Recommence\u00a0!</div>';
+  }
+  var msgs=[
+    '\u00c0 retravailler\u00a0! Relis le po\u00e8me et les indications.',
+    '\u00c0 retravailler\u00a0! Relis le po\u00e8me et les indications.',
+    '\u00c0 retravailler\u00a0! Relis le po\u00e8me et les indications.',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait \u2014 sans faute\u00a0!'
+  ];
+  document.getElementById('results-msg').textContent=msgs[Math.min(scoreOk,msgs.length-1)];
+  document.getElementById('results-screen').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ═══════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════ */
+function resetTout(){
+  scoreOk=0; scoreKo=0;
+  DQ.forEach(function(dq){ doneDQ[dq.id]={a:null,b:null}; });
+  document.getElementById('results-screen').classList.remove('show');
+  document.getElementById('col-right').innerHTML='';
+  DQ.forEach(function(dq,i){ document.getElementById('col-right').appendChild(buildCard(dq,i)); });
+  updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+var colRight = document.getElementById('col-right');
+DQ.forEach(function(dq,i){ colRight.appendChild(buildCard(dq,i)); });
+updateGlobal();
+</script>
+</body>
+</html>
