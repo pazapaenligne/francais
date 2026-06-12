@@ -83,11 +83,12 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 .texte-annote{font-size:clamp(.95rem,3vw,1.08rem);line-height:2.2;padding:14px 16px;background:var(--jour-clair);border:1.5px solid var(--jour-pale);border-radius:10px;word-break:break-word;}
 /* Tokens annotés */
 .tok-ok{color:var(--txt);}
-.tok-err{background:var(--rouge-bg);color:var(--rouge-err);border-bottom:2px solid var(--rouge-err);border-radius:2px;padding:0 1px;}
-.tok-err-cible{background:#fdeaea;color:var(--rouge-err);border-bottom:2.5px solid var(--rouge-err);border-radius:2px;padding:0 1px;font-weight:700;}
-.tok-manq{background:var(--rouge-bg);color:var(--rouge-err);border-bottom:2px dashed var(--rouge-err);border-radius:2px;padding:0 1px;font-style:italic;}
+.tok-err{background:#ffe0a0;color:#6b3a00;border-bottom:2.5px solid #e07800;border-radius:2px;padding:0 1px;font-weight:600;}
+.tok-err-cible{background:#fdeaea;color:#c0392b;border-bottom:2.5px solid #c0392b;border-radius:2px;padding:0 2px;font-weight:700;}
+.tok-manq{background:#ffe0a0;color:#6b3a00;border-bottom:2.5px dashed #e07800;border-radius:2px;padding:0 1px;font-style:italic;font-weight:600;}
 .tok-manq-cible{background:#fdeaea;color:var(--rouge-err);border-bottom:2.5px dashed var(--rouge-err);border-radius:2px;padding:0 1px;font-style:italic;font-weight:700;}
-.tok-extra{background:#fff3cd;color:#856404;border-bottom:2px dotted #856404;border-radius:2px;padding:0 1px;text-decoration:line-through;}
+.tok-corr-cible{font-size:.9em;color:#157f3a;font-style:italic;font-weight:700;background:#d1fae5;padding:0 4px;border-radius:3px;margin-left:1px;}
+.tok-corr{font-size:.9em;color:#7a4e00;font-style:italic;font-weight:600;background:#fef3c7;padding:0 4px;border-radius:3px;margin-left:1px;}
 
 /* ── SCORE ── */
 .score-card{background:#fff;border:2px solid var(--jour-pale);border-radius:14px;padding:22px 20px;margin-top:16px;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.06);}
@@ -98,9 +99,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 .score-msg{font-size:clamp(.88rem,2.5vw,1rem);line-height:1.8;color:var(--txt);max-width:520px;margin:0 auto 16px;}
 
 /* ── LÉGENDE ── */
-.legende{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;background:var(--jour-clair);border-radius:10px;border:1px solid var(--jour-pale);}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--gris);}
-.leg-swatch{width:16px;height:10px;border-radius:2px;}
+
 </style>
 </head>
 <body>
@@ -120,7 +119,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 
     <div class="consigne-box">
       Écoute la dictée, puis saisis le texte dans la zone ci-dessous.<br>
-      <b>Seules les fautes</b> portant sur le <b>conditionnel passé</b> et les <b>terminaisons en [e]</b> sont comptées. <b>&minus;0,5 pt par faute.</b> Note sur 10, plancher&nbsp;: 0.
+      <b>Seules les fautes</b> portant sur le <b>conditionnel passé</b> et les <b>terminaisons en [e]</b> sont comptées. <b>&minus;0,5 pt par faute.</b>
     </div>
 
     <!-- LECTEUR AUDIO CUSTOM -->
@@ -151,11 +150,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
     <div class="result-zone" id="resultZone">
       <div class="result-label">Texte annoté</div>
       <div class="texte-annote" id="texteAnnote"></div>
-      <div class="legende">
-        <div class="leg-item"><div class="leg-swatch" style="background:#fdeaea;border-bottom:2.5px solid #ef4444;"></div>Faute comptée (cible)</div>
-        <div class="leg-item"><div class="leg-swatch" style="background:#fdeaea;border-bottom:2px solid #ef4444;"></div>Faute non comptée</div>
-        <div class="leg-item"><div class="leg-swatch" style="background:#fff3cd;border-bottom:2px dotted #856404;"></div>Mot en trop</div>
-      </div>
+
     </div>
 
     <!-- SCORE -->
@@ -208,16 +203,48 @@ function normTok(s){
     .replace(/['']/g,"'")
     .replace(/[^a-z0-9''\-]/g,"");
 }
+function normStrict(s){
+  return String(s).toLowerCase()
+    .normalize("NFC")
+    .replace(/[\u2019\u2018'']/g,"'")
+    .replace(/[^a-z0-9\u00e0\u00e2\u00e4\u00e9\u00e8\u00ea\u00eb\u00ee\u00ef\u00f4\u00f9\u00fb\u00fc\u00ff\u0153\u00e7'\-]/g,"");
+}
 
 /* Tokeniser en conservant les espaces/ponctuation */
 function tokeniser(texte){
   const tokens=[];
-  const re=/([a-zA-ZÀ-ÿœŒ][a-zA-ZÀ-ÿœŒ'\-]*)|([^a-zA-ZÀ-ÿœŒ'\-]+)/g;
+  const re=/([a-zA-ZÀ-ÿœŒ][a-zA-ZÀ-ÿœŒ'\u2019\-]*)|([^a-zA-ZÀ-ÿœŒ'\u2019\-]+)/g;
   let m;
   while((m=re.exec(texte))!==null){
-    tokens.push({w:m[0], isWord:!!m[1]});
+    tokens.push({w:m[0].replace(/’/g,"'"), isWord:!!m[1]});
   }
   return tokens;
+}
+
+/* ── SIMILARITÉ TOKENS ── */
+function tokSim(a,b){
+  const na=normTok(a), nb=normTok(b);
+  if(na===nb) return true;
+  // Préfixe commun >= 4 chars (ex: s'étendai ~ s'étendait)
+  const minL=Math.min(na.length,nb.length);
+  if(minL>=4 && na.slice(0,minL)===nb.slice(0,minL)) return true;
+  // Distance de Levenshtein <= 2 pour mots courts/moyens
+  if(Math.abs(na.length-nb.length)>3) return false;
+  return lev(na,nb)<=2;
+}
+function lev(a,b){
+  const m=a.length,n=b.length;
+  if(!m) return n; if(!n) return m;
+  const dp=Array.from({length:m+1},(_,i)=>i);
+  for(let j=1;j<=n;j++){
+    let prev=dp[0]; dp[0]=j;
+    for(let i=1;i<=m;i++){
+      const tmp=dp[i];
+      dp[i]=a[i-1]===b[j-1]?prev:1+Math.min(prev,dp[i],dp[i-1]);
+      prev=tmp;
+    }
+  }
+  return dp[m];
 }
 
 /* ── LCS ── */
@@ -225,14 +252,14 @@ function lcs(a,b){
   const m=a.length,n=b.length;
   const dp=Array.from({length:m+1},()=>new Int16Array(n+1));
   for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){
-    if(normTok(a[i-1])===normTok(b[j-1])) dp[i][j]=dp[i-1][j-1]+1;
+    if(tokSim(a[i-1],b[j-1])) dp[i][j]=dp[i-1][j-1]+1;
     else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
   }
   // Backtrack
   const align=[];
   let i=m,j=n;
   while(i>0||j>0){
-    if(i>0&&j>0&&normTok(a[i-1])===normTok(b[j-1])){
+    if(i>0&&j>0&&tokSim(a[i-1],b[j-1])){
       align.unshift({type:'ok',ref:a[i-1],elv:b[j-1]});i--;j--;
     } else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){
       align.unshift({type:'extra',ref:null,elv:b[j-1]});j--;
@@ -255,35 +282,73 @@ function valider(){
   const saisi=preClean(document.getElementById('dicteeInput').value.trim());
   const ref=preClean(REF);
 
-  // Extraire les mots uniquement pour LCS
-  const refMots=tokeniser(ref).filter(t=>t.isWord).map(t=>t.w);
-  const elvMots=tokeniser(saisi).filter(t=>t.isWord).map(t=>t.w);
+  // Tokeniser les deux textes en gardant ponctuation + espaces
+  const elvToks=tokeniser(saisi);
+  const refToks=tokeniser(ref);
+  const elvMots=elvToks.filter(t=>t.isWord).map(t=>t.w);
+  const refMots=refToks.filter(t=>t.isWord).map(t=>t.w);
 
+  // LCS sur les mots seuls
   const align=lcs(refMots,elvMots);
 
-  // Compter les fautes sur les cibles
+  // Construire une map : index mot élève → {refMot}
+  // align peut avoir : ok(ref+elv), extra(elv seulement), manq(ref seulement)
+  const elvWordInfo=[]; // pour chaque mot de l'élève : {refMot ou null, type}
+  align.forEach(a=>{
+    if(a.type==='ok')   elvWordInfo.push({ref:a.ref,  type:'ok'});
+    else if(a.type==='extra') elvWordInfo.push({ref:null, type:'extra'});
+    // manq → pas de mot élève correspondant, ignoré ici
+  });
+
+  // Compter les fautes cibles
   let fautesCiblees=0;
   const fautesDetail=[];
-
   align.forEach(a=>{
-    if(a.type==='ok'){
-      // Vérifier orthographe exacte
-      if(a.ref!==a.elv){
-        const estCible=CIBLES_MOTS.has(normTok(a.ref))||isCible(a.ref);
-        if(estCible){fautesCiblees+=0.5;fautesDetail.push({ref:a.ref,elv:a.elv,type:'orthographe'});}
-      }
-    } else if(a.type==='manq'){
-      const estCible=isCible(a.ref);
-      if(estCible){fautesCiblees+=0.5;fautesDetail.push({ref:a.ref,elv:'(manquant)',type:'manquant'});}
+    if(a.type==='ok' && normStrict(a.ref)!==normStrict(a.elv) && isCible(a.ref)){
+      fautesCiblees+=0.5;
+      fautesDetail.push({ref:a.ref,elv:a.elv});
+    } else if(a.type==='manq' && isCible(a.ref)){
+      fautesCiblees+=0.5;
+      fautesDetail.push({ref:a.ref,elv:'(manquant)'});
     }
   });
 
-  // Construire le texte annoté (token par token du texte référence)
-  const html=construireAnnote(align);
+  // Reconstruire le texte de l'élève avec annotations
+  let html='';
+  let wi=0; // index dans elvWordInfo
+  elvToks.forEach(tok=>{
+    if(!tok.isWord){
+      html+=esc(tok.w); // ponctuation/espaces : tels quels
+    } else {
+      const info=elvWordInfo[wi]||{ref:null,type:'extra'};
+      wi++;
+      if(info.type==='extra' || !info.ref){
+        // Mot sans correspondance dans le référence → orange
+        html+='<span class="tok-err">'+esc(tok.w)+'</span>';
+      } else if(normStrict(info.ref)===normStrict(tok.w)){
+        // Correct
+        html+='<span class="tok-ok">'+esc(tok.w)+'</span>';
+      } else if(isCible(info.ref)){
+        // Faute comptée → rouge + correction en vert
+        html+='<span class="tok-err-cible">'+esc(tok.w)+'</span>'
+            +'<span class="tok-corr-cible"> ('+esc(info.ref)+')</span>';
+      } else {
+        // Faute non comptée → orange + correction en brun
+        html+='<span class="tok-err">'+esc(tok.w)+'</span>'
+            +'<span class="tok-corr"> ('+esc(info.ref)+')</span>';
+      }
+    }
+  });
+
+  // Mots cibles manquants → signalés à la fin
+  const manquants=align.filter(a=>a.type==='manq'&&isCible(a.ref));
+  if(manquants.length>0){
+    html+='<span class="tok-manq-cible"> [manquants\u00a0: '
+      +manquants.map(m=>esc(m.ref)).join(', ')+']</span>';
+  }
+
   document.getElementById('texteAnnote').innerHTML=html;
   document.getElementById('resultZone').className='result-zone show';
-
-  // Score
   const note=Math.max(0,Math.min(10,10-fautesCiblees));
   afficherScore(note,fautesCiblees,fautesDetail);
 }
@@ -293,25 +358,6 @@ function isCible(mot){
   return CIBLES_MOTS.has(n)||CIBLES_MOTS.has(mot);
 }
 
-function construireAnnote(align){
-  let html='';
-  align.forEach(a=>{
-    if(a.type==='ok'){
-      if(a.ref===a.elv){
-        html+='<span class="tok-ok">'+esc(a.ref)+'</span> ';
-      } else {
-        const cible=isCible(a.ref);
-        html+='<span class="'+(cible?'tok-err-cible':'tok-err')+'" title="Vous\u00a0: '+esc(a.elv)+' &rarr; '+esc(a.ref)+'">'+esc(a.elv)+'</span> ';
-      }
-    } else if(a.type==='manq'){
-      const cible=isCible(a.ref);
-      html+='<span class="'+(cible?'tok-manq-cible':'tok-manq')+'" title="Mot manquant\u00a0: '+esc(a.ref)+'">'+esc(a.ref)+'</span> ';
-    } else if(a.type==='extra'){
-      html+='<span class="tok-extra" title="Mot en trop">'+esc(a.elv)+'</span> ';
-    }
-  });
-  return html;
-}
 
 function afficherScore(note,fautes,detail){
   const el=document.getElementById('scoreCard');
