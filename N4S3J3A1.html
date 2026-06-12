@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S3 J3 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#8dc63f; --day-dark:#3d7a10;
+      --day-light:#f0faeb; --day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.28);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+      width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:170px;height:170px;
+      background:var(--orange);bottom:110px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:110px;height:110px;
+      background:var(--pink);top:190px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.5rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.85rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    .progress-wrap{width:100%;max-width:740px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.4rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;width:100%;max-width:740px;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;
+      white-space:nowrap;color:var(--text);}
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:#aaa;}
+
+    /* Référentiel */
+    .referentiel{width:100%;max-width:740px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.2rem;position:relative;z-index:1;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--yellow));}
+    .ref-title{font-family:'JetBrains Mono',monospace;font-size:.7rem;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);
+      margin-bottom:.7rem;font-weight:800;}
+    .ref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem .8rem;
+      margin-bottom:.7rem;}
+    .ref-item{font-size:.82rem;color:var(--text);line-height:1.5;}
+    .ref-tag{font-family:'JetBrains Mono',monospace;font-weight:700;
+      color:var(--day-dark);background:var(--day-light);border:1px solid var(--day-border);
+      border-radius:4px;padding:.05rem .35rem;font-size:.78rem;margin-right:.3rem;}
+    .ref-methode{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:8px;padding:.5rem .8rem;font-size:.82rem;color:var(--text);line-height:1.6;}
+    .ref-methode strong{color:var(--day-dark);}
+
+    /* Cards */
+    .card{width:100%;max-width:740px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.5rem 1.2rem 1.3rem;
+      position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;margin-bottom:1.2rem;}
+    .card.locked{opacity:.5;pointer-events:none;filter:grayscale(.4);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--yellow),var(--day-dark));}
+    .act-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;
+      border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .act-title{font-size:1.12rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;line-height:1.3;}
+    .consigne{font-size:.95rem;color:var(--text);margin-bottom:1.1rem;line-height:1.7;}
+    .lock-msg{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      color:var(--day-dark);text-align:center;padding:.4rem;margin-bottom:.5rem;}
+
+    /* Activité 1 — blocs phrase */
+    .ph-block{background:var(--bg);border:1.5px solid var(--border);
+      border-radius:12px;padding:.8rem 1rem;margin-bottom:.7rem;}
+    .ph-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;
+      color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.08em;}
+    .ph-text{font-size:.97rem;color:var(--text);line-height:1.7;margin-bottom:.6rem;}
+    .ph-text .blank{font-style:italic;color:var(--day-dark);font-weight:700;}
+    .choices{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .choice-btn{padding:.35rem .75rem;border-radius:7px;border:2px solid var(--day-border);
+      background:var(--surface);font-size:.88rem;font-family:Arial,sans-serif;
+      color:var(--text);cursor:pointer;transition:all .15s;min-height:2.8rem;
+      font-weight:600;-webkit-tap-highlight-color:transparent;}
+    .choice-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .choice-btn.sel-c{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+    .choice-btn.ok-c{background:#d4edda;border-color:var(--green);color:#1a4d0d;}
+    .choice-btn.ko-c{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;text-decoration:line-through;}
+    .choice-btn.miss-c{background:#fff3cd;border-color:var(--yellow);color:#5a3e00;}
+    .choice-btn:disabled{cursor:default;}
+    .ph-fb{font-size:.78rem;font-family:'JetBrains Mono',monospace;
+      margin-top:.4rem;display:none;line-height:1.5;}
+    .ph-fb.show{display:block;}
+    .ph-fb.ok-fb{color:#1a4d0d;}
+    .ph-fb.ko-fb{color:#8b1a1a;}
+    .ph-fb.just-fb{color:#3d7a10;font-style:italic;margin-top:.25rem;}
+
+    /* Activité 2 — phrases cliquables */
+    .ph2-block{background:var(--bg);border:1.5px solid var(--border);
+      border-radius:12px;padding:.8rem 1rem;margin-bottom:.7rem;}
+    .ph2-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;
+      color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.08em;}
+    .ph2-consigne{font-size:.8rem;color:var(--muted);margin-bottom:.5rem;
+      font-family:'JetBrains Mono',monospace;}
+    .ph2-text{font-size:.97rem;color:var(--text);line-height:2;margin-bottom:.5rem;}
+    .w2{display:inline;cursor:pointer;border-radius:3px;padding:1px 3px;
+      transition:background .13s;-webkit-user-select:none;user-select:none;
+      -webkit-tap-highlight-color:transparent;}
+    .w2:hover{background:var(--day-light);color:var(--day-dark);}
+    .w2.sel2{background:var(--orange);color:#fff;font-weight:700;border-radius:4px;}
+    .w2.ok-w2{background:#d4edda;border:1.5px solid var(--green);color:#1a4d0d;font-weight:700;border-radius:4px;}
+    .w2.ko-w2{background:#ffe0de;border:1.5px solid var(--pink);color:#8b1a1a;font-weight:700;border-radius:4px;text-decoration:line-through;}
+    .w2.miss-w2{background:#fff3cd;border:1.5px solid var(--yellow);color:#5a3e00;font-weight:700;border-radius:4px;}
+    .correct-tag{display:inline-block;background:#f0faeb;border:1.5px solid var(--green);
+      color:#1a4d0d;font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      padding:.1rem .5rem;border-radius:6px;margin-left:.4rem;display:none;}
+    .correct-tag.show{display:inline-block;}
+    /* Correction saisie */
+    .corr-row{display:flex;align-items:center;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;display:none;}
+    .corr-row.show{display:flex;}
+    .corr-label{font-size:.8rem;color:var(--day-dark);font-weight:700;white-space:nowrap;}
+    .corr-input{border:2px solid var(--day-border);border-radius:7px;
+      padding:.3rem .6rem;font-size:.9rem;font-family:Arial,sans-serif;
+      color:var(--text);background:var(--surface);outline:none;
+      transition:border-color .15s;min-height:2.8rem;width:160px;}
+    .corr-input:focus{border-color:var(--day-color);}
+    .corr-input:disabled{background:#f0ede8;color:var(--muted);}
+    .corr-input.ok-inp{background:#d4edda;border-color:var(--green);color:#1a4d0d;font-weight:700;}
+    .corr-input.ko-inp{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;}
+    /* Bouton "Pas d'erreur" */
+    .no-err-btn{padding:.35rem .8rem;border-radius:7px;border:2px solid var(--day-border);
+      background:var(--surface);font-size:.85rem;font-family:Arial,sans-serif;
+      color:var(--day-dark);cursor:pointer;transition:all .15s;min-height:2.8rem;
+      font-weight:600;-webkit-tap-highlight-color:transparent;}
+    .no-err-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .no-err-btn.sel-ne{border-color:var(--day-color);background:var(--day-light);}
+    .no-err-btn.ok-ne{background:#d4edda;border-color:var(--green);color:#1a4d0d;}
+    .no-err-btn.ko-ne{background:#ffe0de;border-color:var(--pink);color:#8b1a1a;}
+    .no-err-btn:disabled{cursor:default;}
+    .ph2-fb{font-size:.78rem;font-family:'JetBrains Mono',monospace;
+      margin-top:.4rem;display:none;line-height:1.5;}
+    .ph2-fb.show{display:block;}
+    .ph2-fb.ok-fb{color:#1a4d0d;}
+    .ph2-fb.ko-fb{color:#8b1a1a;}
+
+    /* Boutons */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+    .btn-sol{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+    .btn-sol:hover:not(:disabled){background:var(--day-light);}
+
+    .feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;
+      display:none;align-items:flex-start;gap:.6rem;line-height:1.7;}
+    .feedback.show{display:flex;}
+    .feedback.ok {background:#f0faeb;border:1.5px solid var(--green);color:#1a4d0d;}
+    .feedback.ko {background:#fff0ef;border:1.5px solid var(--pink);color:#8b1a1a;}
+    .feedback.mid{background:#fffbeb;border:1.5px solid var(--yellow);color:#5a3e00;}
+    .feedback-icon{font-size:1.3rem;flex-shrink:0;line-height:1;}
+    .feedback-detail{font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.3rem;line-height:1.7;}
+    .feedback.ok  .feedback-detail{color:#1a4d0d;}
+    .feedback.ko  .feedback-detail{color:#8b1a1a;}
+    .feedback.mid .feedback-detail{color:#5a3e00;}
+
+    .results{width:100%;max-width:740px;text-align:center;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2rem 1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:1.8rem;margin:.4rem 0 1rem;letter-spacing:.2rem;}
+    .results-msg{color:var(--text);font-size:.95rem;margin-bottom:1.5rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr 1fr;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4ème
+  </div>
+  <div class="week-label">Semaine 3 – Jour 3</div>
+  <h1>Je m'entraîne · <span class="hl">Terminaisons en [e]</span></h1>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 22 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="cnt-ok">0</span> corrects</div>
+  <div class="chip wrong">  <div class="dot"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="cnt-rem">22</span> restants</div>
+</div>
+
+<!-- Référentiel permanent -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-title">📖 Référentiel — Terminaisons en [e]</div>
+  <div class="ref-grid">
+    <div class="ref-item"><span class="ref-tag">-er</span> Infinitif (après verbe conjugué ou préposition)</div>
+    <div class="ref-item"><span class="ref-tag">-é / -ée</span> Participe passé (après auxiliaire ou comme adjectif)</div>
+    <div class="ref-item"><span class="ref-tag">-ez</span> 2e pers. pl. (vous)</div>
+    <div class="ref-item"><span class="ref-tag">-ais / -ait / -aient</span> Imparfait</div>
+    <div class="ref-item"><span class="ref-tag">-e / -es / -ent</span> Présent de l'indicatif</div>
+  </div>
+  <div class="ref-methode">
+    <strong>Méthode :</strong> remplace par <em>prendre</em> ou <em>pris</em> pour tester infinitif vs participe passé.
+    Si <em>prendre</em> convient → infinitif (-er). Si <em>pris</em> convient → participe passé (-é).
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     ACTIVITÉ 1
+═══════════════════════════ -->
+<div class="card" id="card-a1">
+  <div class="card-stripe"></div>
+  <div class="act-label">Activité 1 / 2</div>
+  <div class="theme-badge">Choix de la terminaison ✏️</div>
+  <div class="act-title">Choisis la bonne terminaison</div>
+  <p class="consigne">Pour chaque phrase, clique sur la forme correcte du verbe.</p>
+  <div id="phrases-a1"></div>
+  <div class="btn-row" id="a1-row1">
+    <button class="btn btn-primary" id="a1-btn-verif" onclick="verifierA1()">✓ Vérifier</button>
+    <button class="btn btn-ghost" onclick="resetA1()">✕ Effacer</button>
+  </div>
+  <div class="btn-row" id="a1-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetA1()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solA1()">Voir la solution</button>
+  </div>
+  <div class="feedback" id="fb-a1">
+    <span class="feedback-icon" id="fb-a1-icon"></span>
+    <div>
+      <div id="fb-a1-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-a1-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     ACTIVITÉ 2
+═══════════════════════════ -->
+<div class="card locked" id="card-a2">
+  <div class="card-stripe"></div>
+  <div class="act-label">Activité 2 / 2</div>
+  <div class="theme-badge">Détecter et corriger 🔍</div>
+  <div class="lock-msg" id="a2-lock-msg">🔒 Valide l'activité 1 pour débloquer.</div>
+  <div class="act-title">Repère et corrige les erreurs</div>
+  <p class="consigne">Certaines phrases contiennent une erreur de terminaison, d'autres sont correctes. Clique sur le mot erroné et saisis la correction — ou indique que la phrase est correcte.</p>
+  <div id="phrases-a2"></div>
+  <div class="btn-row" id="a2-row1">
+    <button class="btn btn-primary" id="a2-btn-verif" onclick="verifierA2()">✓ Vérifier</button>
+    <button class="btn btn-ghost" onclick="resetA2()">✕ Effacer</button>
+  </div>
+  <div class="btn-row" id="a2-row2" style="display:none;">
+    <button class="btn btn-ghost" onclick="resetA2()">Recommencer</button>
+    <button class="btn btn-sol" onclick="solA2()">Voir la solution</button>
+  </div>
+  <div class="feedback" id="fb-a2">
+    <span class="feedback-icon" id="fb-a2-icon"></span>
+    <div>
+      <div id="fb-a2-msg" style="font-weight:700;margin-bottom:.2rem;"></div>
+      <div class="feedback-detail" id="fb-a2-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem;">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/22</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <button class="btn btn-primary" onclick="resetTout()" style="margin:0 auto;display:flex;">Recommencer tout</button>
+  </div>
+</div>
+
+<script>
+var TOTAL = 22;
+var doneA1 = false;
+var doneA2 = false;
+var scoreA1 = 0;
+var scoreA2 = 0;
+
+/* ═══════════════════════════════════
+   DONNÉES ACTIVITÉ 1
+═══════════════════════════════════ */
+var PH1 = [
+  {
+    id: 'p1',
+    avant: 'Il faut ',
+    apres: ' ces informations avant de conclure.',
+    choix: ['v\u00e9rifier','v\u00e9rifiez','v\u00e9rifi\u00e9'],
+    sol: 'v\u00e9rifier',
+    just: 'Infinitif apr\u00e8s le verbe \u00ab\u00a0faut\u00a0\u00bb. Test : \u00ab\u00a0il faut prendre\u00a0\u00bb \u2192 prendre convient \u2192 -er.',
+    fb_er_e: 'Teste la m\u00e9thode : remplace par \u00ab\u00a0prendre\u00a0\u00bb ou \u00ab\u00a0pris\u00a0\u00bb. Lequel convient dans la phrase\u00a0?',
+    fb_ez_er: ''
+  },
+  {
+    id: 'p2',
+    avant: 'Vous ',
+    apres: ' attentivement les r\u00e9sultats.',
+    choix: ['observez','observer','observ\u00e9'],
+    sol: 'observez',
+    just: '2e personne du pluriel au pr\u00e9sent. Le sujet est \u00ab\u00a0vous\u00a0\u00bb \u2192 terminaison -ez.',
+    fb_er_e: 'Teste la m\u00e9thode : remplace par \u00ab\u00a0prendre\u00a0\u00bb ou \u00ab\u00a0pris\u00a0\u00bb. Lequel convient dans la phrase\u00a0?',
+    fb_ez_er: 'Cherche le sujet du verbe. Si c\u2019est \u00ab\u00a0vous\u00a0\u00bb, prends -ez. Sinon, demande-toi si le verbe est \u00e0 l\u2019infinitif.'
+  },
+  {
+    id: 'p3',
+    avant: 'La d\u00e9cision a \u00e9t\u00e9 ',
+    apres: ', malgr\u00e9 les r\u00e9ticences.',
+    choix: ['prise','prendre','prenez'],
+    sol: 'prise',
+    just: 'Participe pass\u00e9 apr\u00e8s l\u2019auxiliaire \u00ab\u00a0a \u00e9t\u00e9\u00a0\u00bb, accord\u00e9 avec \u00ab\u00a0la d\u00e9cision\u00a0\u00bb (f\u00e9minin).',
+    fb_er_e: 'Teste la m\u00e9thode : \u00ab\u00a0pris\u00a0\u00bb convient apr\u00e8s \u00ab\u00a0a \u00e9t\u00e9\u00a0\u00bb \u2192 c\u2019est un participe pass\u00e9. Attention \u00e0 l\u2019accord.',
+    fb_ez_er: ''
+  },
+  {
+    id: 'p4',
+    avant: 'Les enfants ',
+    apres: ' dehors quand la pluie a commenc\u00e9.',
+    choix: ['jouaient','jouer','jouez'],
+    sol: 'jouaient',
+    just: 'Imparfait : l\u2019action \u00e9tait en cours quand un \u00e9v\u00e9nement est survenu (\u00ab\u00a0quand\u00a0\u00bb + pass\u00e9 compos\u00e9).',
+    fb_er_e: 'Repère les indices de temps dans la phrase (\u00ab\u00a0quand\u00a0\u00bb\u2026) pour choisir entre imparfait et pr\u00e9sent.',
+    fb_ez_er: 'Repère les indices de temps dans la phrase (\u00ab\u00a0quand\u00a0\u00bb\u2026) pour choisir entre imparfait et pr\u00e9sent.'
+  },
+  {
+    id: 'p5',
+    avant: 'Sans ',
+    apres: ', il est difficile de progresser.',
+    choix: ['s\u2019entra\u00eener','s\u2019entra\u00eenez','s\u2019entra\u00een\u00e9'],
+    sol: 's\u2019entra\u00eener',
+    just: 'Infinitif apr\u00e8s la pr\u00e9position \u00ab\u00a0sans\u00a0\u00bb. Test : \u00ab\u00a0sans prendre\u00a0\u00bb \u2192 prendre convient \u2192 -er.',
+    fb_er_e: 'Teste la m\u00e9thode : remplace par \u00ab\u00a0prendre\u00a0\u00bb ou \u00ab\u00a0pris\u00a0\u00bb. Lequel convient dans la phrase\u00a0?',
+    fb_ez_er: 'Cherche le sujet du verbe. Si c\u2019est \u00ab\u00a0vous\u00a0\u00bb, prends -ez. Sinon, demande-toi si le verbe est \u00e0 l\u2019infinitif.'
+  },
+  {
+    id: 'p6',
+    avant: 'Les r\u00e9sultats ',
+    apres: ' depuis des semaines ont enfin \u00e9t\u00e9 publi\u00e9s.',
+    choix: ['attendus','attendre','attendez'],
+    sol: 'attendus',
+    just: 'Participe pass\u00e9 employ\u00e9 comme adjectif, accord\u00e9 avec \u00ab\u00a0les r\u00e9sultats\u00a0\u00bb (masculin pluriel) \u2192 attendus.',
+    fb_er_e: 'Teste la m\u00e9thode : \u00ab\u00a0pris\u00a0\u00bb convient ici \u2192 c\u2019est un participe pass\u00e9 adjectif. Attention \u00e0 l\u2019accord.',
+    fb_ez_er: ''
+  },
+  {
+    id: 'p7',
+    avant: 'Vous ',
+    apres: ' ces f\u00e9licitations.',
+    choix: ['m\u00e9ritez','m\u00e9riter','m\u00e9rit\u00e9'],
+    sol: 'm\u00e9ritez',
+    just: '2e personne du pluriel au pr\u00e9sent. Le sujet est \u00ab\u00a0vous\u00a0\u00bb \u2192 terminaison -ez.',
+    fb_er_e: 'Teste la m\u00e9thode : remplace par \u00ab\u00a0prendre\u00a0\u00bb ou \u00ab\u00a0pris\u00a0\u00bb. Lequel convient dans la phrase\u00a0?',
+    fb_ez_er: 'Cherche le sujet du verbe. Si c\u2019est \u00ab\u00a0vous\u00a0\u00bb, prends -ez. Sinon, demande-toi si le verbe est \u00e0 l\u2019infinitif.'
+  },
+  {
+    id: 'p8',
+    avant: 'Il ',
+    apres: ' le paysage en silence.',
+    choix: ['regardait','regarder','regard\u00e9'],
+    sol: 'regardait',
+    just: 'Imparfait : description d\u2019une action pass\u00e9e dans sa dur\u00e9e, sans indication de fin.',
+    fb_er_e: 'Repère les indices de temps dans la phrase pour choisir entre imparfait et pr\u00e9sent.',
+    fb_ez_er: 'Repère les indices de temps dans la phrase pour choisir entre imparfait et pr\u00e9sent.'
+  },
+  {
+    id: 'p9',
+    avant: 'Elle vient de ',
+    apres: ' la r\u00e9daction de son rapport.',
+    choix: ['finir','fini','finissez'],
+    sol: 'finir',
+    just: 'Infinitif apr\u00e8s \u00ab\u00a0vient de\u00a0\u00bb (semi-auxiliaire). Test : \u00ab\u00a0vient de prendre\u00a0\u00bb \u2192 prendre convient \u2192 -ir.',
+    fb_er_e: 'Teste la m\u00e9thode : remplace par \u00ab\u00a0prendre\u00a0\u00bb ou \u00ab\u00a0pris\u00a0\u00bb. \u00ab\u00a0Vient de prendre\u00a0\u00bb convient \u2192 infinitif.',
+    fb_ez_er: ''
+  },
+  {
+    id: 'p10',
+    avant: 'Le projet ',
+    apres: ' en \u00e9quipe a \u00e9t\u00e9 salu\u00e9 par tous.',
+    choix: ['\u00e9labor\u00e9','\u00e9laborer','\u00e9laborez'],
+    sol: '\u00e9labor\u00e9',
+    just: 'Participe pass\u00e9 employ\u00e9 comme adjectif, accord\u00e9 avec \u00ab\u00a0le projet\u00a0\u00bb (masculin singulier) \u2192 \u00e9labor\u00e9.',
+    fb_er_e: 'Teste la m\u00e9thode : \u00ab\u00a0pris\u00a0\u00bb convient ici \u2192 c\u2019est un participe pass\u00e9 adjectif.',
+    fb_ez_er: ''
+  }
+];
+
+/* ═══════════════════════════════════
+   DONNÉES ACTIVITÉ 2
+═══════════════════════════════════ */
+var PH2 = [
+  {
+    id: 'ph2-1',
+    texte: 'Il a oublier de remettre son dossier.',
+    erreur: 'oublier',
+    correct: false,
+    sol_mot: 'oubli\u00e9',
+    just: 'Participe pass\u00e9 apr\u00e8s l\u2019auxiliaire \u00ab\u00a0a\u00a0\u00bb. Test\u00a0: \u00ab\u00a0il a pris\u00a0\u00bb convient \u2192 -\u00e9.',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: ['oubli\u00e9']
+  },
+  {
+    id: 'ph2-2',
+    texte: 'Vous avancez dans la bonne direction.',
+    erreur: null,
+    correct: true,
+    sol_mot: null,
+    just: 'Phrase correcte. \u00ab\u00a0Avancez\u00a0\u00bb est bien \u00e0 la 2e personne du pluriel (vous) au pr\u00e9sent.',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: []
+  },
+  {
+    id: 'ph2-3',
+    texte: 'Les travaux commencer d\u00e8s la semaine prochaine.',
+    erreur: 'commencer',
+    correct: false,
+    sol_mot: 'commenceront',
+    just: 'L\u2019infinitif \u00ab\u00a0commencer\u00a0\u00bb est utilis\u00e9 \u00e0 la place d\u2019un verbe conjugu\u00e9. La phrase parle d\u2019un \u00e9v\u00e9nement futur \u2192 futur simple\u00a0: \u00ab\u00a0commenceront\u00a0\u00bb (ou \u00ab\u00a0vont commencer\u00a0\u00bb).',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: ['commenceront','vont commencer','vont commencer']
+  },
+  {
+    id: 'ph2-4',
+    texte: 'Elle semblait fatigue apr\u00e8s cette longue journ\u00e9e.',
+    erreur: 'fatigue',
+    correct: false,
+    sol_mot: 'fatigu\u00e9e',
+    just: 'Adjectif attribut du sujet f\u00e9minin \u00ab\u00a0elle\u00a0\u00bb \u2192 accord\u00e9 au f\u00e9minin\u00a0: \u00ab\u00a0fatigu\u00e9e\u00a0\u00bb.',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: ['fatigu\u00e9e','fatiguee']
+  },
+  {
+    id: 'ph2-5',
+    texte: 'Il faut analysez les donn\u00e9es avec rigueur.',
+    erreur: 'analysez',
+    correct: false,
+    sol_mot: 'analyser',
+    just: 'Infinitif apr\u00e8s \u00ab\u00a0faut\u00a0\u00bb, pas 2e personne du pluriel. Test\u00a0: \u00ab\u00a0il faut prendre\u00a0\u00bb \u2192 prendre convient \u2192 -er.',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: ['analyser']
+  },
+  {
+    id: 'ph2-6',
+    texte: 'Les documents sign\u00e9s ont \u00e9t\u00e9 transmis au service comp\u00e9tent.',
+    erreur: null,
+    correct: true,
+    sol_mot: null,
+    just: 'Phrase correcte. \u00ab\u00a0Sign\u00e9s\u00a0\u00bb est un participe pass\u00e9 adjectif accord\u00e9 avec \u00ab\u00a0les documents\u00a0\u00bb (masculin pluriel).',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: []
+  },
+  {
+    id: 'ph2-7',
+    texte: 'Vous devez prenez le temps de relire votre travail.',
+    erreur: 'prenez',
+    correct: false,
+    sol_mot: 'prendre',
+    just: 'Infinitif apr\u00e8s le verbe conjugu\u00e9 \u00ab\u00a0devez\u00a0\u00bb, pas 2e personne du pluriel. Test\u00a0: \u00ab\u00a0vous devez prendre\u00a0\u00bb \u2192 prendre convient \u2192 -re.',
+    fb_detect: 'Pour chaque phrase, commence par rep\u00e9rer le verbe et son sujet. Ensuite, v\u00e9rifie la coh\u00e9rence de la terminaison avec le contexte grammatical.',
+    sols_acceptes: ['prendre']
+  },
+  {
+    id: 'ph2-8',
+    texte: 'Ils participaient activement aux \u00e9changes.',
+    erreur: null,
+    correct: true,
+    sol_mot: null,
+    just: 'Phrase correcte. \u00ab\u00a0Participaient\u00a0\u00bb est bien \u00e0 l\u2019imparfait (3e personne du pluriel).',
+    fb_detect: '',
+    sols_acceptes: []
+  }
+];
+
+/* ═══════════════════════════════════
+   NORMALISATION
+═══════════════════════════════════ */
+function norm(s){
+  return s.trim().toLowerCase()
+    .replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e')
+    .replace(/[îï]/g,'i').replace(/[ôö]/g,'o')
+    .replace(/[ùûü]/g,'u').replace(/ç/g,'c')
+    .replace(/['']/g,"'");
+}
+
+/* ═══════════════════════════════════
+   A1 — BUILD
+═══════════════════════════════════ */
+var userA1 = {};
+
+function buildA1(){
+  userA1 = {};
+  var container = document.getElementById('phrases-a1');
+  container.innerHTML = '';
+  PH1.forEach(function(ph, idx){
+    var block = document.createElement('div');
+    block.className = 'ph-block';
+    block.id = 'pb-' + ph.id;
+
+    var num = document.createElement('div');
+    num.className = 'ph-num';
+    num.textContent = (idx+1) + ' / ' + PH1.length;
+    block.appendChild(num);
+
+    var txt = document.createElement('div');
+    txt.className = 'ph-text';
+    txt.innerHTML = ph.avant + '<span class="blank">[…]</span>' + ph.apres;
+    block.appendChild(txt);
+
+    var choices = document.createElement('div');
+    choices.className = 'choices';
+    ph.choix.forEach(function(c){
+      var btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.id = 'cb-' + ph.id + '-' + c;
+      btn.textContent = c;
+      btn.addEventListener('click', function(){ selChoice(ph.id, c); });
+      choices.appendChild(btn);
+    });
+    block.appendChild(choices);
+
+    var fb = document.createElement('div');
+    fb.className = 'ph-fb';
+    fb.id = 'pfb-' + ph.id;
+    block.appendChild(fb);
+
+    container.appendChild(block);
+  });
+}
+
+function selChoice(phId, val){
+  if(doneA1) return;
+  var ph = PH1.find(function(p){ return p.id === phId; });
+  ph.choix.forEach(function(c){
+    document.getElementById('cb-' + phId + '-' + c).classList.remove('sel-c');
+  });
+  userA1[phId] = val;
+  document.getElementById('cb-' + phId + '-' + val).classList.add('sel-c');
+}
+
+/* ═══════════════════════════════════
+   A1 — VÉRIFIER
+═══════════════════════════════════ */
+function verifierA1(){
+  if(doneA1) return;
+  var manq = PH1.filter(function(p){ return !userA1[p.id]; });
+  if(manq.length > 0){
+    showFeedback('fb-a1','mid','!',
+      'Choisis une réponse pour chaque phrase avant de vérifier.',
+      manq.length + ' phrase(s) sans réponse.');
+    return;
+  }
+  doneA1 = true;
+  document.getElementById('a1-btn-verif').disabled = true;
+  var ok = 0;
+
+  PH1.forEach(function(ph){
+    var choix = userA1[ph.id];
+    var fb = document.getElementById('pfb-' + ph.id);
+    ph.choix.forEach(function(c){
+      var btn = document.getElementById('cb-' + ph.id + '-' + c);
+      btn.disabled = true;
+      btn.classList.remove('sel-c');
+      if(c === ph.sol)        btn.classList.add('ok-c');
+      else if(c === choix)    btn.classList.add('ko-c');
+    });
+    if(choix === ph.sol){
+      fb.className = 'ph-fb show ok-fb';
+      fb.textContent = '\u2713';
+      var just = document.createElement('div');
+      just.className = 'ph-fb show just-fb';
+      just.textContent = ph.just;
+      fb.parentNode.insertBefore(just, fb.nextSibling);
+      ok++;
+    } else {
+      fb.className = 'ph-fb show ko-fb';
+      var fbTxt = '';
+      if(ph.sol === 'v\u00e9rifier' || ph.sol === 's\u2019entra\u00eener' || ph.sol === 'finir' || ph.sol === '\u00e9labor\u00e9' || ph.sol === 'attendus' || ph.sol === 'prise'){
+        fbTxt = ph.fb_er_e;
+      } else if(ph.sol === 'observez' || ph.sol === 'm\u00e9ritez'){
+        fbTxt = ph.fb_ez_er;
+      } else {
+        fbTxt = ph.fb_er_e;
+      }
+      fb.textContent = '\u2192 ' + fbTxt + ' R\u00e9ponse : ' + ph.sol + '.';
+    }
+  });
+
+  scoreA1 = ok;
+  var pct = ok / 10 * 100;
+  var cls, ico, msg;
+  if(pct >= 90)     { cls='ok';  ico='✓'; msg='Excellent ! Les terminaisons sont maîtrisées.'; }
+  else if(pct >= 60){ cls='mid'; ico='↑'; msg='Bon travail ! Consulte les corrections en rouge.'; }
+  else              { cls='ko';  ico='!'; msg='À retravailler : relis le référentiel et la méthode.'; }
+  showFeedback('fb-a1', cls, ico, msg, ok + ' / 10 points.');
+
+  document.getElementById('a1-row1').style.display = 'none';
+  document.getElementById('a1-row2').style.display = 'flex';
+  document.getElementById('card-a2').classList.remove('locked');
+  document.getElementById('a2-lock-msg').style.display = 'none';
+  updateGlobal();
+}
+
+function solA1(){
+  PH1.forEach(function(ph){
+    ph.choix.forEach(function(c){
+      var btn = document.getElementById('cb-' + ph.id + '-' + c);
+      btn.classList.remove('ko-c','sel-c','miss-c');
+      if(c === ph.sol) btn.classList.add('ok-c');
+    });
+  });
+}
+
+function resetA1(){
+  doneA1 = false; scoreA1 = 0;
+  buildA1();
+  document.getElementById('a1-btn-verif').disabled = false;
+  document.getElementById('a1-row1').style.display = 'flex';
+  document.getElementById('a1-row2').style.display = 'none';
+  document.getElementById('fb-a1').className = 'feedback';
+  document.getElementById('card-a2').classList.add('locked');
+  document.getElementById('a2-lock-msg').style.display = 'block';
+  document.getElementById('results-screen').classList.remove('show');
+  updateGlobal();
+}
+
+/* ═══════════════════════════════════
+   A2 — BUILD
+═══════════════════════════════════ */
+var userA2 = {}; /* phId → {selMot, noErr, corrVal} */
+
+function buildA2(){
+  userA2 = {};
+  var container = document.getElementById('phrases-a2');
+  container.innerHTML = '';
+
+  PH2.forEach(function(ph, idx){
+    userA2[ph.id] = { selMot: null, noErr: false, corrVal: '' };
+
+    var block = document.createElement('div');
+    block.className = 'ph2-block';
+    block.id = 'pb2-' + ph.id;
+
+    var num = document.createElement('div');
+    num.className = 'ph2-num';
+    num.textContent = (idx+1) + ' / ' + PH2.length;
+    block.appendChild(num);
+
+    var cons = document.createElement('div');
+    cons.className = 'ph2-consigne';
+    cons.textContent = ph.erreur
+      ? 'Clique sur le mot erroné, puis saisis la correction.'
+      : 'Cette phrase est-elle correcte ?';
+    block.appendChild(cons);
+
+    /* Texte cliquable */
+    var txtDiv = document.createElement('div');
+    txtDiv.className = 'ph2-text';
+    var mots = ph.texte.split(' ');
+    mots.forEach(function(mot, mi){
+      var span = document.createElement('span');
+      span.className = 'w2';
+      span.id = 'w2-' + ph.id + '-' + mi;
+      span.textContent = mot;
+      span.dataset.mot = mot;
+      span.addEventListener('click', function(){ clickMot(ph.id, mi, mot); });
+      txtDiv.appendChild(span);
+      if(mi < mots.length - 1) txtDiv.appendChild(document.createTextNode(' '));
+    });
+    block.appendChild(txtDiv);
+
+    /* Ligne correction */
+    var corrRow = document.createElement('div');
+    corrRow.className = 'corr-row';
+    corrRow.id = 'cr-' + ph.id;
+    var corrLabel = document.createElement('span');
+    corrLabel.className = 'corr-label';
+    corrLabel.textContent = 'Correction :';
+    var corrInput = document.createElement('input');
+    corrInput.type = 'text';
+    corrInput.className = 'corr-input';
+    corrInput.id = 'ci-' + ph.id;
+    corrInput.placeholder = 'forme correcte…';
+    corrInput.setAttribute('autocomplete','off');
+    corrInput.setAttribute('autocorrect','off');
+    corrInput.setAttribute('spellcheck','false');
+    corrRow.appendChild(corrLabel);
+    corrRow.appendChild(corrInput);
+    block.appendChild(corrRow);
+
+    /* Bouton "Pas d'erreur" */
+    var neBtn = document.createElement('button');
+    neBtn.className = 'no-err-btn';
+    neBtn.id = 'ne-' + ph.id;
+    neBtn.textContent = '✓ Phrase correcte';
+    neBtn.addEventListener('click', function(){ clickNoErr(ph.id); });
+    block.appendChild(neBtn);
+
+    /* Feedback */
+    var fb = document.createElement('div');
+    fb.className = 'ph2-fb';
+    fb.id = 'ph2fb-' + ph.id;
+    block.appendChild(fb);
+
+    container.appendChild(block);
+  });
+}
+
+function clickMot(phId, mi, mot){
+  if(doneA2) return;
+  var state = userA2[phId];
+  /* Désélectionner "Pas d'erreur" */
+  var neBtn = document.getElementById('ne-' + phId);
+  neBtn.classList.remove('sel-ne');
+  state.noErr = false;
+
+  var ph = PH2.find(function(p){ return p.id === phId; });
+  var mots = ph.texte.split(' ');
+
+  /* Désélectionner l'ancien mot */
+  if(state.selMot !== null){
+    document.getElementById('w2-' + phId + '-' + state.selMot).classList.remove('sel2');
+  }
+
+  if(state.selMot === mi){
+    state.selMot = null;
+    document.getElementById('cr-' + phId).classList.remove('show');
+  } else {
+    state.selMot = mi;
+    document.getElementById('w2-' + phId + '-' + mi).classList.add('sel2');
+    document.getElementById('cr-' + phId).classList.add('show');
+  }
+}
+
+function clickNoErr(phId){
+  if(doneA2) return;
+  var state = userA2[phId];
+  var ph = PH2.find(function(p){ return p.id === phId; });
+  var mots = ph.texte.split(' ');
+
+  /* Désélectionner mot cliqué */
+  if(state.selMot !== null){
+    document.getElementById('w2-' + phId + '-' + state.selMot).classList.remove('sel2');
+    state.selMot = null;
+    document.getElementById('cr-' + phId).classList.remove('show');
+  }
+
+  var neBtn = document.getElementById('ne-' + phId);
+  if(state.noErr){
+    state.noErr = false;
+    neBtn.classList.remove('sel-ne');
+  } else {
+    state.noErr = true;
+    neBtn.classList.add('sel-ne');
+  }
+}
+
+/* ═══════════════════════════════════
+   A2 — VÉRIFIER
+═══════════════════════════════════ */
+function verifierA2(){
+  if(doneA2) return;
+  /* Garde : tout rempli */
+  var manq = PH2.filter(function(ph){
+    var s = userA2[ph.id];
+    return s.selMot === null && !s.noErr;
+  });
+  if(manq.length > 0){
+    showFeedback('fb-a2','mid','!',
+      'Traite toutes les phrases avant de vérifier.',
+      manq.length + ' phrase(s) sans réponse.');
+    return;
+  }
+  doneA2 = true;
+  document.getElementById('a2-btn-verif').disabled = true;
+  var ok = 0;
+
+  PH2.forEach(function(ph){
+    var s = userA2[ph.id];
+    var fb = document.getElementById('ph2fb-' + ph.id);
+    var neBtn = document.getElementById('ne-' + ph.id);
+    var mots = ph.texte.split(' ');
+
+    /* Désactiver tous les mots et bouton */
+    mots.forEach(function(m, mi){
+      var span = document.getElementById('w2-' + ph.id + '-' + mi);
+      span.style.pointerEvents = 'none';
+    });
+    neBtn.disabled = true;
+
+    if(ph.correct){
+      /* Phrase correcte — l'élève devait cliquer "Pas d'erreur" */
+      if(s.noErr){
+        neBtn.classList.remove('sel-ne');
+        neBtn.classList.add('ok-ne');
+        fb.className = 'ph2-fb show ok-fb';
+        fb.textContent = '\u2713 Correct. ' + ph.just;
+        ok++;
+      } else {
+        neBtn.classList.add('ko-ne');
+        /* Montrer quel mot a été cliqué à tort */
+        if(s.selMot !== null){
+          document.getElementById('w2-' + ph.id + '-' + s.selMot).classList.add('ko-w2');
+        }
+        fb.className = 'ph2-fb show ko-fb';
+        fb.textContent = 'Cette phrase est correcte. ' + ph.just;
+        if(ph.fb_detect) fb.textContent += ' ' + ph.fb_detect;
+      }
+    } else {
+      /* Phrase erronée */
+      var errMots = ph.texte.split(' ');
+      var errIdx = errMots.indexOf(ph.erreur);
+
+      /* Correction saisie */
+      var corrInput = document.getElementById('ci-' + ph.id);
+      corrInput.disabled = true;
+      var corrVal = corrInput ? corrInput.value : '';
+
+      var detectOk = s.selMot === errIdx;
+      var corrOk = ph.sols_acceptes.some(function(a){
+        return norm(corrVal) === norm(a);
+      });
+
+      /* Colorier le mot erroné */
+      mots.forEach(function(m, mi){
+        var span = document.getElementById('w2-' + ph.id + '-' + mi);
+        span.classList.remove('sel2');
+        if(mi === errIdx){
+          if(detectOk) span.classList.add('ok-w2');
+          else         span.classList.add('miss-w2');
+        } else if(mi === s.selMot && s.selMot !== errIdx){
+          span.classList.add('ko-w2');
+        }
+      });
+
+      if(detectOk) ok++;
+      if(corrOk)   ok++;
+
+      /* Feedback */
+      neBtn.disabled = true;
+      if(s.noErr) neBtn.classList.add('ko-ne');
+
+      var fbParts = [];
+      if(!detectOk) fbParts.push('Le mot erroné était \u00ab\u00a0' + ph.erreur + '\u00a0\u00bb.');
+      if(!corrOk)   fbParts.push('Correction attendue\u00a0: \u00ab\u00a0' + ph.sol_mot + '\u00a0\u00bb.');
+      fbParts.push(ph.just);
+      if(!detectOk && ph.fb_detect) fbParts.push(ph.fb_detect);
+
+      fb.className = 'ph2-fb show ' + (detectOk && corrOk ? 'ok-fb' : 'ko-fb');
+      fb.textContent = fbParts.join(' ');
+
+      /* Corriger l'input */
+      if(corrInput){
+        corrInput.classList.remove('ok-inp','ko-inp');
+        corrInput.classList.add(corrOk ? 'ok-inp' : 'ko-inp');
+        if(!corrOk) corrInput.value = corrInput.value + ' → ' + ph.sol_mot;
+      }
+    }
+  });
+
+  scoreA2 = ok;
+  var pct = ok / 12 * 100;
+  var cls, ico, msg;
+  if(pct >= 92)     { cls='ok';  ico='✓'; msg='Parfait ! Tu repères et corriges sans erreur.'; }
+  else if(pct >= 58){ cls='mid'; ico='↑'; msg='Bon travail ! Consulte les corrections en rouge.'; }
+  else              { cls='ko';  ico='!'; msg='À retravailler : relis le référentiel et la méthode.'; }
+  showFeedback('fb-a2', cls, ico, msg, ok + ' / 12 points.');
+
+  document.getElementById('a2-row1').style.display = 'none';
+  document.getElementById('a2-row2').style.display = 'flex';
+  updateGlobal();
+}
+
+function solA2(){
+  PH2.forEach(function(ph){
+    var mots = ph.texte.split(' ');
+    var neBtn = document.getElementById('ne-' + ph.id);
+    if(ph.correct){
+      neBtn.classList.remove('ko-ne','sel-ne');
+      neBtn.classList.add('ok-ne');
+    } else {
+      var errIdx = mots.indexOf(ph.erreur);
+      mots.forEach(function(m, mi){
+        var span = document.getElementById('w2-' + ph.id + '-' + mi);
+        span.classList.remove('sel2','ko-w2','miss-w2');
+        if(mi === errIdx) span.classList.add('ok-w2');
+      });
+      var ci = document.getElementById('ci-' + ph.id);
+      if(ci){ ci.value = ph.sol_mot; ci.classList.remove('ko-inp'); ci.classList.add('ok-inp'); }
+    }
+  });
+}
+
+function resetA2(){
+  doneA2 = false; scoreA2 = 0;
+  buildA2();
+  document.getElementById('a2-btn-verif').disabled = false;
+  document.getElementById('a2-row1').style.display = 'flex';
+  document.getElementById('a2-row2').style.display = 'none';
+  document.getElementById('fb-a2').className = 'feedback';
+  document.getElementById('results-screen').classList.remove('show');
+  updateGlobal();
+}
+
+/* ═══════════════════════════════════
+   GLOBAL
+═══════════════════════════════════ */
+function showFeedback(id, cls, ico, msg, det){
+  var fb = document.getElementById(id);
+  fb.className = 'feedback show ' + cls;
+  document.getElementById(id+'-icon').textContent = ico;
+  document.getElementById(id+'-msg').textContent = msg;
+  document.getElementById(id+'-detail').textContent = det;
+}
+
+function updateGlobal(){
+  var ok  = scoreA1 + scoreA2;
+  var ko  = (doneA1?10-scoreA1:0) + (doneA2?12-scoreA2:0);
+  var rem = (doneA1?0:10) + (doneA2?0:12);
+  var pct = Math.round(ok / TOTAL * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = ok + ' / ' + TOTAL + ' points';
+  document.getElementById('prog-pct').textContent = pct + '\u00a0%';
+  document.getElementById('cnt-ok').textContent  = ok;
+  document.getElementById('cnt-ko').textContent  = ko;
+  document.getElementById('cnt-rem').textContent = rem;
+  if(doneA1 && doneA2) afficherResultats(ok);
+}
+
+function afficherResultats(score){
+  document.getElementById('results-screen').classList.add('show');
+  document.getElementById('score-num').textContent = score;
+  var pct = score / TOTAL * 100;
+  var stars = pct>=91?5 : pct>=68?4 : pct>=45?3 : pct>=23?2 : 1;
+  document.getElementById('stars-row').textContent = '\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msgs=[
+    '\u00c0 retravailler \u2014 relis le r\u00e9f\u00e9rentiel\u00a0!',
+    '\u00c0 retravailler \u2014 relis le r\u00e9f\u00e9rentiel\u00a0!',
+    '\u00c0 retravailler \u2014 relis le r\u00e9f\u00e9rentiel\u00a0!',
+    '\u00c0 retravailler \u2014 relis le r\u00e9f\u00e9rentiel\u00a0!',
+    '\u00c0 retravailler \u2014 relis le r\u00e9f\u00e9rentiel\u00a0!',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait\u00a0!',
+    'Parfait\u00a0!',
+    'Parfait \u2014 z\u00e9ro faute\u00a0!'
+  ];
+  document.getElementById('results-msg').textContent = msgs[Math.min(score,msgs.length-1)];
+}
+
+function resetTout(){
+  document.getElementById('results-screen').classList.remove('show');
+  resetA1();
+  resetA2();
+  document.getElementById('card-a2').classList.add('locked');
+  document.getElementById('a2-lock-msg').style.display = 'block';
+}
+
+buildA1();
+buildA2();
+</script>
+</body>
+</html>
