@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S3 J4 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#3ab5d8;--day-dark:#1a6e88;--day-dark2:#0e3f50;
+  --day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  --day-color:#3ab5d8;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#f0f9fd;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:760px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--day);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* Référentiel */
+.ref{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;
+  box-shadow:0 3px 14px rgba(0,0,0,.06);position:relative;z-index:1;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.ref-inner{padding:1.1rem 1.3rem;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.9rem;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem;}
+@media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;}
+.ref-cell-title{font-size:1rem;font-weight:900;color:var(--day-dark);margin-bottom:.35rem;}
+.ref-cell-body{font-size:.9rem;color:var(--muted);line-height:1.65;}
+.ref-cell-body em{color:var(--day-dark2);font-style:normal;font-weight:700;}
+.ref-emplois{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;}
+@media(max-width:580px){.ref-emplois{grid-template-columns:1fr;}}
+.ref-emploi{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;}
+.ref-emploi-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem;}
+.ref-emploi-title{font-size:1rem;font-weight:900;color:var(--day-dark);margin-bottom:.3rem;}
+.ref-emploi-body{font-size:.9rem;color:var(--muted);line-height:1.65;}
+
+/* Card */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.card-body{padding:1.1rem 1.2rem 0;}
+.act-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:800;
+  padding:.18rem .65rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.6rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.act-title{font-size:clamp(1rem,3vw,1.15rem);font-weight:900;color:var(--text);margin-bottom:.25rem;}
+.act-consigne{font-size:.9rem;color:var(--muted);margin-bottom:.85rem;line-height:1.6;}
+
+/* Items saisie */
+.q-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:.8rem 1rem;margin-bottom:.55rem;transition:border-color .2s;}
+.q-item.ok{border-color:var(--green);background:var(--green-light);}
+.q-item.ko{border-color:var(--pink-dark);background:var(--pink-light);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.35rem;}
+.q-phrase{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);
+  line-height:1.7;margin-bottom:.55rem;font-style:italic;}
+.q-phrase em{font-style:normal;color:var(--day-dark);font-weight:900;}
+.q-input-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.q-label{font-size:.82rem;color:var(--muted);font-weight:600;white-space:nowrap;}
+.q-inp{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.5vw,1rem);font-weight:800;
+  background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);
+  padding:.45rem .75rem;min-width:200px;flex:1;color:var(--text);
+  transition:border-color .15s;-webkit-tap-highlight-color:transparent;}
+.q-inp:focus{outline:none;border-color:var(--day-dark);box-shadow:0 0 0 3px var(--day-glow);}
+.q-inp.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+.q-inp.ko{border-color:var(--pink-dark);background:var(--pink-light);color:var(--pink-dark);}
+.q-inp:disabled{cursor:default;opacity:.9;}
+.q-corr{font-size:.83rem;font-weight:700;color:var(--pink-dark);display:none;margin-top:.3rem;}
+.q-corr.show{display:block;}
+.q-expl{font-size:.82rem;color:var(--green-dark);display:none;margin-top:.25rem;line-height:1.6;}
+.q-expl.show{display:block;}
+.q-fb-ko{font-size:.82rem;color:var(--pink-dark);display:none;margin-top:.25rem;line-height:1.6;font-style:italic;}
+.q-item.ko .q-fb-ko{display:block;}
+
+/* Items clic Act2 */
+.ext-pool{display:flex;flex-wrap:wrap;gap:.5rem;padding:.7rem;min-height:52px;
+  background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:var(--radius-sm);
+  margin-bottom:.85rem;}
+.emp-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;margin-bottom:.7rem;}
+@media(max-width:580px){.emp-cols{grid-template-columns:1fr;}}
+.emp-col{border-radius:var(--radius-sm);overflow:hidden;}
+.emp-head{padding:.5rem .7rem;font-size:.75rem;font-weight:900;text-align:center;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;color:#fff;}
+.emp-regrep .emp-head{background:#7a1f1f;}
+.emp-hypo   .emp-head{background:#1a6e88;}
+.emp-fait   .emp-head{background:#3d7a10;}
+.emp-body{min-height:72px;padding:.4rem;display:flex;flex-direction:column;gap:.35rem;
+  background:var(--surface2);border:1.5px solid var(--border);border-top:none;
+  border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  transition:background .15s,border-color .15s;}
+.emp-body.drag-over{background:var(--day-light);border-color:var(--day-dark);}
+
+/* Cartes phrases Act2 */
+.phr-card{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;
+  padding:.4rem .75rem;font-size:.9rem;font-weight:600;cursor:pointer;
+  line-height:1.6;transition:background .12s,border-color .12s,transform .1s;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+.phr-card:hover:not(.done){background:var(--day-light);border-color:var(--day-dark);}
+.phr-card.selected{background:#d4f0fa;border-color:#1a6e88;border-width:2px;
+  box-shadow:0 0 0 3px rgba(58,181,216,.3);}
+.phr-card.placed{background:var(--day-light);border-color:var(--day-dark);}
+.phr-card.placed .phr-assoc{display:block;}
+.phr-card.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);cursor:default;}
+.phr-card.ko{border-color:var(--pink-dark);background:var(--pink-light);color:var(--pink-dark);cursor:default;}
+.phr-card.done{cursor:default;}
+.phr-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);
+  font-weight:700;margin-right:.3rem;}
+.phr-assoc{font-size:.75rem;font-weight:700;color:var(--day-dark);
+  margin-top:.25rem;display:none;font-style:italic;}
+.phr-card.ok .phr-assoc{color:var(--green-dark);}
+.phr-card.ko .phr-assoc{color:var(--pink-dark);}
+
+/* Consigne barre */
+.consigne-bar{background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.87rem;color:var(--day-dark2);
+  margin-bottom:.75rem;text-align:center;font-weight:600;position:relative;z-index:1;}
+
+/* Feedback global + boutons */
+.fb-g{padding:.8rem 1rem;border-radius:var(--radius-sm);font-size:.92rem;
+  display:none;line-height:1.8;margin:.2rem 1.2rem .7rem;}
+.fb-g.show{display:block;animation:fadeUp .3s ease;}
+.fb-g.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-g.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-g.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+
+.btn-ok1{background:var(--day-dark);color:#fff;border:none;border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.95rem);font-weight:800;
+  padding:.45rem .9rem;cursor:pointer;min-height:2.8rem;white-space:nowrap;
+  transition:transform .12s,opacity .12s;-webkit-tap-highlight-color:transparent;}
+.btn-ok1:hover:not(:disabled){transform:translateY(-1px);}
+.btn-ok1:disabled{opacity:.35;cursor:default;transform:none!important;}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.2rem 1.2rem 0;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* Résultats */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.07);text-align:center;
+  position:relative;overflow:hidden;margin-bottom:1rem;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.6rem 0 .3rem;color:var(--day-dark);}
+.stars{font-size:1.9rem;margin:.4rem 0 .7rem;letter-spacing:.1em;}
+.rmsg{color:var(--muted);font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.rappel{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  padding:.75rem 1rem;text-align:left;font-size:.87rem;line-height:1.9;margin-bottom:1.1rem;color:var(--day-dark2);}
+.rappel strong{color:var(--day-dark);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card-body{padding:.9rem .9rem 0;}
+  .btn-row{margin:.2rem .9rem 0;}.fb-g{margin:.2rem .9rem .7rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 4ème</span>
+  </div>
+  <div class="week-label">Semaine 3 – Jour 4</div>
+  <h1>Je m'entraîne · <span class="hl">Conditionnel passé</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 13 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> point(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">13</span> restant(s)</div>
+</div>
+
+<!-- Référentiel permanent -->
+<div class="ref">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-title">&#128218;&nbsp;Référentiel — Le conditionnel passé</div>
+    <div class="ref-grid">
+      <div class="ref-cell">
+        <div class="ref-cell-title">Formation</div>
+        <div class="ref-cell-body">Auxiliaire (<em>être</em> ou <em>avoir</em>) au <em>conditionnel présent</em> + <em>participe passé</em>.<br><br>
+        Ex. : <em>aurait pris</em> — <em>serait parti</em></div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Accord du participe</div>
+        <div class="ref-cell-body">Avec <em>être</em> : le participe s'accorde en genre et en nombre avec le <em>sujet</em>.<br><br>
+        Ex. : <em>elle serait arrivée</em> — <em>ils seraient partis</em></div>
+      </div>
+    </div>
+    <div class="ref-emplois">
+      <div class="ref-emploi emp-regrep-ref">
+        <div class="ref-emploi-num">Emploi 1</div>
+        <div class="ref-emploi-title" style="color:#7a1f1f;">Regret ou reproche</div>
+        <div class="ref-emploi-body">Action passée qui n'a pas eu lieu mais <em style="color:#7a1f1f;font-style:normal;font-weight:700;">aurait dû</em>.<br><em style="color:#8a8f9a;">(aurait dû, aurait pu, auraient dû…)</em></div>
+      </div>
+      <div class="ref-emploi">
+        <div class="ref-emploi-num">Emploi 2</div>
+        <div class="ref-emploi-title" style="color:#1a6e88;">Hypothèse non réalisée</div>
+        <div class="ref-emploi-body"><em style="color:#1a6e88;font-style:normal;font-weight:700;">si + plus-que-parfait</em> → conditionnel passé dans la principale.<br><em style="color:#8a8f9a;">ou : sans + GN</em></div>
+      </div>
+      <div class="ref-emploi">
+        <div class="ref-emploi-num">Emploi 3</div>
+        <div class="ref-emploi-title" style="color:#3d7a10;">Fait passé non confirmé</div>
+        <div class="ref-emploi-body">Information rapportée avec incertitude.<br><em style="color:#8a8f9a;">(selon, d'après, il semblerait que…)</em></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ACT 1 ══ -->
+<div class="card" id="card1">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#9889;&nbsp;Activité 1 / 2</div>
+    <div class="act-title">Conjugue au conditionnel passé.</div>
+    <div class="act-consigne">Écris la forme correcte du verbe entre parenthèses. La casse est ignorée ; les accents comptent.</div>
+    <div id="list1"></div>
+  </div>
+  <div class="fb-g" id="fb1"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v1" onclick="verif1()">&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-g" onclick="reset1()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- ══ ACT 2 ══ -->
+<div class="card" id="card2">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#127993;&nbsp;Activité 2 / 2</div>
+    <div class="act-title">Identifie l'emploi du conditionnel passé.</div>
+    <div class="act-consigne">Clique sur une phrase, puis sur la colonne qui correspond à son emploi.</div>
+    <div class="consigne-bar" id="cons2">&#128073;&nbsp;Clique sur une phrase, puis sur l'emploi qui lui correspond.</div>
+    <div class="ext-pool" id="pool2"></div>
+    <div class="emp-cols">
+      <div class="emp-col emp-regrep">
+        <div class="emp-head">Regret ou reproche</div>
+        <div class="emp-body" id="z-regrep"></div>
+      </div>
+      <div class="emp-col emp-hypo">
+        <div class="emp-head">Hypothèse non réalisée</div>
+        <div class="emp-body" id="z-hypo"></div>
+      </div>
+      <div class="emp-col emp-fait">
+        <div class="emp-head">Fait non confirmé</div>
+        <div class="emp-body" id="z-fait"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fb-g" id="fb2"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v2" onclick="verif2()" disabled>&#10003;&nbsp;Vérifier</button>
+    <button class="btn btn-g" onclick="reset2()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="logo-badge" style="display:inline-block;background:var(--yellow);border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.55rem;">
+      <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+      <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+      <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+      <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Résultats</span>
+    </div>
+    <div class="score-big"><span id="r-score">0</span>/13</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="rappel">
+      <strong>&#128161;&nbsp;Formation :</strong> auxiliaire au conditionnel présent + participe passé.<br>
+      <strong>Avec être :</strong> accord avec le sujet. <strong>Avec avoir :</strong> pas d'accord (sauf COD antéposé).<br>
+      <strong>3 emplois :</strong> regret/reproche — hypothèse non réalisée — fait non confirmé.
+    </div>
+    <button class="btn btn-p" onclick="resetAll()" style="width:100%;justify-content:center;">&#8635;&nbsp;Tout recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+
+/* ══ DONNÉES ACT1 ══ */
+var D1=[
+  {id:1,
+   avant:'Si nous avions mieux pr\u00e9par\u00e9 cette r\u00e9union, elle',
+   verbe:'se d\u00e9rouler', apres:'sans difficult\u00e9.',
+   ans:['se serait d\u00e9roul\u00e9e'],
+   expl:'Verbe pronominal \u2192 auxiliaire <em>\u00eatre</em> + accord f\u00e9minin singulier : <em>se serait d\u00e9roul\u00e9e</em>.',
+   fbKo_aux:'V\u00e9rifie si le verbe se conjugue avec \u00ab\u00a0\u00eatre\u00a0\u00bb ou \u00ab\u00a0avoir\u00a0\u00bb. Les verbes de mouvement et les verbes pronominaux prennent \u00ab\u00a0\u00eatre\u00a0\u00bb.',
+   fbKo_acc:'Avec l\u2019auxiliaire \u00ab\u00a0\u00eatre\u00a0\u00bb, le participe pass\u00e9 s\u2019accorde en genre et en nombre avec le sujet.'},
+  {id:2,
+   avant:'Tu',
+   verbe:'devoir', apres:'v\u00e9rifier ces informations avant de les transmettre.',
+   ans:['aurais d\u00fb'],
+   expl:'Regret ou reproche : <em>aurais d\u00fb</em> (auxiliaire <em>avoir</em> au conditionnel pr\u00e9sent + participe pass\u00e9 invariable).',
+   fbKo_aux:'V\u00e9rifie si le verbe se conjugue avec \u00ab\u00a0\u00eatre\u00a0\u00bb ou \u00ab\u00a0avoir\u00a0\u00bb. Les verbes de mouvement et les verbes pronominaux prennent \u00ab\u00a0\u00eatre\u00a0\u00bb.',
+   fbKo_pfq:'L\u2019auxiliaire doit \u00eatre au conditionnel pr\u00e9sent (aurait, serait\u2026), pas \u00e0 l\u2019imparfait (avait, \u00e9tait\u2026).'},
+  {id:3,
+   avant:'Selon les observateurs, la d\u00e9cision',
+   verbe:'\u00eatre prise', apres:'sans concertation pr\u00e9alable.',
+   ans:['aurait \u00e9t\u00e9 prise'],
+   expl:'Fait passif non confirm\u00e9 : <em>aurait \u00e9t\u00e9 prise</em> (conditionnel pass\u00e9 passif).',
+   fbKo_aux:'V\u00e9rifie si le verbe se conjugue avec \u00ab\u00a0\u00eatre\u00a0\u00bb ou \u00ab\u00a0avoir\u00a0\u00bb. Les verbes de mouvement et les verbes pronominaux prennent \u00ab\u00a0\u00eatre\u00a0\u00bb.',
+   fbKo_pfq:'L\u2019auxiliaire doit \u00eatre au conditionnel pr\u00e9sent (aurait, serait\u2026), pas \u00e0 l\u2019imparfait (avait, \u00e9tait\u2026).'},
+  {id:4,
+   avant:'Si vous',
+   verbe:'consulter / \u00e9viter', apres:'ces erreurs.',
+   ans:['aviez consult\u00e9 / auriez \u00e9vit\u00e9','aviez consult\u00e9 / auriez evite','aviezconsult\u00e9/auriezevit\u00e9'],
+   twoForms:true,
+   ansDisplay:'aviez consult\u00e9 / auriez \u00e9vit\u00e9',
+   expl:'Subordonnée : <em>aviez consult\u00e9</em> (plus-que-parfait) ; principale : <em>auriez \u00e9vit\u00e9</em> (conditionnel pass\u00e9).',
+   fbKo_pfq:'L\u2019auxiliaire doit \u00eatre au conditionnel pr\u00e9sent (aurait, serait\u2026), pas \u00e0 l\u2019imparfait (avait, \u00e9tait\u2026).'},
+  {id:5,
+   avant:'Sans cet incident, ils',
+   verbe:'arriver', apres:'\u00e0 l\u2019heure.',
+   ans:['seraient arriv\u00e9s'],
+   expl:'Verbe de mouvement \u2192 auxiliaire <em>\u00eatre</em> + accord masculin pluriel : <em>seraient arriv\u00e9s</em>.',
+   fbKo_aux:'V\u00e9rifie si le verbe se conjugue avec \u00ab\u00a0\u00eatre\u00a0\u00bb ou \u00ab\u00a0avoir\u00a0\u00bb. Les verbes de mouvement et les verbes pronominaux prennent \u00ab\u00a0\u00eatre\u00a0\u00bb.',
+   fbKo_acc:'Avec l\u2019auxiliaire \u00ab\u00a0\u00eatre\u00a0\u00bb, le participe pass\u00e9 s\u2019accorde en genre et en nombre avec le sujet.'},
+  {id:6,
+   avant:'Il',
+   verbe:'pouvoir', apres:'nous pr\u00e9venir plus t\u00f4t\u00a0!',
+   ans:['aurait pu'],
+   expl:'Regret ou reproche : <em>aurait pu</em>. Participe invariable.',
+   fbKo_pfq:'L\u2019auxiliaire doit \u00eatre au conditionnel pr\u00e9sent (aurait, serait\u2026), pas \u00e0 l\u2019imparfait (avait, \u00e9tait\u2026).'},
+  {id:7,
+   avant:'D\u2019apr\u00e8s certaines sources, les n\u00e9gociations',
+   verbe:'aboutir', apres:'\u00e0 un accord.',
+   ans:['auraient abouti'],
+   expl:'Fait pass\u00e9 non confirm\u00e9 (\u00ab\u00a0d\u2019apr\u00e8s\u00a0\u00bb) : <em>auraient abouti</em>.',
+   fbKo_pfq:'L\u2019auxiliaire doit \u00eatre au conditionnel pr\u00e9sent (aurait, serait\u2026), pas \u00e0 l\u2019imparfait (avait, \u00e9tait\u2026).'},
+  {id:8,
+   avant:'Elle',
+   verbe:'prendre', apres:'une d\u00e9cision plus \u00e9clair\u00e9e si elle avait eu davantage d\u2019informations.',
+   ans:['aurait pris'],
+   expl:'Hypoth\u00e8se non r\u00e9alis\u00e9e : <em>aurait pris</em>.',
+   fbKo_pfq:'L\u2019auxiliaire doit \u00eatre au conditionnel pr\u00e9sent (aurait, serait\u2026), pas \u00e0 l\u2019imparfait (avait, \u00e9tait\u2026).'}
+];
+
+/* ══ DONNÉES ACT2 ══ */
+var D2=[
+  {id:1, ph:'Vous auriez d\u00fb anticiper ces difficult\u00e9s.', cat:'regrep'},
+  {id:2, ph:'Selon les participants, l\u2019exp\u00e9dition aurait atteint son objectif malgr\u00e9 des conditions difficiles.', cat:'fait'},
+  {id:3, ph:'Sans ce contretemps, nous aurions pu pr\u00e9senter nos r\u00e9sultats \u00e0 temps.', cat:'hypo'},
+  {id:4, ph:'Elle aurait pu prendre une d\u00e9cision plus r\u00e9fl\u00e9chie.', cat:'regrep'},
+  {id:5, ph:'D\u2019apr\u00e8s les t\u00e9moins, l\u2019\u00e9v\u00e9nement aurait eu lieu en d\u00e9but de soir\u00e9e.', cat:'fait'}
+];
+
+var FB_EMPLOI="Pour identifier l\u2019emploi, pose-toi ces questions\u00a0: Y a-t-il un \u00ab\u00a0si + plus-que-parfait\u00a0\u00bb ou un \u00ab\u00a0sans + groupe nominal\u00a0\u00bb\u00a0? \u2192 Hypoth\u00e8se non r\u00e9alis\u00e9e. Est-ce un reproche direct sans \u00ab\u00a0si\u00a0\u00bb\u00a0? (\u00ab\u00a0aurait d\u00fb\u00a0\u00bb, \u00ab\u00a0aurait pu\u00a0\u00bb) \u2192 Regret ou reproche. Y a-t-il \u00ab\u00a0selon\u00a0\u00bb, \u00ab\u00a0d\u2019apr\u00e8s\u00a0\u00bb ou une information rapport\u00e9e avec doute\u00a0? \u2192 Fait pass\u00e9 non confirm\u00e9.";
+
+/* ══ ÉTAT ══ */
+var sc1=0, sc2=0, v1=false, v2=false;
+var sel2=null, assoc2={};
+var TOTAL=13;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,type,vol){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+0.02);
+}
+function sndOk(){initA();beep(440,660,0.08,'sine',0.15);setTimeout(function(){beep(660,880,0.15,'sine',0.12);},90);}
+function sndKo(){initA();beep(280,160,0.22,'sawtooth',0.12);}
+function sndPlace(){initA();beep(480,600,0.08,'sine',0.1);}
+function sndFin(){initA();beep(523,659,0.2,'sine',0.14);setTimeout(function(){beep(659,880,0.25,'sine',0.12);},120);}
+
+/* ══ NORMALISATION ══ */
+function norm(s){
+  return s.trim().toLowerCase()
+    .replace(/\u00e0|\u00e2|\u00e4/g,'a').replace(/\u00e9|\u00e8|\u00ea|\u00eb/g,'e')
+    .replace(/\u00ee|\u00ef/g,'i').replace(/\u00f4|\u00f6/g,'o')
+    .replace(/\u00f9|\u00fb|\u00fc/g,'u').replace(/\u00e7/g,'c')
+    .replace(/\s+/g,' ');
+}
+function match(input,ans){
+  var ni=norm(input);
+  for(var i=0;i<ans.length;i++){if(norm(ans[i])===ni)return true;}
+  return false;
+}
+
+/* ══ SHUFFLE ══ */
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+/* ══ BUILD ACT1 ══ */
+function buildAct1(){
+  var list=$('list1');list.innerHTML='';
+  D1.forEach(function(d){
+    var div=document.createElement('div');div.className='q-item';div.id='qi1-'+d.id;
+    var phHtml=d.avant+'&nbsp;<em>('+d.verbe+')</em>'+(d.apres?' '+d.apres:'');
+    var ansHint=d.twoForms?'(2 formes s\u00e9par\u00e9es par /)':'';
+    div.innerHTML='<div class="q-num">Phrase '+d.id+' / 8</div>'
+      +'<div class="q-phrase">'+phHtml+'</div>'
+      +'<div class="q-input-row">'
+        +'<span class="q-label">Conditionnel pass\u00e9'+(ansHint?' <span style="font-size:.72rem;color:var(--muted);">'+ansHint+'</span>':'')+'&nbsp;:</span>'
+        +'<input class="q-inp" id="inp1-'+d.id+'" type="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Votre r\u00e9ponse\u2026"/>'
+        +'<button class="btn-ok1" id="bok1-'+d.id+'" onclick="verifOne('+d.id+')">&#10003;&nbsp;OK</button>'
+      +'</div>'
+      +'<div class="q-corr" id="corr1-'+d.id+'"></div>'
+      +'<div class="q-expl" id="expl1-'+d.id+'"></div>'
+      +'<div class="q-fb-ko" id="fbko1-'+d.id+'"></div>';
+    list.appendChild(div);
+    var inp=div.querySelector('#inp1-'+d.id);
+    (function(idx){inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();var n=$('inp1-'+(idx+1));if(n)n.focus();else verif1();}
+    });})(d.id);
+  });
+}
+
+/* ══ VÉRIF UNE PHRASE ══ */
+var done1={};
+function verifOne(id){
+  if(done1[id])return;
+  var d=D1.find(function(x){return x.id===id;});if(!d)return;
+  var inp=$('inp1-'+id);var bok=$('bok1-'+id);
+  if(!inp||!inp.value.trim())return;
+  done1[id]=true;
+  inp.disabled=true;if(bok)bok.disabled=true;
+  var val=inp.value;var ok=match(val,d.ans);
+  inp.className='q-inp '+(ok?'ok':'ko');
+  var item=$('qi1-'+id);if(item)item.className='q-item '+(ok?'ok':'ko');
+  if(ok){
+    var expl=$('expl1-'+id);if(expl){expl.innerHTML='&#10003;&nbsp;'+d.expl;expl.className='q-expl show';}
+  } else {
+    var corr=$('corr1-'+id);if(corr){corr.innerHTML='&#10007;&nbsp;Forme attendue&nbsp;: <strong>'+(d.ansDisplay||d.ans[0])+'</strong>.';corr.className='q-corr show';}
+    var expl=$('expl1-'+id);if(expl){expl.innerHTML=d.expl;expl.className='q-expl show';}
+    var fb=$('fbko1-'+id);
+    if(fb){
+      var ni=norm(val),msg='';
+      if(d.fbKo_pfq&&(ni.indexOf('avait')>=0||ni.indexOf('\u00e9tait')>=0||ni.indexOf('avaient')>=0)){msg=d.fbKo_pfq;}
+      else if(d.fbKo_aux){msg=d.fbKo_aux;}
+      else if(d.fbKo_pfq){msg=d.fbKo_pfq;}
+      if(msg){fb.textContent=msg;fb.style.display='block';}
+    }
+  }
+  /* Focus phrase suivante */
+  var nextId=id+1;
+  var nextInp=$('inp1-'+nextId);
+  if(nextInp&&!nextInp.disabled)setTimeout(function(){nextInp.focus();},80);
+  /* Vérifier si tout est fait */
+  var allDone=D1.every(function(d2){return done1[d2.id];});
+  if(allDone){
+    sc1=D1.filter(function(d2){return match(($('inp1-'+d2.id)||{value:''}).value,d2.ans);}).length;
+    updateGlobal();
+    var fb1=$('fb1');
+    var ko1=8-sc1;
+    if(ko1===0){fb1.className='fb-g show ok';fb1.innerHTML='&#11088;&nbsp;Parfait&nbsp;! 8/8 &mdash; formation ma\u00eetris\u00e9e&nbsp;!';sndFin();setTimeout(showResults,900);}
+    else{fb1.className='fb-g show '+(sc1>=6?'mid':'ko');fb1.innerHTML='&#128161;&nbsp;'+sc1+'/8&nbsp;&mdash; '+(ko1===1?'1 forme':''+ko1+' formes')+' \u00e0 corriger. Lis les explications ci-dessus&nbsp;!';}
+    $('btn-v1').style.display='none';
+  }
+}
+
+/* ══ VÉRIF ACT1 ══ */
+function verif1(){
+  if(v1)return;v1=true;$('btn-v1').disabled=true;
+  sc1=0;var ko=0;
+  D1.forEach(function(d){
+    var inp=$('inp1-'+d.id);if(!inp)return;
+    var val=inp.value;inp.disabled=true;
+    var bok=$('bok1-'+d.id);if(bok)bok.disabled=true;
+    done1[d.id]=true;
+    var ok=match(val,d.ans);
+    inp.className='q-inp '+(ok?'ok':'ko');
+    var item=$('qi1-'+d.id);if(item)item.className='q-item '+(ok?'ok':'ko');
+    if(ok){
+      sc1++;
+      var expl=$('expl1-'+d.id);if(expl){expl.innerHTML='&#10003;&nbsp;'+d.expl;expl.className='q-expl show';}
+    } else {
+      ko++;
+      var corr=$('corr1-'+d.id);if(corr){corr.innerHTML='&#10007;&nbsp;Forme attendue : <strong>'+(d.ansDisplay||d.ans[0])+'</strong>.';corr.className='q-corr show';}
+      var expl=$('expl1-'+d.id);if(expl){expl.innerHTML=d.expl;expl.className='q-expl show';}
+      /* Feedback ciblé selon type d'erreur */
+      var fb=$('fbko1-'+d.id);
+      if(fb){
+        var msg='';
+        var ni=norm(val);
+        if(d.fbKo_acc&&(ni.indexOf('serait')<0&&ni.indexOf('seraient')<0&&ni.indexOf('\u00e9e')<0&&ni.indexOf('\u00e9s')<0)&&(d.ans[0].indexOf('serait')>=0||d.ans[0].indexOf('seraient')>=0)){
+          msg=d.fbKo_aux||d.fbKo_pfq||'';
+        } else if(d.fbKo_pfq&&(ni.indexOf('avait')>=0||ni.indexOf('\u00e9tait')>=0||ni.indexOf('avaient')>=0)){
+          msg=d.fbKo_pfq;
+        } else if(d.fbKo_aux){
+          msg=d.fbKo_aux;
+        } else if(d.fbKo_pfq){
+          msg=d.fbKo_pfq;
+        }
+        if(msg){fb.textContent=msg;fb.style.display='block';}
+      }
+    }
+  });
+  updateGlobal();
+  var fb=$('fb1');
+  if(ko===0){
+    fb.className='fb-g show ok';fb.innerHTML='&#11088;&nbsp;Parfait\u00a0! 8/8 — formation ma\u00eetris\u00e9e\u00a0!';sndFin();
+    setTimeout(showResults,900);
+  } else {
+    fb.className='fb-g show '+(sc1>=6?'mid':'ko');
+    fb.innerHTML='&#128161;&nbsp;'+sc1+'/8\u00a0\u2014 '+(ko===1?'1 forme':''+ko+' formes')+' \u00e0 corriger. Lis les explications et r\u00e9essaie\u00a0!';
+    sndKo();v1=false;$('btn-v1').disabled=false;
+  }
+}
+
+function reset1(){
+  v1=false;sc1=0;done1={};$('fb1').className='fb-g';
+  $('btn-v1').style.display='';$('btn-v1').disabled=false;
+  buildAct1();updateGlobal();
+}
+
+/* ══ BUILD ACT2 ══ */
+function buildAct2(){
+  var pool=$('pool2');pool.innerHTML='';
+  $('z-regrep').innerHTML='';$('z-hypo').innerHTML='';$('z-fait').innerHTML='';
+  sel2=null;assoc2={};
+  shuffle(D2.map(function(d){return d.id;})).forEach(function(id){
+    pool.appendChild(makeCard2(id));
+  });
+  updateCons2();
+}
+function makeCard2(id){
+  var d=D2.find(function(x){return x.id===id;});
+  var card=document.createElement('div');card.className='phr-card';card.id='pc2-'+id;
+  card.dataset.id=id;
+  card.innerHTML='<span class="phr-num">'+id+'.</span>'+d.ph+'<div class="phr-assoc" id="pa2-'+id+'"></div>';
+  card.addEventListener('click',function(){if(!v2)onPhrClick(id);});
+  return card;
+}
+
+/* ══ CLIC ACT2 ══ */
+function onPhrClick(id){
+  if(v2)return;
+  if(sel2===id){sel2=null;var c=$('pc2-'+id);if(c)c.classList.remove('selected');updateCons2();return;}
+  if(sel2!==null){var old=$('pc2-'+sel2);if(old)old.classList.remove('selected');}
+  sel2=id;var card=$('pc2-'+id);if(card)card.classList.add('selected');
+  updateCons2();
+}
+function onEmpClick(cat){
+  if(v2||sel2===null)return;
+  assoc2[sel2]=cat;
+  var card=$('pc2-'+sel2);if(card){card.classList.remove('selected');card.classList.add('placed');}
+  var pa=$('pa2-'+sel2);
+  if(pa){
+    var labels={'regrep':'Regret ou reproche','hypo':'Hypoth\u00e8se non r\u00e9alis\u00e9e','fait':'Fait non confirm\u00e9'};
+    pa.innerHTML='&#8594;&nbsp;<strong>'+labels[cat]+'</strong>';
+    pa.style.display='block';
+  }
+  /* Déplacer dans la bonne zone */
+  var zone=$('z-'+cat);if(zone)zone.appendChild(card);
+  sndPlace();sel2=null;updateCons2();
+  if(Object.keys(assoc2).length===5){$('btn-v2').disabled=false;updateCons2('all');}
+}
+function updateCons2(state){
+  var bar=$('cons2');
+  if(state==='all'){
+    bar.innerHTML='&#10003;&nbsp;Toutes les phrases sont class\u00e9es — clique sur <strong>V\u00e9rifier</strong>.';
+    bar.style.background='var(--green-light)';bar.style.borderColor='var(--green)';bar.style.color='var(--green-dark)';
+  } else if(sel2!==null){
+    bar.innerHTML='&#128070;&nbsp;Clique sur la colonne qui correspond \u00e0 la phrase <strong>'+sel2+'</strong>.';
+    bar.style.background='var(--day-light)';bar.style.borderColor='var(--day-dark)';bar.style.color='var(--day-dark2)';
+  } else {
+    bar.innerHTML='&#128073;&nbsp;Clique sur une phrase, puis sur la colonne qui correspond \u00e0 son emploi.';
+    bar.style.background='var(--day-light)';bar.style.borderColor='var(--day-border)';bar.style.color='var(--day-dark2)';
+  }
+}
+
+/* ══ VÉRIF ACT2 ══ */
+function verif2(){
+  if(v2)return;v2=true;$('btn-v2').disabled=true;
+  sc2=0;var ko=0;
+  D2.forEach(function(d){
+    var card=$('pc2-'+d.id);if(!card)return;
+    var ok=(assoc2[d.id]===d.cat);
+    card.classList.remove('selected','placed');card.classList.add('done',ok?'ok':'ko');
+    var pa=$('pa2-'+d.id);
+    var labels={'regrep':'Regret ou reproche','hypo':'Hypoth\u00e8se non r\u00e9alis\u00e9e','fait':'Fait non confirm\u00e9'};
+    if(ok){sc2++;if(pa)pa.innerHTML='&#10003;&nbsp;'+labels[d.cat];}
+    else{ko++;if(pa)pa.innerHTML='&#10007;&nbsp;Correct : '+labels[d.cat];}
+  });
+  updateGlobal();
+  var fb=$('fb2');
+  if(ko===0){
+    fb.className='fb-g show ok';fb.innerHTML='&#11088;&nbsp;Parfait\u00a0! 5/5 — emplois ma\u00eetris\u00e9s\u00a0!';sndFin();
+    setTimeout(showResults,900);
+  } else {
+    fb.className='fb-g show '+(sc2>=4?'mid':'ko');
+    fb.innerHTML='&#128161;&nbsp;'+sc2+'/5\u00a0\u2014 '+(ko===1?'1 erreur':''+ko+' erreurs')+'. '+FB_EMPLOI;
+    sndKo();v2=false;$('btn-v2').disabled=false;
+  }
+}
+
+function reset2(){
+  v2=false;sc2=0;$('fb2').className='fb-g';$('btn-v2').disabled=true;
+  buildAct2();updateGlobal();
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var ok=sc1+sc2;var rem=TOTAL-ok;
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=0;$('cnt-rem').textContent=rem;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';
+  $('prog-pct').textContent=pct+'%';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  var tot=sc1+sc2;$('r-score').textContent=tot;
+  var s=tot>=12?5:tot>=10?4:tot>=7?3:tot>=4?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=['\u00c0 retravailler \u2014 relis le r\u00e9f\u00e9rentiel.','Des notions \u00e0 consolider.','Pas mal\u00a0! Tu progresses.','Tr\u00e8s bien\u00a0!','Parfait \u2014 mission accomplie\u00a0!'];
+  $('r-msg').textContent=msgs[s-1];
+  $('results-screen').classList.add('show');
+  setTimeout(function(){$('results-screen').scrollIntoView({behavior:'smooth',block:'start'});},200);
+}
+
+/* ══ RESET ALL ══ */
+function resetAll(){
+  sc1=0;sc2=0;v1=false;v2=false;done1={};
+  $('results-screen').classList.remove('show');
+  $('fb1').className='fb-g';$('fb2').className='fb-g';
+  buildAct1();buildAct2();updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* Clics colonnes Act2 */
+['regrep','hypo','fait'].forEach(function(cat){
+  var zone=$('z-'+cat);if(!zone)return;
+  zone.addEventListener('click',function(){onEmpClick(cat);});
+  zone.previousElementSibling.addEventListener('click',function(){onEmpClick(cat);});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildAct1();buildAct2();updateGlobal();
+</script>
+</body>
+</html>
