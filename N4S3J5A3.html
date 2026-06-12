@@ -50,9 +50,16 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 
 /* ── LECTEUR AUDIO ── */
 .audio-zone{display:flex;align-items:center;gap:14px;background:var(--dark);border-radius:12px;padding:14px 18px;margin-bottom:18px;flex-wrap:wrap;}
+
+/* ── LECTEUR AUDIO CUSTOM ── */
+.audio-controls{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+.btn-play{width:44px;height:44px;border-radius:50%;background:var(--jour);color:var(--dark);border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .12s;box-shadow:0 2px 8px var(--day-glow);}
+.btn-play:hover{transform:scale(1.08);}
+.audio-progress-wrap{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:99px;cursor:pointer;position:relative;overflow:hidden;}
+.audio-progress-bar{height:100%;width:0%;background:var(--jour);border-radius:99px;transition:width .1s linear;pointer-events:none;}
+.audio-time{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:rgba(245,197,24,.7);white-space:nowrap;flex-shrink:0;}
+
 .audio-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(245,197,24,.5);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
-audio{flex:1;min-width:200px;height:36px;accent-color:var(--jour);}
-audio::-webkit-media-controls-panel{background:#1e1a0e;}
 
 /* ── ZONE SAISIE ── */
 .saisie-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--jour-fonce);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
@@ -116,13 +123,19 @@ audio::-webkit-media-controls-panel{background:#1e1a0e;}
       <b>Seules les fautes</b> portant sur le <b>conditionnel passé</b> et les <b>terminaisons en [e]</b> sont comptées. <b>&minus;0,5 pt par faute.</b> Note sur 10, plancher&nbsp;: 0.
     </div>
 
-    <!-- LECTEUR AUDIO -->
+    <!-- LECTEUR AUDIO CUSTOM -->
+    <audio id="audioPlayer" preload="auto">
+      <source src="audio/DicteeN4S3J5.mp3" type="audio/mpeg">
+    </audio>
     <div class="audio-zone">
       <div class="audio-label">Dictée &mdash; écouter</div>
-      <audio id="audioPlayer" controls>
-        <source src="audio/DicteeN4S3J5A3.mp3" type="audio/mpeg">
-        Navigateur non compatible.
-      </audio>
+      <div class="audio-controls">
+        <button class="btn-play" id="btnPlay" onclick="togglePlay()">&#9654;</button>
+        <div class="audio-progress-wrap" id="progressWrap" onclick="seekAudio(event)">
+          <div class="audio-progress-bar" id="progressBar"></div>
+        </div>
+        <span class="audio-time" id="audioTime">0:00</span>
+      </div>
     </div>
 
     <!-- SAISIE -->
@@ -340,6 +353,37 @@ function recommencer(){
   document.getElementById('resultZone').className='result-zone';
   document.getElementById('scoreCard').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+/* ── LECTEUR AUDIO ── */
+const player = document.getElementById('audioPlayer');
+const btnPlay = document.getElementById('btnPlay');
+const progressBar = document.getElementById('progressBar');
+const audioTime = document.getElementById('audioTime');
+
+function togglePlay(){
+  if(!player) return;
+  if(player.paused){ player.play().catch(()=>{}); btnPlay.innerHTML='&#9646;&#9646;'; }
+  else { player.pause(); btnPlay.innerHTML='&#9654;'; }
+}
+function seekAudio(e){
+  if(!player||!player.duration) return;
+  const wrap = document.getElementById('progressWrap');
+  const rect = wrap.getBoundingClientRect();
+  const pct = Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+  player.currentTime = pct * player.duration;
+}
+if(player){
+  player.addEventListener('timeupdate',()=>{
+    if(!player.duration) return;
+    const pct = player.currentTime/player.duration*100;
+    progressBar.style.width = pct+'%';
+    const m=Math.floor(player.currentTime/60), s=Math.floor(player.currentTime%60);
+    audioTime.textContent = m+':'+(s<10?'0':'')+s;
+  });
+  player.addEventListener('ended',()=>{ btnPlay.innerHTML='&#9654;'; progressBar.style.width='100%'; });
+  player.addEventListener('error',()=>{ document.getElementById('audioTime').textContent='Erreur'; });
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
