@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictée – Conditionnel passé & terminaisons [e] – 4e S3 J5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5c518;--jour-fonce:#8a6000;--jour-clair:#fffbeb;--jour-pale:#f5e08a;
+  --day-glow:rgba(245,197,24,.35);
+  --bg:#fffdf7;--dark:#14120a;
+  --vert-ok:#22c55e;--vert-bg:#e7faec;
+  --rouge-err:#ef4444;--rouge-bg:#fdeaea;
+  --txt:#2b2b2b;--gris:#8b8b8b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:16px 12px 60px;overflow-x:hidden;position:relative;}
+.bulle{position:fixed;border-radius:50%;filter:blur(6px);opacity:.45;z-index:0;pointer-events:none;}
+.b1{width:200px;height:200px;background:#ffd84d;top:-60px;right:-50px;}
+.b2{width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px;}
+.b3{width:150px;height:150px;background:#9be7a5;top:45%;right:-70px;}
+.b4{width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px;}
+.wrap{max-width:860px;margin:0 auto;position:relative;z-index:1;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+@keyframes slide{0%{background-position:0%;}100%{background-position:300%;}}
+
+/* ── HEADER ── */
+.header{text-align:center;margin-bottom:20px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#14120a;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px var(--day-glow);margin-bottom:10px;}
+.dots{display:inline-flex;gap:3px;}
+.dots i{width:7px;height:7px;border-radius:50%;background:#14120a;display:block;}
+.dots i:nth-child(2){opacity:.6;}.dots i:nth-child(3){opacity:.3;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:3px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#14120a;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.82rem);letter-spacing:1px;padding:9px 20px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);animation:pulse 1.8s ease-in-out infinite;}
+
+/* ── CARTE PRINCIPALE ── */
+.main-card{background:#fff;border:2px solid var(--jour-pale);border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);animation:fadeUp .4s ease;}
+.card-stripe{height:6px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#ffd84d,var(--jour-fonce));background-size:300% 100%;animation:slide 4s linear infinite;}
+.card-body{padding:20px 20px 24px;}
+
+/* ── CONSIGNE ── */
+.consigne-box{background:var(--jour-clair);border:1.5px solid var(--jour-pale);border-left:4px solid var(--jour-fonce);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:18px;font-size:clamp(.9rem,3vw,1rem);color:#5a4000;line-height:1.75;}
+.consigne-box b{color:var(--jour-fonce);}
+
+/* ── LECTEUR AUDIO ── */
+.audio-zone{display:flex;align-items:center;gap:14px;background:var(--dark);border-radius:12px;padding:14px 18px;margin-bottom:18px;flex-wrap:wrap;}
+.audio-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(245,197,24,.5);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+audio{flex:1;min-width:200px;height:36px;accent-color:var(--jour);}
+audio::-webkit-media-controls-panel{background:#1e1a0e;}
+
+/* ── ZONE SAISIE ── */
+.saisie-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--jour-fonce);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+#dicteeInput{width:100%;min-height:160px;font-family:Arial,sans-serif;font-size:clamp(.95rem,3vw,1.08rem);line-height:1.9;padding:14px 16px;border:2px solid var(--jour-pale);border-radius:10px;background:var(--jour-clair);color:var(--txt);resize:vertical;outline:none;transition:border-color .15s;}
+#dicteeInput:focus{border-color:var(--jour-fonce);}
+#dicteeInput:disabled{cursor:not-allowed;opacity:.85;}
+
+/* ── BOUTONS ── */
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.btn-principal{flex:1;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:none;border-radius:10px;background:var(--jour-fonce);color:#fff;cursor:pointer;min-height:2.8rem;transition:transform .12s;box-shadow:0 3px 12px var(--day-glow);}
+.btn-principal:hover:not(:disabled){transform:translateY(-2px);}
+.btn-principal:disabled{background:#d8d8d8;box-shadow:none;cursor:not-allowed;}
+.btn-sec{flex:1;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:2px solid var(--jour-pale);border-radius:10px;background:#fff;color:var(--jour-fonce);cursor:pointer;min-height:2.8rem;transition:transform .12s;}
+.btn-sec:hover:not(:disabled){transform:translateY(-2px);background:var(--jour-clair);}
+.btn-sec:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ── RÉSULTAT ANNOTÉ ── */
+.result-zone{display:none;margin-top:18px;}
+.result-zone.show{display:block;animation:fadeUp .4s ease;}
+.result-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--jour-fonce);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.texte-annote{font-size:clamp(.95rem,3vw,1.08rem);line-height:2.2;padding:14px 16px;background:var(--jour-clair);border:1.5px solid var(--jour-pale);border-radius:10px;word-break:break-word;}
+/* Tokens annotés */
+.tok-ok{color:var(--txt);}
+.tok-err{background:var(--rouge-bg);color:var(--rouge-err);border-bottom:2px solid var(--rouge-err);border-radius:2px;padding:0 1px;}
+.tok-err-cible{background:#fdeaea;color:var(--rouge-err);border-bottom:2.5px solid var(--rouge-err);border-radius:2px;padding:0 1px;font-weight:700;}
+.tok-manq{background:var(--rouge-bg);color:var(--rouge-err);border-bottom:2px dashed var(--rouge-err);border-radius:2px;padding:0 1px;font-style:italic;}
+.tok-manq-cible{background:#fdeaea;color:var(--rouge-err);border-bottom:2.5px dashed var(--rouge-err);border-radius:2px;padding:0 1px;font-style:italic;font-weight:700;}
+.tok-extra{background:#fff3cd;color:#856404;border-bottom:2px dotted #856404;border-radius:2px;padding:0 1px;text-decoration:line-through;}
+
+/* ── SCORE ── */
+.score-card{background:#fff;border:2px solid var(--jour-pale);border-radius:14px;padding:22px 20px;margin-top:16px;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.06);}
+.score-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);line-height:1;color:var(--jour-fonce);}
+.score-sur{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gris);margin:.3rem 0 .5rem;}
+.score-etoiles{font-size:1.9rem;letter-spacing:.1em;margin:.4rem 0 .8rem;}
+.score-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gris);margin-bottom:14px;line-height:1.8;}
+.score-msg{font-size:clamp(.88rem,2.5vw,1rem);line-height:1.8;color:var(--txt);max-width:520px;margin:0 auto 16px;}
+
+/* ── LÉGENDE ── */
+.legende{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;background:var(--jour-clair);border-radius:10px;border:1px solid var(--jour-pale);}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--gris);}
+.leg-swatch{width:16px;height:10px;border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="bulle b1"></div><div class="bulle b2"></div><div class="bulle b3"></div><div class="bulle b4"></div>
+<div class="wrap">
+
+<div class="header">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 4E</div>
+  <div class="semaine">Semaine 3 &ndash; Jour 5</div>
+  <h1 class="titre">Dictée &mdash; <span class="accent">défi final</span></h1>
+  <div class="badge-theme">CONDITIONNEL PASSÉ &amp; TERMINAISONS [e] &middot; /10</div>
+</div>
+
+<div class="main-card">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+
+    <div class="consigne-box">
+      Écoute la dictée, puis saisis le texte dans la zone ci-dessous.<br>
+      <b>Seules les fautes</b> portant sur le <b>conditionnel passé</b> et les <b>terminaisons en [e]</b> sont comptées. <b>&minus;0,5 pt par faute.</b> Note sur 10, plancher&nbsp;: 0.
+    </div>
+
+    <!-- LECTEUR AUDIO -->
+    <div class="audio-zone">
+      <div class="audio-label">Dictée &mdash; écouter</div>
+      <audio id="audioPlayer" controls>
+        <source src="audio/DicteeN4S3J5A3.mp3" type="audio/mpeg">
+        Navigateur non compatible.
+      </audio>
+    </div>
+
+    <!-- SAISIE -->
+    <div class="saisie-label">Saisir le texte ici</div>
+    <textarea id="dicteeInput" placeholder="Commence à écrire le texte dicté…" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+
+    <div class="btn-row">
+      <button class="btn-principal" id="btnValider" onclick="valider()">VÉRIFIER MA DICTÉE</button>
+      <button class="btn-sec" id="btnRecom" onclick="recommencer()" disabled>↺ Recommencer</button>
+    </div>
+
+    <!-- RÉSULTAT -->
+    <div class="result-zone" id="resultZone">
+      <div class="result-label">Texte annoté</div>
+      <div class="texte-annote" id="texteAnnote"></div>
+      <div class="legende">
+        <div class="leg-item"><div class="leg-swatch" style="background:#fdeaea;border-bottom:2.5px solid #ef4444;"></div>Faute comptée (cible)</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#fdeaea;border-bottom:2px solid #ef4444;"></div>Faute non comptée</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#fff3cd;border-bottom:2px dotted #856404;"></div>Mot en trop</div>
+      </div>
+    </div>
+
+    <!-- SCORE -->
+    <div class="score-card" id="scoreCard" style="display:none;">
+      <div class="score-note" id="scoreNote">10</div>
+      <div class="score-sur">/10 &mdash; <span id="scoreFautes">0 faute(s) comptée(s)</span></div>
+      <div class="score-etoiles" id="scoreEtoiles"></div>
+      <div class="score-detail" id="scoreDetail"></div>
+      <div class="score-msg" id="scoreMsg"></div>
+      <div class="btn-row" style="justify-content:center;max-width:400px;margin:0 auto;">
+        <button class="btn-sec" onclick="recommencer()">↺ Recommencer</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   DICTÉE N4S3J5A3 — Conditionnel passé & terminaisons [e]
+   ════════════════════════════════════════ */
+
+/* ── TEXTE RÉFÉRENCE ── */
+const REF = "La vallée s'étendait à perte de vue, baignée d'une lumière dorée que rien ne semblait pouvoir altérer. Les arbres, soigneusement plantés le long du sentier, offraient une ombre bienfaisante aux promeneurs. Sans la sécheresse de cet été, les prairies auraient conservé leur couleur d'un vert profond et les ruisseaux auraient continué de chanter entre les pierres lisses. Selon les habitants, la source principale aurait tari bien avant la saison habituelle. Il aurait fallu agir plus tôt pour préserver ce paysage que tous semblaient admirer en silence.";
+
+/* ── TOKENS CIBLES (indices dans le tableau de tokens du texte référence) ──
+   Calculés dynamiquement à l'init */
+const CIBLES_MOTS = new Set([
+  "s'étendait","baignée","dorée","semblait","altérer",
+  "plantés","offraient","auraient","conservé","continué",
+  "chanter","aurait","tari","fallu","préserver","semblaient","admirer"
+]);
+
+/* ── UTILITAIRES ── */
+function preClean(s){
+  return s.normalize("NFC")
+    .replace(/\u2019/g,"'").replace(/\u2018/g,"'")
+    .replace(/\u00ab\u00a0?|\u00a0?\u00bb/g,'"')
+    .replace(/\u2013|\u2014/g,"-")
+    .replace(/\u2026/g,"...")
+    .replace(/\u0153/g,"oe").replace(/\u0152/g,"Oe")
+    .replace(/['']/g,"'");
+}
+
+function normTok(s){
+  return s.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/['']/g,"'")
+    .replace(/[^a-z0-9''\-]/g,"");
+}
+
+/* Tokeniser en conservant les espaces/ponctuation */
+function tokeniser(texte){
+  const tokens=[];
+  const re=/([a-zA-ZÀ-ÿœŒ][a-zA-ZÀ-ÿœŒ'\-]*)|([^a-zA-ZÀ-ÿœŒ'\-]+)/g;
+  let m;
+  while((m=re.exec(texte))!==null){
+    tokens.push({w:m[0], isWord:!!m[1]});
+  }
+  return tokens;
+}
+
+/* ── LCS ── */
+function lcs(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},()=>new Int16Array(n+1));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){
+    if(normTok(a[i-1])===normTok(b[j-1])) dp[i][j]=dp[i-1][j-1]+1;
+    else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
+  }
+  // Backtrack
+  const align=[];
+  let i=m,j=n;
+  while(i>0||j>0){
+    if(i>0&&j>0&&normTok(a[i-1])===normTok(b[j-1])){
+      align.unshift({type:'ok',ref:a[i-1],elv:b[j-1]});i--;j--;
+    } else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){
+      align.unshift({type:'extra',ref:null,elv:b[j-1]});j--;
+    } else {
+      align.unshift({type:'manq',ref:a[i-1],elv:null});i--;
+    }
+  }
+  return align;
+}
+
+/* ── VÉRIFIER ── */
+let verifFait=false;
+
+function valider(){
+  if(verifFait)return; verifFait=true;
+  document.getElementById('btnValider').disabled=true;
+  document.getElementById('dicteeInput').disabled=true;
+  document.getElementById('btnRecom').disabled=false;
+
+  const saisi=preClean(document.getElementById('dicteeInput').value.trim());
+  const ref=preClean(REF);
+
+  // Extraire les mots uniquement pour LCS
+  const refMots=tokeniser(ref).filter(t=>t.isWord).map(t=>t.w);
+  const elvMots=tokeniser(saisi).filter(t=>t.isWord).map(t=>t.w);
+
+  const align=lcs(refMots,elvMots);
+
+  // Compter les fautes sur les cibles
+  let fautesCiblees=0;
+  const fautesDetail=[];
+
+  align.forEach(a=>{
+    if(a.type==='ok'){
+      // Vérifier orthographe exacte
+      if(a.ref!==a.elv){
+        const estCible=CIBLES_MOTS.has(normTok(a.ref))||isCible(a.ref);
+        if(estCible){fautesCiblees+=0.5;fautesDetail.push({ref:a.ref,elv:a.elv,type:'orthographe'});}
+      }
+    } else if(a.type==='manq'){
+      const estCible=isCible(a.ref);
+      if(estCible){fautesCiblees+=0.5;fautesDetail.push({ref:a.ref,elv:'(manquant)',type:'manquant'});}
+    }
+  });
+
+  // Construire le texte annoté (token par token du texte référence)
+  const html=construireAnnote(align);
+  document.getElementById('texteAnnote').innerHTML=html;
+  document.getElementById('resultZone').className='result-zone show';
+
+  // Score
+  const note=Math.max(0,Math.min(10,10-fautesCiblees));
+  afficherScore(note,fautesCiblees,fautesDetail);
+}
+
+function isCible(mot){
+  const n=normTok(mot);
+  return CIBLES_MOTS.has(n)||CIBLES_MOTS.has(mot);
+}
+
+function construireAnnote(align){
+  let html='';
+  align.forEach(a=>{
+    if(a.type==='ok'){
+      if(a.ref===a.elv){
+        html+='<span class="tok-ok">'+esc(a.ref)+'</span> ';
+      } else {
+        const cible=isCible(a.ref);
+        html+='<span class="'+(cible?'tok-err-cible':'tok-err')+'" title="Vous\u00a0: '+esc(a.elv)+' &rarr; '+esc(a.ref)+'">'+esc(a.elv)+'</span> ';
+      }
+    } else if(a.type==='manq'){
+      const cible=isCible(a.ref);
+      html+='<span class="'+(cible?'tok-manq-cible':'tok-manq')+'" title="Mot manquant\u00a0: '+esc(a.ref)+'">'+esc(a.ref)+'</span> ';
+    } else if(a.type==='extra'){
+      html+='<span class="tok-extra" title="Mot en trop">'+esc(a.elv)+'</span> ';
+    }
+  });
+  return html;
+}
+
+function afficherScore(note,fautes,detail){
+  const el=document.getElementById('scoreCard');
+  el.style.display='block';
+
+  const noteAff=note%1===0?note:note.toFixed(1);
+  document.getElementById('scoreNote').textContent=noteAff;
+  document.getElementById('scoreFautes').textContent=fautes===0?'Aucune faute comptée':fautes+' faute(s) comptée(s) &times; 0,5 pt';
+
+  const pct=note/10*100;
+  const nb=pct>=90?5:pct>=70?4:pct>=50?3:pct>=30?2:1;
+  document.getElementById('scoreEtoiles').textContent='\u2b50'.repeat(nb)+'\u2606'.repeat(5-nb);
+
+  // Détail fautes
+  let det='';
+  if(detail.length===0){
+    det='Toutes les formes cibles sont correctes.';
+  } else {
+    det=detail.map(f=>'&bull; '+esc(f.elv)+' &rarr; <b>'+esc(f.ref)+'</b>').join('<br>');
+  }
+  document.getElementById('scoreDetail').innerHTML=det;
+
+  // Message
+  let msg='';
+  if(pct>=90) msg='Excellent\u00a0! Tu maîtrises le conditionnel passé et les terminaisons en [e]. Tu es prêt(e) pour l\u2019évaluation.';
+  else if(pct>=70) msg='Très bien\u00a0! Relis les formes en rouge pour consolider tes dernières nuances.';
+  else msg='Continue\u00a0! Retourne sur \u00ab\u00a0Je m\u2019entraîne\u00a0\u00bb pour renforcer tes acquis avant de réessayer.';
+  document.getElementById('scoreMsg').textContent=msg;
+
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),300);
+}
+
+function recommencer(){
+  verifFait=false;
+  const inp=document.getElementById('dicteeInput');
+  inp.value=''; inp.disabled=false;
+  document.getElementById('btnValider').disabled=false;
+  document.getElementById('btnRecom').disabled=true;
+  document.getElementById('resultZone').className='result-zone';
+  document.getElementById('scoreCard').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
