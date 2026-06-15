@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S4 J3 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f; --day-dark:#3d7a10;
+      --day-light:#f0faeb; --day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.2);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-pale:#e7faec;
+      --pink:#f28b82; --red:#ef4444; --red-pale:#fdeaea;
+      --dark:#1a1f2e; --dark2:#232a3d; --dark3:#2d3448;
+      --accent:#8dc63f; --accent2:#b5e08a;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:340px;height:340px;background:#b5e08a;top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.06;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:180px;height:180px;
+      background:#b5e08a;bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* RANG BANNER — ambiance dark compétition */
+    .rang-banner{width:100%;max-width:720px;display:flex;align-items:center;gap:.9rem;
+      background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:.9rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .rang-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--accent2),var(--day-color));}
+    .rang-icon{font-size:2rem;flex-shrink:0;}
+    .rang-info{flex:1;}
+    .rang-etiquette{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#7a8a6a;margin-bottom:.15rem;}
+    .rang-nom{font-size:1.15rem;font-weight:900;color:var(--accent2);
+      font-family:'JetBrains Mono',monospace;letter-spacing:.05em;}
+    .rang-vs{text-align:right;line-height:1.5;}
+    .rang-vs-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#7a8a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .rang-vs-nom{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      color:var(--red);}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.4rem;flex-wrap:wrap;
+      justify-content:center;position:relative;z-index:1;width:100%;max-width:720px;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;
+      white-space:nowrap;color:var(--text);}
+    .chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .chip.ok .dot{background:var(--green);}
+    .chip.ko .dot{background:var(--pink);}
+    .chip.rem .dot{background:#aaa;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.7rem;}
+    .ref-item{font-size:.82rem;color:var(--text);line-height:1.65;
+      padding:.18rem 0;border-bottom:1px solid var(--border);display:flex;gap:.5rem;}
+    .ref-item:last-child{border-bottom:none;}
+    .ref-item strong{color:var(--day-dark);flex-shrink:0;}
+
+    /* niveaux */
+    .niveau-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .niveau-block{margin-bottom:1.4rem;}
+    .niveau-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;
+      background:var(--dark);border-radius:12px;padding:.75rem 1rem;
+      border:1.5px solid var(--dark3);}
+    .niv-pastille{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.85rem;
+      flex-shrink:0;}
+    .n1 .niv-pastille{background:var(--day-color);color:var(--dark);}
+    .n2 .niv-pastille{background:var(--yellow);color:var(--dark);}
+    .n3 .niv-pastille{background:var(--red);color:#fff;}
+    .niv-titre{font-size:.95rem;font-weight:800;color:#fff;}
+    .niv-sous{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:#7a8a9a;}
+    .niv-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      font-weight:700;padding:.2rem .65rem;border-radius:99px;
+      background:var(--dark2);color:var(--accent2);border:1.5px solid var(--dark3);}
+    .niveau-locked{opacity:.35;pointer-events:none;filter:grayscale(.6);}
+    .lock-msg{background:var(--dark);border:1.5px solid var(--dark3);
+      border-radius:10px;padding:.7rem 1rem;font-size:.82rem;font-family:'JetBrains Mono',monospace;
+      color:#7a8a9a;margin-bottom:.8rem;}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.2rem 1rem 1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.8rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
+    .q-phrase{background:#f4f7f0;border:1.5px solid #d8e8c8;border-radius:10px;
+      padding:.65rem .9rem;margin-bottom:.6rem;font-size:1rem;
+      font-weight:700;color:var(--text);line-height:1.6;}
+    .q-consigne{font-size:.88rem;color:var(--muted);margin-bottom:.65rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* options */
+    .opts{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.92rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-dark);background:#f4f7f0;}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* niveau 3 */
+    .n3-input-wrap{display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap;}
+    .n3-input{flex:1;min-width:180px;padding:.55rem .8rem;border-radius:8px;
+      border:2px solid var(--border);background:var(--surface);
+      font-size:.95rem;font-family:Arial,sans-serif;color:var(--text);outline:none;}
+    .n3-input:focus{border-color:var(--day-dark);}
+    .n3-modele{background:#f4f7f0;border:1.5px solid #d8e8c8;border-radius:10px;
+      padding:.7rem .9rem;font-size:.85rem;font-family:'JetBrains Mono',monospace;
+      color:var(--text);line-height:1.7;margin-bottom:.5rem;display:none;}
+    .n3-modele.show{display:block;}
+    .n3-modele strong{color:var(--day-dark);}
+
+    /* feedback */
+    .fb{font-size:.8rem;font-family:'JetBrains Mono',monospace;
+      padding:.4rem .7rem;border-radius:8px;margin-top:.35rem;display:none;line-height:1.55;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border:1px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* boutons */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+      padding:.55rem 1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px rgba(61,122,16,.3);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);background:var(--day-color);color:var(--dark);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-dark);}
+    .btn-dark{background:var(--dark);color:#fff;}
+    .btn-dark:hover:not(:disabled){background:var(--dark2);}
+
+    /* résultat niveau */
+    .niv-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.6rem;}
+    .niv-result.show{display:block;animation:fadeUp .3s ease both;}
+    .niv-score{font-size:2.2rem;font-weight:900;color:var(--accent2);
+      font-family:'JetBrains Mono',monospace;}
+    .niv-msg{font-size:.85rem;color:#9aaa8a;margin:.3rem 0 .8rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.2rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--accent2),var(--yellow));}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.8rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--accent2);}
+    .res-score-denom{font-size:1.5rem;color:#7a8a6a;}
+    .stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.2rem;}
+    .res-msg{font-size:.95rem;color:#c8d8b8;margin-bottom:.8rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:var(--green-pale);
+      border:2px solid var(--green);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+      .n3-input-wrap{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 3</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">Tournoi d&rsquo;orthographe</span></h1>
+</header>
+
+<!-- RANG -->
+<div class="rang-banner" id="rang-banner">
+  <div class="rang-icon" id="rang-icon">&#127942;</div>
+  <div class="rang-info">
+    <div class="rang-etiquette">Ton rang</div>
+    <div class="rang-nom" id="rang-nom">Recrue</div>
+  </div>
+  <div class="rang-vs">
+    <div class="rang-vs-label">Adversaire</div>
+    <div class="rang-vs-nom">Le Correcteur</div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 19 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+<div class="score-row">
+  <div class="chip ok"><div class="dot"></div><span id="cnt-ok">0</span>&nbsp;correct(s)</div>
+  <div class="chip ko"><div class="dot"></div><span id="cnt-ko">0</span>&nbsp;erreur(s)</div>
+  <div class="chip rem"><div class="dot"></div><span id="cnt-rem">19</span>&nbsp;restant(s)</div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&egrave;gles d&rsquo;accord du GN</div>
+  <div class="ref-item"><strong>Nom noyau&nbsp;:</strong> donneur d&rsquo;accord (genre + nombre).</div>
+  <div class="ref-item"><strong>D&eacute;terminant et adjectif&nbsp;:</strong> receveurs d&rsquo;accord.</div>
+  <div class="ref-item"><strong>Adjectif &eacute;pith&egrave;te&nbsp;:</strong> plac&eacute; directement &agrave; c&ocirc;t&eacute; du nom.</div>
+  <div class="ref-item"><strong>Adjectif attribut du sujet&nbsp;:</strong> s&eacute;par&eacute; du nom par un verbe d&rsquo;&eacute;tat.</div>
+  <div class="ref-item"><strong>Adjectifs de couleur compos&eacute;s ou issus d&rsquo;un nom&nbsp;:</strong> invariables.</div>
+  <div class="ref-item"><strong>Adjectifs employ&eacute;s comme adverbes</strong> (ex.&nbsp;: &laquo;&nbsp;chanter faux&nbsp;&raquo;)&nbsp;: invariables.</div>
+</div>
+
+<!-- NIVEAUX -->
+<div class="niveau-wrap">
+
+  <!-- N1 -->
+  <div class="niveau-block n1" id="bloc-n1">
+    <div class="niveau-header">
+      <div class="niv-pastille">1</div>
+      <div>
+        <div class="niv-titre">Niveau 1 &mdash; Recrue</div>
+        <div class="niv-sous">Choisir la bonne forme &mdash; 5 questions</div>
+      </div>
+      <div class="niv-badge" id="badge-n1">0 / 5</div>
+    </div>
+    <div id="cards-n1"></div>
+    <div class="niv-result" id="res-n1">
+      <div class="niv-score" id="score-n1"></div>
+      <div class="niv-msg" id="msg-n1"></div>
+      <div id="btn-n1"></div>
+    </div>
+  </div>
+
+  <!-- N2 -->
+  <div class="niveau-block n2 niveau-locked" id="bloc-n2">
+    <div class="niveau-header">
+      <div class="niv-pastille">2</div>
+      <div>
+        <div class="niv-titre">Niveau 2 &mdash; Challenger</div>
+        <div class="niv-sous">Identifier et corriger l&rsquo;erreur &mdash; 5 questions</div>
+      </div>
+      <div class="niv-badge" id="badge-n2">0 / 5</div>
+    </div>
+    <div class="lock-msg" id="lock-n2">&#128274;&nbsp;D&eacute;bloqu&eacute; apr&egrave;s 3/5 au Niveau 1.</div>
+    <div id="cards-n2"></div>
+    <div class="niv-result" id="res-n2">
+      <div class="niv-score" id="score-n2"></div>
+      <div class="niv-msg" id="msg-n2"></div>
+      <div id="btn-n2"></div>
+    </div>
+  </div>
+
+  <!-- N3 -->
+  <div class="niveau-block n3 niveau-locked" id="bloc-n3">
+    <div class="niveau-header">
+      <div class="niv-pastille">3</div>
+      <div>
+        <div class="niv-titre">Niveau 3 &mdash; Champion</div>
+        <div class="niv-sous">R&eacute;&eacute;crire le GN &mdash; 4 questions</div>
+      </div>
+      <div class="niv-badge" id="badge-n3">0 / 9</div>
+    </div>
+    <div class="lock-msg" id="lock-n3">&#128274;&nbsp;D&eacute;bloqu&eacute; apr&egrave;s 7/10 au Niveau 2.</div>
+    <div id="cards-n3"></div>
+    <div class="niv-result" id="res-n3">
+      <div class="niv-score" id="score-n3"></div>
+      <div class="niv-msg" id="msg-n3"></div>
+      <div id="btn-n3"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS GLOBAUX -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats finaux
+    </div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-score-denom">/19</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DONNÉES
+═══════════════════════════════════════════ */
+var N1 = [
+  {
+    id:'n1q1',
+    phrase:'une for\u00eat (dense / denses / dens\u00e9ment)',
+    consigne:'Quelle forme est correcte\u00a0?',
+    opts:[
+      {t:'denses',ok:false},
+      {t:'dens\u00e9ment',ok:false},
+      {t:'dense',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0for\u00eat\u00a0\u00bb : f\u00e9minin singulier. L\u2019adjectif \u00ab\u00a0dense\u00a0\u00bb re\u00e7oit cet accord : f\u00e9minin singulier \u2192 \u00ab\u00a0dense\u00a0\u00bb (pas de marque visible \u00e0 l\u2019\u00e9crit car le f\u00e9minin de \u00ab\u00a0dense\u00a0\u00bb = \u00ab\u00a0dense\u00a0\u00bb). \u00ab\u00a0Denses\u00a0\u00bb serait le pluriel. \u00ab\u00a0Dens\u00e9ment\u00a0\u00bb est un adverbe, pas un adjectif.'
+  },
+  {
+    id:'n1q2',
+    phrase:'des erreurs (fr\u00e9quent / fr\u00e9quente / fr\u00e9quentes)',
+    consigne:'Quelle forme est correcte\u00a0?',
+    opts:[
+      {t:'fr\u00e9quent',ok:false},
+      {t:'fr\u00e9quente',ok:false},
+      {t:'fr\u00e9quentes',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0erreurs\u00a0\u00bb : f\u00e9minin pluriel. L\u2019adjectif re\u00e7oit les deux marques : f\u00e9minin (-e) + pluriel (-s) = \u00ab\u00a0fr\u00e9quentes\u00a0\u00bb.'
+  },
+  {
+    id:'n1q3',
+    phrase:'un discours (clair / claire / claires) et (pr\u00e9cis / pr\u00e9cise)',
+    consigne:'Quelle combinaison est correcte\u00a0?',
+    opts:[
+      {t:'claire / pr\u00e9cise',ok:false},
+      {t:'claires / pr\u00e9cis',ok:false},
+      {t:'clair / pr\u00e9cis',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0discours\u00a0\u00bb : masculin singulier. Les deux adjectifs coordonn\u00e9s re\u00e7oivent le m\u00eame accord : masculin singulier. \u00ab\u00a0Clair\u00a0\u00bb (masculin singulier) et \u00ab\u00a0pr\u00e9cis\u00a0\u00bb (masculin singulier, -s d\u00e9j\u00e0 pr\u00e9sent au singulier).'
+  },
+  {
+    id:'n1q4',
+    phrase:'les (ancien / anciens / anciennes) b\u00e2timents (abandonn\u00e9 / abandonn\u00e9s)',
+    consigne:'Quelle combinaison est correcte\u00a0?',
+    opts:[
+      {t:'ancien / abandonn\u00e9',ok:false},
+      {t:'anciennes / abandonn\u00e9s',ok:false},
+      {t:'anciens / abandonn\u00e9s',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0b\u00e2timents\u00a0\u00bb : masculin pluriel. \u00ab\u00a0Ancien\u00a0\u00bb \u2192 \u00ab\u00a0anciens\u00a0\u00bb (masculin pluriel). \u00ab\u00a0Abandonn\u00e9\u00a0\u00bb \u2192 \u00ab\u00a0abandonn\u00e9s\u00a0\u00bb (masculin pluriel). Les deux adjectifs re\u00e7oivent l\u2019accord du m\u00eame nom noyau.'
+  },
+  {
+    id:'n1q5',
+    phrase:'une (nouveau / nouvelle / nouvelles) approche (original / originale)',
+    consigne:'Quelle combinaison est correcte\u00a0?',
+    opts:[
+      {t:'nouveau / original',ok:false},
+      {t:'nouvelles / originale',ok:false},
+      {t:'nouvelle / originale',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0approche\u00a0\u00bb : f\u00e9minin singulier. \u00ab\u00a0Nouveau\u00a0\u00bb \u2192 f\u00e9minin singulier \u2192 \u00ab\u00a0nouvelle\u00a0\u00bb (attention : f\u00e9minin irr\u00e9gulier). \u00ab\u00a0Original\u00a0\u00bb \u2192 f\u00e9minin singulier \u2192 \u00ab\u00a0originale\u00a0\u00bb.'
+  }
+];
+
+var N2 = [
+  {
+    id:'n2q6',
+    phrase:'Elle portait des chaussures blanc cass\u00e9 tr\u00e8s \u00e9l\u00e9gant.',
+    consigne:'Quelle est l\u2019erreur\u00a0?',
+    opts:[
+      {t:'\u00ab\u00a0blanc cass\u00e9\u00a0\u00bb devrait \u00eatre \u00ab\u00a0blanche cass\u00e9e\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0\u00e9l\u00e9gant\u00a0\u00bb devrait \u00eatre \u00ab\u00a0\u00e9l\u00e9gants\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0\u00e9l\u00e9gant\u00a0\u00bb devrait \u00eatre \u00ab\u00a0\u00e9l\u00e9gantes\u00a0\u00bb.',ok:true}
+    ],
+    fb:'L\u2019adjectif de couleur compos\u00e9 \u00ab\u00a0blanc cass\u00e9\u00a0\u00bb est invariable : pas d\u2019erreur l\u00e0. L\u2019erreur est sur \u00ab\u00a0\u00e9l\u00e9gant\u00a0\u00bb : il qualifie \u00ab\u00a0chaussures\u00a0\u00bb (f\u00e9minin pluriel) et doit donc s\u2019\u00e9crire \u00ab\u00a0\u00e9l\u00e9gantes\u00a0\u00bb.'
+  },
+  {
+    id:'n2q7',
+    phrase:'Les deux premi\u00e8res semaines semblaient interminable.',
+    consigne:'Quelle est l\u2019erreur\u00a0?',
+    opts:[
+      {t:'\u00ab\u00a0premi\u00e8res\u00a0\u00bb devrait \u00eatre \u00ab\u00a0premiers\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0interminable\u00a0\u00bb devrait \u00eatre \u00ab\u00a0interminables\u00a0\u00bb.',ok:true},
+      {t:'\u00ab\u00a0deux\u00a0\u00bb devrait \u00eatre \u00ab\u00a0deuxi\u00e8mes\u00a0\u00bb.',ok:false}
+    ],
+    fb:'L\u2019adjectif attribut du sujet s\u2019accorde avec le sujet. Le sujet est \u00ab\u00a0semaines\u00a0\u00bb : f\u00e9minin pluriel. \u00ab\u00a0Interminable\u00a0\u00bb \u2192 \u00ab\u00a0interminables\u00a0\u00bb (f\u00e9minin pluriel \u2192 -s).'
+  },
+  {
+    id:'n2q8',
+    phrase:'un projet ambitieux et tout \u00e0 fait r\u00e9alisable.',
+    consigne:'Erreur d\u2019accord\u00a0?',
+    opts:[
+      {t:'\u00ab\u00a0ambitieux\u00a0\u00bb devrait \u00eatre \u00ab\u00a0ambitieuse\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0r\u00e9alisable\u00a0\u00bb devrait \u00eatre \u00ab\u00a0r\u00e9alisables\u00a0\u00bb.',ok:false},
+      {t:'Aucune erreur : le GN est correctement accord\u00e9.',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0projet\u00a0\u00bb : masculin singulier. \u00ab\u00a0Ambitieux\u00a0\u00bb = masculin singulier \u2713. \u00ab\u00a0R\u00e9alisable\u00a0\u00bb = masculin singulier \u2713 (pas de marque visible car le mot ne change pas au masculin singulier). Il n\u2019y a pas d\u2019erreur dans ce GN.'
+  },
+  {
+    id:'n2q9',
+    phrase:'de vieux habitudes difficiles \u00e0 perdre',
+    consigne:'Quelle est l\u2019erreur\u00a0?',
+    opts:[
+      {t:'\u00ab\u00a0difficiles\u00a0\u00bb devrait \u00eatre \u00ab\u00a0difficile\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0perdre\u00a0\u00bb devrait \u00eatre \u00ab\u00a0perdu\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0vieux\u00a0\u00bb devrait \u00eatre \u00ab\u00a0vieilles\u00a0\u00bb.',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0habitudes\u00a0\u00bb : f\u00e9minin pluriel. \u00ab\u00a0Vieux\u00a0\u00bb est le masculin pluriel de \u00ab\u00a0vieux\u00a0\u00bb. Le f\u00e9minin pluriel est \u00ab\u00a0vieilles\u00a0\u00bb (f\u00e9minin irr\u00e9gulier). \u00ab\u00a0Difficiles\u00a0\u00bb est correct : f\u00e9minin pluriel.'
+  },
+  {
+    id:'n2q10',
+    phrase:'Les r\u00e9sultats obtenus \u00e9taient vraiment satisfaisants et encourageant.',
+    consigne:'Quelle est l\u2019erreur\u00a0?',
+    opts:[
+      {t:'\u00ab\u00a0obtenus\u00a0\u00bb devrait \u00eatre \u00ab\u00a0obtenues\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0satisfaisants\u00a0\u00bb devrait \u00eatre \u00ab\u00a0satisfaisantes\u00a0\u00bb.',ok:false},
+      {t:'\u00ab\u00a0encourageant\u00a0\u00bb devrait \u00eatre \u00ab\u00a0encourageants\u00a0\u00bb.',ok:true}
+    ],
+    fb:'Les deux adjectifs attributs du sujet s\u2019accordent tous les deux avec \u00ab\u00a0r\u00e9sultats\u00a0\u00bb : masculin pluriel. \u00ab\u00a0Satisfaisants\u00a0\u00bb est correct. \u00ab\u00a0Encourageant\u00a0\u00bb manque le -s du pluriel : il doit s\u2019\u00e9crire \u00ab\u00a0encourageants\u00a0\u00bb.'
+  }
+];
+
+var N3 = [
+  {
+    id:'n3q11',
+    phrase:'un vieux manteau \u00e9lim\u00e9',
+    consigne:'R\u00e9\u00e9cris ce GN au f\u00e9minin singulier.',
+    modele:'une vieille veste \u00e9lim\u00e9e',
+    explication:'Nom : f\u00e9minin singulier.\n\u00ab\u00a0Vieux\u00a0\u00bb \u2192 \u00ab\u00a0vieille\u00a0\u00bb (f\u00e9minin irr\u00e9gulier).\n\u00ab\u00a0\u00c9lim\u00e9\u00a0\u00bb \u2192 \u00ab\u00a0\u00e9lim\u00e9e\u00a0\u00bb (f\u00e9minin : + e).\nD\u00e9terminant : \u00ab\u00a0un\u00a0\u00bb \u2192 \u00ab\u00a0une\u00a0\u00bb.',
+    fb:'V\u00e9rifie chaque \u00e9l\u00e9ment du GN : le d\u00e9terminant, l\u2019adjectif antépos\u00e9 et l\u2019adjectif postpos\u00e9. Tous doivent recevoir le genre et le nombre du nouveau nom noyau.'
+  },
+  {
+    id:'n3q12',
+    phrase:'les premi\u00e8res d\u00e9cisions courageuses',
+    consigne:'R\u00e9\u00e9cris ce GN au singulier.',
+    modele:'la premi\u00e8re d\u00e9cision courageuse',
+    explication:'Nom : f\u00e9minin singulier.\n\u00ab\u00a0Premi\u00e8res\u00a0\u00bb \u2192 \u00ab\u00a0premi\u00e8re\u00a0\u00bb (f\u00e9minin singulier).\n\u00ab\u00a0Courageuses\u00a0\u00bb \u2192 \u00ab\u00a0courageuse\u00a0\u00bb (f\u00e9minin singulier).\nD\u00e9terminant : \u00ab\u00a0les\u00a0\u00bb \u2192 \u00ab\u00a0la\u00a0\u00bb.',
+    fb:'Au singulier, chaque receveur d\u2019accord perd la marque du pluriel (-s ou -es). Relis le GN obtenu : tous les \u00e9l\u00e9ments sont-ils au singulier\u00a0?'
+  },
+  {
+    id:'n3q13',
+    phrase:'un regard froid et indiff\u00e9rent',
+    consigne:'R\u00e9\u00e9cris ce GN au f\u00e9minin pluriel.',
+    modele:'des expressions froides et indiff\u00e9rentes',
+    explication:'Nom : f\u00e9minin pluriel.\n\u00ab\u00a0Froid\u00a0\u00bb \u2192 \u00ab\u00a0froides\u00a0\u00bb (f\u00e9minin + pluriel).\n\u00ab\u00a0Indiff\u00e9rent\u00a0\u00bb \u2192 \u00ab\u00a0indiff\u00e9rentes\u00a0\u00bb (f\u00e9minin + pluriel).\nD\u00e9terminant : \u00ab\u00a0un\u00a0\u00bb \u2192 \u00ab\u00a0des\u00a0\u00bb.',
+    fb:'Le GN change de genre ET de nombre. Chaque receveur doit recevoir les deux marques : f\u00e9minin (-e) + pluriel (-s). Relis chaque adjectif un par un.'
+  },
+  {
+    id:'n3q14',
+    phrase:'de nouvelles id\u00e9es originales et audacieuses',
+    consigne:'R\u00e9\u00e9cris ce GN au masculin singulier.',
+    modele:'un nouvel objectif original et audacieux',
+    explication:'Nom : masculin singulier.\n\u00ab\u00a0Nouvelles\u00a0\u00bb \u2192 \u00ab\u00a0nouvel\u00a0\u00bb (devant voyelle) ou \u00ab\u00a0nouveau\u00a0\u00bb.\n\u00ab\u00a0Originales\u00a0\u00bb \u2192 \u00ab\u00a0original\u00a0\u00bb.\n\u00ab\u00a0Audacieuses\u00a0\u00bb \u2192 \u00ab\u00a0audacieux\u00a0\u00bb.\nD\u00e9terminant : \u00ab\u00a0de\u00a0\u00bb \u2192 \u00ab\u00a0un\u00a0\u00bb.',
+    fb:'Attention aux formes irr\u00e9guli\u00e8res : \u00ab\u00a0nouvelle\u00a0\u00bb \u2192 \u00ab\u00a0nouvel\u00a0\u00bb devant voyelle, \u00ab\u00a0nouveau\u00a0\u00bb devant consonne. \u00ab\u00a0Audacieuses\u00a0\u00bb \u2192 \u00ab\u00a0audacieux\u00a0\u00bb (masculin pluriel et singulier identiques pour les adjectifs en -eux).'
+  }
+];
+
+/* ═══════════════════════════════════════════
+   ÉTAT
+═══════════════════════════════════════════ */
+var scoreOk=0, scoreKo=0;
+var n1Ok=0, n1Results={};
+var n2Ok=0, n2Results={};
+var n3Validated=0;
+var n1Done=false, n2Done=false, n3Done=false;
+
+function shuffle(a){ return a.slice().sort(function(){ return Math.random()-.5; }); }
+var L=['A','B','C','D'];
+
+/* ═══════════════════════════════════════════
+   BUILD N1
+═══════════════════════════════════════════ */
+function buildN1(){
+  var wrap=document.getElementById('cards-n1');
+  wrap.innerHTML=''; n1Results={}; n1Ok=0;
+  shuffle(N1).forEach(function(q,i){
+    var card=mk('div','card'); card.id='c1-'+q.id;
+    card.appendChild(mk('div','card-stripe'));
+    var lbl=mk('div','q-label'); lbl.textContent='Question '+(i+1)+' / 5'; card.appendChild(lbl);
+    var ph=mk('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var cs=mk('div','q-consigne'); cs.textContent=q.consigne; card.appendChild(cs);
+    var opts=mk('div','opts');
+    shuffle(q.opts).forEach(function(opt,oi){
+      var btn=mkBtn(q,opt,oi,'n1');
+      btn.addEventListener('click',function(){ selN1(q,btn,opts); });
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mk('div','fb'); fb.id='fb1-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selN1(q,btn,optsEl){
+  if(n1Results[q.id]!==undefined) return;
+  var ok=btn.dataset.ok==='1';
+  n1Results[q.id]=ok;
+  colorOpts(optsEl,btn);
+  if(ok){ scoreOk++; n1Ok++; }
+  else { scoreKo++; showFb('fb1-'+q.id,q.fb); }
+  updateGlobal();
+  document.getElementById('badge-n1').textContent=n1Ok+' / 5';
+  if(Object.keys(n1Results).length===N1.length) showResN1();
+}
+
+function showResN1(){
+  n1Done=true;
+  var r=document.getElementById('res-n1'); r.classList.add('show');
+  document.getElementById('score-n1').textContent=n1Ok+' / 5';
+  var ok=n1Ok>=3;
+  document.getElementById('msg-n1').textContent=ok?
+    '\u2713 Niveau 1 valid\u00e9 ! Rang\u00a0: Challenger d\u00e9bloqu\u00e9.':
+    'Score insuffisant (min. 3/5). R\u00e9essaie\u00a0!';
+  document.getElementById('btn-n1').innerHTML=ok?
+    '<button class="btn btn-primary" onclick="debN2()">Niveau 2 \u2192</button>':
+    '<button class="btn btn-ghost" onclick="resetN1()">\u21ba R\u00e9essayer</button>';
+  if(ok) majRang(2);
+}
+
+function debN2(){
+  var b=document.getElementById('bloc-n2');
+  b.classList.remove('niveau-locked');
+  document.getElementById('lock-n2').style.display='none';
+  buildN2();
+  b.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetN1(){
+  var lost=n1Ok; scoreOk=Math.max(0,scoreOk-lost);
+  n1Ok=0; n1Done=false; n1Results={};
+  document.getElementById('res-n1').classList.remove('show');
+  document.getElementById('badge-n1').textContent='0 / 5';
+  buildN1(); updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   BUILD N2
+═══════════════════════════════════════════ */
+function buildN2(){
+  var wrap=document.getElementById('cards-n2');
+  wrap.innerHTML=''; n2Results={}; n2Ok=0;
+  shuffle(N2).forEach(function(q,i){
+    var card=mk('div','card'); card.id='c2-'+q.id;
+    card.appendChild(mk('div','card-stripe'));
+    var lbl=mk('div','q-label'); lbl.textContent='Question '+(i+1)+' / 5'; card.appendChild(lbl);
+    var ph=mk('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var cs=mk('div','q-consigne'); cs.textContent=q.consigne; card.appendChild(cs);
+    var opts=mk('div','opts');
+    shuffle(q.opts).forEach(function(opt,oi){
+      var btn=mkBtn(q,opt,oi,'n2');
+      btn.addEventListener('click',function(){ selN2(q,btn,opts); });
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mk('div','fb'); fb.id='fb2-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selN2(q,btn,optsEl){
+  if(n2Results[q.id]!==undefined) return;
+  var ok=btn.dataset.ok==='1';
+  n2Results[q.id]=ok;
+  colorOpts(optsEl,btn);
+  if(ok){ scoreOk++; n2Ok++; }
+  else { scoreKo++; showFb('fb2-'+q.id,q.fb); }
+  updateGlobal();
+  document.getElementById('badge-n2').textContent=n2Ok+' / 5';
+  if(Object.keys(n2Results).length===N2.length) showResN2();
+}
+
+function showResN2(){
+  n2Done=true;
+  var totalN12=n1Ok+n2Ok;
+  var r=document.getElementById('res-n2'); r.classList.add('show');
+  document.getElementById('score-n2').textContent=n2Ok+' / 5';
+  var ok=totalN12>=7;
+  document.getElementById('msg-n2').textContent=ok?
+    '\u2713 Niveau 2 valid\u00e9 ! Rang\u00a0: Champion d\u00e9bloqu\u00e9.':
+    'Score insuffisant (min. 7/10 cumulatif). R\u00e9essaie\u00a0!';
+  document.getElementById('btn-n2').innerHTML=ok?
+    '<button class="btn btn-primary" onclick="debN3()">Niveau 3 \u2192</button>':
+    '<button class="btn btn-ghost" onclick="resetN2()">\u21ba R\u00e9essayer</button>';
+  if(ok) majRang(3);
+}
+
+function debN3(){
+  var b=document.getElementById('bloc-n3');
+  b.classList.remove('niveau-locked');
+  document.getElementById('lock-n3').style.display='none';
+  buildN3();
+  b.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetN2(){
+  var lost=n2Ok; scoreOk=Math.max(0,scoreOk-lost);
+  n2Ok=0; n2Done=false; n2Results={};
+  document.getElementById('res-n2').classList.remove('show');
+  document.getElementById('badge-n2').textContent='0 / 5';
+  buildN2(); updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   BUILD N3
+═══════════════════════════════════════════ */
+function buildN3(){
+  var wrap=document.getElementById('cards-n3');
+  wrap.innerHTML=''; n3Validated=0;
+  N3.forEach(function(q,i){
+    var card=mk('div','card'); card.id='c3-'+q.id;
+    card.appendChild(mk('div','card-stripe'));
+    var lbl=mk('div','q-label'); lbl.textContent='Question '+(i+1)+' / 4'; card.appendChild(lbl);
+    var ph=mk('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var cs=mk('div','q-consigne'); cs.textContent=q.consigne; card.appendChild(cs);
+    /* saisie */
+    var iw=mk('div','n3-input-wrap');
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='n3-input'; inp.placeholder='Tape ta r\u00e9ponse ici\u2026';
+    inp.id='inp-'+q.id; iw.appendChild(inp);
+    card.appendChild(iw);
+    /* modèle (caché) */
+    var mod=mk('div','n3-modele'); mod.id='mod-'+q.id;
+    mod.innerHTML='<strong>R\u00e9ponse mod\u00e8le\u00a0:</strong> '+q.modele.replace(/\n/g,'<br>')+
+      '<br><br><em style="color:var(--muted)">'+q.explication.replace(/\n/g,'<br>')+'</em>';
+    card.appendChild(mod);
+    var fb=mk('div','fb'); fb.id='fb3-'+q.id; card.appendChild(fb);
+    /* boutons */
+    var brow=mk('div','btn-row');
+    var bv=document.createElement('button'); bv.className='btn btn-primary'; bv.id='bv-'+q.id;
+    bv.innerHTML='\u2713\u00a0V\u00e9rifier';
+    bv.addEventListener('click',function(){ verifN3(q); });
+    var br2=document.createElement('button'); br2.className='btn btn-ghost';
+    br2.innerHTML='\u21ba\u00a0R\u00e9essayer';
+    br2.addEventListener('click',function(){ resetN3item(q); });
+    brow.appendChild(bv); brow.appendChild(br2); card.appendChild(brow);
+    wrap.appendChild(card);
+  });
+}
+
+function verifN3(q){
+  var inp=document.getElementById('inp-'+q.id);
+  var val=inp.value.trim();
+  if(!val){
+    showFb('fb3-'+q.id,'Tape ta r\u00e9ponse avant de v\u00e9rifier.');
+    return;
+  }
+  /* Afficher le modèle et feedback dans tous les cas */
+  document.getElementById('mod-'+q.id).classList.add('show');
+  document.getElementById('bv-'+q.id).disabled=true;
+  inp.disabled=true;
+
+  /* Validation simplifiée : vérifier que les éléments clés du modèle sont présents */
+  var valN=val.toLowerCase().replace(/['']/g,"'");
+  var modN=q.modele.toLowerCase().replace(/['']/g,"'");
+  /* Compter les mots du modèle présents dans la réponse */
+  var modMots=modN.split(' ');
+  var found=modMots.filter(function(m){ return valN.indexOf(m)>=0; }).length;
+  var ok=found>=Math.ceil(modMots.length*0.7);
+
+  var fb=document.getElementById('fb3-'+q.id);
+  if(ok){
+    fb.className='fb show ok-fb';
+    fb.textContent='\u2713 Bonne transformation\u00a0! V\u00e9rifie le mod\u00e8le ci-dessus.';
+    scoreOk++; n3Validated++;
+  } else {
+    fb.className='fb show ko-fb';
+    fb.textContent=q.fb;
+    scoreKo++; n3Validated++;
+  }
+  updateGlobal();
+  document.getElementById('badge-n3').textContent=n3Validated+' / 4';
+  if(n3Validated===N3.length) showResN3();
+}
+
+function resetN3item(q){
+  var inp=document.getElementById('inp-'+q.id);
+  inp.disabled=false; inp.value='';
+  document.getElementById('mod-'+q.id).classList.remove('show');
+  var fb=document.getElementById('fb3-'+q.id);
+  fb.className='fb'; fb.textContent='';
+  document.getElementById('bv-'+q.id).disabled=false;
+  /* Retirer le point si validé */
+  /* Pas de re-score ici : le modèle est affiché donc on laisse l'élève corriger librement */
+}
+
+function showResN3(){
+  n3Done=true;
+  var r=document.getElementById('res-n3'); r.classList.add('show');
+  document.getElementById('score-n3').textContent=n3Validated+' / 4';
+  document.getElementById('msg-n3').textContent='\u2713 Tournoi termin\u00e9\u00a0! Consulte tes r\u00e9sultats.';
+  document.getElementById('btn-n3').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherGlobal()">Voir mes r\u00e9sultats \u2192</button>';
+}
+
+/* ═══════════════════════════════════════════
+   UTILITAIRES
+═══════════════════════════════════════════ */
+function mk(tag,cls){
+  var el=document.createElement(tag);
+  el.className=cls; return el;
+}
+function mkBtn(q,opt,oi,niv){
+  var btn=document.createElement('button'); btn.className='opt-btn';
+  btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+  btn.dataset.ok=opt.ok?'1':'0';
+  return btn;
+}
+function colorOpts(optsEl,selBtn){
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true; b.classList.remove('sel-opt');
+    if(b.dataset.ok==='1') b.classList.add('ok-opt');
+    else if(b===selBtn && b.dataset.ok==='0') b.classList.add('ko-opt');
+  });
+}
+function showFb(id,txt){
+  var fb=document.getElementById(id);
+  if(!fb) return;
+  fb.className='fb show ko-fb'; fb.textContent=txt;
+}
+
+/* RANG */
+function majRang(niveau){
+  var rangs=['','Recrue','Challenger','Champion'];
+  var icons=['','&#127942;','&#129351;','&#127881;'];
+  document.getElementById('rang-nom').textContent=rangs[niveau];
+  document.getElementById('rang-icon').innerHTML=icons[niveau];
+}
+
+/* GLOBAL */
+function updateGlobal(){
+  var done=scoreOk+scoreKo;
+  var pct=Math.round(scoreOk/19*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=scoreOk+' / 19 points';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('cnt-ok').textContent=scoreOk;
+  document.getElementById('cnt-ko').textContent=scoreKo;
+  document.getElementById('cnt-rem').textContent=Math.max(0,19-done);
+}
+
+function afficherGlobal(){
+  var total=scoreOk;
+  var r=document.getElementById('results-global'); r.classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=17?5:total>=14?4:total>=10?3:total>=6?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge=document.getElementById('res-badge');
+  if(total>=14){
+    badge.innerHTML='<div class="badge-ok">\u2713 Score suffisant \u2014 \u00ab\u00a0Je rel\u00e8ve le d\u00e9fi\u00a0\u00bb d\u00e9bloqu\u00e9\u00a0!</div>';
+  } else {
+    badge.innerHTML='<div class="badge-ko">Score insuffisant ('+total+'/19). Il faut 14/19 minimum. Recommence\u00a0!</div>';
+  }
+  var msgs=['','','','','','',
+    'Courage, tu progresses\u00a0!','Courage, tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!','Pas mal \u2014 continue\u00a0!','Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!','Bien jou\u00e9\u00a0!','Bien jou\u00e9\u00a0!',
+    'Excellent\u00a0!','Excellent\u00a0!',
+    'Tr\u00e8s bien\u00a0!','Tr\u00e8s bien\u00a0!',
+    'Parfait \u2014 sans faute\u00a0!','Parfait \u2014 sans faute\u00a0!'];
+  for(var i=0;i<6;i++) msgs[i]='\u00c0 retravailler\u00a0!';
+  document.getElementById('res-msg').textContent=msgs[Math.min(total,msgs.length-1)];
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetTout(){
+  scoreOk=0; scoreKo=0;
+  n1Ok=0; n1Done=false; n1Results={};
+  n2Ok=0; n2Done=false; n2Results={};
+  n3Validated=0; n3Done=false;
+  document.getElementById('results-global').classList.remove('show');
+  ['res-n1','res-n2','res-n3'].forEach(function(id){ document.getElementById(id).classList.remove('show'); });
+  document.getElementById('bloc-n2').classList.add('niveau-locked');
+  document.getElementById('bloc-n3').classList.add('niveau-locked');
+  ['lock-n2','lock-n3'].forEach(function(id){ document.getElementById(id).style.display=''; });
+  ['badge-n1','badge-n2'].forEach(function(id,i){ document.getElementById(id).textContent='0 / '+(i===0?5:5); });
+  document.getElementById('badge-n3').textContent='0 / 4';
+  document.getElementById('cards-n2').innerHTML='';
+  document.getElementById('cards-n3').innerHTML='';
+  majRang(1);
+  buildN1(); updateGlobal();
+}
+
+/* ─── INIT ─── */
+buildN1();
+updateGlobal();
+</script>
+</body>
+</html>
