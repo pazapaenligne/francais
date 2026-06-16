@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictée – Subjonctif &amp; accords du GN – 4e S4 J5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5c518;--jour-fonce:#8a6000;--jour-clair:#fffbeb;--jour-pale:#f5e08a;
+  --day-glow:rgba(245,197,24,.4);--bg:#fffdf7;
+  --vert-ok:#22c55e;--vert-bg:#e7faec;
+  --rouge-err:#ef4444;--rouge-bg:#fdeaea;
+  --orange:#e07800;--orange-bg:#ffe0a0;--orange-txt:#6b3a00;
+  --txt:#2b2b2b;--gris:#8b8b8b;
+  --nuit:#1a1407;--nuit2:#241c0a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-3deg)}100%{opacity:1;transform:scale(1) rotate(-3deg)}}
+@keyframes barProg{0%{width:0}100%{width:var(--w)}}
+
+/* DÉCO BULLES */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(1px);opacity:.5;}
+.bubble.b1{width:120px;height:120px;background:var(--jour);top:-30px;right:-30px;}
+.bubble.b2{width:90px;height:90px;background:var(--jour);bottom:40px;left:-20px;}
+.bubble.b3{width:70px;height:70px;background:#8dc63f;top:40%;right:-25px;}
+.bubble.b4{width:80px;height:80px;background:#f28b82;top:30%;left:-30px;}
+
+.wrap{max-width:880px;margin:0 auto;padding:16px 14px 60px;position:relative;z-index:2;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:16px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#5a4500;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px var(--day-glow);margin-bottom:8px;}
+.dots{display:inline-flex;gap:3px;}
+.dots i{width:7px;height:7px;border-radius:50%;background:#5a4500;display:block;}
+.dots i:nth-child(2){opacity:.6;}.dots i:nth-child(3){opacity:.3;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:3px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#5a4500;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.82rem);letter-spacing:1px;padding:9px 20px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);}
+
+/* CONSIGNE */
+.consigne-box{background:var(--jour-clair);border:1.5px solid var(--jour-pale);border-left:4px solid var(--jour-fonce);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:16px;font-size:clamp(.9rem,2.8vw,1rem);color:#5a4500;line-height:1.7;}
+.consigne-box b{color:var(--jour-fonce);}
+
+/* LECTEUR AUDIO CUSTOM */
+.player-card{background:linear-gradient(145deg,var(--nuit),var(--nuit2));border:1.5px solid rgba(245,197,24,.35);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:0 6px 24px rgba(0,0,0,.25);}
+.player-top{display:flex;align-items:center;gap:14px;}
+.player-btn{width:52px;height:52px;border-radius:50%;border:none;background:var(--jour);color:#3a2e0a;font-size:1.4rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .12s;box-shadow:0 3px 12px var(--day-glow);}
+.player-btn:hover{transform:scale(1.08);}
+.player-info{flex:1;min-width:0;}
+.player-label{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:1.5px;color:var(--jour);text-transform:uppercase;margin-bottom:6px;}
+.player-bar{background:rgba(245,197,24,.15);border-radius:99px;height:8px;cursor:pointer;position:relative;overflow:hidden;}
+.player-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .1s linear;}
+.player-time{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(245,197,24,.7);margin-top:5px;display:flex;justify-content:space-between;}
+
+/* TEXTAREA */
+.saisie-card{background:#fff;border:2px solid var(--jour-pale);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.08);margin-bottom:16px;}
+.saisie-stripe{height:5px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f5e08a,var(--jour-fonce));background-size:300%;animation:slide 4s linear infinite;}
+.saisie-body{padding:16px;}
+.saisie-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--jour-fonce);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+#dictTextarea{width:100%;min-height:220px;font-family:'IM Fell English',serif;font-size:clamp(1rem,3vw,1.15rem);line-height:2;padding:14px 16px;border:2px solid var(--jour-pale);border-radius:10px;background:var(--jour-clair);color:#2a2000;resize:vertical;outline:none;transition:border-color .15s;}
+#dictTextarea:focus{border-color:var(--jour-fonce);}
+#dictTextarea:disabled{background:#f5f5f0;color:#555;}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-verif{flex:2;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:15px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;min-height:2.8rem;transition:transform .12s;box-shadow:0 3px 14px var(--day-glow);}
+.btn-verif:hover{transform:translateY(-2px);}
+.btn-sec{flex:1;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:15px;border:2px solid var(--jour-pale);border-radius:10px;background:#fff;color:var(--jour-fonce);cursor:pointer;min-height:2.8rem;transition:transform .12s;}
+.btn-sec:hover{transform:translateY(-2px);background:var(--jour-clair);}
+
+/* RÉSULTAT */
+.resultat{display:none;margin-top:18px;}
+.resultat.show{display:block;animation:fadeUp .5s ease;}
+.res-card{background:#fff;border:2px solid var(--jour);border-radius:18px;padding:26px 22px;box-shadow:0 14px 40px rgba(0,0,0,.1);position:relative;overflow:hidden;}
+.res-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f5e08a,var(--jour-fonce));}
+.res-top{text-align:center;margin-bottom:20px;}
+.res-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,4vw,1.5rem);letter-spacing:2px;padding:10px 22px;border-radius:10px;border:3.5px solid;display:inline-block;margin-bottom:14px;transform:rotate(-3deg);animation:stampPop .6s cubic-bezier(.3,1.6,.5,1);}
+.res-tampon.ok{color:var(--vert-ok);border-color:var(--vert-ok);}
+.res-tampon.moyen{color:var(--orange);border-color:var(--jour);}
+.res-tampon.ko{color:var(--rouge-err);border-color:var(--rouge-err);}
+.res-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);line-height:1;color:var(--jour-fonce);}
+.res-note small{font-size:.4em;color:var(--gris);}
+.res-et{font-size:1.9rem;letter-spacing:.12em;margin:.3rem 0 .6rem;}
+.res-stats{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gris);margin-bottom:6px;}
+.res-stats b{color:var(--jour-fonce);}
+
+/* CORRECTION */
+.correction-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--jour-fonce);margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--jour-pale);}
+.correction-texte{font-family:'IM Fell English',serif;font-size:clamp(1rem,3vw,1.18rem);line-height:2.4;color:#2a2000;background:var(--jour-clair);border-radius:10px;padding:16px 18px;}
+.mot-ok{color:#157f3a;}
+/* Cible comptée mal orthographiée : rouge + correction verte */
+.mot-faute{color:var(--rouge-err);font-weight:700;text-decoration:line-through;text-decoration-thickness:1.5px;}
+.mot-corr{color:var(--vert-ok);font-weight:700;font-size:.92em;margin-left:2px;}
+/* Faute hors cible (non comptée) : orange */
+.mot-horscible{color:var(--orange);text-decoration:line-through;text-decoration-thickness:1px;}
+.mot-horscible-corr{color:var(--orange-txt);font-size:.9em;margin-left:2px;}
+.legende{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gris);}
+.legende span{display:flex;align-items:center;gap:5px;}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+.btn-rejouer{display:block;width:100%;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;min-height:2.8rem;margin-top:18px;}
+.btn-rejouer:hover{transform:translateY(-2px);}
+
+audio{display:none;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 4E</div>
+    <div class="semaine">Semaine 4 &ndash; Jour 5</div>
+    <h1 class="titre">Dictée &mdash; <span class="accent">poésie romantique</span></h1>
+    <div class="badge-theme">SUBJONCTIF &amp; ACCORDS DU GN &middot; /10</div>
+  </div>
+
+  <div class="consigne-box">
+    Écoute l'enregistrement autant de fois que nécessaire, puis recopie le texte dans le cadre. <b>Seuls la conjugaison du présent du subjonctif et les accords dans le groupe nominal sont évalués</b> (&minus;0,5&nbsp;point par faute, note sur&nbsp;10).
+  </div>
+
+  <!-- LECTEUR AUDIO -->
+  <div class="player-card">
+    <div class="player-top">
+      <button class="player-btn" id="playBtn" onclick="togglePlay()">&#9654;</button>
+      <div class="player-info">
+        <div class="player-label">Enregistrement de la dictée</div>
+        <div class="player-bar" id="playerBar" onclick="seekAudio(event)">
+          <div class="player-fill" id="playerFill"></div>
+        </div>
+        <div class="player-time"><span id="timeCur">0:00</span><span id="timeDur">0:00</span></div>
+      </div>
+    </div>
+    <audio id="audioEl" preload="metadata">
+      <source src="audio/DicteeN4S4J5.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <!-- SAISIE -->
+  <div class="saisie-card">
+    <div class="saisie-stripe"></div>
+    <div class="saisie-body">
+      <div class="saisie-label">Ta dictée</div>
+      <textarea id="dictTextarea" placeholder="Écris ici le texte de la dictée&hellip;" spellcheck="false" autocomplete="off"></textarea>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn-verif" onclick="corriger()">CORRIGER MA DICTÉE</button>
+        <button class="btn-sec" onclick="recommencer()">&#8635; Effacer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div class="resultat" id="resultat">
+    <div class="res-card">
+      <div class="res-top">
+        <div class="res-tampon" id="resTampon"></div>
+        <div class="res-note"><span id="resNote">0</span><small>/10</small></div>
+        <div class="res-et" id="resEt"></div>
+        <div class="res-stats">
+          <span><b id="statFautes">0</b> faute(s) comptée(s)</span>
+          <span><b id="statCibles">0</b> / 20 cibles correctes</span>
+        </div>
+      </div>
+      <div class="correction-titre">Correction de ta dictée</div>
+      <div class="correction-texte" id="correctionTexte"></div>
+      <div class="legende">
+        <span><span class="leg-dot" style="background:var(--vert-ok)"></span> Cible correcte</span>
+        <span><span class="leg-dot" style="background:var(--rouge-err)"></span> Cible comptée (&minus;0,5)</span>
+        <span><span class="leg-dot" style="background:var(--orange)"></span> Autre faute (non comptée)</span>
+      </div>
+      <button class="btn-rejouer" onclick="recommencer()">&#8635; Recommencer la dictée</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DICTÉE · N4S4J5A3
+   Subjonctif présent + accords du GN
+   ══════════════════════════════════════ */
+
+/* ── TEXTE EXACT DE LA DICTÉE (verbatim) ── */
+var TEXTE = "Bien que les po\u00e8tes romantiques contemplent souvent les paysages m\u00e9lancoliques, il faut que leurs vers traduisent des \u00e9motions sinc\u00e8res et des sentiments profonds. Pour que leurs touchantes confidences \u00e9meuvent les lecteurs, il est n\u00e9cessaire que chaque image po\u00e9tique refl\u00e8te leur \u00e9tat d\u2019\u00e2me. Les vastes horizons brumeux, les sombres for\u00eats silencieuses et les paisibles clairs de lune inspirent leurs plus belles cr\u00e9ations.";
+
+/* ── CIBLES ÉVALUÉES (20) ── */
+/* Index = position du token dans le texte tokenisé. On identifie par le mot exact. */
+/* type: 'subj' = subjonctif, 'gn' = accord GN */
+var CIBLES = [
+  {mot:"contemplent",  type:"subj"},
+  {mot:"traduisent",   type:"subj"},
+  {mot:"\u00e9meuvent", type:"subj"},
+  {mot:"refl\u00e8te",  type:"subj"},
+  {mot:"romantiques",  type:"gn"},
+  {mot:"m\u00e9lancoliques", type:"gn"},
+  {mot:"sinc\u00e8res", type:"gn"},
+  {mot:"profonds",     type:"gn"},
+  {mot:"touchantes",   type:"gn"},
+  {mot:"po\u00e9tique", type:"gn"},
+  {mot:"vastes",       type:"gn"},
+  {mot:"brumeux",      type:"gn"},
+  {mot:"sombres",      type:"gn"},
+  {mot:"silencieuses", type:"gn"},
+  {mot:"paisibles",    type:"gn"},
+  {mot:"belles",       type:"gn"},
+  /* possessifs leur/leurs : 4 occurrences, identifiées par position */
+  {mot:"leurs", type:"gn", occ:1},  /* leurs vers */
+  {mot:"leurs", type:"gn", occ:2},  /* leurs touchantes */
+  {mot:"leur",  type:"gn", occ:1},  /* leur état */
+  {mot:"leurs", type:"gn", occ:3},  /* leurs plus belles */
+];
+var TOTAL_CIBLES = CIBLES.length; /* 20 */
+var PENALITE = 0.5;
+var NOTE_MAX = 10;
+
+/* ══ NORMALISATION ══ */
+function preClean(s){
+  /* NFC + apostrophes typographiques + tirets + ligatures */
+  s = s.normalize("NFC");
+  s = s.replace(/\u2019/g,"'").replace(/\u2018/g,"'").replace(/[\u201C\u201D]/g,'"');
+  s = s.replace(/\u0153/g,"oe").replace(/\u0152/g,"OE");
+  s = s.replace(/\u00e6/g,"ae").replace(/\u00c6/g,"AE");
+  s = s.replace(/[\u2013\u2014]/g,"-");
+  return s;
+}
+/* Tokeniser : garde lettres accentuées, apostrophe, tiret intra-mot */
+function tokeniser(s){
+  s = preClean(s);
+  var toks = s.match(/[A-Za-z\u00C0-\u017F]+(?:['\-][A-Za-z\u00C0-\u017F]+)*/g);
+  return toks ? toks.map(function(t){return t.replace(/\u2019/g,"'");}) : [];
+}
+/* normTok : sans accents, minuscule (pour alignement LCS) */
+function normTok(t){
+  return preClean(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+/* normStrict : AVEC accents, minuscule, sans ponctuation (pour notation) */
+function normStrict(t){
+  return preClean(t).toLowerCase().replace(/[^a-z\u00e0-\u00ff'\-]/gi,"");
+}
+
+/* ══ ALIGNEMENT APPROXIMATIF ══ */
+function levenshtein(a,b){
+  var m=a.length,n=b.length,d=[];
+  for(var i=0;i<=m;i++)d[i]=[i];
+  for(var j=0;j<=n;j++)d[0][j]=j;
+  for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){
+    var c=a[i-1]===b[j-1]?0:1;
+    d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);
+  }
+  return d[m][n];
+}
+function tokSim(a,b){
+  var na=normTok(a), nb=normTok(b);
+  if(na===nb) return true;
+  /* préfixe commun >=4 chars */
+  var pref=0;
+  while(pref<na.length&&pref<nb.length&&na[pref]===nb[pref])pref++;
+  if(pref>=4) return true;
+  /* Levenshtein <=2 */
+  if(levenshtein(na,nb)<=2) return true;
+  return false;
+}
+
+/* ══ LCS avec alignement approximatif ══ */
+function lcsAlign(ref, hyp){
+  /* ref = tokens corrects, hyp = tokens élève */
+  var m=ref.length, n=hyp.length;
+  var dp=[];
+  for(var i=0;i<=m;i++){dp[i]=[];for(var j=0;j<=n;j++)dp[i][j]=0;}
+  for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){
+    if(tokSim(ref[i-1],hyp[j-1])) dp[i][j]=dp[i-1][j-1]+1;
+    else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
+  }
+  /* Backtrack → liste d'alignements {refIdx, hypIdx} */
+  var align=[], i=m, j=n;
+  while(i>0&&j>0){
+    if(tokSim(ref[i-1],hyp[j-1])){
+      align.unshift({refIdx:i-1, hypIdx:j-1});
+      i--;j--;
+    } else if(dp[i-1][j]>=dp[i][j-1]){ i--; }
+    else { j--; }
+  }
+  return align;
+}
+
+/* ══ CORRECTION ══ */
+function corriger(){
+  var saisie = $('dictTextarea').value;
+  if(saisie.trim().length<5){
+    $('dictTextarea').style.borderColor='var(--rouge-err)';
+    setTimeout(function(){$('dictTextarea').style.borderColor='';},1000);
+    return;
+  }
+  pauseAudio();
+
+  var refTokens = tokeniser(TEXTE);
+  var hypTokens = tokeniser(saisie);
+  var align = lcsAlign(refTokens, hypTokens);
+
+  /* Map refIdx → hypIdx (mot aligné de l'élève) */
+  var refToHyp = {};
+  align.forEach(function(a){ refToHyp[a.refIdx] = a.hypIdx; });
+
+  /* Identifier quels refIdx sont des cibles */
+  var cibleMap = buildCibleMap(refTokens); /* refIdx → {type} */
+
+  var fautesComptees = 0;
+  var ciblesCorrectes = 0;
+
+  /* Construire l'affichage de correction depuis le TEXTE de référence */
+  var html = '';
+  for(var ri=0; ri<refTokens.length; ri++){
+    var refMot = refTokens[ri];
+    var estCible = cibleMap[ri] !== undefined;
+    var hypIdx = refToHyp[ri];
+    var motEleve = (hypIdx!==undefined) ? hypTokens[hypIdx] : null;
+
+    var correct = false;
+    if(motEleve!==null){
+      correct = normStrict(motEleve) === normStrict(refMot);
+    }
+
+    if(estCible){
+      if(correct){
+        ciblesCorrectes++;
+        html += '<span class="mot-ok">'+esc(refMot)+'</span> ';
+      } else {
+        fautesComptees++;
+        /* Afficher ce qu'a écrit l'élève barré + correction */
+        var ecrit = motEleve!==null ? esc(motEleve) : '____';
+        html += '<span class="mot-faute">'+ecrit+'</span><span class="mot-corr">('+esc(refMot)+')</span> ';
+      }
+    } else {
+      /* Hors cible : si faux, afficher en orange (non compté) */
+      if(motEleve!==null && !correct){
+        html += '<span class="mot-horscible">'+esc(motEleve)+'</span><span class="mot-horscible-corr">('+esc(refMot)+')</span> ';
+      } else {
+        html += esc(refMot)+' ';
+      }
+    }
+  }
+
+  /* Calcul note */
+  var note = NOTE_MAX - (PENALITE * fautesComptees);
+  if(note < 0) note = 0;
+  /* Arrondi à 0,5 près pour affichage propre */
+  var noteAff = (Math.round(note*2)/2);
+
+  afficherResultat(noteAff, fautesComptees, ciblesCorrectes, html);
+}
+
+/* Construire la map refIdx → cible en repérant les mots cibles dans refTokens */
+function buildCibleMap(refTokens){
+  var map = {};
+  /* Pour chaque type de mot cible, on compte combien d'occurrences sont attendues */
+  /* On parcourt le texte et on assigne dans l'ordre d'apparition */
+  var occCount = {}; /* normStrict(mot) → compteur d'occurrences rencontrées */
+
+  for(var ri=0; ri<refTokens.length; ri++){
+    var ns = normStrict(refTokens[ri]);
+    occCount[ns] = (occCount[ns]||0) + 1;
+    var thisOcc = occCount[ns];
+
+    /* Chercher une cible qui correspond à ce mot ET à cette occurrence */
+    for(var ci=0; ci<CIBLES.length; ci++){
+      var cib = CIBLES[ci];
+      if(normStrict(cib.mot) !== ns) continue;
+      if(cib.occ){
+        /* Cible avec occurrence précise */
+        if(cib.occ === thisOcc){ map[ri] = {type:cib.type}; break; }
+      } else {
+        /* Cible simple (mot unique dans le texte) : 1re occurrence */
+        if(thisOcc === 1){ map[ri] = {type:cib.type}; break; }
+      }
+    }
+  }
+  return map;
+}
+
+function afficherResultat(note, fautes, cibles, html){
+  $('resNote').textContent = (note % 1 === 0) ? note : note.toFixed(1).replace('.',',');
+  $('statFautes').textContent = fautes;
+  $('statCibles').textContent = cibles;
+  $('correctionTexte').innerHTML = html;
+
+  var pct = note/NOTE_MAX;
+  var nb = pct>=0.9?5:pct>=0.7?4:pct>=0.5?3:pct>=0.3?2:1;
+  $('resEt').textContent = '\u2b50'.repeat(nb)+'\u2606'.repeat(5-nb);
+
+  var tp = $('resTampon');
+  if(pct>=0.9){tp.textContent='EXCELLENT';tp.className='res-tampon ok';}
+  else if(pct>=0.7){tp.textContent='TRÈS BIEN';tp.className='res-tampon ok';}
+  else if(pct>=0.5){tp.textContent='BIEN';tp.className='res-tampon moyen';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='res-tampon ko';}
+
+  $('dictTextarea').disabled = true;
+  $('resultat').className = 'resultat show';
+  setTimeout(function(){$('resultat').scrollIntoView({behavior:'smooth',block:'start'});},300);
+}
+
+function recommencer(){
+  $('dictTextarea').value='';
+  $('dictTextarea').disabled=false;
+  $('resultat').className='resultat';
+  pauseAudio();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ LECTEUR AUDIO ══ */
+var audio=null, isPlaying=false;
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function initAudio(){
+  audio = $('audioEl');
+  audio.addEventListener('timeupdate', function(){
+    if(audio.duration){
+      var pct = audio.currentTime/audio.duration*100;
+      $('playerFill').style.width = pct+'%';
+      $('timeCur').textContent = fmtTime(audio.currentTime);
+    }
+  });
+  audio.addEventListener('loadedmetadata', function(){
+    $('timeDur').textContent = fmtTime(audio.duration);
+  });
+  audio.addEventListener('ended', function(){
+    isPlaying=false;
+    $('playBtn').innerHTML='&#9654;';
+    
+  });
+}
+function fmtTime(t){
+  if(!isFinite(t))return '0:00';
+  var m=Math.floor(t/60), s=Math.floor(t%60);
+  return m+':'+(s<10?'0':'')+s;
+}
+function togglePlay(){
+  if(!audio)return;
+  if(isPlaying){pauseAudio();}
+  else{
+    audio.play().then(function(){
+      isPlaying=true;
+      $('playBtn').innerHTML='&#10074;&#10074;';
+      
+    }).catch(function(){});
+  }
+}
+function pauseAudio(){
+  if(!audio)return;
+  audio.pause();
+  isPlaying=false;
+  $('playBtn').innerHTML='&#9654;';
+  
+}
+function seekAudio(e){
+  if(!audio||!audio.duration)return;
+  var bar=$('playerBar');
+  var rect=bar.getBoundingClientRect();
+  var pct=(e.clientX-rect.left)/rect.width;
+  audio.currentTime = pct*audio.duration;
+}
+
+/* ── INIT ── */
+initAudio();
+</script>
+</body>
+</html>
