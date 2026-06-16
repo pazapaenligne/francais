@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S4 J4 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8; --day-dark:#1a6e88;
+      --day-light:#e8f6fb; --day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.22);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-pale:#e7faec;
+      --pink:#f28b82; --red:#ef4444; --red-pale:#fdeaea;
+      --dark:#1a1f2e; --dark2:#232a3d; --dark3:#2d3448;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* TABLEAU DE BORD */
+    .dashboard{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:.9rem 1.2rem;margin-bottom:1.2rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .dashboard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#7a9aaa;margin-bottom:.8rem;}
+    .dash-modules{display:flex;gap:.7rem;flex-wrap:wrap;}
+    .dash-module{flex:1;min-width:120px;background:var(--dark2);border:1.5px solid var(--dark3);
+      border-radius:10px;padding:.65rem .9rem;display:flex;align-items:center;gap:.65rem;}
+    .dash-led{width:12px;height:12px;border-radius:50%;flex-shrink:0;
+      background:#2a3a3a;border:2px solid #3a5a5a;transition:all .4s;}
+    .dash-led.on{background:var(--day-color);border-color:var(--day-border);
+      box-shadow:0 0 8px var(--day-glow);}
+    .dash-led.ok{background:var(--green);border-color:#4ade80;box-shadow:0 0 8px rgba(34,197,94,.5);}
+    .dash-led.ko{background:var(--red);border-color:#f87171;box-shadow:0 0 8px rgba(239,68,68,.4);}
+    .dash-mod-info{}
+    .dash-mod-nom{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;
+      color:#c8dde8;text-transform:uppercase;letter-spacing:.08em;}
+    .dash-mod-score{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#7a9aaa;}
+    .dash-score-global{margin-left:auto;text-align:right;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#7a9aaa;
+      text-transform:uppercase;letter-spacing:.1em;}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.75rem .9rem;}
+    .ref-cell-titre{font-size:.78rem;font-weight:900;color:var(--day-dark);
+      margin-bottom:.45rem;font-family:'JetBrains Mono',monospace;
+      text-transform:uppercase;letter-spacing:.06em;}
+    .ref-cell-body{font-size:.8rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+    .ref-irreg{grid-column:1/-1;}
+    .irreg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.35rem;margin-top:.35rem;}
+    .irreg-item{background:var(--surface);border:1px solid var(--day-border);border-radius:7px;
+      padding:.35rem .6rem;font-size:.76rem;color:var(--text);
+      font-family:'JetBrains Mono',monospace;line-height:1.5;}
+    .irreg-item strong{color:var(--day-dark);}
+
+    /* parties */
+    .partie-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-block{margin-bottom:1.4rem;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;
+      background:var(--dark);border-radius:12px;padding:.75rem 1rem;
+      border:1.5px solid var(--dark3);}
+    .part-icon{font-size:1.2rem;flex-shrink:0;}
+    .part-titre{font-size:.95rem;font-weight:800;color:#fff;}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:#7a9aaa;}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      font-weight:700;padding:.2rem .65rem;border-radius:99px;
+      background:var(--dark2);color:var(--day-border);border:1.5px solid var(--dark3);}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.2rem 1rem 1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.8rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+      padding:.65rem .9rem;margin-bottom:.65rem;font-size:1rem;
+      font-weight:700;color:var(--text);line-height:1.65;}
+    .q-consigne{font-size:.88rem;color:var(--muted);margin-bottom:.65rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* vrai/faux */
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.65rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:.95rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .vf-icon{font-size:1.1rem;}
+
+    /* options QCM */
+    .opts{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.92rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.8rem;font-family:'JetBrains Mono',monospace;
+      padding:.45rem .7rem;border-radius:8px;margin-top:.35rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border:1px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* boutons */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+      padding:.55rem 1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);background:var(--day-color);color:var(--dark);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+    .btn-dark{background:var(--dark);color:#fff;}
+
+    /* résultat partie */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.1rem;text-align:center;margin-top:.6rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.82rem;color:#9abacc;margin:.3rem 0 .8rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.2rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.8rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a9aaa;}
+    .stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.2rem;}
+    .res-msg{font-size:.95rem;color:#c8d8e8;margin-bottom:.8rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      .ref-grid{grid-template-columns:1fr;}
+      .ref-irreg{grid-column:1;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 4</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Atelier de r&eacute;paration</span></h1>
+</header>
+
+<!-- TABLEAU DE BORD -->
+<div class="dashboard">
+  <div class="dash-titre">&#9881;&#65039; Tableau de bord &mdash; Diagnostic</div>
+  <div class="dash-modules">
+    <div class="dash-module">
+      <div class="dash-led" id="led-p1"></div>
+      <div class="dash-mod-info">
+        <div class="dash-mod-nom">Module 1</div>
+        <div class="dash-mod-score" id="dash-score-p1">Vrai / Faux &mdash; 0/3</div>
+      </div>
+    </div>
+    <div class="dash-module">
+      <div class="dash-led" id="led-p2"></div>
+      <div class="dash-mod-info">
+        <div class="dash-mod-nom">Module 2</div>
+        <div class="dash-mod-score" id="dash-score-p2">Reconnaitre &mdash; 0/5</div>
+      </div>
+    </div>
+    <div class="dash-score-global">
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Score</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel &mdash; Pr&eacute;sent du subjonctif</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Formation g&eacute;n&eacute;rale</div>
+      <div class="ref-cell-body">
+        Radical = <em>&laquo;&nbsp;ils&hellip;&nbsp;&raquo;</em> indicatif pr&eacute;sent, sans <em>-ent</em><br>
+        + terminaisons&nbsp;:<br>
+        <em>-e, -es, -e, -ions, -iez, -ent</em>
+      </div>
+    </div>
+    <div class="ref-cell ref-irreg">
+      <div class="ref-cell-titre">Verbes irr&eacute;guliers &agrave; conna&icirc;tre</div>
+      <div class="irreg-grid">
+        <div class="irreg-item"><strong>&ecirc;tre &rarr;</strong> sois, sois, soit, soyons, soyez, soient</div>
+        <div class="irreg-item"><strong>avoir &rarr;</strong> aie, aies, ait, ayons, ayez, aient</div>
+        <div class="irreg-item"><strong>aller &rarr;</strong> aille, ailles, aille, allions, alliez, aillent</div>
+        <div class="irreg-item"><strong>faire &rarr;</strong> fasse, fasses, fasse, fassions, fassiez, fassent</div>
+        <div class="irreg-item"><strong>pouvoir &rarr;</strong> puisse, puisses, puisse, puissions, puissiez, puissent</div>
+        <div class="irreg-item"><strong>savoir &rarr;</strong> sache, saches, sache, sachions, sachiez, sachent</div>
+        <div class="irreg-item"><strong>vouloir &rarr;</strong> veuille, veuilles, veuille, voulions, vouliez, veuillent</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIES -->
+<div class="partie-wrap">
+
+  <!-- PARTIE 1 : VRAI/FAUX -->
+  <div class="partie-block" id="bloc-p1">
+    <div class="partie-header">
+      <div class="part-icon">&#128301;</div>
+      <div>
+        <div class="part-titre">Module 1 &mdash; Vrai ou faux</div>
+        <div class="part-sous">3 affirmations &mdash; R&eacute;gle g&eacute;n&eacute;rale</div>
+      </div>
+      <div class="part-badge" id="badge-p1">0 / 3</div>
+    </div>
+    <div id="cards-p1"></div>
+    <div class="part-result" id="res-p1">
+      <div class="part-score" id="score-p1"></div>
+      <div class="part-msg" id="msg-p1"></div>
+      <div id="btn-p1"></div>
+    </div>
+  </div>
+
+  <!-- PARTIE 2 : QCM -->
+  <div class="partie-block" id="bloc-p2" style="display:none;">
+    <div class="partie-header">
+      <div class="part-icon">&#128270;</div>
+      <div>
+        <div class="part-titre">Module 2 &mdash; Reconnaitre la bonne forme</div>
+        <div class="part-sous">5 phrases &mdash; QCM</div>
+      </div>
+      <div class="part-badge" id="badge-p2">0 / 5</div>
+    </div>
+    <div id="cards-p2"></div>
+    <div class="part-result" id="res-p2">
+      <div class="part-score" id="score-p2"></div>
+      <div class="part-msg" id="msg-p2"></div>
+      <div id="btn-p2"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS GLOBAUX -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#e8002d"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Diagnostic termin&eacute;
+    </div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-primary" onclick="resetTout()" style="margin:0 auto;display:flex;padding:.7rem 2rem;font-size:1rem;">↺ Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DONNÉES
+═══════════════════════════════════════════ */
+
+/* PARTIE 1 — Vrai / Faux */
+var P1 = [
+  {
+    id:'p1q1',
+    phrase:'Pour former le pr\u00e9sent du subjonctif d\u2019un verbe r\u00e9gulier, on part de la 3e personne du pluriel de l\u2019indicatif pr\u00e9sent.',
+    rep:true,
+    fb:'C\u2019est la r\u00e8gle de base. Exemple\u00a0: \u00ab\u00a0ils finissent\u00a0\u00bb \u2192 radical \u00ab\u00a0finiss-\u00a0\u00bb \u2192 que je finisse, que tu finisses\u2026 On retire -ent et on ajoute les terminaisons du subjonctif.'
+  },
+  {
+    id:'p1q2',
+    phrase:'Les terminaisons du subjonctif pr\u00e9sent sont diff\u00e9rentes selon le groupe du verbe conjugu\u00e9.',
+    rep:false,
+    fb:'Les terminaisons sont identiques pour tous les groupes\u00a0: -e, -es, -e, -ions, -iez, -ent. C\u2019est le radical qui peut varier, pas les terminaisons.'
+  },
+  {
+    id:'p1q3',
+    phrase:'Le verbe \u00ab\u00a0avoir\u00a0\u00bb au subjonctif pr\u00e9sent se conjugue\u00a0: que j\u2019aie, que tu aies, qu\u2019il ait\u2026',
+    rep:true,
+    fb:'\u00ab\u00a0Avoir\u00a0\u00bb est un verbe enti\u00e8rement irr\u00e9gulier au subjonctif pr\u00e9sent. Ses formes ne suivent pas la r\u00e8gle g\u00e9n\u00e9rale\u00a0: que j\u2019aie, que tu aies, qu\u2019il ait, que nous ayons, que vous ayez, qu\u2019ils aient. Ces formes sont \u00e0 m\u00e9moriser.'
+  }
+];
+
+/* PARTIE 2 — QCM */
+var P2 = [
+  {
+    id:'p2q4',
+    phrase:'Il faut que tu (parlais / parlera / parles) plus clairement.',
+    consigne:'Quelle forme est au subjonctif pr\u00e9sent\u00a0?',
+    opts:[
+      {t:'parlais',ok:false},
+      {t:'parlera',ok:false},
+      {t:'parles',ok:true}
+    ],
+    fb:'Apr\u00e8s \u00ab\u00a0il faut que\u00a0\u00bb \u2192 subjonctif pr\u00e9sent. \u00ab\u00a0Parler\u00a0\u00bb\u00a0: \u00ab\u00a0ils parlent\u00a0\u00bb \u2192 radical \u00ab\u00a0parl-\u00a0\u00bb + terminaison \u00ab\u00a0-es\u00a0\u00bb (2e pers. sing.) \u2192 \u00ab\u00a0parles\u00a0\u00bb. \u00ab\u00a0Parlais\u00a0\u00bb = imparfait indicatif. \u00ab\u00a0Parlera\u00a0\u00bb = futur simple.'
+  },
+  {
+    id:'p2q5',
+    phrase:'Bien qu\u2019elle (est / serait / soit) fatigu\u00e9e, elle continue.',
+    consigne:'Quelle forme est au subjonctif pr\u00e9sent\u00a0?',
+    opts:[
+      {t:'est',ok:false},
+      {t:'serait',ok:false},
+      {t:'soit',ok:true}
+    ],
+    fb:'\u00ab\u00a0Bien que\u00a0\u00bb d\u00e9clenche toujours le subjonctif pr\u00e9sent. \u00ab\u00a0\u00catre\u00a0\u00bb est irr\u00e9gulier\u00a0: 3e personne du singulier \u2192 \u00ab\u00a0soit\u00a0\u00bb. \u00ab\u00a0Est\u00a0\u00bb = indicatif pr\u00e9sent. \u00ab\u00a0Serait\u00a0\u00bb = conditionnel pr\u00e9sent.'
+  },
+  {
+    id:'p2q6',
+    phrase:'Pour que nous (r\u00e9ussissons / r\u00e9ussirions / r\u00e9ussissions) ce projet.',
+    consigne:'Quelle forme est au subjonctif pr\u00e9sent\u00a0?',
+    opts:[
+      {t:'r\u00e9ussissons',ok:false},
+      {t:'r\u00e9ussirions',ok:false},
+      {t:'r\u00e9ussissions',ok:true}
+    ],
+    fb:'\u00ab\u00a0Pour que\u00a0\u00bb d\u00e9clenche le subjonctif pr\u00e9sent. \u00ab\u00a0R\u00e9ussir\u00a0\u00bb (2e groupe)\u00a0: \u00ab\u00a0ils r\u00e9ussissent\u00a0\u00bb \u2192 radical \u00ab\u00a0r\u00e9ussiss-\u00a0\u00bb + terminaison \u00ab\u00a0-ions\u00a0\u00bb (1re pers. plur.) \u2192 \u00ab\u00a0r\u00e9ussissions\u00a0\u00bb. \u00ab\u00a0R\u00e9ussissons\u00a0\u00bb = indicatif pr\u00e9sent. \u00ab\u00a0R\u00e9ussirions\u00a0\u00bb = conditionnel pr\u00e9sent.'
+  },
+  {
+    id:'p2q7',
+    phrase:'\u00c0 moins qu\u2019ils (venaient / viendront / viennent) \u00e0 temps.',
+    consigne:'Quelle forme est au subjonctif pr\u00e9sent\u00a0?',
+    opts:[
+      {t:'venaient',ok:false},
+      {t:'viendront',ok:false},
+      {t:'viennent',ok:true}
+    ],
+    fb:'\u00ab\u00a0\u00c0 moins que\u00a0\u00bb d\u00e9clenche le subjonctif. \u00ab\u00a0Venir\u00a0\u00bb\u00a0: \u00ab\u00a0ils viennent\u00a0\u00bb \u2192 radical \u00ab\u00a0vienn-\u00a0\u00bb + terminaison \u00ab\u00a0-ent\u00a0\u00bb (3e pers. plur.) \u2192 \u00ab\u00a0viennent\u00a0\u00bb. Attention\u00a0: la forme est identique \u00e0 l\u2019indicatif pr\u00e9sent pour cette personne, mais le mode est impos\u00e9 par la conjonction.'
+  },
+  {
+    id:'p2q8',
+    phrase:'Je souhaite qu\u2019il (fait / ferait / fasse) un effort.',
+    consigne:'Quelle forme est au subjonctif pr\u00e9sent\u00a0?',
+    opts:[
+      {t:'fait',ok:false},
+      {t:'ferait',ok:false},
+      {t:'fasse',ok:true}
+    ],
+    fb:'Apr\u00e8s un verbe de souhait (\u00ab\u00a0je souhaite que\u00a0\u00bb) \u2192 subjonctif pr\u00e9sent. \u00ab\u00a0Faire\u00a0\u00bb est irr\u00e9gulier\u00a0: radical \u00ab\u00a0fass-\u00a0\u00bb + terminaison \u00ab\u00a0-e\u00a0\u00bb (3e pers. sing.) \u2192 \u00ab\u00a0fasse\u00a0\u00bb. \u00ab\u00a0Fait\u00a0\u00bb = indicatif pr\u00e9sent. \u00ab\u00a0Ferait\u00a0\u00bb = conditionnel pr\u00e9sent.'
+  }
+];
+
+/* ═══════════════════════════════════════════
+   ÉTAT
+═══════════════════════════════════════════ */
+var scoreOk=0, scoreKo=0;
+var p1Ok=0, p1Results={};
+var p2Ok=0, p2Results={};
+var p1Done=false, p2Done=false;
+
+function shuffle(a){ return a.slice().sort(function(){ return Math.random()-.5; }); }
+var L=['A','B','C'];
+
+/* ═══════════════════════════════════════════
+   BUILD PARTIE 1 — VRAI/FAUX
+═══════════════════════════════════════════ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');
+  wrap.innerHTML=''; p1Results={}; p1Ok=0;
+  P1.forEach(function(q,i){
+    var card=mk('div','card'); card.id='c1-'+q.id;
+    card.appendChild(mk('div','card-stripe'));
+    var lbl=mk('div','q-label');
+    lbl.textContent='Affirmation '+(i+1)+' / 3 \u2014 Vrai ou Faux\u00a0?';
+    card.appendChild(lbl);
+    var ph=mk('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var vfRow=mk('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button');
+      btn.className='vf-btn';
+      var isTrue=(txt==='Vrai');
+      btn.innerHTML='<span class="vf-icon">'+(isTrue?'&#10003;':'&#10007;')+'</span> '+txt;
+      btn.dataset.val=isTrue?'true':'false';
+      btn.addEventListener('click',function(){ selVF(q,btn,vfRow); });
+      vfRow.appendChild(btn);
+    });
+    card.appendChild(vfRow);
+    var fb=mk('div','fb'); fb.id='fb1-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Results[q.id]!==undefined) return;
+  var choix=(btn.dataset.val==='true');
+  var ok=(choix===q.rep);
+  p1Results[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    var bVal=(b.dataset.val==='true');
+    if(bVal===q.rep) b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+  if(ok){ scoreOk++; p1Ok++; }
+  else { scoreKo++; showFb('fb1-'+q.id,q.fb); }
+  updateGlobal();
+  document.getElementById('badge-p1').textContent=p1Ok+' / 3';
+  document.getElementById('dash-score-p1').textContent='Vrai / Faux \u2014 '+p1Ok+'/3';
+  if(Object.keys(p1Results).length===P1.length) showResP1();
+}
+
+function showResP1(){
+  p1Done=true;
+  var r=document.getElementById('res-p1'); r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 3';
+  var ok=p1Ok>=2;
+  document.getElementById('msg-p1').textContent=ok?
+    '\u2713 Module 1 valid\u00e9.':
+    'Module insuffisant. R\u00e9essaie\u00a0!';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Module 2 \u2192</button>'+
+    (ok?'':'<button class="btn btn-ghost" onclick="resetP1()">\u21ba R\u00e9essayer</button>');
+  majLed('led-p1', p1Ok>=2 ? 'ok' : 'ko');
+}
+
+function debP2(){
+  var b=document.getElementById('bloc-p2');
+  b.style.display='';
+  buildP2();
+  b.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetP1(){
+  scoreOk=Math.max(0,scoreOk-p1Ok);
+  p1Ok=0; p1Done=false; p1Results={};
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('badge-p1').textContent='0 / 3';
+  document.getElementById('dash-score-p1').textContent='Vrai / Faux \u2014 0/3';
+  majLed('led-p1','on');
+  buildP1(); updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   BUILD PARTIE 2 — QCM
+═══════════════════════════════════════════ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');
+  wrap.innerHTML=''; p2Results={}; p2Ok=0;
+  majLed('led-p2','on');
+  shuffle(P2).forEach(function(q,i){
+    var card=mk('div','card'); card.id='c2-'+q.id;
+    card.appendChild(mk('div','card-stripe'));
+    var lbl=mk('div','q-label');
+    lbl.textContent='Phrase '+(i+1)+' / 5 \u2014 Subjonctif pr\u00e9sent';
+    card.appendChild(lbl);
+    var ph=mk('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var cs=mk('div','q-consigne'); cs.textContent=q.consigne; card.appendChild(cs);
+    var opts=mk('div','opts');
+    shuffle(q.opts).forEach(function(opt,oi){
+      var btn=document.createElement('button'); btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){ selP2(q,btn,opts); });
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mk('div','fb'); fb.id='fb2-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Results[q.id]!==undefined) return;
+  var ok=btn.dataset.ok==='1';
+  p2Results[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true; b.classList.remove('sel-opt');
+    if(b.dataset.ok==='1') b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+  if(ok){ scoreOk++; p2Ok++; }
+  else { scoreKo++; showFb('fb2-'+q.id,q.fb); }
+  updateGlobal();
+  document.getElementById('badge-p2').textContent=p2Ok+' / 5';
+  document.getElementById('dash-score-p2').textContent='Reconnaitre \u2014 '+p2Ok+'/5';
+  if(Object.keys(p2Results).length===P2.length) showResP2();
+}
+
+function showResP2(){
+  p2Done=true;
+  var r=document.getElementById('res-p2'); r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 5';
+  document.getElementById('msg-p2').textContent=p2Ok>=3?
+    '\u2713 Module 2 valid\u00e9.':'Continue \u00e0 t\u2019entra\u00eener\u00a0!';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherGlobal()">Voir mes r\u00e9sultats \u2192</button>';
+  majLed('led-p2', p2Ok>=3 ? 'ok' : 'ko');
+}
+
+function resetP2(){
+  scoreOk=Math.max(0,scoreOk-p2Ok);
+  p2Ok=0; p2Done=false; p2Results={};
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('badge-p2').textContent='0 / 5';
+  document.getElementById('dash-score-p2').textContent='Reconnaitre \u2014 0/5';
+  majLed('led-p2','on');
+  buildP2(); updateGlobal();
+}
+
+/* ═══════════════════════════════════════════
+   UTILITAIRES
+═══════════════════════════════════════════ */
+function mk(tag,cls){ var e=document.createElement(tag); e.className=cls; return e; }
+
+function showFb(id,txt){
+  var fb=document.getElementById(id); if(!fb) return;
+  fb.className='fb show ko-fb'; fb.textContent=txt;
+}
+
+function majLed(id,state){
+  var el=document.getElementById(id);
+  el.classList.remove('on','ok','ko');
+  el.classList.add(state);
+}
+
+function updateGlobal(){
+  var total=scoreOk;
+  document.getElementById('dash-total').textContent=total;
+  var pct=Math.round(total/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=total+' / 8 points';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+}
+
+/* ═══════════════════════════════════════════
+   RÉSULTATS GLOBAUX
+═══════════════════════════════════════════ */
+function afficherGlobal(){
+  var total=scoreOk;
+  var r=document.getElementById('results-global'); r.classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=7?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge=document.getElementById('res-badge');
+  if(total>=6){
+    badge.innerHTML='<div class="badge-ok">\u2713 Diagnostic r\u00e9ussi \u2014 \u00ab\u00a0Je m\u2019entra\u00eene\u00a0\u00bb d\u00e9bloqu\u00e9\u00a0!</div>';
+  } else {
+    badge.innerHTML='<div class="badge-ko">Score insuffisant ('+total+'/8). Il faut 6/8 minimum. Recommence\u00a0!</div>';
+  }
+  var msgs=[
+    'Relis le r\u00e9f\u00e9rentiel et recommence\u00a0!',
+    'Relis le r\u00e9f\u00e9rentiel et recommence\u00a0!',
+    'Courage \u2014 tu progressses\u00a0!',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait \u2014 diagnostic r\u00e9ussi sans faute\u00a0!'
+  ];
+  document.getElementById('res-msg').textContent=msgs[Math.min(total,msgs.length-1)];
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ═══════════════════════════════════════════
+   RESET TOTAL
+═══════════════════════════════════════════ */
+function resetTout(){
+  scoreOk=0; scoreKo=0;
+  p1Ok=0; p1Done=false; p1Results={};
+  p2Ok=0; p2Done=false; p2Results={};
+  document.getElementById('results-global').classList.remove('show');
+  ['res-p1','res-p2'].forEach(function(id){ document.getElementById(id).classList.remove('show'); });
+  ['badge-p1','badge-p2'].forEach(function(id,i){ document.getElementById(id).textContent='0 / '+(i===0?3:5); });
+  document.getElementById('dash-score-p1').textContent='Vrai / Faux \u2014 0/3';
+  document.getElementById('dash-score-p2').textContent='Reconnaitre \u2014 0/5';
+  document.getElementById('dash-total').textContent='0';
+  ['led-p1','led-p2'].forEach(function(id){ majLed(id,'on'); });
+  document.getElementById('cards-p2').innerHTML='';
+  document.getElementById('bloc-p2').style.display='none';
+  buildP1(); updateGlobal();
+}
+
+/* ─── INIT ─── */
+majLed('led-p1','on');
+buildP1();
+updateGlobal();
+</script>
+</body>
+</html>
