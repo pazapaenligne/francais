@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S4 J5 – 4e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5c518; --day-dark:#8a6000;
+      --day-light:#fffbeb; --day-border:#f5e08a;
+      --day-glow:rgba(245,197,24,.28);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --green:#22c55e; --green-pale:#e7faec;
+      --red:#ef4444; --red-pale:#fdeaea;
+      --dark:#1a1f2e; --dark2:#232a3d; --dark3:#2d3448;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f28b82;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* CARTE EXPÉDITION */
+    .carte{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.2rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .carte::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .carte-titre{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9aaa8a;margin-bottom:.8rem;}
+    .carte-obstacles{display:flex;align-items:center;gap:0;justify-content:space-between;}
+    .obstacle{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1;}
+    .obs-cercle{width:38px;height:38px;border-radius:50%;border:2.5px solid var(--dark3);
+      background:var(--dark2);display:flex;align-items:center;justify-content:center;
+      font-size:1rem;transition:all .4s;position:relative;}
+    .obs-cercle.actif{border-color:var(--day-color);background:var(--dark);
+      box-shadow:0 0 10px var(--day-glow);}
+    .obs-cercle.ok{border-color:var(--green);background:rgba(34,197,94,.18);
+      box-shadow:0 0 10px rgba(34,197,94,.4);}
+    .obs-cercle.ko{border-color:var(--red);background:rgba(239,68,68,.15);}
+    .obs-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:#7a8a6a;
+      text-transform:uppercase;letter-spacing:.06em;text-align:center;}
+    .obs-label.actif{color:var(--day-border);}
+    .obs-label.ok{color:#4ade80;}
+    .pont{flex:1;height:2px;background:var(--dark3);max-width:28px;margin-bottom:18px;
+      transition:background .4s;}
+    .pont.ok{background:var(--green);}
+    .carte-score{text-align:right;margin-top:.8rem;}
+    .carte-score-num{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:800;
+      color:var(--day-border);}
+    .carte-score-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#7a8a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.7rem .9rem;}
+    .ref-cell-titre{font-size:.78rem;font-weight:900;color:var(--day-dark);margin-bottom:.4rem;
+      font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;}
+    .ref-cell-body{font-size:.8rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* phrases (cartes) */
+    .phrases-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.2rem 1rem 1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),#f28b82);}
+    .card.done-ok{border-color:var(--green);}
+    .card.done-ko{border-color:var(--red);}
+
+    .q-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap;}
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .q-type{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;
+      padding:.12rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em;
+      background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+      padding:.7rem .9rem;margin-bottom:.6rem;font-size:1rem;
+      font-weight:700;color:var(--text);line-height:1.65;}
+    .q-phrase .lacune{color:var(--day-dark);text-decoration:underline dotted var(--day-color);}
+    .q-consigne{font-size:.88rem;color:var(--muted);margin-bottom:.65rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* options */
+    .opts{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.95rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.8rem;font-family:'JetBrains Mono',monospace;
+      padding:.45rem .7rem;border-radius:8px;margin-top:.35rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* bouton réessayer */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+      padding:.5rem .95rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.88rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.35;cursor:default;}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+
+    /* résultats */
+    .results{width:100%;max-width:720px;display:none;position:relative;z-index:1;margin-top:1rem;}
+    .results.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.2rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9aaa8a;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a9a6a;}
+    .stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.2rem;}
+    .res-msg{font-size:.92rem;color:#c8d8a8;margin-bottom:.8rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .btn-recommencer{background:var(--day-color);color:#1a1d23;font-family:'JetBrains Mono',monospace;
+      font-weight:700;font-size:.88rem;padding:.65rem 1.4rem;border-radius:10px;
+      border:none;cursor:pointer;margin:0 auto;display:flex;
+      transition:transform .12s;}
+    .btn-recommencer:active{transform:scale(.96);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      .ref-grid{grid-template-columns:1fr;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+      .carte-obstacles{gap:0;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 5</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">L&rsquo;Exp&eacute;dition litt&eacute;raire</span></h1>
+</header>
+
+<!-- CARTE EXPÉDITION -->
+<div class="carte">
+  <div class="carte-titre">&#128506;&#65039; Carte de progression &mdash; 5 obstacles &agrave; franchir</div>
+  <div class="carte-obstacles" id="carte-obstacles">
+    <!-- généré par JS -->
+  </div>
+  <div class="carte-score">
+    <div class="carte-score-num"><span id="score-carte">0</span>/5</div>
+    <div class="carte-score-label">Passages d&eacute;verrouill&eacute;s</div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 5 obstacles franchis</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Subjonctif pr&eacute;sent</div>
+      <div class="ref-cell-body">
+        Radical (<em>ils&hellip;</em> ind. pr&eacute;sent, sans <em>-ent</em>)<br>
+        + <em>-e / -es / -e / -ions / -iez / -ent</em><br><br>
+        Irr&eacute;guliers&nbsp;: <em>&ecirc;tre &rarr; soit&nbsp;; avoir &rarr; ait&nbsp;;<br>
+        faire &rarr; fasse&nbsp;; aller &rarr; aille&nbsp;;<br>
+        pouvoir &rarr; puisse&nbsp;; savoir &rarr; sache&nbsp;;<br>
+        vouloir &rarr; veuille</em>
+      </div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Accord du GN</div>
+      <div class="ref-cell-body">
+        D&eacute;terminant + adjectif re&ccedil;oivent<br>
+        le genre et le nombre du nom noyau.<br><br>
+        <em>-al</em> &rarr; pluriel masculin en <em>-aux</em><br><br>
+        Irr&eacute;guliers&nbsp;:<br>
+        <em>vieux &rarr; vieille(s)&nbsp;;<br>
+        nouveau &rarr; nouvelle(s)</em>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHRASES -->
+<div class="phrases-wrap" id="phrases-wrap"></div>
+
+<!-- RÉSULTATS -->
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-titre">&#128506;&#65039; Exp&eacute;dition termin&eacute;e</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/5</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn-recommencer" onclick="resetTout()">&#8635;&nbsp;Recommencer l&rsquo;exp&eacute;dition</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DONNÉES — 5 phrases (texte prof exact)
+═══════════════════════════════════════ */
+var PHRASES = [
+  {
+    id:'p1',
+    num:'Obstacle 1 / 5',
+    type:'Accord du GN',
+    emoji:'&#127758;',
+    label:'Accord du GN \u2014 F\u00e9minin pluriel',
+    phrase:'Les strophes <span class="lacune">___</span> de ce po\u00e8me traduisent des \u00e9motions profondes.',
+    consigne:'Quelle forme est correcte pour \u00ab\u00a0lyrique\u00a0\u00bb\u00a0?',
+    opts:[
+      {t:'lyrique',ok:false},
+      {t:'lyriquement',ok:false},
+      {t:'lyriques',ok:true}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0strophes\u00a0\u00bb : f\u00e9minin pluriel. L\u2019adjectif \u00ab\u00a0lyrique\u00a0\u00bb re\u00e7oit la marque du pluriel : + s. \u2192 \u00ab\u00a0lyriques\u00a0\u00bb. \u00ab\u00a0Lyrique\u00a0\u00bb = singulier. \u00ab\u00a0Lyriquement\u00a0\u00bb = adverbe.'
+  },
+  {
+    id:'p2',
+    num:'Obstacle 2 / 5',
+    type:'Accord du GN',
+    emoji:'&#128218;',
+    label:'Accord du GN \u2014 Masculin pluriel',
+    phrase:'Ces <span class="lacune">___</span> manuscrits contiennent des po\u00e8mes oubli\u00e9s.',
+    consigne:'Quelle forme est correcte pour \u00ab\u00a0vieux\u00a0\u00bb\u00a0?',
+    opts:[
+      {t:'vieille',ok:false},
+      {t:'vieux',ok:true},
+      {t:'vieil',ok:false}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0manuscrits\u00a0\u00bb : masculin pluriel. \u00ab\u00a0Vieux\u00a0\u00bb est un adjectif irr\u00e9gulier. Masculin pluriel \u2192 \u00ab\u00a0vieux\u00a0\u00bb (la forme ne change pas au pluriel masculin). \u00ab\u00a0Vieil\u00a0\u00bb = masculin singulier devant voyelle. \u00ab\u00a0Vieille\u00a0\u00bb = f\u00e9minin singulier.'
+  },
+  {
+    id:'p3',
+    num:'Obstacle 3 / 5',
+    type:'Subjonctif',
+    emoji:'&#128196;',
+    label:'Subjonctif pr\u00e9sent \u2014 Verbe r\u00e9gulier',
+    phrase:'Il est essentiel que le lecteur <span class="lacune">___</span> l\u2019\u00e9motion des vers.',
+    consigne:'Quelle forme est correcte ? (ressentir \u2014 3e pers. sing.)',
+    opts:[
+      {t:'ressente',ok:true},
+      {t:'ressentira',ok:false},
+      {t:'ressentait',ok:false}
+    ],
+    fb:'\u00ab\u00a0Il est essentiel que\u00a0\u00bb impose le subjonctif pr\u00e9sent. Radical\u00a0: \u00ab\u00a0ils ressentent\u00a0\u00bb \u2192 \u00ab\u00a0ressent-\u00a0\u00bb + terminaison \u00ab\u00a0-e\u00a0\u00bb (3e pers. sing.) \u2192 \u00ab\u00a0ressente\u00a0\u00bb. \u00ab\u00a0Ressentira\u00a0\u00bb = futur simple. \u00ab\u00a0Ressentait\u00a0\u00bb = imparfait indicatif.'
+  },
+  {
+    id:'p4',
+    num:'Obstacle 4 / 5',
+    type:'Accord du GN',
+    emoji:'&#127807;',
+    label:'Accord du GN \u2014 Adjectif en -al',
+    phrase:'Les th\u00e8mes <span class="lacune">___</span> de ce sonnet \u00e9voquent la douceur de la campagne.',
+    consigne:'Quelle forme est correcte pour \u00ab\u00a0pastoral\u00a0\u00bb\u00a0?',
+    opts:[
+      {t:'pastoraux',ok:true},
+      {t:'pastorals',ok:false},
+      {t:'pastorale',ok:false}
+    ],
+    fb:'Le nom noyau est \u00ab\u00a0th\u00e8mes\u00a0\u00bb : masculin pluriel. Les adjectifs en -al forment leur pluriel masculin en -aux. \u00ab\u00a0Pastoral\u00a0\u00bb \u2192 masculin pluriel \u2192 \u00ab\u00a0pastoraux\u00a0\u00bb. \u00ab\u00a0Pastorals\u00a0\u00bb = forme incorrecte. \u00ab\u00a0Pastorale\u00a0\u00bb = f\u00e9minin singulier.'
+  },
+  {
+    id:'p5',
+    num:'Obstacle 5 / 5',
+    type:'Subjonctif',
+    emoji:'&#11088;',
+    label:'Subjonctif pr\u00e9sent \u2014 Verbe irr\u00e9gulier',
+    phrase:'Bien qu\u2019il <span class="lacune">___</span> difficile de traduire un po\u00e8me, certains y parviennent.',
+    consigne:'Quelle forme est correcte ? (\u00eatre \u2014 3e pers. sing.)',
+    opts:[
+      {t:'sera',ok:false},
+      {t:'\u00e9tait',ok:false},
+      {t:'soit',ok:true}
+    ],
+    fb:'\u00ab\u00a0Bien que\u00a0\u00bb impose le subjonctif pr\u00e9sent. \u00ab\u00a0\u00catre\u00a0\u00bb est enti\u00e8rement irr\u00e9gulier : 3e pers. sing. \u2192 \u00ab\u00a0soit\u00a0\u00bb. \u00ab\u00a0Sera\u00a0\u00bb = futur simple. \u00ab\u00a0\u00c9tait\u00a0\u00bb = imparfait indicatif.'
+  }
+];
+
+/* ═══════════════════════════════════════
+   ÉTAT
+═══════════════════════════════════════ */
+var results = {}; /* id → bool */
+var scoreOk = 0;
+var L = ['A','B','C'];
+function shuffle(a){ return a.slice().sort(function(){ return Math.random()-.5; }); }
+
+/* ═══════════════════════════════════════
+   BUILD CARTE
+═══════════════════════════════════════ */
+function buildCarte(){
+  var wrap = document.getElementById('carte-obstacles');
+  wrap.innerHTML = '';
+  PHRASES.forEach(function(p,i){
+    var obs = document.createElement('div');
+    obs.className = 'obstacle';
+    var cercle = document.createElement('div');
+    cercle.className = 'obs-cercle' + (i===0?' actif':'');
+    cercle.id = 'obs-'+p.id;
+    cercle.innerHTML = p.emoji;
+    var lbl = document.createElement('div');
+    lbl.className = 'obs-label' + (i===0?' actif':'');
+    lbl.id = 'lbl-'+p.id;
+    lbl.textContent = 'Obs. '+(i+1);
+    obs.appendChild(cercle);
+    obs.appendChild(lbl);
+    wrap.appendChild(obs);
+    if(i < PHRASES.length-1){
+      var pont = document.createElement('div');
+      pont.className = 'pont';
+      pont.id = 'pont-'+i;
+      wrap.appendChild(pont);
+    }
+  });
+}
+
+function majCarte(idx, ok){
+  var p = PHRASES[idx];
+  var cercle = document.getElementById('obs-'+p.id);
+  var lbl = document.getElementById('lbl-'+p.id);
+  cercle.classList.remove('actif');
+  lbl.classList.remove('actif');
+  cercle.classList.add(ok?'ok':'ko');
+  if(ok) lbl.classList.add('ok');
+  if(ok && idx < PHRASES.length-1){
+    document.getElementById('pont-'+idx).classList.add('ok');
+  }
+  /* activer le suivant */
+  if(idx+1 < PHRASES.length){
+    document.getElementById('obs-'+PHRASES[idx+1].id).classList.add('actif');
+    document.getElementById('lbl-'+PHRASES[idx+1].id).classList.add('actif');
+  }
+}
+
+/* ═══════════════════════════════════════
+   BUILD PHRASES
+═══════════════════════════════════════ */
+function buildPhrases(){
+  var wrap = document.getElementById('phrases-wrap');
+  wrap.innerHTML = '';
+  PHRASES.forEach(function(p,i){
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card-'+p.id;
+    card.appendChild(mkEl('div','card-stripe'));
+
+    var meta = mkEl('div','q-meta');
+    var num = mkEl('div','q-num'); num.textContent = p.num; meta.appendChild(num);
+    var badge = mkEl('div','q-type'); badge.textContent = p.type; meta.appendChild(badge);
+    card.appendChild(meta);
+
+    var ph = mkEl('div','q-phrase'); ph.innerHTML = p.phrase; card.appendChild(ph);
+    var cs = mkEl('div','q-consigne'); cs.textContent = p.consigne; card.appendChild(cs);
+
+    var optsEl = mkEl('div','opts');
+    shuffle(p.opts).forEach(function(opt,oi){
+      var btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.innerHTML = '<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok = opt.ok ? '1' : '0';
+      btn.dataset.pid = p.id;
+      btn.addEventListener('click', function(){ selOpt(p,btn,optsEl,i); });
+      optsEl.appendChild(btn);
+    });
+    card.appendChild(optsEl);
+
+    var fb = mkEl('div','fb'); fb.id = 'fb-'+p.id; card.appendChild(fb);
+
+    var brow = mkEl('div','btn-row');
+    var breset = document.createElement('button');
+    breset.className = 'btn btn-ghost';
+    breset.innerHTML = '\u21ba\u00a0R\u00e9essayer';
+    breset.id = 'reset-'+p.id;
+    breset.addEventListener('click', function(){ resetPhrase(p,optsEl); });
+    brow.appendChild(breset);
+    card.appendChild(brow);
+
+    wrap.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════
+   INTERACTION
+═══════════════════════════════════════ */
+function selOpt(p, btn, optsEl, idx){
+  if(results[p.id] !== undefined) return;
+  var ok = btn.dataset.ok === '1';
+  results[p.id] = ok;
+  if(ok) scoreOk++;
+
+  /* colorier */
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled = true;
+    if(b.dataset.ok === '1') b.classList.add('ok-opt');
+    else if(b === btn) b.classList.add('ko-opt');
+  });
+
+  /* feedback uniquement si erreur */
+  if(!ok){
+    var fb = document.getElementById('fb-'+p.id);
+    fb.className = 'fb show ko-fb';
+    fb.textContent = p.fb;
+  }
+
+  /* carte */
+  majCarte(idx, ok);
+
+  /* card border */
+  var card = document.getElementById('card-'+p.id);
+  card.classList.add(ok?'done-ok':'done-ko');
+
+  /* score carte */
+  document.getElementById('score-carte').textContent = scoreOk;
+  updateProg();
+
+  /* résultats si tout fait */
+  if(Object.keys(results).length === PHRASES.length) showResults();
+}
+
+function resetPhrase(p, optsEl){
+  /* Bloquer uniquement si la bonne réponse a déjà été validée */
+  if(results[p.id] === true) return;
+  /* Annuler la tentative précédente (erreur) */
+  if(results[p.id] === false){
+    results[p.id] = undefined;
+    delete results[p.id];
+    scoreOk = Math.max(0, scoreOk); /* scoreOk n'avait pas bougé sur erreur */
+    var card = document.getElementById('card-'+p.id);
+    card.classList.remove('done-ko');
+  }
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled = false;
+    b.classList.remove('ok-opt','ko-opt');
+  });
+  var fb = document.getElementById('fb-'+p.id);
+  fb.className = 'fb'; fb.textContent = '';
+}
+
+function updateProg(){
+  var done = Object.keys(results).length;
+  var pct = Math.round(scoreOk/5*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = done+' / 5 obstacles franchis';
+  document.getElementById('prog-pct').textContent = pct+'\u00a0%';
+}
+
+/* ═══════════════════════════════════════
+   RÉSULTATS
+═══════════════════════════════════════ */
+function showResults(){
+  var r = document.getElementById('results');
+  r.classList.add('show');
+  document.getElementById('res-num').textContent = scoreOk;
+  var stars = scoreOk===5?5:scoreOk===4?4:scoreOk===3?3:scoreOk===2?2:1;
+  document.getElementById('res-stars').textContent = '\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge = document.getElementById('res-badge');
+  if(scoreOk>=4){
+    badge.innerHTML = '<div class="badge-ok">\u2713 Exp\u00e9dition r\u00e9ussie \u2014 Activit\u00e9 B d\u00e9bloqu\u00e9e\u00a0!</div>';
+  } else {
+    badge.innerHTML = '<div class="badge-ko">Score insuffisant ('+scoreOk+'/5). Il faut 4/5 minimum. R\u00e9essaie\u00a0!</div>';
+  }
+  var msgs = [
+    'Revois le r\u00e9f\u00e9rentiel et recommence\u00a0!',
+    'Courage \u2014 tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!',
+    'Parfait \u2014 sans faute\u00a0!'
+  ];
+  document.getElementById('res-msg').textContent = msgs[scoreOk];
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+function resetTout(){
+  results = {}; scoreOk = 0;
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('score-carte').textContent = '0';
+  buildCarte();
+  buildPhrases();
+  updateProg();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ─── util ─── */
+function mkEl(tag,cls){ var e=document.createElement(tag); e.className=cls; return e; }
+
+/* ─── INIT ─── */
+buildCarte();
+buildPhrases();
+updateProg();
+</script>
+</body>
+</html>
