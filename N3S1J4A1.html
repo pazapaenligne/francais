@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S1 J4 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8; --day-dark:#1a6e88;
+      --day-light:#e8f6fb; --day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.22);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-pale:#e7faec;
+      --pink:#f28b82; --orange:#f5a623;
+      --red:#ef4444; --red-pale:#fdeaea;
+      --dark:#1a1f2e; --dark2:#232a3d; --dark3:#2d3448;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* TABLEAU DE BORD TOURNOI */
+    .tournoi{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .tournoi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .tourn-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9aaabb;margin-bottom:.7rem;}
+    .tourn-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+    .tourn-rang{flex:1;}
+    .tourn-rang-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#7a8a9a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .tourn-rang-nom{font-size:1.1rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .tourn-right{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;}
+    .tourn-chrono{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;
+      color:var(--yellow);letter-spacing:.05em;}
+    .tourn-credits-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#7a8a9a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    /* crédits de forme */
+    .credits-row{display:flex;gap:.35rem;margin-top:.8rem;}
+    .credit{width:30px;height:30px;border-radius:6px;background:var(--day-color);
+      border:2px solid var(--day-border);display:flex;align-items:center;justify-content:center;
+      font-size:.85rem;transition:all .3s;}
+    .credit.perdu{background:var(--dark2);border-color:var(--dark3);opacity:.35;}
+    .credit.flash{animation:creditFlash .5s ease;}
+    @keyframes creditFlash{0%{transform:scale(1);}30%{transform:scale(1.3);background:var(--red);border-color:var(--red);}100%{transform:scale(1);}}
+
+    /* chrono alerte */
+    .chrono-alerte{color:var(--red) !important;animation:cronoPulse 1s infinite;}
+    @keyframes cronoPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;}
+    .ref-item{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:9px;padding:.6rem .8rem;}
+    .ref-verb{font-size:.95rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .ref-conj{font-size:.8rem;color:var(--text);line-height:1.55;font-family:'JetBrains Mono',monospace;}
+
+    /* parties */
+    .partie-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;
+      background:var(--day-dark);color:#fff;}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.1rem;
+      font-style:italic;color:var(--text);line-height:1.75;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.6;}
+
+    /* vrai/faux */
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:1.05rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    /* options QCM */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.9rem;font-family:'JetBrains Mono',monospace;
+      padding:.5rem .8rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* résultat partie */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:#9aaabb;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* boutons */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9aaabb;margin-bottom:.5rem;}
+    .res-rang{font-size:1.3rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .res-chrono{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:#7a9aaa;margin-bottom:.4rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.4rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a8a9a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8d8e8;margin-bottom:.9rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* animations */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both,flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both,flashKo .5s ease both;}
+
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:repeat(2,1fr);}
+      .vf-row{gap:.4rem;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+      .credits-row{gap:.25rem;}
+      .credit{width:26px;height:26px;font-size:.75rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 4</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Tournoi des formes</span></h1>
+</header>
+
+<!-- TABLEAU DE BORD -->
+<div class="tournoi">
+  <div class="tourn-titre">&#9889; Tournoi des formes &mdash; Cr&eacute;dits de forme</div>
+  <div class="tourn-row">
+    <div class="tourn-rang">
+      <div class="tourn-rang-label">Statut</div>
+      <div class="tourn-rang-nom" id="tourn-rang">En comp&eacute;tition</div>
+    </div>
+    <div class="tourn-right">
+      <div class="tourn-chrono" id="chrono">00:00</div>
+      <div class="tourn-credits-label">Cr&eacute;dits restants</div>
+    </div>
+  </div>
+  <div class="credits-row" id="credits-row"></div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; Verbes irr&eacute;guliers &mdash; Pr&eacute;sent de l&rsquo;indicatif</div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-verb">être</div><div class="ref-conj">suis / es / est<br>sommes / êtes / sont</div></div>
+    <div class="ref-item"><div class="ref-verb">avoir</div><div class="ref-conj">ai / as / a<br>avons / avez / ont</div></div>
+    <div class="ref-item"><div class="ref-verb">aller</div><div class="ref-conj">vais / vas / va<br>allons / allez / vont</div></div>
+    <div class="ref-item"><div class="ref-verb">faire</div><div class="ref-conj">fais / fais / fait<br>faisons / faites / font</div></div>
+    <div class="ref-item"><div class="ref-verb">dire</div><div class="ref-conj">dis / dis / dit<br>disons / dites / disent</div></div>
+    <div class="ref-item"><div class="ref-verb">venir</div><div class="ref-conj">viens / viens / vient<br>venons / venez / viennent</div></div>
+    <div class="ref-item"><div class="ref-verb">voir</div><div class="ref-conj">vois / vois / voit<br>voyons / voyez / voient</div></div>
+    <div class="ref-item"><div class="ref-verb">pouvoir</div><div class="ref-conj">peux / peux / peut<br>pouvons / pouvez / peuvent</div></div>
+    <div class="ref-item"><div class="ref-verb">vouloir</div><div class="ref-conj">veux / veux / veut<br>voulons / voulez / veulent</div></div>
+    <div class="ref-item"><div class="ref-verb">savoir</div><div class="ref-conj">sais / sais / sait<br>savons / savez / savent</div></div>
+    <div class="ref-item"><div class="ref-verb">prendre</div><div class="ref-conj">prends / prends / prend<br>prenons / prenez / prennent</div></div>
+    <div class="ref-item"><div class="ref-verb">mettre</div><div class="ref-conj">mets / mets / met<br>mettons / mettez / mettent</div></div>
+  </div>
+</div>
+
+<!-- PARTIES -->
+<div class="partie-wrap">
+  <div id="bloc-p1">
+    <div class="partie-header">
+      <div class="part-icon">&#128301;</div>
+      <div>
+        <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+        <div class="part-sous">3 affirmations &mdash; Manche 1 &agrave; 3</div>
+      </div>
+      <div class="part-badge" id="badge-p1">0/3</div>
+    </div>
+    <div id="cards-p1"></div>
+    <div class="part-result" id="res-p1">
+      <div class="part-score" id="score-p1"></div>
+      <div class="part-msg" id="msg-p1"></div>
+      <div id="btn-p1"></div>
+    </div>
+  </div>
+
+  <div id="bloc-p2" style="display:none;">
+    <div class="partie-header">
+      <div class="part-icon">&#128270;</div>
+      <div>
+        <div class="part-titre">Partie 2 &mdash; Identifier la forme correcte</div>
+        <div class="part-sous">5 questions &mdash; Manche 4 &agrave; 8</div>
+      </div>
+      <div class="part-badge" id="badge-p2">0/5</div>
+    </div>
+    <div id="cards-p2"></div>
+    <div class="part-result" id="res-p2">
+      <div class="part-score" id="score-p2"></div>
+      <div class="part-msg" id="msg-p2"></div>
+      <div id="btn-p2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#9889; Verdict du tournoi</div>
+    <div class="res-rang" id="res-rang"></div>
+    <div class="res-chrono" id="res-chrono"></div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      Rejouer le tournoi
+    </button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════
+   DONNÉES
+══════════════════════════ */
+var P1 = [
+  {
+    id:'q1', qNum:1,
+    phrase:'Le verbe \u00ab\u00a0aller\u00a0\u00bb se conjugue au pr\u00e9sent\u00a0: je vais, tu vas, il va, nous allons, vous allez, ils vont.',
+    rep:true,
+    fb:'C\u2019est la conjugaison correcte de \u00ab\u00a0aller\u00a0\u00bb au pr\u00e9sent de l\u2019indicatif. Ce verbe est enti\u00e8rement irr\u00e9gulier\u00a0: son radical change selon la personne (vai- / all- / vont). Il faut m\u00e9moriser toutes ses formes.'
+  },
+  {
+    id:'q2', qNum:2,
+    phrase:'Le verbe \u00ab\u00a0faire\u00a0\u00bb \u00e0 la 2e personne du pluriel se conjugue\u00a0: vous faites (et non vous faisez).',
+    rep:true,
+    fb:'\u00ab\u00a0Vous faites\u00a0\u00bb est la seule forme correcte pour \u00ab\u00a0faire\u00a0\u00bb \u00e0 la 2e personne du pluriel. \u00ab\u00a0Vous faisez\u00a0\u00bb est une erreur fr\u00e9quente par analogie avec les verbes r\u00e9guliers. \u00c0 retenir aussi\u00a0: \u00ab\u00a0vous dites\u00a0\u00bb pour le verbe \u00ab\u00a0dire\u00a0\u00bb.'
+  },
+  {
+    id:'q3', qNum:3,
+    phrase:'Le verbe \u00ab\u00a0pouvoir\u00a0\u00bb \u00e0 la 1re personne du singulier se conjugue\u00a0: je peux (ou je puis, formel).',
+    rep:true,
+    fb:'\u00ab\u00a0Je peux\u00a0\u00bb est la forme courante. \u00ab\u00a0Je puis\u00a0\u00bb est une forme litt\u00e9raire et formelle, encore employ\u00e9e dans la question \u00ab\u00a0Puis-je\u00a0?\u00a0\u00bb. Les deux sont correctes, mais \u00ab\u00a0je peux\u00a0\u00bb est la forme standard.'
+  }
+];
+
+var P2 = [
+  {
+    id:'q4', qNum:4,
+    phrase:'Les auteurs classiques __ leurs \u0153uvres aux r\u00e8gles de la biens\u00e9ance.',
+    texte:'soumettre \u2014 3e pers. plur.',
+    opts:[{t:'soumettent',ok:true},{t:'soumettont',ok:false},{t:'soum\u00e8ttent',ok:false}],
+    fb:'\u00ab\u00a0Soumettre\u00a0\u00bb suit le mod\u00e8le de \u00ab\u00a0mettre\u00a0\u00bb\u00a0: 3e pers. plur. \u2192 \u00ab\u00a0soumettent\u00a0\u00bb. \u00ab\u00a0Soumettont\u00a0\u00bb n\u2019existe pas (erreur par analogie). \u00ab\u00a0Soum\u00e8ttent\u00a0\u00bb est une graphie incorrecte.'
+  },
+  {
+    id:'q5', qNum:5,
+    phrase:'Nous __ \u00e0 Paris pour assister \u00e0 la repr\u00e9sentation.',
+    texte:'venir \u2014 1re pers. plur.',
+    opts:[{t:'venons',ok:true},{t:'venions',ok:false},{t:'viendrons',ok:false}],
+    fb:'Pr\u00e9sent de l\u2019indicatif, 1re pers. plur. de \u00ab\u00a0venir\u00a0\u00bb\u00a0: \u00ab\u00a0venons\u00a0\u00bb. \u00ab\u00a0Venions\u00a0\u00bb = imparfait. \u00ab\u00a0Viendrons\u00a0\u00bb = futur simple.'
+  },
+  {
+    id:'q6', qNum:6,
+    phrase:'Il __ ses vers par c\u0153ur depuis l\u2019enfance.',
+    texte:'savoir \u2014 3e pers. sing.',
+    opts:[{t:'savait',ok:false},{t:'saura',ok:false},{t:'sait',ok:true}],
+    fb:'Pr\u00e9sent de l\u2019indicatif, 3e pers. sing. de \u00ab\u00a0savoir\u00a0\u00bb\u00a0: \u00ab\u00a0sait\u00a0\u00bb. \u00ab\u00a0Savait\u00a0\u00bb = imparfait. \u00ab\u00a0Saura\u00a0\u00bb = futur simple.'
+  },
+  {
+    id:'q7', qNum:7,
+    phrase:'Vous __ que la r\u00e8gle des trois unit\u00e9s s\u2019applique au th\u00e9\u00e2tre classique.',
+    texte:'dire \u2014 2e pers. plur.',
+    opts:[{t:'disez',ok:false},{t:'dites',ok:true},{t:'direz',ok:false}],
+    fb:'\u00ab\u00a0Dire\u00a0\u00bb a une forme irr\u00e9guli\u00e8re \u00e0 la 2e pers. plur.\u00a0: \u00ab\u00a0vous dites\u00a0\u00bb (et non \u00ab\u00a0vous disez\u00a0\u00bb). \u00c0 retenir avec \u00ab\u00a0vous faites\u00a0\u00bb et \u00ab\u00a0vous \u00eates\u00a0\u00bb\u00a0: les trois formes irr\u00e9guli\u00e8res en \u00ab\u00a0-tes\u00a0\u00bb.'
+  },
+  {
+    id:'q8', qNum:8,
+    phrase:'Ils __ du th\u00e9\u00e2tre de Moli\u00e8re une lecture morale et sociale.',
+    texte:'faire \u2014 3e pers. plur.',
+    opts:[{t:'fons',ok:false},{t:'feront',ok:false},{t:'font',ok:true}],
+    fb:'3e pers. plur. de \u00ab\u00a0faire\u00a0\u00bb\u00a0: \u00ab\u00a0font\u00a0\u00bb. \u00ab\u00a0Fons\u00a0\u00bb n\u2019existe pas. \u00ab\u00a0Feront\u00a0\u00bb = futur simple.'
+  }
+];
+
+/* ══════════════════════════
+   ÉTAT
+══════════════════════════ */
+var scoreOk=0, credits=8;
+var p1Ok=0, p1Results={};
+var p2Ok=0, p2Results={};
+var chronoSec=0, chronoInterval=null;
+var gameStarted=false, gameEnded=false;
+
+function shuffle(a){ return a.slice().sort(function(){ return Math.random()-.5; }); }
+var L=['A','B','C'];
+function mkEl(t,c){ var e=document.createElement(t); if(c) e.className=c; return e; }
+
+/* ══════════════════════════
+   CHRONOMÈTRE
+══════════════════════════ */
+function startChrono(){
+  if(gameStarted) return;
+  gameStarted=true;
+  chronoInterval=setInterval(function(){
+    chronoSec++;
+    var m=Math.floor(chronoSec/60), s=chronoSec%60;
+    var txt=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    var el=document.getElementById('chrono');
+    el.textContent=txt;
+    if(chronoSec>180) el.classList.add('chrono-alerte');
+  },1000);
+}
+
+function stopChrono(){
+  clearInterval(chronoInterval); gameEnded=true;
+}
+
+function tempsTexte(){
+  var m=Math.floor(chronoSec/60), s=chronoSec%60;
+  return 'Temps\u00a0: '+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+
+/* ══════════════════════════
+   CRÉDITS
+══════════════════════════ */
+function buildCredits(){
+  var wrap=document.getElementById('credits-row');
+  wrap.innerHTML='';
+  for(var i=0;i<8;i++){
+    var c=mkEl('div','credit'); c.id='credit-'+i;
+    c.innerHTML='&#9889;'; wrap.appendChild(c);
+  }
+}
+
+function perdreCredit(){
+  if(credits<=0) return;
+  credits--;
+  var el=document.getElementById('credit-'+credits);
+  if(el){ el.classList.add('perdu','flash'); }
+  majRang();
+}
+
+function majRang(){
+  var el=document.getElementById('tourn-rang');
+  if(credits>=8) el.textContent='En comp\u00e9tition';
+  else if(credits>=6) el.textContent='Finaliste';
+  else if(credits>=4) el.textContent='Qualifi\u00e9';
+  else el.textContent='Rep\u00eachage';
+}
+
+/* ══════════════════════════
+   SON + ANIMATION
+══════════════════════════ */
+function jouerSon(ok){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(ok){
+      osc.frequency.setValueAtTime(520,ctx.currentTime);
+      osc.frequency.setValueAtTime(660,ctx.currentTime+.08);
+      osc.frequency.setValueAtTime(800,ctx.currentTime+.16);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.4);
+    } else {
+      osc.frequency.setValueAtTime(280,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.35);
+    }
+  } catch(e){}
+}
+
+function animerCard(id,ok){
+  var card=document.getElementById('c-'+id);
+  if(!card) return;
+  card.classList.remove('anim-ok','anim-ko');
+  void card.offsetWidth;
+  card.classList.add(ok?'anim-ok':'anim-ko');
+}
+
+/* ══════════════════════════
+   PROGRESSION
+══════════════════════════ */
+function majProg(){
+  var done=Object.keys(p1Results).length+Object.keys(p2Results).length;
+  var pct=Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 8 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+}
+
+/* ══════════════════════════
+   BUILD P1
+══════════════════════════ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');
+  wrap.innerHTML=''; p1Results={}; p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card'); card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');
+    lbl.textContent='Manche '+q.qNum+' \u2014 Vrai ou faux\u00a0?'; card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var vfRow=mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button'); btn.className='vf-btn';
+      var isV=txt==='Vrai';
+      btn.innerHTML=(isV?'&#10003;':'&#10007;')+' '+txt;
+      btn.dataset.val=isV?'true':'false';
+      btn.addEventListener('click',function(){
+        startChrono();
+        selVF(q,btn,vfRow);
+      });
+      vfRow.appendChild(btn);
+    });
+    card.appendChild(vfRow);
+    var fb=mkEl('div','fb'); fb.id='fb-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Results[q.id]!==undefined) return;
+  var choix=btn.dataset.val==='true';
+  var ok=choix===q.rep;
+  p1Results[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep) b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+  if(!ok){
+    var fb=document.getElementById('fb-'+q.id);
+    fb.className='fb show ko-fb'; fb.textContent=q.fb;
+    perdreCredit();
+  }
+  if(ok){ scoreOk++; p1Ok++; }
+  jouerSon(ok); animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/3';
+  majProg();
+  if(Object.keys(p1Results).length===P1.length) showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1'); r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 3';
+  document.getElementById('msg-p1').textContent=p1Ok===3?
+    '\u2713 3/3 \u2014 Manche 1 parfaite\u00a0!':
+    p1Ok>=2?'Bien \u2014 passe \u00e0 la manche suivante.':'Continue \u2014 manche 2 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Manche 2 \u2192</button>';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  buildP2();
+}
+
+/* ══════════════════════════
+   BUILD P2
+══════════════════════════ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');
+  wrap.innerHTML=''; p2Results={}; p2Ok=0;
+  shuffle(P2).forEach(function(q){
+    var card=mkEl('div','card'); card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');
+    lbl.textContent='Manche '+q.qNum; card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+    var txt=mkEl('div','q-texte'); txt.textContent=q.texte; card.appendChild(txt);
+    var opts=mkEl('div','opts');
+    shuffle(q.opts).forEach(function(opt,oi){
+      var btn=document.createElement('button'); btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){ selP2(q,btn,opts); });
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb'); fb.id='fb-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Results[q.id]!==undefined) return;
+  var ok=btn.dataset.ok==='1';
+  p2Results[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1') b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+  if(!ok){
+    var fb=document.getElementById('fb-'+q.id);
+    fb.className='fb show ko-fb'; fb.textContent=q.fb;
+    perdreCredit();
+  }
+  if(ok){ scoreOk++; p2Ok++; }
+  jouerSon(ok); animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/5';
+  majProg();
+  if(Object.keys(p2Results).length===P2.length) showResP2();
+}
+
+function showResP2(){
+  stopChrono();
+  var r=document.getElementById('res-p2'); r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 5';
+  document.getElementById('msg-p2').textContent=p2Ok===5?
+    '\u2713 Manche 2 parfaite\u00a0!':
+    p2Ok>=4?'Tr\u00e8s bien\u00a0!':p2Ok>=3?'Bien\u00a0!':'Continue.';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Verdict \u2192</button>';
+}
+
+/* ══════════════════════════
+   VERDICT
+══════════════════════════ */
+function afficherVerdict(){
+  var total=scoreOk;
+  var r=document.getElementById('results-global'); r.classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  document.getElementById('res-chrono').textContent=tempsTexte();
+
+  var rang = credits>=8?'Champion incontest\u00e9 \ud83c\udfc6':
+             credits>=6?'Finaliste \ud83e\udd48':
+             credits>=4?'Qualifi\u00e9 \ud83e\udd49':
+             'Rep\u00eachage \u2014 continue \u00e0 t\u2019entra\u00eener';
+  document.getElementById('res-rang').textContent=rang;
+
+  var stars=total>=8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+
+  var badge=document.getElementById('res-badge');
+  badge.innerHTML=total>=5?
+    '<div class="badge-ok">\u2713 Qualifi\u00e9 \u2014 Je m\u2019entra\u00eene d\u00e9bloqu\u00e9\u00a0!</div>':
+    '<div class="badge-ko">Score insuffisant \u2014 5/8 minimum requis.</div>';
+
+  var msgs=[
+    '\u00c0 retravailler.','\u00c0 retravailler.','\u00c0 retravailler.',
+    'Courage \u2014 tu progresses\u00a0!','Courage \u2014 tu progresses\u00a0!',
+    'Bien jou\u00e9\u00a0!','Tr\u00e8s bien\u00a0!','Excellent\u00a0!','Parfait \u2014 champion incontест\u00e9\u00a0!'
+  ];
+  document.getElementById('res-msg').textContent=msgs[Math.min(total,msgs.length-1)];
+}
+
+/* ══════════════════════════
+   RESET
+══════════════════════════ */
+function resetTout(){
+  scoreOk=0; credits=8; chronoSec=0; gameStarted=false; gameEnded=false;
+  clearInterval(chronoInterval);
+  p1Ok=0; p1Results={}; p2Ok=0; p2Results={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/3';
+  document.getElementById('badge-p2').textContent='0/5';
+  document.getElementById('chrono').textContent='00:00';
+  document.getElementById('chrono').classList.remove('chrono-alerte');
+  document.getElementById('tourn-rang').textContent='En comp\u00e9tition';
+  buildCredits(); buildP1(); majProg();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── INIT ─── */
+buildCredits();
+buildP1();
+majProg();
+</script>
+</body>
+</html>
