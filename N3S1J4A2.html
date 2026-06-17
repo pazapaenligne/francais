@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S1 J4 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#3ab5d8;--day:#3ab5d8;--day-dark:#1a6e88;--day-dark2:#0e3f50;
+  --day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#f0f9fd;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:720px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* Bandeau atelier */
+.atelier-banner{background:#071520;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:.9rem 1.2rem;margin-bottom:1rem;position:relative;z-index:1;animation:fadeUp .35s ease both;}
+.atelier-badge{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.35rem;}
+.atelier-text{font-size:.9rem;color:#a8d8ea;line-height:1.65;}
+.atelier-text strong{color:#fff;}
+
+/* Progression */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* Card */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.card-body{padding:1.1rem 1.2rem 0;}
+.act-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:800;
+  padding:.18rem .65rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.6rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.act-title{font-size:clamp(1rem,3vw,1.12rem);font-weight:900;color:var(--text);margin-bottom:.2rem;}
+.act-consigne{font-size:.9rem;color:var(--muted);margin-bottom:.85rem;line-height:1.6;}
+
+/* Items */
+.q-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:.8rem 1rem;margin-bottom:.55rem;transition:border-color .2s;}
+.q-item.ok{border-color:var(--green);background:var(--green-light);}
+.q-item.ko{border-color:var(--pink-dark);background:var(--pink-light);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.35rem;}
+.q-phrase{font-size:clamp(1rem,3vw,1.12rem);font-weight:700;color:var(--text);
+  line-height:1.7;margin-bottom:.55rem;}
+.q-phrase .verbe-info{display:inline;font-size:.85rem;color:var(--day-dark);
+  font-weight:600;font-style:italic;}
+.q-phrase .err{color:var(--pink-dark);font-weight:900;text-decoration:underline wavy var(--pink-dark);}
+.q-phrase .blank{display:inline-block;min-width:56px;border-bottom:3px solid var(--day-dark);
+  text-align:center;color:var(--day-dark);font-family:'JetBrains Mono',monospace;
+  font-weight:900;margin:0 .15rem;transition:color .2s,border-color .2s;}
+.q-phrase .blank.ok{color:var(--green-dark);border-color:var(--green);}
+.q-phrase .blank.ko{color:var(--pink-dark);border-color:var(--pink-dark);}
+
+/* Boutons option — via addEventListener */
+.opts-row{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:900;
+  padding:.5rem 1.1rem;cursor:pointer;min-height:44px;letter-spacing:.05em;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.opt-selected{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.opt-btn.correct{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .3s ease;}
+.opt-btn.wrong{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .35s ease;}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.06);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+/* Erreur label */
+.q-err-label{font-size:.78rem;color:var(--pink-dark);font-weight:700;margin-bottom:.35rem;}
+.q-err-label .err-word{font-family:'JetBrains Mono',monospace;background:var(--pink-light);
+  padding:.1rem .4rem;border-radius:4px;margin-left:.3rem;}
+
+/* Saisie libre */
+.q-inp-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.q-inp-label{font-size:.82rem;color:var(--muted);font-weight:600;white-space:nowrap;}
+.q-inp{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.5vw,1rem);font-weight:800;
+  background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);
+  padding:.45rem .75rem;min-width:150px;flex:1;color:var(--text);
+  transition:border-color .15s;-webkit-tap-highlight-color:transparent;}
+.q-inp:focus{outline:none;border-color:var(--day-dark);box-shadow:0 0 0 3px var(--day-glow);}
+.q-inp.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
+.q-inp.ko{border-color:var(--pink-dark);background:var(--pink-light);color:var(--pink-dark);}
+.q-inp:disabled{cursor:default;opacity:.9;}
+.btn-ok-inline{background:var(--day-dark);color:#fff;border:none;border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:.88rem;font-weight:800;padding:.45rem .9rem;
+  cursor:pointer;min-height:2.8rem;white-space:nowrap;transition:transform .12s;}
+.btn-ok-inline:hover:not(:disabled){transform:translateY(-1px);}
+.btn-ok-inline:disabled{opacity:.35;cursor:default;}
+.q-modele{font-size:.85rem;color:var(--green-dark);display:none;margin-top:.35rem;line-height:1.65;font-weight:700;}
+.q-modele.show{display:block;}
+.q-fb{font-size:.82rem;color:var(--pink-dark);display:none;margin-top:.3rem;line-height:1.65;font-style:italic;}
+.q-item.ko .q-fb{display:block;}
+
+/* Score partiel + fb global */
+.score-partial{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
+  margin:.6rem 1.2rem 0;display:none;}
+.score-partial.show{display:block;}
+.fb-g{padding:.8rem 1rem;border-radius:var(--radius-sm);font-size:.92rem;
+  display:none;line-height:1.8;margin:.3rem 1.2rem .6rem;}
+.fb-g.show{display:block;}
+.fb-g.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-g.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-g.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.2rem 1.2rem 0;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* Résultats */
+.results{display:none;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:#071520;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.2);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day);}
+.stars{font-size:1.9rem;margin:.35rem 0 .6rem;letter-spacing:.1em;}
+.atel-scores{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.8rem;}
+.as-cell{background:rgba(255,255,255,.05);border:1.5px solid rgba(58,181,216,.25);
+  border-radius:var(--radius-sm);padding:.6rem .5rem;text-align:center;}
+.as-val{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:900;color:var(--day);line-height:1;}
+.as-lbl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem;}
+.rmsg{color:#a8d8ea;font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.unlock-msg{background:rgba(141,198,63,.12);border:1.5px solid var(--green);border-radius:var(--radius-sm);
+  padding:.75rem 1rem;font-size:.88rem;color:var(--green);margin-bottom:1rem;
+  font-family:'JetBrains Mono',monospace;text-align:center;display:none;}
+.unlock-msg.show{display:block;}
+.btn-restart{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;
+  border:2px solid var(--day-border);min-height:2.8rem;
+  background:transparent;color:var(--day);width:100%;justify-content:center;}
+.btn-restart:hover{border-color:var(--day);color:#fff;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card-body{padding:.9rem .9rem 0;}
+  .btn-row{margin:.2rem .9rem 0;}.fb-g{margin:.3rem .9rem .6rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 3ème</span>
+  </div>
+  <div class="week-label">Semaine 1 – Jour 4</div>
+  <h1>Je m'entraîne · <span class="hl">Conjugaison</span></h1>
+</header>
+
+<div class="atelier-banner">
+  <div class="atelier-badge">&#128295;&nbsp;L'atelier des verbes — 3 ateliers · 19 points</div>
+  <div class="atelier-text"><strong>Atelier 1 :</strong> calibrage des formes — <strong>Atelier 2 :</strong> contrôle qualité — <strong>Atelier 3 :</strong> production libre.</div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 19 points</span><span id="prog-pct">0 %</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> point(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">19</span> restant(s)</div>
+</div>
+
+<!-- ATELIER 1 -->
+<div class="card" id="card1">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#128295;&nbsp;Atelier 1 — Calibrage des formes</div>
+    <div class="act-title">Choisis la forme verbale correcte.</div>
+    <div class="act-consigne">Sélectionne la conjugaison exacte pour chaque phrase.</div>
+    <div id="list1"></div>
+  </div>
+  <div class="score-partial" id="sp1"></div>
+  <div class="fb-g" id="fb1"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v1" onclick="verif1()" disabled>&#10003;&nbsp;Vérifier l'atelier 1</button>
+    <button class="btn btn-g" onclick="reset1()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- ATELIER 2 -->
+<div class="card" id="card2">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#128203;&nbsp;Atelier 2 — Contrôle qualité</div>
+    <div class="act-title">Identifie et corrige l'erreur.</div>
+    <div class="act-consigne">Chaque phrase contient peut-être une erreur. Identifie-la et choisis la correction exacte.</div>
+    <div id="list2"></div>
+  </div>
+  <div class="score-partial" id="sp2"></div>
+  <div class="fb-g" id="fb2"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v2" onclick="verif2()" disabled>&#10003;&nbsp;Vérifier l'atelier 2</button>
+    <button class="btn btn-g" onclick="reset2()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- ATELIER 3 -->
+<div class="card" id="card3">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="act-badge">&#9999;&#65039;&nbsp;Atelier 3 — Production libre</div>
+    <div class="act-title">Conjugue le verbe au présent de l'indicatif.</div>
+    <div class="act-consigne">Écris la forme correcte puis valide chaque réponse.</div>
+    <div id="list3"></div>
+  </div>
+  <div class="score-partial" id="sp3"></div>
+  <div class="fb-g" id="fb3"></div>
+  <div class="btn-row">
+    <button class="btn btn-g" onclick="reset3()">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="atelier-badge" style="display:block;margin-bottom:.5rem;">&#128295;&nbsp;Bilan de production</div>
+    <div class="score-big"><span id="r-score">0</span>/19</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="atel-scores">
+      <div class="as-cell"><div class="as-val" id="r-a1">0/5</div><div class="as-lbl">Atelier 1</div></div>
+      <div class="as-cell"><div class="as-val" id="r-a2">0/5</div><div class="as-lbl">Atelier 2</div></div>
+      <div class="as-cell"><div class="as-val" id="r-a3">0/4</div><div class="as-lbl">Atelier 3</div></div>
+    </div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="unlock-msg" id="unlock-msg">&#128275;&nbsp;Accès débloqué — Je relève le défi disponible.</div>
+    <button class="btn-restart" onclick="resetAll()">&#8635;&nbsp;Relancer l'atelier</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+
+/* ══ DONNÉES ══ */
+var D1=[
+  {id:1,avant:"Le dramaturge",apres:"ses répliques avec une précision remarquable.",
+   info:"mettre — 3e pers. sing.",opts:["mettait","mets","met"],ans:"met",
+   fb:"Présent indicatif, 3e pers. sing. de \u00ab\u00a0mettre\u00a0\u00bb\u00a0: \u00ab\u00a0met\u00a0\u00bb (sans -s). \u00ab\u00a0Mettait\u00a0\u00bb = imparfait. \u00ab\u00a0Mets\u00a0\u00bb = 1re ou 2e pers. sing."},
+  {id:2,avant:"Nous",apres:"les règles classiques chaque fois que nous analysons une tragédie.",
+   info:"voir — 1re pers. plur.",opts:["verrons","voyons","voyions"],ans:"voyons",
+   fb:"Présent indicatif, 1re pers. plur. de \u00ab\u00a0voir\u00a0\u00bb\u00a0: \u00ab\u00a0voyons\u00a0\u00bb. \u00ab\u00a0Verrons\u00a0\u00bb = futur simple. \u00ab\u00a0Voyions\u00a0\u00bb = imparfait."},
+  {id:3,avant:"Ils",apres:"comprendre les enjeux moraux de cette fable.",
+   info:"vouloir — 3e pers. plur.",opts:["veulent","voulaient","voudront"],ans:"veulent",
+   fb:"Présent indicatif, 3e pers. plur. de \u00ab\u00a0vouloir\u00a0\u00bb\u00a0: \u00ab\u00a0veulent\u00a0\u00bb. \u00ab\u00a0Voulaient\u00a0\u00bb = imparfait. \u00ab\u00a0Voudront\u00a0\u00bb = futur simple."},
+  {id:4,avant:"Tu",apres:"le sens de cette maxime dès la première lecture.",
+   info:"prendre — 2e pers. sing.",opts:["prenais","prendras","prends"],ans:"prends",
+   fb:"Présent indicatif, 2e pers. sing. de \u00ab\u00a0prendre\u00a0\u00bb\u00a0: \u00ab\u00a0prends\u00a0\u00bb (avec -s). \u00ab\u00a0Prenais\u00a0\u00bb = imparfait. \u00ab\u00a0Prendras\u00a0\u00bb = futur simple."},
+  {id:5,avant:"Vous",apres:"vos arguments avec clarté et concision.",
+   info:"dire — 2e pers. plur.",opts:["direz","disiez","dites"],ans:"dites",
+   fb:"Forme irrégulière à retenir\u00a0: \u00ab\u00a0vous dites\u00a0\u00bb (et non \u00ab\u00a0vous disez\u00a0\u00bb). \u00ab\u00a0Direz\u00a0\u00bb = futur simple. \u00ab\u00a0Disiez\u00a0\u00bb = imparfait."}
+];
+
+var D2=[
+  {id:6,phrase:"Ils faisent preuve d\u2019une grande rigueur dans leurs écrits.",
+   erreur:"faisent",opts:["feront","font","faisaient"],ans:"font",
+   fb:"3e pers. plur. de \u00ab\u00a0faire\u00a0\u00bb\u00a0: \u00ab\u00a0font\u00a0\u00bb. \u00ab\u00a0Faisent\u00a0\u00bb n\u2019existe pas en français. \u00ab\u00a0Feront\u00a0\u00bb = futur. \u00ab\u00a0Faisaient\u00a0\u00bb = imparfait."},
+  {id:7,phrase:"Nous allons au théâtre pour voir la pièce classique.",
+   erreur:null,opts:["\u00ab\u00a0allons\u00a0\u00bb devrait être \u00ab\u00a0allions\u00a0\u00bb.","\u00ab\u00a0allons\u00a0\u00bb devrait être \u00ab\u00a0irons\u00a0\u00bb.","Il n\u2019y a pas d\u2019erreur."],ans:"Il n\u2019y a pas d\u2019erreur.",
+   fb:"\u00ab\u00a0Allons\u00a0\u00bb est la forme correcte de \u00ab\u00a0aller\u00a0\u00bb à la 1re pers. plur. du présent de l\u2019indicatif. La phrase est juste."},
+  {id:8,phrase:"Il voient dans cette fable une critique de la société.",
+   erreur:"voient",opts:["voit","voyait","verra"],ans:"voit",
+   fb:"Le sujet est \u00ab\u00a0il\u00a0\u00bb (singulier). 3e pers. sing. de \u00ab\u00a0voir\u00a0\u00bb\u00a0: \u00ab\u00a0voit\u00a0\u00bb. \u00ab\u00a0Voient\u00a0\u00bb = 3e pers. plur. Erreur d\u2019accord sujet-verbe."},
+  {id:9,phrase:"Vous savez que ce texte est représentatif du classicisme.",
+   erreur:null,opts:["\u00ab\u00a0savez\u00a0\u00bb devrait être \u00ab\u00a0saurez\u00a0\u00bb.","\u00ab\u00a0savez\u00a0\u00bb devrait être \u00ab\u00a0saviez\u00a0\u00bb.","Il n\u2019y a pas d\u2019erreur."],ans:"Il n\u2019y a pas d\u2019erreur.",
+   fb:"\u00ab\u00a0Savez\u00a0\u00bb est la forme correcte de \u00ab\u00a0savoir\u00a0\u00bb à la 2e pers. plur. du présent de l\u2019indicatif. La phrase est juste."},
+  {id:10,phrase:"Ils venent chaque semaine assister à la représentation.",
+   erreur:"venent",opts:["venaient","viennent","viendront"],ans:"viennent",
+   fb:"3e pers. plur. de \u00ab\u00a0venir\u00a0\u00bb\u00a0: \u00ab\u00a0viennent\u00a0\u00bb (avec doublement du -n-). \u00ab\u00a0Venent\u00a0\u00bb n\u2019existe pas. \u00ab\u00a0Venaient\u00a0\u00bb = imparfait. \u00ab\u00a0Viendront\u00a0\u00bb = futur simple."}
+];
+
+var D3=[
+  {id:11,avant:"Les spectateurs",info:"pouvoir — 3e pers. plur.",apres:"reconnaître leurs propres défauts dans les personnages de Molière.",
+   ans:["peuvent"],
+   fb:"3e pers. plur. de \u00ab\u00a0pouvoir\u00a0\u00bb\u00a0: \u00ab\u00a0peuvent\u00a0\u00bb (radical \u00ab\u00a0peuv-\u00a0\u00bb). Ne pas confondre avec \u00ab\u00a0ils pouvaient\u00a0\u00bb (imparfait)."},
+  {id:12,avant:"Je",info:"vouloir — 1re pers. sing.",apres:"approfondir ma connaissance du théâtre classique.",
+   ans:["veux"],
+   fb:"1re pers. sing. de \u00ab\u00a0vouloir\u00a0\u00bb\u00a0: \u00ab\u00a0veux\u00a0\u00bb. \u00ab\u00a0Veut\u00a0\u00bb = 3e pers. sing. \u00ab\u00a0Voulais\u00a0\u00bb = imparfait."},
+  {id:13,avant:"Nous",info:"prendre — 1re pers. plur.",apres:"des notes pendant la lecture.",
+   ans:["prenons"],
+   fb:"1re pers. plur. de \u00ab\u00a0prendre\u00a0\u00bb\u00a0: \u00ab\u00a0prenons\u00a0\u00bb. Aux personnes \u00ab\u00a0nous\u00a0\u00bb et \u00ab\u00a0vous\u00a0\u00bb, \u00ab\u00a0prendre\u00a0\u00bb retrouve son radical régulier\u00a0: \u00ab\u00a0pren-\u00a0\u00bb + \u00ab\u00a0-ons\u00a0\u00bb."},
+  {id:14,avant:"Tu",info:"faire — 2e pers. sing.",apres:"preuve d\u2019une belle maîtrise de l\u2019analyse littéraire.",
+   ans:["fais"],
+   fb:"2e pers. sing. de \u00ab\u00a0faire\u00a0\u00bb\u00a0: \u00ab\u00a0fais\u00a0\u00bb. \u00ab\u00a0Fait\u00a0\u00bb = 3e pers. sing. \u00ab\u00a0Feras\u00a0\u00bb = futur simple."}
+];
+
+/* ══ ÉTAT ══ */
+var sel1={},sel2={};
+var sc1=0,sc2=0,sc3=0,v1=false,v2=false;
+var done3={};
+var TOTAL=19;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,type,vol){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type=type||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+0.02);}
+function sndOk(){initA();beep(440,660,0.08,'sine',0.15);setTimeout(function(){beep(660,880,0.15,'sine',0.12);},90);}
+function sndKo(){initA();beep(280,160,0.22,'sawtooth',0.12);}
+function sndFin(){initA();beep(523,659,0.2,'sine',0.14);setTimeout(function(){beep(659,880,0.25,'sine',0.12);},120);}
+
+/* ══ SHUFFLE ══ */
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ══ NORMALISATION saisie ══ */
+function norm(s){
+  return s.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/['']/g,"'");
+}
+
+/* ══ ATELIER 1 ══ */
+function buildA1(){
+  var list=$('list1');list.innerHTML='';sel1={};
+  D1.forEach(function(d){
+    var div=document.createElement('div');div.className='q-item';div.id='qi1-'+d.id;
+    var qn=document.createElement('div');qn.className='q-num';qn.textContent='Q'+d.id+' / 5';div.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';
+    ph.innerHTML=d.avant+'&nbsp;<span class="blank" id="bl1-'+d.id+'">___</span>&nbsp;'+d.apres
+      +'<br><span class="verbe-info">('+d.info+')</span>';
+    div.appendChild(ph);
+    var row=document.createElement('div');row.className='opts-row';
+    shuffle(d.opts).forEach(function(o){
+      var btn=document.createElement('button');btn.className='opt-btn';btn.textContent=o;btn.dataset.val=o;
+      btn.addEventListener('click',function(){
+        if(v1)return;
+        row.querySelectorAll('.opt-btn').forEach(function(b){b.classList.remove('opt-selected');});
+        btn.classList.add('opt-selected');
+        sel1[d.id]=o;
+        var bl=$('bl1-'+d.id);if(bl)bl.textContent=o;
+        checkV1();
+      });
+      row.appendChild(btn);
+    });
+    div.appendChild(row);
+    var fb=document.createElement('div');fb.className='q-fb';fb.textContent=d.fb;div.appendChild(fb);
+    list.appendChild(div);
+  });
+}
+function checkV1(){$('btn-v1').disabled=(Object.keys(sel1).length<5||v1);}
+function verif1(){
+  if(v1)return;v1=true;$('btn-v1').disabled=true;
+  sc1=0;var ko=0;
+  D1.forEach(function(d){
+    var ua=sel1[d.id]||'';var ok=(ua===d.ans);
+    if(ok)sc1++;else ko++;
+    var item=$('qi1-'+d.id);item.className='q-item '+(ok?'ok':'ko');
+    var bl=$('bl1-'+d.id);if(bl){bl.textContent=ok?d.ans:ua;bl.className='blank '+(ok?'ok':'ko');}
+    var row=item.querySelector('.opts-row');
+    row.querySelectorAll('.opt-btn').forEach(function(b){
+      b.className='opt-btn'+(b.dataset.val===d.ans?' correct':(b.dataset.val===ua&&!ok?' wrong':''));
+    });
+  });
+  updateGlobal();
+  var sp=$('sp1');sp.textContent='Score atelier 1\u00a0: '+sc1+' / 5';sp.classList.add('show');
+  var fb=$('fb1');
+  if(ko===0){fb.className='fb-g show ok';fb.innerHTML='&#11088;\u00a0Atelier 1 valid\u00e9\u00a0! 5/5.';sndOk();}
+  else{fb.className='fb-g show '+(sc1>=4?'mid':'ko');fb.innerHTML='&#128161;\u00a0'+sc1+'/5\u00a0\u2014 '+(ko===1?'1 forme':''+ko+' formes')+' \u00e0 corriger.';sndKo();}
+}
+function reset1(){v1=false;sc1=0;sel1={};$('fb1').className='fb-g';$('sp1').classList.remove('show');$('btn-v1').disabled=true;buildA1();updateGlobal();}
+
+/* ══ ATELIER 2 ══ */
+function buildA2(){
+  var list=$('list2');list.innerHTML='';sel2={};
+  D2.forEach(function(d,i){
+    var div=document.createElement('div');div.className='q-item';div.id='qi2-'+d.id;
+    var qn=document.createElement('div');qn.className='q-num';qn.textContent='Q'+(i+6)+' / 10';div.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';
+    ph.innerHTML=d.erreur?d.phrase.replace(d.erreur,'<span class="err">'+d.erreur+'</span>'):d.phrase;
+    div.appendChild(ph);
+    if(d.erreur){
+      var el=document.createElement('div');el.className='q-err-label';
+      el.innerHTML='Erreur repérée\u00a0:<span class="err-word">'+d.erreur+'</span>';
+      div.appendChild(el);
+    } else {
+      var el2=document.createElement('div');el2.className='q-err-label';
+      el2.textContent='Y a-t-il une erreur dans cette phrase\u00a0?';
+      div.appendChild(el2);
+    }
+    var cl=document.createElement('div');cl.className='act-consigne';cl.style.marginBottom='.4rem';cl.textContent='Correction\u00a0:';div.appendChild(cl);
+    var row=document.createElement('div');row.className='opts-row';row.id='or2-'+d.id;
+    shuffle(d.opts).forEach(function(o){
+      var btn=document.createElement('button');btn.className='opt-btn';btn.textContent=o;btn.dataset.val=o;
+      btn.addEventListener('click',function(){
+        if(v2)return;
+        row.querySelectorAll('.opt-btn').forEach(function(b){b.classList.remove('opt-selected');});
+        btn.classList.add('opt-selected');
+        sel2[d.id]=o;
+        checkV2();
+      });
+      row.appendChild(btn);
+    });
+    div.appendChild(row);
+    var fb=document.createElement('div');fb.className='q-fb';fb.textContent=d.fb;div.appendChild(fb);
+    list.appendChild(div);
+  });
+}
+function checkV2(){$('btn-v2').disabled=(Object.keys(sel2).length<5||v2);}
+function verif2(){
+  if(v2)return;v2=true;$('btn-v2').disabled=true;
+  sc2=0;var ko=0;
+  D2.forEach(function(d){
+    var ua=sel2[d.id]||'';var ok=(ua===d.ans);
+    if(ok)sc2++;else ko++;
+    var item=$('qi2-'+d.id);item.className='q-item '+(ok?'ok':'ko');
+    var row=item.querySelector('.opts-row');
+    row.querySelectorAll('.opt-btn').forEach(function(b){
+      b.className='opt-btn'+(b.dataset.val===d.ans?' correct':(b.dataset.val===ua&&!ok?' wrong':''));
+    });
+  });
+  updateGlobal();
+  var sp=$('sp2');sp.textContent='Score atelier 2\u00a0: '+sc2+' / 5';sp.classList.add('show');
+  var fb=$('fb2');
+  if(ko===0){fb.className='fb-g show ok';fb.innerHTML='&#11088;\u00a0Atelier 2 valid\u00e9\u00a0! 5/5.';sndOk();}
+  else{fb.className='fb-g show '+(sc2>=4?'mid':'ko');fb.innerHTML='&#128161;\u00a0'+sc2+'/5\u00a0\u2014 '+(ko===1?'1 erreur':''+ko+' erreurs')+' \u00e0 corriger.';sndKo();}
+}
+function reset2(){v2=false;sc2=0;sel2={};$('fb2').className='fb-g';$('sp2').classList.remove('show');$('btn-v2').disabled=true;buildA2();updateGlobal();}
+
+/* ══ ATELIER 3 — saisie libre item par item ══ */
+function buildA3(){
+  var list=$('list3');list.innerHTML='';done3={};sc3=0;
+  D3.forEach(function(d){
+    var div=document.createElement('div');div.className='q-item';div.id='qi3-'+d.id;
+    var qn=document.createElement('div');qn.className='q-num';qn.textContent='Q'+(d.id-10)+' / 4';div.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';
+    ph.innerHTML=d.avant+'&nbsp;<span class="blank" id="bl3-'+d.id+'">___</span>&nbsp;'+d.apres
+      +'<br><span class="verbe-info">('+d.info+')</span>';
+    div.appendChild(ph);
+    var inpRow=document.createElement('div');inpRow.className='q-inp-row';
+    var lbl=document.createElement('span');lbl.className='q-inp-label';lbl.textContent='Présent\u00a0:';inpRow.appendChild(lbl);
+    var inp=document.createElement('input');inp.className='q-inp';inp.type='text';inp.autocomplete='off';
+    inp.autocorrect='off';inp.spellcheck=false;inp.placeholder='Ta réponse…';inp.id='inp3-'+d.id;
+    inpRow.appendChild(inp);
+    var okBtn=document.createElement('button');okBtn.className='btn-ok-inline';okBtn.textContent='OK';okBtn.id='bok3-'+d.id;
+    (function(dd,inp2,okBtn2){
+      okBtn2.addEventListener('click',function(){verifOne3(dd,inp2,okBtn2);});
+      inp2.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();verifOne3(dd,inp2,okBtn2);}});
+    })(d,inp,okBtn);
+    inpRow.appendChild(okBtn);
+    div.appendChild(inpRow);
+    var modele=document.createElement('div');modele.className='q-modele';modele.id='mod3-'+d.id;div.appendChild(modele);
+    var fb=document.createElement('div');fb.className='q-fb';fb.id='fb3-'+d.id;fb.textContent=d.fb;div.appendChild(fb);
+    list.appendChild(div);
+  });
+}
+
+function verifOne3(d,inp,okBtn){
+  if(done3[d.id])return;
+  var ua=inp.value.trim();
+  if(!ua)return;
+  done3[d.id]=true;
+  inp.disabled=true;okBtn.disabled=true;
+  var ok=d.ans.some(function(a){return norm(ua)===norm(a);});
+  if(ok)sc3++;
+  var item=$('qi3-'+d.id);item.className='q-item '+(ok?'ok':'ko');
+  inp.className='q-inp '+(ok?'ok':'ko');
+  var bl=$('bl3-'+d.id);if(bl){bl.textContent=ok?d.ans[0]:ua;bl.className='blank '+(ok?'ok':'ko');}
+  var mod=$('mod3-'+d.id);
+  if(mod){mod.textContent=(ok?'':'Réponse attendue\u00a0: '+d.ans[0]+'.');mod.className='q-modele'+(ok?'':' show');}
+  if(ok)sndOk();else sndKo();
+  updateGlobal();
+  // Focus sur la saisie suivante
+  var idx=D3.findIndex(function(x){return x.id===d.id;});
+  if(idx<D3.length-1){
+    var nextInp=$('inp3-'+D3[idx+1].id);
+    if(nextInp&&!nextInp.disabled)setTimeout(function(){nextInp.focus();},80);
+  } else {
+    // Tous faits → afficher résultats
+    if(Object.keys(done3).length===D3.length)setTimeout(showResults,600);
+  }
+  // Afficher score partiel quand tous faits
+  if(Object.keys(done3).length===D3.length){
+    var sp=$('sp3');sp.textContent='Score atelier 3\u00a0: '+sc3+' / 4';sp.classList.add('show');
+    if(sc3===4)sndFin();
+  }
+}
+
+function reset3(){
+  sc3=0;done3={};$('sp3').classList.remove('show');$('fb3').className='fb-g';
+  buildA3();updateGlobal();
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var ok=sc1+sc2+sc3;
+  var answered=(v1?5:0)+(v2?5:0)+Object.keys(done3).length;
+  var ko=answered-ok;var rem=TOTAL-ok;
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;$('cnt-rem').textContent=rem;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';
+  $('prog-pct').textContent=pct+'%';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  var tot=sc1+sc2+sc3;
+  $('r-score').textContent=tot;
+  $('r-a1').textContent=sc1+'/5';
+  $('r-a2').textContent=sc2+'/5';
+  $('r-a3').textContent=sc3+'/4';
+  var s=tot>=18?5:tot>=15?4:tot>=12?3:tot>=8?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=[
+    '\u00c0 retravailler \u2014 reprends les formes irrégulières.',
+    'Des formes à consolider. Continue l\u2019entraînement.',
+    'Bon travail\u00a0! La plupart des formes sont maîtrisées.',
+    'Très bonne maîtrise de la conjugaison.',
+    'Production parfaite \u2014 bilan de fabrication excellent\u00a0!'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  if(tot>=14)$('unlock-msg').classList.add('show');
+  $('results-screen').classList.add('show');
+}
+
+/* ══ RESET ALL ══ */
+function resetAll(){
+  sc1=0;sc2=0;sc3=0;v1=false;v2=false;done3={};
+  $('results-screen').classList.remove('show');
+  $('unlock-msg').classList.remove('show');
+  $('fb1').className='fb-g';$('fb2').className='fb-g';$('fb3').className='fb-g';
+  $('sp1').classList.remove('show');$('sp2').classList.remove('show');$('sp3').classList.remove('show');
+  $('btn-v1').disabled=true;$('btn-v2').disabled=true;
+  buildA1();buildA2();buildA3();updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildA1();buildA2();buildA3();
+updateGlobal();
+</script>
+</body>
+</html>
