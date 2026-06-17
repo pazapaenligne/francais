@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – J'observe et je teste – S1 J1 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5200;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+  --day-color:#f5a623;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffbf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--blue-dark:#1a6e88;--blue-light:#e8f6fb;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:720px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.11;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:110px;height:110px;
+  background:var(--blue);top:180px;left:-25px;pointer-events:none;}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* MISSION BANNER */
+.mission-banner{background:#1a1208;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+  animation:fadeUp .35s ease both;}
+.mission-badge{display:inline-flex;align-items:center;gap:.4rem;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.45rem;}
+.mission-text{font-size:.9rem;color:#d4b896;line-height:1.65;}
+.mission-text strong{color:#fff;}
+
+/* PROGRESSION */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+
+
+/* CARD QCM */
+.card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  animation:fadeUp .35s ease both;position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.card-body{padding:1.1rem 1.2rem 0;}
+.q-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.1em;}
+.theme-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:800;
+  padding:.18rem .65rem;border-radius:99px;text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:.65rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.q-text{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);
+  margin-bottom:.85rem;line-height:1.7;}
+
+/* BOUTONS V/F */
+.vf-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.5rem;}
+.vf-btn{border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:900;
+  padding:.75rem 1rem;cursor:pointer;min-height:50px;letter-spacing:.08em;
+  transition:background .12s,border-color .12s,transform .1s;
+  -webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+.vf-btn:hover:not(:disabled){transform:translateY(-2px);}
+.vf-btn:disabled{cursor:default;transform:none!important;}
+.vf-true{background:var(--blue-light);border-color:var(--blue);color:var(--blue-dark);}
+.vf-false{background:#fff5e0;border-color:#f5a623;color:#8a5000;}
+
+/* BOUTONS QCM */
+.qcm-opts{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.5rem;}
+.qcm-btn{background:var(--surface2);border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.7rem 1.1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s,transform .1s;
+  -webkit-tap-highlight-color:transparent;font-family:Arial,sans-serif;
+  text-align:left;display:flex;align-items:flex-start;gap:.6rem;line-height:1.6;word-break:break-word;}
+.qcm-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.qcm-btn:disabled{cursor:default;}
+.opt-letter{width:26px;height:26px;border-radius:50%;flex-shrink:0;min-width:26px;
+  display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark);margin-top:1px;}
+
+/* ÉTATS */
+.vf-btn.correct,.qcm-btn.correct{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .3s ease;}
+.vf-btn.correct .opt-letter,.qcm-btn.correct .opt-letter{background:var(--green);color:#fff;}
+.vf-btn.wrong,.qcm-btn.wrong{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .4s ease;}
+.vf-btn.wrong .opt-letter,.qcm-btn.wrong .opt-letter{background:var(--pink-dark);color:#fff;}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.03);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+/* FEEDBACK */
+.feedback{padding:.75rem .95rem;border-radius:var(--radius-sm);
+  font-size:clamp(.9rem,2.5vw,1rem);display:none;line-height:1.75;
+  margin:.4rem 1.2rem .6rem;word-break:break-word;}
+.feedback.show{display:block;animation:fadeUp .25s ease;}
+.feedback.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.feedback.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+
+/* BOUTON SUIVANT */
+.btn-next-wrap{display:none;justify-content:flex-end;margin:.2rem 1.2rem .2rem;}
+.btn-next-wrap.show{display:flex;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+
+/* RÉSULTATS */
+.results{display:none;animation:fadeUp .4s ease both;position:relative;z-index:1;}
+.results.show{display:block;}
+.rcard{background:#1a1208;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:2rem 1.5rem;box-shadow:0 5px 22px rgba(0,0,0,.2);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#f5d080,var(--day-dark));}
+.titre-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.15em;margin-bottom:.5rem;}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day);}
+.stars{font-size:1.9rem;margin:.35rem 0 .5rem;letter-spacing:.1em;}
+.titre-attribue{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:.65rem;
+  border:2px solid var(--day);border-radius:6px;padding:.35rem 1.1rem;
+  display:inline-block;color:var(--day);}
+.rmsg{color:#d4b896;font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.35rem;margin-bottom:1.2rem;}
+.recap-item{display:flex;align-items:center;gap:.55rem;padding:.42rem .8rem;
+  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:var(--radius-sm);font-size:.82rem;font-family:'JetBrains Mono',monospace;color:#ccc;}
+.recap-item.ok-r{border-color:rgba(141,198,63,.35);}
+.recap-item.ko-r{border-color:rgba(192,57,43,.35);}
+.unlock-msg{background:rgba(141,198,63,.12);border:1.5px solid var(--green);
+  border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.88rem;
+  color:var(--green);margin-bottom:1rem;font-family:'JetBrains Mono',monospace;
+  text-align:center;display:none;}
+.unlock-msg.show{display:block;}
+.btn-restart{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;
+  border:2px solid var(--day-border);transition:transform .12s;min-height:2.8rem;
+  background:transparent;color:var(--day);width:100%;justify-content:center;}
+.btn-restart:hover{border-color:var(--day);color:#fff;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card-body{padding:.9rem .9rem 0;}
+  .feedback{margin:.4rem .9rem .6rem;}.btn-next-wrap{margin:.2rem .9rem .2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 3ème</span>
+  </div>
+  <div class="week-label">Semaine 1 – Jour 1</div>
+  <h1>J'observe et je teste · <span class="hl">Le classicisme</span></h1>
+</header>
+
+<!-- Bandeau académicien -->
+<div class="mission-banner">
+  <div class="mission-badge">&#127981;&nbsp;Le Cercle des Académiciens — Jury d'admission</div>
+  <div class="mission-text">&#128218;&nbsp;Vous vous présentez devant le jury. Avant d'être admis comme membre, vous devez répondre aux <strong>8 questions d'admission</strong>. Chaque bonne réponse vous confère un titre. Montrez l'étendue de vos connaissances.</div>
+</div>
+
+<!-- Progression -->
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">0 / 8 questions</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correct(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">8</span> restant(s)</div>
+</div>
+
+<!-- Carte QCM -->
+<div class="card" id="main-card">
+  <div class="card-stripe"></div>
+  <div class="card-body">
+    <div class="q-num" id="q-num">Question 1 / 8</div>
+    <div class="theme-badge" id="q-badge">&#128269;&nbsp;Vrai ou Faux ?</div>
+    <div class="q-text" id="q-text"></div>
+    <div id="opts"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+  <div class="btn-next-wrap" id="btn-next-wrap">
+    <button class="btn btn-p" onclick="goNext()">Question suivante &#8594;</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div class="titre-label">&#127981;&nbsp;Jury d'admission — Délibération</div>
+    <div class="score-big"><span id="r-score">0</span>/8</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="titre-attribue" id="r-titre"></div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="unlock-msg" id="unlock-msg">&#128275;&nbsp;Accès débloqué — Je m'entraîne disponible.</div>
+    <div class="recap" id="r-recap"></div>
+    <button class="btn-restart" onclick="restartAll()">&#8635;&nbsp;Se représenter devant le jury</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+var LETTERS=['A','B','C'];
+
+var QS=[
+  /* PARTIE 1 — Vrai / Faux */
+  {type:'vf', part:1,
+   q:'«\u00a0Le classicisme est un mouvement littéraire qui valorise la raison, l\u2019ordre et l\u2019imitation des auteurs de l\u2019Antiquité grecque et latine.\u00a0»',
+   ans:true,
+   fbKo:'C\u2019est exact. Le classicisme place la raison et la mesure au c\u0153ur de la création littéraire. Les auteurs classiques s\u2019inspirent des Anciens et cherchent à atteindre un idéal de beauté ordonnée.',
+   label:'Q1 — Valeurs du classicisme'},
+  {type:'vf', part:1,
+   q:'«\u00a0La règle des trois unités s\u2019applique au roman classique\u00a0: un seul lieu, un seul temps, une seule action.\u00a0»',
+   ans:false,
+   fbKo:'La règle des trois unités s\u2019applique au théâtre classique, pas au roman. Elle impose\u00a0: unité de lieu (une seule scène), unité de temps (l\u2019action se déroule en 24 heures maximum), unité d\u2019action (une seule intrigue).',
+   label:'Q2 — Règle des trois unités'},
+  {type:'vf', part:1,
+   q:'«\u00a0Boileau est considéré comme le législateur du goût classique\u00a0: son Art poétique fixe les règles de la littérature classique.\u00a0»',
+   ans:true,
+   fbKo:'Nicolas Boileau (1636-1711) est le théoricien du classicisme. Son Art poétique (1674) définit les règles de chaque genre littéraire et fixe les critères du bon goût classique.',
+   label:'Q3 — Boileau et l\u2019Art poétique'},
+  /* PARTIE 2 — QCM */
+  {type:'qcm', part:2,
+   q:'Quel auteur classique est l\u2019auteur des Fables, recueil qui utilise des animaux pour illustrer des leçons morales\u00a0?',
+   opts:['Racine.','La Fontaine.','Corneille.'],
+   ans:1,
+   fbKo:'Jean de La Fontaine (1621-1695) est l\u2019auteur des Fables (1668-1694). Ses récits mettent en scène des animaux pour critiquer les vices humains et transmettre une leçon morale. Racine et Corneille sont des auteurs de tragédies, pas de fables.',
+   label:'Q4 — La Fontaine et les Fables'},
+  {type:'qcm', part:2,
+   q:'Quelle est la caractéristique principale de la bienséance dans le théâtre classique\u00a0?',
+   opts:[
+     'Représenter les scènes violentes directement sur scène pour frapper le spectateur.',
+     'Écarter de la scène tout ce qui pourrait choquer ou blesser la sensibilité du public.',
+     'Multiplier les intrigues secondaires pour enrichir la pièce.'
+   ],
+   ans:1,
+   fbKo:'La bienséance est une règle du théâtre classique qui interdit de montrer sur scène tout ce qui est violent, indécent ou choquant. Les scènes de mort ou de violence se déroulent hors scène et sont rapportées par un personnage.',
+   label:'Q5 — La bienséance'},
+  {type:'qcm', part:2,
+   q:'Quel genre littéraire Molière a-t-il principalement illustré au XVII<sup>e</sup> siècle\u00a0?',
+   opts:['La tragédie.','La fable.','La comédie.'],
+   ans:2,
+   fbKo:'Molière (1622-1673) est le maître de la comédie classique. Ses pièces (Le Bourgeois gentilhomme, L\u2019Avare, Le Malade imaginaire\u2026) dénoncent les défauts humains par le rire, conformément à la devise classique\u00a0: «\u00a0plaire et instruire\u00a0».',
+   label:'Q6 — Molière et la comédie'},
+  {type:'qcm', part:2,
+   q:'Quelle valeur esthétique le classicisme place-t-il au-dessus de toutes les autres\u00a0?',
+   opts:[
+     'L\u2019originalité à tout prix et la rupture avec les traditions.',
+     'La raison, la mesure et la clarté au service d\u2019un idéal de beauté ordonnée et universelle.',
+     'L\u2019expression libre et débordante des émotions personnelles.'
+   ],
+   ans:1,
+   fbKo:'Le classicisme s\u2019oppose à l\u2019excès et à la fantaisie. Il place la raison, la clarté et la mesure au c\u0153ur de l\u2019art. C\u2019est le romantisme (XIX<sup>e</sup> siècle) qui valorisera l\u2019expression des émotions personnelles.',
+   label:'Q7 — Valeur esthétique centrale'},
+  {type:'qcm', part:2,
+   q:'La Bruyère est l\u2019auteur des Caractères (1688). Quel est l\u2019objectif principal de cet ouvrage\u00a0?',
+   opts:[
+     'Raconter des aventures héroïques pour divertir la cour du roi.',
+     'Peindre les m\u0153urs et les défauts de la société de son temps à travers des portraits moraux.',
+     'Défendre les règles de la tragédie classique contre ses détracteurs.'
+   ],
+   ans:1,
+   fbKo:'Jean de La Bruyère (1645-1696) peint dans Les Caractères les vices et les ridicules de la société du XVII<sup>e</sup> siècle. À travers des portraits incisifs, il critique l\u2019hypocrisie, la vanité et la servilité de ses contemporains. C\u2019est un ouvrage moral et satirique, conforme à l\u2019idéal classique d\u2019instruire en divertissant.',
+   label:'Q8 — La Bruyère et Les Caractères'}
+];
+
+var curQ=0,score=0,done=new Array(8).fill(false),scoreByQ=new Array(8).fill(false);
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,type,vol){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=type||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+0.02);
+}
+function sndOk(){initA();beep(440,660,0.08,'sine',0.15);setTimeout(function(){beep(660,880,0.15,'sine',0.12);},90);}
+function sndKo(){initA();beep(280,160,0.22,'sawtooth',0.12);}
+function sndFin(){initA();beep(523,659,0.2,'sine',0.14);setTimeout(function(){beep(659,880,0.25,'sine',0.12);},120);}
+
+/* ══ LOAD ══ */
+function loadQ(){
+  if(curQ>=QS.length){showResults();return;}
+  var q=QS[curQ];
+  $('q-num').textContent='Question '+(curQ+1)+' / 8';
+  $('q-badge').innerHTML=q.type==='vf'?'&#128269;&nbsp;Vrai ou Faux&nbsp;?':'&#128269;&nbsp;QCM · Identifie';
+  $('q-text').innerHTML=q.q;
+  $('feedback').className='feedback';
+  $('btn-next-wrap').className='btn-next-wrap';
+  var opts=$('opts');opts.innerHTML='';
+
+  if(q.type==='vf'){
+    var row=document.createElement('div');row.className='vf-row';
+    var btnV=document.createElement('button');btnV.className='vf-btn vf-true';
+    btnV.innerHTML='&#10003;&nbsp;VRAI';
+    var btnF=document.createElement('button');btnF.className='vf-btn vf-false';
+    btnF.innerHTML='&#10007;&nbsp;FAUX';
+    (function(bv,bf){
+      bv.addEventListener('click',function(){if(!done[curQ])answer(true,q,bv,bf);});
+      bf.addEventListener('click',function(){if(!done[curQ])answer(false,q,bf,bv);});
+    })(btnV,btnF);
+    row.appendChild(btnV);row.appendChild(btnF);opts.appendChild(row);
+  } else {
+    var indices=shuffle([0,1,2]);
+    var btns=[];
+    indices.forEach(function(oi,li){
+      var btn=document.createElement('button');btn.className='qcm-btn';
+      btn.innerHTML='<span class="opt-letter">'+LETTERS[li]+'</span><span>'+q.opts[oi]+'</span>';
+      btn.dataset.oi=oi;
+      (function(b,idx,all){
+        b.addEventListener('click',function(){if(!done[curQ])answerQCM(idx,q,b,all);});
+      })(btn,oi,btns);
+      opts.appendChild(btn);btns.push(btn);
+    });
+  }
+}
+
+/* ══ RÉPONSES ══ */
+function answer(val,q,btnCliqued,btnAutre){
+  if(done[curQ])return;done[curQ]=true;
+  initA();btnCliqued.disabled=true;btnAutre.disabled=true;
+  var ok=(val===q.ans);
+  scoreByQ[curQ]=ok;if(ok)score++;
+  btnCliqued.classList.add(ok?'correct':'wrong');
+  if(!ok)(val===true?btnAutre:btnCliqued).classList.add('correct');
+  if(!ok)(q.ans===true?btnAutre:btnCliqued).classList.add('correct');
+  showFB(ok,q.fbKo);
+  updateGlobal();
+}
+
+function answerQCM(oi,q,btnCliqued,btns){
+  if(done[curQ])return;done[curQ]=true;
+  initA();btns.forEach(function(b){b.disabled=true;});
+  var ok=(oi===q.ans);
+  scoreByQ[curQ]=ok;if(ok)score++;
+  btnCliqued.classList.add(ok?'correct':'wrong');
+  if(!ok)btns.forEach(function(b){if(parseInt(b.dataset.oi)===q.ans)b.classList.add('correct');});
+  showFB(ok,q.fbKo);
+  updateGlobal();
+}
+
+function showFB(ok,msg){
+  var fb=$('feedback');
+  if(ok){fb.innerHTML='&#10003;&nbsp;Exact\u00a0!';fb.className='feedback show ok';sndOk();}
+  else{fb.innerHTML='&#10006;&nbsp;'+msg;fb.className='feedback show ko';sndKo();}
+  $('btn-next-wrap').className='btn-next-wrap show';
+  setTimeout(function(){fb.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
+}
+
+/* ══ SUIVANT ══ */
+function goNext(){
+  curQ++;
+  $('main-card').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(function(){loadQ();},280);
+}
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var answered=done.filter(Boolean).length;
+  var ko=answered-score;var rem=8-answered;
+  $('cnt-ok').textContent=score;$('cnt-ko').textContent=ko;$('cnt-rem').textContent=rem;
+  var pct=Math.round(answered/8*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=answered+' / 8 questions';
+  $('prog-pct').textContent=pct+'%';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  if(score>=7)sndFin();
+  $('r-score').textContent=score;
+  var s=score>=8?5:score>=7?4:score>=6?3:score>=5?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  /* Titres */
+  var titres=['À retravailler','Initié','Lettré','Académicien confirmé','Maître des Lettres Classiques'];
+  var ti=score>=8?4:score>=7?3:score>=6?2:score>=5?1:0;
+  $('r-titre').textContent=titres[ti];
+  var msgs=[
+    'Vos connaissances restent fragiles. Relisez le référentiel avant de vous représenter.',
+    'Titre d\u2019Initié accordé. Les fondements sont là — continuez à approfondir.',
+    'Titre de Lettré accordé. Vous maîtrisez les principaux repères du classicisme.',
+    'Titre d\u2019Académicien confirmé. Excellente maîtrise du mouvement classique.',
+    'Titre de Maître des Lettres Classiques. Connaissance exemplaire — le jury vous félicite.'
+  ];
+  $('r-msg').textContent=msgs[ti];
+  if(score>=5)$('unlock-msg').classList.add('show');
+  var recap=$('r-recap');recap.innerHTML='';
+  QS.forEach(function(q,i){
+    var ok2=scoreByQ[i];
+    var dv=document.createElement('div');dv.className='recap-item '+(ok2?'ok-r':'ko-r');
+    dv.innerHTML='<span>'+(ok2?'&#10003;':'&#10007;')+'</span>'
+      +'<span style="flex:1;">'+q.label+'</span>'
+      +'<span style="color:'+(ok2?'#8dc63f':'#f28b82')+';font-weight:700;">'+(ok2?'1':'0')+'/1</span>';
+    recap.appendChild(dv);
+  });
+  $('results-screen').classList.add('show');
+  setTimeout(function(){$('results-screen').scrollIntoView({behavior:'smooth',block:'start'});},200);
+}
+
+/* ══ RESTART ══ */
+function restartAll(){
+  curQ=0;score=0;done=new Array(8).fill(false);scoreByQ=new Array(8).fill(false);
+  $('results-screen').classList.remove('show');
+  $('unlock-msg').classList.remove('show');
+  updateGlobal();loadQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ UTILS ══ */
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+document.addEventListener('pointerdown',initA,{once:true});
+loadQ();updateGlobal();
+</script>
+</body>
+</html>
