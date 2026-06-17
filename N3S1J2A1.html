@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S1 J2 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#b94040; --day-dark:#7a1f1f;
+      --day-light:#f7eded; --day-border:#e8b0b0;
+      --day-glow:rgba(185,64,64,.22);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-pale:#e7faec;
+      --pink:#f28b82; --orange:#f5a623;
+      --red:#ef4444; --red-pale:#fdeaea;
+      --dark:#1a1f2e; --dark2:#232a3d; --dark3:#2d3448;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* TABLEAU DE BORD */
+    .dashboard{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:.9rem 1.2rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .dashboard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9a8a8a;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+    .dash-rang{flex:1;}
+    .dash-rang-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#7a6a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-rang-nom{font-size:1rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-global{text-align:right;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:#7a6a6a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    .dash-tests{display:flex;gap:.4rem;margin-top:.8rem;flex-wrap:wrap;}
+    .dash-test{width:28px;height:28px;border-radius:6px;background:var(--dark2);
+      border:1.5px solid var(--dark3);display:flex;align-items:center;justify-content:center;
+      font-size:.75rem;font-family:'JetBrains Mono',monospace;color:#7a6a6a;
+      transition:all .3s;}
+    .dash-test.ok{background:rgba(34,197,94,.2);border-color:var(--green);color:#4ade80;}
+    .dash-test.ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#f87171;}
+    .dash-test.actif{border-color:var(--day-color);color:var(--day-border);}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-items{display:flex;flex-direction:column;gap:.3rem;}
+    .ref-item{font-size:.82rem;color:var(--text);line-height:1.65;
+      padding:.25rem 0;border-bottom:1px solid var(--border);}
+    .ref-item:last-child{border-bottom:none;}
+    .ref-item strong{color:var(--day-dark);}
+
+    /* parties */
+    .partie-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;
+      background:var(--day-light);border-radius:12px;padding:.75rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:.95rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+      font-weight:700;padding:.2rem .65rem;border-radius:99px;
+      background:var(--day-dark);color:#fff;border:none;}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.2rem 1rem 1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.8rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--pink));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.65rem .9rem;margin-bottom:.65rem;font-size:1rem;
+      font-style:italic;color:var(--text);line-height:1.7;}
+    .q-texte{font-size:.92rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.65rem;}
+
+    /* vrai/faux */
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.65rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:.95rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    /* options QCM */
+    .opts{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.92rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:2.8rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.8rem;font-family:'JetBrains Mono',monospace;
+      padding:.45rem .7rem;border-radius:8px;margin-top:.35rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* boutons */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+      padding:.55rem 1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:.9rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-dark);color:#fff;}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+
+    /* résultat partie */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.1rem;text-align:center;margin-top:.6rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.82rem;color:#9a8a8a;margin:.3rem 0 .8rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.2rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-habilitation{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9a8a8a;margin-bottom:.4rem;}
+    .res-rang{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:900;
+      color:var(--day-border);margin-bottom:.4rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.4rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a6a6a;}
+    .stars{font-size:1.8rem;margin:.4rem 0 .8rem;letter-spacing:.2rem;}
+    .res-msg{font-size:.92rem;color:#c8b8b8;margin-bottom:.8rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.08);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:scale(1);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 12px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 12px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both, flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both, flashKo .5s ease both;}
+    @media(max-width:480px){
+      .vf-row{flex-direction:column;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+      .dash-tests{gap:.3rem;}
+      .dash-test{width:24px;height:24px;font-size:.65rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 2</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Le D&eacute;codeur de Phrases</span></h1>
+</header>
+
+<!-- TABLEAU DE BORD -->
+<div class="dashboard">
+  <div class="dash-titre">&#128279; Laboratoire de langues &mdash; Tests d&rsquo;habilitation</div>
+  <div class="dash-row">
+    <div class="dash-rang">
+      <div class="dash-rang-label">Niveau d&rsquo;habilitation</div>
+      <div class="dash-rang-nom" id="dash-rang">En cours d&rsquo;évaluation&hellip;</div>
+    </div>
+    <div class="dash-score-global">
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Tests valid&eacute;s</div>
+    </div>
+  </div>
+  <div class="dash-tests" id="dash-tests"></div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 tests</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-items">
+    <div class="ref-item"><strong>Phrase simple&nbsp;:</strong> une seule proposition (un seul verbe conjugu&eacute;).</div>
+    <div class="ref-item"><strong>Phrase complexe&nbsp;:</strong> plusieurs propositions (plusieurs verbes conjugu&eacute;s).</div>
+    <div class="ref-item"><strong>Juxtaposition&nbsp;:</strong> propositions s&eacute;par&eacute;es par un signe de ponctuation (virgule, point-virgule, deux-points). Pas de mot de liaison.</div>
+    <div class="ref-item"><strong>Coordination&nbsp;:</strong> propositions reli&eacute;es par une conjonction de coordination (mais, ou, et, donc, or, ni, car) ou un adverbe de liaison (puis, alors, ensuite&hellip;).</div>
+    <div class="ref-item"><strong>Subordination&nbsp;:</strong> une proposition principale + une ou plusieurs propositions subordonn&eacute;es introduites par un subordonnant (que, qui, quand, parce que, bien que, si, dont&hellip;). La subordonn&eacute;e d&eacute;pend de la principale.</div>
+  </div>
+</div>
+
+<!-- PARTIES -->
+<div class="partie-wrap">
+
+  <!-- PARTIE 1 : VRAI/FAUX -->
+  <div id="bloc-p1">
+    <div class="partie-header">
+      <div class="part-icon">&#128301;</div>
+      <div>
+        <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+        <div class="part-sous">3 affirmations &mdash; Tests 1 &agrave; 3</div>
+      </div>
+      <div class="part-badge" id="badge-p1">0 / 3</div>
+    </div>
+    <div id="cards-p1"></div>
+    <div class="part-result" id="res-p1">
+      <div class="part-score" id="score-p1"></div>
+      <div class="part-msg" id="msg-p1"></div>
+      <div id="btn-p1"></div>
+    </div>
+  </div>
+
+  <!-- PARTIE 2 : QCM -->
+  <div id="bloc-p2" style="display:none;">
+    <div class="partie-header">
+      <div class="part-icon">&#128270;</div>
+      <div>
+        <div class="part-titre">Partie 2 &mdash; Identifier le type de phrase</div>
+        <div class="part-sous">5 phrases &mdash; Tests 4 &agrave; 8</div>
+      </div>
+      <div class="part-badge" id="badge-p2">0 / 5</div>
+    </div>
+    <div id="cards-p2"></div>
+    <div class="part-result" id="res-p2">
+      <div class="part-score" id="score-p2"></div>
+      <div class="part-msg" id="msg-p2"></div>
+      <div id="btn-p2"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS GLOBAUX -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-habilitation">&#128279; Certificat d&rsquo;habilitation</div>
+    <div class="res-rang" id="res-rang"></div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      Recommencer les tests
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   DONNÉES
+═══════════════════════════════════ */
+var P1 = [
+  {
+    id:'q1',
+    phrase:'Dans une phrase par juxtaposition, les propositions sont reli\u00e9es par une conjonction de coordination.',
+    rep: false,
+    fb: 'La juxtaposition n\u2019utilise aucun mot de liaison. Les propositions sont s\u00e9par\u00e9es uniquement par un signe de ponctuation\u00a0: virgule, point-virgule ou deux-points. C\u2019est la coordination qui utilise des conjonctions (mais, et, car\u2026).'
+  },
+  {
+    id:'q2',
+    phrase:'Dans une phrase par subordination, la proposition subordonn\u00e9e ne peut pas fonctionner seule\u00a0: elle d\u00e9pend de la proposition principale.',
+    rep: true,
+    fb: 'C\u2019est la d\u00e9finition m\u00eame de la subordination. La proposition subordonn\u00e9e est introduite par un subordonnant (que, qui, parce que, bien que\u2026) et ne peut pas \u00eatre isol\u00e9e sans perdre son sens. Elle d\u00e9pend de la principale.'
+  },
+  {
+    id:'q3',
+    phrase:'Les conjonctions de coordination sont\u00a0: mais, ou, et, donc, or, ni, car.',
+    rep: true,
+    fb: 'Ces sept conjonctions forment la liste des conjonctions de coordination en fran\u00e7ais. Le moyen mn\u00e9motechnique classique\u00a0: \u00ab\u00a0Mais o\u00f9 est donc Ornicar\u00a0?\u00a0\u00bb (mais\u00a0/ ou\u00a0/ et\u00a0/ donc\u00a0/ or\u00a0/ ni\u00a0/ car).'
+  }
+];
+
+var P2 = [
+  {
+    id:'q4', qNum:4,
+    phrase:'Le soleil se levait\u00a0; les oiseaux commen\u00e7aient \u00e0 s\u2019agiter dans les branches.',
+    texte:'Quel type de relation unit les deux propositions\u00a0?',
+    opts:[
+      {t:'Coordination', ok:false},
+      {t:'Subordination', ok:false},
+      {t:'Juxtaposition', ok:true}
+    ],
+    fb:'Les deux propositions sont s\u00e9par\u00e9es par un point-virgule, sans aucun mot de liaison. C\u2019est la juxtaposition\u00a0: les propositions sont ind\u00e9pendantes syntaxiquement mais li\u00e9es par le sens.'
+  },
+  {
+    id:'q5', qNum:5,
+    phrase:'Il \u00e9tudia toute la nuit car il voulait r\u00e9ussir son examen.',
+    texte:'Quel type de relation unit les deux propositions\u00a0?',
+    opts:[
+      {t:'Juxtaposition', ok:false},
+      {t:'Coordination', ok:true},
+      {t:'Subordination', ok:false}
+    ],
+    fb:'\u00ab\u00a0Car\u00a0\u00bb est une conjonction de coordination. Elle relie deux propositions ind\u00e9pendantes en exprimant une relation de cause. \u00ab\u00a0Car\u00a0\u00bb est diff\u00e9rent de \u00ab\u00a0parce que\u00a0\u00bb\u00a0: \u00ab\u00a0parce que\u00a0\u00bb est une conjonction de subordination.'
+  },
+  {
+    id:'q6', qNum:6,
+    phrase:'Je sais que ce travail demande de la patience.',
+    texte:'Quel type de relation unit les deux propositions\u00a0?',
+    opts:[
+      {t:'Juxtaposition', ok:false},
+      {t:'Coordination', ok:false},
+      {t:'Subordination', ok:true}
+    ],
+    fb:'\u00ab\u00a0Que\u00a0\u00bb est une conjonction de subordination. \u00ab\u00a0Ce travail demande de la patience\u00a0\u00bb est une proposition subordonn\u00e9e conjonctive compl\u00e9tive\u00a0: elle compl\u00e8te le verbe \u00ab\u00a0sais\u00a0\u00bb de la proposition principale \u00ab\u00a0Je sais\u00a0\u00bb.'
+  },
+  {
+    id:'q7', qNum:7,
+    phrase:'Les auteurs classiques imitaient les Anciens, ils cherchaient la perfection formelle.',
+    texte:'Quel type de relation unit les deux propositions\u00a0?',
+    opts:[
+      {t:'Subordination', ok:false},
+      {t:'Juxtaposition', ok:true},
+      {t:'Coordination', ok:false}
+    ],
+    fb:'Les deux propositions sont s\u00e9par\u00e9es par une virgule, sans mot de liaison. C\u2019est la juxtaposition. Le sens sugg\u00e8re une relation (cause ou cons\u00e9quence), mais syntaxiquement il n\u2019y a pas de mot de liaison.'
+  },
+  {
+    id:'q8', qNum:8,
+    phrase:'Moli\u00e8re voulait plaire au public mais il cherchait aussi \u00e0 corriger les m\u0153urs.',
+    texte:'Quel type de relation unit les deux propositions\u00a0?',
+    opts:[
+      {t:'Subordination', ok:false},
+      {t:'Juxtaposition', ok:false},
+      {t:'Coordination', ok:true}
+    ],
+    fb:'\u00ab\u00a0Mais\u00a0\u00bb est une conjonction de coordination. Elle exprime une opposition entre les deux propositions. Les deux propositions sont syntaxiquement ind\u00e9pendantes mais reli\u00e9es par ce mot de liaison.'
+  }
+];
+
+/* ═══════════════════════════════════
+   ÉTAT
+═══════════════════════════════════ */
+var scoreOk = 0;
+var p1Ok = 0, p1Results = {};
+var p2Ok = 0, p2Results = {};
+var testStates = {}; /* id → bool */
+
+function shuffle(a){ return a.slice().sort(function(){ return Math.random()-.5; }); }
+var L = ['A','B','C'];
+function mkEl(t,c){ var e=document.createElement(t); if(c) e.className=c; return e; }
+
+/* ═══════════════════════════════════
+   TABLEAU DE BORD
+═══════════════════════════════════ */
+function buildDashTests(){
+  var wrap = document.getElementById('dash-tests');
+  wrap.innerHTML = '';
+  for(var i=1; i<=8; i++){
+    var t = mkEl('div','dash-test'); t.id='dt-'+i; t.textContent=i;
+    if(i<=3 && i===1) t.classList.add('actif');
+    wrap.appendChild(t);
+  }
+}
+
+function majDash(qNum, ok){
+  var t = document.getElementById('dt-'+qNum);
+  if(t){ t.classList.remove('actif'); t.classList.add(ok?'ok':'ko'); }
+  /* activer suivant */
+  var next = document.getElementById('dt-'+(qNum+1));
+  if(next) next.classList.add('actif');
+  /* rang */
+  document.getElementById('dash-total').textContent = scoreOk;
+  majRang();
+  majProg();
+}
+
+function majRang(){
+  var el = document.getElementById('dash-rang');
+  if(scoreOk >= 8)      el.textContent = 'Ma\u00eetre analyste';
+  else if(scoreOk >= 7) el.textContent = 'Expert syntaxique';
+  else if(scoreOk >= 6) el.textContent = 'Analyste confirm\u00e9';
+  else if(scoreOk >= 5) el.textContent = 'Analyste junior';
+  else                  el.textContent = 'En cours d\u2019\u00e9valuation\u2026';
+}
+
+function majProg(){
+  var done = Object.keys(testStates).length;
+  var pct = Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = done+' / 8 tests';
+  document.getElementById('prog-pct').textContent = pct+'\u00a0%';
+}
+
+/* ═══════════════════════════════════
+   BUILD PARTIE 1
+═══════════════════════════════════ */
+function buildP1(){
+  var wrap = document.getElementById('cards-p1');
+  wrap.innerHTML = ''; p1Results = {}; p1Ok = 0;
+  P1.forEach(function(q,i){
+    var card = mkEl('div','card'); card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl = mkEl('div','q-label');
+    lbl.textContent = 'Test '+(i+1)+' / 8 \u2014 Vrai ou faux\u00a0?';
+    card.appendChild(lbl);
+    var ph = mkEl('div','q-phrase'); ph.textContent = q.phrase; card.appendChild(ph);
+    var vfRow = mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn = document.createElement('button');
+      btn.className = 'vf-btn';
+      var isV = txt==='Vrai';
+      btn.innerHTML = (isV ? '&#10003;' : '&#10007;') + ' ' + txt;
+      btn.dataset.val = isV ? 'true' : 'false';
+      btn.addEventListener('click', function(){ selVF(q, btn, vfRow, i+1); });
+      vfRow.appendChild(btn);
+    });
+    card.appendChild(vfRow);
+    var fb = mkEl('div','fb'); fb.id='fb-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q, btn, row, qNum){
+  if(p1Results[q.id] !== undefined) return;
+  var choix = btn.dataset.val === 'true';
+  var ok = choix === q.rep;
+  p1Results[q.id] = ok;
+  testStates[q.id] = ok;
+  jouerSon(ok); animerCard(q.id, ok);
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled = true;
+    if((b.dataset.val==='true') === q.rep) b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+  if(!ok){
+    var fb = document.getElementById('fb-'+q.id);
+    fb.className = 'fb show ko-fb'; fb.textContent = q.fb;
+  }
+  if(ok){ scoreOk++; p1Ok++; }
+  document.getElementById('badge-p1').textContent = p1Ok+' / 3';
+  majDash(qNum, ok);
+  if(Object.keys(p1Results).length === P1.length) showResP1();
+}
+
+function showResP1(){
+  var r = document.getElementById('res-p1'); r.classList.add('show');
+  document.getElementById('score-p1').textContent = p1Ok+' / 3';
+  document.getElementById('msg-p1').textContent = p1Ok===3 ?
+    '\u2713 Parfait \u2014 Partie 2 d\u00e9bloqu\u00e9e.' :
+    p1Ok>=2 ? 'Bien \u2014 Partie 2 d\u00e9bloqu\u00e9e.' :
+    'Continue \u2014 Partie 2 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p1').innerHTML =
+    '<button class="btn btn-primary" onclick="debP2()">Partie 2 \u2192</button>';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display = '';
+  document.getElementById('bloc-p2').scrollIntoView({behavior:'smooth',block:'start'});
+  buildP2();
+}
+
+function resetP1(){
+  scoreOk = Math.max(0, scoreOk - p1Ok);
+  p1Ok = 0; p1Results = {};
+  P1.forEach(function(q){ delete testStates[q.id]; });
+  [1,2,3].forEach(function(n){
+    var t=document.getElementById('dt-'+n);
+    if(t){ t.classList.remove('ok','ko'); if(n===1) t.classList.add('actif'); }
+  });
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('badge-p1').textContent='0 / 3';
+  majDash(0,false); majRang(); majProg();
+  buildP1();
+}
+
+/* ═══════════════════════════════════
+   BUILD PARTIE 2
+═══════════════════════════════════ */
+function buildP2(){
+  var wrap = document.getElementById('cards-p2');
+  wrap.innerHTML = ''; p2Results = {}; p2Ok = 0;
+  shuffle(P2).forEach(function(q,i){
+    var card = mkEl('div','card'); card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl = mkEl('div','q-label');
+    lbl.textContent = 'Test '+q.qNum+' / 8';
+    card.appendChild(lbl);
+    var ph = mkEl('div','q-phrase'); ph.textContent = q.phrase; card.appendChild(ph);
+    var txt = mkEl('div','q-texte'); txt.textContent = q.texte; card.appendChild(txt);
+    var opts = mkEl('div','opts');
+    shuffle(q.opts).forEach(function(opt,oi){
+      var btn = document.createElement('button'); btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok = opt.ok?'1':'0';
+      btn.addEventListener('click', function(){ selP2(q, btn, opts, q.qNum); });
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb = mkEl('div','fb'); fb.id='fb-'+q.id; card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q, btn, optsEl, qNum){
+  if(p2Results[q.id] !== undefined) return;
+  var ok = btn.dataset.ok === '1';
+  p2Results[q.id] = ok;
+  testStates[q.id] = ok;
+  jouerSon(ok); animerCard(q.id, ok);
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled = true;
+    if(b.dataset.ok==='1') b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+  if(!ok){
+    var fb = document.getElementById('fb-'+q.id);
+    fb.className='fb show ko-fb'; fb.textContent=q.fb;
+  }
+  if(ok){ scoreOk++; p2Ok++; }
+  document.getElementById('badge-p2').textContent = p2Ok+' / 5';
+  majDash(qNum, ok);
+  if(Object.keys(p2Results).length === P2.length) showResP2();
+}
+
+function showResP2(){
+  var r = document.getElementById('res-p2'); r.classList.add('show');
+  document.getElementById('score-p2').textContent = p2Ok+' / 5';
+  document.getElementById('msg-p2').textContent = p2Ok===5 ?
+    '\u2713 Excellent \u2014 tous les types identifi\u00e9s.' :
+    p2Ok>=4 ? 'Tr\u00e8s bien !' : p2Ok>=3 ? 'Bien !' : 'Continue \u2014 relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML =
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir mon habilitation \u2192</button>';
+}
+
+function resetP2(){
+  scoreOk = Math.max(0, scoreOk - p2Ok);
+  p2Ok = 0; p2Results = {};
+  P2.forEach(function(q){ delete testStates[q.id]; });
+  [4,5,6,7,8].forEach(function(n){
+    var t=document.getElementById('dt-'+n);
+    if(t){ t.classList.remove('ok','ko'); }
+  });
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('badge-p2').textContent='0 / 5';
+  majRang(); majProg();
+  buildP2();
+}
+
+/* ═══════════════════════════════════
+   VERDICT
+═══════════════════════════════════ */
+function afficherVerdict(){
+  var total = scoreOk;
+  var r = document.getElementById('results-global'); r.classList.add('show');
+  document.getElementById('res-num').textContent = total;
+  var rang = total>=8 ? 'Ma\u00eetre analyste' :
+             total>=7 ? 'Expert syntaxique' :
+             total>=6 ? 'Analyste confirm\u00e9' :
+             total>=5 ? 'Analyste junior' : 'Apprenti analyste';
+  document.getElementById('res-rang').textContent = rang;
+  var stars = total>=8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent = '\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge = document.getElementById('res-badge');
+  if(total>=5){
+    badge.innerHTML='<div class="badge-ok">\u2713 Habilitation d\u00e9livr\u00e9e\u00a0: '+rang+'</div>';
+  } else {
+    badge.innerHTML='<div class="badge-ko">Habilitation refus\u00e9e \u2014 Formation compl\u00e9mentaire requise.</div>';
+  }
+  var msgs=['Formation requise.','Formation requise.','Formation requise.','Formation requise.',
+    'Formation requise.',
+    'Analyste junior valid\u00e9\u00a0!','Analyste confirm\u00e9 valid\u00e9\u00a0!',
+    'Expert syntaxique valid\u00e9\u00a0!','Ma\u00eetre analyste \u2014 sans faute\u00a0!'];
+  document.getElementById('res-msg').textContent = msgs[Math.min(total,msgs.length-1)];
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ═══════════════════════════════════
+   RESET
+═══════════════════════════════════ */
+function resetTout(){
+  scoreOk=0; p1Ok=0; p1Results={}; p2Ok=0; p2Results={}; testStates={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0 / 3';
+  document.getElementById('badge-p2').textContent='0 / 5';
+  document.getElementById('dash-total').textContent='0';
+  buildDashTests();
+  buildP1();
+  majRang(); majProg();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════
+   SON + ANIMATION
+═══════════════════════════════════ */
+function jouerSon(ok){
+  try{
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(ok){
+      osc.frequency.setValueAtTime(520, ctx.currentTime);
+      osc.frequency.setValueAtTime(660, ctx.currentTime+0.08);
+      osc.frequency.setValueAtTime(800, ctx.currentTime+0.16);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.4);
+    } else {
+      osc.frequency.setValueAtTime(280, ctx.currentTime);
+      osc.frequency.setValueAtTime(220, ctx.currentTime+0.12);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.35);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.35);
+    }
+  } catch(e){}
+}
+
+function animerCard(id, ok){
+  var card = document.getElementById('c-'+id);
+  if(!card) return;
+  card.classList.remove('anim-ok','anim-ko');
+  void card.offsetWidth; /* reflow */
+  card.classList.add(ok ? 'anim-ok' : 'anim-ko');
+}
+
+/* ─── INIT ─── */
+buildDashTests();
+buildP1();
+majRang();
+majProg();
+</script>
+</body>
+</html>
