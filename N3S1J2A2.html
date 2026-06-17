@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Je m'entraîne – S1 J2 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#b94040; --day-dark:#7a1f1f;
+      --day-light:#f7eded; --day-border:#e8b0b0;
+      --day-glow:rgba(185,64,64,.22);
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#22c55e; --green-pale:#e7faec;
+      --pink:#f28b82; --orange:#f5a623;
+      --red:#ef4444; --red-pale:#fdeaea;
+      --dark:#1a1f2e; --dark2:#232a3d; --dark3:#2d3448;
+      --text:#1a1d23; --muted:#555860; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* BANNIÈRE CHANTIER */
+    .chantier{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .chantier::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .ch-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9a8a8a;margin-bottom:.6rem;}
+    .ch-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+    .ch-rang{flex:1;}
+    .ch-rang-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#7a6a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .ch-rang-nom{font-size:1.1rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .ch-score{text-align:right;}
+    .ch-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .ch-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#7a6a6a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    .ch-phases{display:flex;gap:.6rem;margin-top:.8rem;flex-wrap:wrap;}
+    .ch-phase{flex:1;min-width:120px;background:var(--dark2);border:1.5px solid var(--dark3);
+      border-radius:8px;padding:.5rem .8rem;}
+    .ch-phase-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#7a6a6a;
+      text-transform:uppercase;letter-spacing:.06em;}
+    .ch-phase-score{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;
+      color:var(--day-border);}
+    .ch-phase.actif{border-color:var(--day-color);}
+    .ch-phase.actif .ch-phase-num{color:var(--day-border);}
+    .ch-phase.valide{border-color:var(--green);}
+    .ch-phase.valide .ch-phase-score{color:#4ade80;}
+    .ch-phase.echec{border-color:var(--red);}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-items{display:flex;flex-direction:column;gap:.3rem;}
+    .ref-item{font-size:.95rem;color:var(--text);line-height:1.7;
+      padding:.3rem 0;border-bottom:1px solid var(--border);}
+    .ref-item:last-child{border-bottom:none;}
+    .ref-item strong{color:var(--day-dark);}
+
+    /* niveaux */
+    .niveau-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .niveau-block{margin-bottom:1.4rem;}
+    .niveau-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .niv-pastille{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;
+      flex-shrink:0;}
+    .n1 .niv-pastille{background:var(--day-color);color:#fff;}
+    .n2 .niv-pastille{background:var(--day-dark);color:#fff;}
+    .niv-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .niv-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .niv-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;
+      background:var(--day-dark);color:#fff;}
+    .niveau-locked{opacity:.35;pointer-events:none;filter:grayscale(.6);}
+    .lock-msg{background:var(--dark);border:1.5px solid var(--dark3);
+      border-radius:10px;padding:.8rem 1rem;font-size:.92rem;
+      font-family:'JetBrains Mono',monospace;color:#9a8a8a;margin-bottom:.8rem;}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--pink));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.1rem;
+      font-style:italic;color:var(--text);line-height:1.75;}
+    .q-sous-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      color:var(--day-dark);text-transform:uppercase;letter-spacing:.08em;
+      margin:.6rem 0 .4rem;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);line-height:1.6;margin-bottom:.6rem;}
+
+    /* options */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.9rem;font-family:'JetBrains Mono',monospace;
+      padding:.5rem .8rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* N2 saisie */
+    .n2-depart{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.5rem;font-size:1.05rem;
+      font-style:italic;color:var(--text);line-height:1.75;}
+    .n2-consigne{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.6rem;line-height:1.6;}
+    .n2-input{width:100%;padding:.65rem .9rem;border-radius:8px;
+      border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      outline:none;resize:vertical;min-height:80px;}
+    .n2-input:focus{border-color:var(--day-color);}
+    .n2-modele{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+      padding:.8rem 1rem;font-size:.95rem;color:var(--text);
+      line-height:1.75;margin-top:.5rem;display:none;}
+    .n2-modele.show{display:block;}
+    .n2-modele strong{color:var(--day-dark);}
+    .n2-critere{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;
+      padding:.6rem .85rem;font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-top:.4rem;display:none;line-height:1.6;}
+    .n2-critere.show{display:block;}
+
+    /* boutons */
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);}
+    .btn-ghost{background:transparent;color:var(--text);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);}
+
+    /* résultat niveau */
+    .niv-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;}
+    .niv-result.show{display:block;animation:fadeUp .3s ease both;}
+    .niv-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .niv-msg{font-size:.92rem;color:#9a8a8a;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9a8a8a;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a6a6a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8b8b8;margin-bottom:.9rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);font-size:1rem;}
+
+    /* animations */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:scale(1);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both, flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both, flashKo .5s ease both;}
+
+    @media(max-width:540px){
+      .ch-phases{flex-direction:column;}
+      .btn-row{flex-direction:column;}
+      .btn{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 2</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">L&rsquo;Architecte de phrases</span></h1>
+</header>
+
+<!-- BANNIÈRE CHANTIER -->
+<div class="chantier">
+  <div class="ch-titre">&#129521; Chantier syntaxique &mdash; Plan en cours</div>
+  <div class="ch-row">
+    <div class="ch-rang">
+      <div class="ch-rang-label">Phase active</div>
+      <div class="ch-rang-nom" id="ch-rang">Lecture des plans</div>
+    </div>
+    <div class="ch-score">
+      <div class="ch-score-num"><span id="ch-total">0</span>/14</div>
+      <div class="ch-score-label">Points</div>
+    </div>
+  </div>
+  <div class="ch-phases">
+    <div class="ch-phase actif" id="phase-1">
+      <div class="ch-phase-num">Phase 1 &mdash; Lecture</div>
+      <div class="ch-phase-score" id="ph1-score">0/10</div>
+    </div>
+    <div class="ch-phase" id="phase-2">
+      <div class="ch-phase-num">Phase 2 &mdash; Modification</div>
+      <div class="ch-phase-score" id="ph2-score">0/4</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 14 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-items">
+    <div class="ref-item"><strong>Phrase simple&nbsp;:</strong> une seule proposition (un seul verbe conjugu&eacute;).</div>
+    <div class="ref-item"><strong>Phrase complexe&nbsp;:</strong> plusieurs propositions (plusieurs verbes conjugu&eacute;s).</div>
+    <div class="ref-item"><strong>Juxtaposition&nbsp;:</strong> propositions s&eacute;par&eacute;es par un signe de ponctuation (virgule, point-virgule, deux-points). Pas de mot de liaison.</div>
+    <div class="ref-item"><strong>Coordination&nbsp;:</strong> propositions reli&eacute;es par une conjonction de coordination (mais, ou, et, donc, or, ni, car) ou un adverbe de liaison (puis, alors, ensuite&hellip;).</div>
+    <div class="ref-item"><strong>Subordination&nbsp;:</strong> proposition principale + proposition(s) subordonn&eacute;e(s) introduites par un subordonnant (que, qui, quand, parce que, bien que, si, dont&hellip;). La subordonn&eacute;e d&eacute;pend de la principale.</div>
+  </div>
+</div>
+
+<!-- NIVEAUX -->
+<div class="niveau-wrap">
+
+  <!-- N1 -->
+  <div class="niveau-block n1" id="bloc-n1">
+    <div class="niveau-header">
+      <div class="niv-pastille">1</div>
+      <div>
+        <div class="niv-titre">Lecture des plans</div>
+        <div class="niv-sous">Identifier et justifier &mdash; 5 questions &mdash; 10 points</div>
+      </div>
+      <div class="niv-badge" id="badge-n1">0/10</div>
+    </div>
+    <div id="cards-n1"></div>
+    <div class="niv-result" id="res-n1">
+      <div class="niv-score" id="score-n1-txt"></div>
+      <div class="niv-msg" id="msg-n1"></div>
+      <div id="btn-n1"></div>
+    </div>
+  </div>
+
+  <!-- N2 -->
+  <div class="niveau-block n2 niveau-locked" id="bloc-n2">
+    <div class="niveau-header">
+      <div class="niv-pastille">2</div>
+      <div>
+        <div class="niv-titre">Modification des plans</div>
+        <div class="niv-sous">Transformer les phrases &mdash; 4 questions &mdash; 4 points</div>
+      </div>
+      <div class="niv-badge" id="badge-n2">0/4</div>
+    </div>
+    <div class="lock-msg" id="lock-n2">&#128274;&nbsp;D&eacute;bloqu&eacute; apr&egrave;s 7/10 en Phase 1.</div>
+    <div id="cards-n2"></div>
+    <div class="niv-result" id="res-n2">
+      <div class="niv-score" id="score-n2-txt"></div>
+      <div class="niv-msg" id="msg-n2"></div>
+      <div id="btn-n2"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS GLOBAUX -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#129521; B&acirc;timent syntaxique valid&eacute;</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/14</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      Recommencer le chantier
+    </button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   DONNÉES N1
+══════════════════════════════════ */
+var N1 = [
+  {
+    id:'n1q1',
+    phrase:'La Fontaine \u00e9crivait des fables ; La Bruy\u00e8re peignait des portraits.',
+    type_label:'Type de relation\u00a0?',
+    type_opts:[
+      {t:'Coordination', ok:false},
+      {t:'Subordination', ok:false},
+      {t:'Juxtaposition', ok:true}
+    ],
+    indice_label:'Indice formel\u00a0?',
+    indice_opts:[
+      {t:'La conjonction \u00ab\u00a0et\u00a0\u00bb qui relie les deux propositions.', ok:false},
+      {t:'Le pronom relatif \u00ab\u00a0qui\u00a0\u00bb qui introduit la subordonn\u00e9e.', ok:false},
+      {t:'Le point-virgule qui s\u00e9pare les deux propositions sans mot de liaison.', ok:true}
+    ],
+    fb:'Le point-virgule est le signe de la juxtaposition\u00a0: il s\u00e9pare deux propositions sans aucun mot de liaison. Les propositions sont syntaxiquement ind\u00e9pendantes mais li\u00e9es par le sens.'
+  },
+  {
+    id:'n1q2',
+    phrase:'Boileau estimait que la clart\u00e9 \u00e9tait la premi\u00e8re vertu du style.',
+    type_label:'Type de relation\u00a0?',
+    type_opts:[
+      {t:'Juxtaposition', ok:false},
+      {t:'Coordination', ok:false},
+      {t:'Subordination', ok:true}
+    ],
+    indice_label:'Indice formel\u00a0?',
+    indice_opts:[
+      {t:'La virgule entre les propositions.', ok:false},
+      {t:'La conjonction \u00ab\u00a0et\u00a0\u00bb qui relie les deux propositions.', ok:false},
+      {t:'La conjonction de subordination \u00ab\u00a0que\u00a0\u00bb qui introduit la subordonn\u00e9e.', ok:true}
+    ],
+    fb:'\u00ab\u00a0Que\u00a0\u00bb est une conjonction de subordination. \u00ab\u00a0La clart\u00e9 \u00e9tait la premi\u00e8re vertu du style\u00a0\u00bb est une proposition subordonn\u00e9e conjonctive compl\u00e9tive, d\u00e9pendante de la principale \u00ab\u00a0Boileau estimait\u00a0\u00bb.'
+  },
+  {
+    id:'n1q3',
+    phrase:'Les com\u00e9dies de Moli\u00e8re divertissaient le public, elles instruisaient aussi les spectateurs.',
+    type_label:'Type de relation\u00a0?',
+    type_opts:[
+      {t:'Subordination', ok:false},
+      {t:'Juxtaposition', ok:true},
+      {t:'Coordination', ok:false}
+    ],
+    indice_label:'Indice formel\u00a0?',
+    indice_opts:[
+      {t:'La conjonction \u00ab\u00a0mais\u00a0\u00bb entre les deux propositions.', ok:false},
+      {t:'La virgule seule entre les deux propositions, sans mot de liaison.', ok:true},
+      {t:'Le pronom \u00ab\u00a0qui\u00a0\u00bb qui introduit la deuxi\u00e8me proposition.', ok:false}
+    ],
+    fb:'Il n\u2019y a pas de mot de liaison entre les deux propositions, seulement une virgule. C\u2019est la juxtaposition. La relation de sens (addition, concession) est implicite.'
+  },
+  {
+    id:'n1q4',
+    phrase:'Les r\u00e8gles classiques sont strictes mais elles permettent d\u2019atteindre la perfection formelle.',
+    type_label:'Type de relation\u00a0?',
+    type_opts:[
+      {t:'Juxtaposition', ok:false},
+      {t:'Coordination', ok:true},
+      {t:'Subordination', ok:false}
+    ],
+    indice_label:'Indice formel\u00a0?',
+    indice_opts:[
+      {t:'Le point-virgule entre les deux propositions.', ok:false},
+      {t:'La conjonction de coordination \u00ab\u00a0mais\u00a0\u00bb qui relie les deux propositions.', ok:true},
+      {t:'La conjonction de subordination \u00ab\u00a0bien que\u00a0\u00bb qui introduit la deuxi\u00e8me proposition.', ok:false}
+    ],
+    fb:'\u00ab\u00a0Mais\u00a0\u00bb est une conjonction de coordination qui exprime une opposition. Les deux propositions sont syntaxiquement ind\u00e9pendantes et reli\u00e9es par ce mot de liaison.'
+  },
+  {
+    id:'n1q5',
+    phrase:'Le lecteur qui s\u2019impr\u00e8gne des \u0153uvres classiques d\u00e9veloppe son sens du style.',
+    type_label:'Type de relation\u00a0?',
+    type_opts:[
+      {t:'Coordination', ok:false},
+      {t:'Juxtaposition', ok:false},
+      {t:'Subordination', ok:true}
+    ],
+    indice_label:'Indice formel\u00a0?',
+    indice_opts:[
+      {t:'La virgule entre les deux propositions.', ok:false},
+      {t:'La conjonction \u00ab\u00a0donc\u00a0\u00bb qui relie les propositions.', ok:false},
+      {t:'Le pronom relatif \u00ab\u00a0qui\u00a0\u00bb qui introduit la proposition subordonn\u00e9e.', ok:true}
+    ],
+    fb:'\u00ab\u00a0Qui\u00a0\u00bb est un pronom relatif qui introduit une proposition subordonn\u00e9e relative. \u00ab\u00a0Qui s\u2019impr\u00e8gne des \u0153uvres classiques\u00a0\u00bb d\u00e9pend du nom \u00ab\u00a0lecteur\u00a0\u00bb dans la proposition principale.'
+  }
+];
+
+/* ══════════════════════════════════
+   DONNÉES N2
+══════════════════════════════════ */
+var N2 = [
+  {
+    id:'n2q6',
+    depart:'Il lisait attentivement.\nIl prenait des notes.',
+    consigne:'R\u00e9unis ces deux phrases en une seule phrase complexe par juxtaposition.',
+    modele:'Il lisait attentivement ; il prenait des notes. (ou avec une virgule)',
+    critere:'Les deux propositions sont reli\u00e9es par un signe de ponctuation, sans mot de liaison.'
+  },
+  {
+    id:'n2q7',
+    depart:'Les auteurs classiques imitaient les Anciens.\nIls cherchaient la perfection.',
+    consigne:'R\u00e9unis ces deux phrases en une seule phrase par coordination. Choisis la conjonction la plus appropri\u00e9e.',
+    modele:'Les auteurs classiques imitaient les Anciens car ils cherchaient la perfection. (Accepter\u00a0: \u00ab\u00a0et\u00a0\u00bb, \u00ab\u00a0donc\u00a0\u00bb)',
+    critere:'Une conjonction de coordination relie les deux propositions.'
+  },
+  {
+    id:'n2q8',
+    depart:'La pi\u00e8ce \u00e9tait bien construite.\nElle respectait les trois unit\u00e9s.',
+    consigne:'Transforme ces deux phrases en une seule phrase par subordination, en exprimant la cause. Utilise un subordonnant appropri\u00e9.',
+    modele:'La pi\u00e8ce \u00e9tait bien construite parce qu\u2019elle respectait les trois unit\u00e9s.',
+    critere:'Un subordonnant de cause introduit la deuxi\u00e8me proposition qui d\u00e9pend de la premi\u00e8re.'
+  },
+  {
+    id:'n2q9',
+    depart:'Le critique appr\u00e9cia la pi\u00e8ce parce qu\u2019elle respectait les r\u00e8gles classiques.',
+    consigne:'Transforme cette phrase en une phrase par coordination en gardant le m\u00eame sens.',
+    modele:'Le critique appr\u00e9cia la pi\u00e8ce, car elle respectait les r\u00e8gles classiques. (Accepter\u00a0: \u00ab\u00a0en effet, elle\u2026\u00a0\u00bb)',
+    critere:'Le subordonnant est remplac\u00e9 par une conjonction de coordination ; les deux propositions deviennent syntaxiquement ind\u00e9pendantes.'
+  }
+];
+
+/* ══════════════════════════════════
+   ÉTAT
+══════════════════════════════════ */
+var n1Ok=0, n1Done=false, n1TypeOk={}, n1IndiceOk={};
+var n2Validated=0;
+var totalScore=0;
+
+function shuffle(a){ return a.slice().sort(function(){ return Math.random()-.5; }); }
+var L=['A','B','C'];
+function mkEl(t,c){ var e=document.createElement(t); if(c) e.className=c; return e; }
+
+/* ══════════════════════════════════
+   SON + ANIMATION
+══════════════════════════════════ */
+function jouerSon(ok){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(ok){
+      osc.frequency.setValueAtTime(520,ctx.currentTime);
+      osc.frequency.setValueAtTime(660,ctx.currentTime+.08);
+      osc.frequency.setValueAtTime(800,ctx.currentTime+.16);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.4);
+    } else {
+      osc.frequency.setValueAtTime(280,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+.35);
+    }
+  } catch(e){}
+}
+
+function animerCard(id, ok){
+  var card=document.getElementById('c-'+id);
+  if(!card) return;
+  card.classList.remove('anim-ok','anim-ko');
+  void card.offsetWidth;
+  card.classList.add(ok?'anim-ok':'anim-ko');
+}
+
+/* ══════════════════════════════════
+   MISE À JOUR GLOBALE
+══════════════════════════════════ */
+function majGlobal(){
+  document.getElementById('ch-total').textContent=totalScore;
+  document.getElementById('ph1-score').textContent=n1Ok+'/10';
+  document.getElementById('ph2-score').textContent=n2Validated+'/4';
+  var pct=Math.round(totalScore/14*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=totalScore+' / 14 points';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+}
+
+/* ══════════════════════════════════
+   BUILD N1 — Double QCM par question
+══════════════════════════════════ */
+function buildN1(){
+  var wrap=document.getElementById('cards-n1');
+  wrap.innerHTML=''; n1TypeOk={}; n1IndiceOk={}; n1Ok=0; n1Done=false;
+
+  shuffle(N1).forEach(function(q){
+    var card=mkEl('div','card'); card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label'); lbl.textContent='Phrase \u00e0 analyser'; card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase'); ph.textContent=q.phrase; card.appendChild(ph);
+
+    /* --- QCM Type --- */
+    var typeLbl=mkEl('div','q-sous-label'); typeLbl.textContent='1. '+q.type_label; card.appendChild(typeLbl);
+    var typeOpts=mkEl('div','opts'); typeOpts.dataset.qid=q.id; typeOpts.dataset.part='type';
+    shuffle(q.type_opts).forEach(function(opt,oi){
+      var btn=document.createElement('button'); btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){ selN1(q,btn,typeOpts,'type'); });
+      typeOpts.appendChild(btn);
+    });
+    card.appendChild(typeOpts);
+    var fbType=mkEl('div','fb'); fbType.id='fb-type-'+q.id; card.appendChild(fbType);
+
+    /* --- QCM Indice --- */
+    var indiceLbl=mkEl('div','q-sous-label'); indiceLbl.textContent='2. '+q.indice_label; card.appendChild(indiceLbl);
+    var indiceOpts=mkEl('div','opts'); indiceOpts.dataset.qid=q.id; indiceOpts.dataset.part='indice';
+    shuffle(q.indice_opts).forEach(function(opt,oi){
+      var btn=document.createElement('button'); btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){ selN1(q,btn,indiceOpts,'indice'); });
+      indiceOpts.appendChild(btn);
+    });
+    card.appendChild(indiceOpts);
+    var fbIndice=mkEl('div','fb'); fbIndice.id='fb-indice-'+q.id; card.appendChild(fbIndice);
+
+    wrap.appendChild(card);
+  });
+}
+
+function selN1(q, btn, optsEl, part){
+  var done = part==='type' ? n1TypeOk[q.id] : n1IndiceOk[q.id];
+  if(done !== undefined) return;
+  var ok=btn.dataset.ok==='1';
+  if(part==='type') n1TypeOk[q.id]=ok;
+  else n1IndiceOk[q.id]=ok;
+
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1') b.classList.add('ok-opt');
+    else if(b===btn && !ok) b.classList.add('ko-opt');
+  });
+
+  jouerSon(ok);
+  animerCard(q.id, ok);
+
+  if(!ok){
+    var fb=document.getElementById('fb-'+part+'-'+q.id);
+    fb.className='fb show ko-fb'; fb.textContent=q.fb;
+  }
+
+  if(ok){ totalScore++; n1Ok++; }
+  document.getElementById('badge-n1').textContent=n1Ok+'/10';
+  majGlobal();
+
+  /* Vérifier si toutes les 10 réponses sont faites */
+  var typeDone=Object.keys(n1TypeOk).length;
+  var indiceDone=Object.keys(n1IndiceOk).length;
+  if(typeDone===N1.length && indiceDone===N1.length && !n1Done){
+    n1Done=true;
+    showResN1();
+  }
+}
+
+function showResN1(){
+  var r=document.getElementById('res-n1'); r.classList.add('show');
+  document.getElementById('score-n1-txt').textContent=n1Ok+' / 10';
+  var valid=n1Ok>=7;
+  document.getElementById('msg-n1').textContent=valid?
+    '\u2713 Phase 1 valid\u00e9e \u2014 Phase 2 d\u00e9bloqu\u00e9e.':
+    'Score insuffisant (min. 7/10). R\u00e9essaie\u00a0!';
+  document.getElementById('btn-n1').innerHTML=valid?
+    '<button class="btn btn-primary" onclick="debN2()">Phase 2 \u2192</button>':
+    '<button class="btn btn-ghost" onclick="resetN1()">\u21ba R\u00e9essayer</button>';
+  document.getElementById('phase-1').classList.add(valid?'valide':'echec');
+}
+
+function debN2(){
+  var b=document.getElementById('bloc-n2');
+  b.classList.remove('niveau-locked');
+  document.getElementById('lock-n2').style.display='none';
+  buildN2();
+  document.getElementById('ch-rang').textContent='Modification des plans';
+  document.getElementById('phase-2').classList.add('actif');
+}
+
+function resetN1(){
+  totalScore=Math.max(0,totalScore-n1Ok);
+  n1Ok=0; n1Done=false; n1TypeOk={}; n1IndiceOk={};
+  document.getElementById('res-n1').classList.remove('show');
+  document.getElementById('badge-n1').textContent='0/10';
+  document.getElementById('phase-1').classList.remove('valide','echec');
+  buildN1(); majGlobal();
+}
+
+/* ══════════════════════════════════
+   BUILD N2 — Saisie guidée
+══════════════════════════════════ */
+function buildN2(){
+  var wrap=document.getElementById('cards-n2');
+  wrap.innerHTML=''; n2Validated=0;
+  N2.forEach(function(q,i){
+    var card=mkEl('div','card'); card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label'); lbl.textContent='Transformation '+(i+1)+' / 4'; card.appendChild(lbl);
+    var dep=mkEl('div','n2-depart');
+    dep.innerHTML=q.depart.replace(/\n/g,'<br>'); card.appendChild(dep);
+    var cs=mkEl('div','n2-consigne'); cs.textContent=q.consigne; card.appendChild(cs);
+    var inp=document.createElement('textarea'); inp.className='n2-input';
+    inp.placeholder='Tape ta r\u00e9ponse ici\u2026';
+    inp.id='inp-'+q.id; card.appendChild(inp);
+    var mod=mkEl('div','n2-modele'); mod.id='mod-'+q.id;
+    mod.innerHTML='<strong>R\u00e9ponse mod\u00e8le\u00a0:</strong><br>'+q.modele;
+    card.appendChild(mod);
+    var crit=mkEl('div','n2-critere'); crit.id='crit-'+q.id;
+    crit.innerHTML='<strong>Crit\u00e8re\u00a0:</strong> '+q.critere;
+    card.appendChild(crit);
+    var fb=mkEl('div','fb'); fb.id='fb-'+q.id; card.appendChild(fb);
+    var brow=mkEl('div','btn-row');
+    var bv=document.createElement('button'); bv.className='btn btn-primary';
+    bv.innerHTML='\u2713\u00a0Valider'; bv.id='bv-'+q.id;
+    bv.addEventListener('click',function(){ verifN2(q); });
+    brow.appendChild(bv); card.appendChild(brow);
+    wrap.appendChild(card);
+  });
+}
+
+function verifN2(q){
+  var inp=document.getElementById('inp-'+q.id);
+  if(!inp.value.trim()){
+    var fb=document.getElementById('fb-'+q.id);
+    fb.className='fb show ko-fb'; fb.textContent='R\u00e9dige ta r\u00e9ponse avant de valider.';
+    return;
+  }
+  var bv=document.getElementById('bv-'+q.id);
+  if(bv.disabled) return;
+  bv.disabled=true; inp.disabled=true;
+  document.getElementById('mod-'+q.id).classList.add('show');
+  document.getElementById('crit-'+q.id).classList.add('show');
+  jouerSon(true); animerCard(q.id,true);
+  totalScore++; n2Validated++;
+  document.getElementById('badge-n2').textContent=n2Validated+'/4';
+  majGlobal();
+  if(n2Validated===N2.length) showResN2();
+}
+
+function showResN2(){
+  var r=document.getElementById('res-n2'); r.classList.add('show');
+  document.getElementById('score-n2-txt').textContent=n2Validated+' / 4';
+  document.getElementById('msg-n2').textContent='\u2713 Phase 2 termin\u00e9e \u2014 B\u00e2timent valid\u00e9\u00a0!';
+  document.getElementById('btn-n2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir mon bilan \u2192</button>';
+  document.getElementById('phase-2').classList.add('valide');
+}
+
+/* ══════════════════════════════════
+   VERDICT
+══════════════════════════════════ */
+function afficherVerdict(){
+  var total=totalScore;
+  var r=document.getElementById('results-global'); r.classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=13?5:total>=10?4:total>=7?3:total>=4?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge=document.getElementById('res-badge');
+  badge.innerHTML=total>=10?
+    '<div class="badge-ok">\u2713 Architecte de phrases confirm\u00e9\u00a0!</div>':
+    '<div class="badge-ko">Relis le r\u00e9f\u00e9rentiel et recommence.</div>';
+  var msgs=[
+    '\u00c0 retravailler.','\u00c0 retravailler.','\u00c0 retravailler.','\u00c0 retravailler.',
+    'Courage \u2014 tu progresses\u00a0!','Courage \u2014 tu progresses\u00a0!',
+    'Pas mal \u2014 continue\u00a0!','Pas mal \u2014 continue\u00a0!',
+    'Bien jou\u00e9\u00a0!','Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!','Tr\u00e8s bien\u00a0!',
+    'Excellent\u00a0!','Parfait \u2014 sans faute\u00a0!','Parfait \u2014 sans faute\u00a0!'
+  ];
+  document.getElementById('res-msg').textContent=msgs[Math.min(total,msgs.length-1)];
+}
+
+/* ══════════════════════════════════
+   RESET
+══════════════════════════════════ */
+function resetTout(){
+  totalScore=0; n1Ok=0; n1Done=false; n1TypeOk={}; n1IndiceOk={};
+  n2Validated=0;
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-n1').classList.remove('show');
+  document.getElementById('res-n2').classList.remove('show');
+  document.getElementById('bloc-n2').classList.add('niveau-locked');
+  document.getElementById('lock-n2').style.display='';
+  document.getElementById('badge-n1').textContent='0/10';
+  document.getElementById('badge-n2').textContent='0/4';
+  document.getElementById('ch-rang').textContent='Lecture des plans';
+  ['phase-1','phase-2'].forEach(function(id){
+    var e=document.getElementById(id);
+    e.classList.remove('valide','echec','actif');
+  });
+  document.getElementById('phase-1').classList.add('actif');
+  document.getElementById('cards-n2').innerHTML='';
+  buildN1(); majGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── INIT ─── */
+buildN1();
+majGlobal();
+</script>
+</body>
+</html>
