@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Rapport Final d'Analyse – L'Avare – 3e S2 J1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.36);--bg:#fffdf7;
+  --vert-ok:#22c55e;--vert-bg:#e7faec;
+  --rouge-err:#ef4444;--rouge-bg:#fdeaea;
+  --acier:#6b6b58;--acier-clair:#f5f3e8;--acier-bord:#e0dcc8;
+  --txt:#27231a;--gris:#8b8b72;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+@keyframes shake{10%,90%{transform:translateX(-3px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-4px)}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.4) rotate(-14deg)}55%{opacity:1;transform:scale(1.15) rotate(-14deg)}100%{opacity:1;transform:scale(1) rotate(-9deg)}}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}100%{box-shadow:0 0 0 12px rgba(34,197,94,0)}}
+@keyframes glowErr{0%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}100%{box-shadow:0 0 0 12px rgba(239,68,68,0)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes voyantOn{0%,100%{filter:drop-shadow(0 0 4px #f5a623)}50%{filter:drop-shadow(0 0 9px #f5c518)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-60px) scale(1)}}
+
+/* BULLES */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.38;}
+.bubble.b1{width:130px;height:130px;background:var(--jour);top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:#f5a623;bottom:30px;left:-26px;}
+.bubble.b3{width:74px;height:74px;background:#8dc63f;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:#f9c0bb;top:26%;left:-32px;}
+
+/* ════ PHASE 1 ════ */
+.phase1{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:radial-gradient(ellipse at 60% 40%,#2a1f14 0%,#1a1208 60%,#0e0b05 100%);}
+.p1-inner{position:relative;z-index:2;max-width:720px;width:100%;animation:fadeUp .6s ease;}
+.p1-badge{text-align:center;margin-bottom:16px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:var(--jour-fonce);font-family:'Orbitron',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 15px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.brief-card{background:rgba(20,14,6,.94);border:1.5px solid rgba(245,166,35,.35);border-radius:18px;padding:30px 28px 34px;box-shadow:0 0 60px rgba(245,166,35,.08),0 20px 60px rgba(0,0,0,.8);position:relative;overflow:hidden;}
+.brief-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,var(--jour),transparent);}
+.svgdecor{width:100%;max-width:540px;display:block;margin:0 auto 20px;border-radius:10px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.5);}
+.brief-semaine{font-family:'Orbitron',sans-serif;font-size:.88rem;letter-spacing:2px;color:rgba(245,166,35,.55);text-transform:uppercase;margin-bottom:10px;text-align:center;}
+.brief-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5vw,2.1rem);color:#f0e4cc;line-height:1.18;margin-bottom:8px;text-align:center;}
+.brief-titre .accent{color:var(--jour);}
+.brief-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgba(245,166,35,.6);letter-spacing:1.5px;margin-bottom:20px;text-transform:uppercase;text-align:center;}
+.brief-texte{font-size:clamp(.92rem,2.8vw,1.02rem);color:rgba(230,220,200,.88);line-height:1.85;margin-bottom:18px;border-left:3px solid rgba(245,166,35,.5);padding-left:14px;}
+.brief-texte b{color:var(--jour);}
+.brief-mission{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:22px;}
+@media(max-width:560px){.brief-mission{grid-template-columns:1fr 1fr;}}
+.bm-card{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:11px;padding:13px 10px;text-align:center;}
+.bm-num{width:30px;height:30px;margin:0 auto 7px;border-radius:50%;background:rgba(245,166,35,.18);color:var(--jour);font-family:'Orbitron',sans-serif;font-weight:900;font-size:.85rem;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(245,166,35,.35);}
+.bm-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.3px;color:var(--jour);text-transform:uppercase;margin-bottom:3px;line-height:1.3;}
+.bm-desc{font-size:.72rem;color:rgba(230,220,200,.7);line-height:1.4;}
+.btn-commencer{display:block;width:100%;font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.95rem,3vw,1.15rem);letter-spacing:2px;padding:20px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;min-height:60px;transition:all .2s;text-transform:uppercase;box-shadow:0 6px 20px var(--day-glow);animation:pulse 2.4s ease-in-out infinite;}
+.btn-commencer:hover{transform:translateY(-3px);}
+
+/* ════ PHASE 2 ════ */
+.phase2{display:none;min-height:100vh;}
+.phase2.active{display:block;animation:fadeUp .5s ease;}
+.p2-grid{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:18px;align-items:start;}
+@media(max-width:880px){.p2-grid{grid-template-columns:1fr;}}
+@media(min-width:881px){.col-rapport{position:sticky;top:14px;}}
+.col-rapport{display:flex;flex-direction:column;gap:12px;}
+.col-contenu{min-width:0;}
+.p2-wrap{max-width:1300px;margin:0 auto;padding:16px 12px 60px;position:relative;z-index:2;}
+.p2-header{text-align:center;margin-bottom:14px;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.88rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin:10px 0 6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#5a3000;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.72rem);letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);}
+
+/* RAPPORT SVG (colonne gauche) */
+.rapport-card{background:linear-gradient(145deg,#1a1208,#0e0b05);border:1px solid rgba(245,166,35,.3);border-radius:14px;padding:12px;box-shadow:0 8px 28px rgba(0,0,0,.3);}
+.rapport-label{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:1.5px;color:var(--jour);text-transform:uppercase;margin-bottom:8px;text-align:center;}
+.rapport-svg{width:100%;display:block;border-radius:8px;overflow:hidden;}
+
+/* Console score */
+.console{background:#fff;border:1px solid var(--acier-bord);border-radius:14px;padding:12px 16px;box-shadow:0 3px 14px rgba(107,107,88,.07);}
+.console-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+.score-geant{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--jour-fonce);line-height:1;}
+.score-geant small{font-size:.38em;color:var(--gris);font-weight:700;}
+.score-detail{display:flex;gap:8px;flex-wrap:wrap;}
+.sd-item{font-family:'JetBrains Mono',monospace;font-size:.66rem;background:var(--acier-clair);border:1px solid var(--acier-bord);border-radius:8px;padding:5px 9px;color:var(--acier);}
+.sd-item b{color:var(--jour-fonce);font-size:.95rem;}
+.prog-bg{background:var(--acier-clair);border:1px solid var(--acier-bord);border-radius:99px;height:10px;overflow:hidden;}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+
+/* TEXTE + CONTEXTE permanent */
+.texte-card{background:linear-gradient(160deg,#fdf8ee,#f5ecd8);border:1px solid #d8c898;border-radius:13px;padding:15px 16px;box-shadow:0 2px 12px rgba(120,90,30,.1);}
+.texte-label{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:#8a6020;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.texte-label::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--jour);display:block;}
+.texte-corps{font-family:'IM Fell English',serif;font-size:clamp(.95rem,2.7vw,1.05rem);line-height:2;color:#2a1a04;}
+.perso{font-weight:700;color:#7a4010;}
+.didascape{font-style:italic;color:#8a6030;font-size:.9em;}
+.texte-sep{border:none;border-top:1px solid #d8c898;margin:10px 0;}
+.contexte-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#8a6020;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.contexte-corps{font-size:.84rem;line-height:1.7;color:#4a3010;}
+.contexte-corps b{color:#7a4010;}
+
+/* RÉFÉRENTIEL */
+.ref-card{background:#fff;border:1px solid var(--acier-bord);border-left:4px solid var(--jour);border-radius:12px;overflow:hidden;}
+.ref-body{padding:11px 14px;}
+.ref-toggle{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1px;color:var(--jour-fonce);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;width:100%;justify-content:space-between;text-transform:uppercase;}
+.ref-content.collapsed{display:none;}
+.ref-item{font-size:.82rem;line-height:1.58;color:var(--txt);padding:.6rem .85rem;background:var(--jour-clair);border-radius:8px;border-left:3px solid var(--jour);margin-top:7px;}
+.ref-item b{color:var(--jour-fonce);}
+
+/* QUESTION */
+.q-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(107,107,88,.08);margin-bottom:14px;animation:fadeUp .4s ease;}
+.q-stripe{height:5px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f5d080,var(--jour-fonce));background-size:300%;animation:slide 4s linear infinite;}
+.q-body{padding:16px;}
+.q-partie{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:1.5px;color:#fff;background:var(--jour-fonce);padding:5px 12px;border-radius:14px;display:inline-block;margin-bottom:10px;}
+.q-titre-sec{font-family:'Orbitron',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.5px;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid var(--jour-pale);}
+.q-texte{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;line-height:1.55;margin-bottom:14px;color:var(--txt);}
+.opts{display:grid;grid-template-columns:1fr;gap:8px;}
+.opt{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--acier-bord);border-radius:10px;padding:12px 14px;font-size:clamp(.95rem,2.6vw,1.05rem);text-align:left;cursor:pointer;transition:all .15s;line-height:1.5;width:100%;font-family:inherit;min-height:50px;}
+.opt:hover:not([disabled]){background:var(--jour-clair);border-color:var(--jour);transform:translateY(-1px);}
+.opt[disabled]{cursor:default;}
+.opt .lettre{flex-shrink:0;width:27px;height:27px;border-radius:50%;background:var(--jour-pale);color:var(--jour-fonce);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.opt.correct{background:var(--vert-bg);border-color:var(--vert-ok);animation:glowOk .6s ease;}
+.opt.correct .lettre{background:var(--vert-ok);color:#fff;}
+.opt.wrong{background:var(--rouge-bg);border-color:var(--rouge-err);animation:shake .4s,glowErr .6s ease;}
+.opt.wrong .lettre{background:var(--rouge-err);color:#fff;}
+.q-fb{display:none;padding:10px 13px;border-radius:8px;font-size:clamp(.9rem,2.5vw,1rem);line-height:1.65;margin-top:10px;background:var(--rouge-bg);border-left:3px solid var(--rouge-err);color:#a33;}
+.q-fb.show{display:block;animation:fadeUp .3s ease;}
+.sous-sep{border:none;border-top:1.5px dashed var(--acier-bord);margin:18px 0;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.btn-valider{flex:2;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;min-height:2.8rem;box-shadow:0 3px 12px var(--day-glow);transition:transform .12s;}
+.btn-valider:hover{transform:translateY(-2px);}
+.btn-valider:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-retry{flex:1;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:2px solid var(--acier-bord);border-radius:10px;background:#fff;color:var(--acier);cursor:pointer;min-height:2.8rem;transition:transform .12s;}
+.btn-retry:hover{transform:translateY(-2px);background:var(--acier-clair);}
+.btn-next{display:none;width:100%;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.9rem,2.6vw,1rem);letter-spacing:1px;padding:15px;border:none;border-radius:10px;background:#3fa66f;color:#fff;cursor:pointer;min-height:2.8rem;margin-top:12px;box-shadow:0 4px 14px rgba(63,166,111,.3);transition:transform .12s;}
+.btn-next.visible{display:block;animation:fadeUp .3s ease;}
+.btn-next:hover{transform:translateY(-2px);}
+
+/* VERDICT */
+.verdict{display:none;margin-top:18px;}
+.verdict.show{display:block;animation:fadeUp .5s ease;}
+.verdict-card{background:#fff;border:1px solid var(--acier-bord);border-radius:20px;padding:30px 22px;box-shadow:0 16px 44px rgba(107,107,88,.12);text-align:center;position:relative;overflow:hidden;}
+.verdict-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),var(--jour-pale),var(--jour));background-size:300%;animation:slide 5s linear infinite;}
+.verdict-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.particle{position:absolute;width:7px;height:7px;border-radius:50%;opacity:0;}
+.verdict-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.9rem,3.8vw,1.35rem);letter-spacing:1.5px;padding:11px 24px;border-radius:12px;border:3.5px solid;display:inline-block;margin-bottom:14px;transform:rotate(-4deg);animation:stampPop .6s cubic-bezier(.3,1.6,.5,1);}
+.verdict-tampon.ok{color:#3fa66f;border-color:#3fa66f;}
+.verdict-tampon.moyen{color:#e8902a;border-color:#e8902a;}
+.verdict-tampon.ko{color:var(--rouge-err);border-color:var(--rouge-err);}
+.verdict-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);line-height:1;color:var(--jour-fonce);margin:.4rem 0 .2rem;}
+.verdict-et{font-size:1.9rem;letter-spacing:.12em;margin:.3rem 0 .8rem;}
+.verdict-msg{font-size:clamp(.92rem,2.6vw,1.05rem);line-height:1.8;color:var(--txt);margin-bottom:16px;max-width:560px;margin-left:auto;margin-right:auto;}
+.recap-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;text-align:left;}
+@media(max-width:580px){.recap-grid{grid-template-columns:1fr;}}
+.recap-item{font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:8px 12px;border-radius:8px;line-height:1.5;}
+.recap-ok{background:var(--vert-bg);color:#157f3a;}
+.recap-ko{background:var(--rouge-bg);color:#c0392b;}
+.btn-rejouer{font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);padding:13px 26px;border:none;border-radius:10px;background:var(--jour-fonce);color:#fff;cursor:pointer;min-height:2.8rem;}
+.btn-rejouer:hover{background:var(--jour);}
+#flashStar{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:1500;pointer-events:none;opacity:0;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+
+<!-- ════ PHASE 1 ════ -->
+<div id="phase1" class="phase1">
+  <div class="p1-inner">
+    <div class="p1-badge">
+      <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 3ÈME</div>
+    </div>
+    <div class="brief-card">
+      <!-- DÉCOR SVG : bureau d'expert -->
+      <svg class="svgdecor" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bois1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a1f14"/><stop offset="100%" stop-color="#1a1208"/></linearGradient>
+          <linearGradient id="sm1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2d4a2d"/><stop offset="100%" stop-color="#152516"/></linearGradient>
+          <linearGradient id="rp1" x1="0" y1="0" x2="0.05" y2="1"><stop offset="0%" stop-color="#fffef9"/><stop offset="100%" stop-color="#f5edd8"/></linearGradient>
+          <linearGradient id="or1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0c840"/><stop offset="100%" stop-color="#a07810"/></linearGradient>
+          <filter id="sh1"><feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-opacity=".4"/></filter>
+          <filter id="sh2"><feDropShadow dx="1" dy="1.5" stdDeviation="1.5" flood-opacity=".25"/></filter>
+        </defs>
+        <rect width="520" height="220" fill="url(#bois1)"/>
+        <line x1="0" y1="45" x2="520" y2="43" stroke="#1e1508" stroke-width="6" opacity=".25"/>
+        <line x1="0" y1="130" x2="520" y2="132" stroke="#1e1508" stroke-width="4" opacity=".2"/>
+        <line x1="0" y1="195" x2="520" y2="197" stroke="#1e1508" stroke-width="5" opacity=".18"/>
+        <!-- Sous-main -->
+        <rect x="18" y="16" width="350" height="195" rx="4" fill="url(#sm1)" filter="url(#sh1)"/>
+        <rect x="18" y="16" width="350" height="195" rx="4" fill="none" stroke="url(#or1)" stroke-width="2"/>
+        <rect x="24" y="22" width="338" height="183" rx="3" fill="none" stroke="url(#or1)" stroke-width=".7" opacity=".5"/>
+        <!-- Rapport principal -->
+        <g transform="translate(38,28) rotate(-1.2,155,90)" filter="url(#sh2)">
+          <rect width="295" height="168" rx="2" fill="url(#rp1)"/>
+          <rect x="0" y="0" width="295" height="5" rx="2" fill="#c47a10"/>
+          <text x="148" y="22" text-anchor="middle" font-family="Georgia,serif" font-size="8.5" font-weight="bold" fill="#3a2010" letter-spacing="1.5">RAPPORT D'ANALYSE LITTÉRAIRE</text>
+          <text x="148" y="32" text-anchor="middle" font-family="Georgia,serif" font-size="6" fill="#7a5030" letter-spacing="1">L'Avare — Molière — Acte I, scène 3</text>
+          <line x1="18" y1="38" x2="276" y2="38" stroke="#c47a10" stroke-width=".8"/>
+          <text x="18" y="53" font-family="Georgia,serif" font-size="5.5" font-weight="bold" fill="#5a3010" letter-spacing=".8">§ I. PROCÉDÉS COMIQUES</text>
+          <rect x="18" y="57" width="140" height="1.2" fill="#d4a846" opacity=".7"/>
+          <rect x="18" y="63" width="255" height="1.8" rx=".9" fill="#c8a878" opacity=".35"/>
+          <rect x="18" y="69" width="230" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="18" y="75" width="242" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="90" y="63" width="38" height="1.8" rx=".9" fill="#c47a10" opacity=".45"/>
+          <text x="18" y="92" font-family="Georgia,serif" font-size="5.5" font-weight="bold" fill="#5a3010" letter-spacing=".8">§ II. TRIPLE VISÉE</text>
+          <rect x="18" y="96" width="110" height="1.2" fill="#d4a846" opacity=".7"/>
+          <rect x="18" y="102" width="248" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="18" y="108" width="260" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="18" y="114" width="195" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="50" y="102" width="52" height="1.8" rx=".9" fill="#c47a10" opacity=".4"/>
+          <text x="18" y="130" font-family="Georgia,serif" font-size="5.5" font-weight="bold" fill="#5a3010" letter-spacing=".8">§ III. SENS GLOBAL</text>
+          <rect x="18" y="134" width="115" height="1.2" fill="#d4a846" opacity=".7"/>
+          <rect x="18" y="140" width="252" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="18" y="146" width="238" height="1.8" rx=".9" fill="#c8a878" opacity=".3"/>
+          <rect x="18" y="152" width="160" height="1.8" rx=".9" fill="#c8a878" opacity=".25"/>
+          <!-- Tampon -->
+          <g transform="translate(50,138) rotate(-16)">
+            <ellipse cx="0" cy="0" rx="35" ry="23" fill="#c0392b" opacity=".78"/>
+            <ellipse cx="0" cy="0" rx="35" ry="23" fill="none" stroke="#fff" stroke-width="1.1" opacity=".5"/>
+            <ellipse cx="0" cy="0" rx="29" ry="17" fill="none" stroke="#fff" stroke-width=".6" opacity=".4"/>
+            <text x="0" y="-6" text-anchor="middle" font-family="Courier New,monospace" font-size="5.5" font-weight="bold" fill="#fff" letter-spacing="1">ANALYSE</text>
+            <text x="0" y="2" text-anchor="middle" font-family="Courier New,monospace" font-size="5" fill="#fff">VALIDÉE</text>
+            <text x="0" y="10" text-anchor="middle" font-family="Courier New,monospace" font-size="4.5" fill="#fff" opacity=".8">★ ★ ★ ★ ★</text>
+          </g>
+          <!-- Ligne signature -->
+          <line x1="165" y1="158" x2="277" y2="158" stroke="#8a6030" stroke-width=".8"/>
+          <text x="221" y="164" text-anchor="middle" font-family="Georgia,serif" font-size="5" fill="#8a6030" font-style="italic">Signature de l'analyste</text>
+        </g>
+        <!-- Plume -->
+        <g transform="translate(330,28) rotate(30)">
+          <path d="M0,0 L6,0 L8,140 L3,146 L-2,140 Z" fill="#1a1a2e"/>
+          <path d="M1,0 L3,0 L4,140 L3,146 L2,140 Z" fill="#2d2d4a" opacity=".5"/>
+          <rect x="-2" y="112" width="10" height="7" rx="1" fill="url(#or1)"/>
+          <path d="-2,140 L3,155 L8,140 Z" fill="#b0b0b0"/>
+          <path d="M1,140 L3,155 L5,140 Z" fill="#e0e0e0"/>
+          <rect x="4.5" y="8" width="2" height="62" rx="1" fill="url(#or1)"/>
+          <ellipse cx="5.5" cy="8" rx="3" ry="3" fill="url(#or1)"/>
+        </g>
+        <!-- Règle -->
+        <rect x="392" y="38" width="11" height="170" rx="2" fill="#e8d4a0" stroke="#c4a860" stroke-width=".8" opacity=".85"/>
+        <g stroke="#6a5020" stroke-width=".6" opacity=".7">
+          <line x1="392" y1="58" x2="398" y2="58"/>
+          <line x1="392" y1="76" x2="398" y2="76"/>
+          <line x1="392" y1="94" x2="398" y2="94"/>
+          <line x1="392" y1="112" x2="398" y2="112"/>
+          <line x1="392" y1="130" x2="398" y2="130"/>
+          <line x1="392" y1="148" x2="398" y2="148"/>
+          <line x1="392" y1="166" x2="398" y2="166"/>
+          <line x1="392" y1="184" x2="398" y2="184"/>
+        </g>
+        <!-- Pièces -->
+        <g transform="translate(420,120)">
+          <ellipse cx="18" cy="6" rx="14" ry="4.5" fill="#7a5010" opacity=".6"/>
+          <ellipse cx="17" cy="3" rx="14" ry="4.5" fill="#b88020"/>
+          <ellipse cx="17" cy="0" rx="14" ry="4.5" fill="#d4a030"/>
+          <ellipse cx="17" cy="0" rx="14" ry="4.5" fill="none" stroke="#f0c040" stroke-width=".5"/>
+          <ellipse cx="38" cy="12" rx="11" ry="3.8" fill="#7a5010" opacity=".5"/>
+          <ellipse cx="37" cy="10" rx="11" ry="3.8" fill="#b88020"/>
+          <ellipse cx="37" cy="7" rx="11" ry="3.8" fill="#d4a030"/>
+        </g>
+        <!-- Voyants 5 questions -->
+        <g transform="translate(425,28)">
+          <text x="28" y="-2" text-anchor="middle" font-family="Courier New,monospace" font-size="5" fill="#d4a846">QUESTIONS</text>
+          <circle id="sv0" cx="8" cy="10" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1.1"/>
+          <circle id="sv1" cx="22" cy="10" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1.1"/>
+          <circle id="sv2" cx="36" cy="10" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1.1"/>
+          <circle id="sv3" cx="15" cy="24" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1.1"/>
+          <circle id="sv4" cx="29" cy="24" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1.1"/>
+          <text id="svtxt" x="28" y="38" text-anchor="middle" font-family="Courier New,monospace" font-size="4.8" fill="#8a6030">0 / 5</text>
+        </g>
+        <!-- Lunettes -->
+        <g transform="translate(195,183)">
+          <path d="M0,0 Q-7,-16 -25,-9 Q-42,-2 -37,12 Q-32,24 -17,20 Q-2,16 0,6 Z" fill="none" stroke="#4a3010" stroke-width="2"/>
+          <path d="M0,0 Q7,-16 25,-9 Q42,-2 37,12 Q32,24 17,20 Q2,16 0,6 Z" fill="none" stroke="#4a3010" stroke-width="2"/>
+          <path d="M-37,12 Q-48,9 -55,11" fill="none" stroke="#4a3010" stroke-width="1.8"/>
+          <path d="M37,12 Q48,9 55,11" fill="none" stroke="#4a3010" stroke-width="1.8"/>
+        </g>
+      </svg>
+      <div class="brief-semaine">Semaine 2 &mdash; Jour 1 &mdash; Épreuve finale</div>
+      <h1 class="brief-titre">Le Rapport Final <span class="accent">d'Analyse</span></h1>
+      <div class="brief-sous">Section III — Interprétation littéraire</div>
+      <div class="brief-texte">
+        Tu rédiges la <b>dernière section de ton rapport d'analyste</b>&nbsp;: l'interprétation. C'est l'épreuve la plus exigeante&nbsp;: il ne s'agit plus de comprendre ce qui est dit, mais d'interpréter <b>pourquoi c'est dit ainsi</b> et ce que cela produit sur le spectateur. 5 questions à valider pour soumettre ton rapport au jury.
+      </div>
+      <div class="brief-mission">
+        <div class="bm-card"><div class="bm-num">5</div><div class="bm-titre">Questions</div><div class="bm-desc">Doubles questions A+B.</div></div>
+        <div class="bm-card"><div class="bm-num">10</div><div class="bm-titre">Points</div><div class="bm-desc">2 pts par double question.</div></div>
+        <div class="bm-card"><div class="bm-num">⚖</div><div class="bm-titre">Jury</div><div class="bm-desc">Rapport soumis au jury final.</div></div>
+      </div>
+      <button class="btn-commencer" onclick="commencer()">SOUMETTRE AU JURY &#9656;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PHASE 2 ════ -->
+<div id="phase2" class="phase2">
+  <div class="p2-wrap">
+    <div class="p2-header">
+      <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 3ÈME</div>
+      <div class="semaine">Semaine 2 &mdash; Jour 1</div>
+      <h1 class="titre">Le Rapport Final <span class="accent">d'Analyse</span></h1>
+      <div class="badge-theme">Interprétation &middot; Molière &middot; /5</div>
+    </div>
+
+    <div class="p2-grid">
+      <!-- COLONNE GAUCHE -->
+      <div class="col-rapport">
+        <!-- Mini SVG rapport -->
+        <div class="rapport-card">
+          <div class="rapport-label">Rapport en cours &mdash; <span id="rapportCount">0</span>/5 sections validées</div>
+          <svg class="rapport-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bois2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a1f14"/><stop offset="100%" stop-color="#1a1208"/></linearGradient>
+              <linearGradient id="sm2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2d4a2d"/><stop offset="100%" stop-color="#152516"/></linearGradient>
+              <linearGradient id="rp2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fffef9"/><stop offset="100%" stop-color="#f5edd8"/></linearGradient>
+              <linearGradient id="or2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0c840"/><stop offset="100%" stop-color="#a07810"/></linearGradient>
+              <filter id="sh3"><feDropShadow dx="1.5" dy="2" stdDeviation="2" flood-opacity=".35"/></filter>
+            </defs>
+            <rect width="280" height="200" fill="url(#bois2)"/>
+            <rect x="10" y="10" width="200" height="178" rx="4" fill="url(#sm2)" filter="url(#sh3)"/>
+            <rect x="10" y="10" width="200" height="178" rx="4" fill="none" stroke="url(#or2)" stroke-width="1.5"/>
+            <g transform="translate(22,18)" filter="url(#sh3)">
+              <rect width="176" height="162" rx="2" fill="url(#rp2)"/>
+              <rect x="0" y="0" width="176" height="4" rx="2" fill="#c47a10"/>
+              <text x="88" y="18" text-anchor="middle" font-family="Georgia,serif" font-size="7" font-weight="bold" fill="#3a2010">RAPPORT D'ANALYSE</text>
+              <text x="88" y="27" text-anchor="middle" font-family="Georgia,serif" font-size="5" fill="#7a5030">L'Avare — Molière</text>
+              <line x1="10" y1="32" x2="165" y2="32" stroke="#c47a10" stroke-width=".7"/>
+              <!-- 5 sections du rapport = 5 lignes qui se remplissent -->
+              <g id="sections">
+                <g id="sec0"><rect x="10" y="40" width="154" height="2" rx="1" fill="#e8ddc8" opacity=".5"/><rect x="10" y="40" width="0" height="2" rx="1" fill="#22c55e" id="fill0"/></g>
+                <g id="sec1"><rect x="10" y="56" width="154" height="2" rx="1" fill="#e8ddc8" opacity=".5"/><rect x="10" y="56" width="0" height="2" rx="1" fill="#22c55e" id="fill1"/></g>
+                <g id="sec2"><rect x="10" y="72" width="154" height="2" rx="1" fill="#e8ddc8" opacity=".5"/><rect x="10" y="72" width="0" height="2" rx="1" fill="#22c55e" id="fill2"/></g>
+                <g id="sec3"><rect x="10" y="88" width="154" height="2" rx="1" fill="#e8ddc8" opacity=".5"/><rect x="10" y="88" width="0" height="2" rx="1" fill="#22c55e" id="fill3"/></g>
+                <g id="sec4"><rect x="10" y="104" width="154" height="2" rx="1" fill="#e8ddc8" opacity=".5"/><rect x="10" y="104" width="0" height="2" rx="1" fill="#22c55e" id="fill4"/></g>
+              </g>
+              <!-- Tampon final (caché jusqu'à 5/5) -->
+              <g id="tampFinal" opacity="0" transform="translate(88,135) rotate(-12)">
+                <ellipse cx="0" cy="0" rx="50" ry="28" fill="#c0392b" opacity=".85"/>
+                <ellipse cx="0" cy="0" rx="50" ry="28" fill="none" stroke="#fff" stroke-width="1.2" opacity=".5"/>
+                <text x="0" y="-8" text-anchor="middle" font-family="Courier New,monospace" font-size="7" font-weight="bold" fill="#fff" letter-spacing="1">ANALYSE</text>
+                <text x="0" y="4" text-anchor="middle" font-family="Courier New,monospace" font-size="6" fill="#fff">VALIDÉE</text>
+                <text x="0" y="14" text-anchor="middle" font-family="Courier New,monospace" font-size="6" fill="#fff">★ ★ ★ ★ ★</text>
+              </g>
+              <text x="88" y="155" text-anchor="middle" font-family="Georgia,serif" font-size="4.5" fill="#8a6030" font-style="italic">Signature de l'analyste</text>
+              <line x1="42" y1="150" x2="134" y2="150" stroke="#8a6030" stroke-width=".7"/>
+            </g>
+            <!-- Voyants -->
+            <g transform="translate(222,20)">
+              <text x="26" y="0" text-anchor="middle" font-family="Courier New,monospace" font-size="4.5" fill="#d4a846">SECTIONS</text>
+              <circle id="v0" cx="10" cy="12" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1"/>
+              <circle id="v1" cx="24" cy="12" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1"/>
+              <circle id="v2" cx="10" cy="26" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1"/>
+              <circle id="v3" cx="24" cy="26" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1"/>
+              <circle id="v4" cx="17" cy="40" r="5" fill="#1a1208" stroke="#d4a846" stroke-width="1"/>
+              <text id="vtxt" x="17" y="54" text-anchor="middle" font-family="Courier New,monospace" font-size="4.5" fill="#8a6030">0/5</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Console score -->
+        <div class="console">
+          <div class="console-top">
+            <div class="score-geant"><span id="scoreTotal">0</span><small>/5</small></div>
+            <div class="score-detail">
+              <div class="sd-item">Questions <b id="sdOk">0</b>/5</div>
+              <div class="sd-item">Erreurs <b id="sdErr">0</b></div>
+            </div>
+          </div>
+          <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+        </div>
+
+        <!-- RÉFÉRENTIEL -->
+        <div class="ref-card">
+          <div class="ref-body">
+            <button class="ref-toggle" onclick="toggleRef()"><span>Référentiel — triple visée &amp; procédés</span><span id="refArrow">&#9660;</span></button>
+            <div id="refContent">
+              <div class="ref-item"><b>Triple visée du classicisme :</b> Plaire / Divertir / Instruire.</div>
+              <div class="ref-item"><b>Procédés comiques :</b> comique de mots, de situation, de caractère, de gestes.</div>
+              <div class="ref-item"><b>Hyperbole :</b> exagération d'un trait ou d'une idée.</div>
+              <div class="ref-item"><b>Gradation :</b> progression d'éléments de plus en plus forts.</div>
+              <div class="ref-item"><b>Aparté :</b> réplique prononcée à voix basse, entendue du spectateur mais pas des autres personnages.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEXTE PERMANENT -->
+        <div class="texte-card">
+          <div class="texte-label">Texte support — L'Avare, acte I, scène 3</div>
+          <div class="texte-corps">
+            <span class="perso">HARPAGON, à La Flèche&nbsp;:</span><br>
+            «&nbsp;Hors d'ici tout à l'heure, et qu'on ne réplique pas. Allons, que l'on détale de chez moi, maître juré filou, vrai gibier de potence&nbsp;!&nbsp;»<br>
+            <span class="perso">LA FLÈCHE&nbsp;:</span><br>
+            «&nbsp;Je n'ai jamais rien vu d'aussi méchant que ce diable d'homme-là.&nbsp;»<br>
+            <span class="perso">HARPAGON&nbsp;:</span><br>
+            «&nbsp;Tu murmures entre tes dents&nbsp;?&nbsp;»<br>
+            <span class="perso">LA FLÈCHE&nbsp;:</span><br>
+            «&nbsp;Pourquoi me chassez-vous&nbsp;?&nbsp;»<br>
+            <span class="perso">HARPAGON&nbsp;:</span><br>
+            «&nbsp;C'est bien à toi, pendard, à me demander des raisons&nbsp;! Sors vite, que je ne t'assomme.&nbsp;»<br>
+            <span class="didascape">[Il fouille dans ses poches et dans ses vêtements.]</span><br>
+            «&nbsp;Çà, donne-moi vite. […] Montre-moi tes mains.&nbsp;»<br>
+            <span class="perso">LA FLÈCHE&nbsp;:</span><br>
+            «&nbsp;Les voilà.&nbsp;»<br>
+            <span class="perso">HARPAGON&nbsp;:</span><br>
+            «&nbsp;Les autres.&nbsp;»<br>
+            <span class="perso">LA FLÈCHE&nbsp;:</span><br>
+            «&nbsp;Les autres&nbsp;?&nbsp;»<br>
+            <span class="perso">HARPAGON&nbsp;:</span><br>
+            «&nbsp;Oui.&nbsp;»<br>
+            <span class="perso">LA FLÈCHE,</span> <span class="didascape">lui tendant les mains&nbsp;:</span><br>
+            «&nbsp;Les voilà.&nbsp;»<br>
+            <span class="perso">HARPAGON,</span> <span class="didascape">regardant dans les poches de La Flèche&nbsp;:</span><br>
+            «&nbsp;N'as-tu rien mis ici&nbsp;?&nbsp;»<br>
+            <span class="perso">LA FLÈCHE&nbsp;:</span><br>
+            «&nbsp;Voyez vous-même.&nbsp;»<br>
+            <span class="perso">HARPAGON,</span> <span class="didascape">tâtant les bas de ses chausses&nbsp;:</span><br>
+            «&nbsp;Ces grands hauts-de-chausses sont propres à devenir les receleurs de choses qu'on dérobe&nbsp;; et je voudrais qu'on en eût fait pendre quelqu'un.&nbsp;»
+          </div>
+          <hr class="texte-sep">
+          <div class="contexte-label">Contexte</div>
+          <div class="contexte-corps">
+            <b>Auteur&nbsp;:</b> Molière (1622-1673), auteur classique du XVII<sup>e</sup>&nbsp;siècle.<br>
+            <b>Œuvre&nbsp;:</b> L'Avare, comédie en cinq actes, créée en 1668.<br>
+            <b>Personnages&nbsp;:</b><br>
+            — <b>Harpagon&nbsp;:</b> bourgeois avare, obsédé par son argent et sa cassette.<br>
+            — <b>La Flèche&nbsp;:</b> valet d'Élise, chassé ici par son maître.<br>
+            <b>Situation&nbsp;:</b> Harpagon surprend La Flèche et le soupçonne de lui avoir dérobé quelque chose. Il le chasse en l'insultant et fouille ses vêtements.
+          </div>
+        </div>
+      </div>
+
+      <!-- COLONNE DROITE : QUESTIONS -->
+      <div class="col-contenu">
+        <div id="qZone"></div>
+      </div>
+    </div>
+
+    <!-- VERDICT -->
+    <div class="verdict" id="verdict">
+      <div class="verdict-card">
+        <div class="verdict-particles" id="particles"></div>
+        <div class="verdict-tampon" id="verdictTampon"></div>
+        <div class="verdict-note"><span id="verdictNote">0</span>/5</div>
+        <div class="verdict-et" id="verdictEt"></div>
+        <div class="verdict-msg" id="verdictMsg"></div>
+        <div class="recap-grid" id="recapGrid"></div>
+        <button class="btn-rejouer" onclick="recommencer()">&#8635; Nouvelle tentative</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="flashStar">
+  <svg viewBox="0 0 120 120" width="86" height="86" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="fstar" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff"/><stop offset="45%" stop-color="#f5c518" stop-opacity=".85"/><stop offset="100%" stop-color="#f5a623" stop-opacity="0"/></radialGradient></defs>
+    <circle cx="60" cy="60" r="55" fill="url(#fstar)"/>
+    <path d="M60,16 L66,54 L104,60 L66,66 L60,104 L54,66 L16,60 L54,54 Z" fill="#fff" fill-opacity=".95"/>
+  </svg>
+</div>
+
+<script>
+var QS=[
+  {titre:"Proc\u00e9d\u00e9 comique et effet produit",
+   q:"L\u2019accumulation d\u2019injures dans la premi\u00e8re r\u00e9plique d\u2019Harpagon (\u00ab\u00a0ma\u00eetre jur\u00e9 filou\u00a0\u00bb, \u00ab\u00a0vrai gibier de potence\u00a0\u00bb, \u00ab\u00a0pendard\u00a0\u00bb) produit quel effet sur le spectateur\u00a0?",
+   opts:["Elle \u00e9meut le spectateur en lui montrant la souffrance d\u2019Harpagon face \u00e0 la trahison.","Elle fait rire par la gradation hyperbolique\u00a0: plus Harpagon accumule, plus il para\u00eet d\u00e9mesur\u00e9 et ridicule.","Elle informe le spectateur sur le pass\u00e9 criminel r\u00e9el de La Fl\u00e8che."],
+   ans:1,fb:"L\u2019accumulation ici n\u2019est pas au service de la tristesse. Les injures sont de plus en plus fortes (\u00ab\u00a0filou\u00a0\u00bb \u2192 \u00ab\u00a0gibier de potence\u00a0\u00bb). Demande-toi si cette exag\u00e9ration rend Harpagon sympathique ou ridicule aux yeux du spectateur.",
+   qB:"Quel proc\u00e9d\u00e9 Moli\u00e8re utilise-t-il principalement dans cette premi\u00e8re r\u00e9plique\u00a0?",
+   optsB:["Un comique de gestes\u00a0: Harpagon mime la col\u00e8re avec le corps.","Une gradation hyperbolique\u00a0: les injures s\u2019intensifient progressivement.","Un apart\u00e9\u00a0: Harpagon parle \u00e0 voix basse, sans que La Fl\u00e8che l\u2019entende."],
+   ansB:1,fbB:"L\u2019hyperbole et la gradation sont les deux proc\u00e9d\u00e9s cl\u00e9s ici. La gradation, c\u2019est une progression d\u2019\u00e9l\u00e9ments de plus en plus forts. Les injures vont de \u00ab\u00a0filou\u00a0\u00bb \u00e0 \u00ab\u00a0gibier de potence\u00a0\u00bb\u00a0: c\u2019est bien une mont\u00e9e en intensit\u00e9."},
+  {titre:"Proc\u00e9d\u00e9 comique et effet produit",
+   q:"La r\u00e9plique \u00ab\u00a0Les autres\u00a0\u00bb est comique par son absurdit\u00e9. Quel m\u00e9canisme comique Moli\u00e8re utilise-t-il ici\u00a0?",
+   opts:["Il cr\u00e9e un comique de situation par la logique impossible d\u2019Harpagon\u00a0: en r\u00e9clamant \u00ab\u00a0les autres\u00a0\u00bb mains.","Il joue sur un jeu de mots\u00a0: \u00ab\u00a0les autres\u00a0\u00bb renvoie \u00e0 autre chose que les mains dans le contexte.","Il produit un comique de gestes\u00a0: La Fl\u00e8che mime l\u2019incompr\u00e9hension devant le public."],
+   ans:0,fb:"\u00ab\u00a0Les autres\u00a0\u00bb ne peut pas avoir de sens litt\u00e9ral raisonnable. Moli\u00e8re joue sur cette impossibilit\u00e9\u00a0: ce n\u2019est pas un jeu de mots mais une r\u00e9v\u00e9lation de l\u2019\u00e9tat mental d\u2019Harpagon. Quel registre comique repose sur l\u2019aveuglement d\u2019un personnage\u00a0?",
+   qB:"Parmi les types de comique, lequel est \u00e9galement \u00e0 l\u2019\u0153uvre dans cette sc\u00e8ne (fouille des poches, inspection des bas-de-chausses)\u00a0?",
+   optsB:["Le comique de mots\u00a0: les r\u00e9pliques jouent sur les doubles sens.","Le comique de gestes\u00a0: les actions d\u2019Harpagon en fouillant La Fl\u00e8che font rire.","Le comique de caract\u00e8re\u00a0: c\u2019est le noble qui se ridiculise par ses \u00e9motions."],
+   ansB:1,fbB:"La fouille des v\u00eatements, l\u2019inspection des \u00ab\u00a0grands hauts-de-chausses\u00a0\u00bb\u00a0: c\u2019est le corps en action qui fait rire. Le comique de gestes repose sur les actions physiques visibles par le spectateur."},
+  {titre:"Proc\u00e9d\u00e9 comique et vis\u00e9e \u00ab\u00a0plaire\u00a0\u00bb",
+   q:"Comment Moli\u00e8re fait-il \u00ab\u00a0plaire\u00a0\u00bb le spectateur dans cette sc\u00e8ne par la construction du dialogue\u00a0?",
+   opts:["En \u00e9crivant de longs monologues o\u00f9 Harpagon d\u00e9veloppe ses r\u00e9flexions morales avec humour.","En utilisant un registre de langue soutenu qui \u00e9l\u00e8ve le niveau du dialogue tout en repr\u00e9sentant les diff\u00e9rents statuts sociaux.","En construisant un dialogue vif, rythm\u00e9, avec des r\u00e9pliques tr\u00e8s courtes qui cr\u00e9ent une tension comique et captivent le spectateur."],
+   ans:2,fb:"\u00ab\u00a0Plaire\u00a0\u00bb dans le classicisme, c\u2019est satisfaire le go\u00fbt du spectateur par la forme de l\u2019\u0153uvre. Moli\u00e8re n\u2019\u00e9crit pas ici de longs discours. Observe la longueur des r\u00e9pliques au centre de la sc\u00e8ne\u00a0: qu\u2019est-ce que ce rythme produit\u00a0?",
+   qB:"Dans la triple vis\u00e9e classique, \u00ab\u00a0plaire\u00a0\u00bb renvoie \u00e0 quelle exigence de l\u2019\u0153uvre\u00a0?",
+   optsB:["L\u2019\u0153uvre doit d\u00e9livrer une le\u00e7on morale explicite et claire.","L\u2019\u0153uvre doit satisfaire le spectateur par sa forme, son rythme, sa beaut\u00e9 stylistique.","L\u2019\u0153uvre doit faire rire \u00e0 travers des situations invraisemblables et spectaculaires."],
+   ansB:1,fbB:"\u00ab\u00a0Plaire\u00a0\u00bb et \u00ab\u00a0divertir\u00a0\u00bb ne se confondent pas\u00a0: plaire, c\u2019est satisfaire le go\u00fbt \u00e9clair\u00e9 du spectateur par la qualit\u00e9 de la forme\u00a0; divertir, c\u2019est provoquer le rire ou l\u2019\u00e9motion."},
+  {titre:"Proc\u00e9d\u00e9 comique et vis\u00e9e \u00ab\u00a0instruire\u00a0\u00bb",
+   q:"Comment le comique de caract\u00e8re d\u2019Harpagon sert-il la vis\u00e9e \u00ab\u00a0instruire\u00a0\u00bb du classicisme\u00a0?",
+   opts:["En montrant qu\u2019Harpagon est un mod\u00e8le \u00e0 imiter\u00a0: sa vigilance est une vertu.","En pr\u00e9sentant un personnage parfaitement raisonnable dont le comportement est justifi\u00e9.","En exag\u00e9rant l\u2019avarice, Moli\u00e8re invite le spectateur \u00e0 reconna\u00eetre ce vice."],
+   ans:2,fb:"Instruit-on en pr\u00e9sentant un mod\u00e8le \u00e0 imiter ou en montrant un d\u00e9faut pour que le spectateur le reconnaisse et s\u2019en garde\u00a0? La r\u00e9plique de La Fl\u00e8che sur Harpagon contient la r\u00e9ponse.",
+   qB:"Quel \u00e9l\u00e9ment du texte montre le mieux qu\u2019Harpagon est aveugl\u00e9 par son vice au point de perdre tout sens de la raison\u00a0?",
+   optsB:["La r\u00e9plique \u00ab\u00a0Hors d\u2019ici tout \u00e0 l\u2019heure\u00a0\u00bb qui montre son autorit\u00e9 de ma\u00eetre.","La r\u00e9plique \u00ab\u00a0Les autres\u00a0\u00bb qui r\u00e9v\u00e8le un personnage d\u00e9connect\u00e9 de la r\u00e9alit\u00e9.","La didascalie \u00ab\u00a0Il fouille dans ses poches\u00a0\u00bb qui d\u00e9crit une action normale de prudence."],
+   ansB:1,fbB:"\u00ab\u00a0Les autres\u00a0\u00bb est la r\u00e9plique la plus r\u00e9v\u00e9latrice\u00a0: elle montre qu\u2019Harpagon ne peut plus raisonner normalement. L\u2019avarice est devenue une folie. C\u2019est exactement le vice que Moli\u00e8re veut d\u00e9noncer pour que le spectateur s\u2019en garde."},
+  {titre:"Triple vis\u00e9e articul\u00e9e \u2014 sens global",
+   q:"Comment cette sc\u00e8ne articule-t-elle les trois vis\u00e9es classiques\u00a0: plaire, divertir, instruire\u00a0?",
+   opts:["Elle pla\u00eet par son style \u00e9labor\u00e9, divertit par sa longueur et instruit par des discours moraux explicites prononc\u00e9s par Harpagon.","Elle pla\u00eet par son rythme vif\u00a0; elle divertit par les proc\u00e9d\u00e9s comiques et instruit en montrant que l\u2019avarice rend injuste, aveugle et mauvais.","Elle pla\u00eet, divertit et instruit de fa\u00e7on s\u00e9par\u00e9e et successive\u00a0: d\u2019abord le plaisir, ensuite le rire, enfin la le\u00e7on morale."],
+   ans:1,fb:"Les trois vis\u00e9es ne fonctionnent pas de fa\u00e7on s\u00e9par\u00e9e dans le classicisme\u00a0: elles sont simultan\u00e9es. Le m\u00eame proc\u00e9d\u00e9 pla\u00eet, divertit et instruit en m\u00eame temps. Cherche comment une seule r\u00e9plique ou action peut produire ces trois effets \u00e0 la fois.",
+   qB:"La r\u00e9plique de La Fl\u00e8che (\u00ab\u00a0Je n\u2019ai jamais rien vu d\u2019aussi m\u00e9chant que ce diable d\u2019homme-l\u00e0\u00a0\u00bb) est un exemple d\u2019apart\u00e9. Quel est son r\u00f4le dans la triple vis\u00e9e\u00a0?",
+   optsB:["Il sert uniquement \u00e0 divertir\u00a0: La Fl\u00e8che fait rire par son insolence.","Il sert uniquement \u00e0 informer\u00a0: le spectateur apprend qu\u2019Harpagon est cruel.","Il articule les trois vis\u00e9es\u00a0: il divertit par l\u2019insolence, pla\u00eet par sa concision, et instruit en r\u00e9sumant le portrait moral d\u2019Harpagon."],
+   ansB:2,fbB:"L\u2019apart\u00e9 cr\u00e9e une complicit\u00e9 entre La Fl\u00e8che et le spectateur. En une seule phrase, il fait rire (divertit), satisfait par sa formule frapp\u00e9e (pla\u00eet), et r\u00e9sume le vice d\u2019Harpagon (instruit). C\u2019est l\u2019exemple parfait de la triple vis\u00e9e simultan\u00e9e."}
+]
+function fisherYates(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var LABELS=['A','B','C'];
+var score=0,errCount=0,qIdx=0;
+var repondus={},verifFait={};
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function commencer(){$('phase1').style.display='none';$('phase2').classList.add('active');afficherQ(0);initA();window.scrollTo({top:0});}
+function toggleRef(){var c=$('refContent'),a=$('refArrow');c.classList.toggle('collapsed');a.innerHTML=c.classList.contains('collapsed')?'&#9654;':'&#9660;';}
+function afficherQ(idx){
+  qIdx=idx;var q=QS[idx];
+  var sh=fisherYates(q.opts.map(function(o,i){return{txt:o,orig:i};}));
+  var h='<div class="q-card"><div class="q-stripe"></div><div class="q-body">';
+  h+='<div class="q-titre-sec">'+esc(q.titre)+'</div>';
+  h+='<span class="q-partie">Question '+(idx+1)+' sur 5 · 1 pt</span>';
+  h+='<div class="q-texte">'+esc(q.q)+'</div>';
+  h+='<div class="opts" id="opts_'+idx+'">';
+  sh.forEach(function(o,i){h+='<button class="opt" data-orig="'+o.orig+'" onclick="choisir('+idx+','+o.orig+',this)"><span class="lettre">'+LABELS[i]+'</span><span>'+esc(o.txt)+'</span></button>';});
+  h+='</div><div class="q-fb" id="fb_'+idx+'"></div>';
+  var last=idx+1>=QS.length;
+  h+='<div class="btn-row"><button class="btn-valider" id="valider_'+idx+'" onclick="verifier('+idx+')">VALIDER</button>';
+  h+='<button class="btn-retry" onclick="resetQ('+idx+')">↻ Réessayer</button></div>';
+  h+='<button class="btn-next" id="next_'+idx+'" onclick="'+(last?'afficherVerdict()':'afficherQ('+(idx+1)+')')+'">'+(last?'Soumettre le rapport ▶':'Question '+(idx+2)+' ▶')+'</button>';
+  h+='</div></div>';
+  $('qZone').innerHTML=h;$('qZone').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function choisir(idx,orig,btn){
+  if(verifFait[idx])return;repondus[idx]=orig;
+  document.querySelectorAll('#opts_'+idx+' .opt').forEach(function(b){b.style.boxShadow='';b.style.borderColor='';});
+  btn.style.borderColor='var(--jour)';btn.style.boxShadow='0 0 0 2px var(--day-glow)';
+}
+function verifier(idx){
+  if(verifFait[idx])return;
+  if(repondus[idx]===undefined){flashBtn('valider_'+idx,'CHOISIS UNE RÉPONSE');beepErr();return;}
+  verifFait[idx]=true;$('valider_'+idx).disabled=true;
+  var q=QS[idx],ok=repondus[idx]===q.ans;
+  document.querySelectorAll('#opts_'+idx+' .opt').forEach(function(b){
+    b.setAttribute('disabled','');b.style.boxShadow='';b.style.borderColor='';
+    var o=+b.dataset.orig;
+    if(o===q.ans)b.className='opt correct';else if(o===repondus[idx])b.className='opt wrong';
+  });
+  if(!ok){var fb=$('fb_'+idx);if(fb){fb.innerHTML='❌ '+esc(q.fb);fb.className='q-fb show';}}
+  if(ok){score++;beepOk();showFlash();}else{errCount++;beepErr();}
+  validerSection(idx,ok);updateScore();
+  $('next_'+idx).classList.add('visible');
+}
+function resetQ(idx){
+  if(verifFait[idx]){
+    if(repondus[idx]===QS[idx].ans){score=Math.max(0,score-1);}else{errCount=Math.max(0,errCount-1);}
+    delete verifFait[idx];
+  }
+  delete repondus[idx];afficherQ(idx);updateScore();
+}
+function validerSection(idx,ok){
+  var fill=$('fill'+idx);if(fill){fill.style.transition='width .8s ease';fill.setAttribute('width',ok?'154':'77');}
+  var v=$('v'+idx);if(v){v.setAttribute('fill',ok?'#22c55e':'#f5a623');}
+  var n=Object.keys(verifFait).length;
+  $('rapportCount').textContent=n;var vtxt=$('vtxt');if(vtxt)vtxt.textContent=n+'/5';
+  if(n===5){var t=$('tampFinal');if(t){t.style.transition='opacity .6s ease';t.setAttribute('opacity','1');}}
+}
+function updateScore(){
+  $('scoreTotal').textContent=score;$('sdOk').textContent=score;$('sdErr').textContent=errCount;
+  $('progFill').style.width=Math.round(score/5*100)+'%';
+}
+function afficherVerdict(){
+  var total=score;$('verdictNote').textContent=total;
+  var pct=total/5;var nb=pct>=.9?5:pct>=.7?4:pct>=.5?3:pct>=.3?2:1;
+  $('verdictEt').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=$('verdictTampon'),msg=$('verdictMsg');
+  if(total===5){tp.textContent='RAPPORT VALIDÉ PAR LE JURY';tp.className='verdict-tampon ok';msg.innerHTML='Rapport soumis et validé sans réserve.';launchParticles();}
+  else if(total>=4){tp.textContent='RAPPORT APPROUVÉ';tp.className='verdict-tampon ok';msg.innerHTML='Rapport approuvé. Excellente maîtrise générale.';launchParticles();}
+  else if(total>=3){tp.textContent='RAPPORT À COMPLÉTER';tp.className='verdict-tampon moyen';msg.innerHTML='Rapport incomplet. Certains procédés et visées restent à approfondir.';}
+  else{tp.textContent='RAPPORT RENVOYÉ';tp.className='verdict-tampon ko';msg.innerHTML='Le jury renvoie le rapport. Reprends le référentiel et retente l’épreuve.';}
+  var recap='';QS.forEach(function(q,i){var ok=verifFait[i]&&repondus[i]===q.ans;recap+='<div class="recap-item '+(ok?'recap-ok':'recap-ko')+'">Q'+(i+1)+' — '+(ok?'✓':'✗')+' '+esc(q.titre)+'</div>';});
+  $('recapGrid').innerHTML=recap;$('verdict').className='verdict show';
+  setTimeout(function(){$('verdict').scrollIntoView({behavior:'smooth',block:'start'});},300);
+  beepFinal(total>=3);
+}
+function recommencer(){
+  score=0;errCount=0;verifFait={};repondus={};
+  $('scoreTotal').textContent='0';$('sdOk').textContent='0';$('sdErr').textContent='0';
+  $('progFill').style.width='0%';$('verdict').className='verdict';
+  $('rapportCount').textContent='0';var vtxt=$('vtxt');if(vtxt)vtxt.textContent='0/5';
+  for(var i=0;i<5;i++){var v=$('v'+i);if(v)v.setAttribute('fill','#1a1208');var f=$('fill'+i);if(f)f.setAttribute('width','0');}
+  var t=$('tampFinal');if(t)t.setAttribute('opacity','0');
+  afficherQ(0);window.scrollTo({top:0,behavior:'smooth'});
+}
+function flashBtn(id,txt){var b=$(id);if(!b)return;var t=b.textContent;b.textContent=txt;setTimeout(function(){b.textContent=t;},1300);}
+function showFlash(){var f=$('flashStar');if(!f)return;f.style.animation='none';void f.offsetWidth;f.style.animation='flashPop 1s ease forwards';}
+function launchParticles(){var box=$('particles');box.innerHTML='';var cols=['#f5a623','#f5c518','#3fa66f','#c47a10'];for(var i=0;i<26;i++){var p=document.createElement('div');p.className='particle';p.style.left=(10+Math.random()*80)+'%';p.style.top=(40+Math.random()*30)+'%';p.style.background=cols[i%cols.length];p.style.animation='particleUp '+(1+Math.random())+'s ease '+(Math.random()*.5)+'s forwards';box.appendChild(p);}}
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);}
+function beepOk(){initA();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.12,'sine',.1);},75);}
+function beepErr(){initA();beep(220,90,.22,'sawtooth',.09);}
+function beepFinal(ok){initA();if(ok){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){beep(f,f,.2,'triangle',.13);},i*150);});}else{beep(200,80,.4,'sawtooth',.11);}}
+document.addEventListener('pointerdown',initA,{once:true});
+</script>
+</body>
+</html>
