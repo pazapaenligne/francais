@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S2 J2 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#b94040;--day:#b94040;--day-dark:#7a1f1f;--day-dark2:#4a1010;
+  --day-light:#f7eded;--day-border:#e8b0b0;--day-glow:rgba(185,64,64,.22);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fdf7f7;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;
+  --radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:780px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--blue);top:180px;left:-25px;pointer-events:none;}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* POINT CARDINAL */
+.cardinal{background:#1a0505;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1rem 1.2rem;margin-bottom:.9rem;position:relative;z-index:1;}
+.cardinal-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.45rem;}
+.cardinal-text{font-size:.88rem;color:#f5d0d0;line-height:1.7;}
+.cardinal-text strong{color:#fff;}
+
+/* RÉFÉRENTIEL */
+.ref{background:var(--surface);border:1.5px solid var(--day-border);border-radius:var(--radius);
+  overflow:hidden;margin-bottom:.9rem;box-shadow:0 3px 14px rgba(0,0,0,.06);position:relative;z-index:1;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.ref-inner{padding:.9rem 1.2rem;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+@media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.65rem .85rem;}
+.ref-cell-title{font-size:.82rem;font-weight:900;color:var(--day-dark);margin-bottom:.2rem;}
+.ref-cell-body{font-size:.8rem;color:var(--muted);line-height:1.6;}
+.ref-cell-body em{color:var(--day-dark2);font-style:normal;font-weight:700;}
+
+/* JAUGE LABO */
+.jauge-wrap{margin-bottom:.9rem;position:relative;z-index:1;}
+.jauge-labels{display:flex;justify-content:space-between;font-size:.68rem;
+  font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.3rem;}
+.jauge-bg{background:#e0ddd5;border-radius:99px;height:10px;overflow:hidden;position:relative;}
+.jauge-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0);
+  border-radius:99px;transition:width .6s ease;width:0%;}
+.palier-dots{display:flex;justify-content:space-between;margin-top:.35rem;}
+.pdot{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);
+  display:flex;align-items:center;gap:.25rem;}
+.pdot .dot{width:8px;height:8px;border-radius:50%;background:#d8d2c4;transition:background .4s;}
+.pdot.active .dot{background:var(--day);}
+.pdot.done .dot{background:var(--green);}
+
+/* Progression globale */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* CARD PALIER */
+.palier-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.palier-card.locked{opacity:.5;pointer-events:none;}
+.palier-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.palier-head{padding:.9rem 1.1rem .6rem;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
+.palier-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.palier-badge.done{background:var(--green);}
+.palier-instrument{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.palier-score{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;color:var(--day-dark);
+  margin-left:auto;}
+.palier-consigne{font-size:.88rem;color:var(--muted);line-height:1.65;padding:0 1.1rem .7rem;
+  border-bottom:1px solid var(--border);margin-bottom:.7rem;}
+
+/* Phrase item */
+.phrase-item{padding:.6rem 1.1rem;margin-bottom:.4rem;}
+.phrase-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.3rem;}
+.phrase-display{font-size:clamp(1rem,2.8vw,1.12rem);font-weight:700;color:var(--text);
+  line-height:1.9;margin-bottom:.55rem;padding:.6rem .8rem;
+  background:var(--surface2);border-radius:var(--radius-sm);border:1.5px solid var(--border);}
+
+/* Mots surlignables */
+.mot{cursor:pointer;border-radius:4px;padding:.05rem .15rem;transition:background .12s;
+  display:inline;-webkit-tap-highlight-color:transparent;user-select:none;}
+.mot:hover{background:rgba(185,64,64,.15);}
+.mot.sel{background:#ffe0b2;color:#8a5200;}
+.mot.correct-h{background:#c8edaa;color:var(--green-dark);cursor:default;}
+.mot.wrong-h{background:#fcc;color:var(--pink-dark);cursor:default;}
+.mot.missed-h{background:#ffe0e0;color:var(--pink-dark);cursor:default;
+  text-decoration:underline wavy var(--pink-dark);}
+
+/* Étape */
+.etape{margin:.5rem 1.1rem .3rem;padding:.65rem .85rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.etape-label{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+.opts-col{display:flex;flex-direction:column;gap:.35rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.9rem,2.5vw,.98rem);font-weight:600;
+  padding:.5rem .8rem;cursor:pointer;min-height:44px;line-height:1.5;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:flex-start;gap:.4rem;word-break:break-word;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.opt-sel{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.opt-btn.correct{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;}
+.opt-btn.wrong{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;}
+.opt-letter{width:20px;height:20px;border-radius:50%;flex-shrink:0;min-width:20px;
+  display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark);margin-top:2px;}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--pink-dark);color:#fff;}
+
+/* Feedback */
+.etape-fb{font-size:.82rem;color:var(--pink-dark);display:none;margin-top:.4rem;
+  line-height:1.7;padding:.45rem .65rem;background:var(--pink-light);
+  border:1.5px solid var(--pink-dark);border-radius:var(--radius-sm);}
+.etape-fb.show{display:block;}
+.etape-fb.ok{color:var(--green-dark);background:var(--green-light);border-color:var(--green);}
+.h-fb{font-size:.82rem;color:var(--pink-dark);display:none;margin-top:.3rem;
+  padding:.45rem .65rem;background:var(--pink-light);border:1.5px solid var(--pink-dark);
+  border-radius:var(--radius-sm);line-height:1.7;}
+.h-fb.show{display:block;}
+
+/* Bouton valider surlignage */
+.btn-h{font-family:Arial,sans-serif;font-weight:800;font-size:.88rem;
+  padding:.5rem .9rem;border:none;border-radius:var(--radius-sm);
+  background:var(--day-dark);color:#fff;cursor:pointer;min-height:2.8rem;
+  transition:transform .12s;margin-top:.4rem;display:inline-flex;align-items:center;gap:.35rem;}
+.btn-h:hover{transform:translateY(-1px);}
+.btn-h:disabled{opacity:.35;cursor:default;}
+
+/* Bouton suite palier */
+.btn-suite{display:none;width:calc(100% - 2.2rem);margin:.4rem 1.1rem .2rem;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.7rem 1rem;border:none;border-radius:var(--radius-sm);
+  background:var(--day-dark);color:#fff;cursor:pointer;min-height:2.8rem;transition:transform .12s;}
+.btn-suite.show{display:block;}
+.btn-suite:hover{transform:translateY(-1px);}
+
+/* Btn retry */
+.btn-retry{font-family:Arial,sans-serif;font-weight:800;font-size:.85rem;
+  padding:.45rem .85rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:transparent;color:var(--muted);cursor:pointer;min-height:2.8rem;
+  margin:.2rem 1.1rem .5rem;}
+.btn-retry:hover{border-color:var(--day-dark);color:var(--day-dark);}
+
+/* Score palier */
+.palier-score-display{font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  color:var(--muted);padding:.1rem 1.1rem .4rem;display:none;}
+.palier-score-display.show{display:block;}
+.palier-fb{padding:.6rem 1.1rem;font-size:.9rem;display:none;line-height:1.7;margin-bottom:.3rem;}
+.palier-fb.show{display:block;}
+.palier-fb.ok{color:var(--green-dark);background:var(--green-light);
+  border-top:1.5px solid var(--green);border-bottom:1.5px solid var(--green);}
+.palier-fb.ko{color:var(--pink-dark);background:var(--pink-light);
+  border-top:1.5px solid var(--pink-dark);border-bottom:1.5px solid var(--pink-dark);}
+.palier-fb.mid{color:var(--day-dark2);background:var(--day-light);
+  border-top:1.5px solid var(--day-border);border-bottom:1.5px solid var(--day-border);}
+
+/* RÉSULTATS */
+.results{display:none;position:relative;z-index:1;}
+.results.show{display:block;animation:fadeUp .4s ease both;}
+.rcard{background:#1a0505;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.2);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day);}
+.stars{font-size:1.9rem;margin:.35rem 0 .6rem;letter-spacing:.1em;}
+.titre-labo{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+  letter-spacing:.1em;color:var(--day);border:2px solid var(--day-border);
+  border-radius:6px;padding:.35rem 1rem;display:inline-block;margin-bottom:.7rem;}
+.detail-paliers{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.8rem;}
+.dp-cell{background:rgba(255,255,255,.06);border:1.5px solid rgba(185,64,64,.25);
+  border-radius:var(--radius-sm);padding:.6rem .5rem;text-align:center;}
+.dp-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:900;color:var(--day);line-height:1;}
+.dp-lbl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem;}
+.rmsg{color:#f5d0d0;font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.unlock-msg{background:rgba(141,198,63,.12);border:1.5px solid var(--green);border-radius:var(--radius-sm);
+  padding:.75rem 1rem;font-size:.88rem;color:var(--green);margin-bottom:1rem;
+  font-family:'JetBrains Mono',monospace;text-align:center;display:none;}
+.unlock-msg.show{display:block;}
+.btn-restart{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;
+  border:2px solid var(--day-border);min-height:2.8rem;
+  background:transparent;color:var(--day);width:100%;justify-content:center;}
+.btn-restart:hover{border-color:var(--day);color:#fff;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.phrase-item{padding:.6rem .8rem;}.etape{margin:.5rem .8rem .3rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 3ème</span>
+  </div>
+  <div class="week-label">Semaine 2 – Jour 2</div>
+  <h1>Je m'entraîne · <span class="hl">Prop. relative</span></h1>
+</header>
+
+<!-- Point cardinal -->
+<div class="cardinal">
+  <div class="cardinal-title">&#128270;&nbsp;À retenir — Règle absolue</div>
+  <div class="cardinal-text">La proposition subordonnée relative (PSR) a <strong>toujours</strong> pour fonction&nbsp;: <strong>COMPLÉMENT DE L'ANTÉCÉDENT</strong>. Cette fonction ne change jamais. Ce qui varie, c'est la fonction du <strong>PRONOM RELATIF</strong> à l'intérieur de la subordonnée&nbsp;: sujet, COD, COI, CC de lieu, CC de temps, complément du nom…</div>
+</div>
+
+<!-- Référentiel -->
+<div class="ref">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-title">&#128218;&nbsp;Référentiel — Pronoms relatifs</div>
+    <div class="ref-grid">
+      <div class="ref-cell">
+        <div class="ref-cell-title">Pronoms simples</div>
+        <div class="ref-cell-body"><em>qui</em> → sujet · <em>que</em> → COD · <em>dont</em> → COI « de » · <em>où</em> → CC lieu/temps</div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Pronoms composés</div>
+        <div class="ref-cell-body"><em>auquel / à laquelle…</em> → COI (verbe en « à ») · <em>duquel / de laquelle…</em> → compl. en « de »</div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Antécédent</div>
+        <div class="ref-cell-body">Nom ou pronom de la principale que la PSR <em>complète</em>.</div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Fonction PSR</div>
+        <div class="ref-cell-body"><em>Toujours</em> complément de l'antécédent — jamais sujet ni COD du verbe principal.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Jauge laboratoire -->
+<div class="jauge-wrap">
+  <div class="jauge-labels">
+    <span>&#128300;&nbsp;Avancement du laboratoire</span>
+    <span id="jauge-pct">0 %</span>
+  </div>
+  <div class="jauge-bg"><div class="jauge-fill" id="jauge-fill"></div></div>
+  <div class="palier-dots">
+    <div class="pdot active" id="pdot0"><div class="dot"></div><span>Palier 1</span></div>
+    <div class="pdot" id="pdot1"><div class="dot"></div><span>Palier 2</span></div>
+    <div class="pdot" id="pdot2"><div class="dot"></div><span>Palier 3</span></div>
+    <div class="pdot" id="pdot3"><div class="dot"></div><span>Palier 4</span></div>
+  </div>
+</div>
+
+<!-- Progression -->
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 30 points</span><span id="prog-pct">0 %</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> point(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">30</span> restant(s)</div>
+</div>
+
+<!-- PALIER 1 -->
+<div class="palier-card" id="pal1">
+  <div class="palier-stripe"></div>
+  <div class="palier-head">
+    <span class="palier-badge" id="pb1">Palier 1</span>
+    <span class="palier-instrument">&#128296;&nbsp;Instrument 1 — Le délimiteur</span>
+    <span class="palier-score" id="ps1">0 / 3</span>
+  </div>
+  <div class="palier-consigne">Surligne la proposition subordonnée relative en cliquant sur les mots qui la composent. Ne surligne pas l'antécédent ni le reste de la principale.</div>
+  <div id="p1-phrases"></div>
+  <div class="palier-score-display" id="psd1"></div>
+  <div class="palier-fb" id="pfb1"></div>
+  <button class="btn-retry" id="pry1">&#8635;&nbsp;Réessayer le palier 1</button>
+  <button class="btn-suite" id="pnext1">Palier 2 — L'identificateur &#8594;</button>
+</div>
+
+<!-- PALIER 2 -->
+<div class="palier-card locked" id="pal2">
+  <div class="palier-stripe"></div>
+  <div class="palier-head">
+    <span class="palier-badge" id="pb2">Palier 2</span>
+    <span class="palier-instrument">&#128270;&nbsp;Instrument 2 — L'identificateur</span>
+    <span class="palier-score" id="ps2">0 / 9</span>
+  </div>
+  <div class="palier-consigne">Pour chaque phrase : 1. Surligne la PSR. 2. Identifie le pronom relatif. 3. Identifie l'antécédent.</div>
+  <div id="p2-phrases"></div>
+  <div class="palier-score-display" id="psd2"></div>
+  <div class="palier-fb" id="pfb2"></div>
+  <button class="btn-retry" id="pry2">&#8635;&nbsp;Réessayer le palier 2</button>
+  <button class="btn-suite" id="pnext2">Palier 3 — Le classificateur &#8594;</button>
+</div>
+
+<!-- PALIER 3 -->
+<div class="palier-card locked" id="pal3">
+  <div class="palier-stripe"></div>
+  <div class="palier-head">
+    <span class="palier-badge" id="pb3">Palier 3</span>
+    <span class="palier-instrument">&#9878;&#65039;&nbsp;Instrument 3 — Le classificateur</span>
+    <span class="palier-score" id="ps3">0 / 8</span>
+  </div>
+  <div class="palier-consigne">Pour chaque phrase : 1. Surligne la PSR. 2. Pronom relatif. 3. Antécédent. 4. Fonction de la PSR dans la principale.</div>
+  <div id="p3-phrases"></div>
+  <div class="palier-score-display" id="psd3"></div>
+  <div class="palier-fb" id="pfb3"></div>
+  <button class="btn-retry" id="pry3">&#8635;&nbsp;Réessayer le palier 3</button>
+  <button class="btn-suite" id="pnext3">Palier 4 — L'analyseur complet &#8594;</button>
+</div>
+
+<!-- PALIER 4 -->
+<div class="palier-card locked" id="pal4">
+  <div class="palier-stripe"></div>
+  <div class="palier-head">
+    <span class="palier-badge" id="pb4">Palier 4</span>
+    <span class="palier-instrument">&#128300;&nbsp;Instrument 4 — L'analyseur complet</span>
+    <span class="palier-score" id="ps4">0 / 10</span>
+  </div>
+  <div class="palier-consigne">Analyse complète en 5 étapes : délimitation PSR · pronom relatif · antécédent · fonction PSR · fonction du pronom dans la subordonnée.</div>
+  <div id="p4-phrases"></div>
+  <div class="palier-score-display" id="psd4"></div>
+  <div class="palier-fb" id="pfb4"></div>
+  <button class="btn-retry" id="pry4">&#8635;&nbsp;Réessayer le palier 4</button>
+  <button class="btn-suite" id="pnext4">Voir le bilan final &#8594;</button>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;">&#128300;&nbsp;Rapport de laboratoire</div>
+    <div class="score-big"><span id="r-score">0</span>/30</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="titre-labo" id="r-titre"></div>
+    <div class="detail-paliers">
+      <div class="dp-cell"><div class="dp-val" id="r-p1">0/3</div><div class="dp-lbl">Palier 1</div></div>
+      <div class="dp-cell"><div class="dp-val" id="r-p2">0/9</div><div class="dp-lbl">Palier 2</div></div>
+      <div class="dp-cell"><div class="dp-val" id="r-p3">0/8</div><div class="dp-lbl">Palier 3</div></div>
+      <div class="dp-cell"><div class="dp-val" id="r-p4">0/10</div><div class="dp-lbl">Palier 4</div></div>
+    </div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="unlock-msg" id="unlock-msg">&#128275;&nbsp;Score ≥ 22/30 — Je relève le défi disponible.</div>
+    <button class="btn-restart" id="btn-restart">&#8635;&nbsp;Recommencer depuis le palier 1</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+var LETTERS=['A','B','C','D'];
+
+/* ══════════════════════════════════════
+   DONNÉES
+══════════════════════════════════════ */
+
+/* PALIER 1 — surlignage uniquement */
+var P1=[
+  {
+    id:'p1',
+    tokens:['Les','auteurs','qui','respectent','les','règles','classiques','atteignent','la','perfection','.'],
+    psr:[2,3,4,5,6], /* indices des tokens dans la PSR */
+    fb:'La PSR commence au pronom relatif \u00ab\u00a0qui\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0atteignent\u00a0\u00bb. L\u2019ant\u00e9c\u00e9dent \u00ab\u00a0Les auteurs\u00a0\u00bb n\u2019est pas dans la PSR. Surligne uniquement\u00a0: \u00ab\u00a0qui respectent les r\u00e8gles classiques\u00a0\u00bb.'
+  },
+  {
+    id:'p2',
+    tokens:['C\u2019est','l\u2019auteur','classique','qui','a','le','mieux','illustr\u00e9','la','com\u00e9die','de','caract\u00e8re','.'],
+    psr:[3,4,5,6,7,8,9,10,11],
+    fb:'La PSR s\u2019\u00e9tend du pronom relatif \u00ab\u00a0qui\u00a0\u00bb jusqu\u2019\u00e0 la fin de la phrase. L\u2019ant\u00e9c\u00e9dent est \u00ab\u00a0l\u2019auteur classique\u00a0\u00bb. Surligne tout ce qui suit l\u2019ant\u00e9c\u00e9dent \u00e0 partir de \u00ab\u00a0qui\u00a0\u00bb.'
+  },
+  {
+    id:'p3',
+    tokens:['Les','spectateurs','que','Moli\u00e8re','faisait','rire','reconnaissaient','leurs','propres','d\u00e9fauts','.'],
+    psr:[2,3,4,5],
+    fb:'La PSR commence au pronom relatif \u00ab\u00a0que\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0reconnaissaient\u00a0\u00bb. Surligne uniquement\u00a0: \u00ab\u00a0que Moli\u00e8re faisait rire\u00a0\u00bb.'
+  }
+];
+
+/* PALIER 2 — surlignage + QCM pronom + QCM antécédent */
+var P2=[
+  {
+    id:'p4',
+    tokens:['La','caissette','dont','Harpagon','ne','pouvait','se','passer','contenait','toutes','ses','\u00e9conomies','.'],
+    psr:[2,3,4,5,6,7],
+    fbH:'La PSR commence au pronom relatif \u00ab\u00a0dont\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0contenait\u00a0\u00bb. Surligne uniquement\u00a0: \u00ab\u00a0dont Harpagon ne pouvait se passer\u00a0\u00bb.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['que','dont','o\u00f9'],ans:1,
+       fb:'Le pronom relatif est le mot qui introduit la PSR et reprend l\u2019ant\u00e9c\u00e9dent. Ici, c\u2019est \u00ab\u00a0dont\u00a0\u00bb.'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0dont\u00a0\u00bb\u00a0?',opts:['ses \u00e9conomies','Harpagon','La caissette'],ans:2,
+       fb:'\u00ab\u00a0Dont\u00a0\u00bb reprend le nom qui pr\u00e9c\u00e8de la PSR dans la principale. La PSR \u00ab\u00a0dont Harpagon ne pouvait se passer\u00a0\u00bb compl\u00e8te \u00ab\u00a0La caissette\u00a0\u00bb.'}
+    ]
+  },
+  {
+    id:'p5',
+    tokens:['C\u2019est','l\u2019\u00e9poque','o\u00f9','les','r\u00e8gles','classiques','s\u2019imposaient','\u00e0','tous','les','auteurs','.'],
+    psr:[2,3,4,5,6,7,8,9,10],
+    fbH:'La PSR commence au pronom relatif \u00ab\u00a0o\u00f9\u00a0\u00bb et s\u2019\u00e9tend jusqu\u2019\u00e0 la fin. Surligne \u00e0 partir de \u00ab\u00a0o\u00f9\u00a0\u00bb jusqu\u2019au bout de la phrase.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['qui','o\u00f9','dont'],ans:1,
+       fb:'Le pronom relatif introduit la PSR. Ici, c\u2019est \u00ab\u00a0o\u00f9\u00a0\u00bb, qui exprime une valeur temporelle (l\u2019\u00e9poque o\u00f9\u2026).'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0o\u00f9\u00a0\u00bb\u00a0?',opts:['tous les auteurs','les r\u00e8gles classiques','l\u2019\u00e9poque'],ans:2,
+       fb:'\u00ab\u00a0O\u00f9\u00a0\u00bb reprend \u00ab\u00a0l\u2019\u00e9poque\u00a0\u00bb\u00a0: la PSR compl\u00e8te ce nom. \u00ab\u00a0O\u00f9\u00a0\u00bb a ici une valeur temporelle.'}
+    ]
+  },
+  {
+    id:'p6',
+    tokens:['Le','vice','auquel','Harpagon','ne','pouvait','r\u00e9sister','le','rendait','ridicule','.'],
+    psr:[2,3,4,5,6],
+    fbH:'La PSR commence au pronom relatif compos\u00e9 \u00ab\u00a0auquel\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0rendait\u00a0\u00bb. Surligne\u00a0: \u00ab\u00a0auquel Harpagon ne pouvait r\u00e9sister\u00a0\u00bb.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['dont','que','auquel'],ans:2,
+       fb:'Le pronom relatif est ici un pronom compos\u00e9\u00a0: \u00ab\u00a0auquel\u00a0\u00bb (= \u00e0 + lequel). Le verbe \u00ab\u00a0r\u00e9sister\u00a0\u00bb se construit avec \u00ab\u00a0\u00e0\u00a0\u00bb.'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0auquel\u00a0\u00bb\u00a0?',opts:['Harpagon','Le vice','ridicule'],ans:1,
+       fb:'\u00ab\u00a0Auquel\u00a0\u00bb reprend \u00ab\u00a0le vice\u00a0\u00bb\u00a0: la PSR \u00ab\u00a0auquel Harpagon ne pouvait r\u00e9sister\u00a0\u00bb compl\u00e8te ce nom.'}
+    ]
+  }
+];
+
+/* PALIER 3 — surlignage + pronom + antécédent + fonction PSR */
+var P3=[
+  {
+    id:'p7',
+    tokens:['Les','\u0153uvres','dont','La','Bruy\u00e8re','tire','ses','portraits','d\u00e9noncent','les','vices','de','son','si\u00e8cle','.'],
+    psr:[2,3,4,5,6,7],
+    fbH:'La PSR commence \u00e0 \u00ab\u00a0dont\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0d\u00e9noncent\u00a0\u00bb. Surligne\u00a0: \u00ab\u00a0dont La Bruy\u00e8re tire ses portraits\u00a0\u00bb.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['que','dont','qui'],ans:1,
+       fb:'Le pronom relatif qui introduit la PSR est \u00ab\u00a0dont\u00a0\u00bb\u00a0: il signale un compl\u00e9ment introduit par \u00ab\u00a0de\u00a0\u00bb dans la subordonn\u00e9e.'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0dont\u00a0\u00bb\u00a0?',opts:['La Bruy\u00e8re','ses portraits','Les \u0153uvres'],ans:2,
+       fb:'\u00ab\u00a0Dont\u00a0\u00bb reprend \u00ab\u00a0Les \u0153uvres\u00a0\u00bb\u00a0: la PSR compl\u00e8te ce nom. La Bruy\u00e8re tire ses portraits de ces \u0153uvres.'},
+      {label:'Quelle est la fonction de la PSR dans la phrase\u00a0?',
+       opts:['Sujet du verbe \u00ab\u00a0d\u00e9noncent\u00a0\u00bb','COD du verbe \u00ab\u00a0d\u00e9noncent\u00a0\u00bb','Compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent \u00ab\u00a0\u0153uvres\u00a0\u00bb'],ans:2,
+       fb:'La PSR est toujours compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent. Elle n\u2019est jamais sujet, COD ou attribut du verbe principal. Ici, la PSR \u00ab\u00a0dont La Bruy\u00e8re tire ses portraits\u00a0\u00bb est compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent \u00ab\u00a0\u0153uvres\u00a0\u00bb.'}
+    ]
+  },
+  {
+    id:'p8',
+    tokens:['C\u2019est','le','th\u00e9\u00e2tre','classique','que','Boileau','d\u00e9fendait','dans','ses','\u00e9crits','.'],
+    psr:[4,5,6,7,8,9],
+    fbH:'La PSR commence \u00e0 \u00ab\u00a0que\u00a0\u00bb et s\u2019\u00e9tend jusqu\u2019\u00e0 la fin. Surligne\u00a0: \u00ab\u00a0que Boileau d\u00e9fendait dans ses \u00e9crits\u00a0\u00bb.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['qui','dont','que'],ans:2,
+       fb:'Le pronom relatif est \u00ab\u00a0que\u00a0\u00bb\u00a0: il reprend l\u2019ant\u00e9c\u00e9dent et joue le r\u00f4le de COD dans la subordonn\u00e9e.'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0que\u00a0\u00bb\u00a0?',opts:['Boileau','le th\u00e9\u00e2tre classique','ses \u00e9crits'],ans:1,
+       fb:'\u00ab\u00a0Que\u00a0\u00bb reprend \u00ab\u00a0le th\u00e9\u00e2tre classique\u00a0\u00bb\u00a0: la PSR compl\u00e8te ce nom. Boileau d\u00e9fendait ce th\u00e9\u00e2tre classique.'},
+      {label:'Quelle est la fonction de la PSR dans la phrase\u00a0?',
+       opts:['COD du verbe \u00ab\u00a0est\u00a0\u00bb','Attribut du sujet \u00ab\u00a0le th\u00e9\u00e2tre classique\u00a0\u00bb','Compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent \u00ab\u00a0le th\u00e9\u00e2tre classique\u00a0\u00bb'],ans:2,
+       fb:'La PSR est toujours compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent. \u00ab\u00a0Que Boileau d\u00e9fendait dans ses \u00e9crits\u00a0\u00bb compl\u00e8te le nom \u00ab\u00a0le th\u00e9\u00e2tre classique\u00a0\u00bb.'}
+    ]
+  }
+];
+
+/* PALIER 4 — analyse complète 5 étapes */
+var P4=[
+  {
+    id:'p9',
+    tokens:['La','r\u00e8gle','classique','\u00e0','laquelle','tous','les','auteurs','devaient','se','soumettre','exigeait','clart\u00e9','et','mesure','.'],
+    psr:[3,4,5,6,7,8,9,10],
+    fbH:'La PSR commence au pronom relatif compos\u00e9 \u00ab\u00a0\u00e0 laquelle\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0exigeait\u00a0\u00bb. Surligne\u00a0: \u00ab\u00a0\u00e0 laquelle tous les auteurs devaient se soumettre\u00a0\u00bb.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['dont','laquelle','\u00e0 laquelle'],ans:2,
+       fb:'Le pronom relatif compos\u00e9 est \u00ab\u00a0\u00e0 laquelle\u00a0\u00bb (= \u00e0 + laquelle), f\u00e9minin singulier pour s\u2019accorder avec \u00ab\u00a0La r\u00e8gle classique\u00a0\u00bb. La pr\u00e9position \u00ab\u00a0\u00e0\u00a0\u00bb est n\u00e9cessaire car \u00ab\u00a0se soumettre\u00a0\u00bb se construit avec \u00ab\u00a0\u00e0\u00a0\u00bb.'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0\u00e0 laquelle\u00a0\u00bb\u00a0?',opts:['tous les auteurs','clart\u00e9 et mesure','La r\u00e8gle classique'],ans:2,
+       fb:'\u00ab\u00a0\u00c0 laquelle\u00a0\u00bb reprend \u00ab\u00a0La r\u00e8gle classique\u00a0\u00bb\u00a0: la PSR compl\u00e8te ce nom. Les auteurs devaient se soumettre \u00e0 cette r\u00e8gle.'},
+      {label:'Quelle est la fonction de la PSR dans la phrase\u00a0?',
+       opts:['Sujet du verbe \u00ab\u00a0exigeait\u00a0\u00bb','Compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent \u00ab\u00a0La r\u00e8gle classique\u00a0\u00bb','COD du verbe \u00ab\u00a0exigeait\u00a0\u00bb'],ans:1,
+       fb:'La PSR est toujours compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent. Ici, la PSR pr\u00e9cise \u00ab\u00a0La r\u00e8gle classique\u00a0\u00bb\u00a0: elle en est le compl\u00e9ment.'},
+      {label:'Quelle est la fonction de \u00ab\u00a0\u00e0 laquelle\u00a0\u00bb \u00c0 L\u2019INT\u00c9RIEUR de la subordonn\u00e9e\u00a0?',
+       opts:['Sujet du verbe \u00ab\u00a0devaient se soumettre\u00a0\u00bb','COD du verbe \u00ab\u00a0devaient se soumettre\u00a0\u00bb','COI du verbe \u00ab\u00a0devaient se soumettre\u00a0\u00bb (se soumettre \u00c0)'],ans:2,
+       fb:'Le verbe \u00ab\u00a0se soumettre\u00a0\u00bb se construit avec \u00ab\u00a0\u00e0\u00a0\u00bb. \u00c0 l\u2019int\u00e9rieur de la subordonn\u00e9e, \u00ab\u00a0\u00e0 laquelle\u00a0\u00bb remplace \u00ab\u00a0\u00e0 cette r\u00e8gle classique\u00a0\u00bb\u00a0: c\u2019est un COI.'}
+    ]
+  },
+  {
+    id:'p10',
+    tokens:['Les','sc\u00e8nes','dont','Moli\u00e8re','tirait','ses','effets','comiques','d\u00e9peignaient','des','d\u00e9fauts','universels','.'],
+    psr:[2,3,4,5,6,7],
+    fbH:'La PSR commence \u00e0 \u00ab\u00a0dont\u00a0\u00bb et se termine avant le verbe principal \u00ab\u00a0d\u00e9peignaient\u00a0\u00bb. Surligne\u00a0: \u00ab\u00a0dont Moli\u00e8re tirait ses effets comiques\u00a0\u00bb.',
+    etapes:[
+      {label:'Quel est le pronom relatif\u00a0?',opts:['que','dont','o\u00f9'],ans:1,
+       fb:'Le pronom relatif est \u00ab\u00a0dont\u00a0\u00bb\u00a0: il signale un compl\u00e9ment introduit par \u00ab\u00a0de\u00a0\u00bb dans la subordonn\u00e9e.'},
+      {label:'Quel est l\u2019ant\u00e9c\u00e9dent de \u00ab\u00a0dont\u00a0\u00bb\u00a0?',opts:['ses effets comiques','Moli\u00e8re','Les sc\u00e8nes'],ans:2,
+       fb:'\u00ab\u00a0Dont\u00a0\u00bb reprend \u00ab\u00a0Les sc\u00e8nes\u00a0\u00bb\u00a0: la PSR compl\u00e8te ce nom. Moli\u00e8re tirait ses effets comiques de ces sc\u00e8nes.'},
+      {label:'Quelle est la fonction de la PSR dans la phrase\u00a0?',
+       opts:['COD du verbe \u00ab\u00a0d\u00e9peignaient\u00a0\u00bb','Sujet du verbe \u00ab\u00a0d\u00e9peignaient\u00a0\u00bb','Compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent \u00ab\u00a0Les sc\u00e8nes\u00a0\u00bb'],ans:2,
+       fb:'La PSR est toujours compl\u00e9ment de l\u2019ant\u00e9c\u00e9dent. La PSR \u00ab\u00a0dont Moli\u00e8re tirait ses effets comiques\u00a0\u00bb compl\u00e8te \u00ab\u00a0Les sc\u00e8nes\u00a0\u00bb.'},
+      {label:'Quelle est la fonction de \u00ab\u00a0dont\u00a0\u00bb \u00c0 L\u2019INT\u00c9RIEUR de la subordonn\u00e9e\u00a0?',
+       opts:['Sujet du verbe \u00ab\u00a0tirait\u00a0\u00bb','COI du verbe \u00ab\u00a0tirait\u00a0\u00bb','CC de lieu du verbe \u00ab\u00a0tirait\u00a0\u00bb'],ans:1,
+       fb:'\u00ab\u00a0Dont\u00a0\u00bb remplace \u00ab\u00a0de ces sc\u00e8nes\u00a0\u00bb \u00e0 l\u2019int\u00e9rieur de la subordonn\u00e9e. Dans la subordonn\u00e9e reconstitu\u00e9e\u00a0: \u00ab\u00a0Moli\u00e8re tirait ses effets comiques DE ces sc\u00e8nes\u00a0\u00bb. \u00ab\u00a0Dont\u00a0\u00bb est COI (les effets comiques DE ces sc\u00e8nes).'}
+    ]
+  }
+];
+
+/* ══════════════════════════════════════
+   ÉTAT GLOBAL
+══════════════════════════════════════ */
+var scores={p1:0,p2:0,p3:0,p4:0};
+var palierDone={1:false,2:false,3:false,4:false};
+var hState={}; /* surlignage par id phrase */
+var etapeState={}; /* QCM par id phrase + étape */
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,t,v){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),tc=actx.currentTime;o.type=t||'sine';o.frequency.setValueAtTime(f1,tc);o.frequency.exponentialRampToValueAtTime(f2,tc+d);g.gain.setValueAtTime(0.0001,tc);g.gain.linearRampToValueAtTime(v||0.14,tc+0.01);g.gain.exponentialRampToValueAtTime(0.0001,tc+d);o.connect(g);g.connect(actx.destination);o.start(tc);o.stop(tc+d+0.02);}
+function sndOk(){initA();beep(440,660,0.08,'sine',0.15);setTimeout(function(){beep(660,880,0.15,'sine',0.12);},90);}
+function sndKo(){initA();beep(280,160,0.22,'sawtooth',0.12);}
+function sndFin(){initA();beep(523,659,0.2,'sine',0.14);setTimeout(function(){beep(659,880,0.25,'sine',0.12);},120);}
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+/* ══ GLOBAL UPDATE ══ */
+function updateGlobal(){
+  var ok=scores.p1+scores.p2+scores.p3+scores.p4;
+  var total=30;
+  $('cnt-ok').textContent=ok;
+  $('cnt-rem').textContent=total-ok;
+  var pct=Math.round(ok/total*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+total+' points';
+  $('prog-pct').textContent=pct+'%';
+  $('jauge-fill').style.width=pct+'%';
+  $('jauge-pct').textContent=pct+'%';
+  /* Dots palier */
+  [1,2,3,4].forEach(function(p){
+    var d=$('pdot'+(p-1));
+    if(palierDone[p])d.className='pdot done';
+    else if(!$('pal'+p).classList.contains('locked'))d.className='pdot active';
+    else d.className='pdot';
+  });
+}
+function updatePscore(p,sc,max){$('ps'+p).textContent=sc+' / '+max;}
+
+/* ══ BUILD SURLIGNAGE ══ */
+function buildHighlight(phrase, containerId, onValidate){
+  var ph=document.createElement('div');ph.className='phrase-item';
+  var num=document.createElement('div');num.className='phrase-num';
+  num.textContent='Phrase '+phrase.id.replace('p','');ph.appendChild(num);
+  var disp=document.createElement('div');disp.className='phrase-display';
+  disp.id='pd-'+phrase.id;
+  hState[phrase.id]={sel:[], validated:false};
+  phrase.tokens.forEach(function(tok,i){
+    if(tok==='.'){disp.appendChild(document.createTextNode('.'));return;}
+    var sp=document.createElement('span');sp.className='mot';sp.textContent=tok;
+    sp.dataset.idx=i;sp.dataset.pid=phrase.id;
+    sp.addEventListener('click',function(){
+      if(hState[phrase.id].validated)return;
+      var st=hState[phrase.id];
+      var si=st.sel.indexOf(i);
+      if(si>=0){st.sel.splice(si,1);sp.className='mot';}
+      else{st.sel.push(i);sp.className='mot sel';}
+    });
+    disp.appendChild(sp);
+    if(i<phrase.tokens.length-2)disp.appendChild(document.createTextNode(' '));
+  });
+  ph.appendChild(disp);
+  /* Boutons */
+  var btnRow=document.createElement('div');btnRow.style.display='flex';btnRow.style.gap='.5rem';btnRow.style.flexWrap='wrap';
+  var btnVal=document.createElement('button');btnVal.className='btn-h';btnVal.innerHTML='&#10003;&nbsp;Valider le surlignage';
+  var hFb=document.createElement('div');hFb.className='h-fb';hFb.id='hfb-'+phrase.id;
+  btnVal.addEventListener('click',function(){
+    if(hState[phrase.id].validated)return;
+    var st=hState[phrase.id];
+    var sel=st.sel.slice().sort(function(a,b){return a-b;});
+    var expected=phrase.psr.slice().sort(function(a,b){return a-b;});
+    var ok=JSON.stringify(sel)===JSON.stringify(expected);
+    hState[phrase.id].validated=true;
+    hState[phrase.id].ok=ok;
+    btnVal.disabled=true;
+    /* Colorier les mots */
+    var allSpans=disp.querySelectorAll('.mot');
+    allSpans.forEach(function(sp){
+      var idx2=parseInt(sp.dataset.idx);
+      var inPsr=expected.indexOf(idx2)>=0;
+      var inSel=sel.indexOf(idx2)>=0;
+      sp.className='mot '+(inPsr&&inSel?'correct-h':inPsr&&!inSel?'missed-h':!inPsr&&inSel?'wrong-h':'');
+    });
+    if(ok){hFb.className='h-fb show ok';hFb.innerHTML='&#10003;&nbsp;PSR correctement délimitée.';}
+    else{hFb.className='h-fb show';hFb.innerHTML='&#10006;&nbsp;'+phrase.fbH;}
+    if(ok)sndOk();else sndKo();
+    if(onValidate)onValidate(ok,phrase.id);
+  });
+  btnRow.appendChild(btnVal);
+  ph.appendChild(btnRow);ph.appendChild(hFb);
+  document.getElementById(containerId).appendChild(ph);
+}
+
+/* ══ BUILD QCM ETAPE ══ */
+function buildEtape(etape, phraseId, etapeIdx, containerId, onDone){
+  var div=document.createElement('div');div.className='etape';div.id='et-'+phraseId+'-'+etapeIdx;
+  div.style.display='none';
+  var lbl=document.createElement('div');lbl.className='etape-label';
+  lbl.textContent=(etapeIdx+2)+'. '+etape.label;div.appendChild(lbl);
+  var opts=document.createElement('div');opts.className='opts-col';
+  var fb=document.createElement('div');fb.className='etape-fb';fb.id='efb-'+phraseId+'-'+etapeIdx;
+  var shuffled=shuffle(etape.opts.map(function(o,i){return{txt:o,orig:i};}));
+  shuffled.forEach(function(item,li){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.dataset.orig=item.orig;
+    btn.innerHTML='<span class="opt-letter">'+LETTERS[li]+'</span><span>'+item.txt+'</span>';
+    btn.addEventListener('click',function(){
+      if(btn.disabled)return;
+      opts.querySelectorAll('.opt-btn').forEach(function(b){b.disabled=true;});
+      var ok=(parseInt(btn.dataset.orig)===etape.ans);
+      opts.querySelectorAll('.opt-btn').forEach(function(b){
+        b.className='opt-btn'+(parseInt(b.dataset.orig)===etape.ans?' correct':(b===btn&&!ok?' wrong':''));
+      });
+      if(ok){fb.className='etape-fb show ok';fb.innerHTML='&#10003;&nbsp;Correct.';}
+      else{fb.className='etape-fb show';fb.innerHTML='&#10006;&nbsp;'+etape.fb;}
+      if(ok)sndOk();else sndKo();
+      if(onDone)onDone(ok);
+    });
+    opts.appendChild(btn);
+  });
+  div.appendChild(opts);div.appendChild(fb);
+  document.getElementById(containerId).appendChild(div);
+  return div;
+}
+
+/* ══ PALIER 1 ══ */
+var p1scores=[];
+function buildP1(){
+  $('p1-phrases').innerHTML='';
+  p1scores=[];hState={};
+  scores.p1=0;updatePscore(1,0,3);
+  P1.forEach(function(ph,i){
+    buildHighlight(ph,'p1-phrases',function(ok,pid){
+      p1scores[i]=ok?1:0;
+      scores.p1=p1scores.reduce(function(a,b){return a+(b||0);},0);
+      updatePscore(1,scores.p1,3);updateGlobal();
+      /* Si toutes validées */
+      var allDone=P1.every(function(p){return hState[p.id]&&hState[p.id].validated;});
+      if(allDone)endPalier1();
+    });
+  });
+}
+function endPalier1(){
+  var sc=scores.p1;
+  $('psd1').textContent='Score Palier 1\u00a0: '+sc+' / 3';$('psd1').classList.add('show');
+  var fb=$('pfb1');
+  if(sc>=3){fb.className='palier-fb show ok';fb.innerHTML='&#11088;\u00a0Palier 1 valid\u00e9\u00a0! 3/3.';sndOk();$('pnext1').classList.add('show');}
+  else if(sc>=2){fb.className='palier-fb show mid';fb.innerHTML='&#128161;\u00a0'+sc+'/3 \u2014 Score suffisant. Palier 2 d\u00e9bloqu\u00e9.';$('pnext1').classList.add('show');}
+  else{fb.className='palier-fb show ko';fb.innerHTML='&#10006;\u00a0'+sc+'/3 \u2014 Score insuffisant (minimum\u00a0: 2/3). Rien\u00a0: retente avant de continuer.';}
+  palierDone[1]=true;updateGlobal();
+}
+
+/* ══ PALIER 2 ══ */
+var p2scores={};
+function buildP2(){
+  $('p2-phrases').innerHTML='';
+  p2scores={};
+  scores.p2=0;updatePscore(2,0,9);
+  P2.forEach(function(ph,pi){
+    p2scores[ph.id]={h:0,etapes:[]};
+    buildHighlight(ph,'p2-phrases',function(ok,pid){
+      p2scores[pid].h=ok?1:0;
+      recalcP2();
+      /* Afficher étape 1 */
+      var e0=$('et-'+pid+'-0');if(e0)e0.style.display='block';
+    });
+    ph.etapes.forEach(function(et,ei){
+      buildEtape(et,ph.id,ei,'p2-phrases',function(ok){
+        p2scores[ph.id].etapes[ei]=ok?1:0;
+        recalcP2();
+        /* Afficher étape suivante */
+        var ne=$('et-'+ph.id+'-'+(ei+1));if(ne)ne.style.display='block';
+        /* Si dernier du palier */
+        var allDone2=P2.every(function(p){
+          return hState[p.id]&&hState[p.id].validated&&p2scores[p.id].etapes.length>=p.etapes.length&&
+            p2scores[p.id].etapes.every(function(v){return v!==undefined;});
+        });
+        if(allDone2)endPalier2();
+      });
+    });
+  });
+}
+function recalcP2(){
+  var sc=0;
+  P2.forEach(function(p){
+    sc+=(p2scores[p.id]&&p2scores[p.id].h)||0;
+    (p2scores[p.id]&&p2scores[p.id].etapes||[]).forEach(function(v){sc+=v||0;});
+  });
+  scores.p2=sc;updatePscore(2,sc,9);updateGlobal();
+}
+function endPalier2(){
+  var sc=scores.p2;
+  $('psd2').textContent='Score Palier 2\u00a0: '+sc+' / 9';$('psd2').classList.add('show');
+  var fb=$('pfb2');
+  if(sc>=9){fb.className='palier-fb show ok';fb.innerHTML='&#11088;\u00a0Palier 2 valid\u00e9\u00a0! 9/9.';sndOk();$('pnext2').classList.add('show');}
+  else if(sc>=7){fb.className='palier-fb show mid';fb.innerHTML='&#128161;\u00a0'+sc+'/9 \u2014 Score suffisant. Palier 3 d\u00e9bloqu\u00e9.';$('pnext2').classList.add('show');}
+  else{fb.className='palier-fb show ko';fb.innerHTML='&#10006;\u00a0'+sc+'/9 \u2014 Score insuffisant (minimum\u00a0: 7/9). R\u00e9essaie avant de continuer.';}
+  palierDone[2]=true;updateGlobal();
+}
+
+/* ══ PALIER 3 ══ */
+var p3scores={};
+function buildP3(){
+  $('p3-phrases').innerHTML='';
+  p3scores={};scores.p3=0;updatePscore(3,0,8);
+  P3.forEach(function(ph){
+    p3scores[ph.id]={h:0,etapes:[]};
+    buildHighlight(ph,'p3-phrases',function(ok,pid){
+      p3scores[pid].h=ok?1:0;recalcP3();
+      var e0=$('et-'+pid+'-0');if(e0)e0.style.display='block';
+    });
+    ph.etapes.forEach(function(et,ei){
+      buildEtape(et,ph.id,ei,'p3-phrases',function(ok){
+        p3scores[ph.id].etapes[ei]=ok?1:0;recalcP3();
+        var ne=$('et-'+ph.id+'-'+(ei+1));if(ne)ne.style.display='block';
+        var allDone=P3.every(function(p){
+          return hState[p.id]&&hState[p.id].validated&&
+            p3scores[p.id].etapes.length>=p.etapes.length&&
+            p3scores[p.id].etapes.every(function(v){return v!==undefined;});
+        });
+        if(allDone)endPalier3();
+      });
+    });
+  });
+}
+function recalcP3(){
+  var sc=0;
+  P3.forEach(function(p){
+    sc+=(p3scores[p.id]&&p3scores[p.id].h)||0;
+    (p3scores[p.id]&&p3scores[p.id].etapes||[]).forEach(function(v){sc+=v||0;});
+  });
+  scores.p3=sc;updatePscore(3,sc,8);updateGlobal();
+}
+function endPalier3(){
+  var sc=scores.p3;
+  $('psd3').textContent='Score Palier 3\u00a0: '+sc+' / 8';$('psd3').classList.add('show');
+  var fb=$('pfb3');
+  if(sc>=8){fb.className='palier-fb show ok';fb.innerHTML='&#11088;\u00a0Palier 3 valid\u00e9\u00a0! 8/8.';sndOk();$('pnext3').classList.add('show');}
+  else if(sc>=6){fb.className='palier-fb show mid';fb.innerHTML='&#128161;\u00a0'+sc+'/8 \u2014 Score suffisant. Palier 4 d\u00e9bloqu\u00e9.';$('pnext3').classList.add('show');}
+  else{fb.className='palier-fb show ko';fb.innerHTML='&#10006;\u00a0'+sc+'/8 \u2014 Score insuffisant (minimum\u00a0: 6/8). R\u00e9essaie avant de continuer.';}
+  palierDone[3]=true;updateGlobal();
+}
+
+/* ══ PALIER 4 ══ */
+var p4scores={};
+function buildP4(){
+  $('p4-phrases').innerHTML='';
+  p4scores={};scores.p4=0;updatePscore(4,0,10);
+  P4.forEach(function(ph){
+    p4scores[ph.id]={h:0,etapes:[]};
+    buildHighlight(ph,'p4-phrases',function(ok,pid){
+      p4scores[pid].h=ok?1:0;recalcP4();
+      var e0=$('et-'+pid+'-0');if(e0)e0.style.display='block';
+    });
+    ph.etapes.forEach(function(et,ei){
+      buildEtape(et,ph.id,ei,'p4-phrases',function(ok){
+        p4scores[ph.id].etapes[ei]=ok?1:0;recalcP4();
+        var ne=$('et-'+ph.id+'-'+(ei+1));if(ne)ne.style.display='block';
+        var allDone=P4.every(function(p){
+          return hState[p.id]&&hState[p.id].validated&&
+            p4scores[p.id].etapes.length>=p.etapes.length&&
+            p4scores[p.id].etapes.every(function(v){return v!==undefined;});
+        });
+        if(allDone)endPalier4();
+      });
+    });
+  });
+}
+function recalcP4(){
+  var sc=0;
+  P4.forEach(function(p){
+    sc+=(p4scores[p.id]&&p4scores[p.id].h)||0;
+    (p4scores[p.id]&&p4scores[p.id].etapes||[]).forEach(function(v){sc+=v||0;});
+  });
+  scores.p4=sc;updatePscore(4,sc,10);updateGlobal();
+}
+function endPalier4(){
+  var sc=scores.p4;
+  $('psd4').textContent='Score Palier 4\u00a0: '+sc+' / 10';$('psd4').classList.add('show');
+  var fb=$('pfb4');
+  if(sc>=9){fb.className='palier-fb show ok';fb.innerHTML='&#11088;\u00a0Palier 4 valid\u00e9\u00a0! Rapport complet.';sndFin();}
+  else if(sc>=7){fb.className='palier-fb show mid';fb.innerHTML='&#128161;\u00a0'+sc+'/10 \u2014 Bonne analyse. Voir le bilan.';}
+  else{fb.className='palier-fb show ko';fb.innerHTML='&#10006;\u00a0'+sc+'/10 \u2014 Quelques analyses \u00e0 retravailler.';}
+  palierDone[4]=true;$('pnext4').classList.add('show');updateGlobal();
+}
+
+/* ══ DÉBLOCAGE PALIERS ══ */
+function unlockPalier(n){
+  $('pal'+n).classList.remove('locked');
+  $('pdot'+(n-1)).className='pdot active';
+}
+
+/* ══ BOUTONS NEXT ══ */
+$('pnext1').addEventListener('click',function(){unlockPalier(2);buildP2();
+  $('pal2').scrollIntoView({behavior:'smooth',block:'start'});});
+$('pnext2').addEventListener('click',function(){unlockPalier(3);buildP3();
+  $('pal3').scrollIntoView({behavior:'smooth',block:'start'});});
+$('pnext3').addEventListener('click',function(){unlockPalier(4);buildP4();
+  $('pal4').scrollIntoView({behavior:'smooth',block:'start'});});
+$('pnext4').addEventListener('click',function(){showResults();});
+
+/* ══ RETRY ══ */
+$('pry1').addEventListener('click',function(){
+  scores.p1=0;palierDone[1]=false;
+  $('psd1').classList.remove('show');$('pfb1').className='palier-fb';$('pnext1').classList.remove('show');
+  buildP1();updateGlobal();
+});
+$('pry2').addEventListener('click',function(){
+  scores.p2=0;palierDone[2]=false;
+  $('psd2').classList.remove('show');$('pfb2').className='palier-fb';$('pnext2').classList.remove('show');
+  buildP2();updateGlobal();
+});
+$('pry3').addEventListener('click',function(){
+  scores.p3=0;palierDone[3]=false;
+  $('psd3').classList.remove('show');$('pfb3').className='palier-fb';$('pnext3').classList.remove('show');
+  buildP3();updateGlobal();
+});
+$('pry4').addEventListener('click',function(){
+  scores.p4=0;palierDone[4]=false;
+  $('psd4').classList.remove('show');$('pfb4').className='palier-fb';$('pnext4').classList.remove('show');
+  buildP4();updateGlobal();
+});
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  var tot=scores.p1+scores.p2+scores.p3+scores.p4;
+  $('r-score').textContent=tot;
+  $('r-p1').textContent=scores.p1+'/3';$('r-p2').textContent=scores.p2+'/9';
+  $('r-p3').textContent=scores.p3+'/8';$('r-p4').textContent=scores.p4+'/10';
+  var s=tot>=27?5:tot>=22?4:tot>=15?3:tot>=8?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var titres=[
+    'Retour aux instruments \u2014 Reprends depuis le palier 1.',
+    'Technicien en formation \u2014 Reprends les paliers 3 et 4.',
+    'Technicien en formation \u2014 Reprends les paliers 3 et 4.',
+    'Technicien confirm\u00e9 \u2014 Analyse solide, quelques points \u00e0 affiner.',
+    '\ud83d\udd2c\u00a0Analyste expert \u2014 Rapport de laboratoire irr\u00e9prochable.'
+  ];
+  $('r-titre').textContent=titres[s-1];
+  var msgs=[
+    'Score insuffisant. Recommence depuis le palier 1 pour consolider les bases.',
+    'Les paliers 3 et 4 n\u00e9cessitent un travail suppl\u00e9mentaire.',
+    'Bonne progression. Les paliers 3 et 4 m\u00e9ritent d\u2019\u00eatre repris.',
+    'Analyse solide. Quelques op\u00e9rations \u00e0 affiner au palier 4.',
+    'Rapport exemplaire \u2014 toutes les op\u00e9rations ma\u00eetris\u00e9es.'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  if(tot>=22)$('unlock-msg').classList.add('show');
+  $('results-screen').classList.add('show');
+}
+$('btn-restart').addEventListener('click',function(){
+  scores={p1:0,p2:0,p3:0,p4:0};palierDone={1:false,2:false,3:false,4:false};
+  hState={};p2scores={};p3scores={};p4scores={};p1scores=[];
+  [2,3,4].forEach(function(n){$('pal'+n).classList.add('locked');});
+  [1,2,3,4].forEach(function(n){
+    $('psd'+n).classList.remove('show');$('pfb'+n).className='palier-fb';$('pnext'+n).classList.remove('show');
+  });
+  $('results-screen').classList.remove('show');$('unlock-msg').classList.remove('show');
+  [1,2,3,4].forEach(function(n){$('pdot'+(n-1)).className=n===1?'pdot active':'pdot';});
+  buildP1();updateGlobal();window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildP1();updateGlobal();
+</script>
+</body>
+</html>
