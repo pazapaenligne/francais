@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J1 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5a623;--day-dark:#c47a10;
+      --day-light:#fff5e0;--day-border:#f5d080;
+      --day-glow:rgba(245,166,35,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f28b82;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* TABLEAU DE BORD ACADÉMIE */
+    .academie{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .academie::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .ac-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9a9a7a;margin-bottom:.7rem;}
+    .ac-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.85rem;}
+    .ac-statut{flex:1;}
+    .ac-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#7a7a5a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .ac-titre-nom{font-size:1.05rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;line-height:1.3;}
+    .ac-score{text-align:right;}
+    .ac-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .ac-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#7a7a5a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    /* sièges académie */
+    .sieges{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .siege{width:30px;height:30px;border-radius:6px;background:var(--dark2);
+      border:1.5px solid var(--dark3);display:flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:#7a7a5a;
+      transition:all .3s;}
+    .siege.actif{border-color:var(--day-color);color:var(--day-border);}
+    .siege.ok{background:rgba(34,197,94,.2);border-color:var(--green);color:#4ade80;}
+    .siege.ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#f87171;}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    .ref-item{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:9px;padding:.7rem .9rem;}
+    .ref-item-titre{font-size:.8rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.35rem;}
+    .ref-item-body{font-size:.85rem;color:var(--text);line-height:1.65;}
+    .ref-item-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* parties */
+    .partie-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),#f5c518);}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.05rem;
+      font-style:italic;color:var(--text);line-height:1.8;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.6;}
+
+    /* vrai/faux */
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:1.05rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    /* options QCM */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.97rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;line-height:1.5;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.9rem;font-family:'JetBrains Mono',monospace;
+      padding:.5rem .8rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* résultat partie */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:#9a9a7a;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* boutons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre-acad{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9a9a7a;margin-bottom:.3rem;}
+    .res-grade{font-size:1.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;line-height:1.3;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.4rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a7a5a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8c8a8;margin-bottom:.9rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both,flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both,flashKo .5s ease both;}
+
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr;}
+      .vf-row{gap:.4rem;}
+      .btn-dark,.btn-primary{width:100%;}
+      .sieges{gap:.3rem;}
+      .siege{width:26px;height:26px;font-size:.68rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 3 &ndash; Jour 1</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Acad&eacute;mie fran&ccedil;aise</span></h1>
+</header>
+
+<!-- TABLEAU DE BORD -->
+<div class="academie">
+  <div class="ac-titre">&#127979; Jury d&rsquo;admission &mdash; 7 questions</div>
+  <div class="ac-row">
+    <div class="ac-statut">
+      <div class="ac-statut-label">Titre actuel</div>
+      <div class="ac-titre-nom" id="ac-titre">Candidat &mdash; en attente</div>
+    </div>
+    <div class="ac-score">
+      <div class="ac-score-num"><span id="ac-total">0</span>/7</div>
+      <div class="ac-score-label">R&eacute;ponses correctes</div>
+    </div>
+  </div>
+  <div class="sieges" id="sieges"></div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 7 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel &mdash; Romantisme et lyrisme</div>
+  <div class="ref-grid">
+    <div class="ref-item">
+      <div class="ref-item-titre">Le romantisme</div>
+      <div class="ref-item-body">Mouvement n&eacute; fin XVIII<sup>e</sup>, épanoui en France 1820-1850. Réaction contre le classicisme. <em>Valeurs</em> : émotions, mélancolie, solitude, liberté formelle, goût du passé.</div>
+    </div>
+    <div class="ref-item">
+      <div class="ref-item-titre">Le lyrisme</div>
+      <div class="ref-item-body">Registre de l’expression directe des sentiments. <em>Marques</em> : pronom « je », vocabulaire des émotions, exclamations, apostrophes, rythme expressif.</div>
+    </div>
+    <div class="ref-item">
+      <div class="ref-item-titre">Paysage &eacute;tat d’âme / Mal du siècle</div>
+      <div class="ref-item-body">La nature reflète l’intériorité du poète. Le <em>mal du siècle</em> : mélancolie et désillusion de la jeunesse après les espérances révolutionnaires.</div>
+    </div>
+    <div class="ref-item">
+      <div class="ref-item-titre">Auteurs &amp; genres</div>
+      <div class="ref-item-body">Hugo, Lamartine, Musset, Vigny, Nerval, Chateaubriand. <em>Genres</em> : poésie lyrique, roman historique, drame romantique.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIES -->
+<div class="partie-wrap">
+
+  <div id="bloc-p1">
+    <div class="partie-header">
+      <div class="part-icon">&#128301;</div>
+      <div>
+        <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+        <div class="part-sous">3 affirmations &mdash; Questions 1 &agrave; 3</div>
+      </div>
+      <div class="part-badge" id="badge-p1">0/3</div>
+    </div>
+    <div id="cards-p1"></div>
+    <div class="part-result" id="res-p1">
+      <div class="part-score" id="score-p1"></div>
+      <div class="part-msg" id="msg-p1"></div>
+      <div id="btn-p1"></div>
+    </div>
+  </div>
+
+  <div id="bloc-p2" style="display:none;">
+    <div class="partie-header">
+      <div class="part-icon">&#127979;</div>
+      <div>
+        <div class="part-titre">Partie 2 &mdash; Questions du jury</div>
+        <div class="part-sous">4 questions &mdash; Questions 4 &agrave; 7</div>
+      </div>
+      <div class="part-badge" id="badge-p2">0/4</div>
+    </div>
+    <div id="cards-p2"></div>
+    <div class="part-result" id="res-p2">
+      <div class="part-score" id="score-p2"></div>
+      <div class="part-msg" id="msg-p2"></div>
+      <div id="btn-p2"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre-acad">&#127979; Verdict du jury</div>
+    <div class="res-grade" id="res-grade"></div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/7</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      Repasser l&rsquo;examen
+    </button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════
+   DONNÉES P1
+════════════════════ */
+var P1=[
+  {
+    id:'q1',qNum:1,
+    phrase:'Le lyrisme est un registre litt\u00e9raire qui se reconna\u00eet \u00e0 l\u2019expression directe et intense des sentiments du po\u00e8te\u00a0: emploi du \u00ab\u00a0je\u00a0\u00bb, vocabulaire des \u00e9motions, exclamations, apostrophes.',
+    rep:true,
+    fb:'C\u2019est la d\u00e9finition exacte du lyrisme. Il ne faut pas confondre le lyrisme (un registre, une fa\u00e7on d\u2019\u00e9crire) et le romantisme (un mouvement litt\u00e9raire du XIX\u1d49 si\u00e8cle). Le romantisme use abondamment du lyrisme, mais le lyrisme existe aussi dans d\u2019autres mouvements et d\u2019autres \u00e9poques.'
+  },
+  {
+    id:'q2',qNum:2,
+    phrase:'Dans le romantisme, la nature est d\u00e9crite uniquement pour sa beaut\u00e9 pittoresque, sans lien avec l\u2019\u00e9tat int\u00e9rieur du po\u00e8te.',
+    rep:false,
+    fb:'Dans le romantisme, la nature est un \u00ab\u00a0paysage \u00e9tat d\u2019\u00e2me\u00a0\u00bb\u00a0: elle refl\u00e8te l\u2019int\u00e9riorit\u00e9 du po\u00e8te. Un ciel couvert et orageux traduit son angoisse\u00a0; un soleil couchant traduit sa m\u00e9lancolie face au temps qui passe. La nature n\u2019est jamais un simple d\u00e9cor dans la po\u00e9sie romantique\u00a0: elle est le prolongement du moi du po\u00e8te.'
+  },
+  {
+    id:'q3',qNum:3,
+    phrase:'Le romantisme s\u2019\u00e9panouit principalement en France au XVII\u1d49 si\u00e8cle, en m\u00eame temps que le classicisme.',
+    rep:false,
+    fb:'Le classicisme s\u2019\u00e9panouit en France au XVII\u1d49 si\u00e8cle (sous Louis XIV). Le romantisme, lui, na\u00eet \u00e0 la fin du XVIII\u1d49 si\u00e8cle en Allemagne et en Angleterre et s\u2019\u00e9panouit en France dans la premi\u00e8re moiti\u00e9 du XIX\u1d49 si\u00e8cle (ann\u00e9es 1820-1850). Les deux mouvements ne sont pas contemporains\u00a0: le romantisme na\u00eet en r\u00e9action contre les valeurs du classicisme.'
+  }
+];
+
+/* ════════════════════
+   DONNÉES P2
+════════════════════ */
+var P2=[
+  {
+    id:'q4',qNum:4,
+    texte:'Parmi ces marques du lyrisme, laquelle est incorrecte\u00a0?',
+    opts:[
+      {t:'L\u2019emploi du pronom personnel \u00ab\u00a0je\u00a0\u00bb.',ok:false},
+      {t:'Le vocabulaire des \u00e9motions et des sentiments.',ok:false},
+      {t:'La description objective et impersonnelle des faits.',ok:true}
+    ],
+    fb:'Le lyrisme se reconna\u00eet \u00e0 la pr\u00e9sence du po\u00e8te dans son texte\u00a0: pronom \u00ab\u00a0je\u00a0\u00bb, \u00e9motions exprim\u00e9es, exclamations, apostrophes. Une description objective et impersonnelle est au contraire caract\u00e9ristique du registre r\u00e9aliste ou descriptif, pas du lyrisme.'
+  },
+  {
+    id:'q5',qNum:5,
+    texte:'Quelle \u0153uvre de Victor Hugo est consid\u00e9r\u00e9e comme le manifeste du romantisme fran\u00e7ais et affirme la libert\u00e9 de l\u2019\u00e9crivain contre les r\u00e8gles classiques\u00a0?',
+    opts:[
+      {t:'Les Contemplations (1856)',ok:false},
+      {t:'La Pr\u00e9face de Cromwell (1827)',ok:true},
+      {t:'Les Feuilles d\u2019Automne (1831)',ok:false}
+    ],
+    fb:'La Pr\u00e9face de Cromwell (1827) est le manifeste fondateur du romantisme fran\u00e7ais. Hugo y th\u00e9orise la rupture avec le classicisme\u00a0: libert\u00e9 des formes, m\u00e9lange des genres (sublime et grotesque), refus des trois unit\u00e9s. Les Contemplations et Les Feuilles d\u2019Automne sont des recueils po\u00e9tiques post\u00e9rieurs.'
+  },
+  {
+    id:'q6',qNum:6,
+    texte:'Quelle caract\u00e9ristique distingue le h\u00e9ros romantique du h\u00e9ros classique\u00a0?',
+    opts:[
+      {t:'Le h\u00e9ros romantique respecte les r\u00e8gles sociales et trouve sa place dans la soci\u00e9t\u00e9 de son \u00e9poque.',ok:false},
+      {t:'Le h\u00e9ros romantique est un \u00eatre exceptionnel, solitaire et rejet\u00e9 de la soci\u00e9t\u00e9.',ok:true},
+      {t:'Le h\u00e9ros romantique est un personnage ordinaire qui illustre des vertus morales universelles.',ok:false}
+    ],
+    fb:'Le h\u00e9ros classique incarne des vertus universelles reconnues par tous. Le h\u00e9ros romantique est au contraire exceptionnel, incompris, solitaire. Il souffre de ne pas trouver sa place dans le monde tel qu\u2019il est\u00a0: trop grand, trop sensible, trop id\u00e9aliste pour s\u2019y conformer.'
+  },
+  {
+    id:'q7',qNum:7,
+    texte:'Dans quel recueil Alphonse de Lamartine inaugure-t-il la po\u00e9sie lyrique romantique en France en 1820\u00a0?',
+    opts:[
+      {t:'Les Destin\u00e9es',ok:false},
+      {t:'Les Chim\u00e8res',ok:false},
+      {t:'Les M\u00e9ditations po\u00e9tiques',ok:true}
+    ],
+    fb:'Les M\u00e9ditations po\u00e9tiques de Lamartine (1820) marquent la naissance du lyrisme romantique en France. Le recueil exprime des \u00e9motions intimes\u00a0: m\u00e9lancolie, m\u00e9ditation sur le temps qui passe, contemplation de la nature.'
+  }
+];
+
+/* Positions fixes garanties : Q4=C, Q5=B, Q6=B, Q7=C → C,B,B,C
+   Les opts sont déjà dans le bon ordre dans les données */
+
+/* ════════════════════
+   ÉTAT
+════════════════════ */
+var scoreOk=0,p1Ok=0,p1Results={},p2Ok=0,p2Results={};
+
+var GRADES=[
+  {min:0,titre:'Candidat refus\u00e9'},
+  {min:4,titre:'Initié romantique'},
+  {min:5,titre:'Lettré du XIX\u1d49 siècle'},
+  {min:6,titre:'Romantique confirmé'},
+  {min:7,titre:'Maître des lettres romantiques'}
+];
+
+function getGrade(n){
+  var g=GRADES[0];
+  for(var i=0;i<GRADES.length;i++){ if(n>=GRADES[i].min) g=GRADES[i]; }
+  return g.titre;
+}
+
+function shuffle(a){
+  var arr=a.slice();
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;
+  }
+  return arr;
+}
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+/* ════════════════════
+   SIÈGES
+════════════════════ */
+function buildSieges(){
+  var wrap=document.getElementById('sieges');wrap.innerHTML='';
+  for(var i=1;i<=7;i++){
+    var s=mkEl('div','siege'+(i===1?' actif':''));
+    s.id='s-'+i;s.textContent=i;wrap.appendChild(s);
+  }
+}
+
+function majSiege(n,ok){
+  var s=document.getElementById('s-'+n);
+  if(s){s.classList.remove('actif');s.classList.add(ok?'ok':'ko');}
+  var next=document.getElementById('s-'+(n+1));
+  if(next)next.classList.add('actif');
+  document.getElementById('ac-total').textContent=scoreOk;
+  document.getElementById('ac-titre').textContent=getGrade(scoreOk);
+  var done=Object.keys(p1Results).length+Object.keys(p2Results).length;
+  var pct=Math.round(done/7*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 7 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+}
+
+/* ════════════════════
+   SON + ANIMATION
+════════════════════ */
+function jouerSon(ok){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(ok){
+      osc.frequency.setValueAtTime(520,ctx.currentTime);
+      osc.frequency.setValueAtTime(660,ctx.currentTime+.08);
+      osc.frequency.setValueAtTime(800,ctx.currentTime+.16);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.4);
+    }else{
+      osc.frequency.setValueAtTime(280,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.35);
+    }
+  }catch(e){}
+}
+
+function animerCard(id,ok){
+  var card=document.getElementById('c-'+id);
+  if(!card)return;
+  card.classList.remove('anim-ok','anim-ko');
+  void card.offsetWidth;
+  card.classList.add(ok?'anim-ok':'anim-ko');
+}
+
+/* ════════════════════
+   BUILD P1
+════════════════════ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Results={};p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum+' \u2014 Vrai ou faux\u00a0?';card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var vfRow=mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button');btn.className='vf-btn';
+      var isV=txt==='Vrai';
+      btn.innerHTML=(isV?'&#10003;':'&#10007;')+' '+txt;
+      btn.dataset.val=isV?'true':'false';
+      btn.addEventListener('click',function(){selVF(q,btn,vfRow);});
+      vfRow.appendChild(btn);
+    });
+    card.appendChild(vfRow);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Results[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Results[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p1Ok++;}
+  jouerSon(ok);animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/3';
+  majSiege(q.qNum,ok);
+  if(Object.keys(p1Results).length===P1.length)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 3';
+  document.getElementById('msg-p1').textContent=p1Ok===3?
+    '\u2713 Partie 1 ma\u00eetris\u00e9e \u2014 Partie 2 d\u00e9bloqu\u00e9e.':
+    p1Ok>=2?'Bien \u2014 Partie 2 d\u00e9bloqu\u00e9e.':'Continue \u2014 Partie 2 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Partie 2 \u2192</button>';
+}
+
+function debP2(){document.getElementById('bloc-p2').style.display='';buildP2();}
+
+/* ════════════════════
+   BUILD P2
+════════════════════ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Results={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    var opts=mkEl('div','opts');
+    q.opts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selP2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Results[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p2Results[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p2Ok++;}
+  jouerSon(ok);animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/4';
+  majSiege(q.qNum,ok);
+  if(Object.keys(p2Results).length===P2.length)showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 4';
+  document.getElementById('msg-p2').textContent=p2Ok===4?
+    '\u2713 Partie 2 parfaite\u00a0!':
+    p2Ok>=3?'Tr\u00e8s bien\u00a0!':p2Ok>=2?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir le verdict \u2192</button>';
+}
+
+/* ════════════════════
+   VERDICT
+════════════════════ */
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  document.getElementById('res-grade').textContent=getGrade(total);
+  var stars=total>=7?5:total>=6?4:total>=5?3:total>=4?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  document.getElementById('res-badge').innerHTML=total>=4?
+    '<div class="badge-ok">\u2713 Admis \u00e0 l\u2019Acad\u00e9mie\u00a0!</div>':
+    '<div class="badge-ko">Non admis \u2014 4/7 minimum requis.</div>';
+  var msgs=['\u00c0 retravailler.','\u00c0 retravailler.','\u00c0 retravailler.','\u00c0 retravailler.',
+    'Bien jou\u00e9\u00a0!','Tr\u00e8s bien\u00a0!','Excellent\u00a0!','Parfait \u2014 sans faute\u00a0!'];
+  document.getElementById('res-msg').textContent=msgs[Math.min(total,msgs.length-1)];
+}
+
+/* ════════════════════
+   RESET
+════════════════════ */
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Results={};p2Ok=0;p2Results={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/3';
+  document.getElementById('badge-p2').textContent='0/4';
+  document.getElementById('ac-total').textContent='0';
+  document.getElementById('ac-titre').textContent='Candidat \u2014 en attente';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('prog-label').textContent='0 / 7 questions';
+  document.getElementById('prog-pct').textContent='0\u00a0%';
+  document.getElementById('cards-p2').innerHTML='';
+  buildSieges();buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── INIT ─── */
+buildSieges();
+buildP1();
+</script>
+</body>
+</html>
