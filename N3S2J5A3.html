@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictée – Impératif et accord de l'adjectif – 3e S2 J5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5c518;--jour-fonce:#8a6000;--jour-clair:#fffbeb;--jour-pale:#f5e08a;
+  --day-glow:rgba(245,197,24,.38);--bg:#fffdf7;
+  --vert-ok:#22c55e;--vert-bg:#e7faec;
+  --rouge-err:#ef4444;--rouge-bg:#fdeaea;
+  --orange:#e8902a;--txt:#2b2a20;--gris:#8b8b80;
+  --acier:#6b6b58;--acier-clair:#f5f3e8;--acier-bord:#e0dcc8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-3deg)}100%{opacity:1;transform:scale(1) rotate(-3deg)}}
+
+/* BULLES DÉCO */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.38;}
+.bubble.b1{width:130px;height:130px;background:var(--jour);top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:#f5a623;bottom:30px;left:-26px;}
+.bubble.b3{width:74px;height:74px;background:#8dc63f;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:var(--jour-pale);top:26%;left:-32px;}
+
+/* HEADER PAZAPA */
+.p2-wrap{max-width:860px;margin:0 auto;padding:20px 14px 60px;position:relative;z-index:2;}
+.p2-header{text-align:center;margin-bottom:18px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);border:none;color:var(--jour-fonce);font-family:'Orbitron',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 15px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);margin-bottom:10px;}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.88rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#5a3800;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.72rem);letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);}
+
+/* LECTEUR AUDIO */
+.audio-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:0 3px 14px rgba(107,107,88,.07);}
+.audio-label{font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:1.5px;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.audio-label::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--jour);box-shadow:0 0 6px var(--day-glow);}
+.audio-controls{display:flex;align-items:center;gap:12px;}
+.btn-play{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0;box-shadow:0 3px 10px var(--day-glow);transition:transform .12s;}
+.btn-play:hover{transform:scale(1.08);}
+.audio-progress{flex:1;display:flex;flex-direction:column;gap:5px;}
+.progress-bar{height:8px;background:var(--acier-clair);border-radius:99px;cursor:pointer;position:relative;overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .1s linear;}
+.audio-time{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gris);}
+
+/* ZONE SAISIE */
+.saisie-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 14px rgba(107,107,88,.07);}
+.saisie-label{font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:1.5px;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.saisie-label::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--jour);box-shadow:0 0 6px var(--day-glow);}
+#saisieZone{width:100%;min-height:160px;border:1.5px solid var(--acier-bord);border-radius:10px;padding:14px 16px;font-family:'IM Fell English',serif;font-size:clamp(1rem,3vw,1.15rem);line-height:2.1;color:var(--txt);resize:vertical;background:var(--acier-clair);}
+#saisieZone:focus{outline:2px solid var(--jour);outline-offset:-2px;background:#fffdf7;}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.btn-principal{flex:2;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;min-height:2.8rem;box-shadow:0 3px 12px var(--day-glow);transition:transform .12s;}
+.btn-principal:hover{transform:translateY(-2px);}
+.btn-sec{flex:1;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:2px solid var(--acier-bord);border-radius:10px;background:#fff;color:var(--acier);cursor:pointer;min-height:2.8rem;transition:transform .12s;}
+.btn-sec:hover{transform:translateY(-2px);background:var(--acier-clair);}
+
+/* CORRECTION */
+.correction-card{display:none;background:#fff;border:1.5px solid var(--acier-bord);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 14px rgba(107,107,88,.07);}
+.correction-card.show{display:block;animation:fadeUp .4s ease;}
+.correction-label{font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:1.5px;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.correction-label::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--jour);box-shadow:0 0 6px var(--day-glow);}
+.correction-txt{font-family:'IM Fell English',serif;font-size:clamp(1rem,2.9vw,1.12rem);line-height:2.3;color:var(--txt);}
+.tok-ok{color:var(--txt);}
+.tok-cible-ok{color:#157f3a;font-weight:700;background:var(--vert-bg);padding:1px 5px;border-radius:4px;}
+.tok-cible-ko{text-decoration:line-through;color:var(--rouge-err);font-weight:700;background:var(--rouge-bg);padding:1px 5px;border-radius:4px;}
+.tok-cible-ko::after{content:attr(data-corr);text-decoration:none;color:#157f3a;font-weight:700;margin-left:6px;}
+.tok-hors-cible{text-decoration:line-through;color:var(--orange);padding:1px 4px;border-radius:4px;background:#fff6ea;}
+.tok-hors-cible::after{content:attr(data-corr);text-decoration:none;color:#b56010;font-weight:700;margin-left:5px;}
+
+/* LÉGENDE */
+.legende{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.leg-item{display:flex;align-items:center;gap:6px;}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* SCORE */
+.score-card{display:none;background:#fff;border:2px solid var(--jour);border-radius:16px;padding:22px;text-align:center;box-shadow:0 8px 30px var(--day-glow);margin-bottom:16px;position:relative;overflow:hidden;}
+.score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f5e08a,var(--jour-fonce));background-size:300%;animation:slide 4s linear infinite;}
+.score-card.show{display:block;animation:fadeUp .5s ease;}
+.score-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);line-height:1;color:var(--jour-fonce);margin:.3rem 0;}
+.score-etoiles{font-size:1.9rem;letter-spacing:.1em;margin:.3rem 0 .6rem;}
+.score-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gris);margin-bottom:10px;}
+.score-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.9rem,3.5vw,1.25rem);padding:9px 20px;border-radius:10px;border:3px solid;display:inline-block;transform:rotate(-3deg);animation:stampPop .5s cubic-bezier(.3,1.6,.5,1);margin-bottom:10px;}
+.score-tampon.ok{color:var(--vert-ok);border-color:var(--vert-ok);}
+.score-tampon.moyen{color:var(--orange);border-color:var(--orange);}
+.score-tampon.ko{color:var(--rouge-err);border-color:var(--rouge-err);}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div>
+<div class="bubble b3"></div><div class="bubble b4"></div>
+
+<div class="p2-wrap">
+  <div class="p2-header">
+    <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 3ÈME</div>
+    <div class="semaine">Semaine 2 &mdash; Jour 5</div>
+    <h1 class="titre"><span class="accent">Dictée</span></h1>
+    <div class="badge-theme">Impératif présent &middot; accord de l'adjectif &middot; /10</div>
+  </div>
+
+  <!-- LECTEUR AUDIO -->
+  <div class="audio-card">
+    <div class="audio-label">Écouter la dictée</div>
+    <div class="audio-controls">
+      <button class="btn-play" id="btnPlay" onclick="togglePlay()">&#9654;</button>
+      <div class="audio-progress">
+        <div class="progress-bar" id="progressBar" onclick="seekAudio(event)">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="audio-time"><span id="timeCur">0:00</span> / <span id="timeTot">0:00</span></div>
+      </div>
+    </div>
+    <audio id="audioEl" src="audio/DicteeN3S2J5.mp3" preload="metadata"></audio>
+  </div>
+
+  <!-- SAISIE -->
+  <div class="saisie-card">
+    <div class="saisie-label">Votre texte</div>
+    <textarea id="saisieZone" placeholder="Écrivez votre texte ici…" spellcheck="false"></textarea>
+  </div>
+
+  <!-- BOUTONS -->
+  <div class="btn-row">
+    <button class="btn-principal" onclick="corriger()">CORRIGER</button>
+    <button class="btn-sec" onclick="recommencer()">&#8635; Recommencer</button>
+  </div>
+
+  <!-- LÉGENDE -->
+  <div class="legende" id="legende" style="display:none">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--vert-bg);border:1.5px solid var(--vert-ok)"></div>Cible correcte</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--rouge-bg);border:1.5px solid var(--rouge-err)"></div>Cible incorrecte (comptée)</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#fff6ea;border:1.5px solid var(--orange)"></div>Faute hors cible (non comptée)</div>
+  </div>
+
+  <!-- CORRECTION -->
+  <div class="correction-card" id="correctionCard">
+    <div class="correction-label">Correction détaillée</div>
+    <div class="correction-txt" id="correctionTxt"></div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="score-card" id="scoreCard">
+    <div class="score-tampon" id="scoreTampon"></div>
+    <div class="score-note" id="scoreNote"></div>
+    <div class="score-etoiles" id="scoreEtoiles"></div>
+    <div class="score-detail" id="scoreDetail"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DICTÉE ÉVALUATION N°1 · N3S1J5A3
+   Verbes irréguliers + homonymes — 3e S1 J5
+   ══════════════════════════════════════ */
+
+/* ── TEXTE DE RÉFÉRENCE (verbatim prof) ── */
+var TEXTE_REF = "Soyez attentifs aux procédés comiques que Molière utilise dans ses pièces. Observez les réactions excessives et ridicules d’Harpagon : elles révèlent un caractère profondément avare. Prenez note des règles classiques, strictes et précises, qui encadrent la construction de la comédie. Ayez à l’esprit que les effets moraux et satiriques de ces œuvres dépassent le simple divertissement.";
+
+/* ── CIBLES (token, index dans le texte tokenisé, forme attendue) ──
+   buildCibleMap() les positionne automatiquement via LCS  */
+var CIBLES_DEF = [
+  {aff:"Soyez",     norm:"Soyez",     cat:"IMP"},
+  {aff:"attentifs", norm:"attentifs", cat:"ADJ"},
+  {aff:"Observez",  norm:"Observez",  cat:"IMP"},
+  {aff:"excessives",norm:"excessives",cat:"ADJ"},
+  {aff:"ridicules", norm:"ridicules", cat:"ADJ"},
+  {aff:"Prenez",    norm:"Prenez",    cat:"IMP"},
+  {aff:"classiques",norm:"classiques",cat:"ADJ"},
+  {aff:"strictes",  norm:"strictes",  cat:"ADJ"},
+  {aff:"précises",   norm:"precises",  cat:"ADJ"},
+  {aff:"Ayez",      norm:"Ayez",      cat:"IMP"},
+  {aff:"moraux",    norm:"moraux",    cat:"ADJ"},
+  {aff:"satiriques",norm:"satiriques",cat:"ADJ"},
+];
+
+/* ── ALGO LCS ── */
+function preClean(s){
+  return s.normalize('NFD')
+    .replace(/[\u2018\u2019\u02bc]/g,"'")
+    .replace(/[\u00e6]/g,'ae').replace(/[\u0153]/g,'oe')
+    .normalize('NFC')
+    /* accepter 14 pour XIV et XIV pour 14 */
+    .replace(/\bXIV\b/gi,'14').replace(/\b14\b/g,'14');
+}
+function normTok(s){
+  // sans accents pour alignement
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+    .replace(/['']/g,"'").replace(/[^a-z0-9']/g,'');
+}
+function normStrict(s){
+  // avec accents pour notation
+  return s.toLowerCase().replace(/['']/g,"'").replace(/[^a-z0-9'\u00e0-\u00ff]/g,'');
+}
+function levenshtein(a,b){
+  var m=a.length,n=b.length;
+  var d=[];
+  for(var i=0;i<=m;i++){d[i]=[i];}
+  for(var j=0;j<=n;j++){d[0][j]=j;}
+  for(var i=1;i<=m;i++) for(var j=1;j<=n;j++){
+    d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:1+Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1]);
+  }
+  return d[m][n];
+}
+function commonPrefix(a,b){var i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;return i;}
+function tokSim(a,b){
+  if(a===b) return true;
+  if(levenshtein(a,b)<=2) return true;
+  if(commonPrefix(a,b)>=4) return true;
+  return false;
+}
+function tokeniser(txt){
+  return preClean(txt).split(/(\s+|[.,;:!?«»\u2026—\u2014\(\)\[\]""])/u).filter(function(t){return t.trim()!=='';});
+}
+function lcsAlign(ref,hyp){
+  var R=ref.length,H=hyp.length;
+  var dp=[];
+  for(var i=0;i<=R;i++){dp[i]=[];for(var j=0;j<=H;j++)dp[i][j]=0;}
+  for(var i=1;i<=R;i++) for(var j=1;j<=H;j++){
+    if(tokSim(normTok(ref[i-1]),normTok(hyp[j-1]))) dp[i][j]=dp[i-1][j-1]+1;
+    else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
+  }
+  var align=[]; var i=R,j=H;
+  while(i>0||j>0){
+    if(i>0&&j>0&&tokSim(normTok(ref[i-1]),normTok(hyp[j-1]))){
+      align.unshift({ri:i-1,hi:j-1}); i--;j--;
+    } else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){
+      align.unshift({ri:-1,hi:j-1}); j--;
+    } else {
+      align.unshift({ri:i-1,hi:-1}); i--;
+    }
+  }
+  return align;
+}
+
+/* ── CONSTRUCTION DU MAP DES CIBLES ──
+   On aligne le texte ref tokenisé avec les tokens de CIBLES_DEF
+   pour identifier l'index ri de chaque cible dans les tokens ref */
+function buildCibleMap(refToks){
+  /* On cherche séquentiellement : pour chaque cible, le prochain token ref
+     qui matche (normTok), en avançant dans l'ordre */
+  var map=[]; // [{cible, ri}]
+  var pos=0;
+  for(var k=0;k<CIBLES_DEF.length;k++){
+    var c=CIBLES_DEF[k];
+    for(var i=pos;i<refToks.length;i++){
+      if(normTok(refToks[i])===normTok(c.aff)){
+        map.push({c:c,ri:i});
+        pos=i+1;
+        break;
+      }
+    }
+  }
+  return map;
+}
+
+/* ── CORRECTION ── */
+var checked=false;
+function corriger(){
+  if(checked) return;
+  var saisie=$('saisieZone').value.trim();
+  if(!saisie){alert('Écris ton texte avant de corriger.');return;}
+  checked=true;
+
+  var refToks=tokeniser(TEXTE_REF);
+  var hypToks=tokeniser(saisie);
+  var cibleMap=buildCibleMap(refToks);
+  /* set des ri cibles */
+  var cibleRi={};
+  cibleMap.forEach(function(m){cibleRi[m.ri]=m.c;});
+
+  var align=lcsAlign(refToks,hypToks);
+
+  /* construire les résultats token par token côté ref */
+  var tokens=[]; // {refTok, hypTok, status:'ok'|'cible_ok'|'cible_ko'|'hors_cible'|'ins', cible?}
+  var hInserts=[]; // tokens hyp non alignés (insertions)
+  align.forEach(function(a){
+    if(a.ri>=0&&a.hi>=0){
+      var rt=refToks[a.ri], ht=hypToks[a.hi];
+      var isCible=cibleRi.hasOwnProperty(a.ri);
+      var isWord=/[a-zA-Z\u00C0-\u024F]/.test(normTok(rt));
+      if(!isWord){tokens.push({rt:rt,ht:ht,status:'ok'});return;}
+      if(normStrict(ht)===normStrict(rt)){
+        tokens.push({rt:rt,ht:ht,status:isCible?'cible_ok':'ok',cible:isCible?cibleRi[a.ri]:null});
+      } else if(isCible){
+        tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:cibleRi[a.ri]});
+      } else {
+        tokens.push({rt:rt,ht:ht,status:'hors_cible'});
+      }
+    } else if(a.ri>=0){
+      /* token ref manquant dans hyp */
+      var rt=refToks[a.ri];
+      var isCible=cibleRi.hasOwnProperty(a.ri);
+      var isWord=/[a-zA-Z\u00C0-\u024F]/.test(normTok(rt));
+      if(!isWord){tokens.push({rt:rt,ht:'',status:'ok'});return;}
+      tokens.push({rt:rt,ht:'',status:isCible?'cible_ko':'hors_cible',cible:isCible?cibleRi[a.ri]:null});
+    }
+    /* insertions (hi>=0,ri<0) : ignorées dans l'affichage ref */
+  });
+
+  /* compter fautes sur cibles */
+  var fautesCibles=0;
+  tokens.forEach(function(t){if(t.status==='cible_ko')fautesCibles++;});
+  var score=Math.max(0, 10 - 0.5*fautesCibles);
+  var scoreStr=Number.isInteger(score)?score.toString():score.toFixed(1);
+
+  /* afficher la correction */
+    $('correctionTxt').innerHTML=buildCorrHTML(tokens);
+  $('correctionCard').className='correction-card show';
+  $('legende').style.display='flex';
+
+  /* score */
+  var nb=score>=9?5:score>=7?4:score>=5?3:score>=3?2:1;
+  $('scoreNote').textContent=scoreStr+'/10';
+  $('scoreEtoiles').textContent='\u2b50'.repeat(nb)+'\u2606'.repeat(5-nb);
+  $('scoreDetail').textContent=fautesCibles+' faute'+(fautesCibles>1?'s':'')+' sur cible'+(fautesCibles>1?'s':'')+' × 0,5 pt';
+  var tp=$('scoreTampon');
+  if(score>=9){tp.textContent='EXCELLENT';tp.className='score-tampon ok';}
+  else if(score>=7){tp.textContent='TRÈS BIEN';tp.className='score-tampon ok';}
+  else if(score>=5){tp.textContent='BIEN';tp.className='score-tampon moyen';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='score-tampon ko';}
+  $('scoreCard').className='score-card show';
+  setTimeout(function(){$('scoreCard').scrollIntoView({behavior:'smooth',block:'nearest'});},300);
+}
+
+function buildCorrHTML(tokens){
+  var html='';
+  for(var i=0;i<tokens.length;i++){
+    var t=tokens[i];
+    var next=tokens[i+1];
+    /* séparateur selon le token suivant (ponctuation, apostrophe) */
+    var sep=' ';
+    if(next){
+      var nr=next.rt||'';
+      if(/^[.,;:!?\u2026\u2019)\u00bb\]\u2014\u2013—]/.test(nr)) sep='';
+    }
+    var cr=t.rt||'';
+    if(/[\u2019'\(\u00ab\[]$/.test(cr)) sep='';
+
+    var ht=t.ht||t.rt||''; /* ce que l'élève a écrit */
+
+    if(t.status==='ok'||t.status===undefined){
+      /* mot correct : afficher ce que l'élève a écrit */
+      if(!ht){if(i<tokens.length-1)html+=sep;continue;}
+      html+=esc(ht);
+    } else if(t.status==='cible_ok'){
+      /* cible bien écrite : vert */
+      html+='<span class="tok-cible-ok">'+esc(ht)+'</span>';
+    } else if(t.status==='cible_ko'){
+      /* cible mal écrite : barré rouge + correction verte via ::after */
+      var corr=t.cible?t.cible.aff:t.rt;
+      html+='<span class="tok-cible-ko" data-corr="'+esc(corr)+'">'+esc(ht)+'</span>';
+    } else if(t.status==='hors_cible'){
+      /* faute hors cible : barré orange + correction via ::after */
+      html+='<span class="tok-hors-cible" data-corr="'+esc(t.rt)+'">'+esc(ht)+'</span>';
+    }
+    if(i<tokens.length-1) html+=sep;
+  }
+  return html;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function $(id){return document.getElementById(id);}
+
+/* ── RECOMMENCER ── */
+function recommencer(){
+  checked=false;
+  $('saisieZone').value='';
+  $('correctionCard').className='correction-card';
+  $('scoreCard').className='score-card';
+  $('legende').style.display='none';
+  $('saisieZone').focus();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── LECTEUR AUDIO ── */
+var audio=$('audioEl');
+audio.addEventListener('timeupdate',function(){
+  if(!audio.duration) return;
+  var pct=audio.currentTime/audio.duration*100;
+  $('progressFill').style.width=pct+'%';
+  $('timeCur').textContent=fmt(audio.currentTime);
+  $('timeTot').textContent=fmt(audio.duration);
+});
+audio.addEventListener('ended',function(){$('btnPlay').innerHTML='&#9654;';});
+function fmt(s){var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
+function togglePlay(){
+  if(audio.paused){audio.play();$('btnPlay').innerHTML='&#9646;&#9646;';}
+  else{audio.pause();$('btnPlay').innerHTML='&#9654;';}
+}
+function seekAudio(e){
+  if(!audio.duration) return;
+  var r=$('progressBar').getBoundingClientRect();
+  audio.currentTime=(e.clientX-r.left)/r.width*audio.duration;
+}
+</script>
+</body>
+</html>
