@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Laboratoire des relations logiques – 3e S3 J2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#b94040;--jour-fonce:#7a1f1f;--jour-clair:#f7eded;--jour-pale:#f9c0bb;
+  --bg:#f4f1eb;--blanc:#ffffff;--txt:#1a1a2e;--gris:#636e72;--gris-clair:#b2bec3;
+  --bord:#e2ddd5;
+  --vert:#00b894;--vert-bg:#d8f5e8;--vert-txt:#00695c;
+  --bleu:#0984e3;--bleu-bg:#dbeafe;--bleu-txt:#1e40af;
+  --rouge:#e17055;--rouge-bg:#fde8e8;
+  --jaune:#f9ca24;--jaune-bg:#fff9e6;
+  --p1-col:#00b894;--p2-col:#0984e3;--p3-col:#a29bfe;--p4-col:#fd79a8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+
+/* ════ BULLES DÉCORATIVES ════ */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.25;}
+.bubble.b1{width:130px;height:130px;background:var(--jaune);top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:var(--jour);bottom:30px;left:-26px;}
+.bubble.b3{width:74px;height:74px;background:#8dc63f;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:var(--jour-pale);top:26%;left:-32px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+@keyframes shake{10%,90%{transform:translateX(-3px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-4px)}}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(0,184,148,.4)}100%{box-shadow:0 0 0 10px rgba(0,184,148,0)}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-8deg)}60%{opacity:1;transform:scale(1.1) rotate(-8deg)}100%{opacity:1;transform:scale(1) rotate(-6deg)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1)}}
+@keyframes unlockFlash{0%,100%{background:var(--bleu-bg)}50%{background:#bfdbfe}}
+@keyframes instrOn{0%{box-shadow:0 0 0 0 rgba(0,184,148,.5)}100%{box-shadow:0 0 20px rgba(0,184,148,.0)}}
+
+
+
+/* ════ PHASE 2 ════ */
+.phase2{display:none;min-height:100vh;position:relative;z-index:1;}
+.phase2.active{display:block;animation:fadeUp .5s ease;}
+.p2-wrap{max-width:1200px;margin:0 auto;padding:16px 12px 60px;}
+.p2-header{text-align:center;margin-bottom:14px;}
+.semaine-label{font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin:8px 0 5px;}
+.titre-h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.2rem,4vw,1.7rem);line-height:1.15;margin-bottom:6px;}
+.titre-h1 span{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.68rem,2.5vw,.75rem);letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:24px;}
+
+/* GRILLE */
+.p2-grid{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;}
+@media(max-width:860px){.p2-grid{grid-template-columns:1fr;}}
+@media(min-width:861px){.col-gauche{position:sticky;top:14px;}}
+.col-gauche{display:flex;flex-direction:column;gap:12px;}
+.col-droite{min-width:0;}
+
+/* CARTE GÉNÉRIQUE */
+.card{background:var(--blanc);border-radius:12px;border:2px solid var(--bord);overflow:hidden;}
+.card-header{padding:10px 16px;border-bottom:2px solid var(--bord);display:flex;align-items:center;justify-content:space-between;}
+.card-label{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;color:var(--gris);font-weight:700;text-transform:uppercase;}
+
+/* INSTRUMENTS */
+.instrument{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1.5px solid #f4f1eb;transition:all .4s;}
+.instrument:last-child{border-bottom:none;}
+.inst-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .4s;}
+.inst-icon svg{width:20px;height:20px;stroke-width:2;stroke-linecap:round;}
+.inst-info{flex:1;min-width:0;}
+.inst-num{font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;font-weight:700;}
+.inst-name{font-size:14px;font-weight:800;}
+.inst-status{font-size:10px;padding:4px 9px;border-radius:20px;font-weight:800;letter-spacing:.5px;white-space:nowrap;border:1.5px solid;}
+
+.inst-done .inst-icon{background:var(--vert-bg);border:2px solid var(--vert);}
+.inst-done .inst-icon svg{stroke:var(--vert);}
+.inst-done .inst-name{color:var(--vert-txt);}
+.inst-done .inst-num{color:var(--vert);}
+.inst-done .inst-status{background:var(--vert-bg);color:var(--vert-txt);border-color:var(--vert);}
+
+.inst-current .inst-icon{background:var(--bleu-bg);border:2px solid var(--bleu);}
+.inst-current .inst-icon svg{stroke:var(--bleu);}
+.inst-current .inst-name{color:var(--bleu-txt);}
+.inst-current .inst-num{color:var(--bleu);}
+.inst-current .inst-status{background:var(--bleu-bg);color:var(--bleu-txt);border-color:var(--bleu);}
+
+.inst-locked .inst-icon{background:#f4f1eb;border:2px solid #ddd;}
+.inst-locked .inst-icon svg{stroke:#ccc;}
+.inst-locked .inst-name{color:#bbb;}
+.inst-locked .inst-num{color:#ccc;}
+.inst-locked .inst-status{background:#f4f1eb;color:#ccc;border-color:#ddd;}
+
+/* SCORE */
+.score-geant{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--txt);text-align:center;padding:12px 0 2px;line-height:1;}
+.score-denom{font-size:14px;color:var(--gris);text-align:center;font-weight:700;margin-bottom:14px;letter-spacing:1px;}
+.paliers-wrap{padding:0 16px 14px;}
+.palier-row{margin-bottom:10px;}
+.palier-labels{display:flex;justify-content:space-between;margin-bottom:5px;}
+.palier-labels span{font-size:12px;font-weight:700;color:var(--gris);}
+.palier-bar{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;border:1.5px solid var(--bord);}
+.palier-fill{height:100%;border-radius:6px;width:0%;transition:width .6s ease;}
+.p1-fill{background:var(--p1-col);}
+.p2-fill{background:var(--p2-col);}
+.p3-fill{background:var(--p3-col);}
+.p4-fill{background:var(--p4-col);}
+
+/* RÉFÉRENTIEL */
+.ref-item{display:flex;align-items:center;gap:0;padding:9px 16px;border-bottom:1.5px solid #f4f1eb;}
+.ref-item:last-child{border-bottom:none;}
+.ref-sub{font-size:13px;font-weight:800;color:var(--bleu);min-width:118px;line-height:1.3;}
+.ref-arrow{font-size:13px;color:var(--gris-clair);margin:0 8px;}
+.ref-rel{font-size:13px;font-weight:700;color:var(--txt);}
+
+/* POINT CARDINAL */
+.cardinal{background:var(--jaune-bg);border-radius:12px;border:2px solid var(--jaune);padding:13px 16px;}
+.cardinal-label{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--rouge);font-weight:700;margin-bottom:7px;text-transform:uppercase;}
+.cardinal-text{font-size:15px;line-height:1.8;color:#2d3436;font-weight:600;}
+.cardinal-text b{color:var(--bleu-txt);font-weight:800;}
+
+/* PALIER BANNER */
+.palier-banner{padding:12px 18px;display:flex;align-items:center;gap:14px;background:var(--txt);border-bottom:3px solid var(--bleu);}
+.palier-icon-wrap{width:36px;height:36px;border-radius:10px;background:var(--bleu-bg);border:2px solid var(--bleu);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.palier-icon-wrap svg{width:18px;height:18px;stroke:var(--bleu);stroke-width:2;stroke-linecap:round;}
+.palier-banner-info{}
+.palier-num-label{font-family:'Orbitron',sans-serif;font-size:9px;color:#74b9ff;letter-spacing:2px;margin-bottom:3px;}
+.palier-titre-label{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:#fff;}
+.palier-score-badge{margin-left:auto;font-family:'Orbitron',sans-serif;font-size:12px;color:#74b9ff;background:rgba(116,185,255,.15);border:2px solid var(--bleu);padding:5px 12px;border-radius:6px;font-weight:700;}
+.palier-banner.p1{border-bottom-color:var(--p1-col);}
+.palier-banner.p1 .palier-icon-wrap{background:var(--vert-bg);border-color:var(--vert);}
+.palier-banner.p1 .palier-icon-wrap svg{stroke:var(--vert);}
+.palier-banner.p3{border-bottom-color:var(--p3-col);}
+.palier-banner.p3 .palier-icon-wrap{background:#ede9fe;border-color:#a29bfe;}
+.palier-banner.p3 .palier-icon-wrap svg{stroke:#a29bfe;}
+.palier-banner.p4{border-bottom-color:var(--p4-col);}
+.palier-banner.p4 .palier-icon-wrap{background:#fce4ec;border-color:#fd79a8;}
+.palier-banner.p4 .palier-icon-wrap svg{stroke:#fd79a8;}
+
+/* PHRASE */
+.phrase-wrap{padding:16px;}
+.phrase-num-label{font-size:11px;font-weight:800;color:var(--gris-clair);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;}
+.phrase-texte{font-size:17px;font-weight:700;color:var(--txt);line-height:1.9;background:#f8f6f0;border-radius:10px;padding:14px 16px;border-left:5px solid var(--bleu);margin-bottom:14px;}
+
+
+/* QUESTIONS */
+.question-block{margin-bottom:13px;}
+.question-label{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:8px;padding:9px 13px;background:var(--bg);border-radius:8px;border-left:4px solid var(--bleu);}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--blanc);border:2px solid var(--bord);border-radius:10px;font-size:16px;font-weight:700;color:var(--txt);cursor:pointer;transition:all .15s;text-align:left;width:100%;min-height:50px;line-height:1.4;}
+.opt:hover:not([disabled]){background:var(--bleu-bg);border-color:var(--bleu);color:var(--bleu-txt);}
+.opt[disabled]{cursor:default;}
+.opt.correct{background:var(--vert-bg);border-color:var(--vert);color:var(--vert-txt);animation:glowOk .5s ease;}
+.opt.wrong{background:var(--rouge-bg);border-color:var(--rouge);color:#c0392b;animation:shake .4s ease;}
+.opt-letter{width:30px;height:30px;border-radius:8px;background:var(--bg);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:900;flex-shrink:0;color:var(--gris);}
+.opt.correct .opt-letter{background:var(--vert);color:#fff;border-color:var(--vert);}
+.opt.wrong .opt-letter{background:var(--rouge);color:#fff;border-color:var(--rouge);}
+
+/* FEEDBACK */
+.q-fb{display:none;padding:10px 14px;border-radius:8px;font-size:14px;line-height:1.65;margin-top:8px;background:var(--rouge-bg);border-left:4px solid var(--rouge);color:#a33;font-weight:600;}
+.q-fb.show{display:block;animation:fadeUp .3s ease;}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.btn-valider{flex:2;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--bleu),#0660a9);color:#fff;cursor:pointer;min-height:2.8rem;box-shadow:0 3px 12px rgba(9,132,227,.3);transition:transform .12s;}
+.btn-valider:hover{transform:translateY(-2px);}
+.btn-valider:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-retry{flex:1;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);letter-spacing:1px;padding:14px;border:2px solid var(--bord);border-radius:10px;background:#fff;color:var(--gris);cursor:pointer;min-height:2.8rem;transition:transform .12s;}
+.btn-retry:hover{transform:translateY(-2px);}
+.btn-suivant{display:none;width:100%;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.9rem,2.6vw,1rem);letter-spacing:1px;padding:15px;border:none;border-radius:10px;background:#3fa66f;color:#fff;cursor:pointer;min-height:2.8rem;margin-top:10px;box-shadow:0 4px 14px rgba(63,166,111,.3);transition:transform .12s;}
+.btn-suivant.visible{display:block;animation:fadeUp .3s ease;}
+.btn-suivant:hover{transform:translateY(-2px);}
+
+/* SEUIL */
+.seuil-box{margin:0 16px 16px;padding:11px 14px;background:var(--jaune-bg);border:2px solid var(--jaune);border-radius:8px;font-size:14px;font-weight:700;color:#856404;display:flex;align-items:center;gap:8px;}
+
+/* MESSAGE DÉBLOCAGE */
+.unlock-msg{display:none;margin:0 16px 16px;padding:13px 16px;background:var(--vert-bg);border:2px solid var(--vert);border-radius:10px;font-size:15px;font-weight:800;color:var(--vert-txt);text-align:center;animation:unlockFlash .6s ease 2;}
+.unlock-msg.show{display:block;animation:fadeUp .4s ease,unlockFlash .6s ease 2;}
+
+/* MESSAGE SCORE INSUFFISANT */
+.score-insuf{display:none;margin:12px 0;padding:14px 18px;background:var(--rouge-bg);border:2px solid var(--rouge);border-radius:10px;font-size:15px;font-weight:700;color:#c0392b;}
+.score-insuf.show{display:block;animation:fadeUp .3s ease;}
+
+/* VERDICT */
+.verdict-card{display:none;background:var(--blanc);border:2px solid var(--bord);border-radius:20px;padding:28px 22px;box-shadow:0 16px 44px rgba(0,0,0,.08);text-align:center;position:relative;overflow:hidden;margin-top:16px;}
+.verdict-card.show{display:block;animation:fadeUp .5s ease;}
+.verdict-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--p1-col),var(--p2-col),var(--p3-col),var(--p4-col));background-size:300%;animation:slide 5s linear infinite;}
+.verdict-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.9rem,3.5vw,1.3rem);letter-spacing:1.5px;padding:10px 22px;border-radius:10px;border:3.5px solid;display:inline-block;margin-bottom:14px;transform:rotate(-4deg);animation:stampPop .6s cubic-bezier(.3,1.6,.5,1);}
+.verdict-tampon.ok{color:#3fa66f;border-color:#3fa66f;}
+.verdict-tampon.moyen{color:#e8902a;border-color:#e8902a;}
+.verdict-tampon.ko{color:var(--rouge);border-color:var(--rouge);}
+.verdict-score-num{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);line-height:1;color:var(--txt);margin:.4rem 0 .2rem;}
+.verdict-etoiles{font-size:1.9rem;letter-spacing:.1em;margin:.3rem 0 .8rem;}
+.verdict-msg{font-size:clamp(.95rem,2.6vw,1.05rem);line-height:1.8;color:var(--txt);margin-bottom:16px;max-width:560px;margin-left:auto;margin-right:auto;font-weight:600;}
+.verdict-bilan{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:16px;text-align:left;}
+@media(max-width:480px){.verdict-bilan{grid-template-columns:1fr;}}
+.bilan-item{font-size:14px;font-weight:700;padding:8px 12px;border-radius:8px;}
+.bilan-ok{background:var(--vert-bg);color:var(--vert-txt);}
+.bilan-ko{background:var(--rouge-bg);color:#c0392b;}
+.verdict-paliers{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;}
+@media(max-width:560px){.verdict-paliers{grid-template-columns:1fr 1fr;}}
+.vp-item{padding:10px;border-radius:10px;text-align:center;border:2px solid var(--bord);}
+.vp-score{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;display:block;margin-bottom:3px;}
+.vp-label{font-size:11px;font-weight:700;color:var(--gris);}
+.verdict-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.particle{position:absolute;width:7px;height:7px;border-radius:50%;opacity:0;}
+.btn-rejouer{font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);padding:13px 26px;border:none;border-radius:10px;background:var(--jour-fonce);color:#fff;cursor:pointer;min-height:2.8rem;}
+.btn-rejouer:hover{background:var(--jour);}
+
+@keyframes float1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(4deg)}}
+@keyframes float2{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(-3deg)}}
+@keyframes float3{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-22px) rotate(6deg)}}
+@keyframes scanLine{0%{transform:translateY(-100%);opacity:.6}100%{transform:translateY(2000%);opacity:.2}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes orbitRing{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes dataPulse{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.4)}}
+@keyframes particleFloat{0%{transform:translateY(0) translateX(0);opacity:.7}50%{opacity:1}100%{transform:translateY(-120px) translateX(var(--dx,20px));opacity:0}}
+@keyframes logoGlow{0%,100%{text-shadow:0 0 20px rgba(185,64,64,.4)}50%{text-shadow:0 0 40px rgba(185,64,64,.9),0 0 80px rgba(185,64,64,.4)}}
+@keyframes borderSpin{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@keyframes typewriter{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
+@keyframes countUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes instrAppear{0%{opacity:0;transform:translateX(-20px) scale(.95)}100%{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes screenFlicker{0%,98%,100%{opacity:1}99%{opacity:.85}}
+/* ═══ PHASE 1 REFONTE ═══ */
+.phase1{min-height:100vh;background:radial-gradient(ellipse at 30% 40%,#1a0808 0%,#0d0a18 45%,#060410 100%);display:flex;align-items:center;justify-content:center;padding:24px 16px;position:relative;overflow:hidden;}
+/* GRILLE FOND ANIMÉE */
+.p1-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(185,64,64,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(185,64,64,.06) 1px,transparent 1px);background-size:44px 44px;animation:screenFlicker 8s ease infinite;}
+/* LIGNE DE SCAN */
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(185,64,64,.6),transparent);animation:scanLine 4s linear infinite;pointer-events:none;z-index:1;}
+/* PARTICULES FLOTTANTES */
+.p1-particles{position:absolute;inset:0;pointer-events:none;z-index:1;}
+.fp{position:absolute;width:6px;height:6px;border-radius:50%;animation:particleFloat var(--dur,6s) ease-in-out var(--delay,0s) infinite;}
+/* INNER */
+.p1-inner{position:relative;z-index:2;max-width:860px;width:100%;}
+/* BADGE */
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.5px;padding:8px 18px;border-radius:22px;margin-bottom:16px;box-shadow:0 0 24px rgba(185,64,64,.5);}
+/* BRIEF CARD */
+.brief-card{background:rgba(15,8,8,.92);border:2px solid rgba(185,64,64,.5);border-radius:20px;padding:0 0 32px;position:relative;overflow:hidden;box-shadow:0 0 60px rgba(185,64,64,.15),inset 0 0 60px rgba(0,0,0,.4);}
+.brief-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,#b94040,#f9c0bb,#b94040,transparent);background-size:300%;animation:borderSpin 3s linear infinite;}
+/* SVG LABO */
+.brief-labo{width:100%;padding:24px 24px 8px;}
+.labo-svg{width:100%;height:auto;display:block;}
+/* CONTENU */
+.brief-content{padding:0 32px;}
+.brief-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.8rem,5.5vw,2.6rem);color:#f5e8cc;line-height:1.2;margin-bottom:10px;text-align:center;animation:logoGlow 3s ease-in-out infinite;}
+.brief-titre span{color:#f9c0bb;}
+.brief-texte{font-size:clamp(1.05rem,2.8vw,1.18rem);color:rgba(245,225,205,.9);line-height:2;margin-bottom:22px;border-left:4px solid var(--jour);padding-left:18px;}
+.brief-texte b{color:#f9c0bb;font-size:1.05em;}
+/* CARTES PALIERS */
+.bm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:26px;}
+.bm-card{background:rgba(185,64,64,.08);border:1.5px solid rgba(185,64,64,.3);border-radius:13px;padding:14px 10px;text-align:center;transition:all .3s;}
+.bm-card:hover{background:rgba(185,64,64,.16);border-color:rgba(185,64,64,.6);transform:translateY(-3px);}
+.bm-num{width:34px;height:34px;margin:0 auto 8px;border-radius:50%;background:rgba(185,64,64,.2);color:#f9c0bb;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.9rem;display:flex;align-items:center;justify-content:center;border:2px solid rgba(185,64,64,.5);box-shadow:0 0 12px rgba(185,64,64,.3);}
+.bm-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;color:#f9c0bb;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.bm-desc{font-size:.82rem;color:rgba(245,220,190,.7);line-height:1.5;font-weight:600;}
+/* BOUTON */
+.btn-commencer{display:block;width:100%;font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3vw,1.2rem);letter-spacing:2px;padding:22px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;min-height:64px;text-transform:uppercase;box-shadow:0 8px 28px rgba(185,64,64,.45),0 0 0 0 rgba(185,64,64,.3);animation:pulse 2.2s ease-in-out infinite;}
+.btn-commencer:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(185,64,64,.6);}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+
+<!-- ════ PHASE 1 ════ -->
+<div id="phase1" class="phase1">
+<div class="p1-grid-bg"></div>
+<div class="scan-line"></div>
+<div class="p1-particles" id="p1Particles"></div>
+<div class="p1-inner">
+  <div style="text-align:center;margin-bottom:14px">
+    <div class="logo-badge">PAZAPA &middot; FRANÇAIS &middot; 3ÈME</div>
+  </div>
+  <div class="brief-card">
+    <div class="brief-labo">
+      <svg class="labo-svg" viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="gL"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gS"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b94040" stop-opacity=".4"/>
+      <stop offset="100%" stop-color="#b94040" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Fond labo -->
+  <rect width="780" height="260" fill="#080410" rx="14"/>
+  <!-- Grille -->
+  <g stroke="rgba(185,64,64,.08)" stroke-width=".5">
+    <line x1="0" y1="50" x2="780" y2="50"/><line x1="0" y1="100" x2="780" y2="100"/>
+    <line x1="0" y1="150" x2="780" y2="150"/><line x1="0" y1="200" x2="780" y2="200"/>
+    <line x1="130" y1="0" x2="130" y2="260"/><line x1="260" y1="0" x2="260" y2="260"/>
+    <line x1="390" y1="0" x2="390" y2="260"/><line x1="520" y1="0" x2="520" y2="260"/>
+    <line x1="650" y1="0" x2="650" y2="260"/>
+  </g>
+  <!-- Bandeau titre principal -->
+  <rect x="60" y="10" width="660" height="62" rx="10" fill="#0d0510" stroke="#b94040" stroke-width="2" filter="url(#gL)"/>
+  <rect x="65" y="15" width="650" height="52" rx="8" fill="none" stroke="#b94040" stroke-width=".6" opacity=".4"/>
+  <!-- Points déco coins -->
+  <circle cx="72" cy="22" r="3" fill="#b94040" opacity=".7"/>
+  <circle cx="708" cy="22" r="3" fill="#b94040" opacity=".7"/>
+  <circle cx="72" cy="64" r="3" fill="#b94040" opacity=".7"/>
+  <circle cx="708" cy="64" r="3" fill="#b94040" opacity=".7"/>
+  <text x="390" y="36" text-anchor="middle" font-family="Orbitron,Arial" font-size="10" font-weight="700" fill="#b94040" letter-spacing="3">CENTRE DE RECHERCHE SYNTAXIQUE — SESSION ACTIVE</text>
+  <text x="390" y="58" text-anchor="middle" font-family="Orbitron,Arial" font-size="15" font-weight="900" fill="#f5e8cc" letter-spacing="1.5">LABORATOIRE DES RELATIONS LOGIQUES</text>
+
+  <!-- ══ INSTRUMENT 1 : DÉTECTEUR ══ -->
+  <rect x="20" y="90" width="165" height="130" rx="10" fill="#0a0510" stroke="#00b894" stroke-width="2" filter="url(#gS)"/>
+  <rect x="25" y="95" width="155" height="120" rx="8" fill="#030810" stroke="#00b894" stroke-width=".5" opacity=".5"/>
+  <!-- Icône détecteur (table/grille) -->
+  <g filter="url(#gS)">
+    <rect x="60" y="112" width="85" height="58" rx="3" fill="none" stroke="#00b894" stroke-width="1.5"/>
+    <line x1="60" y1="127" x2="145" y2="127" stroke="#00b894" stroke-width="1"/>
+    <line x1="88" y1="112" x2="88" y2="170" stroke="#00b894" stroke-width="1"/>
+    <line x1="117" y1="112" x2="117" y2="170" stroke="#00b894" stroke-width="1"/>
+    <rect x="90" y="114" width="25" height="11" rx="1" fill="#00b894" opacity=".3"/>
+    <rect x="90" y="130" width="25" height="11" rx="1" fill="#00b894" opacity=".15"/>
+    <rect x="119" y="130" width="24" height="11" rx="1" fill="#00b894" opacity=".2"/>
+  </g>
+  <!-- Voyant actif animé -->
+  <circle cx="102" cy="190" r="8" fill="#00b894" opacity=".9" filter="url(#gL)">
+    <animate attributeName="opacity" values=".5;1;.5" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="7;9;7" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <text x="102" y="208" text-anchor="middle" font-family="Orbitron,Arial" font-size="7" fill="#00b894" letter-spacing="1">INSTR. 1</text>
+  <text x="102" y="219" text-anchor="middle" font-family="Orbitron,Arial" font-size="9" font-weight="700" fill="#d8f5e8">DÉTECTEUR</text>
+
+  <!-- ══ INSTRUMENT 2 : ANALYSEUR ══ -->
+  <rect x="205" y="90" width="165" height="130" rx="10" fill="#0a0510" stroke="#0984e3" stroke-width="2" filter="url(#gS)"/>
+  <rect x="210" y="95" width="155" height="120" rx="8" fill="#030810" stroke="#0984e3" stroke-width=".5" opacity=".5"/>
+  <!-- Loupe animée -->
+  <g filter="url(#gS)">
+    <circle cx="270" cy="145" r="28" fill="none" stroke="#0984e3" stroke-width="2"/>
+    <circle cx="270" cy="145" r="22" fill="#0984e3" opacity=".06"/>
+    <!-- Lignes dans la loupe (données) -->
+    <line x1="257" y1="140" x2="283" y2="140" stroke="#0984e3" stroke-width="1.5" opacity=".7"/>
+    <line x1="257" y1="148" x2="283" y2="148" stroke="#0984e3" stroke-width="1.5" opacity=".5"/>
+    <line x1="261" y1="156" x2="280" y2="156" stroke="#0984e3" stroke-width="1.5" opacity=".4"/>
+    <line x1="288" y1="163" x2="304" y2="179" stroke="#0984e3" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <circle cx="288" cy="190" r="6" fill="#0984e3" opacity=".7">
+    <animate attributeName="opacity" values=".3;.9;.3" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="288" y="208" text-anchor="middle" font-family="Orbitron,Arial" font-size="7" fill="#0984e3" letter-spacing="1">INSTR. 2</text>
+  <text x="288" y="219" text-anchor="middle" font-family="Orbitron,Arial" font-size="9" font-weight="700" fill="#dbeafe">ANALYSEUR</text>
+
+  <!-- ══ INSTRUMENT 3 : IDENTIFICATEUR (verrouillé) ══ -->
+  <rect x="390" y="90" width="165" height="130" rx="10" fill="#080408" stroke="#2a1a2a" stroke-width="1.5"/>
+  <!-- Cadenas -->
+  <rect x="437" y="120" width="46" height="36" rx="5" fill="#1a0a1a" stroke="#3a2a4a" stroke-width="1.5"/>
+  <path d="M448,120 Q448,105 460,105 Q472,105 472,120" fill="none" stroke="#3a2a4a" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="460" cy="136" r="6" fill="#3a2a4a"/>
+  <line x1="460" y1="136" x2="460" y2="146" stroke="#3a2a4a" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="460" cy="190" r="5" fill="#2a1a2a"/>
+  <text x="460" y="208" text-anchor="middle" font-family="Orbitron,Arial" font-size="7" fill="#3a2a4a" letter-spacing="1">INSTR. 3</text>
+  <text x="460" y="219" text-anchor="middle" font-family="Orbitron,Arial" font-size="8" fill="#3a2a4a">VERROUILLÉ</text>
+
+  <!-- ══ INSTRUMENT 4 : VALIDATEUR (verrouillé) ══ -->
+  <rect x="575" y="90" width="165" height="130" rx="10" fill="#080408" stroke="#2a1a2a" stroke-width="1.5"/>
+  <!-- Cadenas -->
+  <rect x="622" y="120" width="46" height="36" rx="5" fill="#1a0a1a" stroke="#3a2a4a" stroke-width="1.5"/>
+  <path d="M633,120 Q633,105 645,105 Q657,105 657,120" fill="none" stroke="#3a2a4a" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="645" cy="136" r="6" fill="#3a2a4a"/>
+  <line x1="645" y1="136" x2="645" y2="146" stroke="#3a2a4a" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="645" cy="190" r="5" fill="#2a1a2a"/>
+  <text x="645" y="208" text-anchor="middle" font-family="Orbitron,Arial" font-size="7" fill="#3a2a4a" letter-spacing="1">INSTR. 4</text>
+  <text x="645" y="219" text-anchor="middle" font-family="Orbitron,Arial" font-size="8" fill="#3a2a4a">VERROUILLÉ</text>
+
+  <!-- BARRE ANALYSTE EN BAS -->
+  <rect x="240" y="234" width="300" height="22" rx="6" fill="#0d0510" stroke="#b94040" stroke-width="1.5"/>
+  <text x="390" y="250" text-anchor="middle" font-family="Orbitron,Arial" font-size="10" font-weight="900" fill="#f9c0bb" letter-spacing="2">ANALYSTE EN POSTE</text>
+
+  <!-- COMPTEUR HAUT DROITE -->
+  <rect x="685" y="12" width="80" height="40" rx="6" fill="#0d0510" stroke="#b94040" stroke-width="1"/>
+  <text x="725" y="28" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#b94040" letter-spacing="1">SCORE</text>
+  <text x="725" y="45" text-anchor="middle" font-family="Orbitron,Arial" font-size="16" font-weight="900" fill="#f9c0bb">0/21</text>
+
+  <!-- BARRES DATA ANIMÉES (déco) -->
+  <g transform="translate(20,244)">
+    <rect x="0" y="-12" width="8" height="12" rx="1" fill="#b94040" opacity=".5">
+      <animate attributeName="height" values="12;20;8;16;12" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="-12;-20;-8;-16;-12" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="10" y="-8" width="8" height="8" rx="1" fill="#b94040" opacity=".4">
+      <animate attributeName="height" values="8;15;5;18;8" dur="2.3s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="-8;-15;-5;-18;-8" dur="2.3s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="20" y="-16" width="8" height="16" rx="1" fill="#b94040" opacity=".6">
+      <animate attributeName="height" values="16;10;22;8;16" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="-16;-10;-22;-8;-16" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="30" y="-6" width="8" height="6" rx="1" fill="#b94040" opacity=".3">
+      <animate attributeName="height" values="6;18;10;14;6" dur="2.7s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="-6;-18;-10;-14;-6" dur="2.7s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>
+    </div>
+    <div class="brief-content">
+      <h1 class="brief-titre">Laboratoire des <span>relations logiques</span></h1>
+      <div class="brief-texte">
+        Tu es <b>analyste linguistique</b> dans un centre de recherche syntaxique. Chaque phrase est une structure complexe à démonter. Au fil des paliers, tu activeras de nouveaux instruments d'analyse. Objectif&nbsp;: maîtriser les <b>liens logiques entre les propositions</b>.
+      </div>
+      <div class="bm-grid">
+        <div class="bm-card"><div class="bm-num">1</div><div class="bm-titre">Palier 1</div><div class="bm-desc">Identifier la subordonnée — /3</div></div>
+        <div class="bm-card"><div class="bm-num">2</div><div class="bm-titre">Palier 2</div><div class="bm-desc">+ subordonnant + relation — /6</div></div>
+        <div class="bm-card"><div class="bm-num">3</div><div class="bm-titre">Palier 3</div><div class="bm-desc">Analyse complète — /6</div></div>
+        <div class="bm-card"><div class="bm-num">4</div><div class="bm-titre">Palier 4</div><div class="bm-desc">Analyse experte — /6</div></div>
+      </div>
+      <button class="btn-commencer" onclick="commencer()">ACTIVER LES INSTRUMENTS &#9656;</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════ PHASE 2 ════ -->
+<div id="phase2" class="phase2">
+<div class="p2-wrap">
+  <div class="p2-header">
+    <div class="logo-badge" style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:12px;letter-spacing:1.5px;background:var(--jour);color:#fff;display:inline-flex;align-items:center;padding:7px 16px;border-radius:22px;margin-bottom:8px;">PAZAPA &middot; FRANÇAIS &middot; 3ÈME</div>
+    <div class="semaine-label">Semaine 3 &mdash; Jour 2</div>
+    <h1 class="titre-h1">Laboratoire des <span>relations logiques</span></h1>
+    <div class="badge-theme">Propositions subordonnées circonstancielles &middot; /21</div>
+  </div>
+
+  <div class="p2-grid">
+    <!-- COLONNE GAUCHE PERMANENTE -->
+    <div class="col-gauche">
+
+      <!-- INSTRUMENTS -->
+      <div class="card">
+        <div class="card-header"><span class="card-label">Instruments</span><span id="instrCount" style="font-size:12px;font-weight:700;color:var(--gris)">1/4 actif</span></div>
+        <div class="instrument" id="instr1">
+          <div class="inst-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+          <div class="inst-info"><div class="inst-num">Instrument 1</div><div class="inst-name">Détecteur</div></div>
+          <div class="inst-status">✓ Actif</div>
+        </div>
+        <div class="instrument" id="instr2">
+          <div class="inst-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+          <div class="inst-info"><div class="inst-num">Instrument 2</div><div class="inst-name">Analyseur</div></div>
+          <div class="inst-status">Verrouillé</div>
+        </div>
+        <div class="instrument" id="instr3">
+          <div class="inst-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <div class="inst-info"><div class="inst-num">Instrument 3</div><div class="inst-name">Identificateur</div></div>
+          <div class="inst-status">Verrouillé</div>
+        </div>
+        <div class="instrument" id="instr4">
+          <div class="inst-icon"><svg viewBox="0 0 24 24" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="inst-info"><div class="inst-num">Instrument 4</div><div class="inst-name">Validateur</div></div>
+          <div class="inst-status">Verrouillé</div>
+        </div>
+      </div>
+
+      <!-- SCORE -->
+      <div class="card">
+        <div class="card-header"><span class="card-label">Score global</span></div>
+        <div class="score-geant" id="scoreTotal">0</div>
+        <div class="score-denom">/ 21 points</div>
+        <div class="paliers-wrap">
+          <div class="palier-row">
+            <div class="palier-labels"><span>Palier 1</span><span id="lbl_p1" style="color:var(--gris-clair)">0 / 3</span></div>
+            <div class="palier-bar"><div class="palier-fill p1-fill" id="bar_p1"></div></div>
+          </div>
+          <div class="palier-row">
+            <div class="palier-labels"><span>Palier 2</span><span id="lbl_p2" style="color:var(--gris-clair)">0 / 6</span></div>
+            <div class="palier-bar"><div class="palier-fill p2-fill" id="bar_p2"></div></div>
+          </div>
+          <div class="palier-row">
+            <div class="palier-labels"><span>Palier 3</span><span id="lbl_p3" style="color:var(--gris-clair)">0 / 6</span></div>
+            <div class="palier-bar"><div class="palier-fill p3-fill" id="bar_p3"></div></div>
+          </div>
+          <div class="palier-row">
+            <div class="palier-labels"><span>Palier 4</span><span id="lbl_p4" style="color:var(--gris-clair)">0 / 6</span></div>
+            <div class="palier-bar"><div class="palier-fill p4-fill" id="bar_p4"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POINT CARDINAL -->
+      <div class="cardinal">
+        <div class="cardinal-label">Point cardinal</div>
+        <div class="cardinal-text">Une <b>proposition subordonnée circonstancielle</b> exprime une circonstance. Elle est introduite par un <b>subordonnant</b> et précise le <b>lien logique</b> entre les propositions.</div>
+      </div>
+
+      <!-- RÉFÉRENTIEL -->
+      <div class="card">
+        <div class="card-header"><span class="card-label">Référentiel</span></div>
+        <div class="ref-item"><span class="ref-sub">quand / lorsque</span><span class="ref-arrow">→</span><span class="ref-rel">temps</span></div>
+        <div class="ref-item"><span class="ref-sub">parce que / puisque</span><span class="ref-arrow">→</span><span class="ref-rel">cause</span></div>
+        <div class="ref-item"><span class="ref-sub">afin que / pour que</span><span class="ref-arrow">→</span><span class="ref-rel">but</span></div>
+        <div class="ref-item"><span class="ref-sub">si</span><span class="ref-arrow">→</span><span class="ref-rel">condition</span></div>
+        <div class="ref-item"><span class="ref-sub">bien que / quoique</span><span class="ref-arrow">→</span><span class="ref-rel">opposition</span></div>
+        <div class="ref-item"><span class="ref-sub">de sorte que…</span><span class="ref-arrow">→</span><span class="ref-rel">conséquence</span></div>
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div class="col-droite">
+      <div id="exerciceZone"></div>
+      <!-- Score insuffisant -->
+      <div class="score-insuf" id="msgInsuf"></div>
+      <!-- Verdict -->
+      <div class="verdict-card" id="verdictCard">
+        <div class="verdict-particles" id="particles"></div>
+        <div class="verdict-tampon" id="vTampon"></div>
+        <div class="verdict-score-num" id="vScore"></div>
+        <div class="verdict-etoiles" id="vEtoiles"></div>
+        <div class="verdict-msg" id="vMsg"></div>
+        <div class="verdict-paliers" id="vPaliers"></div>
+        <button class="btn-rejouer" onclick="recommencer()">&#8635; Recommencer</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ══ LABORATOIRE DES RELATIONS LOGIQUES — N3S3J2A3 ══ */
+
+/* ── DONNÉES PALIER 1 (phrases 1-3) : identifier la subordonnée ── */
+var P1=[
+  { phrase:"Les \u00e9l\u00e8ves r\u00e9visent leurs le\u00e7ons afin qu\u2019ils r\u00e9ussissent l\u2019\u00e9preuve finale.",
+    consigne:"Quelle est la proposition subordonn\u00e9e circonstancielle\u00a0?",
+    opts:["afin qu\u2019ils r\u00e9ussissent l\u2019\u00e9preuve finale","Les \u00e9l\u00e8ves r\u00e9visent leurs le\u00e7ons","r\u00e9visent leurs le\u00e7ons afin qu\u2019ils r\u00e9ussissent"],
+    ans:0, fb:"La proposition subordonn\u00e9e circonstancielle est introduite par \u00ab\u00a0afin que\u00a0\u00bb. Elle indique le but de l\u2019action principale." },
+  { phrase:"Le professeur a interrompu le cours parce qu\u2019un exercice posait probl\u00e8me.",
+    consigne:"Quelle est la proposition subordonn\u00e9e circonstancielle\u00a0?",
+    opts:["Le professeur a interrompu le cours","un exercice posait probl\u00e8me","parce qu\u2019un exercice posait probl\u00e8me"],
+    ans:2, fb:"La proposition subordonn\u00e9e est \u00ab\u00a0parce qu\u2019un exercice posait probl\u00e8me\u00a0\u00bb. Elle est introduite par \u00ab\u00a0parce que\u00a0\u00bb et exprime la cause." },
+  { phrase:"Nous sommes rest\u00e9s silencieux lorsque le directeur est entr\u00e9 dans la salle.",
+    consigne:"Quelle est la proposition subordonn\u00e9e circonstancielle\u00a0?",
+    opts:["Nous sommes rest\u00e9s silencieux","lorsque le directeur est entr\u00e9 dans la salle","le directeur est entr\u00e9 dans la salle"],
+    ans:1, fb:"La proposition subordonn\u00e9e est introduite par \u00ab\u00a0lorsque\u00a0\u00bb et exprime le temps de l\u2019action principale." }
+];
+
+/* ── DONNÉES PALIER 2 (phrases 4-6) : subordonnant + relation logique ── */
+var P2=[
+  { phrase:"Les routes ont \u00e9t\u00e9 ferm\u00e9es si bien que les voyageurs ont d\u00fb attendre.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["parce que","si bien que","lorsque"], ans:1,
+        fb:"\u00ab\u00a0Si bien que\u00a0\u00bb est une locution conjonctive qui introduit une subordonn\u00e9e de cons\u00e9quence." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["cause","cons\u00e9quence","temps"], ans:1,
+        fb:"La subordonnée exprime la cons\u00e9quence de la fermeture des routes." }
+    ]},
+  { phrase:"Il a poursuivi son entra\u00eenement bien qu\u2019il soit fatigu\u00e9.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["bien que","afin que","puisque"], ans:0,
+        fb:"\u00ab\u00a0Bien que\u00a0\u00bb est une conjonction qui introduit une subordonn\u00e9e d\u2019opposition (concession)." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["cause","but","concession"], ans:2,
+        fb:"La subordonnée exprime une concession\u00a0: malgr\u00e9 la fatigue, l\u2019action continue." }
+    ]},
+  { phrase:"Nous avons pris des notes pour que le travail soit plus clair.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["parce que","pour que","si"], ans:1,
+        fb:"\u00ab\u00a0Pour que\u00a0\u00bb est une locution conjonctive qui introduit une subordonn\u00e9e de but." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["temps","but","cons\u00e9quence"], ans:1,
+        fb:"La subordonnée exprime le but des prises de notes." }
+    ]}
+];
+
+/* ── DONNÉES PALIER 3 (phrases 7-8) : analyse complète ── */
+var P3=[
+  { phrase:"Les scientifiques ont ajust\u00e9 leurs hypoth\u00e8ses puisque les r\u00e9sultats \u00e9taient incoh\u00e9rents.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["puisque","afin que","si"], ans:0,
+        fb:"\u00ab\u00a0Puisque\u00a0\u00bb introduit une subordonn\u00e9e de cause." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["cause","but","opposition"], ans:0,
+        fb:"La subordonnée indique la cause de l\u2019ajustement des hypoth\u00e8ses." },
+      { consigne:"Quelle est la fonction de la subordonn\u00e9e\u00a0?",
+        opts:["Cause de l\u2019action principale","Temps de l\u2019action principale","Condition de l\u2019action principale"], ans:0,
+        fb:"La subordonn\u00e9e est compl\u00e9ment circonstanciel de cause du verbe \u00ab\u00a0ont ajust\u00e9\u00a0\u00bb." }
+    ]},
+  { phrase:"Le projet avancera rapidement si tous les membres coop\u00e8rent efficacement.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["si","lorsque","parce que"], ans:0,
+        fb:"\u00ab\u00a0Si\u00a0\u00bb introduit une subordonn\u00e9e de condition (ou hypoth\u00e8se)." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["condition","cause","cons\u00e9quence"], ans:0,
+        fb:"La subordonnée exprime la condition n\u00e9cessaire \u00e0 la r\u00e9alisation de l\u2019action." },
+      { consigne:"Quelle est la fonction de la subordonn\u00e9e\u00a0?",
+        opts:["Condition de r\u00e9alisation de l\u2019action principale","Cause de l\u2019action principale","Opposition \u00e0 l\u2019action principale"], ans:0,
+        fb:"La subordonn\u00e9e est compl\u00e9ment circonstanciel de condition de \u00ab\u00a0avancera\u00a0\u00bb." }
+    ]}
+];
+
+/* ── DONNÉES PALIER 4 (phrases 9-10) : analyse experte ── */
+var P4=[
+  { phrase:"Les \u00e9quipes ont \u00e9t\u00e9 r\u00e9organis\u00e9es de sorte que la production a augment\u00e9 rapidement.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["de sorte que","parce que","bien que"], ans:0,
+        fb:"\u00ab\u00a0De sorte que\u00a0\u00bb est une locution conjonctive de cons\u00e9quence." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["cons\u00e9quence","cause","temps"], ans:0,
+        fb:"La subordonnée exprime la cons\u00e9quence de la r\u00e9organisation." },
+      { consigne:"Quelle est la fonction de la subordonn\u00e9e\u00a0?",
+        opts:["Cons\u00e9quence de l\u2019action principale","Condition de l\u2019action principale","Opposition \u00e0 l\u2019action principale"], ans:0,
+        fb:"La subordonn\u00e9e est compl\u00e9ment circonstanciel de cons\u00e9quence." }
+    ]},
+  { phrase:"Les visiteurs ont quitt\u00e9 le mus\u00e9e bien qu\u2019ils aient encore des questions.",
+    qs:[
+      { consigne:"Quel est le subordonnant\u00a0?",
+        opts:["bien que","puisque","afin que"], ans:0,
+        fb:"\u00ab\u00a0Bien que\u00a0\u00bb est une conjonction d\u2019opposition (concession). Elle se construit avec le subjonctif." },
+      { consigne:"Quelle est la relation logique\u00a0?",
+        opts:["concession","cause","but"], ans:0,
+        fb:"La subordonnée exprime une concession\u00a0: les visiteurs partent malgr\u00e9 leurs questions." },
+      { consigne:"Quelle est la fonction de la subordonn\u00e9e\u00a0?",
+        opts:["Concession \u00e0 l\u2019action principale","Cons\u00e9quence de l\u2019action principale","Condition de l\u2019action principale"], ans:0,
+        fb:"La subordonn\u00e9e est compl\u00e9ment circonstanciel d\u2019opposition (concession)." }
+    ]}
+];
+
+/* ── ÉTAT ── */
+var etat={
+  palier:1, scores:[0,0,0,0], total:0,
+  p1idx:0, p2idx:0, p3idx:0, p4idx:0,
+  p1verifFait:false, p2QFait:{}, p3QFait:{}, p4QFait:{},
+  p1sel:null, p2sel:{}, p3sel:{}, p4sel:{}
+};
+var actx=null;
+function $i(id){return document.getElementById(id);}
+function LABELS(){return['A','B','C'];}
+function fisher(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+function commencer(){
+  $i('phase1').style.display='none';
+  $i('phase2').classList.add('active');
+  initAudio();
+  majInstruments();
+  afficherPalier1();
+  window.scrollTo({top:0});
+}
+
+/* ── INSTRUMENTS ── */
+function setInstr(n,state){
+  var el=$i('instr'+n);
+  if(!el)return;
+  var status=el.querySelector('.inst-status');
+  var icon=el.querySelector('.inst-icon');
+  el.className='instrument inst-'+state;
+  if(state==='done'){status.textContent='✓ Actif';}
+  else if(state==='current'){status.textContent='En cours';}
+  else{status.textContent='Verrouillé';}
+}
+function majInstruments(){
+  var p=etat.palier;
+  setInstr(1,p>1?'done':'current');
+  setInstr(2,p>2?'done':p===2?'current':'locked');
+  setInstr(3,p>3?'done':p===3?'current':'locked');
+  setInstr(4,p>4?'done':p===4?'current':'locked');
+  var actifs=[1,2,3,4].filter(function(n){return p>n;}).length+(p<=4?1:0);
+  $i('instrCount').textContent=actifs+'/4 actif'+(actifs>1?'s':'');
+}
+
+/* ── SCORE UI ── */
+function majScore(){
+  $i('scoreTotal').textContent=etat.total;
+  var maxs=[3,6,6,6];
+  var cols=['var(--p1-col)','var(--p2-col)','var(--p3-col)','var(--p4-col)'];
+  for(var i=0;i<4;i++){
+    var lbl=$i('lbl_p'+(i+1));
+    var bar=$i('bar_p'+(i+1));
+    if(lbl){lbl.textContent=etat.scores[i]+' / '+maxs[i];lbl.style.color=etat.scores[i]>0?cols[i]:'var(--gris-clair)';}
+    if(bar){bar.style.width=Math.round(etat.scores[i]/maxs[i]*100)+'%';}
+  }
+}
+
+/* ══ PALIER 1 ══ */
+function afficherPalier1(){
+  var idx=etat.p1idx;
+  if(idx>=P1.length){finPalier1();return;}
+  etat.p1sel=null;etat.p1verifFait=false;
+  var d=P1[idx];
+  var shuffled=fisher(d.opts.map(function(o,i){return{txt:o,orig:i};}));
+  var h='<div class="card" style="margin-bottom:12px">';
+  h+='<div class="palier-banner p1">';
+  h+='<div class="palier-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>';
+  h+='<div class="palier-banner-info"><div class="palier-num-label">PALIER 1 &mdash; Instrument 1</div><div class="palier-titre-label">Identifier la subordonn\u00e9e</div></div>';
+  h+='<div class="palier-score-badge">'+etat.scores[0]+' / 3</div></div>';
+  h+='<div class="phrase-wrap">';
+  h+='<div class="phrase-num-label">Phrase '+(idx+1)+' / 3</div>';
+  h+='<div class="phrase-texte">'+d.phrase+'</div>';
+  h+='<div class="question-block"><div class="question-label">'+d.consigne+'</div>';
+  h+='<div class="opts" id="opts_p1">';
+  shuffled.forEach(function(o,i){
+    h+='<button class="opt" data-orig="'+o.orig+'" onclick="selP1('+o.orig+',this)"><div class="opt-letter">'+LABELS()[i]+'</div><span>'+o.txt+'</span></button>';
+  });
+  h+='</div><div class="q-fb" id="fb_p1"></div></div>';
+  h+='<div class="btn-row"><button class="btn-valider" id="btnV_p1" onclick="verifierP1('+idx+')">VALIDER</button>';
+  h+='<button class="btn-retry" onclick="afficherPalier1()">&#8635; R\u00e9essayer</button></div>';
+  h+='<button class="btn-suivant" id="btnS_p1" onclick="suitePalier1()">Phrase suivante &#9656;</button>';
+  h+='</div></div>';
+  $i('exerciceZone').innerHTML=h;
+  $i('exerciceZone').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function selP1(orig,btn){if(etat.p1verifFait)return;etat.p1sel=orig;document.querySelectorAll('#opts_p1 .opt').forEach(function(b){b.style.borderColor='';b.style.background='';});btn.style.borderColor='var(--bleu)';btn.style.background='var(--bleu-bg)';}
+function verifierP1(idx){
+  if(etat.p1verifFait)return;
+  if(etat.p1sel===null){flashBtn('btnV_p1','Choisis une r\u00e9ponse');beepErr();return;}
+  etat.p1verifFait=true;$i('btnV_p1').disabled=true;
+  var d=P1[idx];var ok=etat.p1sel===d.ans;
+  document.querySelectorAll('#opts_p1 .opt').forEach(function(b){
+    b.setAttribute('disabled','');b.style.borderColor='';b.style.background='';
+    if(+b.dataset.orig===d.ans)b.className='opt correct';
+    else if(+b.dataset.orig===etat.p1sel)b.className='opt wrong';
+  });
+  if(!ok){var fb=$i('fb_p1');fb.innerHTML='\u274c '+d.fb;fb.className='q-fb show';beepErr();}
+  else{etat.scores[0]++;etat.total++;majScore();beepOk();flash();}
+  $i('btnS_p1').className='btn-suivant visible';
+}
+function suitePalier1(){etat.p1idx++;afficherPalier1();}
+function finPalier1(){
+  var sc=etat.scores[0];
+  if(sc>=2){debloquerInstrument(2);etat.palier=2;majInstruments();afficherPalier2();}
+  else{afficherInsuf(1,sc,3,2);}
+}
+
+/* ══ PALIER 2 ══ */
+function afficherPalier2(){
+  var idx=etat.p2idx;
+  if(idx>=P2.length){finPalier2();return;}
+  etat.p2sel[idx]={};etat.p2QFait[idx]={};
+  var d=P2[idx];
+  var h='<div class="card" style="margin-bottom:12px">';
+  h+='<div class="palier-banner">';
+  h+='<div class="palier-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>';
+  h+='<div class="palier-banner-info"><div class="palier-num-label">PALIER 2 &mdash; Instrument 2</div><div class="palier-titre-label">Subordonnant + relation logique</div></div>';
+  h+='<div class="palier-score-badge">'+etat.scores[1]+' / 6</div></div>';
+  h+='<div class="phrase-wrap">';
+  h+='<div class="phrase-num-label">Phrase '+(idx+4)+' / 6</div>';
+  h+='<div class="phrase-texte">'+d.phrase+'</div>';
+  d.qs.forEach(function(q,qi){
+    var sh=fisher(q.opts.map(function(o,i){return{txt:o,orig:i};}));
+    h+='<div class="question-block"><div class="question-label">Q'+(qi+1)+' &mdash; '+q.consigne+'</div>';
+    h+='<div class="opts" id="opts_p2_'+idx+'_'+qi+'">';
+    sh.forEach(function(o,i){h+='<button class="opt" data-orig="'+o.orig+'" onclick="selP2('+idx+','+qi+','+o.orig+',this)"><div class="opt-letter">'+LABELS()[i]+'</div><span>'+o.txt+'</span></button>';});
+    h+='</div><div class="q-fb" id="fb_p2_'+idx+'_'+qi+'"></div>';
+    h+='<div class="btn-row"><button class="btn-valider" id="btnV_p2_'+idx+'_'+qi+'" onclick="verifierP2Q('+idx+','+qi+')">VALIDER</button>';
+    h+='<button class="btn-retry" onclick="retryP2Q('+idx+','+qi+')">&#8635;</button></div></div>';
+  });
+  h+='<button class="btn-suivant" id="btnS_p2_'+idx+'" onclick="suiteP2('+idx+')">Phrase suivante &#9656;</button>';
+  h+='</div></div>';
+  h+='<div class="seuil-box" id="seuil_p2">&#9888; Seuil palier 3\u00a0: 5/6 minimum</div>';
+  $i('exerciceZone').innerHTML=h;
+  $i('exerciceZone').scrollIntoView({behavior:'smooth',block:'nearest'});
+  majBtnSuiteP2(idx);
+}
+function selP2(idx,qi,orig,btn){if(etat.p2QFait[idx]&&etat.p2QFait[idx][qi])return;if(!etat.p2sel[idx])etat.p2sel[idx]={};etat.p2sel[idx][qi]=orig;document.querySelectorAll('#opts_p2_'+idx+'_'+qi+' .opt').forEach(function(b){b.style.borderColor='';b.style.background='';});btn.style.borderColor='var(--bleu)';btn.style.background='var(--bleu-bg)';}
+function verifierP2Q(idx,qi){
+  if(!etat.p2QFait[idx])etat.p2QFait[idx]={};
+  if(etat.p2QFait[idx][qi])return;
+  if(etat.p2sel[idx]===undefined||etat.p2sel[idx][qi]===undefined){flashBtn('btnV_p2_'+idx+'_'+qi,'Choisis');beepErr();return;}
+  etat.p2QFait[idx][qi]=true;$i('btnV_p2_'+idx+'_'+qi).disabled=true;
+  var q=P2[idx].qs[qi];var ok=etat.p2sel[idx][qi]===q.ans;
+  document.querySelectorAll('#opts_p2_'+idx+'_'+qi+' .opt').forEach(function(b){
+    b.setAttribute('disabled','');b.style.borderColor='';b.style.background='';
+    if(+b.dataset.orig===q.ans)b.className='opt correct';
+    else if(+b.dataset.orig===etat.p2sel[idx][qi])b.className='opt wrong';
+  });
+  if(!ok){var fb=$i('fb_p2_'+idx+'_'+qi);fb.innerHTML='\u274c '+q.fb;fb.className='q-fb show';beepErr();}
+  else{etat.scores[1]++;etat.total++;majScore();beepOk();flash();}
+  majBtnSuiteP2(idx);
+}
+function retryP2Q(idx,qi){if(etat.p2QFait[idx]&&etat.p2QFait[idx][qi])return;delete(etat.p2sel[idx]||{})[qi];document.querySelectorAll('#opts_p2_'+idx+'_'+qi+' .opt').forEach(function(b){b.className='opt';b.removeAttribute('disabled');b.style.borderColor='';b.style.background='';});var fb=$i('fb_p2_'+idx+'_'+qi);if(fb)fb.className='q-fb';}
+function majBtnSuiteP2(idx){var allDone=P2[idx].qs.every(function(_,qi){return etat.p2QFait[idx]&&etat.p2QFait[idx][qi];});var btn=$i('btnS_p2_'+idx);if(btn)btn.className='btn-suivant'+(allDone?' visible':'');}
+function suiteP2(idx){etat.p2idx++;afficherPalier2();}
+function finPalier2(){if(etat.scores[1]>=5){debloquerInstrument(3);etat.palier=3;majInstruments();afficherPalier3();}else{afficherInsuf(2,etat.scores[1],6,5);}}
+
+/* ══ PALIER 3 ══ */
+function afficherPalier3(){
+  var idx=etat.p3idx;
+  if(idx>=P3.length){finPalier3();return;}
+  etat.p3sel[idx]={};etat.p3QFait[idx]={};
+  var d=P3[idx];
+  var h='<div class="card" style="margin-bottom:12px">';
+  h+='<div class="palier-banner p3">';
+  h+='<div class="palier-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>';
+  h+='<div class="palier-banner-info"><div class="palier-num-label">PALIER 3 &mdash; Instrument 3</div><div class="palier-titre-label">Analyse compl\u00e8te</div></div>';
+  h+='<div class="palier-score-badge">'+etat.scores[2]+' / 6</div></div>';
+  h+='<div class="phrase-wrap">';
+  h+='<div class="phrase-num-label">Phrase '+(idx+7)+' / 8</div>';
+  h+='<div class="phrase-texte">'+d.phrase+'</div>';
+  d.qs.forEach(function(q,qi){
+    var sh=fisher(q.opts.map(function(o,i){return{txt:o,orig:i};}));
+    h+='<div class="question-block"><div class="question-label">Q'+(qi+1)+' &mdash; '+q.consigne+'</div>';
+    h+='<div class="opts" id="opts_p3_'+idx+'_'+qi+'">';
+    sh.forEach(function(o,i){h+='<button class="opt" data-orig="'+o.orig+'" onclick="selP3('+idx+','+qi+','+o.orig+',this)"><div class="opt-letter">'+LABELS()[i]+'</div><span>'+o.txt+'</span></button>';});
+    h+='</div><div class="q-fb" id="fb_p3_'+idx+'_'+qi+'"></div>';
+    h+='<div class="btn-row"><button class="btn-valider" id="btnV_p3_'+idx+'_'+qi+'" onclick="verifierP3Q('+idx+','+qi+')">VALIDER</button>';
+    h+='<button class="btn-retry" onclick="retryP3Q('+idx+','+qi+')">&#8635;</button></div></div>';
+  });
+  h+='<button class="btn-suivant" id="btnS_p3_'+idx+'" onclick="suiteP3('+idx+')">Phrase suivante &#9656;</button>';
+  h+='</div></div>';
+  h+='<div class="seuil-box" id="seuil_p3">&#9888; Seuil palier 4\u00a0: 5/6 minimum</div>';
+  $i('exerciceZone').innerHTML=h;
+  $i('exerciceZone').scrollIntoView({behavior:'smooth',block:'nearest'});
+  majBtnSuiteP3(idx);
+}
+function selP3(idx,qi,orig,btn){if(etat.p3QFait[idx]&&etat.p3QFait[idx][qi])return;if(!etat.p3sel[idx])etat.p3sel[idx]={};etat.p3sel[idx][qi]=orig;document.querySelectorAll('#opts_p3_'+idx+'_'+qi+' .opt').forEach(function(b){b.style.borderColor='';b.style.background='';});btn.style.borderColor='var(--bleu)';btn.style.background='var(--bleu-bg)';}
+function verifierP3Q(idx,qi){
+  if(!etat.p3QFait[idx])etat.p3QFait[idx]={};
+  if(etat.p3QFait[idx][qi])return;
+  if(etat.p3sel[idx]===undefined||etat.p3sel[idx][qi]===undefined){flashBtn('btnV_p3_'+idx+'_'+qi,'Choisis');beepErr();return;}
+  etat.p3QFait[idx][qi]=true;$i('btnV_p3_'+idx+'_'+qi).disabled=true;
+  var q=P3[idx].qs[qi];var ok=etat.p3sel[idx][qi]===q.ans;
+  document.querySelectorAll('#opts_p3_'+idx+'_'+qi+' .opt').forEach(function(b){
+    b.setAttribute('disabled','');b.style.borderColor='';b.style.background='';
+    if(+b.dataset.orig===q.ans)b.className='opt correct';
+    else if(+b.dataset.orig===etat.p3sel[idx][qi])b.className='opt wrong';
+  });
+  if(!ok){var fb=$i('fb_p3_'+idx+'_'+qi);fb.innerHTML='\u274c '+q.fb;fb.className='q-fb show';beepErr();}
+  else{etat.scores[2]++;etat.total++;majScore();beepOk();flash();}
+  majBtnSuiteP3(idx);
+}
+function retryP3Q(idx,qi){if(etat.p3QFait[idx]&&etat.p3QFait[idx][qi])return;delete(etat.p3sel[idx]||{})[qi];document.querySelectorAll('#opts_p3_'+idx+'_'+qi+' .opt').forEach(function(b){b.className='opt';b.removeAttribute('disabled');b.style.borderColor='';b.style.background='';});var fb=$i('fb_p3_'+idx+'_'+qi);if(fb)fb.className='q-fb';}
+function majBtnSuiteP3(idx){var allDone=P3[idx].qs.every(function(_,qi){return etat.p3QFait[idx]&&etat.p3QFait[idx][qi];});var btn=$i('btnS_p3_'+idx);if(btn)btn.className='btn-suivant'+(allDone?' visible':'');}
+function suiteP3(idx){etat.p3idx++;afficherPalier3();}
+function finPalier3(){if(etat.scores[2]>=5){debloquerInstrument(4);etat.palier=4;majInstruments();afficherPalier4();}else{afficherInsuf(3,etat.scores[2],6,5);}}
+
+/* ══ PALIER 4 ══ */
+function afficherPalier4(){
+  var idx=etat.p4idx;
+  if(idx>=P4.length){finPalier4();return;}
+  etat.p4sel[idx]={};etat.p4QFait[idx]={};
+  var d=P4[idx];
+  var h='<div class="card" style="margin-bottom:12px">';
+  h+='<div class="palier-banner p4">';
+  h+='<div class="palier-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>';
+  h+='<div class="palier-banner-info"><div class="palier-num-label">PALIER 4 &mdash; Instrument 4</div><div class="palier-titre-label">Analyse experte</div></div>';
+  h+='<div class="palier-score-badge">'+etat.scores[3]+' / 6</div></div>';
+  h+='<div class="phrase-wrap">';
+  h+='<div class="phrase-num-label">Phrase '+(idx+9)+' / 10</div>';
+  h+='<div class="phrase-texte">'+d.phrase+'</div>';
+  d.qs.forEach(function(q,qi){
+    var sh=fisher(q.opts.map(function(o,i){return{txt:o,orig:i};}));
+    h+='<div class="question-block"><div class="question-label">Q'+(qi+1)+' &mdash; '+q.consigne+'</div>';
+    h+='<div class="opts" id="opts_p4_'+idx+'_'+qi+'">';
+    sh.forEach(function(o,i){h+='<button class="opt" data-orig="'+o.orig+'" onclick="selP4('+idx+','+qi+','+o.orig+',this)"><div class="opt-letter">'+LABELS()[i]+'</div><span>'+o.txt+'</span></button>';});
+    h+='</div><div class="q-fb" id="fb_p4_'+idx+'_'+qi+'"></div>';
+    h+='<div class="btn-row"><button class="btn-valider" id="btnV_p4_'+idx+'_'+qi+'" onclick="verifierP4Q('+idx+','+qi+')">VALIDER</button>';
+    h+='<button class="btn-retry" onclick="retryP4Q('+idx+','+qi+')">&#8635;</button></div></div>';
+  });
+  h+='<button class="btn-suivant" id="btnS_p4_'+idx+'" onclick="suiteP4('+idx+')">Phrase suivante &#9656;</button>';
+  h+='</div></div>';
+  $i('exerciceZone').innerHTML=h;
+  $i('exerciceZone').scrollIntoView({behavior:'smooth',block:'nearest'});
+  majBtnSuiteP4(idx);
+}
+function selP4(idx,qi,orig,btn){if(etat.p4QFait[idx]&&etat.p4QFait[idx][qi])return;if(!etat.p4sel[idx])etat.p4sel[idx]={};etat.p4sel[idx][qi]=orig;document.querySelectorAll('#opts_p4_'+idx+'_'+qi+' .opt').forEach(function(b){b.style.borderColor='';b.style.background='';});btn.style.borderColor='var(--bleu)';btn.style.background='var(--bleu-bg)';}
+function verifierP4Q(idx,qi){
+  if(!etat.p4QFait[idx])etat.p4QFait[idx]={};
+  if(etat.p4QFait[idx][qi])return;
+  if(etat.p4sel[idx]===undefined||etat.p4sel[idx][qi]===undefined){flashBtn('btnV_p4_'+idx+'_'+qi,'Choisis');beepErr();return;}
+  etat.p4QFait[idx][qi]=true;$i('btnV_p4_'+idx+'_'+qi).disabled=true;
+  var q=P4[idx].qs[qi];var ok=etat.p4sel[idx][qi]===q.ans;
+  document.querySelectorAll('#opts_p4_'+idx+'_'+qi+' .opt').forEach(function(b){
+    b.setAttribute('disabled','');b.style.borderColor='';b.style.background='';
+    if(+b.dataset.orig===q.ans)b.className='opt correct';
+    else if(+b.dataset.orig===etat.p4sel[idx][qi])b.className='opt wrong';
+  });
+  if(!ok){var fb=$i('fb_p4_'+idx+'_'+qi);fb.innerHTML='\u274c '+q.fb;fb.className='q-fb show';beepErr();}
+  else{etat.scores[3]++;etat.total++;majScore();beepOk();flash();}
+  majBtnSuiteP4(idx);
+}
+function retryP4Q(idx,qi){if(etat.p4QFait[idx]&&etat.p4QFait[idx][qi])return;delete(etat.p4sel[idx]||{})[qi];document.querySelectorAll('#opts_p4_'+idx+'_'+qi+' .opt').forEach(function(b){b.className='opt';b.removeAttribute('disabled');b.style.borderColor='';b.style.background='';});var fb=$i('fb_p4_'+idx+'_'+qi);if(fb)fb.className='q-fb';}
+function majBtnSuiteP4(idx){var allDone=P4[idx].qs.every(function(_,qi){return etat.p4QFait[idx]&&etat.p4QFait[idx][qi];});var btn=$i('btnS_p4_'+idx);if(btn)btn.className='btn-suivant'+(allDone?' visible':'');}
+function suiteP4(idx){etat.p4idx++;afficherPalier4();}
+function finPalier4(){afficherVerdict();}
+
+/* ── SCORE INSUFFISANT ── */
+function afficherInsuf(pal,sc,max,seuil){
+  $i('exerciceZone').innerHTML='';
+  var msg=$i('msgInsuf');
+  msg.innerHTML='\u26a0 Score insuffisant au palier '+pal+'\u00a0: <b>'+sc+'/'+max+'</b> (seuil\u00a0: '+seuil+'/'+max+'). Reprends le palier pour renforcer tes bases.';
+  msg.innerHTML+='<br><br><button class="btn-rejouer" onclick="retourPalier('+pal+')" style="font-size:14px;padding:10px 20px;">&#8635; Reprendre le palier '+pal+'</button>';
+  msg.className='score-insuf show';
+}
+function retourPalier(pal){
+  $i('msgInsuf').className='score-insuf';
+  if(pal===1){etat.p1idx=0;etat.scores[0]=0;etat.total=etat.scores[1]+etat.scores[2]+etat.scores[3];majScore();afficherPalier1();}
+  else if(pal===2){etat.p2idx=0;etat.scores[1]=0;etat.total=etat.scores[0]+etat.scores[2]+etat.scores[3];majScore();afficherPalier2();}
+  else if(pal===3){etat.p3idx=0;etat.scores[2]=0;etat.total=etat.scores[0]+etat.scores[1]+etat.scores[3];majScore();afficherPalier3();}
+}
+
+/* ── DÉBLOCAGE ── */
+function debloquerInstrument(n){
+  setInstr(n,'current');
+  var noms=['D\u00e9tecteur','Analyseur','Identificateur','Validateur'];
+  var h='<div class="unlock-msg show" id="unlockMsg">&#9989; Instrument '+(n)+' d\u00e9verrouill\u00e9\u00a0: <b>'+noms[n-1]+'</b> activ\u00e9 !</div>';
+  $i('exerciceZone').insertAdjacentHTML('afterbegin',h);
+  beepDeblocage();
+  setTimeout(function(){var m=$i('unlockMsg');if(m)m.remove();},2500);
+}
+
+/* ── VERDICT ── */
+function afficherVerdict(){
+  $i('exerciceZone').innerHTML='';
+  var total=etat.total;
+  var pct=Math.round(total/21*100);
+  var nb=pct>=90?5:pct>=71?4:pct>=52?3:pct>=30?2:1;
+  $i('vEtoiles').textContent='\u2b50'.repeat(nb)+'\u2606'.repeat(5-nb);
+  $i('vScore').textContent=total+'/21';
+  var tp=$i('vTampon'),msg=$i('vMsg');
+  if(total>=19){tp.textContent='EXPERT DES RELATIONS LOGIQUES';tp.className='verdict-tampon ok';msg.innerHTML='Ma\u00eetrise parfaite des relations logiques. Tous les instruments valident ton analyse\u00a0!';lancerParticules();}
+  else if(total>=15){tp.textContent='ANALYSTE CONFIRM\u00c9';tp.className='verdict-tampon ok';msg.innerHTML='Tr\u00e8s bonne analyse\u00a0! Tu ma\u00eetrises les subordonnants et les relations logiques.';}
+  else if(total>=11){tp.textContent='TECHNICIEN EN PROGRESSION';tp.className='verdict-tampon moyen';msg.innerHTML='Bons acquis\u00a0! Revois les relations logiques les moins ma\u00eetris\u00e9es.';}
+  else{tp.textContent='REPRISE N\u00c9CESSAIRE';tp.className='verdict-tampon ko';msg.innerHTML='Reprends le r\u00e9f\u00e9rentiel et retente l\u2019exercice.';}
+  var vp=$i('vPaliers');
+  var pals=[{n:'Palier 1',s:etat.scores[0],m:3,c:'var(--p1-col)'},{n:'Palier 2',s:etat.scores[1],m:6,c:'var(--p2-col)'},{n:'Palier 3',s:etat.scores[2],m:6,c:'var(--p3-col)'},{n:'Palier 4',s:etat.scores[3],m:6,c:'var(--p4-col)'}];
+  vp.innerHTML=pals.map(function(p){return'<div class="vp-item" style="border-color:'+p.c+'"><span class="vp-score" style="color:'+p.c+'">'+p.s+'/'+p.m+'</span><span class="vp-label">'+p.n+'</span></div>';}).join('');
+  $i('verdictCard').className='verdict-card show';
+  setTimeout(function(){$i('verdictCard').scrollIntoView({behavior:'smooth',block:'start'});},300);
+  beepFinal(total>=15);
+}
+function lancerParticules(){
+  var box=$i('particles');box.innerHTML='';
+  var cols=['var(--p1-col)','var(--p2-col)','var(--p3-col)','var(--p4-col)','var(--jaune)'];
+  for(var i=0;i<28;i++){var p=document.createElement('div');p.className='particle';p.style.cssText='left:'+(10+Math.random()*80)+'%;top:'+(40+Math.random()*30)+'%;background:'+cols[i%cols.length]+';animation:particleUp '+(1+Math.random())+'s ease '+(Math.random()*.5)+'s forwards;position:absolute;width:7px;height:7px;border-radius:50%;opacity:0;';box.appendChild(p);}
+}
+
+function recommencer(){
+  etat={palier:1,scores:[0,0,0,0],total:0,p1idx:0,p2idx:0,p3idx:0,p4idx:0,p1verifFait:false,p2QFait:{},p3QFait:{},p4QFait:{},p1sel:null,p2sel:{},p3sel:{},p4sel:{}};
+  majScore();majInstruments();
+  $i('verdictCard').className='verdict-card';
+  $i('msgInsuf').className='score-insuf';
+  afficherPalier1();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── UTILS ── */
+function flashBtn(id,txt){var b=$i(id);if(!b)return;var t=b.textContent;b.textContent=txt;setTimeout(function(){b.textContent=t;},1200);}
+function flash(){var f=document.createElement('div');f.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;z-index:9999;animation:particleUp .8s ease forwards;pointer-events:none;';f.textContent='\u2b50';document.body.appendChild(f);setTimeout(function(){f.remove();},900);}
+
+var actxO=null;
+function initAudio(){if(actxO)return;try{actxO=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){if(!actxO)return;var o=actxO.createOscillator(),g=actxO.createGain(),t=actxO.currentTime;o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(actxO.destination);o.start(t);o.stop(t+d+.02);}
+function beepOk(){initAudio();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.1,'sine',.09);},70);}
+function beepErr(){initAudio();beep(220,90,.2,'sawtooth',.08);}
+function beepDeblocage(){initAudio();[523,659,784].forEach(function(f,i){setTimeout(function(){beep(f,f,.15,'triangle',.12);},i*130);});}
+function beepFinal(ok){initAudio();if(ok){[523,659,784,1047,1318].forEach(function(f,i){setTimeout(function(){beep(f,f,.2,'triangle',.13);},i*130);});}else beep(200,80,.4,'sawtooth',.1);}
+document.addEventListener('pointerdown',initAudio,{once:true});
+
+/* Particules flottantes phase 1 */
+(function(){
+  var box=document.getElementById('p1Particles');
+  if(!box)return;
+  var cols=['#b94040','#f9c0bb','#7a1f1f','#d48080','#ff8888'];
+  for(var i=0;i<28;i++){
+    var p=document.createElement('div');
+    p.className='fp';
+    var size=(3+Math.random()*6)+'px';
+    p.style.cssText='width:'+size+';height:'+size+
+      ';left:'+(Math.random()*100)+'%;'+
+      'top:'+(20+Math.random()*75)+'%;'+
+      'background:'+cols[Math.floor(Math.random()*cols.length)]+';'+
+      '--dur:'+(4+Math.random()*8)+'s;'+
+      '--delay:'+(Math.random()*6)+'s;'+
+      '--dx:'+(Math.random()*60-30)+'px;'+
+      'opacity:.6;';
+    box.appendChild(p);
+  }
+})();
+</script>
+</body>
+</html>
