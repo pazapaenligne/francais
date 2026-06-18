@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S3 J2 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#b94040;--day:#b94040;--day-dark:#7a1f1f;--day-dark2:#4a1010;
+  --day-light:#f7eded;--day-border:#e8b0b0;--day-glow:rgba(185,64,64,.22);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fdf7f7;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --blue:#3ab5d8;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;
+  --radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:760px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--blue);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* POINT CARDINAL */
+.cardinal{background:#1a0505;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:.9rem 1.2rem;margin-bottom:1rem;position:relative;z-index:1;}
+.cardinal-badge{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem;}
+.cardinal-text{font-size:.95rem;color:#f5d0d0;line-height:1.75;}
+.cardinal-text strong{color:#fff;}
+
+/* RÉFÉRENTIEL */
+.ref{background:var(--surface);border:1.5px solid var(--day-border);border-radius:var(--radius);
+  overflow:hidden;margin-bottom:1rem;box-shadow:0 3px 14px rgba(0,0,0,.06);position:relative;z-index:1;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.ref-inner{padding:.9rem 1.2rem;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;}
+@media(max-width:560px){.ref-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:380px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.6rem .8rem;}
+.ref-cell-title{font-size:.8rem;font-weight:900;color:var(--day-dark);margin-bottom:.2rem;}
+.ref-cell-body{font-size:.82rem;color:var(--muted);line-height:1.65;}
+.ref-cell-body em{color:var(--day-dark2);font-style:normal;font-weight:700;}
+
+/* NIVEAUX DOSSIERS — design gamifié */
+.niveaux-row{display:flex;gap:.5rem;margin-bottom:1.1rem;position:relative;z-index:1;flex-wrap:wrap;}
+.niv-dot{
+  flex:1;min-width:72px;
+  background:var(--surface);
+  border:2px solid #ccc8be;
+  border-radius:0 var(--radius-sm) var(--radius-sm) var(--radius-sm);
+  padding:.7rem .4rem .6rem;
+  text-align:center;position:relative;
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;color:var(--muted);
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 2px 6px rgba(0,0,0,.07);
+  cursor:default;
+}
+/* Onglet saillant */
+.niv-dot::before{
+  content:'';position:absolute;top:-12px;left:-2px;
+  width:45%;height:13px;
+  background:#ccc8be;
+  border-radius:5px 5px 0 0;
+  transition:background .4s ease,width .3s ease;
+}
+/* Badge numéro */
+.niv-dot::after{
+  content:attr(data-num);
+  position:absolute;top:-9px;left:4px;
+  font-size:.55rem;font-weight:900;color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  z-index:2;line-height:13px;padding:0 2px;
+}
+/* État verrouillé */
+.niv-dot.locked-nd{opacity:.55;filter:grayscale(.6);}
+
+/* État actif */
+.niv-dot.active{
+  border-color:var(--day);color:var(--day-dark);
+  background:linear-gradient(160deg,var(--day-light) 0%,#fff 100%);
+  box-shadow:0 4px 18px var(--day-glow),0 1px 3px rgba(0,0,0,.08);
+  transform:translateY(-3px);
+}
+.niv-dot.active::before{background:var(--day);width:52%;}
+
+/* État terminé */
+.niv-dot.done{
+  border-color:var(--green);color:var(--green-dark);
+  background:linear-gradient(160deg,var(--green-light) 0%,#f8fff2 100%);
+  box-shadow:0 4px 14px rgba(141,198,63,.25);
+  transform:translateY(-2px);
+}
+.niv-dot.done::before{background:var(--green);width:52%;}
+
+.niv-icon{
+  font-size:1.5rem;display:block;margin-bottom:.3rem;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  line-height:1;
+}
+.niv-dot.active .niv-icon{transform:scale(1.18);}
+.niv-dot.done .niv-icon{transform:scale(1.05);}
+.niv-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.18rem;}
+.niv-sc-mini{font-size:.7rem;font-weight:900;display:block;min-height:.9rem;}
+.niv-dot.active .niv-sc-mini{color:var(--day-dark);}
+.niv-dot.done .niv-sc-mini{color:var(--green-dark);}
+/* Barre de progression sous l'icône */
+.niv-bar-bg{background:rgba(0,0,0,.08);border-radius:99px;height:5px;margin:.35rem .3rem .1rem;overflow:hidden;}
+.niv-bar-fill{height:100%;border-radius:99px;background:var(--day);width:0%;transition:width .6s ease;}
+.niv-dot.done .niv-bar-fill{background:var(--green);width:100%!important;}
+
+/* PROGRESSION */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* CARD NIVEAU */
+.niv-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.niv-card.locked{opacity:.42;pointer-events:none;}
+.niv-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.niv-head{padding:.85rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.niv-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.niv-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.niv-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark);margin-left:auto;}
+.niv-consigne{font-size:1rem;color:var(--muted);line-height:1.65;
+  padding:0 1.2rem .8rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+/* PHRASE ITEM */
+.q-item{padding:.7rem 1.2rem;margin-bottom:.5rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.4rem;}
+.q-phrase{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);
+  line-height:1.8;margin-bottom:.6rem;padding:.7rem 1rem;
+  background:var(--surface2);border-radius:var(--radius-sm);border:1.5px solid var(--border);}
+.q-phrase .sub-conn{color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:900;}
+
+/* Étapes séquentielles */
+.etape{background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:.5rem;
+  display:none;}
+.etape.show{display:block;}
+.etape-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.opts-col{display:flex;flex-direction:column;gap:.3rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.55rem .9rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:flex-start;gap:.4rem;word-break:break-word;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.opt-sel{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.opt-btn.correct{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .3s ease;}
+.opt-btn.wrong{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .35s ease;}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark);margin-top:2px;}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--pink-dark);color:#fff;}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.04);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.etape-fb{font-size:clamp(.88rem,2.5vw,1rem);display:none;margin-top:.4rem;line-height:1.7;
+  padding:.5rem .7rem;border-radius:var(--radius-sm);}
+.etape-fb.show{display:block;}
+.etape-fb.ok{background:var(--green-light);border:1px solid var(--green);color:var(--green-dark);}
+.etape-fb.ko{background:var(--pink-light);border:1px solid var(--pink-dark);color:var(--pink-dark);}
+
+/* Score + fb globaux */
+.sp{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);
+  margin:.7rem 1.2rem 0;display:none;}
+.sp.show{display:block;}
+.fb-g{padding:.9rem 1.2rem;border-radius:var(--radius-sm);font-size:1rem;
+  display:none;line-height:1.8;margin:.4rem 1.2rem .8rem;}
+.fb-g.show{display:block;}
+.fb-g.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-g.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-g.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.2rem 1.2rem 0;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* RÉSULTATS */
+.results{display:none;position:relative;z-index:1;}
+.results.show{display:block;animation:fadeUp .4s ease both;}
+.rcard{background:#1a0505;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.2);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#e8b0b0,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day);}
+.stars{font-size:1.9rem;margin:.35rem 0 .6rem;letter-spacing:.1em;}
+.niv-scores{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.4rem;margin-bottom:.8rem;}
+.ns-cell{background:rgba(255,255,255,.06);border:1.5px solid rgba(185,64,64,.25);
+  border-radius:var(--radius-sm);padding:.6rem .4rem;text-align:center;}
+.ns-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:900;color:var(--day);line-height:1;}
+.ns-lbl{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem;}
+.rmsg{color:#f5d0d0;font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.conseil-msg{border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.88rem;
+  margin-bottom:1rem;font-family:'JetBrains Mono',monospace;text-align:center;
+  display:none;line-height:1.6;}
+.conseil-msg.show{display:block;}
+.conseil-msg.ok{background:rgba(141,198,63,.15);border:1.5px solid var(--green);color:var(--green);}
+.conseil-msg.mid{background:rgba(245,166,35,.12);border:1.5px solid var(--orange);color:var(--orange);}
+.conseil-msg.ko{background:rgba(192,57,43,.1);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.btn-restart{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;
+  border:2px solid var(--day-border);min-height:2.8rem;
+  background:transparent;color:var(--day);width:100%;justify-content:center;}
+.btn-restart:hover{border-color:var(--day);color:#fff;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 3ème</span>
+  </div>
+  <div class="week-label">Semaine 3 – Jour 2</div>
+  <h1>Je m'entraîne · <span class="hl">Subordonnée circ.</span></h1>
+</header>
+
+<!-- Point cardinal -->
+<div class="cardinal">
+  <div class="cardinal-badge">&#128270;&nbsp;À retenir — Règle absolue</div>
+  <div class="cardinal-text">Une <strong>proposition subordonnée circonstancielle</strong> exprime un lien logique avec la principale&nbsp;: temps, cause, conséquence, but, condition ou concession. Elle est introduite par une <strong>conjonction ou locution conjonctive</strong>.</div>
+</div>
+
+<!-- Référentiel -->
+<div class="ref">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-title">&#128218;&nbsp;Référentiel — Rapports logiques</div>
+    <div class="ref-grid">
+      <div class="ref-cell"><div class="ref-cell-title">Temps</div>
+        <div class="ref-cell-body"><em>quand, lorsque, dès que, pendant que, avant que, après que</em></div></div>
+      <div class="ref-cell"><div class="ref-cell-title">Cause</div>
+        <div class="ref-cell-body"><em>parce que, puisque, comme</em></div></div>
+      <div class="ref-cell"><div class="ref-cell-title">Conséquence</div>
+        <div class="ref-cell-body"><em>si bien que, de sorte que, tellement… que, si… que</em></div></div>
+      <div class="ref-cell"><div class="ref-cell-title">But</div>
+        <div class="ref-cell-body"><em>afin que, pour que</em></div></div>
+      <div class="ref-cell"><div class="ref-cell-title">Condition</div>
+        <div class="ref-cell-body"><em>si, à condition que</em></div></div>
+      <div class="ref-cell"><div class="ref-cell-title">Opposition / concession</div>
+        <div class="ref-cell-body"><em>bien que, alors que, tandis que, quoique</em></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Niveaux -->
+<div class="niveaux-row">
+  <div class="niv-dot active" id="nd0" data-num="1">
+    <span class="niv-icon">&#128270;</span>
+    <span class="niv-lbl">Niveau 1</span>
+    <span class="niv-sc-mini" id="nst0">0 / 3</span>
+    <div class="niv-bar-bg"><div class="niv-bar-fill" id="nbar0"></div></div>
+  </div>
+  <div class="niv-dot locked-nd" id="nd1" data-num="2">
+    <span class="niv-icon">&#128203;</span>
+    <span class="niv-lbl">Niveau 2</span>
+    <span class="niv-sc-mini" id="nst1">0 / 9</span>
+    <div class="niv-bar-bg"><div class="niv-bar-fill" id="nbar1"></div></div>
+  </div>
+  <div class="niv-dot locked-nd" id="nd2" data-num="3">
+    <span class="niv-icon">&#128300;</span>
+    <span class="niv-lbl">Niveau 3</span>
+    <span class="niv-sc-mini" id="nst2">0 / 8</span>
+    <div class="niv-bar-bg"><div class="niv-bar-fill" id="nbar2"></div></div>
+  </div>
+  <div class="niv-dot locked-nd" id="nd3" data-num="4">
+    <span class="niv-icon">&#9998;&#65039;</span>
+    <span class="niv-lbl">Niveau 4</span>
+    <span class="niv-sc-mini" id="nst3">0 / 10</span>
+    <div class="niv-bar-bg"><div class="niv-bar-fill" id="nbar4"></div></div>
+  </div>
+</div>
+
+<!-- Progression -->
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 10 points</span><span id="prog-pct">0 %</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> point(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">10</span> restant(s)</div>
+</div>
+
+<!-- NIVEAU 1 -->
+<div class="niv-card" id="card1">
+  <div class="niv-stripe"></div>
+  <div class="niv-head">
+    <span class="niv-badge">Niveau 1</span>
+    <span class="niv-label">&#128270;&nbsp;Identifier le rapport logique</span>
+    <span class="niv-sc" id="sc1">0 / 3</span>
+  </div>
+  <div class="niv-consigne">Identifie le rapport logique exprimé par la subordonnée dans chaque phrase.</div>
+  <div id="list1"></div>
+  <div class="sp" id="sp1"></div>
+  <div class="fb-g" id="fb1"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v1" disabled>&#10003;&nbsp;Vérifier le niveau 1</button>
+    <button class="btn btn-g" id="btn-r1">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- NIVEAU 2 -->
+<div class="niv-card locked" id="card2">
+  <div class="niv-stripe"></div>
+  <div class="niv-head">
+    <span class="niv-badge">Niveau 2</span>
+    <span class="niv-label">&#128203;&nbsp;Rapport + subordonnée + subordonnant</span>
+    <span class="niv-sc" id="sc2">0 / 9</span>
+  </div>
+  <div class="niv-consigne">Pour chaque phrase&nbsp;: identifie le rapport logique, la proposition subordonnée et le mot subordonnant (3 étapes séquentielles).</div>
+  <div id="list2"></div>
+  <div class="sp" id="sp2"></div>
+  <div class="fb-g" id="fb2"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v2" disabled>&#10003;&nbsp;Vérifier le niveau 2</button>
+    <button class="btn btn-g" id="btn-r2">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- NIVEAU 3 -->
+<div class="niv-card locked" id="card3">
+  <div class="niv-stripe"></div>
+  <div class="niv-head">
+    <span class="niv-badge">Niveau 3</span>
+    <span class="niv-label">&#128300;&nbsp;Analyse complète + justification</span>
+    <span class="niv-sc" id="sc3">0 / 8</span>
+  </div>
+  <div class="niv-consigne">Analyse complète&nbsp;: rapport logique, subordonnée, subordonnant et justification (4 étapes séquentielles).</div>
+  <div id="list3"></div>
+  <div class="sp" id="sp3"></div>
+  <div class="fb-g" id="fb3"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v3" disabled>&#10003;&nbsp;Vérifier le niveau 3</button>
+    <button class="btn btn-g" id="btn-r3">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- NIVEAU 4 -->
+<div class="niv-card locked" id="card4">
+  <div class="niv-stripe"></div>
+  <div class="niv-head">
+    <span class="niv-badge">Niveau 4</span>
+    <span class="niv-label">&#9998;&#65039;&nbsp;Analyse complète + reformulation</span>
+    <span class="niv-sc" id="sc4">0 / 10</span>
+  </div>
+  <div class="niv-consigne">Analyse complète + reformule le lien logique avec un autre connecteur (5 étapes séquentielles).</div>
+  <div id="list4"></div>
+  <div class="sp" id="sp4"></div>
+  <div class="fb-g" id="fb4"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-v4" disabled>&#10003;&nbsp;Vérifier le niveau 4</button>
+    <button class="btn btn-g" id="btn-r4">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;">&#128270;&nbsp;Rapport d'analyse</div>
+    <div class="score-big"><span id="r-score">0</span>/10</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="niv-scores">
+      <div class="ns-cell"><div class="ns-val" id="rn1">0/3</div><div class="ns-lbl">Niveau 1</div></div>
+      <div class="ns-cell"><div class="ns-val" id="rn2">0/3</div><div class="ns-lbl">Niveau 2</div></div>
+      <div class="ns-cell"><div class="ns-val" id="rn3">0/2</div><div class="ns-lbl">Niveau 3</div></div>
+      <div class="ns-cell"><div class="ns-val" id="rn4">0/2</div><div class="ns-lbl">Niveau 4</div></div>
+    </div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="conseil-msg" id="conseil-msg"></div>
+    <button class="btn-restart" id="btn-restart">&#8635;&nbsp;Recommencer depuis le niveau 1</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+var LETTERS=['A','B','C','D'];
+
+/* ══ DONNÉES ══ */
+
+/* NIVEAU 1 : 1 étape (rapport logique) par phrase */
+var D1=[
+  {id:'p1',
+   phrase:"Il a \u00e9teint son t\u00e9l\u00e9phone <span class='sub-conn'>afin que</span> le cours se d\u00e9roule calmement.",
+   etapes:[
+     {label:'Rapport logique\u00a0:',opts:['But','Cause','Temps'],ans:0,
+      fb:'\u00ab\u00a0Afin que\u00a0\u00bb exprime un objectif\u00a0: c\u2019est un rapport de but.'}
+   ]
+  },
+  {id:'p2',
+   phrase:"<span class='sub-conn'>Comme</span> la pluie s\u2019intensifie, les activit\u00e9s sont annul\u00e9es.",
+   etapes:[
+     {label:'Rapport logique\u00a0:',opts:['Cause','Cons\u00e9quence','Opposition'],ans:0,
+      fb:'\u00ab\u00a0Comme\u00a0\u00bb en d\u00e9but de phrase introduit la cause de la situation.'}
+   ]
+  },
+  {id:'p3',
+   phrase:"Il a \u00e9tudi\u00e9 r\u00e9guli\u00e8rement <span class='sub-conn'>si bien qu\u2019</span>il a r\u00e9ussi l\u2019examen.",
+   etapes:[
+     {label:'Rapport logique\u00a0:',opts:['Cons\u00e9quence','Condition','Temps'],ans:0,
+      fb:'\u00ab\u00a0Si bien que\u00a0\u00bb exprime le r\u00e9sultat de l\u2019action\u00a0: une cons\u00e9quence logique.'}
+   ]
+  }
+];
+
+/* NIVEAU 2 : 3 étapes par phrase */
+var D2=[
+  {id:'p4',
+   phrase:"<span class='sub-conn'>Lorsque</span> la sonnerie retentit, les \u00e9l\u00e8ves quittent la salle.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Temps','Cause','Condition'],ans:0,
+      fb:'\u00ab\u00a0Lorsque\u00a0\u00bb situe l\u2019action dans le temps.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0les \u00e9l\u00e8ves quittent la salle\u00a0\u00bb','\u00ab\u00a0lorsque la sonnerie retentit\u00a0\u00bb','\u00ab\u00a0la sonnerie retentit\u00a0\u00bb'],ans:1,
+      fb:'La subordonn\u00e9e commence au subordonnant \u00ab\u00a0lorsque\u00a0\u00bb et inclut tout ce qui suit jusqu\u2019\u00e0 la virgule.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0retentit\u00a0\u00bb','\u00ab\u00a0lorsque\u00a0\u00bb','\u00ab\u00a0la sonnerie\u00a0\u00bb'],ans:1,
+      fb:'Le subordonnant est la conjonction qui introduit la proposition subordonn\u00e9e\u00a0: \u00ab\u00a0lorsque\u00a0\u00bb.'}
+   ]
+  },
+  {id:'p5',
+   phrase:"<span class='sub-conn'>Bien qu\u2019</span>il ait pr\u00e9par\u00e9 son expos\u00e9, il reste h\u00e9sitant \u00e0 l\u2019oral.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Concession','But','Temps'],ans:0,
+      fb:'\u00ab\u00a0Bien que\u00a0\u00bb exprime une opposition entre deux id\u00e9es.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0il reste h\u00e9sitant \u00e0 l\u2019oral\u00a0\u00bb','\u00ab\u00a0bien qu\u2019il ait pr\u00e9par\u00e9 son expos\u00e9\u00a0\u00bb','\u00ab\u00a0il ait pr\u00e9par\u00e9 son expos\u00e9\u00a0\u00bb'],ans:1,
+      fb:'La subordonn\u00e9e commence \u00e0 \u00ab\u00a0bien que\u00a0\u00bb et se termine avant la virgule.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0bien que\u00a0\u00bb','\u00ab\u00a0ait pr\u00e9par\u00e9\u00a0\u00bb','\u00ab\u00a0h\u00e9sitant\u00a0\u00bb'],ans:0,
+      fb:'La locution conjonctive \u00ab\u00a0bien que\u00a0\u00bb est le subordonnant\u00a0: elle introduit la concession.'}
+   ]
+  },
+  {id:'p6',
+   phrase:"Il r\u00e9vise avec s\u00e9rieux <span class='sub-conn'>de sorte qu\u2019</span>il progresse rapidement.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Cons\u00e9quence','Condition','Opposition'],ans:0,
+      fb:'\u00ab\u00a0De sorte que\u00a0\u00bb introduit le r\u00e9sultat de l\u2019action.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0il r\u00e9vise avec s\u00e9rieux\u00a0\u00bb','\u00ab\u00a0de sorte qu\u2019il progresse rapidement\u00a0\u00bb','\u00ab\u00a0il progresse rapidement\u00a0\u00bb'],ans:1,
+      fb:'La subordonn\u00e9e commence \u00e0 \u00ab\u00a0de sorte que\u00a0\u00bb et inclut tout ce qui suit.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0rapidement\u00a0\u00bb','\u00ab\u00a0s\u00e9rieux\u00a0\u00bb','\u00ab\u00a0de sorte que\u00a0\u00bb'],ans:2,
+      fb:'La locution conjonctive \u00ab\u00a0de sorte que\u00a0\u00bb est le subordonnant de cons\u00e9quence.'}
+   ]
+  }
+];
+
+/* NIVEAU 3 : 4 étapes par phrase */
+var D3=[
+  {id:'p7',
+   phrase:"<span class='sub-conn'>Puisqu\u2019</span>il n\u2019avait pas compris la consigne, il a demand\u00e9 de l\u2019aide.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Cause','But','Temps'],ans:0,
+      fb:'\u00ab\u00a0Puisque\u00a0\u00bb introduit la raison de l\u2019action principale.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0il a demand\u00e9 de l\u2019aide\u00a0\u00bb','\u00ab\u00a0puisqu\u2019il n\u2019avait pas compris la consigne\u00a0\u00bb','\u00ab\u00a0il n\u2019avait pas compris la consigne\u00a0\u00bb'],ans:1,
+      fb:'La subordonn\u00e9e commence \u00e0 \u00ab\u00a0puisque\u00a0\u00bb et se termine avant la virgule.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0il n\u2019avait pas\u00a0\u00bb','\u00ab\u00a0compris\u00a0\u00bb','\u00ab\u00a0puisque\u00a0\u00bb'],ans:2,
+      fb:'\u00ab\u00a0Puisque\u00a0\u00bb est la conjonction de cause qui introduit la subordonn\u00e9e.'},
+     {label:'\u00c9tape 4 — Justification du rapport\u00a0:',
+      opts:['La subordonn\u00e9e explique la raison de l\u2019action principale.','La subordonn\u00e9e d\u00e9crit le r\u00e9sultat de l\u2019action.','La subordonn\u00e9e exprime un objectif vis\u00e9.'],ans:0,
+      fb:'La cause r\u00e9pond \u00e0 la question \u00ab\u00a0Pourquoi\u00a0?\u00a0\u00bb\u00a0: \u00ab\u00a0Puisqu\u2019il n\u2019avait pas compris\u00a0\u00bb explique pourquoi il a demand\u00e9 de l\u2019aide.'}
+   ]
+  },
+  {id:'p8',
+   phrase:"Il a continu\u00e9 \u00e0 travailler <span class='sub-conn'>alors qu\u2019</span>il \u00e9tait fatigu\u00e9.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Concession','Condition','Cons\u00e9quence'],ans:0,
+      fb:'\u00ab\u00a0Alors que\u00a0\u00bb exprime une opposition entre deux r\u00e9alit\u00e9s.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0il a continu\u00e9 \u00e0 travailler\u00a0\u00bb','\u00ab\u00a0alors qu\u2019il \u00e9tait fatigu\u00e9\u00a0\u00bb','\u00ab\u00a0il \u00e9tait fatigu\u00e9\u00a0\u00bb'],ans:1,
+      fb:'La subordonn\u00e9e commence \u00e0 \u00ab\u00a0alors que\u00a0\u00bb et s\u2019\u00e9tend jusqu\u2019\u00e0 la fin.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0alors que\u00a0\u00bb','\u00ab\u00a0fatigu\u00e9\u00a0\u00bb','\u00ab\u00a0continu\u00e9\u00a0\u00bb'],ans:0,
+      fb:'La locution conjonctive \u00ab\u00a0alors que\u00a0\u00bb est le subordonnant d\u2019opposition.'},
+     {label:'\u00c9tape 4 — Justification du rapport\u00a0:',
+      opts:['La subordonn\u00e9e exprime un r\u00e9sultat inattendu de l\u2019action.','La subordonn\u00e9e cr\u00e9e un contraste entre l\u2019effort fourni et l\u2019\u00e9tat du sujet.','La subordonn\u00e9e d\u00e9signe la condition n\u00e9cessaire \u00e0 l\u2019action.'],ans:1,
+      fb:'La concession (ou opposition) souligne un contraste\u00a0: continuer \u00e0 travailler \u2013 malgr\u00e9 la fatigue.'}
+   ]
+  }
+];
+
+/* NIVEAU 4 : 5 étapes par phrase */
+var D4=[
+  {id:'p9',
+   phrase:"<span class='sub-conn'>Comme</span> le vent s\u2019est lev\u00e9, la sortie a \u00e9t\u00e9 annul\u00e9e.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Cause','Temps','Opposition'],ans:0,
+      fb:'\u00ab\u00a0Comme\u00a0\u00bb en d\u00e9but de phrase exprime la cause.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0la sortie a \u00e9t\u00e9 annul\u00e9e\u00a0\u00bb','\u00ab\u00a0comme le vent s\u2019est lev\u00e9\u00a0\u00bb','\u00ab\u00a0le vent s\u2019est lev\u00e9\u00a0\u00bb'],ans:1,
+      fb:'La subordonn\u00e9e commence \u00e0 \u00ab\u00a0comme\u00a0\u00bb et se termine avant la virgule.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0comme\u00a0\u00bb','\u00ab\u00a0le vent\u00a0\u00bb','\u00ab\u00a0lev\u00e9\u00a0\u00bb'],ans:0,
+      fb:'\u00ab\u00a0Comme\u00a0\u00bb est la conjonction de cause lorsqu\u2019elle est plac\u00e9e en t\u00eate de phrase.'},
+     {label:'\u00c9tape 4 — Justification du rapport\u00a0:',
+      opts:['La subordonn\u00e9e indique la raison de l\u2019annulation.','La subordonn\u00e9e d\u00e9crit ce qui se passe en m\u00eame temps.','La subordonn\u00e9e exprime le but de l\u2019annulation.'],ans:0,
+      fb:'\u00ab\u00a0Comme le vent s\u2019est lev\u00e9\u00a0\u00bb r\u00e9pond \u00e0 \u00ab\u00a0Pourquoi la sortie a-t-elle \u00e9t\u00e9 annul\u00e9e\u00a0?\u00a0\u00bb\u00a0: c\u2019est bien une cause.'},
+     {label:'\u00c9tape 5 — Reformulation avec un autre connecteur\u00a0:',
+      opts:['\u00ab\u00a0Puisque le vent s\u2019est lev\u00e9\u00a0\u00bb','\u00ab\u00a0Lorsque le vent s\u2019est lev\u00e9\u00a0\u00bb','\u00ab\u00a0M\u00eame si le vent s\u2019est lev\u00e9\u00a0\u00bb'],ans:0,
+      fb:'\u00ab\u00a0Puisque\u00a0\u00bb est une autre conjonction de cause qui peut remplacer \u00ab\u00a0comme\u00a0\u00bb dans ce contexte.'}
+   ]
+  },
+  {id:'p10',
+   phrase:"Il a r\u00e9ussi son projet <span class='sub-conn'>bien qu\u2019</span>il ait rencontr\u00e9 plusieurs difficult\u00e9s.",
+   etapes:[
+     {label:'\u00c9tape 1 — Rapport logique\u00a0:',opts:['Concession','Cause','But'],ans:0,
+      fb:'\u00ab\u00a0Bien que\u00a0\u00bb introduit une concession\u00a0: une r\u00e9ussite malgr\u00e9 un obstacle.'},
+     {label:'\u00c9tape 2 — Proposition subordonn\u00e9e\u00a0:',
+      opts:['\u00ab\u00a0il a r\u00e9ussi son projet\u00a0\u00bb','\u00ab\u00a0il ait rencontr\u00e9 plusieurs difficult\u00e9s\u00a0\u00bb','\u00ab\u00a0bien qu\u2019il ait rencontr\u00e9 plusieurs difficult\u00e9s\u00a0\u00bb'],ans:2,
+      fb:'La subordonn\u00e9e commence \u00e0 \u00ab\u00a0bien que\u00a0\u00bb et inclut tout ce qui suit.'},
+     {label:'\u00c9tape 3 — Mot subordonnant\u00a0:',opts:['\u00ab\u00a0difficult\u00e9s\u00a0\u00bb','\u00ab\u00a0bien que\u00a0\u00bb','\u00ab\u00a0plusieurs\u00a0\u00bb'],ans:1,
+      fb:'\u00ab\u00a0Bien que\u00a0\u00bb est la locution conjonctive de concession.'},
+     {label:'\u00c9tape 4 — Justification du rapport\u00a0:',
+      opts:['La subordonn\u00e9e exprime un obstacle surmont\u00e9 malgr\u00e9 tout.','La subordonn\u00e9e d\u00e9crit la raison du succ\u00e8s.','La subordonn\u00e9e indique une condition au succ\u00e8s.'],ans:0,
+      fb:'La concession souligne le contraste\u00a0: le succ\u00e8s est obtenu malgr\u00e9 l\u2019obstacle des difficult\u00e9s.'},
+     {label:'\u00c9tape 5 — Reformulation avec un autre connecteur\u00a0:',
+      opts:['\u00ab\u00a0M\u00eame s\u2019il a rencontr\u00e9 plusieurs difficult\u00e9s\u00a0\u00bb','\u00ab\u00a0Parce qu\u2019il a rencontr\u00e9 plusieurs difficult\u00e9s\u00a0\u00bb','\u00ab\u00a0Lorsqu\u2019il a rencontr\u00e9 plusieurs difficult\u00e9s\u00a0\u00bb'],ans:0,
+      fb:'\u00ab\u00a0M\u00eame si\u00a0\u00bb est une autre locution de concession\/condition qui peut remplacer \u00ab\u00a0bien que\u00a0\u00bb.'}
+   ]
+  }
+];
+
+/* ══ ÉTAT ══ */
+var scores={n1:0,n2:0,n3:0,n4:0};
+var done={n1:false,n2:false,n3:false,n4:false};
+var etDone={};
+var TOTAL=10;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,t,v){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),tc=actx.currentTime;o.type=t||'sine';o.frequency.setValueAtTime(f1,tc);o.frequency.exponentialRampToValueAtTime(f2,tc+d);g.gain.setValueAtTime(0.0001,tc);g.gain.linearRampToValueAtTime(v||0.14,tc+0.01);g.gain.exponentialRampToValueAtTime(0.0001,tc+d);o.connect(g);g.connect(actx.destination);o.start(tc);o.stop(tc+d+0.02);}
+function sndOk(){initA();beep(440,660,0.08,'sine',0.15);setTimeout(function(){beep(660,880,0.15,'sine',0.12);},90);}
+function sndKo(){initA();beep(280,160,0.22,'sawtooth',0.12);}
+function sndFin(){initA();beep(523,659,0.2,'sine',0.14);setTimeout(function(){beep(659,880,0.25,'sine',0.12);},120);}
+
+function shuffle(a){
+  var b=a.slice();
+  for(var i=b.length-1;i>0;i--){
+    var buf=new Uint32Array(1);
+    (window.crypto||window.msCrypto).getRandomValues(buf);
+    var j=buf[0]%(i+1);var t=b[i];b[i]=b[j];b[j]=t;
+  }
+  return b;
+}
+
+/* ══ BUILD ÉTAPE QCM ══ */
+function buildEtape(et,pid,eidx,parentDiv,onDone){
+  var wrap=document.createElement('div');wrap.className='etape';wrap.id='et-'+pid+'-'+eidx;
+  if(eidx===0)wrap.classList.add('show');
+  var lbl=document.createElement('div');lbl.className='etape-label';lbl.textContent=et.label;wrap.appendChild(lbl);
+  var opts=document.createElement('div');opts.className='opts-col';
+  var fb=document.createElement('div');fb.className='etape-fb';
+  var shuffled=shuffle(et.opts.map(function(o,oi){return{txt:o,orig:oi};}));
+  shuffled.forEach(function(item,li){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.dataset.val=item.orig;
+    btn.innerHTML='<span class="opt-letter">'+LETTERS[li]+'</span><span>'+item.txt+'</span>';
+    btn.addEventListener('click',function(){
+      if(etDone[pid+'-'+eidx])return;
+      etDone[pid+'-'+eidx]=true;
+      opts.querySelectorAll('.opt-btn').forEach(function(b){b.disabled=true;});
+      var ok=(parseInt(btn.dataset.val)===et.ans);
+      opts.querySelectorAll('.opt-btn').forEach(function(b){
+        b.className='opt-btn'+(parseInt(b.dataset.val)===et.ans?' correct':(b===btn&&!ok?' wrong':''));
+      });
+      if(ok){fb.className='etape-fb show ok';fb.innerHTML='&#10003;&nbsp;Correct.';}
+      else{fb.className='etape-fb show ko';fb.innerHTML='&#10006;&nbsp;'+et.fb;}
+      if(ok)sndOk();else sndKo();
+      onDone(ok);
+      /* Afficher étape suivante */
+      var nextWrap=document.getElementById('et-'+pid+'-'+(eidx+1));
+      if(nextWrap)setTimeout(function(){nextWrap.classList.add('show');},350);
+    });
+    opts.appendChild(btn);
+  });
+  wrap.appendChild(opts);wrap.appendChild(fb);
+  parentDiv.appendChild(wrap);
+}
+
+/* ══ BUILD LISTE ══ */
+function buildList(data,listId,nKey,maxEt,checkFn){
+  var list=$(listId);list.innerHTML='';
+  data.forEach(function(d,i){
+    var div=document.createElement('div');div.className='q-item';div.id='qi-'+d.id;
+    var qn=document.createElement('div');qn.className='q-num';
+    qn.textContent='Phrase '+(i+1+(nKey==='n1'?0:nKey==='n2'?3:nKey==='n3'?6:8));
+    div.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=d.phrase;div.appendChild(ph);
+    /* Suivi score par étape */
+    d._sc=new Array(d.etapes.length).fill(null);
+    d.etapes.forEach(function(et,ei){
+      buildEtape(et,d.id,ei,div,function(ok){
+        d._sc[ei]=ok?1:0;
+        /* Recalculer score du niveau */
+        var sc=0;
+        data.forEach(function(dd){
+          (dd._sc||[]).forEach(function(v){if(v!==null)sc+=v;});
+        });
+        scores[nKey]=sc;
+        var max=data.reduce(function(a,dd){return a+dd.etapes.length;},0);
+        $(nKey.replace('n','sc')).textContent=sc+' / '+max;
+        updateGlobal();
+        checkFn();
+      });
+    });
+    list.appendChild(div);
+  });
+}
+
+/* ══ CHECK COMPLET ══ */
+function allDone(data){
+  return data.every(function(d){
+    return d._sc&&d._sc.length===d.etapes.length&&d._sc.every(function(v){return v!==null;});
+  });
+}
+
+/* ══ VERIF NIVEAU ══ */
+function verifNiveau(nKey,data,maxScore,minOk,nextCardId,nextNdIdx,scEl,spId,fbId){
+  if(done[nKey])return;done[nKey]=true;
+  var sc=scores[nKey];
+  var ko=maxScore-sc;
+  $(spId).textContent='Score niveau '+nKey.replace('n','')+'\u00a0: '+sc+' / '+maxScore;
+  $(spId).classList.add('show');
+  var fb=$(fbId);
+  if(ko===0){fb.className='fb-g show ok';fb.innerHTML='&#11088;\u00a0Niveau valid\u00e9\u00a0! '+sc+'/'+maxScore+'.';sndOk();}
+  else if(sc>=minOk){fb.className='fb-g show mid';fb.innerHTML='&#128161;\u00a0'+sc+'/'+maxScore+'\u00a0\u2014 Score suffisant. Niveau suivant d\u00e9bloqu\u00e9.';sndKo();}
+  else{fb.className='fb-g show ko';fb.innerHTML='&#10006;\u00a0'+sc+'/'+maxScore+'\u00a0\u2014 Score insuffisant. Rien\u00a0: retente ce niveau.';sndKo();}
+  /* Mettre à jour dot */
+  $('nd'+(parseInt(nKey.replace('n',''))-1)).className='niv-dot done';
+  $('nst'+(parseInt(nKey.replace('n',''))-1)).textContent='valid\u00e9';
+  updateGlobal();
+  if(sc>=minOk&&nextCardId){
+    $(nextCardId).classList.remove('locked');
+    $('nd'+nextNdIdx).className='niv-dot active';
+    $('nst'+nextNdIdx).textContent='en cours';
+  }
+  if(nKey==='n4')setTimeout(showResults,700);
+}
+
+/* ══ NIVEAU 1 ══ */
+var v1=false;
+function build1(){
+  v1=false;done.n1=false;scores.n1=0;etDone={};
+  D1.forEach(function(d){d._sc=null;});
+  $('sp1').classList.remove('show');$('fb1').className='fb-g';$('btn-v1').disabled=true;
+  buildList(D1,'list1','n1',1,function(){
+    if(allDone(D1))$('btn-v1').disabled=(done.n1);
+  });
+  $('sc1').textContent='0 / 3';
+}
+$('btn-v1').addEventListener('click',function(){
+  verifNiveau('n1',D1,3,2,'card2',1,'sc1','sp1','fb1');
+});
+$('btn-r1').addEventListener('click',function(){build1();updateGlobal();});
+
+/* ══ NIVEAU 2 ══ */
+var v2=false;
+function build2(){
+  v2=false;done.n2=false;scores.n2=0;
+  D2.forEach(function(d){d._sc=null;});
+  $('sp2').classList.remove('show');$('fb2').className='fb-g';$('btn-v2').disabled=true;
+  buildList(D2,'list2','n2',3,function(){
+    if(allDone(D2))$('btn-v2').disabled=(done.n2);
+  });
+  $('sc2').textContent='0 / 9';
+}
+$('btn-v2').addEventListener('click',function(){
+  verifNiveau('n2',D2,9,7,'card3',2,'sc2','sp2','fb2');
+});
+$('btn-r2').addEventListener('click',function(){build2();updateGlobal();});
+
+/* ══ NIVEAU 3 ══ */
+function build3(){
+  done.n3=false;scores.n3=0;
+  D3.forEach(function(d){d._sc=null;});
+  $('sp3').classList.remove('show');$('fb3').className='fb-g';$('btn-v3').disabled=true;
+  buildList(D3,'list3','n3',4,function(){
+    if(allDone(D3))$('btn-v3').disabled=(done.n3);
+  });
+  $('sc3').textContent='0 / 8';
+}
+$('btn-v3').addEventListener('click',function(){
+  verifNiveau('n3',D3,8,6,'card4',3,'sc3','sp3','fb3');
+});
+$('btn-r3').addEventListener('click',function(){build3();updateGlobal();});
+
+/* ══ NIVEAU 4 ══ */
+function build4(){
+  done.n4=false;scores.n4=0;
+  D4.forEach(function(d){d._sc=null;});
+  $('sp4').classList.remove('show');$('fb4').className='fb-g';$('btn-v4').disabled=true;
+  buildList(D4,'list4','n4',5,function(){
+    if(allDone(D4))$('btn-v4').disabled=(done.n4);
+  });
+  $('sc4').textContent='0 / 10';
+}
+$('btn-v4').addEventListener('click',function(){
+  verifNiveau('n4',D4,10,8,null,null,'sc4','sp4','fb4');
+});
+$('btn-r4').addEventListener('click',function(){build4();updateGlobal();});
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var sc10=Math.min(scores.n1,3)+Math.min(Math.round(scores.n2/3),3)+Math.min(Math.round(scores.n3/4),2)+Math.min(Math.round(scores.n4/5),2);
+  $('cnt-ok').textContent=sc10;$('cnt-rem').textContent=10-sc10;
+  var pct=Math.round(sc10/10*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=sc10+' / 10 points';$('prog-pct').textContent=pct+'%';
+  /* Barres de progression dans les dossiers */
+  var b0=$('nbar0');if(b0)b0.style.width=Math.round(Math.min(scores.n1,3)/3*100)+'%';
+  var b1=$('nbar1');if(b1)b1.style.width=Math.round(Math.min(scores.n2,9)/9*100)+'%';
+  var b2=$('nbar2');if(b2)b2.style.width=Math.round(Math.min(scores.n3,8)/8*100)+'%';
+  var b3=$('nbar4');if(b3)b3.style.width=Math.round(Math.min(scores.n4,10)/10*100)+'%';
+  /* Scores mini */
+  $('nst0').textContent=scores.n1+' / 3';
+  $('nst1').textContent=scores.n2+' / 9';
+  $('nst2').textContent=scores.n3+' / 8';
+  $('nst3').textContent=scores.n4+' / 10';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  var sc1=Math.min(scores.n1,3);
+  var sc2=Math.min(Math.round(scores.n2/3),3);
+  var sc3=Math.min(Math.round(scores.n3/4),2);
+  var sc4=Math.min(Math.round(scores.n4/5),2);
+  var tot=sc1+sc2+sc3+sc4;
+  $('r-score').textContent=tot;
+  $('rn1').textContent=sc1+'/3';$('rn2').textContent=sc2+'/3';
+  $('rn3').textContent=sc3+'/2';$('rn4').textContent=sc4+'/2';
+  var s=tot>=10?5:tot>=8?4:tot>=6?3:tot>=4?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=[
+    'Reprends depuis le niveau 1. Les bases des connexions logiques sont \u00e0 consolider.',
+    'Quelques rapports logiques \u00e0 retravailler. Revois le r\u00e9f\u00e9rentiel.',
+    'Analyse correcte dans l\u2019ensemble. Revois les niveaux 3 et 4.',
+    'Tr\u00e8s bonne ma\u00eetrise des connexions logiques.',
+    'Analyse exemplaire. Tous les niveaux ma\u00eetris\u00e9s.'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  var cm=$('conseil-msg');
+  if(tot>=8){cm.className='conseil-msg show ok';cm.innerHTML='&#128270;\u00a0Tu peux passer au d\u00e9fi.';}
+  else if(tot>=5){cm.className='conseil-msg show mid';cm.innerHTML='&#128161;\u00a0Tu peux tenter le d\u00e9fi, mais revois d\u2019abord les niveaux 3 et 4.';}
+  else{cm.className='conseil-msg show ko';cm.innerHTML='&#128218;\u00a0Je te conseille de retravailler les connexions logiques avant le d\u00e9fi.';}
+  $('results-screen').classList.add('show');
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  scores={n1:0,n2:0,n3:0,n4:0};done={n1:false,n2:false,n3:false,n4:false};etDone={};
+  $('results-screen').classList.remove('show');$('conseil-msg').className='conseil-msg';
+  ['card2','card3','card4'].forEach(function(id){$(id).classList.add('locked');});
+  [0,1,2,3].forEach(function(i){
+    $('nd'+i).className='niv-dot'+(i===0?' active':'');
+    $('nst'+i).textContent=i===0?'en cours':'verrouill\u00e9';
+  });
+  ['sp1','sp2','sp3','sp4'].forEach(function(id){$(id).classList.remove('show');});
+  ['fb1','fb2','fb3','fb4'].forEach(function(id){$(id).className='fb-g';});
+  build1();build2();build3();build4();updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+build1();build2();build3();build4();updateGlobal();
+</script>
+</body>
+</html>
