@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J3 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.22);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f28b82;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* BUREAU D'IDENTIFICATION */
+    .bureau{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .bureau::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .bur-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9aaa8a;margin-bottom:.7rem;}
+    .bur-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.85rem;}
+    .bur-statut{flex:1;}
+    .bur-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#7a8a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .bur-statut-nom{font-size:1.05rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .bur-score{text-align:right;}
+    .bur-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .bur-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#7a8a6a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    .suspects{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .susp{width:30px;height:30px;border-radius:6px;background:var(--dark2);
+      border:1.5px solid var(--dark3);display:flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:#7a8a6a;
+      transition:all .3s;}
+    .susp.actif{border-color:var(--day-color);color:var(--day-border);}
+    .susp.ok{background:rgba(34,197,94,.2);border-color:var(--green);color:#4ade80;}
+    .susp.ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#f87171;}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.75rem .9rem;}
+    .ref-cell-titre{font-size:.9rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;letter-spacing:.05em;}
+    .ref-cell-body{font-size:.85rem;color:var(--text);line-height:1.7;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* parties */
+    .partie-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+
+    /* card */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.1rem;
+      font-style:italic;color:var(--text);line-height:1.75;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.6;}
+
+    /* vrai/faux */
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:1.05rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    /* options */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* feedback */
+    .fb{font-size:.9rem;font-family:'JetBrains Mono',monospace;
+      padding:.5rem .8rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* résultat partie */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:#9aaa8a;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* boutons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#9aaa8a;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a8a6a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8d8a8;margin-bottom:.9rem;line-height:1.7;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both,flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both,flashKo .5s ease both;}
+
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr;}
+      .vf-row{gap:.4rem;}
+      .btn-dark,.btn-primary{width:100%;}
+      .suspects{gap:.3rem;}
+      .susp{width:26px;height:26px;font-size:.68rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 3 &ndash; Jour 3</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Bureau d&rsquo;identification</span></h1>
+</header>
+
+<!-- BUREAU D'IDENTIFICATION -->
+<div class="bureau">
+  <div class="bur-titre">&#128269; Bureau d&rsquo;identification &mdash; 8 suspects &agrave; identifier</div>
+  <div class="bur-row">
+    <div class="bur-statut">
+      <div class="bur-statut-label">Statut du dossier</div>
+      <div class="bur-statut-nom" id="bur-statut">Enqu&ecirc;te ouverte</div>
+    </div>
+    <div class="bur-score">
+      <div class="bur-score-num"><span id="bur-total">0</span>/8</div>
+      <div class="bur-score-label">Identifi&eacute;s</div>
+    </div>
+  </div>
+  <div class="suspects" id="suspects"></div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 suspects</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel &mdash; ces / ses / c&rsquo;est / s&rsquo;est</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">CES</div>
+      <div class="ref-cell-body">D&eacute;terminant <em>d&eacute;monstratif</em> pluriel.<br>Test&nbsp;: remplaçable par <em>les</em> ou <em>des</em>.<br><em>Ces livres, ces &eacute;l&egrave;ves&hellip;</em></div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">SES</div>
+      <div class="ref-cell-body">D&eacute;terminant <em>possessif</em> pluriel (3e pers. sing.).<br>Test&nbsp;: remplaçable par <em>mes</em> ou <em>tes</em>.<br><em>ses livres → mes livres</em> ✓</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">C&rsquo;EST</div>
+      <div class="ref-cell-body"><em>ce + est</em> (verbe &ecirc;tre).<br>Test&nbsp;: remplaçable par <em>cela est</em> ou <em>c&rsquo;&eacute;tait</em>.<br><em>c&rsquo;est beau → c&rsquo;&eacute;tait beau</em> ✓</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">S&rsquo;EST</div>
+      <div class="ref-cell-body"><em>se + est</em> (verbe pronominal, PC).<br>Test&nbsp;: remplaçable par <em>s&rsquo;&eacute;tait</em>.<br>Sujet 3e pers. sing. + participe pass&eacute;.<br><em>il s&rsquo;est lev&eacute; → il s&rsquo;&eacute;tait lev&eacute;</em> ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIES -->
+<div class="partie-wrap">
+
+  <div id="bloc-p1">
+    <div class="partie-header">
+      <div class="part-icon">&#128301;</div>
+      <div>
+        <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+        <div class="part-sous">3 affirmations &mdash; Suspects 1 &agrave; 3</div>
+      </div>
+      <div class="part-badge" id="badge-p1">0/3</div>
+    </div>
+    <div id="cards-p1"></div>
+    <div class="part-result" id="res-p1">
+      <div class="part-score" id="score-p1"></div>
+      <div class="part-msg" id="msg-p1"></div>
+      <div id="btn-p1"></div>
+    </div>
+  </div>
+
+  <div id="bloc-p2" style="display:none;">
+    <div class="partie-header">
+      <div class="part-icon">&#128270;</div>
+      <div>
+        <div class="part-titre">Partie 2 &mdash; Choisir le bon homophone</div>
+        <div class="part-sous">5 phrases &mdash; Suspects 4 &agrave; 8</div>
+      </div>
+      <div class="part-badge" id="badge-p2">0/5</div>
+    </div>
+    <div id="cards-p2"></div>
+    <div class="part-result" id="res-p2">
+      <div class="part-score" id="score-p2"></div>
+      <div class="part-msg" id="msg-p2"></div>
+      <div id="btn-p2"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#128269; Rapport d&rsquo;identification</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      Rouvrir le dossier
+    </button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════
+   DONNÉES P1
+════════════════════ */
+var P1=[
+  {
+    id:'q1',qNum:1,
+    phrase:'Pour distinguer \u00ab\u00a0c\u2019est\u00a0\u00bb de \u00ab\u00a0s\u2019est\u00a0\u00bb, on peut remplacer la forme par son \u00e9quivalent \u00e0 l\u2019imparfait\u00a0: \u00ab\u00a0c\u2019\u00e9tait\u00a0\u00bb ou \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb.',
+    rep:true,
+    fb:'C\u2019est la m\u00e9thode de substitution par l\u2019imparfait. \u00ab\u00a0C\u2019est\u00a0\u00bb \u2192 \u00ab\u00a0c\u2019\u00e9tait\u00a0\u00bb (imparfait de \u00eatre pr\u00e9c\u00e9d\u00e9 de ce). \u00ab\u00a0S\u2019est\u00a0\u00bb \u2192 \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb (imparfait d\u2019un verbe pronominal). Si \u00ab\u00a0c\u2019\u00e9tait\u00a0\u00bb fonctionne : on \u00e9crit \u00ab\u00a0c\u2019est\u00a0\u00bb. Si \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb fonctionne : on \u00e9crit \u00ab\u00a0s\u2019est\u00a0\u00bb.'
+  },
+  {
+    id:'q2',qNum:2,
+    phrase:'\u00ab\u00a0Ces\u00a0\u00bb et \u00ab\u00a0ses\u00a0\u00bb sont tous les deux des d\u00e9terminants qui se placent devant un nom pluriel, mais ils n\u2019ont pas la m\u00eame nature grammaticale.',
+    rep:true,
+    fb:'\u00ab\u00a0Ces\u00a0\u00bb est un d\u00e9terminant d\u00e9monstratif pluriel\u00a0: il d\u00e9signe des \u00eatres ou des choses que l\u2019on montre ou dont on parle. \u00ab\u00a0Ses\u00a0\u00bb est un d\u00e9terminant possessif pluriel\u00a0: il indique que quelque chose appartient \u00e0 un possesseur \u00e0 la 3e personne du singulier. Pour les distinguer\u00a0: remplace par \u00ab\u00a0mes\u00a0\u00bb ou \u00ab\u00a0tes\u00a0\u00bb \u2014 si \u00e7a fonctionne, c\u2019est \u00ab\u00a0ses\u00a0\u00bb\u00a0; sinon, c\u2019est \u00ab\u00a0ces\u00a0\u00bb.'
+  },
+  {
+    id:'q3',qNum:3,
+    phrase:'\u00ab\u00a0S\u2019est\u00a0\u00bb peut \u00eatre pr\u00e9c\u00e9d\u00e9 d\u2019un sujet \u00e0 la premi\u00e8re ou \u00e0 la deuxi\u00e8me personne du singulier.',
+    rep:false,
+    fb:'\u00ab\u00a0S\u2019est\u00a0\u00bb est toujours pr\u00e9c\u00e9d\u00e9 d\u2019un sujet \u00e0 la 3e personne du singulier\u00a0: \u00ab\u00a0il s\u2019est\u00a0\u00bb, \u00ab\u00a0elle s\u2019est\u00a0\u00bb, \u00ab\u00a0on s\u2019est\u00a0\u00bb. \u00c0 la 1re personne, on \u00e9crit \u00ab\u00a0je me suis\u00a0\u00bb\u00a0; \u00e0 la 2e personne, \u00ab\u00a0tu t\u2019es\u00a0\u00bb. \u00ab\u00a0S\u2019est\u00a0\u00bb ne peut jamais \u00eatre pr\u00e9c\u00e9d\u00e9 de \u00ab\u00a0je\u00a0\u00bb ou \u00ab\u00a0tu\u00a0\u00bb.'
+  }
+];
+
+/* ════════════════════
+   DONNÉES P2
+   Positions: Q4=C, Q5=C, Q6=B, Q7=C, Q8=B
+════════════════════ */
+var P2=[
+  {
+    id:'q4',qNum:4,
+    phrase:'__ r\u00e9sultats sont meilleurs que pr\u00e9vu.',
+    texte:'Quel mot convient\u00a0?',
+    opts:[
+      {t:'Ses',ok:false},
+      {t:'C\u2019est',ok:false},
+      {t:'Ces',ok:true}
+    ],
+    fb:'Peut-on remplacer par \u00ab\u00a0les\u00a0\u00bb\u00a0? \u00ab\u00a0Les r\u00e9sultats sont meilleurs que pr\u00e9vu.\u00a0\u00bb \u2713 \u2192 d\u00e9terminant d\u00e9monstratif \u2192 \u00ab\u00a0ces\u00a0\u00bb. \u00ab\u00a0Ses\u00a0\u00bb impliquerait un possesseur pr\u00e9cis identifi\u00e9 dans le contexte. \u00ab\u00a0C\u2019est\u00a0\u00bb ne peut pas pr\u00e9c\u00e9der directement un nom.'
+  },
+  {
+    id:'q5',qNum:5,
+    phrase:'L\u2019auteur a relu __ notes avant de commencer \u00e0 \u00e9crire.',
+    texte:'Quel mot convient\u00a0?',
+    opts:[
+      {t:'ces',ok:false},
+      {t:'c\u2019est',ok:false},
+      {t:'ses',ok:true}
+    ],
+    fb:'Test\u00a0: remplace par \u00ab\u00a0mes\u00a0\u00bb\u00a0: \u00ab\u00a0L\u2019auteur a relu mes notes avant de commencer \u00e0 \u00e9crire.\u00a0\u00bb \u2713 \u2192 d\u00e9terminant possessif \u2192 \u00ab\u00a0ses\u00a0\u00bb. L\u2019auteur poss\u00e8de ces notes. \u00ab\u00a0Ces\u00a0\u00bb d\u00e9signerait des notes sans lien de possession avec l\u2019auteur.'
+  },
+  {
+    id:'q6',qNum:6,
+    phrase:'__ un po\u00e8me remarquable par sa construction.',
+    texte:'Quel mot convient\u00a0?',
+    opts:[
+      {t:'S\u2019est',ok:false},
+      {t:'C\u2019est',ok:true},
+      {t:'Ces',ok:false}
+    ],
+    fb:'Test\u00a0: remplace par \u00ab\u00a0cela est\u00a0\u00bb\u00a0: \u00ab\u00a0Cela est un po\u00e8me remarquable par sa construction.\u00a0\u00bb \u2713 \u2192 \u00ab\u00a0c\u2019est\u00a0\u00bb (ce + est, verbe \u00eatre). Test imparfait\u00a0: \u00ab\u00a0C\u2019\u00e9tait un po\u00e8me remarquable.\u00a0\u00bb \u2713 \u2192 confirm\u00e9. \u00ab\u00a0S\u2019est\u00a0\u00bb est impossible\u00a0: il faudrait un sujet et un participe pass\u00e9 qui suivent.'
+  },
+  {
+    id:'q7',qNum:7,
+    phrase:'Le conf\u00e9rencier __ exprim\u00e9 avec clart\u00e9 et pr\u00e9cision.',
+    texte:'Quel mot convient\u00a0?',
+    opts:[
+      {t:'c\u2019est',ok:false},
+      {t:'ses',ok:false},
+      {t:'s\u2019est',ok:true}
+    ],
+    fb:'Test\u00a0: remplace par \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb\u00a0: \u00ab\u00a0Le conf\u00e9rencier s\u2019\u00e9tait exprim\u00e9 avec clart\u00e9 et pr\u00e9cision.\u00a0\u00bb \u2713 \u2192 \u00ab\u00a0s\u2019est\u00a0\u00bb (verbe pronominal \u00ab\u00a0s\u2019exprimer\u00a0\u00bb au pass\u00e9 compos\u00e9). Le sujet est \u00ab\u00a0le conf\u00e9rencier\u00a0\u00bb (3e personne du singulier). \u00ab\u00a0C\u2019est\u00a0\u00bb est impossible\u00a0: il faudrait \u00ab\u00a0ce\u00a0\u00bb comme sujet.'
+  },
+  {
+    id:'q8',qNum:8,
+    phrase:'Le professeur a corrig\u00e9 __ copies avec attention.',
+    texte:'Quel mot convient\u00a0?',
+    opts:[
+      {t:'s\u2019est',ok:false},
+      {t:'ses',ok:true},
+      {t:'c\u2019est',ok:false}
+    ],
+    fb:'Test\u00a0: remplace par \u00ab\u00a0mes\u00a0\u00bb\u00a0: \u00ab\u00a0Le professeur a corrig\u00e9 mes copies avec attention.\u00a0\u00bb \u2713 \u2192 d\u00e9terminant possessif \u2192 \u00ab\u00a0ses\u00a0\u00bb. Les copies appartiennent au professeur (3e personne sing.). \u00ab\u00a0Ces\u00a0\u00bb serait possible sans id\u00e9e de possession, mais ici le lien possessif est impliqu\u00e9 par le contexte.'
+  }
+];
+
+/* ════════════════════
+   ÉTAT
+════════════════════ */
+var scoreOk=0,p1Ok=0,p1Results={},p2Ok=0,p2Results={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+/* ════════════════════
+   SUSPECTS
+════════════════════ */
+function buildSuspects(){
+  var wrap=document.getElementById('suspects');wrap.innerHTML='';
+  for(var i=1;i<=8;i++){
+    var s=mkEl('div','susp'+(i===1?' actif':''));
+    s.id='s-'+i;s.textContent=i;wrap.appendChild(s);
+  }
+}
+
+function majSusp(n,ok){
+  var s=document.getElementById('s-'+n);
+  if(s){s.classList.remove('actif');s.classList.add(ok?'ok':'ko');}
+  var next=document.getElementById('s-'+(n+1));
+  if(next)next.classList.add('actif');
+  document.getElementById('bur-total').textContent=scoreOk;
+  var done=Object.keys(p1Results).length+Object.keys(p2Results).length;
+  var pct=Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 8 suspects';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  var el=document.getElementById('bur-statut');
+  if(done===8)el.textContent=scoreOk===8?'Dossier r\u00e9solu \u2713':'Identification termin\u00e9e';
+  else el.textContent='Suspect '+(done+1)+' / 8 en cours\u2026';
+}
+
+/* ════════════════════
+   SON + ANIMATION
+════════════════════ */
+function jouerSon(ok){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(ok){
+      osc.frequency.setValueAtTime(520,ctx.currentTime);
+      osc.frequency.setValueAtTime(660,ctx.currentTime+.08);
+      osc.frequency.setValueAtTime(800,ctx.currentTime+.16);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.4);
+    }else{
+      osc.frequency.setValueAtTime(280,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.35);
+    }
+  }catch(e){}
+}
+
+function animerCard(id,ok){
+  var card=document.getElementById('c-'+id);
+  if(!card)return;
+  card.classList.remove('anim-ok','anim-ko');
+  void card.offsetWidth;
+  card.classList.add(ok?'anim-ok':'anim-ko');
+}
+
+/* ════════════════════
+   BUILD P1
+════════════════════ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Results={};p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Suspect '+q.qNum+' \u2014 Vrai ou faux\u00a0?';card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var vfRow=mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button');btn.className='vf-btn';
+      var isV=txt==='Vrai';
+      btn.innerHTML=(isV?'&#10003;':'&#10007;')+' '+txt;
+      btn.dataset.val=isV?'true':'false';
+      btn.addEventListener('click',function(){selVF(q,btn,vfRow);});
+      vfRow.appendChild(btn);
+    });
+    card.appendChild(vfRow);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Results[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Results[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p1Ok++;}
+  jouerSon(ok);animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/3';
+  majSusp(q.qNum,ok);
+  if(Object.keys(p1Results).length===P1.length)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 3';
+  document.getElementById('msg-p1').textContent=p1Ok===3?
+    '\u2713 3 suspects identifi\u00e9s \u2014 Partie 2 d\u00e9bloqu\u00e9e.':
+    p1Ok>=2?'Bien \u2014 Partie 2 d\u00e9bloqu\u00e9e.':'Continue \u2014 Partie 2 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Partie 2 \u2192</button>';
+}
+
+function debP2(){document.getElementById('bloc-p2').style.display='';buildP2();}
+
+/* ════════════════════
+   BUILD P2
+════════════════════ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Results={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Suspect '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    var opts=mkEl('div','opts');
+    q.opts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selP2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Results[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p2Results[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p2Ok++;}
+  jouerSon(ok);animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/5';
+  majSusp(q.qNum,ok);
+  if(Object.keys(p2Results).length===P2.length)showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 5';
+  document.getElementById('msg-p2').textContent=p2Ok===5?
+    '\u2713 Dossier r\u00e9solu \u2014 tous les suspects identifi\u00e9s\u00a0!':
+    p2Ok>=4?'Tr\u00e8s bien\u00a0!':p2Ok>=3?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir le rapport \u2192</button>';
+}
+
+/* ════════════════════
+   VERDICT
+════════════════════ */
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  document.getElementById('res-badge').innerHTML=total>=5?
+    '<div class="badge-ok">\u2713 Dossier r\u00e9solu\u00a0!</div>':
+    '<div class="badge-ko">5/8 minimum requis \u2014 Recommence.</div>';
+  var msgs=['\u00c0 retravailler.','\u00c0 retravailler.','\u00c0 retravailler.',
+    'Courage\u00a0!','Courage\u00a0!','Bien jou\u00e9\u00a0!',
+    'Tr\u00e8s bien\u00a0!','Excellent\u00a0!','Parfait \u2014 sans faute\u00a0!'];
+  document.getElementById('res-msg').textContent=msgs[Math.min(total,msgs.length-1)];
+}
+
+/* ════════════════════
+   RESET
+════════════════════ */
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Results={};p2Ok=0;p2Results={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/3';
+  document.getElementById('badge-p2').textContent='0/5';
+  document.getElementById('bur-total').textContent='0';
+  document.getElementById('bur-statut').textContent='Enqu\u00eate ouverte';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('prog-label').textContent='0 / 8 suspects';
+  document.getElementById('prog-pct').textContent='0\u00a0%';
+  document.getElementById('cards-p2').innerHTML='';
+  buildSuspects();buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── INIT ─── */
+buildSuspects();
+buildP1();
+</script>
+</body>
+</html>
