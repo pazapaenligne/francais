@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sas de vérification — Je m’entraîne (homophones)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+:root{--bg:#fffdf7;--txt:#1a1a1a;--mut:#7a6f54;--ln:#ece2c8;
+ --j:#f5c518;--jd:#8a6000;--jl:#fffbeb;--jm:#f5e08a;
+ --gr:#5aa92e;--gbg:#eef8e3;--gbd:#bfe39a;
+ --rd:#c0392b;--rbg:#fdeeec;--rbd:#f3c6c0;--ink:#1d2531;}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;min-height:100vh;line-height:1.65;}
+body.noscroll{overflow:hidden;}
+.wrap{max-width:880px;margin:0 auto;padding:16px;position:relative;z-index:1;}
+/* bulles */
+.bubbles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.bb{position:absolute;border-radius:50%;opacity:.5;filter:blur(1px);}
+.bY{top:-70px;right:-50px;width:240px;height:240px;background:#ffe9a8;}
+.bJ{bottom:-60px;left:-50px;width:260px;height:260px;background:#f5e08a;}
+.bG{top:42%;right:-70px;width:200px;height:200px;background:#d6f0bf;}
+.bP{top:28%;left:-70px;width:200px;height:200px;background:#fbd6d2;}
+/* intro */
+.intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:var(--bg);}
+.intro.hidden{opacity:0;visibility:hidden;transition:opacity .55s,visibility .55s;}
+.brief{position:relative;z-index:2;max-width:600px;width:100%;background:#fff;border:1px solid var(--ln);border-radius:20px;padding:26px 24px;box-shadow:0 16px 44px rgba(120,90,10,.12);}
+.brief h1{margin:6px 0 4px;font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jd);}
+.brief p{font-size:.96rem;color:#333;margin:0 0 10px;}
+.univ{font-weight:800;color:var(--jd);font-size:.92rem;margin:2px 0 10px;}
+.obj{background:var(--jl);border-left:5px solid var(--j);border-radius:10px;padding:11px 13px;color:#5e4a12;font-size:.95rem;}
+.cible{background:var(--jl);border:2px solid var(--jm);border-radius:14px;padding:13px 16px;margin:14px 0 8px;text-align:center;animation:glow 1.9s ease-in-out infinite;}
+.cible .cl{font-size:.74rem;letter-spacing:2px;color:var(--jd);font-weight:800;}
+.cible .cv{font-size:clamp(1.05rem,4.2vw,1.35rem);color:#5e4a12;font-weight:900;margin-top:3px;}
+@keyframes glow{50%{box-shadow:0 0 0 5px rgba(245,197,24,.16);}}
+.enter{width:100%;min-height:2.8rem;margin-top:14px;background:var(--j);color:#5a3d00;border:none;border-radius:12px;font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.95rem,2.6vw,1.05rem);cursor:pointer;box-shadow:0 4px 0 #d8ab10;animation:btnp 1.9s ease-in-out infinite;}
+@keyframes btnp{50%{box-shadow:0 4px 0 #d8ab10,0 0 0 5px rgba(245,197,24,.22);}}
+.hint{text-align:center;color:var(--mut);font-size:.84rem;margin-top:10px;}
+/* header */
+.topbar{position:relative;margin-bottom:14px;text-align:center;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--jm);border-radius:999px;padding:6px 15px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.logo-badge .dots{font-size:14px;letter-spacing:3px;line-height:1;}
+.r{color:#ef6f6c;}.y{color:#f5c518;}.g{color:#6cc04a;}
+.logo-badge .lab{font-size:13px;font-weight:800;color:#6a5a2a;letter-spacing:.4px;}
+.wk{font-size:.88rem;color:var(--mut);margin-top:8px;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jd);margin:8px 0 2px;line-height:1.15;}
+.sub{color:var(--mut);font-size:.92rem;margin:0;}
+.snd{position:absolute;top:0;right:0;background:#fff;border:1px solid var(--ln);color:#7a6f54;font-size:1.1rem;width:44px;height:44px;border-radius:10px;cursor:pointer;}
+/* strip */
+.strip{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px;background:rgba(255,253,247,.96);backdrop-filter:blur(5px);border:1px solid var(--ln);border-radius:0 0 12px 12px;padding:8px 14px;margin:0 -16px 14px;box-shadow:0 5px 16px rgba(120,90,10,.08);}
+.minis{display:flex;gap:7px;flex:1;justify-content:center;}
+.m{width:26px;height:26px;border-radius:50%;background:#f1ead7;border:1px solid var(--jm);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#b09a55;transition:all .4s;}
+.m.on{background:var(--gr);border-color:var(--gr);color:#fff;box-shadow:0 0 8px rgba(90,169,46,.5);}
+.mc{font-weight:800;color:var(--jd);font-size:.84rem;white-space:nowrap;}
+.mc b{color:var(--gr);}
+/* consigne + ref */
+.csn{background:var(--jl);border:1px solid var(--jm);border-left:5px solid var(--j);border-radius:12px;padding:12px 15px;margin-bottom:12px;font-size:.92rem;color:#3a3320;}
+.csn b{color:var(--jd);}
+.ref{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:13px 15px;margin-bottom:14px;box-shadow:0 6px 18px rgba(120,90,10,.06);}
+.rft{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--jd);letter-spacing:1px;margin-bottom:10px;}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.rc{background:var(--jl);border:1px solid var(--jm);border-radius:10px;padding:9px 11px;}
+.rk{font-weight:900;color:var(--jd);font-size:1rem;}
+.rd{font-size:.86rem;color:#444;}
+.rt{font-size:.82rem;color:var(--mut);font-style:italic;margin-top:2px;}
+/* board / sas */
+.bcard{background:var(--ink);border:1px solid #2c3543;border-radius:18px;padding:6px;box-shadow:0 14px 34px rgba(20,28,40,.32);max-width:780px;margin:0 auto 8px;}
+.bwrap{position:relative;border-radius:13px;overflow:hidden;}
+#board{width:100%;height:auto;display:block;}
+.leaf{transition:transform .6s cubic-bezier(.3,.8,.3,1);}
+.voy .von{opacity:0;transition:opacity .4s;}
+.voy.on .von{opacity:1;}
+.voy.on{animation:vpop .55s ease-out;}
+@keyframes vpop{30%{transform:translateY(-4px);}100%{transform:translateY(0);}}
+.bgl{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(245,197,24,.28),transparent 60%);opacity:0;transition:opacity .8s;pointer-events:none;}
+.bwrap.activated .bgl{opacity:1;animation:pls 1.9s ease-in-out infinite;}
+@keyframes pls{0%,100%{opacity:.5;}50%{opacity:1;}}
+/* tampon victoire */
+#stamp{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) scale(0) rotate(-12deg);opacity:0;pointer-events:none;text-align:center;z-index:10;}
+#stamp.show{animation:stampin .65s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes stampin{0%{transform:translate(-50%,-50%) scale(0) rotate(-12deg);opacity:0;}60%{transform:translate(-50%,-50%) scale(1.15) rotate(-5deg);opacity:1;}100%{transform:translate(-50%,-50%) scale(1) rotate(-5deg);opacity:1;}}
+.sbox{background:rgba(255,253,247,.97);border:4px solid var(--gr);border-radius:14px;padding:12px 22px;box-shadow:0 6px 28px rgba(0,0,0,.45);white-space:nowrap;}
+.skeys{font-size:2.4rem;display:block;animation:jgl .5s ease-in-out 4 .75s;}
+@keyframes jgl{0%,100%{transform:rotate(0);}30%{transform:rotate(-22deg);}70%{transform:rotate(22deg);}}
+.stxt{display:block;font-family:Arial,sans-serif;font-weight:900;font-size:1.05rem;color:var(--gr);letter-spacing:1px;margin-top:6px;text-transform:uppercase;}
+.gauge{text-align:center;color:var(--jd);font-weight:800;letter-spacing:.5px;font-size:.9rem;margin-bottom:16px;}
+.gauge b{color:var(--gr);}
+/* stepper */
+.stit{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--jd);letter-spacing:1px;margin:0 2px 12px;}
+.stp{display:flex;align-items:center;gap:10px;margin:0 2px 14px;}
+.nav{min-width:44px;height:44px;border-radius:10px;background:#fff;border:1px solid var(--ln);color:var(--jd);font-size:1rem;cursor:pointer;flex:0 0 auto;padding:0 12px;font-weight:800;font-family:Arial,sans-serif;}
+.nav:disabled{opacity:.4;cursor:default;}
+.nav:hover:not(:disabled){background:var(--jl);}
+#nxt{background:var(--j);color:#5a3d00;border-color:var(--jm);box-shadow:0 4px 0 #d8ab10;min-width:140px;font-size:.97rem;}
+#nxt:disabled{background:#e8d9a0;color:#9a8040;border-color:#e0d090;box-shadow:none;}
+#nxt:hover:not(:disabled){filter:brightness(1.05);}
+#nxt.pulse{animation:nbp 1s ease-in-out 3;}
+@keyframes nbp{50%{box-shadow:0 4px 0 #d8ab10,0 0 0 6px rgba(245,197,24,.35);transform:scale(1.03);}}
+.dots2{display:flex;gap:7px;flex:1;justify-content:center;flex-wrap:wrap;}
+.dot{width:26px;height:26px;border-radius:50%;border:1px solid var(--jm);background:#f6efde;color:#b09a55;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;}
+.dot.cur{border-color:var(--jd);color:var(--jd);box-shadow:0 0 7px rgba(245,197,24,.5);transform:scale(1.12);}
+.dot.done{background:var(--gr);border-color:var(--gr);color:#fff;}
+.dot.err{border-color:var(--rd);color:var(--rd);}
+.mod{display:none;}.mod.active{display:block;}
+.card{background:#fff;border:1px solid var(--ln);border-top:5px solid var(--j);border-radius:14px;padding:18px;box-shadow:0 6px 18px rgba(120,90,10,.06);}
+.card.ok{border-top-color:var(--gr);}.card.ko{border-top-color:var(--rd);}
+.card.flash{animation:cf .8s ease-out;}
+@keyframes cf{30%{box-shadow:0 0 0 4px rgba(90,169,46,.3);}100%{box-shadow:0 6px 18px rgba(120,90,10,.06);}}
+.card.shake{animation:cs .42s;}
+@keyframes cs{20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+.qn{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;color:var(--mut);letter-spacing:1px;}
+.ctx{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;line-height:1.6;margin:10px 0 14px;}
+.ctx u{text-decoration:none;color:var(--jd);background:var(--jl);border-bottom:2px solid var(--j);border-radius:4px;padding:0 8px;font-weight:900;}
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{min-height:50px;background:#fff;color:#1a1a1a;border:2px solid var(--ln);border-radius:11px;padding:13px 16px;font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;text-align:left;cursor:pointer;transition:transform .12s,background .2s,border-color .2s;}
+.opt:hover:not(:disabled){background:var(--jl);transform:translateY(-2px);border-color:var(--j);}
+.opt:disabled{cursor:default;opacity:.95;}
+.opt.cok{background:var(--gbg);border-color:var(--gr);color:#2f6a14;font-weight:700;}
+.opt.cko{background:var(--rbg);border-color:var(--rd);color:#9a2419;animation:sh .4s;}
+@keyframes sh{25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.fb{margin-top:14px;}
+.okmsg{display:inline-flex;align-items:center;gap:6px;color:var(--gr);font-weight:800;animation:pop .5s;font-size:clamp(.9rem,2.5vw,1rem);}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.ebox{background:var(--rbg);border:1px solid var(--rbd);border-left:5px solid var(--rd);border-radius:10px;padding:12px 14px;font-size:clamp(.9rem,2.5vw,1rem);line-height:1.8;color:#7a2018;margin-bottom:10px;animation:fd .4s;}
+.ebox .lab{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--rd);font-weight:800;margin-bottom:4px;}
+.retry{min-height:2.8rem;background:#fff;color:var(--jd);border:2px solid var(--j);border-radius:10px;padding:0 18px;font-weight:800;cursor:pointer;font-size:clamp(.88rem,2.5vw,.97rem);font-family:Arial,sans-serif;}
+.retry:hover{background:var(--jl);}
+.act{display:none;text-align:center;margin:10px 0 24px;}
+.act.show{display:block;animation:fd .4s;}
+.btn{min-height:2.8rem;border:none;border-radius:11px;padding:0 26px;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);cursor:pointer;font-family:Arial,sans-serif;}
+.dbtn{background:var(--j);color:#5a3d00;box-shadow:0 4px 0 #d8ab10;}
+.res{display:none;text-align:center;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:22px 18px;box-shadow:0 8px 24px rgba(120,90,10,.08);margin-top:4px;}
+.res.show{display:block;animation:fd .5s;}
+@keyframes fd{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.sc{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;margin:2px 0;color:var(--jd);}
+.sc.ko{color:#b98a10;}
+.st{font-size:1.9rem;letter-spacing:4px;margin:6px 0;}
+.st .on{color:var(--j);}.st .off{color:#e3d9bd;}
+.res h2{font-size:1.12rem;color:var(--jd);margin:6px 0;}
+.rmsg{font-size:clamp(.88rem,2.5vw,1rem);color:#444;margin:6px 0 12px;}
+.rcap{text-align:left;max-width:420px;margin:0 auto;}
+.ri{font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:6px 0;border-bottom:1px dashed var(--ln);display:flex;gap:8px;}
+.ri.ok{color:var(--gr);}.ri.ko{color:var(--rd);}
+.ul{display:inline-block;margin-top:14px;background:var(--gbg);border:1px solid var(--gr);color:#2f6a14;border-radius:10px;padding:10px 16px;font-weight:800;animation:pop .6s;}
+@media(max-width:560px){.rg{grid-template-columns:1fr;}}
+</style>
+</head>
+<body class="noscroll">
+<div class="bubbles"><div class="bb bY"></div><div class="bb bJ"></div><div class="bb bG"></div><div class="bb bP"></div></div>
+
+<div class="intro" id="intro">
+  <div class="brief">
+    <div class="logo-badge"><span class="dots"><span class="r">●</span><span class="y">●</span><span class="g">●</span></span><span class="lab">PAZAPA · FRANÇAIS · 3ÈME</span></div>
+    <div class="wk">Semaine 3 — Jour 5</div>
+    <h1>Je m’entraîne</h1>
+    <div class="univ">🚪 Sas de vérification avant la salle de dictée</div>
+    <p>Avant d’entrer en salle de dictée, tu effectues ta dernière vérification en <b>6 questions</b>.</p>
+    <p>Si les <b>6 points</b> sont validés, la porte s’ouvre et tu entres en salle serein·e.</p>
+    <div class="cible"><div class="cl">🎯 VÉRIFICATION</div><div class="cv">ces · ses · c’est · s’est</div></div>
+    <div class="obj">🔓 Valide au moins <b>4 points sur 6</b> pour débloquer « Je relève le défi ».</div>
+    <button class="enter" id="enterBtn">Lancer la vérification ▸</button>
+    <div class="hint">Les explications n’apparaissent qu’en cas d’erreur.</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo-badge"><span class="dots"><span class="r">●</span><span class="y">●</span><span class="g">●</span></span><span class="lab">PAZAPA · FRANÇAIS · 3ÈME</span></div>
+    <div class="wk">Semaine 3 — Jour 5</div>
+    <h1>Je m’entraîne</h1>
+    <p class="sub">🚪 Sas de vérification avant la salle de dictée</p>
+    <button class="snd" id="sndBtn">🔊</button>
+  </div>
+  <div class="strip">
+    <div class="minis" id="minis"></div>
+    <div class="mc">🔓 <b><span id="gv2">0</span>/6</b></div>
+  </div>
+  <div class="csn"><b>Consigne :</b> Choisis la forme correcte pour compléter chaque phrase. Applique le test de substitution pour vérifier ton choix.</div>
+  <div class="ref">
+    <div class="rft">📋 Référentiel</div>
+    <div class="rg"><div class="rc"><div class="rk">CES</div><div class="rd">déterminant démonstratif pluriel</div><div class="rt">test : « les » ou « des »</div></div><div class="rc"><div class="rk">SES</div><div class="rd">déterminant possessif pluriel</div><div class="rt">test : « mes » ou « tes »</div></div><div class="rc"><div class="rk">C'EST</div><div class="rd">ce + est</div><div class="rt">test : « cela est » ou « c'était »</div></div><div class="rc"><div class="rk">S'EST</div><div class="rd">se + est (pronominal)</div><div class="rt">test : « s'était » + participe passé qui suit</div></div></div>
+  </div>
+  <div class="bcard">
+    <div class="bwrap" id="bwrap">
+      <svg id="board" viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="bgl"></div>
+      <div id="stamp"><div class="sbox"><span class="skeys">🗝️</span><span class="stxt">Porte ouverte</span></div></div>
+    </div>
+  </div>
+  <div class="gauge">POINTS VALIDÉS : <b><span id="gv">0</span> / 6</b></div>
+  <div class="stit">✔️ Dernière vérification</div>
+  <div class="stp">
+    <button class="nav" id="prv">◂</button>
+    <div class="dots2" id="dotsWrap"></div>
+    <button class="nav" id="nxt">Suivant ▸</button>
+  </div>
+  <div id="phrases"></div>
+  <div class="act" id="act"><button class="btn dbtn" id="dbtn">Voir le diagnostic</button></div>
+  <div class="res" id="res"></div>
+</div>
+
+<script>
+const QQ=[{"ctx": "Victor Hugo <u>__</u> consacré toute son existence à la défense des plus démunis.", "opts": ["ces", "c'est", "s'est"], "ok": "s'est", "fb": "Test imparfait : 'Victor Hugo s'était consacré toute son existence…' ✓ → verbe pronominal 'se consacrer' au passé composé → 's'est'. Le sujet est 'Victor Hugo' (3e pers. sing.) ; le participe passé 'consacré' confirme le passé composé pronominal."}, {"ctx": "<u>__</u> vers de Lamartine sont parmi les plus émouvants de la poésie romantique française.", "opts": ["C'est", "Ces", "Ses"], "ok": "Ces", "fb": "Test : remplace par 'les' : 'Les vers de Lamartine sont parmi les plus émouvants…' ✓ → déterminant démonstratif → 'Ces'. 'Ses' impliquerait que les vers appartiennent à quelqu'un de précis dans la phrase, ce qui n'est pas le cas ici."}, {"ctx": "Le poète a relu <u>__</u> brouillons avant de soumettre son manuscrit à l'éditeur.", "opts": ["c'est", "s'est", "ses"], "ok": "ses", "fb": "Test : remplace par 'mes' : 'Le poète a relu mes brouillons…' ✓ → déterminant possessif → 'ses'. Les brouillons appartiennent au poète (3e pers. sing.). 'Ces' serait possible sans idée de possession, mais ici le lien possessif est clairement établi."}, {"ctx": "<u>__</u> en lisant les Feuilles d'Automne que l'on comprend la profondeur du lyrisme hugolien.", "opts": ["S'est", "C'est", "Ces"], "ok": "C'est", "fb": "Test : remplace par 'cela est' : 'Cela est en lisant les Feuilles d'Automne que…' ✓ → 'c'est' (ce + est). Test imparfait : 'C'était en lisant…' ✓ → 'c'est' confirmé. 's'est' est impossible : il faudrait un sujet nominal et un participe passé qui suit."}, {"ctx": "Chateaubriand <u>__</u> imposé comme l'un des précurseurs du romantisme français.", "opts": ["ses", "ces", "s'est"], "ok": "s'est", "fb": "Test imparfait : 'Chateaubriand s'était imposé comme l'un des précurseurs…' ✓ → verbe pronominal 's'imposer' au passé composé → 's'est'. Le sujet est 'Chateaubriand' (3e pers. sing.) ; le participe passé 'imposé' suit bien 's'est'."}, {"ctx": "Musset exprimait <u>__</u> émotions avec une intensité qui touchait tous les lecteurs.", "opts": ["s'est", "ses", "c'est"], "ok": "ses", "fb": "Test : remplace par 'mes' : 'Musset exprimait mes émotions…' → la substitution fonctionne grammaticalement. Les émotions appartiennent à Musset (3e pers. sing.) → déterminant possessif → 'ses'. 'Ces' effacerait l'idée de possession."}];
+const N=QQ.length;
+const $=id=>document.getElementById(id);
+let cur=0,activated=false;
+const st=QQ.map(()=>({tried:false,ok:false,busy:false}));
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let li=QQ.map(()=>-1);
+function bal(n,nb){const off=Math.floor(Math.random()*nb);const a=[];for(let k=0;k<n;k++)a.push((k+off)%nb);for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a;}
+function pi(i){const nb=QQ[i].opts.length;let x;do{x=Math.floor(Math.random()*nb);}while(x===li[i]&&nb>1);li[i]=x;return x;}
+function arr(i,wi){const q=QQ[i];const ds=shuf(q.opts.filter(o=>o!==q.ok));const a=[];let di=0;for(let p=0;p<q.opts.length;p++)a[p]=(p===wi)?q.ok:ds[di++];return a;}
+function rOpts(i,wi){if(wi===undefined)wi=pi(i);else li[i]=wi;const a=arr(i,wi),box=$('opts'+i);box.innerHTML='';a.forEach(v=>{const b=document.createElement('button');b.className='opt';b.textContent=v;b.addEventListener('click',()=>ans(i,v,b));box.appendChild(b);});}
+/* BOARD */
+const IX=294,IY=82,IW=172,IH=182,LW=86;
+function buildBoard(){
+  let s='<defs><linearGradient id="wm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c8"/><stop offset="1" stop-color="#f2cf6b"/></linearGradient>'
+   +'<linearGradient id="lf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a4456"/><stop offset="1" stop-color="#2a3340"/></linearGradient>'
+   +'<clipPath id="dc"><rect x="'+IX+'" y="'+IY+'" width="'+IW+'" height="'+IH+'" rx="3"/></clipPath></defs>';
+  s+='<rect x="14" y="14" width="732" height="332" rx="12" fill="none" stroke="#f5c518" stroke-width="1.5" opacity="0.32"/>';
+  s+='<rect x="282" y="28" width="196" height="32" rx="8" fill="#0f141c" stroke="#f5c518" stroke-width="1.5"/>';
+  s+='<text x="380" y="49" font-family="Arial" font-size="14" font-weight="900" fill="#f5d97a" text-anchor="middle" letter-spacing="2">SALLE DE DICTÉE</text>';
+  s+='<rect x="286" y="74" width="188" height="198" rx="6" fill="#0e131a"/>';
+  s+='<g clip-path="url(#dc)">';
+  s+='<rect x="'+IX+'" y="'+IY+'" width="'+IW+'" height="'+IH+'" fill="url(#wm)"/>';
+  s+='<rect x="'+(IX+IW/2-4)+'" y="'+IY+'" width="8" height="'+IH+'" fill="#fff8df" opacity="0.7"/>';
+  s+='<g class="leaf" id="leafL"><rect x="'+IX+'" y="'+IY+'" width="'+LW+'" height="'+IH+'" fill="url(#lf)"/>'
+   +'<rect x="'+(IX+6)+'" y="'+(IY+14)+'" width="'+(LW-14)+'" height="'+(IH-28)+'" rx="3" fill="none" stroke="#1f2733" stroke-width="2"/>'
+   +'<circle cx="'+(IX+LW-10)+'" cy="'+(IY+IH/2)+'" r="3.5" fill="#f5c518"/></g>';
+  s+='<g class="leaf" id="leafR"><rect x="'+(IX+LW)+'" y="'+IY+'" width="'+LW+'" height="'+IH+'" fill="url(#lf)"/>'
+   +'<rect x="'+(IX+LW+8)+'" y="'+(IY+14)+'" width="'+(LW-14)+'" height="'+(IH-28)+'" rx="3" fill="none" stroke="#1f2733" stroke-width="2"/>'
+   +'<circle cx="'+(IX+LW+10)+'" cy="'+(IY+IH/2)+'" r="3.5" fill="#f5c518"/></g>';
+  s+='</g>';
+  s+='<text x="380" y="304" id="gboard" font-family="Arial" font-size="12" font-weight="800" fill="#f5d97a" text-anchor="middle" letter-spacing="1">VÉRIFICATION  0 / 6</text>';
+  for(let i=0;i<N;i++){const cx=150+i*92;
+    s+='<g class="voy" id="voy'+i+'"><circle cx="'+cx+'" cy="330" r="13" fill="#2a3340" stroke="#48586b" stroke-width="2"/>'
+      +'<text x="'+cx+'" y="334" font-family="Arial" font-size="12" font-weight="700" fill="#7d8ea3" text-anchor="middle">'+(i+1)+'</text>'
+      +'<g class="von"><circle cx="'+cx+'" cy="330" r="20" fill="#7bd957" opacity="0.18"/>'
+      +'<circle cx="'+cx+'" cy="330" r="13" fill="#6cc04a" stroke="#bdeaa0" stroke-width="2"/>'
+      +'<path d="M'+(cx-5)+',330 l3.5,4 l7,-8" fill="none" stroke="#13340a" stroke-width="3" stroke-linecap="round"/></g></g>';}
+  $('board').innerHTML=s;
+}
+function rState(){let n=0;
+  for(let i=0;i<N;i++){const on=st[i].ok;if(on)n++;
+    const v=$('voy'+i);if(v)v.classList.toggle('on',on);
+    const m=$('m'+i);if(m)m.classList.toggle('on',on);}
+  const op=LW*(n/N);
+  const lL=$('leafL'),lR=$('leafR');if(lL)lL.style.transform='translateX('+(-op)+'px)';if(lR)lR.style.transform='translateX('+op+'px)';
+  $('gv').textContent=n;$('gv2').textContent=n;const gb=$('gboard');if(gb)gb.textContent='VÉRIFICATION  '+n+' / 6';
+  if(n>=N&&!activated){activated=true;$('bwrap').classList.add('activated');
+    setTimeout(()=>{const s=$('stamp');if(s){s.classList.remove('show');void s.offsetWidth;s.classList.add('show');}},220);
+    victorySound();}}
+/* MODULES */
+function buildMinis(){const w=$('minis');for(let i=0;i<N;i++){const d=document.createElement('div');d.className='m';d.id='m'+i;d.textContent=(i+1);d.style.cursor='pointer';d.addEventListener('click',()=>go(i));w.appendChild(d);}}
+function buildCards(){const b=$('phrases');QQ.forEach((q,i)=>{const c=document.createElement('div');c.className='card mod';c.id='card'+i;c.innerHTML='<span class="qn">Question '+(i+1)+' / '+N+'</span><div class="ctx">'+q.ctx+'</div><div class="opts" id="opts'+i+'"></div><div class="fb" id="fb'+i+'"></div>';b.appendChild(c);});}
+function buildDots(){const w=$('dotsWrap');QQ.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.id='dot'+i;d.textContent=(i+1);d.addEventListener('click',()=>go(i));w.appendChild(d);});}
+function uDots(){QQ.forEach((_,i)=>{const d=$('dot'+i);if(!d)return;d.classList.toggle('cur',i===cur);d.classList.toggle('done',st[i].ok);d.classList.toggle('err',st[i].tried&&!st[i].ok);});}
+function uAct(){const all=st.every(s=>s.tried);$('act').classList.toggle('show',(cur===N-1)||all);}
+function go(i){cur=Math.max(0,Math.min(N-1,i));QQ.forEach((_,k)=>{const c=$('card'+k);if(c)c.classList.toggle('active',k===cur);});
+  $('prv').disabled=(cur===0);$('nxt').textContent=(cur===N-1)?'✓ Voir le diagnostic':'Suivant ▸';uDots();uAct();}
+function pulseNxt(i){const b=(i<N-1)?$('nxt'):$('dbtn');if(b){b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse');}}
+function ans(i,val,btn){const s=st[i];if(s.busy||s.ok)return;s.busy=true;
+  const q=QQ[i],card=$('card'+i),fb=$('fb'+i);card.classList.remove('ok','ko','flash','shake');s.tried=true;
+  if(val===q.ok){
+    card.classList.add('ok');void card.offsetWidth;card.classList.add('flash');
+    document.querySelectorAll('#opts'+i+' .opt').forEach(b=>b.disabled=true);if(btn)btn.classList.add('cok');
+    fb.innerHTML='<div class="okmsg">✔ Point vérifié.</div>';
+    s.ok=true;rState();okSound();uDots();pulseNxt(i);
+  }else{
+    card.classList.add('ko');void card.offsetWidth;card.classList.add('shake');
+    if(btn){btn.classList.add('cko');setTimeout(()=>btn.classList.remove('cko'),500);}
+    fb.innerHTML='<div class="ebox"><span class="lab">À revoir</span>'+q.fb+'</div><button class="retry" id="rb'+i+'">Réessayer</button>';
+    $('rb'+i).addEventListener('click',()=>retry(i));denySound();uDots();}
+  s.busy=false;uAct();maybe();}
+function retry(i){const s=st[i];if(s.ok)return;$('fb'+i).innerHTML='';$('card'+i).classList.remove('ko');rOpts(i);}
+function maybe(){if(st.every(s=>s.tried))showRes();}
+function showRes(){const n=st.filter(s=>s.ok).length,r=$('res');
+  let stars='';for(let k=0;k<N;k++)stars+='<span class="'+(k<n?'on':'off')+'">★</span>';
+  let recap='';QQ.forEach((q,i)=>{const ok=st[i].ok;recap+='<div class="ri '+(ok?'ok':'ko')+'">'+(ok?'✔':'✗')+' Question '+(i+1)+' → '+q.ok+'</div>';});
+  const msgs=['Vérification insuffisante. Reprends l’activité précédente avant de tenter la dictée.','Vérification insuffisante. Reprends l’activité précédente avant de tenter la dictée.','Vérification insuffisante. Reprends l’activité précédente avant de tenter la dictée.','Vérification insuffisante. Reprends l’activité précédente avant de tenter la dictée.','Vérification acceptable. Revois les tests de substitution avant la dictée.','Très bonne vérification. Reste vigilant(e) sur le point signalé.','Vérification parfaite. Tu entres en salle de dictée avec une maîtrise totale.'];
+  let h='<div class="sc '+(n>=4?'':'ko')+'">'+n+' / 6</div><div class="st">'+stars+'</div>';
+  h+='<h2>'+(n>=4?'Tu peux entrer en salle.':'Encore un effort.')+'</h2><div class="rmsg">'+msgs[n]+'</div>';
+  h+='<div class="rcap">'+recap+'</div>';
+  if(n>=4)h+='<div class="ul">✅ Tu es prêt·e pour passer au défi !</div>';
+  r.innerHTML=h;r.classList.add('show');}
+function vDiag(){showRes();$('res').scrollIntoView({behavior:'smooth',block:'center'});}
+/* SON */
+let AC=null,snd=true;
+function iA(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){if(!AC||!snd)return;const t=AC.currentTime+(dl||0);const o=AC.createOscillator(),g=AC.createGain();o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.13,t+0.012);g.gain.exponentialRampToValueAtTime(0.0006,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+0.03);}
+function victorySound(){iA();if(!AC||!snd)return;[523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.22,'sine',.13,k*.09));const t=AC.currentTime+.5;const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(800,t);o.frequency.exponentialRampToValueAtTime(1400,t+.22);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+.35);}
+function okSound(){iA();tone(523,784,.16,'sine',.12,0);tone(784,1046,.14,'sine',.10,.08);}
+function denySound(){iA();tone(220,140,.18,'sine',.11,0);}
+function bootSound(){iA();tone(330,560,.3,'sine',.10,0);tone(660,660,.3,'sine',.09,.12);}
+function enterSas(){iA();if(AC&&AC.state==='suspended')AC.resume();bootSound();const intro=$('intro');intro.classList.add('hidden');document.body.classList.remove('noscroll');setTimeout(()=>{intro.style.display='none';},600);}
+/* INIT */
+buildBoard();buildMinis();buildCards();buildDots();
+const idx=bal(N,QQ[0].opts.length);QQ.forEach((_,i)=>rOpts(i,idx[i]));
+rState();go(0);
+$('enterBtn').addEventListener('click',enterSas);
+$('prv').addEventListener('click',()=>go(cur-1));
+$('nxt').addEventListener('click',()=>{if(cur<N-1)go(cur+1);else vDiag();});
+$('dbtn').addEventListener('click',vDiag);
+$('sndBtn').addEventListener('click',()=>{snd=!snd;iA();if(AC&&AC.state==='suspended')AC.resume();$('sndBtn').textContent=snd?'🔊':'🔇';});
+document.addEventListener('pointerdown',iA,{once:true});
+</script>
+</body>
+</html>
