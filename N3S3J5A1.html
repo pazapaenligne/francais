@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J5 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5c518;--day-dark:#8a6000;
+      --day-light:#fffbeb;--day-border:#f5e08a;
+      --day-glow:rgba(245,197,24,.28);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f28b82;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* BUREAU */
+    .bureau{width:100%;max-width:720px;background:var(--dark);
+      border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);overflow:hidden;}
+    .bureau::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .bur-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#aaa08a;margin-bottom:.7rem;}
+    .bur-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.85rem;}
+    .bur-statut{flex:1;}
+    .bur-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#8a7a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .bur-statut-nom{font-size:1.05rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .bur-score{text-align:right;}
+    .bur-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .bur-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#8a7a6a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    /* fiches d'identité */
+    .fiches{display:flex;gap:.4rem;flex-wrap:wrap;}
+
+    /* progression */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* référentiel */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.7rem .9rem;}
+    .ref-cell-forme{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:900;
+      color:var(--day-dark);margin-bottom:.3rem;}
+    .ref-cell-body{font-size:.82rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* niveaux */
+    .niveaux-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .niveau-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .niv-icon{font-size:1.1rem;flex-shrink:0;}
+    .niv-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .niv-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .niv-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+
+    /* bloc appariement */
+    .appariement{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.2rem 1.1rem;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);animation:fadeUp .35s ease both;
+      margin-bottom:.9rem;}
+    .app-consigne{font-size:.9rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:1rem;line-height:1.5;}
+
+    /* formes sélectionnables */
+    .formes-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+    .forme-btn{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:900;
+      padding:.5rem 1rem;border-radius:8px;border:2px solid var(--day-border);
+      background:var(--day-light);color:var(--day-dark);cursor:pointer;
+      transition:all .18s;-webkit-tap-highlight-color:transparent;min-height:3rem;}
+    .forme-btn:hover:not(:disabled):not(.used){border-color:var(--day-color);
+      background:var(--yellow);color:#000;}
+    .forme-btn.selected{background:var(--day-color);border-color:var(--day-dark);
+      color:#000;box-shadow:0 0 0 3px var(--day-glow);}
+    .forme-btn.used{opacity:.38;cursor:default;background:#f0f0f0;border-color:#ccc;color:#999;}
+    .forme-btn:disabled{cursor:default;}
+
+    /* cibles */
+    .cibles{display:flex;flex-direction:column;gap:.5rem;}
+    .cible{display:flex;align-items:flex-start;gap:.7rem;padding:.7rem .9rem;
+      border-radius:10px;border:2px dashed var(--border);background:#fafafa;
+      cursor:pointer;transition:all .18s;min-height:3.2rem;
+      -webkit-tap-highlight-color:transparent;}
+    .cible:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .cible.filled{border-style:solid;border-color:var(--day-border);background:var(--day-light);}
+    .cible.ok-cible{border-color:var(--green);background:var(--green-pale);}
+    .cible.ko-cible{border-color:var(--red);background:var(--red-pale);}
+    .cible.locked{cursor:default;}
+    .cible-badge{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:900;
+      color:var(--day-dark);min-width:28px;flex-shrink:0;padding-top:1px;}
+    .cible-texte{font-size:.9rem;color:var(--text);line-height:1.6;flex:1;}
+    .cible-forme{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:900;
+      margin-left:auto;padding:.15rem .5rem;border-radius:6px;
+      background:var(--day-color);color:#000;flex-shrink:0;align-self:center;}
+    .cible-forme.ok{background:var(--green);color:#fff;}
+    .cible-forme.ko{background:var(--red);color:#fff;}
+
+    /* feedback erreur */
+    .fb-err{font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      padding:.5rem .8rem;border-radius:8px;margin-top:.4rem;
+      display:none;line-height:1.6;background:var(--red-pale);
+      border:1px solid var(--red);color:#7f1d1d;}
+    .fb-err.show{display:block;}
+
+    /* résultat niveau */
+    .niv-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;}
+    .niv-result.show{display:block;animation:fadeUp .3s ease both;}
+    .niv-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .niv-msg{font-size:.92rem;color:#aaa08a;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* boutons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover{background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* résultats globaux */
+    .results-global{width:100%;max-width:720px;display:none;
+      position:relative;z-index:1;margin-top:1.5rem;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#aaa08a;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#8a7a6a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8c0a0;margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both,flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both,flashKo .5s ease both;}
+
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr;}
+      .formes-row{gap:.35rem;}
+      .forme-btn{font-size:.9rem;padding:.45rem .75rem;}
+      .btn-dark,.btn-primary{width:100%;}
+      .fiches{gap:.3rem;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 3 &ndash; Jour 5</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Archiviste linguistique</span></h1>
+</header>
+
+<!-- BUREAU -->
+<div class="bureau">
+  <div class="bur-titre">&#128196; Bureau d&rsquo;archivage &mdash; 4 fiches d&rsquo;identit&eacute; &times; 3 niveaux</div>
+  <div class="bur-row">
+    <div class="bur-statut">
+      <div class="bur-statut-label">Mission</div>
+      <div class="bur-statut-nom" id="bur-statut">Niveau 1 en cours&hellip;</div>
+    </div>
+    <div class="bur-score">
+      <div class="bur-score-num"><span id="bur-total">0</span>/12</div>
+      <div class="bur-score-label">Points</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.2rem;" id="niv-progress"></div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Niveau 1 / 3</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel &mdash; ces / ses / c&rsquo;est / s&rsquo;est</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-forme">CES</div>
+      <div class="ref-cell-body">D&eacute;terminant <em>d&eacute;monstratif</em> pluriel.<br>D&eacute;signe ce qu&rsquo;on montre.<br>Test&nbsp;: <em>les</em> ou <em>des</em>.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-forme">SES</div>
+      <div class="ref-cell-body">D&eacute;terminant <em>possessif</em> pluriel.<br>Indique la possession (3e pers.).<br>Test&nbsp;: <em>mes</em> ou <em>tes</em>.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-forme">C&rsquo;EST</div>
+      <div class="ref-cell-body"><em>ce</em> + <em>est</em> (verbe &ecirc;tre).<br>Pr&eacute;sente ou d&eacute;finit.<br>Test&nbsp;: <em>cela est</em> / <em>c&rsquo;&eacute;tait</em>.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-forme">S&rsquo;EST</div>
+      <div class="ref-cell-body"><em>se</em> + <em>est</em> (verbe pronominal PC).<br>Toujours + participe pass&eacute;.<br>Test&nbsp;: <em>s&rsquo;&eacute;tait</em>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- NIVEAUX -->
+<div class="niveaux-wrap">
+
+  <!-- NIVEAU 1 -->
+  <div id="bloc-n1">
+    <div class="niveau-header">
+      <div class="niv-icon">&#128196;</div>
+      <div>
+        <div class="niv-titre">Niveau 1 &mdash; Classe grammaticale</div>
+        <div class="niv-sous">Associe chaque forme &agrave; sa classe</div>
+      </div>
+      <div class="niv-badge" id="badge-n1">0/4</div>
+    </div>
+    <div class="appariement" id="app-n1">
+      <div class="app-consigne">S&eacute;lectionne une forme, puis clique sur la classe qui lui correspond.</div>
+      <div class="formes-row" id="formes-n1"></div>
+      <div class="cibles" id="cibles-n1"></div>
+    </div>
+    <div class="niv-result" id="res-n1">
+      <div class="niv-score" id="score-n1"></div>
+      <div class="niv-msg" id="msg-n1"></div>
+      <div id="btn-n1"></div>
+    </div>
+  </div>
+
+  <!-- NIVEAU 2 -->
+  <div id="bloc-n2" style="display:none;">
+    <div class="niveau-header">
+      <div class="niv-icon">&#128203;</div>
+      <div>
+        <div class="niv-titre">Niveau 2 &mdash; D&eacute;finition</div>
+        <div class="niv-sous">Associe chaque forme &agrave; sa d&eacute;finition</div>
+      </div>
+      <div class="niv-badge" id="badge-n2">0/4</div>
+    </div>
+    <div class="appariement" id="app-n2">
+      <div class="app-consigne">S&eacute;lectionne une forme, puis clique sur la d&eacute;finition qui lui correspond.</div>
+      <div class="formes-row" id="formes-n2"></div>
+      <div class="cibles" id="cibles-n2"></div>
+    </div>
+    <div class="niv-result" id="res-n2">
+      <div class="niv-score" id="score-n2"></div>
+      <div class="niv-msg" id="msg-n2"></div>
+      <div id="btn-n2"></div>
+    </div>
+  </div>
+
+  <!-- NIVEAU 3 -->
+  <div id="bloc-n3" style="display:none;">
+    <div class="niveau-header">
+      <div class="niv-icon">&#128270;</div>
+      <div>
+        <div class="niv-titre">Niveau 3 &mdash; Crit&egrave;re de substitution</div>
+        <div class="niv-sous">Associe chaque forme &agrave; son test</div>
+      </div>
+      <div class="niv-badge" id="badge-n3">0/4</div>
+    </div>
+    <div class="appariement" id="app-n3">
+      <div class="app-consigne">S&eacute;lectionne une forme, puis clique sur le crit&egrave;re de substitution qui lui correspond.</div>
+      <div class="formes-row" id="formes-n3"></div>
+      <div class="cibles" id="cibles-n3"></div>
+    </div>
+    <div class="niv-result" id="res-n3">
+      <div class="niv-score" id="score-n3"></div>
+      <div class="niv-msg" id="msg-n3"></div>
+      <div id="btn-n3"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#128196; Rapport d&rsquo;archivage</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/12</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      Recommencer l&rsquo;archivage
+    </button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════
+   DONNÉES
+════════════════════ */
+var FORMES=['CES','SES','C\u2019EST','S\u2019EST'];
+
+var N1={
+  cibles:[
+    {id:'c1',texte:'D\u00e9terminant d\u00e9monstratif pluriel',forme:'CES'},
+    {id:'c2',texte:'D\u00e9terminant possessif pluriel',forme:'SES'},
+    {id:'c3',texte:'Pronom d\u00e9monstratif + verbe \u00eatre',forme:'C\u2019EST'},
+    {id:'c4',texte:'Pronom r\u00e9fl\u00e9chi + auxiliaire \u00eatre',forme:'S\u2019EST'}
+  ],
+  feedbacks:{
+    'CES':'\u00ab\u00a0Ces\u00a0\u00bb est un d\u00e9terminant d\u00e9monstratif pluriel\u00a0: il se place devant un nom pluriel pour d\u00e9signer quelque chose que l\u2019on montre ou dont on parle. Exemple\u00a0: \u00ab\u00a0ces livres\u00a0\u00bb, \u00ab\u00a0ces \u00e9l\u00e8ves\u00a0\u00bb. Il ne contient pas de verbe.',
+    'SES':'\u00ab\u00a0Ses\u00a0\u00bb est un d\u00e9terminant possessif pluriel\u00a0: il indique que des \u00eatres ou des choses appartiennent \u00e0 un possesseur \u00e0 la 3e personne du singulier. Exemple\u00a0: \u00ab\u00a0ses notes\u00a0\u00bb, \u00ab\u00a0ses id\u00e9es\u00a0\u00bb. Il ne contient pas de verbe.',
+    'C\u2019EST':'\u00ab\u00a0C\u2019est\u00a0\u00bb est form\u00e9 de deux \u00e9l\u00e9ments\u00a0: le pronom d\u00e9monstratif \u00ab\u00a0ce\u00a0\u00bb et le verbe \u00ab\u00a0\u00eatre\u00a0\u00bb conjugu\u00e9 \u00e0 la 3e personne du singulier du pr\u00e9sent. Ce n\u2019est pas un d\u00e9terminant\u00a0: il ne se place pas devant un nom sans article.',
+    'S\u2019EST':'\u00ab\u00a0S\u2019est\u00a0\u00bb est form\u00e9 de deux \u00e9l\u00e9ments\u00a0: le pronom personnel r\u00e9fl\u00e9chi \u00ab\u00a0se\u00a0\u00bb et l\u2019auxiliaire \u00ab\u00a0\u00eatre\u00a0\u00bb \u00e0 la 3e personne du singulier. C\u2019est toujours suivi d\u2019un participe pass\u00e9\u00a0: \u00ab\u00a0il s\u2019est lev\u00e9\u00a0\u00bb, \u00ab\u00a0elle s\u2019est exprim\u00e9e\u00a0\u00bb. Ce n\u2019est pas un d\u00e9terminant.'
+  }
+};
+
+var N2={
+  cibles:[
+    {id:'d1',texte:'Se place devant un nom pluriel pour d\u00e9signer des \u00eatres ou des choses que l\u2019on montre ou dont on parle.',forme:'CES'},
+    {id:'d2',texte:'Se place devant un nom pluriel pour indiquer qu\u2019ils appartiennent \u00e0 un possesseur \u00e0 la 3e personne du singulier.',forme:'SES'},
+    {id:'d3',texte:'Introduit une pr\u00e9sentation, une d\u00e9finition ou une mise en valeur\u00a0; contraction de \u00ab\u00a0ce\u00a0\u00bb + \u00ab\u00a0est\u00a0\u00bb.',forme:'C\u2019EST'},
+    {id:'d4',texte:'Forme d\u2019un verbe pronominal au pass\u00e9 compos\u00e9\u00a0; toujours suivi d\u2019un participe pass\u00e9\u00a0; sujet = 3e personne du singulier.',forme:'S\u2019EST'}
+  ],
+  feedbacks:{
+    'CES':'\u00ab\u00a0Ces\u00a0\u00bb d\u00e9signe des \u00eatres ou des choses que l\u2019on montre ou dont on vient de parler\u00a0: d\u00e9finition A. Il ne marque pas la possession (\u2260\u00a0B), il ne contient pas de verbe (\u2260\u00a0C et D).',
+    'SES':'\u00ab\u00a0Ses\u00a0\u00bb indique la possession\u00a0: ces \u00e9l\u00e9ments appartiennent \u00e0 quelqu\u2019un \u00e0 la 3e personne. C\u2019est la d\u00e9finition B. \u00ab\u00a0Ces\u00a0\u00bb (A) d\u00e9signe sans poss\u00e9der\u00a0; \u00ab\u00a0c\u2019est\u00a0\u00bb (C) et \u00ab\u00a0s\u2019est\u00a0\u00bb (D) sont des formes verbales.',
+    'C\u2019EST':'\u00ab\u00a0C\u2019est\u00a0\u00bb pr\u00e9sente ou d\u00e9finit quelque chose. C\u2019est la d\u00e9finition C. On peut le remplacer par \u00ab\u00a0cela est\u00a0\u00bb. Ce n\u2019est pas un d\u00e9terminant (\u2260\u00a0A, B) et il ne s\u2019agit pas d\u2019un pass\u00e9 compos\u00e9 pronominal (\u2260\u00a0D).',
+    'S\u2019EST':'\u00ab\u00a0S\u2019est\u00a0\u00bb est la marque d\u2019un verbe pronominal au pass\u00e9 compos\u00e9. C\u2019est la d\u00e9finition D. On le reconna\u00eet au participe pass\u00e9 qui suit toujours. Ce n\u2019est pas un d\u00e9terminant (\u2260\u00a0A, B) ni une simple pr\u00e9sentation (\u2260\u00a0C).'
+  }
+};
+
+var N3={
+  cibles:[
+    {id:'s1',texte:'Remplaçable par \u00ab\u00a0les\u00a0\u00bb ou \u00ab\u00a0des\u00a0\u00bb\u00a0; au singulier, devient \u00ab\u00a0ce\u00a0\u00bb + nom.',forme:'CES'},
+    {id:'s2',texte:'Remplaçable par \u00ab\u00a0mes\u00a0\u00bb ou \u00ab\u00a0tes\u00a0\u00bb en changeant la personne.',forme:'SES'},
+    {id:'s3',texte:'Remplaçable par \u00ab\u00a0cela est\u00a0\u00bb ou par \u00ab\u00a0c\u2019\u00e9tait\u00a0\u00bb \u00e0 l\u2019imparfait.',forme:'C\u2019EST'},
+    {id:'s4',texte:'Remplaçable par \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb \u00e0 l\u2019imparfait\u00a0; toujours suivi d\u2019un participe pass\u00e9.',forme:'S\u2019EST'}
+  ],
+  feedbacks:{
+    'CES':'Le test de \u00ab\u00a0ces\u00a0\u00bb\u00a0: peut-on remplacer par \u00ab\u00a0les\u00a0\u00bb\u00a0? \u00ab\u00a0Ces livres\u00a0\u00bb \u2192 \u00ab\u00a0les livres\u00a0\u00bb \u2713 \u2192 c\u2019est \u00ab\u00a0ces\u00a0\u00bb (d\u00e9monstratif). Si \u00ab\u00a0mes\u00a0\u00bb fonctionne \u2192 \u00ab\u00a0ses\u00a0\u00bb\u00a0; si \u00ab\u00a0cela est\u00a0\u00bb fonctionne \u2192 \u00ab\u00a0c\u2019est\u00a0\u00bb\u00a0; si \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb fonctionne \u2192 \u00ab\u00a0s\u2019est\u00a0\u00bb.',
+    'SES':'Le test de \u00ab\u00a0ses\u00a0\u00bb\u00a0: peut-on remplacer par \u00ab\u00a0mes\u00a0\u00bb\u00a0? \u00ab\u00a0Ses notes\u00a0\u00bb \u2192 \u00ab\u00a0mes notes\u00a0\u00bb \u2713 \u2192 c\u2019est \u00ab\u00a0ses\u00a0\u00bb (possessif). Si \u00ab\u00a0les\u00a0\u00bb fonctionne seul sans id\u00e9e de possession \u2192 \u00ab\u00a0ces\u00a0\u00bb\u00a0; si \u00ab\u00a0cela est\u00a0\u00bb fonctionne \u2192 \u00ab\u00a0c\u2019est\u00a0\u00bb\u00a0; si \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb fonctionne \u2192 \u00ab\u00a0s\u2019est\u00a0\u00bb.',
+    'C\u2019EST':'Le test de \u00ab\u00a0c\u2019est\u00a0\u00bb\u00a0: peut-on remplacer par \u00ab\u00a0cela est\u00a0\u00bb\u00a0? \u00ab\u00a0C\u2019est beau\u00a0\u00bb \u2192 \u00ab\u00a0Cela est beau\u00a0\u00bb \u2713. Ou par \u00ab\u00a0c\u2019\u00e9tait\u00a0\u00bb \u00e0 l\u2019imparfait\u00a0? \u00ab\u00a0C\u2019est beau\u00a0\u00bb \u2192 \u00ab\u00a0C\u2019\u00e9tait beau\u00a0\u00bb \u2713 \u2192 c\u2019est \u00ab\u00a0c\u2019est\u00a0\u00bb.',
+    'S\u2019EST':'Le test de \u00ab\u00a0s\u2019est\u00a0\u00bb\u00a0: peut-on remplacer par \u00ab\u00a0s\u2019\u00e9tait\u00a0\u00bb\u00a0? \u00ab\u00a0Il s\u2019est lev\u00e9\u00a0\u00bb \u2192 \u00ab\u00a0Il s\u2019\u00e9tait lev\u00e9\u00a0\u00bb \u2713. Et y a-t-il un participe pass\u00e9 qui suit\u00a0? \u2192 c\u2019est \u00ab\u00a0s\u2019est\u00a0\u00bb.'
+  }
+};
+
+/* ════════════════════
+   ÉTAT
+════════════════════ */
+var scoreTotal=0;
+var n1Ok=0,n1Results={};
+var n2Ok=0,n2Results={};
+var n3Ok=0,n3Results={};
+var selected=null; // forme sélectionnée
+
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+/* ════════════════════
+   FICHES (dashboard)
+════════════════════ */
+function buildFiches(){
+  var wrap=document.getElementById('niv-progress');wrap.innerHTML='';
+  [['1','Niveau 1'],['2','Niveau 2'],['3','Niveau 3']].forEach(function(niv){
+    var badge=document.createElement('div');
+    badge.id='niv-badge-'+niv[0];
+    badge.style.cssText='display:flex;align-items:center;gap:.5rem;background:var(--dark2);border:1.5px solid var(--dark3);border-radius:8px;padding:.3rem .8rem;font-family:JetBrains Mono,monospace;font-size:.78rem;transition:all .4s;';
+    badge.innerHTML='<span style="color:var(--muted);font-weight:700;">'+niv[1]+'</span><span id="nb-s-'+niv[0]+'" style="font-weight:900;color:#8a7a6a;">0/4</span>';
+    wrap.appendChild(badge);
+  });
+}
+
+function majFiche(niv,forme,ok){
+  document.getElementById('bur-total').textContent=scoreTotal;
+  var pct=Math.round(scoreTotal/12*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+' %';
+}
+
+function majNivBadge(nivNum,okCount){
+  var badge=document.getElementById('niv-badge-'+nivNum);
+  var sc=document.getElementById('nb-s-'+nivNum);
+  if(!badge||!sc)return;
+  sc.textContent=okCount+'/4';
+  if(okCount===4){
+    badge.style.background='rgba(34,197,94,.2)';
+    badge.style.borderColor='var(--green)';
+    sc.style.color='#4ade80';
+  }else if(okCount>0){
+    badge.style.background='rgba(245,197,24,.12)';
+    badge.style.borderColor='var(--day-color)';
+    sc.style.color='var(--day-border)';
+  }
+}
+
+/* ════════════════════
+   SON
+════════════════════ */
+function jouerSon(ok){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(ok){
+      osc.frequency.setValueAtTime(520,ctx.currentTime);
+      osc.frequency.setValueAtTime(800,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.4);
+    }else{
+      osc.frequency.setValueAtTime(280,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+.12);
+      gain.gain.setValueAtTime(.18,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+      osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.35);
+    }
+  }catch(e){}
+}
+
+/* ════════════════════
+   BUILD NIVEAU générique
+════════════════════ */
+function buildNiveau(nData,nivId,formesId,ciblesId,resultsObj){
+  // Formes
+  var fw=document.getElementById(formesId);fw.innerHTML='';
+  // Ordre aléatoire des formes
+  var fOrd=['CES','SES','C\u2019EST','S\u2019EST'].slice().sort(function(){return Math.random()-.5;});
+  // Fisher-Yates
+  for(var i=fOrd.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=fOrd[i];fOrd[i]=fOrd[j];fOrd[j]=tmp;
+  }
+  fOrd.forEach(function(f){
+    var btn=document.createElement('button');btn.className='forme-btn';
+    btn.textContent=f;btn.dataset.forme=f;btn.id='fb-'+nivId+'-'+f.replace('\u2019','');
+    btn.addEventListener('click',function(){selForme(f,btn,nivId);});
+    fw.appendChild(btn);
+  });
+  // Cibles mélangées
+  var cw=document.getElementById(ciblesId);cw.innerHTML='';
+  var cibOrd=nData.cibles.slice();
+  for(var ci=cibOrd.length-1;ci>0;ci--){var cj=Math.floor(Math.random()*(ci+1));var ct=cibOrd[ci];cibOrd[ci]=cibOrd[cj];cibOrd[cj]=ct;}
+  cibOrd.forEach(function(cible,idx){
+    var div=mkEl('div','cible');div.id='ci-'+cible.id;div.dataset.forme=cible.forme;
+    var badge=mkEl('div','cible-badge');badge.textContent=String.fromCharCode(65+idx)+'.';
+    var texte=mkEl('div','cible-texte');texte.textContent=cible.texte;
+    div.appendChild(badge);div.appendChild(texte);
+    div.addEventListener('click',function(){selCible(div,nData,nivId,resultsObj);});
+    cw.appendChild(div);
+    // feedback sous chaque cible
+    var fb=mkEl('div','fb-err');fb.id='fbe-'+cible.id;cw.appendChild(fb);
+  });
+}
+
+function selForme(f,btn,nivId){
+  // Désélectionner l'ancien
+  if(selected&&selected.btn){
+    selected.btn.classList.remove('selected');
+  }
+  if(selected&&selected.forme===f&&selected.niv===nivId){
+    selected=null;return;
+  }
+  selected={forme:f,btn:btn,niv:nivId};
+  btn.classList.add('selected');
+}
+
+function selCible(cibleEl,nData,nivId,resultsObj){
+  if(!selected||selected.niv!==nivId)return;
+  var formeAttendue=cibleEl.dataset.forme;
+  var formeChoisie=selected.forme;
+  var cibleId=cibleEl.id.replace('ci-','');
+
+  // Déjà rempli ?
+  if(cibleEl.classList.contains('locked'))return;
+  // La forme est-elle déjà placée ailleurs ?
+  if(resultsObj[formeChoisie]!==undefined)return;
+
+  var ok=formeChoisie===formeAttendue;
+  resultsObj[formeChoisie]=ok;
+  if(ok) scoreTotal++;
+
+  // UI cible
+  cibleEl.classList.add('filled','locked',ok?'ok-cible':'ko-cible');
+  var formeTag=mkEl('div','cible-forme '+(ok?'ok':'ko'));
+  formeTag.textContent=formeChoisie;
+  cibleEl.appendChild(formeTag);
+
+  // Marquer la forme comme utilisée
+  var fbtn=document.getElementById('fb-'+nivId+'-'+formeChoisie.replace('\u2019',''));
+  if(fbtn){fbtn.classList.add('used');fbtn.disabled=true;}
+  selected=null;
+
+  // Feedback erreur
+  if(!ok){
+    var fb=document.getElementById('fbe-'+cibleId);
+    if(fb){fb.className='fb-err show';fb.textContent=nData.feedbacks[formeChoisie];}
+    // Si la bonne forme n'a pas encore été placée, la montrer aussi sur la bonne cible
+    // pour que l'élève comprenne
+  }
+
+  jouerSon(ok);
+  majFiche(nivId,formeChoisie,ok);
+
+  // Badge
+  var bOk=Object.keys(resultsObj).filter(function(k){return resultsObj[k];}).length;
+  document.getElementById('badge-'+nivId.toLowerCase()).textContent=bOk+'/4';
+
+  // Fin de niveau ?
+  if(Object.keys(resultsObj).length===4){
+    setTimeout(function(){showResNiv(nivId,bOk,nData,resultsObj);},400);
+  }
+}
+
+function showResNiv(nivId,ok,nData,resultsObj){
+  var r=document.getElementById('res-'+nivId.toLowerCase());
+  r.classList.add('show');
+  document.getElementById('score-'+nivId.toLowerCase()).textContent=ok+' / 4';
+
+  var nivNum=nivId.slice(1);
+  majNivBadge(nivNum,ok);
+  var nextNiv=nivId==='n1'?'n2':nivId==='n2'?'n3':null;
+  var seuil=3;
+  var msg='';
+  if(ok===4)msg='\u2713 Niveau '+nivId.slice(1)+' parfait\u00a0!';
+  else if(ok>=seuil)msg='Bien \u2014 niveau suivant d\u00e9bloqu\u00e9.';
+  else msg='Relis le r\u00e9f\u00e9rentiel \u2014 niveau suivant d\u00e9bloqu\u00e9.';
+  document.getElementById('msg-'+nivId.toLowerCase()).textContent=msg;
+
+  var btnDiv=document.getElementById('btn-'+nivId.toLowerCase());
+  if(nextNiv){
+    btnDiv.innerHTML='<button class="btn btn-primary" onclick="debNiv(\''+nextNiv+'\')">Niveau suivant \u2192</button>';
+  } else {
+    btnDiv.innerHTML='<button class="btn btn-primary" onclick="afficherVerdict()">Voir le rapport \u2192</button>';
+  }
+  document.getElementById('bur-statut').textContent=
+    nextNiv?'Niveau '+(parseInt(nivId.slice(1))+1)+' en cours\u2026':'Archivage termin\u00e9';
+  document.getElementById('prog-label').textContent=
+    nextNiv?'Niveau '+(parseInt(nivId.slice(1))+1)+' / 3':'3 / 3 niveaux';
+}
+
+function debNiv(niv){
+  document.getElementById('bloc-'+niv).style.display='';
+  if(niv==='n2')buildNiveau(N2,'n2','formes-n2','cibles-n2',n2Results);
+  if(niv==='n3')buildNiveau(N3,'n3','formes-n3','cibles-n3',n3Results);
+}
+
+/* ════════════════════
+   VERDICT
+════════════════════ */
+function afficherVerdict(){
+  var total=scoreTotal;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=12?5:total>=10?4:total>=7?3:total>=4?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  document.getElementById('res-badge').innerHTML=total>=9?
+    '<div class="badge-ok">\u2713 Fiches valid\u00e9es\u00a0!</div>':
+    '<div class="badge-ko">9/12 minimum requis \u2014 Recommence.</div>';
+  var msgs={
+    12:'Fiches d\u2019identit\u00e9 compl\u00e8tes. Ma\u00eetrise parfaite des quatre homophones.',
+    11:'Tr\u00e8s bon archivage. Un point \u00e0 consolider.',
+    10:'Tr\u00e8s bon archivage. Un point \u00e0 consolider.',
+    9:'Archivage partiel. Revois les crit\u00e8res de substitution.',
+    8:'Archivage partiel. Revois les crit\u00e8res de substitution.',
+    7:'Archivage partiel. Revois les crit\u00e8res de substitution.'
+  };
+  document.getElementById('res-msg').textContent=
+    msgs[total]||'Fiches incompl\u00e8tes. Reprends le r\u00e9f\u00e9rentiel avant de continuer.';
+}
+
+/* ════════════════════
+   RESET
+════════════════════ */
+function resetTout(){
+  scoreTotal=0;n1Ok=0;n1Results={};n2Ok=0;n2Results={};n3Ok=0;n3Results={};
+  selected=null;
+  document.getElementById('results-global').classList.remove('show');
+  ['n1','n2','n3'].forEach(function(n){
+    var r=document.getElementById('res-'+n);if(r)r.classList.remove('show');
+    document.getElementById('badge-'+n).textContent='0/4';
+  });
+  document.getElementById('bloc-n2').style.display='none';
+  document.getElementById('bloc-n3').style.display='none';
+  document.getElementById('bur-total').textContent='0';
+  document.getElementById('bur-statut').textContent='Niveau 1 en cours\u2026';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('prog-label').textContent='Niveau 1 / 3';
+  document.getElementById('prog-pct').textContent='0\u00a0%';
+  buildFiches();
+  buildNiveau(N1,'n1','formes-n1','cibles-n1',n1Results);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── INIT ─── */
+buildFiches();
+buildNiveau(N1,'n1','formes-n1','cibles-n1',n1Results);
+</script>
+</body>
+</html>
