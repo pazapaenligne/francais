@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S3 J4 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#3ab5d8;--day-dark:#1a6e88;--day-dark2:#0e3f50;
+  --day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  --day-color:#3ab5d8;--orange:#f5a623;
+  --bg:#fffdf7;--surface:#fff;--surface2:#f0f9fd;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--green-light:#f0faeb;--green-dark:#3d7a10;
+  --pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:760px;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.45rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+
+/* PROGRESSION */
+.prog-wrap{width:100%;margin-bottom:.7rem;position:relative;z-index:1;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;margin-bottom:.9rem;flex-wrap:wrap;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .6rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;
+  border:1.5px solid var(--border);background:var(--surface);font-weight:600;white-space:nowrap;}
+.chip .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* RÉFÉRENTIEL */
+.ref{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;
+  box-shadow:0 3px 14px rgba(0,0,0,.06);position:relative;z-index:1;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.ref-inner{padding:.9rem 1.2rem;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+@media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.7rem .9rem;}
+.ref-cell-title{font-size:.85rem;font-weight:900;color:var(--day-dark);margin-bottom:.25rem;}
+.ref-cell-body{font-size:.82rem;color:var(--muted);line-height:1.65;}
+.ref-cell-body em{color:var(--day-dark2);font-style:normal;font-weight:700;}
+
+/* CARD PARTIE */
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);
+  position:relative;z-index:1;overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:var(--muted);line-height:1.65;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+/* ITEMS */
+.q-item{padding:.65rem 1.2rem .3rem;margin-bottom:.5rem;}
+.q-item.ok .q-phrase{border-color:var(--green);}
+.q-item.ko .q-phrase{border-color:var(--pink-dark);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.35rem;}
+.verbe-badge{display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(58,181,216,.13);border:2px solid var(--day-border);
+  border-radius:8px;padding:.4rem .9rem;margin-bottom:.55rem;
+  font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:900;
+  color:var(--day-dark);line-height:1.4;}
+.verbe-badge .vb-lbl{font-size:.65rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;}
+.verbe-badge{display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(58,181,216,.12);border:1.5px solid var(--day-border);
+  border-radius:8px;padding:.35rem .8rem;margin-bottom:.5rem;
+  font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:800;
+  color:var(--day-dark);line-height:1.4;}
+.verbe-badge .vb-label{font-size:.68rem;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-right:.2rem;}
+.q-phrase{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);
+  line-height:1.85;margin-bottom:.6rem;padding:.7rem 1rem;
+  background:var(--surface2);border-radius:var(--radius-sm);border:1.5px solid var(--border);
+  transition:border-color .3s;}
+.q-phrase em{color:var(--day-dark);font-style:normal;font-family:'JetBrains Mono',monospace;font-size:.92em;}
+.q-phrase .blank{display:inline-block;min-width:70px;border-bottom:3px solid var(--day-dark);
+  text-align:center;color:var(--day-dark);font-family:'JetBrains Mono',monospace;
+  font-weight:900;margin:0 .2rem;vertical-align:bottom;}
+
+/* ÉTAPES SÉQUENTIELLES PARTIE A */
+.step{background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.75rem .95rem;margin:.35rem 0;display:none;}
+.step.show{display:block;animation:fadeIn .3s ease;}
+.step-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.45rem;}
+.opts-col{display:flex;flex-direction:column;gap:.35rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.55rem .95rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:flex-start;gap:.45rem;word-break:break-word;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.opt-sel{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.opt-btn.correct{background:var(--green-light)!important;border-color:var(--green)!important;
+  color:var(--green-dark)!important;animation:popIn .3s ease;}
+.opt-btn.wrong{background:var(--pink-light)!important;border-color:var(--pink-dark)!important;
+  color:var(--pink-dark)!important;animation:wrongShake .35s ease;}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark);margin-top:2px;}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--pink-dark);color:#fff;}
+.step-fb{font-size:clamp(.88rem,2.5vw,.98rem);display:none;margin-top:.35rem;line-height:1.7;
+  padding:.45rem .7rem;border-radius:var(--radius-sm);}
+.step-fb.show.ok{display:block;background:var(--green-light);border:1px solid var(--green);color:var(--green-dark);}
+.step-fb.show.ko{display:block;background:var(--pink-light);border:1px solid var(--pink-dark);color:var(--pink-dark);}
+
+/* SAISIE PARTIE B */
+.q-input-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.3rem;}
+.q-label-mode{font-size:.82rem;color:var(--day-dark);font-weight:700;
+  font-family:'JetBrains Mono',monospace;padding:.3rem .6rem;
+  background:rgba(58,181,216,.12);border:1.5px solid var(--day-border);
+  border-radius:6px;white-space:nowrap;}
+.q-inp{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.5vw,1rem);font-weight:800;
+  background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);
+  padding:.45rem .75rem;min-width:180px;flex:1;color:var(--text);
+  transition:border-color .15s;-webkit-tap-highlight-color:transparent;}
+.q-inp:focus{outline:none;border-color:var(--day-dark);}
+.q-inp.ok{border-color:var(--green);background:var(--green-light);}
+.q-inp.ko{border-color:var(--pink-dark);background:var(--pink-light);}
+.btn-ok{background:var(--day-dark);color:#fff;border:none;border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:.9rem;font-weight:800;
+  padding:.45rem .9rem;cursor:pointer;min-height:2.8rem;
+  transition:transform .12s;white-space:nowrap;}
+.btn-ok:hover:not(:disabled){transform:translateY(-1px);}
+.btn-ok:disabled{opacity:.35;cursor:default;}
+.q-corr{font-size:.85rem;font-weight:700;color:var(--pink-dark);display:none;margin-top:.3rem;
+  padding:.3rem .5rem;background:var(--pink-light);border-radius:6px;}
+.q-corr.show{display:block;}
+.q-expl{font-size:.85rem;color:var(--green-dark);display:none;margin-top:.25rem;
+  line-height:1.65;padding:.35rem .5rem;}
+.q-expl.show{display:block;}
+.q-fb-ko{font-size:.83rem;color:var(--pink-dark);display:none;margin-top:.2rem;
+  line-height:1.6;font-style:italic;padding:.3rem .5rem;}
+.q-fb-ko.show{display:block;}
+
+/* FB GLOBAUX */
+.fb-g{padding:.85rem 1.2rem;border-radius:var(--radius-sm);font-size:.95rem;
+  display:none;line-height:1.8;margin:.4rem 1.2rem .7rem;}
+.fb-g.show{display:block;}
+.fb-g.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
+.fb-g.ko{background:var(--pink-light);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.fb-g.mid{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark2);}
+.sp{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);
+  margin:.6rem 1.2rem 0;display:none;}
+.sp.show{display:block;}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.3rem 1.2rem 0;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.2rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;transform:none!important;pointer-events:none;}
+.btn-p{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);flex:1;}
+.btn-p:hover:not(:disabled){transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+
+/* RÉSULTATS */
+.results{display:none;position:relative;z-index:1;}
+.results.show{display:block;animation:fadeUp .4s ease both;}
+.rcard{background:#071520;border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1.8rem 1.3rem;box-shadow:0 5px 22px rgba(0,0,0,.2);text-align:center;
+  position:relative;overflow:hidden;}
+.rcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--day-dark),var(--day),#9dd4e8,var(--day-dark));}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  margin:.5rem 0 .25rem;color:var(--day);}
+.stars{font-size:1.9rem;margin:.35rem 0 .6rem;letter-spacing:.1em;}
+.part-scores{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem;}
+.ps-cell{background:rgba(255,255,255,.06);border:1.5px solid rgba(58,181,216,.25);
+  border-radius:var(--radius-sm);padding:.7rem .5rem;text-align:center;}
+.ps-val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:900;color:var(--day);line-height:1;}
+.ps-lbl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem;}
+.rmsg{color:#a8d8ea;font-size:clamp(.88rem,2.5vw,1rem);margin-bottom:1rem;line-height:1.8;}
+.conseil-msg{border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.88rem;
+  margin-bottom:1rem;font-family:'JetBrains Mono',monospace;text-align:center;display:none;line-height:1.6;}
+.conseil-msg.show{display:block;}
+.conseil-msg.ok{background:rgba(141,198,63,.15);border:1.5px solid var(--green);color:var(--green);}
+.conseil-msg.mid{background:rgba(245,166,35,.12);border:1.5px solid var(--orange);color:var(--orange);}
+.conseil-msg.ko{background:rgba(192,57,43,.1);border:1.5px solid var(--pink-dark);color:var(--pink-dark);}
+.btn-restart{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;
+  border:2px solid var(--day-border);min-height:2.8rem;
+  background:transparent;color:var(--day);width:100%;justify-content:center;}
+.btn-restart:hover{border-color:var(--day);color:#fff;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{0%{transform:scale(1);}45%{transform:scale(1.04);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span style="font-family:monospace;font-size:13px;font-weight:bold;color:#000;">&nbsp;Pazapa · Français · 3ème</span>
+  </div>
+  <div class="week-label">Semaine 3 – Jour 4</div>
+  <h1>Je m'entraîne · <span class="hl">PSC — mode et temps</span></h1>
+</header>
+
+<!-- Référentiel -->
+<div class="ref">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-title">&#128218;&nbsp;Référentiel — PSC et modes</div>
+    <div class="ref-grid">
+      <div class="ref-cell">
+        <div class="ref-cell-title">Indicatif</div>
+        <div class="ref-cell-body"><em>Cause</em> (parce que, puisque, comme) · <em>Antériorité</em> (après que, aussitôt que, dès que) · <em>Simultanéité</em> (pendant que, alors que) · <em>Conséquence réelle</em> (si bien que, tellement… que)</div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Subjonctif</div>
+        <div class="ref-cell-body"><em>But</em> (pour que, afin que, de sorte que + subj.) · <em>Postériorité</em> (avant que, jusqu'à ce que) · <em>Condition / concession</em> (bien que, quoique, à condition que)</div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Temps principaux — indicatif</div>
+        <div class="ref-cell-body">Simultanéité → <em>même temps que la principale</em> · Antériorité → <em>présent ou passé composé</em> · Principale au passé → <em>imparfait</em></div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">Temps principaux — subjonctif</div>
+        <div class="ref-cell-body">But, postériorité, concession → <em>subjonctif présent</em> (après principale au présent, passé composé ou passé simple)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progression -->
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 15 points</span><span id="prog-pct">0 %</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="dot" style="background:#8dc63f"></div><span id="cnt-ok">0</span> point(s)</div>
+  <div class="chip"><div class="dot" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreur(s)</div>
+  <div class="chip"><div class="dot" style="background:#8a8f9a"></div><span id="cnt-rem">15</span> restant(s)</div>
+</div>
+
+<!-- PROTOCOLE A -->
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Protocole A</span>
+    <span class="part-label">&#128270;&nbsp;Analyser et justifier</span>
+    <span class="part-sc" id="scA">0 / 10</span>
+  </div>
+  <div class="part-consigne">Pour chaque phrase : <strong>(1)</strong> identifie le type de PSC, puis <strong>(2)</strong> choisis le mode qui convient. Le verbe à conjuguer est indiqué sous chaque phrase. La deuxième question apparaît après la première.</div>
+  <div id="listA"></div>
+  <div class="sp" id="spA"></div>
+  <div class="fb-g" id="fbA"></div>
+  <div class="btn-row">
+    <button class="btn btn-g" id="btn-rA">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- PROTOCOLE B -->
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Protocole B</span>
+    <span class="part-label">&#9998;&#65039;&nbsp;Construire et calibrer</span>
+    <span class="part-sc" id="scB">0 / 5</span>
+  </div>
+  <div class="part-consigne">Conjugue le verbe indiqué au mode et au temps corrects dans la PSC. Le mode requis est indiqué — à toi de trouver la forme exacte.</div>
+  <div id="listB"></div>
+  <div class="sp" id="spB"></div>
+  <div class="fb-g" id="fbB"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="btn-vB" disabled>&#10003;&nbsp;Vérifier le protocole B</button>
+    <button class="btn btn-g" id="btn-rB">&#8635;&nbsp;Réessayer</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="results" id="results-screen">
+  <div class="rcard">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;color:var(--day);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;">&#128203;&nbsp;Rapport d'analyse</div>
+    <div class="score-big"><span id="r-score">0</span>/15</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="part-scores">
+      <div class="ps-cell"><div class="ps-val" id="r-sA">0/10</div><div class="ps-lbl">Protocole A — Analyse</div></div>
+      <div class="ps-cell"><div class="ps-val" id="r-sB">0/5</div><div class="ps-lbl">Protocole B — Conjugaison</div></div>
+    </div>
+    <div class="rmsg" id="r-msg"></div>
+    <div class="conseil-msg" id="conseil-msg"></div>
+    <button class="btn-restart" id="btn-restart">&#8635;&nbsp;Recommencer depuis le début</button>
+
+</div>
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+var LETTERS=['A','B','C'];
+
+/* ══ DONNÉES PROTOCOLE A — double QCM séquentiel ══ */
+var DA=[
+  {id:'a1',
+   phrase:"Le conférencier a attendu que tout le monde <span class='blank'>___</span> avant de commencer.",
+   verbe:"s'installer — 3e pers. sing.",
+   steps:[
+     {label:"Quel est le type de cette PSC\u00a0?",
+      opts:["CC de cause","CC de conséquence","CC de temps (postériorité)"],ans:2,
+      fb:"«\u00a0Attendre que\u00a0» exprime que l'installation n'a pas encore eu lieu au moment de l'attente. L'action de la subordonnée se déroule après celle de la principale\u00a0: c'est une PSC de temps à valeur de postériorité."},
+     {label:"Quel mode s'impose ici\u00a0?",
+      opts:["Indicatif imparfait","Subjonctif présent","Conditionnel présent"],ans:1,
+      fb:"La postériorité impose le subjonctif\u00a0: l'action n'est pas encore réalisée. «\u00a0S'installer\u00a0» au subjonctif présent, 3e pers. sing.\u00a0: «\u00a0s'installe\u00a0»."}
+   ]
+  },
+  {id:'a2',
+   phrase:"Le journaliste a noté toutes les informations parce que le sujet <span class='blank'>___</span> particulièrement complexe.",
+   verbe:"être — 3e pers. sing.",
+   steps:[
+     {label:"Quel est le type de cette PSC\u00a0?",
+      opts:["CC de but","CC de temps (simultanéité)","CC de cause"],ans:2,
+      fb:"«\u00a0Parce que\u00a0» exprime la cause\u00a0: il explique pourquoi le journaliste a noté toutes les informations. La cause est réelle et accomplie."},
+     {label:"Quel mode s'impose ici\u00a0?",
+      opts:["Indicatif imparfait","Subjonctif présent","Indicatif futur simple"],ans:0,
+      fb:"La cause → indicatif. La principale est au passé composé (a noté)\u00a0; la cause est antérieure ou simultanée → imparfait\u00a0: «\u00a0était\u00a0»."}
+   ]
+  },
+  {id:'a3',
+   phrase:"L'archiviste range les documents de sorte que les chercheurs <span class='blank'>___</span> les retrouver facilement.",
+   verbe:"pouvoir — 3e pers. plur.",
+   steps:[
+     {label:"Quel est le type de cette PSC\u00a0?",
+      opts:["CC de temps (antériorité)","CC de conséquence","CC de but"],ans:2,
+      fb:"«\u00a0De sorte que\u00a0» avec le subjonctif exprime le but\u00a0: le rangement est voulu pour permettre aux chercheurs de retrouver les documents. C'est un résultat envisagé, non encore réalisé."},
+     {label:"Quel mode s'impose ici\u00a0?",
+      opts:["Subjonctif présent","Indicatif présent","Conditionnel présent"],ans:0,
+      fb:"Quand «\u00a0de sorte que\u00a0» exprime un but (résultat envisagé, non encore réalisé) → subjonctif. «\u00a0Pouvoir\u00a0» au subjonctif présent, 3e pers. plur.\u00a0: «\u00a0puissent\u00a0»."}
+   ]
+  },
+  {id:'a4',
+   phrase:"Le chercheur publie ses résultats aussitôt qu'il <span class='blank'>___</span> ses expériences.",
+   verbe:"terminer — 3e pers. sing.",
+   steps:[
+     {label:"Quel est le type de cette PSC\u00a0?",
+      opts:["CC de cause","CC de temps (antériorité)","CC de but"],ans:1,
+      fb:"«\u00a0Aussitôt que\u00a0» exprime l'antériorité\u00a0: la fin des expériences précède la publication des résultats. L'action de la subordonnée se déroule avant celle de la principale."},
+     {label:"Quel mode s'impose ici\u00a0?",
+      opts:["Subjonctif présent","Conditionnel présent","Indicatif présent"],ans:2,
+      fb:"L'antériorité → indicatif. La principale est au présent (publie)\u00a0; la subordonnée d'antériorité est au présent\u00a0: «\u00a0aussitôt qu'il termine\u00a0» \u2713."}
+   ]
+  },
+  {id:'a5',
+   phrase:"Le responsable a présenté le projet clairement afin que le comité <span class='blank'>___</span> une décision éclairée.",
+   verbe:"prendre — 3e pers. sing.",
+   steps:[
+     {label:"Quel est le type de cette PSC\u00a0?",
+      opts:["CC de conséquence","CC de temps (simultanéité)","CC de but"],ans:2,
+      fb:"«\u00a0Afin que\u00a0» exprime toujours le but\u00a0: la présentation claire a pour objectif que le comité prenne une décision éclairée. Le but est un résultat envisagé."},
+     {label:"Quel mode s'impose ici\u00a0?",
+      opts:["Indicatif imparfait","Subjonctif présent","Indicatif passé composé"],ans:1,
+      fb:"But → subjonctif. «\u00a0Prendre\u00a0» au subjonctif présent, 3e pers. sing.\u00a0: «\u00a0prenne\u00a0»."}
+   ]
+  }
+];
+
+/* ══ DONNÉES PROTOCOLE B — saisie guidée ══ */
+var DB=[
+  {id:1,
+   avant:"Les élèves relisaient leur copie pendant que le professeur",
+   verbe:"corriger",apres:"en silence.",
+   modeLabel:"Indicatif imparfait",
+   ans:["corrigeait"],
+   expl:"«\u00a0Pendant que\u00a0» → simultanéité → indicatif. La principale est à l'imparfait (relisaient) → la subordonnée de simultanéité est aussi à l'imparfait. «\u00a0Corriger\u00a0»\u00a0: <em>corrigeait</em>.",
+   fbKo:"Vérifie le temps\u00a0: simultanéité → même temps que la principale. La principale est à l'imparfait → imparfait aussi dans la subordonnée."},
+  {id:2,
+   avant:"Le directeur a convoqué une réunion pour que chacun",
+   verbe:"formuler",apres:"ses remarques.",
+   modeLabel:"Subjonctif présent",
+   ans:["formule"],
+   expl:"«\u00a0Pour que\u00a0» → but → subjonctif présent. «\u00a0Formuler\u00a0», 1er groupe\u00a0: radical «\u00a0formul-\u00a0» + terminaison «\u00a0-e\u00a0» (3e pers. sing.) → <em>formule</em>.",
+   fbKo:"«\u00a0Pour que\u00a0» impose le subjonctif présent. Pour les verbes du 1er groupe\u00a0: radical + -e à la 3e pers. sing."},
+  {id:3,
+   avant:"L'auteur avait relu son texte avant que l'éditeur ne le",
+   verbe:"recevoir",apres:".",
+   modeLabel:"Subjonctif présent",
+   ans:["reçoive"],
+   expl:"«\u00a0Avant que\u00a0» → postériorité → subjonctif. L'éditeur ne reçoit pas encore le texte au moment où l'auteur le relit. «\u00a0Recevoir\u00a0» au subjonctif présent, 3e pers. sing.\u00a0: <em>reçoive</em>.",
+   fbKo:"«\u00a0Avant que\u00a0» impose le subjonctif présent. «\u00a0Recevoir\u00a0» est irrégulier au subjonctif\u00a0: je reçoive, tu reçoives, il reçoive…"},
+  {id:4,
+   avant:"Il a tellement travaillé que ses progrès",
+   verbe:"être",apres:"immédiatement visibles.",
+   modeLabel:"Indicatif passé composé",
+   ans:["ont été","ont ete"],
+   expl:"«\u00a0Tellement… que\u00a0» → conséquence effective et réalisée → indicatif. La principale est au passé composé (a travaillé)\u00a0; la conséquence réalisée est aussi au passé composé\u00a0: <em>ont été</em>.",
+   fbKo:"La conséquence réelle → indicatif. La principale est au passé composé → la conséquence aussi. «\u00a0Être\u00a0» au passé composé, 3e pers. plur.\u00a0: ont été."},
+  {id:5,
+   avant:"Dès qu'il",
+   verbe:"comprendre",apres:"la consigne, il leva la main.",
+   modeLabel:"Indicatif passé simple",
+   ans:["comprit"],
+   expl:"«\u00a0Dès que\u00a0» → antériorité → indicatif. La principale est au passé simple (leva) → la subordonnée d'antériorité est aussi au passé simple\u00a0: <em>comprit</em>.",
+   fbKo:"Antériorité → indicatif. La principale est au passé simple → même temps dans la subordonnée. «\u00a0Comprendre\u00a0» au passé simple, 3e pers. sing.\u00a0: comprit."}
+];
+
+/* ══ ÉTAT ══ */
+var scA=0,scB=0,vB=false;
+var doneA={},doneB={};
+var TOTAL=15;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,t,v){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),tc=actx.currentTime;o.type=t||'sine';o.frequency.setValueAtTime(f1,tc);o.frequency.exponentialRampToValueAtTime(f2,tc+d);g.gain.setValueAtTime(0.0001,tc);g.gain.linearRampToValueAtTime(v||0.14,tc+0.01);g.gain.exponentialRampToValueAtTime(0.0001,tc+d);o.connect(g);g.connect(actx.destination);o.start(tc);o.stop(tc+d+0.02);}
+function sndOk(){initA();beep(440,660,0.08,'sine',0.15);setTimeout(function(){beep(660,880,0.15,'sine',0.12);},90);}
+function sndKo(){initA();beep(280,160,0.22,'sawtooth',0.12);}
+function sndFin(){initA();beep(523,659,0.2,'sine',0.14);setTimeout(function(){beep(659,880,0.25,'sine',0.12);},120);}
+
+function shuffle(a){
+  var b=a.slice();
+  for(var i=b.length-1;i>0;i--){
+    var buf=new Uint32Array(1);
+    (window.crypto||window.msCrypto).getRandomValues(buf);
+    var j=buf[0]%(i+1);var t=b[i];b[i]=b[j];b[j]=t;
+  }
+  return b;
+}
+
+function norm(s){
+  return s.trim().toLowerCase()
+    .replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e')
+    .replace(/[îï]/g,'i').replace(/[ôö]/g,'o')
+    .replace(/[ùûü]/g,'u').replace(/ç/g,'c')
+    .replace(/\s+/g,' ');
+}
+function matchAns(input,ans){
+  var ni=norm(input);
+  for(var i=0;i<ans.length;i++){if(norm(ans[i])===ni)return true;}
+  return false;
+}
+
+/* ══ BUILD PROTOCOLE A ══ */
+function buildA(){
+  doneA={};scA=0;$('scA').textContent='0 / 10';
+  $('spA').classList.remove('show');$('fbA').className='fb-g';
+  var list=$('listA');list.innerHTML='';
+  DA.forEach(function(d,di){
+    doneA[d.id]={step:0,sc:0};
+    var div=document.createElement('div');div.className='q-item';div.id='qia-'+d.id;
+    var qn=document.createElement('div');qn.className='q-num';
+    qn.textContent='Phrase '+(di+1)+' / 5';div.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=d.phrase;div.appendChild(ph);
+    var vb=document.createElement('div');vb.className='verbe-badge';
+    vb.innerHTML='<span class="vb-lbl">Verbe à conjuguer :</span> '+d.verbe;
+    div.appendChild(vb);
+    /* Badge verbe bien visible */
+
+    /* 2 étapes séquentielles */
+    d.steps.forEach(function(st,si){
+      var stepDiv=document.createElement('div');stepDiv.className='step'+(si===0?' show':'');
+      stepDiv.id='step-'+d.id+'-'+si;
+      var lbl=document.createElement('div');lbl.className='step-label';lbl.textContent=st.label;
+      stepDiv.appendChild(lbl);
+      var opts=document.createElement('div');opts.className='opts-col';
+      var fb=document.createElement('div');fb.className='step-fb';
+      var shuffled=shuffle(st.opts.map(function(o,oi){return{txt:o,orig:oi};}));
+      shuffled.forEach(function(item,li){
+        var btn=document.createElement('button');btn.className='opt-btn';
+        btn.dataset.val=item.orig;
+        btn.innerHTML='<span class="opt-letter">'+LETTERS[li]+'</span><span>'+item.txt+'</span>';
+        btn.addEventListener('click',function(){
+          if(doneA[d.id].step>si)return;
+          opts.querySelectorAll('.opt-btn').forEach(function(b){b.disabled=true;});
+          var ok=(parseInt(btn.dataset.val)===st.ans);
+          opts.querySelectorAll('.opt-btn').forEach(function(b){
+            b.className='opt-btn'+(parseInt(b.dataset.val)===st.ans?' correct':(b===btn&&!ok?' wrong':''));
+          });
+          if(ok){fb.className='step-fb show ok';fb.innerHTML='\u2713\u00a0Correct.';}
+          else{fb.className='step-fb show ko';fb.innerHTML='\u2717\u00a0'+st.fb;}
+          if(ok){sndOk();doneA[d.id].sc++;}else sndKo();
+          doneA[d.id].step++;
+          /* Recalc scA */
+          scA=0;Object.values(doneA).forEach(function(s){scA+=s.sc;});
+          $('scA').textContent=scA+' / 10';
+          updateGlobal();
+          /* Afficher étape suivante */
+          var nextStep=$('step-'+d.id+'-'+(si+1));
+          if(nextStep){setTimeout(function(){nextStep.classList.add('show');},350);}
+          /* Si toutes les phrases terminées */
+          var allDone=DA.every(function(dd){return doneA[dd.id].step>=dd.steps.length;});
+          if(allDone)endA();
+        });
+        opts.appendChild(btn);
+      });
+      stepDiv.appendChild(opts);stepDiv.appendChild(fb);
+      div.appendChild(stepDiv);
+    });
+    list.appendChild(div);
+  });
+}
+
+function endA(){
+  $('spA').textContent='Score protocole A\u00a0: '+scA+' / 10';$('spA').classList.add('show');
+  var ko=10-scA;var fb=$('fbA');
+  if(ko===0){fb.className='fb-g show ok';fb.innerHTML='&#11088;\u00a0Protocole A valid\u00e9\u00a0! 10/10.';sndOk();}
+  else if(scA>=7){fb.className='fb-g show mid';fb.innerHTML='&#128161;\u00a0'+scA+'/10\u00a0\u2014 Score suffisant. Protocole B débloqué.';sndKo();}
+  else{fb.className='fb-g show ko';fb.innerHTML='&#10006;\u00a0'+scA+'/10\u00a0\u2014 Score insuffisant (minimum\u00a0: 7/10). Réessaie le protocole A.';sndKo();}
+  if(scA>=7)$('cardB').classList.remove('locked');
+}
+
+$('btn-rA').addEventListener('click',function(){buildA();updateGlobal();});
+
+/* ══ BUILD PROTOCOLE B ══ */
+function buildB(){
+  doneB={};scB=0;vB=false;
+  $('spB').classList.remove('show');$('fbB').className='fb-g';
+  $('btn-vB').disabled=true;$('scB').textContent='0 / 5';
+  var list=$('listB');list.innerHTML='';
+  DB.forEach(function(d){
+    doneB[d.id]=false;
+    var div=document.createElement('div');div.className='q-item';div.id='qib-'+d.id;
+    var qn=document.createElement('div');qn.className='q-num';
+    qn.textContent='Phrase '+d.id+' / 5';div.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';
+    ph.innerHTML=d.avant+' <em>('+d.verbe+')</em>'+(d.apres?' '+d.apres:'');
+    div.appendChild(ph);
+    var row=document.createElement('div');row.className='q-input-row';
+    var modeEl=document.createElement('div');modeEl.className='q-label-mode';
+    modeEl.innerHTML='&#9654;\u00a0'+d.modeLabel;row.appendChild(modeEl);
+    var inp=document.createElement('input');inp.className='q-inp';inp.id='inpB-'+d.id;
+    inp.type='text';inp.autocomplete='off';inp.autocorrect='off';inp.spellcheck=false;
+    inp.placeholder='Forme conjuguée\u2026';
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();
+        var nextInp=$('inpB-'+(d.id+1));if(nextInp&&!nextInp.disabled)nextInp.focus();
+        else checkAllB();
+      }
+    });
+    inp.addEventListener('input',function(){checkAllB();});
+    row.appendChild(inp);
+    var corr=document.createElement('div');corr.className='q-corr';corr.id='corrB-'+d.id;
+    var expl=document.createElement('div');expl.className='q-expl';expl.id='explB-'+d.id;
+    var fbko=document.createElement('div');fbko.className='q-fb-ko';fbko.id='fbkoB-'+d.id;
+    div.appendChild(row);div.appendChild(corr);div.appendChild(expl);div.appendChild(fbko);
+    list.appendChild(div);
+  });
+}
+
+function checkAllB(){
+  var allFilled=DB.every(function(d){
+    var inp=$('inpB-'+d.id);return inp&&inp.value.trim().length>0&&!inp.disabled;
+  });
+  $('btn-vB').disabled=(!allFilled||vB);
+}
+
+$('btn-vB').addEventListener('click',function(){
+  if(vB)return;vB=true;$('btn-vB').disabled=true;
+  scB=0;
+  DB.forEach(function(d){
+    var inp=$('inpB-'+d.id);if(!inp)return;
+    inp.disabled=true;
+    var ok=matchAns(inp.value,d.ans);
+    if(ok)scB++;
+    inp.className='q-inp '+(ok?'ok':'ko');
+    $('qib-'+d.id).className='q-item '+(ok?'ok':'ko');
+    if(ok){
+      var expl=$('explB-'+d.id);if(expl){expl.innerHTML='\u2713\u00a0'+d.expl;expl.className='q-expl show';}
+    } else {
+      var corr=$('corrB-'+d.id);if(corr){corr.innerHTML='\u2717\u00a0Forme attendue\u00a0: <strong>'+d.ans[0]+'</strong>.';corr.className='q-corr show';}
+      var expl=$('explB-'+d.id);if(expl){expl.innerHTML=d.expl;expl.className='q-expl show';}
+      var fbko=$('fbkoB-'+d.id);if(fbko&&d.fbKo){fbko.innerHTML=d.fbKo;fbko.className='q-fb-ko show';}
+    }
+  });
+  $('scB').textContent=scB+' / 5';
+  $('spB').textContent='Score protocole B\u00a0: '+scB+' / 5';$('spB').classList.add('show');
+  var ko=5-scB;var fb=$('fbB');
+  if(ko===0){fb.className='fb-g show ok';fb.innerHTML='&#11088;\u00a0Protocole B valid\u00e9\u00a0! 5/5.';sndFin();}
+  else if(scB>=4){fb.className='fb-g show mid';fb.innerHTML='&#128161;\u00a0'+scB+'/5\u00a0\u2014 Très bon travail.';sndKo();}
+  else{fb.className='fb-g show ko';fb.innerHTML='&#10006;\u00a0'+scB+'/5\u00a0\u2014 Revois les règles de mode et de temps.';sndKo();}
+  updateGlobal();
+  setTimeout(showResults,700);
+});
+$('btn-rB').addEventListener('click',function(){buildB();updateGlobal();});
+
+/* ══ GLOBAL ══ */
+function updateGlobal(){
+  var ok=scA+scB;
+  var ko=ok>0?(ok-ok):0; /* calculé par différence */
+  var answered=scA+(vB?5:0);var erreurs=answered-ok;
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=erreurs;$('cnt-rem').textContent=TOTAL-ok;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  var tot=scA+scB;
+  $('r-score').textContent=tot;$('r-sA').textContent=scA+'/10';$('r-sB').textContent=scB+'/5';
+  var s=tot>=15?5:tot>=13?4:tot>=10?3:tot>=7?2:1;
+  $('r-stars').textContent='\u2b50'.repeat(s)+'\u2606'.repeat(5-s);
+  var msgs=[
+    'Résultats insuffisants. Reprends le référentiel et recommence les deux protocoles.',
+    'Quelques incertitudes sur les modes et les temps. Revois les règles signalées.',
+    'Analyse correcte dans l\u2019ensemble. Revois les cas particuliers avant le défi.',
+    'Très bonne maîtrise de la PSC. Un ou deux ajustements mineurs.',
+    'Rapport irréprochable. Toutes les PSC parfaitement analysées et conjuguées.'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  var cm=$('conseil-msg');
+  if(tot>=11){cm.className='conseil-msg show ok';cm.innerHTML='&#128270;\u00a0Tu peux passer au d\u00e9fi.';}
+  else if(tot>=8){cm.className='conseil-msg show mid';cm.innerHTML='&#128161;\u00a0Tu peux tenter le d\u00e9fi, mais revois d\u2019abord les modes signalés.';}
+  else{cm.className='conseil-msg show ko';cm.innerHTML='&#128218;\u00a0Je te conseille de retravailler le r\u00e9férentiel avant le d\u00e9fi.';}
+  $('results-screen').classList.add('show');
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  scA=0;scB=0;vB=false;doneA={};doneB={};
+  $('results-screen').classList.remove('show');$('conseil-msg').className='conseil-msg';
+  $('cardB').classList.add('locked');
+  buildA();buildB();updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildA();buildB();updateGlobal();
+buildA();buildB();updateGlobal();
+</script>
+
+</script>
+</body>
+</html>
