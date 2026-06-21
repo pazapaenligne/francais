@@ -69,6 +69,13 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 .ref-def{font-size:.78rem;color:#2a4a10;line-height:1.55;}
 .ref-def em{font-style:italic;color:var(--jour-fonce);}
 .ref-def strong{font-weight:700;}
+/* RÉFÉRENTIEL REFERMABLE */
+.ref-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0;margin-bottom:0;}
+.ref-toggle-label{font-family:'Orbitron',sans-serif;font-size:.62rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#fff;}
+.ref-toggle-arrow{font-size:.85rem;color:#fff;transition:transform .3s;display:inline-block;}
+.ref-toggle-arrow.open{transform:rotate(180deg);}
+.ref-body{overflow:hidden;transition:max-height .35s ease,opacity .3s ease;max-height:1200px;opacity:1;margin-top:10px;}
+.ref-body.collapsed{max-height:0;opacity:0;margin-top:0;}
 
 /* COLONNE DROITE */
 .col-droite{min-width:0;display:flex;flex-direction:column;gap:14px;}
@@ -229,7 +236,11 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
     <!-- COLONNE GAUCHE : RÉFÉRENTIEL -->
     <div class="col-gauche">
       <div class="ref-card">
-        <div class="ref-section-titre">Référentiel</div>
+        <div class="ref-section-titre ref-toggle" onclick="toggleRef()" id="refToggle">
+          <span class="ref-toggle-label">Référentiel</span>
+          <span class="ref-toggle-arrow open" id="refArrow">▲</span>
+        </div>
+        <div class="ref-body" id="refBody">
 
         <div class="ref-item">
           <div class="ref-paire">A / À</div>
@@ -294,6 +305,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
             <em>Ex.&nbsp;: «&nbsp;Ils ont fini.&nbsp;»<br>→ «&nbsp;Ils avaient fini.&nbsp;» ✓ → ont.</em>
           </div>
         </div>
+        </div><!-- /ref-body -->
       </div>
     </div>
 
@@ -350,29 +362,29 @@ var QA = [
   {
     id:'A1',
     phrase:'« Marie __ offert un livre __ sa meilleure amie. »',
-    opts:['a / à','à / à','a / a'],
-    ans:0,
+    opts:['à / à','a / a','a / à'],
+    ans:2,
     fb:'Premier blanc : test avait → « Marie avait offert un livre… » ✓ → a (verbe avoir).\nDeuxième blanc : test avait → « à avait sa meilleure amie » ✗ → préposition.\n→ à (accent grave).'
   },
   {
     id:'A2',
     phrase:'« Le ciel __ couvert __ les enfants jouent dans le jardin. »',
-    opts:['est / et','et / est','est / est'],
-    ans:0,
+    opts:['et / est','est / et','est / est'],
+    ans:1,
     fb:'Premier blanc : test était → « Le ciel était couvert » ✓ → est (verbe être).\nDeuxième blanc : test et puis → « et puis les enfants jouent » ✓\n→ et (conjonction).'
   },
   {
     id:'A3',
     phrase:'« __ frère __ arrivé hier soir. »',
-    opts:['Son / est','Sont / est','Son / et'],
-    ans:0,
+    opts:['Sont / est','Son / et','Son / est'],
+    ans:2,
     fb:'Premier blanc : test mon → « mon frère » ✓\n→ son (déterminant possessif).\nDeuxième blanc : test était → « était arrivé » ✓\n→ est (verbe être).'
   },
   {
     id:'A4',
     phrase:'« __ dit que cette histoire __ passionnante. »',
-    opts:['On / est','Ont / est','On / et'],
-    ans:0,
+    opts:['Ont / est','On / est','On / et'],
+    ans:1,
     fb:'Premier blanc : test il → « Il dit que cette histoire… » ✓\n→ on (pronom indéfini).\nDeuxième blanc : test était → « cette histoire était passionnante » ✓\n→ est (verbe être).'
   },
   {
@@ -385,8 +397,8 @@ var QA = [
   {
     id:'A6',
     phrase:'« Lucas __ allé __ la bibliothèque __ il __ emprunté deux romans. »',
-    opts:['est / à / et / a','et / à / est / a','est / a / et / à'],
-    ans:0,
+    opts:['et / à / est / a','est / à / et / a','est / a / et / à'],
+    ans:1,
     fb:'Premier blanc : test était → « Lucas était allé » ✓ → est.\nDeuxième blanc : test avait → « avait la bibliothèque » ✗ → préposition → à.\nTroisième blanc : test et puis → ✓ → et.\nQuatrième blanc : test avait → « il avait emprunté » ✓ → a.'
   }
 ];
@@ -623,10 +635,6 @@ function resetA(){
 /* ══ MISSION B ══ */
 function lancerB(){
   missionIdx=1;
-  etatB={};scoresM[1]=0;
-  updateTabs(1);
-function lancerB(){
-  missionIdx=1;
   scoresM[1]=0;
   updateTabs(1);
   buildDots(1);
@@ -640,7 +648,6 @@ function lancerB(){
   html+='<div class="mission-sous-titre">Corriger les erreurs dans le texte</div>';
   html+='</div><div class="mission-body">';
   html+='<div class="consigne-box">Ce texte contient quatre erreurs sur les homophones. Identifie chaque erreur et choisis la correction exacte.</div>';
-  /* Texte annoté de la prof */
   html+='<div class="texte-b">';
   html+='« Ce matin, on <span class="mot-erreur">à</span><span class="num-ref">1</span> ouvert la nouvelle salle de sciences. ';
   html+='Les élèves <span class="mot-correct">sont</span><span class="num-ref">2</span> très enthousiastes ';
@@ -648,11 +655,9 @@ function lancerB(){
   html+='Le professeur <span class="mot-erreur">à</span><span class="num-ref">4</span> préparé une expérience passionnante. ';
   html+='<span class="mot-correct">Son</span><span class="num-ref">5</span> cours <span class="mot-erreur">et</span><span class="num-ref">6</span> déjà très attendu. »';
   html+='</div>';
-  /* Runner en iframe */
   html+='<div class="iframe-wrap">';
   html+='<iframe id="runnerIframe" src="N3S3J3A1_missionB_runner.html" scrolling="no" allowtransparency="true"></iframe>';
   html+='</div>';
-  html+='<div class="runner-msg">Écris chaque correction directement dans le jeu !</div>';
   html+='<div class="sous-score" id="sousScoreB" style="display:none;">';
   html+='<div class="sous-score-val" id="sousScoreValB">0 / 4</div>';
   html+='<div class="sous-score-label">Score Mission B</div></div>';
@@ -669,7 +674,6 @@ window.addEventListener('message',function(ev){
   if(ev.data&&ev.data.type==='pazapaScore'){
     var s=Math.min(ev.data.score,4);
     scoresM[1]=s;
-    /* Mettre à jour dots */
     for(var i=0;i<4;i++) markDot(1,i,i<s);
     updateBar(1,s);
     document.getElementById('sousScoreValB').textContent=s+' / 4';
@@ -680,6 +684,8 @@ window.addEventListener('message',function(ev){
   }
 });
 
+/* ══ BILAN FINAL ══ */
+function afficherBilan(){
   document.getElementById('missionZone').innerHTML='';
   var total=scoresM[0]+scoresM[1];
   document.getElementById('bGlobal').textContent=total;
@@ -716,11 +722,13 @@ window.addEventListener('message',function(ev){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+
+
 /* PLUIE D'EMOJI — thème écriture / correction */
 function launchEmojis(){
   var box=document.getElementById('bilanParticles');
   box.innerHTML='';
-  var emojis=['✏️','\u{1f4dd}','✒️','\u{1f4da}','✨','✅','\u{1f3af}','\u{1f4c3}','✏️','\u{1f4dd}','✨','✅','\u{1f4da}','\u{1f3af}','✒️','✏️','\u{1f4dd}','✨','\u{1f4da}','✅','\u{1f3af}','✒️','✏️','\u{1f4dd}','✨'];
+  var emojis=['✏️','📝','✒️','📚','✨','✅','🎯','📃','✏️','📝','✨','✅','📚','🎯','✒️','✏️','📝','✨','📚','✅','🎯','✒️','✏️','📝','✨'];
   emojis.forEach(function(em,i){
     var e=document.createElement('div');
     e.textContent=em;
@@ -730,6 +738,14 @@ function launchEmojis(){
       +'animation:particleUp '+(1+Math.random()*1.1)+'s ease '+(i*0.07+Math.random()*0.2)+'s forwards;';
     box.appendChild(e);
   });
+}
+
+/* ══ RÉFÉRENTIEL TOGGLE ══ */
+function toggleRef(){
+  var body=document.getElementById('refBody');
+  var arrow=document.getElementById('refArrow');
+  body.classList.toggle('collapsed');
+  arrow.classList.toggle('open');
 }
 
 /* ══ RECOMMENCER ══ */
