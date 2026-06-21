@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Le Chasseur d'Erreurs — Je relève le défi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#fffdf7;--j:#8dc63f;--jd:#3d7a10;--jl:#f0faeb;--jm:#b5e08a;
+  --ok:#22c55e;--okbg:#f0fdf4;--okbd:#86efac;--ko:#ef4444;--kobg:#fef2f2;--kobd:#fca5a5;
+  --txt:#1a1a1a;--mut:#6a7a5a;--ln:#dce8d0;}
+body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;min-height:100vh;line-height:1.6;}
+/* HEADER */
+.hdr{background:var(--bg);border-bottom:2px solid #e5c417;padding:16px 20px 12px;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center;}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#fefdf8;border:2px solid #e5c417;border-radius:999px;padding:6px 16px;margin-bottom:6px;box-shadow:0 2px 10px rgba(229,196,23,.2);}
+.pdot{width:10px;height:10px;border-radius:50%;background:#89c843;box-shadow:0 0 7px rgba(137,200,67,.8);}
+.badge .lab{font-size:13px;font-weight:800;color:#795700;letter-spacing:.4px;}
+.wk{font-size:.88rem;color:var(--mut);margin-bottom:6px;}
+.hdr h1{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:900;color:var(--jd);line-height:1.15;margin-bottom:4px;}
+.hdr h1 .accent{color:var(--j);}
+.hsub{color:var(--mut);font-size:.92rem;}
+.snd{position:absolute;top:14px;right:14px;background:#fff;border:1px solid var(--jm);color:var(--jd);font-size:1rem;width:42px;height:42px;border-radius:10px;cursor:pointer;}
+/* WRAP */
+.wrap{max-width:920px;margin:0 auto;padding:14px 16px;}
+/* XP */
+.xpw{height:20px;background:#e8f6eb;border:1px solid var(--jm);border-radius:30px;overflow:hidden;position:relative;margin-bottom:14px;}
+.xpf{height:100%;background:linear-gradient(90deg,var(--jd),var(--j),#b5e08a);border-radius:30px;transition:width .7s cubic-bezier(.34,1.56,.64,1);width:0%;}
+.xpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;color:var(--jd);font-family:'JetBrains Mono',monospace;}
+/* REFERENTIEL */
+.refcard{background:var(--jl);border:1px solid var(--jm);border-radius:12px;padding:13px 16px;margin-bottom:14px;}
+.rlbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--jd);margin-bottom:8px;}
+.rrow{display:flex;gap:10px;margin-bottom:6px;font-size:.92rem;align-items:baseline;line-height:1.55;}
+.rrow:last-child{margin-bottom:0;}
+.rk{color:var(--jd);font-weight:900;min-width:64px;font-size:.98rem;}
+.rv{color:#2a4a1a;}
+/* TEXTE */
+.txcard{background:#fff;border:2px solid var(--jm);border-radius:14px;padding:18px 20px;margin-bottom:14px;box-shadow:0 4px 12px rgba(141,198,63,.06);}
+.txlbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:var(--jd);margin-bottom:10px;}
+.txtit{font-size:1.08rem;font-weight:900;color:var(--jd);margin-bottom:10px;font-style:italic;}
+.txtxt{font-size:clamp(1rem,2.6vw,1.1rem);line-height:2.3;color:var(--txt);}
+.hn{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--mut);vertical-align:super;margin-right:1px;}
+.hw{font-weight:800;padding:2px 6px;border-radius:4px;background:rgba(245,200,30,.18);color:#5a3a00;border:1px solid rgba(245,200,30,.5);}
+.hw.hl{background:rgba(245,200,30,.38);outline:2.5px solid #e5c417;border-radius:5px;color:#3d2000;}
+.hw.fixed{background:rgba(34,197,94,.15);border-color:var(--ok);color:#166534;}
+.hw.err{background:rgba(239,68,68,.12);border-color:var(--ko);color:#991b1b;}
+/* QUESTIONS */
+.qcard{background:#fff;border:2px solid var(--jm);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 4px 12px rgba(141,198,63,.06);display:none;animation:fd .4s;}
+.qcard.active{display:block;}
+@keyframes fd{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.qetape{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:#fff;background:var(--j);border-radius:6px;padding:4px 10px;display:inline-block;margin-bottom:10px;}
+.qtitre{font-size:1.12rem;font-weight:900;color:var(--jd);margin-bottom:8px;line-height:1.35;}
+.qctx{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:var(--jl);border:1px solid var(--jm);border-radius:8px;padding:8px 12px;margin-bottom:12px;color:var(--jd);font-style:italic;line-height:1.7;}
+.csn{font-size:.96rem;color:var(--mut);margin-bottom:14px;line-height:1.65;font-style:italic;}
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt{min-height:50px;background:#fffdf7;color:var(--txt);border:2px solid var(--ln);border-radius:11px;padding:13px 16px;font-size:clamp(.93rem,2.4vw,1.02rem);font-family:Arial,sans-serif;text-align:left;cursor:pointer;line-height:1.5;transition:transform .12s,background .18s,border-color .18s;}
+.opt:hover:not(:disabled){background:var(--jl);transform:translateY(-2px);border-color:var(--j);}
+.opt:disabled{cursor:default;}
+.opt.cok{background:var(--okbg);border-color:var(--ok);color:#166534;font-weight:700;}
+.opt.cko{background:var(--kobg);border-color:var(--ko);color:#991b1b;animation:sh .4s;}
+@keyframes sh{25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.fb{margin-top:12px;padding:13px 15px;background:#fff8f0;border-left:4px solid var(--ko);border-radius:10px;font-size:.96rem;color:#7a2018;line-height:1.8;animation:fd .4s;}
+.fbl{display:block;font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:var(--ko);font-family:'JetBrains Mono',monospace;margin-bottom:4px;}
+.retry{margin-top:10px;min-height:2.6rem;background:#fff;color:var(--jd);border:2px solid var(--j);border-radius:10px;padding:0 18px;font-size:.95rem;font-weight:800;cursor:pointer;font-family:Arial,sans-serif;}
+.retry:hover{background:var(--jl);}
+.okmsg{display:inline-flex;align-items:center;gap:6px;color:var(--ok);font-weight:800;font-size:.96rem;margin-top:10px;animation:pop .5s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.nxt{min-height:2.8rem;background:var(--j);color:#1a4010;border:none;border-radius:11px;padding:0 26px;font-weight:800;font-size:1rem;cursor:pointer;font-family:Arial,sans-serif;box-shadow:0 4px 0 var(--jd);margin-top:14px;display:none;align-items:center;gap:6px;}
+.nxt.show{display:inline-flex;animation:pop .4s;}
+.nxt.pulse{animation:np 1s ease-in-out 3;}
+@keyframes np{50%{box-shadow:0 4px 0 var(--jd),0 0 0 6px rgba(141,198,63,.28);transform:scale(1.03);}}
+/* Compteur formes */
+.fcount{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--mut);margin-bottom:8px;}
+/* BILAN */
+.bilan{display:none;text-align:center;background:#fff;border:2px solid var(--jm);border-radius:16px;padding:28px 20px;box-shadow:0 8px 24px rgba(141,198,63,.12);}
+.bilan.show{display:block;animation:fd .5s;}
+.btroph{font-size:3rem;margin-bottom:6px;}
+.bsc{font-size:clamp(2.6rem,9vw,4rem);font-weight:900;color:var(--jd);line-height:1;}
+.bsc.ko{color:#b98a10;}
+.bstars{display:flex;justify-content:center;gap:4px;font-size:1.8rem;margin:8px 0;}
+.star.on{color:var(--j);}.star.off{color:#d0e0c0;}
+.btit{font-size:1.05rem;font-weight:900;color:var(--jd);margin:6px 0;}
+.bmsg{font-size:.95rem;color:var(--mut);margin-bottom:14px;line-height:1.65;}
+.bdet{text-align:left;max-width:420px;margin:0 auto 16px;background:var(--jl);border:1px solid var(--jm);border-radius:10px;padding:12px 14px;}
+.bdet h3{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--jd);font-family:'JetBrains Mono',monospace;margin-bottom:8px;}
+.brow{font-size:.88rem;color:#2a4a1a;padding:4px 0;border-bottom:1px solid var(--jm);display:flex;gap:8px;}
+.brow:last-child{border:none;}
+.bgrand{display:inline-block;margin-top:14px;background:var(--jl);border:2px solid var(--j);color:var(--jd);border-radius:10px;padding:12px 20px;font-weight:800;animation:pop .6s;font-size:1rem;}
+.bretent{min-height:2.8rem;background:#fff;color:var(--jd);border:2px solid var(--j);border-radius:10px;padding:0 22px;font-weight:800;font-size:.97rem;cursor:pointer;font-family:Arial,sans-serif;margin-top:14px;}
+.bretent:hover{background:var(--jl);}
+.spark{position:fixed;pointer-events:none;z-index:9999;font-size:1.2rem;animation:sparkfly .85s ease-out forwards;}
+@keyframes sparkfly{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2);}}
+@media(max-width:600px){.opt{font-size:.91rem;}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <button class="snd" id="sndBtn">🔊</button>
+  <div class="badge"><span class="pdot"></span><span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span></div>
+  <div class="wk">Semaine 3 — Jour 3</div>
+  <h1>Je relève le défi<br><span class="accent">Le Chasseur d'Erreurs</span></h1>
+  <p class="hsub">Homophones a/à · et/est · son/sont · on/ont · Chasse aux erreurs</p>
+</div>
+
+<div class="wrap">
+  <div class="xpw"><div class="xpf" id="xpf"></div><div class="xpt" id="xpt">0 / 11</div></div>
+
+  <!-- MISSION -->
+  <div class="refcard" style="background:linear-gradient(135deg,#fff8e1,#fffdf7);border-color:#e5c417;margin-bottom:10px;">
+    <div class="rlbl" style="color:#795700;">🎯 Ta mission</div>
+    <p style="font-size:.96rem;color:#5a3a00;line-height:1.75;">Bravo, jeune détective des mots ! La chasse aux erreurs touche à sa fin… Ouvre l'œil une dernière fois et montre que plus aucune faute ne peut t'échapper !</p>
+  </div>
+
+  <!-- RÉFÉRENTIEL -->
+  <div class="refcard">
+    <div class="rlbl">📋 Référentiel — à consulter à tout moment</div>
+    <div class="rrow"><span class="rk">A / À</span><span class="rv"><strong>a</strong> = verbe avoir (test : remplacer par « avait ») — <strong>à</strong> = préposition (ne se remplace pas)</span></div>
+    <div class="rrow"><span class="rk">ET / EST</span><span class="rv"><strong>est</strong> = verbe être (test : remplacer par « était ») — <strong>et</strong> = conjonction (test : remplacer par « et puis »)</span></div>
+    <div class="rrow"><span class="rk">SON / SONT</span><span class="rv"><strong>sont</strong> = verbe être au pluriel (test : remplacer par « étaient ») — <strong>son</strong> = déterminant possessif (test : remplacer par « mon »)</span></div>
+    <div class="rrow"><span class="rk">ON / ONT</span><span class="rv"><strong>ont</strong> = verbe avoir au pluriel (test : remplacer par « avaient ») — <strong>on</strong> = pronom indéfini (test : remplacer par « il »)</span></div>
+  </div>
+
+  <!-- TEXTE -->
+  <div class="txcard">
+    <div class="txlbl">📜 Manuscrit à corriger — 20 formes surlignées</div>
+    <div class="txtit">« Une matinée à la campagne »</div>
+    <div class="txtxt" id="txte">
+Ce matin-là, Lucas <span class="hn">[1]</span><span class="hw" id="w1">est</span> sorti très tôt de chez lui. Le ciel <span class="hn">[2]</span><span class="hw" id="w2">et</span> d'un bleu profond <span class="hn">[3]</span><span class="hw" id="w3">est</span> les premiers rayons du soleil réchauffaient doucement la terre. Lucas <span class="hn">[4]</span><span class="hw" id="w4">à</span> traversé le petit bois qui bordait <span class="hn">[5]</span><span class="hw" id="w5">sont</span> village. Il <span class="hn">[6]</span><span class="hw" id="w6">à</span> remarqué que les arbres avaient déjà perdu une partie de leurs feuilles. <span class="hn">[7]</span><span class="hw" id="w7">Sont</span> ami Thomas l'attendait au bord du chemin. <span class="hn">[8]</span><span class="hw" id="w8">On</span> voyait au loin la silhouette d'un vieux moulin. Les deux garçons <span class="hn">[9]</span><span class="hw" id="w9">ont</span> marché longtemps en silence, écoutant le chant des oiseaux <span class="hn">[10]</span><span class="hw" id="w10">et</span> le murmure du ruisseau. Lucas <span class="hn">[11]</span><span class="hw" id="w11">a</span> dit <span class="hn">[12]</span><span class="hw" id="w12">à</span> Thomas qu'il voulait revenir <span class="hn">[13]</span><span class="hw" id="w13">à</span> cet endroit chaque semaine. Thomas <span class="hn">[14]</span><span class="hw" id="w14">à</span> souri <span class="hn">[15]</span><span class="hw" id="w15">est</span> a répondu qu'il était d'accord. Le soleil <span class="hn">[16]</span><span class="hw" id="w16">est</span> maintenant haut dans le ciel <span class="hn">[17]</span><span class="hw" id="w17">est</span> la journée s'annonçait belle. <span class="hn">[18]</span><span class="hw" id="w18">On</span> dit souvent que la nature <span class="hn">[19]</span><span class="hw" id="w19">et</span> une source de calme. Ils <span class="hn">[20]</span><span class="hw" id="w20">ont</span> passé là une belle matinée.
+    </div>
+  </div>
+
+  <!-- ÉTAPE 1 — Repérage -->
+  <div class="qcard active" id="q1">
+    <div class="qetape">Étape 1 — Lecture et repérage</div>
+    <div class="qtitre">Combien d'erreurs as-tu repérées dans ce texte ?</div>
+    <p class="csn">Lis attentivement le texte ci-dessus. Compte le nombre de formes qui ne correspondent pas à leur emploi grammatical correct.</p>
+    <div class="opts" id="optsQ1"></div>
+    <div id="fbQ1"></div>
+    <button class="nxt" id="nxtQ1" onclick="showQ(2)">Étape 2 — Corriger les erreurs ▸</button>
+  </div>
+
+  <!-- ÉTAPE 2 — Correction des 10 erreurs (q2 à q11) -->
+  <!-- q2: forme [2] -->
+  <div class="qcard" id="q2">
+    <div class="qetape">Étape 2 — Correction · Forme [2]</div>
+    <div class="qtitre">La forme [2] <strong>et</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« Le ciel [2]<em>et</em> d'un bleu profond… »</div>
+    <div class="opts" id="optsQ2"></div>
+    <div id="fbQ2"></div>
+    <button class="nxt" id="nxtQ2" onclick="showQ(3)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q3: forme [3] -->
+  <div class="qcard" id="q3">
+    <div class="qetape">Étape 2 — Correction · Forme [3]</div>
+    <div class="qtitre">La forme [3] <strong>est</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« …d'un bleu profond [3]<em>est</em> les premiers rayons du soleil réchauffaient doucement la terre. »</div>
+    <div class="opts" id="optsQ3"></div>
+    <div id="fbQ3"></div>
+    <button class="nxt" id="nxtQ3" onclick="showQ(4)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q4: forme [4] -->
+  <div class="qcard" id="q4">
+    <div class="qetape">Étape 2 — Correction · Forme [4]</div>
+    <div class="qtitre">La forme [4] <strong>à</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« Lucas [4]<em>à</em> traversé le petit bois… »</div>
+    <div class="opts" id="optsQ4"></div>
+    <div id="fbQ4"></div>
+    <button class="nxt" id="nxtQ4" onclick="showQ(5)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q5: forme [5] -->
+  <div class="qcard" id="q5">
+    <div class="qetape">Étape 2 — Correction · Forme [5]</div>
+    <div class="qtitre">La forme [5] <strong>sont</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« …le petit bois qui bordait [5]<em>sont</em> village. »</div>
+    <div class="opts" id="optsQ5"></div>
+    <div id="fbQ5"></div>
+    <button class="nxt" id="nxtQ5" onclick="showQ(6)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q6: forme [6] -->
+  <div class="qcard" id="q6">
+    <div class="qetape">Étape 2 — Correction · Forme [6]</div>
+    <div class="qtitre">La forme [6] <strong>à</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« Il [6]<em>à</em> remarqué que les arbres… »</div>
+    <div class="opts" id="optsQ6"></div>
+    <div id="fbQ6"></div>
+    <button class="nxt" id="nxtQ6" onclick="showQ(7)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q7: forme [7] -->
+  <div class="qcard" id="q7">
+    <div class="qetape">Étape 2 — Correction · Forme [7]</div>
+    <div class="qtitre">La forme [7] <strong>Sont</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« [7]<em>Sont</em> ami Thomas l'attendait au bord du chemin. »</div>
+    <div class="opts" id="optsQ7"></div>
+    <div id="fbQ7"></div>
+    <button class="nxt" id="nxtQ7" onclick="showQ(8)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q8: forme [14] -->
+  <div class="qcard" id="q8">
+    <div class="qetape">Étape 2 — Correction · Forme [14]</div>
+    <div class="qtitre">La forme [14] <strong>à</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« Thomas [14]<em>à</em> souri est a répondu qu'il était d'accord. »</div>
+    <div class="opts" id="optsQ8"></div>
+    <div id="fbQ8"></div>
+    <button class="nxt" id="nxtQ8" onclick="showQ(9)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q9: forme [15] -->
+  <div class="qcard" id="q9">
+    <div class="qetape">Étape 2 — Correction · Forme [15]</div>
+    <div class="qtitre">La forme [15] <strong>est</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« Thomas à souri [15]<em>est</em> a répondu qu'il était d'accord. »</div>
+    <div class="opts" id="optsQ9"></div>
+    <div id="fbQ9"></div>
+    <button class="nxt" id="nxtQ9" onclick="showQ(10)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q10: forme [17] -->
+  <div class="qcard" id="q10">
+    <div class="qetape">Étape 2 — Correction · Forme [17]</div>
+    <div class="qtitre">La forme [17] <strong>est</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« Le soleil est maintenant haut dans le ciel [17]<em>est</em> la journée s'annonçait belle. »</div>
+    <div class="opts" id="optsQ10"></div>
+    <div id="fbQ10"></div>
+    <button class="nxt" id="nxtQ10" onclick="showQ(11)">Forme suivante ▸</button>
+  </div>
+
+  <!-- q11: forme [19] -->
+  <div class="qcard" id="q11">
+    <div class="qetape">Étape 2 — Correction · Forme [19]</div>
+    <div class="qtitre">La forme [19] <strong>et</strong> est-elle correcte dans cette phrase ?</div>
+    <div class="qctx">« On dit souvent que la nature [19]<em>et</em> une source de calme. »</div>
+    <div class="opts" id="optsQ11"></div>
+    <div id="fbQ11"></div>
+    <button class="nxt" id="nxtQ11" onclick="showBilan()">Voir le bilan ▸</button>
+  </div>
+
+  <!-- BILAN -->
+  <div class="bilan" id="bilan"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let sc=0, son=true, actx=null;
+// qOk[0]=étape1, qOk[1..10]=corrections formes [2][3][4][5][6][7][14][15][17][19]
+const qOk=new Array(11).fill(false);
+
+/* XP */
+function updXP(n){const p=Math.round(n/11*100);$('xpf').style.width=p+'%';$('xpt').textContent=n+' / 11';}
+
+/* Données questions */
+// Q1 — repérage
+const QS={
+  1:{opts:["Six erreurs","Dix erreurs","Douze erreurs"],ok:1,
+     fb:"Il y a exactement dix erreurs dans ce texte. Elles portent sur les quatre paires d'homophones. Repère l'auxiliaire ou la nature grammaticale de chaque forme pour les identifier."},
+
+  2:{opts:["Oui, elle est correcte.","Non, il faut écrire est.","Non, il faut écrire a."],ok:1,
+     fb:"Test : « Le ciel était d'un bleu profond. » ✓\n→ Le test avait fonctionne : c'est le verbe être → est.",
+     fix:"est",wid:"w2"},
+
+  3:{opts:["Oui, elle est correcte.","Non, il faut écrire et.","Non, il faut écrire a."],ok:1,
+     fb:"Test : « était les premiers rayons du soleil réchauffaient doucement la terre. » ✓\n→ Le test ne fonctionne pas  : c'est la conjonction de coordination → et.",
+     fix:"et",wid:"w3"},
+
+  4:{opts:["Oui, elle est correcte.","Non, il faut écrire a.","Non, il faut écrire et."],ok:1,
+     fb:"Test : « Lucas avait traversé le petit bois. » ✓\n→ Le test avait fonctionne : c'est le verbe avoir → a.",
+     fix:"a",wid:"w4"},
+
+  5:{opts:["Oui, elle est correcte.","Non, il faut écrire son.","Non, il faut écrire on."],ok:1,
+     fb:"Test : « mon village. » ✓\n→ Le test mon fonctionne : c'est le déterminant possessif → son.",
+     fix:"son",wid:"w5"},
+
+  6:{opts:["Oui, elle est correcte.","Non, il faut écrire a.","Non, il faut écrire et."],ok:1,
+     fb:"Test : « Il avait remarqué. » ✓\n→ Le test avait fonctionne : c'est le verbe avoir → a.",
+     fix:"a",wid:"w6"},
+
+  7:{opts:["Oui, elle est correcte.","Non, il faut écrire Son.","Non, il faut écrire On."],ok:1,
+     fb:"Test : « Mon ami Thomas. » ✓\n→ Le test mon fonctionne : c'est le déterminant possessif → Son.",
+     fix:"Son",wid:"w7"},
+
+  8:{opts:["Oui, elle est correcte.","Non, il faut écrire a.","Non, il faut écrire est."],ok:1,
+     fb:"Le sujet est Thomas : singulier. Test : « Thomas avait souri. » ✓\n→ verbe avoir, sing. → a.",
+     fix:"a",wid:"w14"},
+
+  9:{opts:["Oui, elle est correcte.","Non, il faut écrire et.","Non, il faut écrire a."],ok:1,
+     fb:"Deux verbes sont reliés ici. Test : « et puis a répondu. » ✓\n→ conjonction → et.",
+     fix:"et",wid:"w15"},
+
+  10:{opts:["Oui, elle est correcte.","Non, il faut écrire et.","Non, il faut écrire a."],ok:1,
+      fb:"Deux propositions sont reliées. Test : « et puis la journée s'annonçait belle. » ✓\n→ conjonction → et.",
+      fix:"et",wid:"w17"},
+
+  11:{opts:["Oui, elle est correcte.","Non, il faut écrire est.","Non, il faut écrire a."],ok:1,
+      fb:"Test : « la nature était une source de calme. » ✓\n→ verbe être à l'imparfait → est.",
+      fix:"est",wid:"w19"}
+};
+
+/* Mélange (bonne réponse jamais en position 0 systématiquement) */
+const perms={};
+function mkPerm(qn){
+  const q=QS[qn];if(!q||!q.opts)return;
+  const n=q.opts.length,ok=q.ok;
+  const oth=[];for(let i=0;i<n;i++)if(i!==ok)oth.push(i);
+  for(let i=oth.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[oth[i],oth[j]]=[oth[j],oth[i]];}
+  const pos=Math.floor(Math.random()*n);
+  const p=[];let di=0;for(let i=0;i<n;i++)p.push(i===pos?ok:oth[di++]);
+  perms[qn]=p;
+}
+for(let i=1;i<=11;i++)mkPerm(i);
+
+function buildOpts(qn){
+  const q=QS[qn],box=$('optsQ'+qn);
+  if(!q||!box)return;
+  box.innerHTML='';
+  const p=perms[qn]||q.opts.map((_,i)=>i);
+  p.forEach(oi=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=q.opts[oi];
+    b.addEventListener('click',()=>ans(qn,oi,b));box.appendChild(b);
+  });
+}
+
+function ans(qn,oi,btn){
+  if(btn.checked)return;btn.checked=true;
+  const q=QS[qn];
+  document.querySelectorAll('#optsQ'+qn+' .opt').forEach(b=>{b.disabled=true;b.checked=true;});
+  if(oi===q.ok){
+    btn.classList.add('cok');
+    $('fbQ'+qn).innerHTML='<div class="okmsg">✔ Réponse validée !</div>';
+    if(!qOk[qn-1]){qOk[qn-1]=true;sc++;updXP(sc);}
+    okS();sparkBurst();
+    // Corriger le mot dans le texte
+    if(q.fix&&q.wid){const w=$(q.wid);if(w){w.classList.remove('hl','err');w.classList.add('fixed');w.textContent=q.fix;}}
+    const nb=$('nxtQ'+qn);if(nb){nb.classList.add('show');setTimeout(()=>nb.classList.add('pulse'),300);}
+  } else {
+    btn.classList.add('cko');
+    $('fbQ'+qn).innerHTML=`<div class="fb"><span class="fbl">À revoir</span><span style="white-space:pre-line;">${q.fb}</span><br><button class="retry" onclick="retryQ(${qn})">Réessayer</button></div>`;
+    dnyS();
+  }
+}
+
+function retryQ(qn){
+  $('fbQ'+qn).innerHTML='';
+  document.querySelectorAll('#optsQ'+qn+' .opt').forEach(b=>{b.disabled=false;b.checked=false;b.classList.remove('cok','cko');});
+}
+
+function showQ(qn){
+  document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('active'));
+  const card=$('q'+qn);if(!card)return;
+  card.classList.add('active');
+  buildOpts(qn);
+  // Surligner la forme active dans le texte
+  highlightForm(qn);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Correspondance qn → id de la forme dans le texte
+const QN_TO_W={2:'w2',3:'w3',4:'w4',5:'w5',6:'w6',7:'w7',8:'w14',9:'w15',10:'w17',11:'w19'};
+
+function highlightForm(qn){
+  // Retirer tous les surlignages actifs
+  for(let i=1;i<=20;i++){const w=$('w'+i);if(w)w.classList.remove('hl');}
+  const wid=QN_TO_W[qn];
+  if(wid){const w=$(wid);if(w&&!w.classList.contains('fixed'))w.classList.add('hl');}
+}
+
+/* BILAN */
+function showBilan(){
+  victS();
+  const r=$('bilan');
+  let t,ti,m;
+  if(sc>=10){t='🔎';ti='Chasseur d\'Erreurs certifié !';m='Tu as repéré les dix erreurs.';}
+  else if(sc>=9){t='🥇';ti='Excellent travail !';m='Presque parfait.';}
+  else if(sc>=7){t='🥈';ti='Bon travail.';m='Relis les formes signalées.';}
+  else{t='📖';ti='Reprends le parcours';m='Reprends le parcours et retente.';}
+  let stars='';for(let i=0;i<10;i++)stars+=`<span class="star ${i<sc?'on':'off'}">★</span>`;
+
+  const labels={2:'[2] et → est',3:'[3] est → et',4:'[4] à → a',5:'[5] sont → son',
+    6:'[6] à → a',7:'[7] Sont → Son',8:'[14] à → a',9:'[15] est → et',
+    10:'[17] est → et',11:'[19] et → est'};
+  let rows='';
+  for(let i=1;i<=11;i++){
+    const lab=i===1?'Étape 1 — Repérage : dix erreurs':labels[i]||'';
+    rows+=`<div class="brow">${qOk[i-1]?'✔ ':'✗ '}${lab}</div>`;
+  }
+
+  r.innerHTML=`<div class="btroph">${t}</div>
+<div class="bsc${sc<7?' ko':''}">${sc} / 11</div>
+<div class="bstars">${stars}</div>
+<div class="btit">${ti}</div>
+<div class="bmsg">${m}</div>
+<div class="bdet"><h3>Détail des réponses</h3>${rows}</div>
+${sc>=10?'<div class="bgrand">🔎 Chasseur d\'Erreurs certifié !</div>':''}
+<br><button class="bretent" onclick="retenter()">🔄 Retenter l'épreuve</button>`;
+  r.classList.add('show');
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function retenter(){
+  sc=0;qOk.fill(false);updXP(0);
+  $('bilan').classList.remove('show');$('bilan').innerHTML='';
+  // Restaurer le texte
+  const restore={w2:'et',w3:'est',w4:'à',w5:'sont',w6:'à',w7:'Sont',w14:'à',w15:'est',w17:'est',w19:'et'};
+  Object.entries(restore).forEach(([id,txt])=>{
+    const w=$(id);if(w){w.classList.remove('fixed','hl','err');w.textContent=txt;}
+  });
+  // Réinitialiser les permutations
+  for(let i=1;i<=11;i++)mkPerm(i);
+  document.querySelectorAll('.qcard').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.nxt').forEach(n=>n.classList.remove('show','pulse'));
+  document.querySelectorAll('[id^="optsQ"]').forEach(b=>b.innerHTML='');
+  document.querySelectorAll('[id^="fbQ"]').forEach(f=>f.innerHTML='');
+  $('q1').classList.add('active');
+  buildOpts(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* Sons */
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol,dl){if(!actx||!son)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();o.type=tp||'sine';
+  o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+0.03);}
+function okS(){initA();beep(523,784,.15,'sine',.12,0);beep(784,1046,.13,'sine',.1,.09);}
+function dnyS(){initA();beep(240,140,.2,'sine',.11,0);}
+function victS(){initA();[523,659,784,1046,1318].forEach((f,k)=>beep(f,f,.25,'sine',.12,k*.09));}
+
+/* Particules */
+function sparkBurst(){
+  const emojis=['✨','⭐','🌟','💫'];
+  for(let i=0;i<6;i++){
+    const el=document.createElement('div');el.className='spark';
+    el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left=(20+Math.random()*60)+'vw';el.style.top=(20+Math.random()*50)+'vh';
+    el.style.setProperty('--dx',(Math.random()*120-60)+'px');
+    el.style.setProperty('--dy',(Math.random()*-120-40)+'px');
+    document.body.appendChild(el);setTimeout(()=>el.remove(),900);
+  }
+}
+
+$('sndBtn').addEventListener('click',()=>{son=!son;initA();if(actx&&actx.state==='suspended')actx.resume();$('sndBtn').textContent=son?'🔊':'🔇';});
+document.addEventListener('pointerdown',initA,{once:true});
+
+/* Init */
+buildOpts(1);updXP(0);
+</script>
+</body>
+</html>
