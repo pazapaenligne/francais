@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J2 – 5e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#b94040;--day-dark:#7a1f1f;
+      --day-light:#f7eded;--day-border:#e2a3a3;
+      --day-glow:rgba(185,64,64,.22);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f5a623;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* DASHBOARD */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a0a0;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#9a7a7a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1.05rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#9a7a7a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);
+      border:1.5px solid var(--dark3);border-radius:8px;padding:.28rem .7rem;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;transition:all .4s;color:var(--muted);}
+
+    /* PROGRESSION */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.7rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:9px;padding:.7rem .85rem;}
+    .ref-cell.full{grid-column:1/-1;}
+    .ref-cell-titre{font-size:.8rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.35rem;}
+    .ref-cell-body{font-size:.82rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+    .ref-regle{background:var(--dark);border:1.5px solid var(--dark3);border-radius:9px;
+      padding:.7rem .9rem;margin-top:.3rem;}
+    .ref-regle-titre{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-border);margin-bottom:.35rem;}
+    .ref-regle-body{font-size:.82rem;color:#c8b0b0;line-height:1.65;}
+    .ref-regle-body em{font-style:normal;color:var(--day-border);font-weight:700;}
+
+    /* BLOCS PARTIES */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+    .consigne{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.65rem .9rem;margin-bottom:.8rem;
+      font-size:.92rem;color:var(--day-dark);font-weight:700;line-height:1.5;}
+
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),#f5a623);}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.05rem;
+      color:var(--text);line-height:1.8;font-style:italic;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.6rem;line-height:1.5;}
+    .q-sous-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;
+      margin:.7rem 0 .4rem;border-top:1px solid var(--border);padding-top:.6rem;}
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:1.05rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+    .fb{font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      padding:.55rem .85rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.65;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* RÉSULTATS PARTIE */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;
+      max-width:720px;width:100%;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:#c8a0a0;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* BOUTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover{background:var(--day-color);color:#fff;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* RÉSULTATS GLOBAL */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a0a0;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#9a7a7a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8a0a0;margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both,flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both,flashKo .5s ease both;}
+
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr;}
+      .vf-row{gap:.4rem;}
+      .btn-dark,.btn-primary{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 3 &ndash; Jour 2</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Types et formes de phrases</span></h1>
+</header>
+
+<!-- DASHBOARD -->
+<div class="dash">
+  <div class="dash-titre">&#9881; Tableau de bord &mdash; 10 questions</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Partie 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/10</div>
+      <div class="dash-score-label">Valid&eacute;es</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Partie&nbsp;1</span><span id="nb-s-p1" style="font-weight:900;">0/3</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Partie&nbsp;2</span><span id="nb-s-p2" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p3"><span style="font-weight:700;">Partie&nbsp;3</span><span id="nb-s-p3" style="font-weight:900;">0/6</span></div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 10 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel visible en permanence</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">D&Eacute;CLARATIF</div>
+      <div class="ref-cell-body">Donne une information, constate, affirme ou nie.<br>Se termine par un point.<br><em>Ex.</em> : &laquo;&nbsp;Le vent souffle fort.&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">INTERROGATIF</div>
+      <div class="ref-cell-body">Pose une question.<br>Se termine par&nbsp;?<br><em>Ex.</em> : &laquo;&nbsp;Fait-il beau&nbsp;?&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell full">
+      <div class="ref-cell-titre">INJONCTIF</div>
+      <div class="ref-cell-body">Exprime un ordre, un conseil, une interdiction.<br>Verbe &agrave; l&rsquo;imp&eacute;ratif ou &agrave; l&rsquo;infinitif.<br>Se termine par . ou&nbsp;!<br><em>Ex.</em> : &laquo;&nbsp;Lis ce texte.&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Affirmative / N&eacute;gative</div>
+      <div class="ref-cell-body">N&eacute;gative &rarr; ne&hellip; pas, ne&hellip; plus, ne&hellip; jamais, ne&hellip; rien&hellip;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Exclamative</div>
+      <div class="ref-cell-body">Exclamative &rarr; point d&rsquo;exclamation + &eacute;motion&nbsp;; souvent un mot exclamatif (quel, que, comme&hellip;).<br><em>Ex.</em> : &laquo;&nbsp;Quel beau paysage&nbsp;!&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Active / Passive</div>
+      <div class="ref-cell-body">Active &rarr; le sujet fait l&rsquo;action.<br>Passive &rarr; le sujet subit l&rsquo;action (être + p.p.).</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Personnelle / Impersonnelle</div>
+      <div class="ref-cell-body">Impersonnelle &rarr; verbe pr&eacute;c&eacute;d&eacute; du pronom &laquo;&nbsp;il&nbsp;&raquo; sans r&eacute;f&eacute;rent.<br><em>Ex.</em> : &laquo;&nbsp;Il pleut.&nbsp;&raquo; &laquo;&nbsp;Il faut&hellip;&nbsp;&raquo;</div>
+    </div>
+  </div>
+  <div class="ref-regle">
+    <div class="ref-regle-titre">R&egrave;gle fondamentale</div>
+    <div class="ref-regle-body">Type et forme sont ind&eacute;pendants. Une phrase combine <em>toujours</em> un type ET une ou plusieurs formes.<br><em>Ex.</em> : &laquo;&nbsp;Ne pars pas&nbsp;!&nbsp;&raquo; &rarr; Type&nbsp;: injonctif. &rarr; Formes&nbsp;: n&eacute;gative + exclamative.</div>
+  </div>
+</div>
+
+<!-- PARTIE 1 -->
+<div class="bloc-partie" id="bloc-p1">
+  <div class="partie-header">
+    <div class="part-icon">&#128214;</div>
+    <div>
+      <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+      <div class="part-sous">3 affirmations &mdash; Questions 1 &agrave; 3</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/3</div>
+  </div>
+  <div id="cards-p1"></div>
+  <div class="part-result" id="res-p1">
+    <div class="part-score" id="score-p1"></div>
+    <div class="part-msg" id="msg-p1"></div>
+    <div id="btn-p1"></div>
+  </div>
+</div>
+
+<!-- PARTIE 2 -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128279;</div>
+    <div>
+      <div class="part-titre">Partie 2 &mdash; Identifier le type</div>
+      <div class="part-sous">4 phrases &mdash; Questions 4 &agrave; 7</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/4</div>
+  </div>
+  <div class="consigne">Indique le type de chaque phrase&nbsp;: d&eacute;claratif, interrogatif ou injonctif.</div>
+  <div id="cards-p2"></div>
+  <div class="part-result" id="res-p2">
+    <div class="part-score" id="score-p2"></div>
+    <div class="part-msg" id="msg-p2"></div>
+    <div id="btn-p2"></div>
+  </div>
+</div>
+
+<!-- PARTIE 3 -->
+<div class="bloc-partie" id="bloc-p3" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#9881;</div>
+    <div>
+      <div class="part-titre">Partie 3 &mdash; Identifier type et forme</div>
+      <div class="part-sous">3 phrases &mdash; Questions 8 &agrave; 10</div>
+    </div>
+    <div class="part-badge" id="badge-p3">0/6</div>
+  </div>
+  <div class="consigne">Pour chaque phrase, indique le TYPE et la FORME (ou les formes) qui conviennent.</div>
+  <div id="cards-p3"></div>
+  <div class="part-result" id="res-p3">
+    <div class="part-score" id="score-p3"></div>
+    <div class="part-msg" id="msg-p3"></div>
+    <div id="btn-p3"></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS GLOBAL -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">Bilan de s&eacute;ance</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/10</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:0 auto;display:flex;">
+      &#8635; Recommencer
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DONNÉES — PARTIE 1 Vrai/Faux
+═══════════════════════════════════════ */
+var P1=[
+  {id:'q1',qNum:1,
+   phrase:'La phrase exclamative est un type de phrase, au même titre que la phrase déclarative ou interrogative.',
+   rep:false,
+   fb:'La phrase exclamative n\'est plus un TYPE de phrase : c\'est une FORME de phrase. Les trois types de phrases sont : déclaratif, interrogatif, injonctif. La forme exclamative s\'ajoute au type : une phrase injonctive peut être exclamative (\'Rangez vos affaires !\'), une phrase déclarative aussi (\'Comme il fait beau aujourd\'hui !\').'},
+  {id:'q2',qNum:2,
+   phrase:'Une même phrase peut avoir un type ET plusieurs formes en même temps. Par exemple, une phrase peut être à la fois injonctive, négative et exclamative.',
+   rep:true,
+   fb:'Type et forme sont deux dimensions différentes et indépendantes. Une phrase combine toujours un type (déclaratif / interrogatif / injonctif) et peut cumuler plusieurs formes (affirmative ou négative ; neutre ou exclamative ; active ou passive ; personnelle ou impersonnelle). Exemple : \'Ne pars jamais !\' → Type : injonctif. → Formes : négative + exclamative.'},
+  {id:'q3',qNum:3,
+   phrase:'La phrase passive se reconnaît à la présence du verbe \'être\' suivi d\'un participe passé. Le sujet subit l\'action au lieu de la faire.',
+   rep:true,
+   fb:'La forme passive se construit avec être + participe passé. Active : \'Le professeur corrige les copies.\' (sujet = professeur = fait l\'action) Passive : \'Les copies sont corrigées par le professeur.\' (sujet = copies = subit l\'action) À noter : le complément d\'agent (\'par le professeur\') peut être absent.'}
+];
+
+/* ═══════════════════════════════════════
+   DONNÉES — PARTIE 2 QCM type
+═══════════════════════════════════════ */
+var P2=[
+  {id:'q4',qNum:4,
+   phrase:'Les élèves ont étudié la poésie de Rimbaud.',
+   texte:'Quel est le type de cette phrase ?',
+   opts:[{t:'Interrogatif.',ok:false},{t:'Injonctif.',ok:false},{t:'Déclaratif.',ok:true}],
+   fb:'La phrase donne une information : elle constate un fait. Elle se termine par un point simple. → Type déclaratif. Il n\'y a pas de question (≠ interrogatif) ni d\'ordre ou de conseil (≠ injonctif).'},
+  {id:'q5',qNum:5,
+   phrase:'Pourquoi n\'as-tu pas rendu ton travail ?',
+   texte:'Quel est le type de cette phrase ?',
+   opts:[{t:'Déclaratif.',ok:false},{t:'Interrogatif.',ok:true},{t:'Injonctif.',ok:false}],
+   fb:'La phrase pose une question (mot interrogatif \'pourquoi\' + inversion du sujet) et se termine par un point d\'interrogation. → Type interrogatif. La négation (\'n\'as pas\') indique que c\'est aussi une phrase de forme négative.'},
+  {id:'q6',qNum:6,
+   phrase:'Ne parlez pas tous en même temps !',
+   texte:'Quel est le type de cette phrase ?',
+   opts:[{t:'Déclaratif.',ok:false},{t:'Interrogatif.',ok:false},{t:'Injonctif.',ok:true}],
+   fb:'Le verbe \'parlez\' est à l\'impératif présent (2e pers. plur.). La phrase exprime une interdiction. → Type injonctif. Elle est aussi de forme négative (\'ne… pas\') et exclamative (point d\'exclamation + émotion). Un même type peut se combiner avec plusieurs formes.'},
+  {id:'q7',qNum:7,
+   phrase:'Comme ce poème est émouvant !',
+   texte:'Quel est le type de cette phrase ?',
+   opts:[{t:'Déclaratif.',ok:true},{t:'Injonctif.',ok:false},{t:'Interrogatif.',ok:false}],
+   fb:'Attention au piège : le point d\'exclamation et le mot exclamatif \'comme\' indiquent que c\'est une phrase de forme EXCLAMATIVE, mais cela ne change pas le TYPE. La phrase donne une information (exprime ce que ressent le locuteur) : → Type déclaratif. → Forme : exclamative. L\'exclamation est une FORME, pas un type.'}
+];
+
+/* ═══════════════════════════════════════
+   DONNÉES — PARTIE 3 double QCM type+forme
+   Chaque question = 2 sous-questions
+   score partiel : 1 pt type + 1 pt forme
+═══════════════════════════════════════ */
+var P3=[
+  {id:'q8',qNum:8,
+   phrase:'Ce roman n\'a pas été lu par tous les élèves.',
+   typeOpts:[{t:'Interrogatif.',ok:false},{t:'Injonctif.',ok:false},{t:'Déclaratif.',ok:true}],
+   formeOpts:[{t:'Affirmative et active.',ok:false},{t:'Négative et passive.',ok:true},{t:'Négative et impersonnelle.',ok:false}],
+   fbType:'La phrase donne une information → type déclaratif.',
+   fbForme:'\'N\'a pas été lu\' : \'ne… pas\' → forme négative. \'A été lu par\' : être + participe passé + complément d\'agent → forme passive. Le sujet \'Ce roman\' subit l\'action.'},
+  {id:'q9',qNum:9,
+   phrase:'Il faut réviser régulièrement.',
+   typeOpts:[{t:'Déclaratif.',ok:false},{t:'Injonctif.',ok:true},{t:'Interrogatif.',ok:false}],
+   formeOpts:[{t:'Affirmative et personnelle.',ok:false},{t:'Affirmative et passive.',ok:false},{t:'Affirmative et impersonnelle.',ok:true}],
+   fbType:'Attention au piège : le verbe n\'est pas à l\'impératif, mais l\'expression \'il faut\' marque une obligation ou une nécessité. La phrase donne donc une consigne ou un conseil. → type injonctif.',
+   fbForme:'Pas de négation → affirmative. \'Il\' ne renvoie à aucun être précis : c\'est le pronom impersonnel. → forme impersonnelle. Exemples de verbes impersonnels : il faut, il pleut, il neige, il est nécessaire de…'},
+  {id:'q10',qNum:10,
+   phrase:'Est-ce qu\'il ne fait pas trop froid dehors ?',
+   typeOpts:[{t:'Injonctif.',ok:false},{t:'Déclaratif.',ok:false},{t:'Interrogatif.',ok:true}],
+   formeOpts:[{t:'Affirmative et personnelle.',ok:false},{t:'Négative et personnelle.',ok:false},{t:'Négative et impersonnelle.',ok:true}],
+   fbType:'La phrase pose une question avec \'est-ce que\' et se termine par un point d\'interrogation. → type interrogatif.',
+   fbForme:'\'Ne fait pas\' → négative. \'Il\' renvoie à un référent implicite (le temps, la météo) : c\'est ici un \'il\' impersonnel. → forme impersonnelle.'}
+];
+
+/* ═══════════════════════════════════════
+   ÉTAT GLOBAL
+═══════════════════════════════════════ */
+var scoreOk=0;
+var p1Ok=0, p1Res={};
+var p2Ok=0, p2Res={};
+var p3Ok=0, p3TypeRes={}, p3FormeRes={};
+var TOTAL_MAX=10; /* 3+4+3 types + 3 formes = 10 pts */
+var L=['A','B','C'];
+
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+/* ─── Sons ─── */
+function jouerOk(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(520,ctx.currentTime);
+    o.frequency.setValueAtTime(660,ctx.currentTime+.08);
+    o.frequency.setValueAtTime(800,ctx.currentTime+.16);
+    g.gain.setValueAtTime(.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}
+}
+function jouerErreur(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(280,ctx.currentTime);
+    o.frequency.setValueAtTime(220,ctx.currentTime+.12);
+    g.gain.setValueAtTime(.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}
+}
+
+/* ─── Animation carte ─── */
+function animerCard(id,ok){
+  var c=document.getElementById('c-'+id);if(!c)return;
+  c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;
+  c.classList.add(ok?'anim-ok':'anim-ko');
+}
+
+/* ─── Progression ─── */
+function majProg(){
+  var done=Object.keys(p1Res).length+Object.keys(p2Res).length
+          +Object.keys(p3TypeRes).length+Object.keys(p3FormeRes).length;
+  var pct=Math.round(done/TOTAL_MAX*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=scoreOk+' / '+TOTAL_MAX+' questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+}
+
+function majPartBadge(id,ok,total){
+  var sc=document.getElementById('nb-s-'+id);
+  var b=document.getElementById('nb-'+id);
+  if(!sc||!b)return;
+  sc.textContent=ok+'/'+total;
+  if(ok===total){b.style.background='rgba(34,197,94,.2)';b.style.borderColor='var(--green)';sc.style.color='#4ade80';}
+  else if(ok>0){b.style.background='rgba(185,64,64,.15)';b.style.borderColor='var(--day-color)';sc.style.color='var(--day-border)';}
+}
+
+/* ═══════════════════════════════════════
+   PARTIE 1 — Vrai/Faux
+═══════════════════════════════════════ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Res={};p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum+' \u2014 Vrai ou faux\u00a0?';card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var row=mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button');btn.className='vf-btn';
+      var isV=txt==='Vrai';
+      btn.innerHTML=(isV?'&#10003;':'&#10007;')+' '+txt;
+      btn.dataset.val=isV?'true':'false';
+      btn.addEventListener('click',function(){selVF1(q,btn,row);});
+      row.appendChild(btn);
+    });
+    card.appendChild(row);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF1(q,btn,row){
+  if(p1Res[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Res[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p1Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/3';
+  majPartBadge('p1',p1Ok,3);
+  majProg();
+  document.getElementById('dash-statut').textContent=
+    Object.keys(p1Res).length<3?'Partie 1 \u2014 question '+(Object.keys(p1Res).length+1)+'/3\u2026':'Partie 1 termin\u00e9e';
+  if(Object.keys(p1Res).length===P1.length)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 3';
+  document.getElementById('msg-p1').textContent=p1Ok===3?'\u2713 Partie 1 r\u00e9ussie \u2014 Partie 2 d\u00e9bloqu\u00e9e.':
+    p1Ok>=2?'Bien \u2014 Partie 2 d\u00e9bloqu\u00e9e.':'Continue \u2014 Partie 2 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Partie 2 \u2192</button>';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  document.getElementById('dash-statut').textContent='Partie 2 en cours\u2026';
+  buildP2();
+}
+
+/* ═══════════════════════════════════════
+   PARTIE 2 — QCM type
+═══════════════════════════════════════ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Res={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    var opts=mkEl('div','opts');
+    q.opts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selQCM2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selQCM2(q,btn,optsEl){
+  if(p2Res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p2Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p2Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/4';
+  majPartBadge('p2',p2Ok,4);
+  majProg();
+  var done=Object.keys(p2Res).length;
+  document.getElementById('dash-statut').textContent=
+    done<4?'Partie 2 \u2014 question '+(done+1)+'/4\u2026':'Partie 2 termin\u00e9e';
+  if(done===P2.length)showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 4';
+  document.getElementById('msg-p2').textContent=p2Ok===4?'\u2713 Partie 2 parfaite \u2014 Partie 3 d\u00e9bloqu\u00e9e.':
+    p2Ok>=3?'Bien \u2014 Partie 3 d\u00e9bloqu\u00e9e.':'Continue \u2014 Partie 3 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="debP3()">Partie 3 \u2192</button>';
+}
+
+function debP3(){
+  document.getElementById('bloc-p3').style.display='';
+  document.getElementById('dash-statut').textContent='Partie 3 en cours\u2026';
+  buildP3();
+}
+
+/* ═══════════════════════════════════════
+   PARTIE 3 — double QCM type + forme
+   Chaque sous-question = 1 point séparé
+═══════════════════════════════════════ */
+function buildP3(){
+  var wrap=document.getElementById('cards-p3');wrap.innerHTML='';
+  p3TypeRes={};p3FormeRes={};p3Ok=0;
+
+  P3.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+
+    /* Sous-question TYPE */
+    var lblT=mkEl('div','q-sous-label');lblT.textContent='Type de la phrase';card.appendChild(lblT);
+    var optsT=mkEl('div','opts');optsT.id='opts-t-'+q.id;
+    q.typeOpts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selType3(q,btn,optsT);});
+      optsT.appendChild(btn);
+    });
+    card.appendChild(optsT);
+    var fbT=mkEl('div','fb');fbT.id='fbt-'+q.id;card.appendChild(fbT);
+
+    /* Sous-question FORME */
+    var lblF=mkEl('div','q-sous-label');lblF.textContent='Forme(s) de la phrase';card.appendChild(lblF);
+    var optsF=mkEl('div','opts');optsF.id='opts-f-'+q.id;
+    q.formeOpts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selForme3(q,btn,optsF);});
+      optsF.appendChild(btn);
+    });
+    card.appendChild(optsF);
+    var fbF=mkEl('div','fb');fbF.id='fbf-'+q.id;card.appendChild(fbF);
+
+    wrap.appendChild(card);
+  });
+}
+
+function selType3(q,btn,optsEl){
+  if(p3TypeRes[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p3TypeRes[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fbt-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fbType;}
+  if(ok){scoreOk++;p3Ok++;jouerOk();}else jouerErreur();
+  majPartBadge('p3',p3Ok,6);
+  document.getElementById('badge-p3').textContent=p3Ok+'/6';
+  majProg();
+  checkDoneP3();
+}
+
+function selForme3(q,btn,optsEl){
+  if(p3FormeRes[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p3FormeRes[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fbf-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fbForme;}
+  if(ok){scoreOk++;p3Ok++;jouerOk();}else jouerErreur();
+  /* animation sur la carte si les deux sous-questions sont répondues */
+  if(p3TypeRes[q.id]!==undefined){
+    var bothOk=p3TypeRes[q.id]&&ok;
+    animerCard(q.id,bothOk);
+  }
+  majPartBadge('p3',p3Ok,6);
+  document.getElementById('badge-p3').textContent=p3Ok+'/6';
+  majProg();
+  checkDoneP3();
+}
+
+function checkDoneP3(){
+  var doneT=Object.keys(p3TypeRes).length;
+  var doneF=Object.keys(p3FormeRes).length;
+  document.getElementById('dash-statut').textContent=
+    (doneT+doneF<6)?'Partie 3 en cours\u2026':'S\u00e9ance termin\u00e9e';
+  if(doneT===P3.length&&doneF===P3.length)showResP3();
+}
+
+function showResP3(){
+  var r=document.getElementById('res-p3');r.classList.add('show');
+  document.getElementById('score-p3').textContent=p3Ok+' / 6';
+  document.getElementById('msg-p3').textContent=p3Ok===6?'\u2713 Partie 3 parfaite\u00a0!':
+    p3Ok>=5?'Tr\u00e8s bien\u00a0!':p3Ok>=3?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p3').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+}
+
+/* ═══════════════════════════════════════
+   VERDICT FINAL
+═══════════════════════════════════════ */
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=10?5:total>=8?4:total>=6?3:total>=4?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===10){
+    badge='<div class="badge-ok">\u2713 Carnet de bord complet\u00a0!</div>';
+    msg='Carnet de bord complet !\nTu ma\u00eetrises les types\net les formes de phrases.';
+  }else if(total>=8){
+    badge='<div class="badge-ok">\u2713 Tr\u00e8s bon travail\u00a0!</div>';
+    msg='Tr\u00e8s bon travail !\nUn ou deux points \u00e0 revoir.';
+  }else if(total>=6){
+    badge='<div class="badge-ko">Bon d\u00e9but \u2014 quelques points \u00e0 revoir.</div>';
+    msg='Bon d\u00e9but !\nRelis le r\u00e9f\u00e9rentiel\nsur les points signal\u00e9s.';
+  }else{
+    badge='<div class="badge-ko">Pas de panique \u2014 recommence\u00a0!</div>';
+    msg='Pas de panique !\nRelis le r\u00e9f\u00e9rentiel\net retente le test.';
+  }
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Res={};p2Ok=0;p2Res={};p3Ok=0;p3TypeRes={};p3FormeRes={};
+  document.getElementById('results-global').classList.remove('show');
+  ['p1','p2','p3'].forEach(function(id){
+    document.getElementById('res-'+id).classList.remove('show');
+    var bloc=document.getElementById('bloc-'+id);
+    if(id!=='p1')bloc.style.display='none';
+    var b=document.getElementById('nb-'+id);var s=document.getElementById('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    if(s){s.style.color='';}
+  });
+  document.getElementById('badge-p1').textContent='0/3';
+  document.getElementById('nb-s-p1').textContent='0/3';
+  document.getElementById('badge-p2').textContent='0/4';
+  document.getElementById('nb-s-p2').textContent='0/4';
+  document.getElementById('badge-p3').textContent='0/6';
+  document.getElementById('nb-s-p3').textContent='0/6';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Partie 1 en cours\u2026';
+  document.getElementById('cards-p2').innerHTML='';
+  document.getElementById('cards-p3').innerHTML='';
+  majProg();
+  buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* Init */
+buildP1();majProg();
+</script>
+</body>
+</html>
