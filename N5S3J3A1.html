@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J3 – 5e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f5c518;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* UNIVERS */
+    .univers{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-left:5px solid var(--day-color);border-radius:var(--radius);
+      padding:.9rem 1.2rem;margin-bottom:1rem;position:relative;z-index:1;overflow:hidden;}
+    .univers::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .univers-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-border);margin-bottom:.35rem;}
+    .univers-texte{font-size:.95rem;color:#c8d8b8;line-height:1.65;}
+
+    /* DASHBOARD */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#7a9a6a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1.05rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#7a9a6a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);
+      border:1.5px solid var(--dark3);border-radius:8px;padding:.28rem .7rem;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;transition:all .4s;color:var(--muted);}
+
+    /* PROGRESSION */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.8rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.8rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.7rem .85rem;}
+    .ref-cell-titre{font-size:.85rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .ref-cell-body{font-size:.82rem;color:var(--text);line-height:1.7;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+    .ref-test{display:inline-block;background:#fff;border:1px solid var(--day-border);
+      border-radius:5px;padding:.1rem .4rem;font-family:'JetBrains Mono',monospace;
+      font-size:.78rem;color:var(--day-dark);font-weight:700;margin:.1rem 0;}
+
+    /* BLOCS PARTIES */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.05rem;
+      color:var(--text);line-height:1.85;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.5;}
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:1.05rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+    .fb{font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      padding:.55rem .85rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.65;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* RÉSULTATS PARTIE */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;
+      max-width:720px;width:100%;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:#a8c888;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* BOUTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover{background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* RÉSULTATS GLOBAL */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a9a6a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#a8c888;margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .deblocage{display:inline-block;background:rgba(141,198,63,.15);color:var(--day-border);
+      border:2px solid var(--day-color);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-top:.6rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    @keyframes flashOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+    @keyframes flashKo{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6);}70%{box-shadow:0 0 0 14px rgba(239,68,68,0);}100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}}
+    .anim-ok{animation:popOk .4s ease both,flashOk .5s ease both;}
+    .anim-ko{animation:popKo .4s ease both,flashKo .5s ease both;}
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr;}
+      .vf-row{gap:.4rem;}
+      .btn-dark,.btn-primary{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 3 &ndash; Jour 3</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Homophones grammaticaux</span></h1>
+</header>
+
+<!-- UNIVERS -->
+<div class="univers">
+  <div class="univers-label">&#128269; Mission du d&eacute;tective</div>
+  <div class="univers-texte">Tu es d&eacute;tective linguistique. 8&nbsp;indices &agrave; analyser pour identifier les suspects. Fais preuve de m&eacute;thode.</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash">
+  <div class="dash-titre">&#128269; Dossier d&rsquo;enqu&ecirc;te &mdash; 8 indices</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Indice 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">R&eacute;solus</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Partie&nbsp;1</span><span id="nb-s-p1" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Partie&nbsp;2</span><span id="nb-s-p2" style="font-weight:900;">0/4</span></div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 indices</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">A / &Agrave;</div>
+      <div class="ref-cell-body">
+        <em>a</em>&nbsp;: verbe avoir au pr&eacute;sent, 3e pers. sing.<br>
+        Test&nbsp;: remplacer par <span class="ref-test">avait</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;Il a faim.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Il avait faim.&nbsp;&raquo; &#10003; &rarr; <em>a</em>.<br><br>
+        <em>&agrave;</em>&nbsp;: pr&eacute;position.<br>
+        Test&nbsp;: ne peut pas &ecirc;tre remplac&eacute; par <span class="ref-test">avait</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;Elle va &agrave; l&rsquo;&eacute;cole.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Elle va avait l&rsquo;&eacute;cole.&nbsp;&raquo; &#10007; &rarr; <em>&agrave;</em>.
+      </div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">ET / EST</div>
+      <div class="ref-cell-body">
+        <em>et</em>&nbsp;: conjonction de coordination (liaison, addition).<br>
+        Test&nbsp;: remplacer par <span class="ref-test">et puis</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;Il lit et &eacute;crit.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Il lit et puis &eacute;crit.&nbsp;&raquo; &#10003; &rarr; <em>et</em>.<br><br>
+        <em>est</em>&nbsp;: verbe &ecirc;tre au pr&eacute;sent, 3e pers. sing.<br>
+        Test&nbsp;: remplacer par <span class="ref-test">était</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;Il est grand.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Il &eacute;tait grand.&nbsp;&raquo; &#10003; &rarr; <em>est</em>.
+      </div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">SON / SONT</div>
+      <div class="ref-cell-body">
+        <em>son</em>&nbsp;: d&eacute;terminant possessif sing. (il/elle + nom).<br>
+        Test&nbsp;: remplacer par <span class="ref-test">mon</span> ou <span class="ref-test">ton</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;son livre&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;mon livre&nbsp;&raquo; &#10003; &rarr; <em>son</em>.<br><br>
+        <em>sont</em>&nbsp;: verbe &ecirc;tre au pr&eacute;sent, 3e pers. plur.<br>
+        Test&nbsp;: remplacer par <span class="ref-test">étaient</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;Ils sont partis.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Ils &eacute;taient partis.&nbsp;&raquo; &#10003; &rarr; <em>sont</em>.
+      </div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">ON / ONT</div>
+      <div class="ref-cell-body">
+        <em>on</em>&nbsp;: pronom ind&eacute;fini sing.<br>
+        Test&nbsp;: remplacer par <span class="ref-test">il</span> ou <span class="ref-test">elle</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;On part.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Il part.&nbsp;&raquo; &#10003; &rarr; <em>on</em>.<br><br>
+        <em>ont</em>&nbsp;: verbe avoir au pr&eacute;sent, 3e pers. plur.<br>
+        Test&nbsp;: remplacer par <span class="ref-test">avaient</span>.<br>
+        Ex.&nbsp;: &laquo;&nbsp;Ils ont fini.&nbsp;&raquo;<br>
+        &rarr; &laquo;&nbsp;Ils avaient fini.&nbsp;&raquo; &#10003; &rarr; <em>ont</em>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIE 1 -->
+<div class="bloc-partie" id="bloc-p1">
+  <div class="partie-header">
+    <div class="part-icon">&#128269;</div>
+    <div>
+      <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+      <div class="part-sous">4 indices &mdash; Questions 1 &agrave; 4</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/4</div>
+  </div>
+  <div id="cards-p1"></div>
+  <div class="part-result" id="res-p1">
+    <div class="part-score" id="score-p1"></div>
+    <div class="part-msg" id="msg-p1"></div>
+    <div id="btn-p1"></div>
+  </div>
+</div>
+
+<!-- PARTIE 2 -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#9881;</div>
+    <div>
+      <div class="part-titre">Partie 2 &mdash; Choisir le bon homophone</div>
+      <div class="part-sous">4 indices &mdash; Questions 5 &agrave; 8</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/4</div>
+  </div>
+  <div id="cards-p2"></div>
+  <div class="part-result" id="res-p2">
+    <div class="part-score" id="score-p2"></div>
+    <div class="part-msg" id="msg-p2"></div>
+    <div id="btn-p2"></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS GLOBAL -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#128269; Bilan d&rsquo;enqu&ecirc;te</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <div id="res-deblocage"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">
+      &#8635; Recommencer
+    </button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   DONNÉES P1 — Vrai/Faux
+═══════════════════════════════ */
+var P1=[
+  {id:'q1',qNum:1,
+   phrase:'\u00ab\u00a0Pour distinguer <b>a</b> et <b>\u00e0</b>, on peut essayer de remplacer la forme par <b>avait</b>. Si la phrase reste correcte, on \u00e9crit <b>a</b> sans accent.\u00a0\u00bb',
+   rep:true,
+   fb:'\u00ab\u00a0C\u2019est la r\u00e8gle fondamentale.\n<b>a</b> = verbe avoir (pr\u00e9sent)\u00a0: remplaçable par <b>avait</b>.\n<b>\u00e0</b> = pr\u00e9position\u00a0: non remplaçable par <b>avait</b>.\nEx.\u00a0: \u00ab\u00a0Il <b>a</b> un stylo.\u00a0\u00bb\n\u2192 \u00ab\u00a0Il <b>avait</b> un stylo.\u00a0\u00bb \u2713 \u2192 <b>a</b>.\n\u00ab\u00a0Il va <b>\u00e0</b> Paris.\u00a0\u00bb\n\u2192 \u00ab\u00a0Il va avait Paris.\u00a0\u00bb \u2717 \u2192 <b>\u00e0</b>.\u00a0\u00bb'},
+  {id:'q2',qNum:2,
+   phrase:'\u00ab\u00a0<b>Son</b> et <b>sont</b> se prononcent de la m\u00eame fa\u00e7on, mais <b>sont</b> est toujours un d\u00e9terminant.\u00a0\u00bb',
+   rep:false,
+   fb:'\u00ab\u00a0Ce n\u2019est pas <b>son</b> qui est toujours un d\u00e9terminant, c\u2019est le contraire\u00a0:\n\u2014 <b>son</b> = d\u00e9terminant possessif (plac\u00e9 devant un nom)\u00a0: \u00ab\u00a0<b>son</b> cartable\u00a0\u00bb, \u00ab\u00a0<b>son</b> id\u00e9e\u00a0\u00bb.\n\u2014 <b>sont</b> = verbe \u00eatre \u00e0 la 3e pers. plur.\u00a0: \u00ab\u00a0ils <b>sont</b> pr\u00eats\u00a0\u00bb.\nTest\u00a0: remplace par <b>\u00e9taient</b>.\nSi \u00e7a marche \u2192 <b>sont</b>.\nSinon \u2192 <b>son</b>.\u00a0\u00bb'},
+  {id:'q3',qNum:3,
+   phrase:'\u00ab\u00a0Dans la phrase \u00ab\u00a0Karim <b>et</b> Ali jouent au football.\u00a0\u00bb, on peut remplacer <b>et</b> par <b>et puis</b>. Si la phrase reste correcte, on \u00e9crit <b>et</b> sans accent.\u00a0\u00bb',
+   rep:true,
+   fb:'\u00ab\u00a0Le test de <b>et puis</b> est la m\u00e9thode pour distinguer <b>et</b> (conjonction) de <b>est</b> (verbe).\n\u00ab\u00a0Karim <b>et puis</b> Ali jouent au football.\u00a0\u00bb\n\u2192 Le test fonctionne \u2192 <b>et</b>.\u00a0\u00bb'},
+  {id:'q4',qNum:4,
+   phrase:'\u00ab\u00a0<b>On</b> et <b>ont</b> se distinguent par leur nature grammaticale\u00a0: <b>on</b> est un pronom, <b>ont</b> est un verbe.\u00a0\u00bb',
+   rep:true,
+   fb:'\u00ab\u00a0Exactement.\n\u2014 <b>on</b> = pronom ind\u00e9fini (remplaçable par <b>il</b> ou <b>elle</b>)\u00a0: \u00ab\u00a0<b>On</b> mange.\u00a0\u00bb \u2192 \u00ab\u00a0<b>Il</b> mange.\u00a0\u00bb \u2713.\n\u2014 <b>ont</b> = verbe avoir au pr\u00e9sent, 3e pers. plur. (remplaçable par <b>avaient</b>)\u00a0: \u00ab\u00a0Ils <b>ont</b> mang\u00e9.\u00a0\u00bb\n\u2192 \u00ab\u00a0Ils <b>avaient</b> mang\u00e9.\u00a0\u00bb \u2713.\u00a0\u00bb'}
+];
+
+/* ═══════════════════════════════
+   DONNÉES P2 — QCM homophones
+═══════════════════════════════ */
+var P2=[
+  {id:'q5',qNum:5,
+   phrase:'\u00ab\u00a0Le professeur __ expliqu\u00e9 la le\u00e7on tr\u00e8s clairement.\u00a0\u00bb',
+   texte:'Quel homophone convient dans la phrase\u00a0?',
+   opts:[{t:'on',ok:false},{t:'a',ok:true},{t:'\u00e0',ok:false}],
+   fb:'\u00ab\u00a0Test\u00a0: remplace par <b>avait</b>\u00a0:\n\u00ab\u00a0Le professeur <b>avait</b> expliqu\u00e9 la le\u00e7on tr\u00e8s clairement.\u00a0\u00bb \u2713\n\u2192 verbe avoir au pr\u00e9sent \u2192 <b>a</b>.\n<b>\u00e0</b> est une pr\u00e9position\u00a0: elle ne peut pas introduire un participe pass\u00e9 (expliqu\u00e9).\n<b>on</b> est un pronom\u00a0: il ne peut pas avoir pour sujet \u00ab\u00a0le professeur\u00a0\u00bb (sujet explicite \u2260 pronom).\u00a0\u00bb'},
+  {id:'q6',qNum:6,
+   phrase:'\u00ab\u00a0Ces \u00e9l\u00e8ves __ travaill\u00e9 toute la semaine.\u00a0\u00bb',
+   texte:'Quel homophone convient dans la phrase\u00a0?',
+   opts:[{t:'on',ok:false},{t:'sont',ok:false},{t:'ont',ok:true}],
+   fb:'\u00ab\u00a0Test\u00a0: remplace par <b>avaient</b>\u00a0:\n\u00ab\u00a0Ces \u00e9l\u00e8ves <b>avaient</b> travaill\u00e9 toute la semaine.\u00a0\u00bb \u2713\n\u2192 verbe avoir, 3e pers. plur. \u2192 <b>ont</b>.\n<b>on</b> est singulier\u00a0: il ne peut pas avoir pour sujet un groupe nominal pluriel (ces \u00e9l\u00e8ves).\n<b>sont</b> est le verbe \u00eatre\u00a0: \u00ab\u00a0ces \u00e9l\u00e8ves \u00e9taient travaill\u00e9\u00a0\u00bb \u2717 \u2192 ne fonctionne pas.\u00a0\u00bb'},
+  {id:'q7',qNum:7,
+   phrase:'\u00ab\u00a0Clara __ rang\u00e9 __ bureau hier soir.\u00a0\u00bb',
+   texte:'Quelle combinaison convient dans la phrase\u00a0?',
+   opts:[{t:'a / son',ok:true},{t:'\u00e0 / son',ok:false},{t:'a / sont',ok:false}],
+   fb:null},
+  {id:'q8',qNum:8,
+   phrase:'\u00ab\u00a0Le ciel __ nuageux __ les oiseaux __ silencieux.\u00a0\u00bb',
+   texte:'Quelle combinaison convient dans la phrase\u00a0?',
+   opts:[{t:'est / et / sont',ok:true},{t:'et / est / son',ok:false},{t:'est / est / sont',ok:false}],
+   fb:'\u00ab\u00a0Premier blanc\u00a0: \u00ab\u00a0Le ciel \u00e9tait nuageux\u00a0\u00bb \u2713 \u2192 <b>est</b> (verbe \u00eatre).\nDeuxi\u00e8me blanc\u00a0: liaison entre deux groupes \u2192 <b>et</b> (conj.).\nTest <b>et puis</b> \u2192 \u00ab\u00a0Le ciel nuageux <b>et puis</b> les oiseaux\u2026\u00a0\u00bb \u2713.\nTroisi\u00e8me blanc\u00a0: \u00ab\u00a0les oiseaux \u00e9taient silencieux\u00a0\u00bb \u2713 \u2192 <b>sont</b>.\u00a0\u00bb'}
+];
+
+/* ═══════════════════════════════
+   ÉTAT
+═══════════════════════════════ */
+var scoreOk=0,p1Ok=0,p1Res={},p2Ok=0,p2Res={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+/* Sons */
+function jouerOk(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(520,ctx.currentTime);
+    o.frequency.setValueAtTime(660,ctx.currentTime+.08);
+    o.frequency.setValueAtTime(800,ctx.currentTime+.16);
+    g.gain.setValueAtTime(.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}
+}
+function jouerErreur(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(280,ctx.currentTime);
+    o.frequency.setValueAtTime(220,ctx.currentTime+.12);
+    g.gain.setValueAtTime(.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}
+}
+
+function animerCard(id,ok){
+  var c=document.getElementById('c-'+id);if(!c)return;
+  c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;
+  c.classList.add(ok?'anim-ok':'anim-ko');
+}
+
+function majProg(done){
+  var pct=Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 8 indices';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+}
+
+function majBadge(id,ok,total){
+  var sc=document.getElementById('nb-s-'+id);
+  var b=document.getElementById('nb-'+id);
+  if(!sc||!b)return;
+  sc.textContent=ok+'/'+total;
+  if(ok===total){b.style.background='rgba(34,197,94,.2)';b.style.borderColor='var(--green)';sc.style.color='#4ade80';}
+  else if(ok>0){b.style.background='rgba(141,198,63,.15)';b.style.borderColor='var(--day-color)';sc.style.color='var(--day-border)';}
+}
+
+/* ═══ PARTIE 1 ═══ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Res={};p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Indice '+q.qNum+' \u2014 Vrai ou faux\u00a0?';card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.innerHTML=q.phrase.replace(/\n/g,'<br>');card.appendChild(ph);
+    var row=mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button');btn.className='vf-btn';
+      var isV=txt==='Vrai';
+      btn.innerHTML=(isV?'&#10003;':'&#10007;')+' '+txt;
+      btn.dataset.val=isV?'true':'false';
+      btn.addEventListener('click',function(){selVF1(q,btn,row);});
+      row.appendChild(btn);
+    });
+    card.appendChild(row);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF1(q,btn,row){
+  if(p1Res[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Res[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb.replace(/\n/g,'<br>');}
+  if(ok){scoreOk++;p1Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/4';
+  majBadge('p1',p1Ok,4);
+  majProg(Object.keys(p1Res).length);
+  var done=Object.keys(p1Res).length;
+  document.getElementById('dash-statut').textContent=
+    done<4?'Indice '+(done+1)+' en cours\u2026':'Partie 1 termin\u00e9e';
+  if(done===P1.length)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 4';
+  document.getElementById('msg-p1').textContent=p1Ok===4?'\u2713 Dossier 1 r\u00e9solu \u2014 Dossier 2 d\u00e9bloqu\u00e9.':
+    p1Ok>=3?'Bien \u2014 Dossier 2 d\u00e9bloqu\u00e9.':'Continue \u2014 Dossier 2 d\u00e9bloqu\u00e9.';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Dossier 2 \u2192</button>';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  document.getElementById('dash-statut').textContent='Indice 5 en cours\u2026';
+  buildP2();
+}
+
+/* ═══ PARTIE 2 ═══ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Res={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Indice '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.innerHTML=q.phrase.replace(/\n/g,'<br>');card.appendChild(ph);
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    var opts=mkEl('div','opts');
+    q.opts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selQCM2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selQCM2(q,btn,optsEl){
+  if(p2Res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p2Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok&&q.fb){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb.replace(/\n/g,'<br>');}
+  if(ok){scoreOk++;p2Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/4';
+  majBadge('p2',p2Ok,4);
+  var done=Object.keys(p2Res).length;
+  majProg(4+done);
+  document.getElementById('dash-statut').textContent=
+    done<4?'Indice '+(4+done+1)+' en cours\u2026':'Enqu\u00eate termin\u00e9e';
+  if(done===P2.length)showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 4';
+  document.getElementById('msg-p2').textContent=p2Ok===4?'\u2713 Dossier 2 r\u00e9solu\u00a0!':
+    p2Ok>=3?'Tr\u00e8s bien\u00a0!':p2Ok>=2?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+}
+
+/* ═══ VERDICT ═══ */
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===8){
+    badge='<div class="badge-ok">\u2713 Enqu\u00eate r\u00e9solue\u00a0!</div>';
+    msg='Enqu\u00eate r\u00e9solue !\nMa\u00eetrise parfaite\ndes quatre paires.';
+  }else if(total>=6){
+    badge='<div class="badge-ok">\u2713 Tr\u00e8s bon travail\u00a0!</div>';
+    msg='Tr\u00e8s bon travail !\nUn point \u00e0 consolider.';
+  }else if(total>=4){
+    badge='<div class="badge-ko">Bon d\u00e9but \u2014 relis le r\u00e9f\u00e9rentiel.</div>';
+    msg='Bon d\u00e9but !\nRelis le r\u00e9f\u00e9rentiel.';
+  }else{
+    badge='<div class="badge-ko">Relis le r\u00e9f\u00e9rentiel et retente.</div>';
+    msg='Relis le r\u00e9f\u00e9rentiel\net retente.';
+  }
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+  var deb=document.getElementById('res-deblocage');
+  if(total>=5){
+    deb.innerHTML='<div class="deblocage">&#128275; D\u00e9blocage \u00ab\u00a0Je m\u2019entra\u00eene\u00a0\u00bb d\u00e9bloqu\u00e9\u00a0!</div>';
+  }else{
+    deb.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:.82rem;color:var(--muted);margin-top:.5rem;">D\u00e9blocage \u00ab\u00a0Je m\u2019entra\u00eene\u00a0\u00bb\u00a0: 5/8 minimum requis.</div>';
+  }
+}
+
+/* ═══ RESET ═══ */
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Res={};p2Ok=0;p2Res={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/4';
+  document.getElementById('badge-p2').textContent='0/4';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Indice 1 en cours\u2026';
+  ['p1','p2'].forEach(function(id){
+    var b=document.getElementById('nb-'+id);var s=document.getElementById('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    if(s){s.textContent='0/4';s.style.color='';}
+  });
+  document.getElementById('cards-p2').innerHTML='';
+  majProg(0);
+  buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildP1();majProg(0);
+</script>
+</body>
+</html>
