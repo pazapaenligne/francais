@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne – En sortant de l'école – 5e S4 J1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.32);
+  --bg:#fffdf7;
+  --vert:#22c55e;--vert-bg:#e7faec;--vert-bord:#86efac;
+  --rouge:#ef4444;--rouge-bg:#fdeaea;--rouge-bord:#fca5a5;
+  --txt:#2a1a04;--gris:#8a7050;
+  --bord:#e0cca8;--card-bg:#fff;
+  --parchemin:#fdf6e3;--parchemin-bord:#c8a96a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}100%{box-shadow:0 0 0 10px rgba(34,197,94,0)}}
+@keyframes glowErr{0%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}100%{box-shadow:0 0 0 10px rgba(239,68,68,0)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes stampPop{0%{opacity:0;transform:translate(-50%,-50%) scale(2) rotate(-8deg)}60%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(-8deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-6deg)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1)}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+
+/* BULLES */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.3;}
+.bubble.b1{width:110px;height:110px;background:#f5c518;top:-28px;right:-24px;}
+.bubble.b2{width:80px;height:80px;background:var(--jour);bottom:24px;left:-22px;}
+.bubble.b3{width:66px;height:66px;background:#3ab5d8;top:40%;right:-22px;}
+.bubble.b4{width:72px;height:72px;background:#8dc63f;top:22%;left:-26px;}
+
+#flashIcon{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:4.5rem;z-index:9999;pointer-events:none;opacity:0;}
+#flashIcon.show{animation:flashPop .9s ease forwards;}
+
+.wrap{max-width:1240px;margin:0 auto;padding:16px 14px 70px;position:relative;z-index:2;}
+
+/* HEADER */
+.header{text-align:center;padding:18px 0 10px;animation:fadeUp .5s ease;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#3a1800;font-family:'Orbitron',sans-serif;font-weight:700;font-size:12px;letter-spacing:1.2px;padding:7px 15px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);margin-bottom:12px;}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,5vw,2rem);color:var(--txt);line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#3a1800;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.62rem,2vw,.68rem);letter-spacing:1px;text-transform:uppercase;padding:7px 18px;border-radius:22px;box-shadow:0 3px 12px var(--day-glow);}
+
+/* GRILLE */
+.main-grid{display:grid;grid-template-columns:minmax(270px,360px) 1fr;gap:18px;align-items:start;margin-top:18px;}
+@media(max-width:860px){.main-grid{grid-template-columns:1fr;}}
+@media(min-width:861px){.col-gauche{position:sticky;top:14px;}}
+
+/* COLONNE GAUCHE */
+.col-gauche{display:flex;flex-direction:column;gap:14px;}
+
+/* POÈME */
+.poeme-card{background:var(--parchemin);border:1.5px solid var(--parchemin-bord);border-radius:13px;padding:16px 18px;box-shadow:0 4px 18px rgba(180,130,40,.12);position:relative;overflow:hidden;}
+.poeme-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--jour),var(--jour-pale),var(--jour),transparent);background-size:300%;animation:slide 3.5s linear infinite;}
+.poeme-titre{font-family:'IM Fell English',serif;font-weight:700;font-size:1rem;color:var(--jour-fonce);margin-bottom:2px;text-align:center;}
+.poeme-auteur{font-family:'IM Fell English',serif;font-style:italic;font-size:.82rem;color:var(--gris);text-align:center;margin-bottom:12px;}
+.poeme-vers{list-style:none;padding:0;}
+.poeme-vers li{display:flex;gap:10px;margin-bottom:3px;font-family:'IM Fell English',serif;font-size:.93rem;line-height:1.65;color:#2a1a04;}
+.num-vers{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--parchemin-bord);min-width:18px;text-align:right;padding-top:3px;flex-shrink:0;}
+.sep-strophe{height:8px;}
+
+/* CONTEXTE */
+.contexte-card{background:#fff;border:1px solid var(--bord);border-radius:13px;overflow:hidden;}
+.ctx-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:11px 14px;background:var(--jour-clair);}
+.ctx-toggle-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--jour-fonce);text-transform:uppercase;}
+.ctx-arrow{font-size:.85rem;color:var(--jour-fonce);transition:transform .3s;display:inline-block;}
+.ctx-arrow.open{transform:rotate(180deg);}
+.ctx-body{overflow:hidden;transition:max-height .35s ease,opacity .3s ease;max-height:1200px;opacity:1;padding:12px 14px;}
+.ctx-body.collapsed{max-height:0;opacity:0;padding:0 14px;}
+.ctx-auteur{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:6px;}
+.ctx-texte{font-size:.78rem;color:#5a4020;line-height:1.6;margin-bottom:8px;}
+.ctx-texte strong{font-weight:700;}
+
+/* RÉFÉRENTIEL */
+.ref-card{background:#fff;border:1px solid var(--bord);border-radius:13px;overflow:hidden;}
+.ref-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:11px 14px;background:var(--jour-clair);}
+.ref-toggle-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--jour-fonce);text-transform:uppercase;}
+.ref-arrow{font-size:.85rem;color:var(--jour-fonce);transition:transform .3s;display:inline-block;}
+.ref-arrow.open{transform:rotate(180deg);}
+.ref-body{overflow:hidden;transition:max-height .35s ease,opacity .3s ease;max-height:1200px;opacity:1;padding:12px 14px;}
+.ref-body.collapsed{max-height:0;opacity:0;padding:0 14px;}
+.ref-item{margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid #f0e8d4;}
+.ref-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.ref-mot{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:2px;}
+.ref-def{font-size:.78rem;color:#5a4020;line-height:1.5;}
+
+/* COLONNE DROITE */
+.col-droite{min-width:0;display:flex;flex-direction:column;gap:14px;}
+
+/* PROGRESSION */
+.prog-wrap{background:#fff;border:1px solid var(--bord);border-radius:13px;padding:13px 16px;display:flex;flex-direction:column;gap:8px;}
+.prog-head{display:flex;justify-content:space-between;align-items:center;}
+.prog-label{font-family:'Orbitron',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;}
+.prog-score{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.88rem;color:var(--jour-fonce);}
+.prog-bg{background:#f0e8d4;border-radius:99px;height:8px;overflow:hidden;}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+.entrees-dots{display:flex;gap:6px;flex-wrap:wrap;}
+.entree-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--bord);background:#faf5ea;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--gris);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
+.entree-dot.ok{background:var(--vert-bg);border-color:var(--vert-bord);color:#157f3a;}
+.entree-dot.active{border-color:var(--jour);background:var(--jour-clair);color:var(--jour-fonce);}
+
+/* CONSIGNE */
+.consigne-box{background:var(--jour-clair);border-left:4px solid var(--jour);border-radius:0 8px 8px 0;padding:9px 14px;font-size:.9rem;color:var(--jour-fonce);font-style:italic;}
+
+/* CARTE ENTRÉE */
+.entree-card{background:#fff;border:1.5px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(180,130,40,.08);animation:fadeUp .4s ease;}
+.entree-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.entree-num{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.78rem;letter-spacing:1.5px;color:rgba(255,255,255,.9);text-transform:uppercase;}
+.entree-titre-h{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.5px;color:#fff;flex:1;text-align:center;}
+.entree-pts{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.8);}
+.entree-body{padding:16px 18px 20px;}
+
+/* QUESTION */
+.q-bloc{margin-bottom:14px;}
+.q-etiquette{display:inline-flex;align-items:center;gap:6px;font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gris);margin-bottom:8px;}
+.q-icone{width:20px;height:20px;border-radius:50%;background:var(--jour);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;flex-shrink:0;}
+.q-texte{font-size:.98rem;color:var(--txt);line-height:1.6;margin-bottom:10px;font-weight:600;}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border:2px solid var(--bord);border-radius:10px;background:#fdfaf4;cursor:pointer;text-align:left;font-size:.93rem;color:var(--txt);line-height:1.5;transition:border-color .15s,background .15s;min-height:3rem;width:100%;}
+.opt:hover:not([disabled]){border-color:var(--jour);background:var(--jour-clair);}
+.opt.selected{border-color:var(--jour);background:var(--jour-clair);}
+.opt.correct{border-color:var(--vert);background:var(--vert-bg);animation:glowOk .5s ease;}
+.opt.wrong{border-color:var(--rouge);background:var(--rouge-bg);animation:glowErr .5s ease;}
+.opt[disabled]{cursor:default;}
+.opt-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--bord);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.opt.selected .opt-radio{border-color:var(--jour);background:var(--jour);}
+.opt.correct .opt-radio{border-color:var(--vert);background:var(--vert);}
+.opt.wrong .opt-radio{border-color:var(--rouge);background:var(--rouge);}
+.opt-radio::after{content:'';display:block;width:8px;height:8px;border-radius:50%;background:#fff;opacity:0;}
+.opt.selected .opt-radio::after,.opt.correct .opt-radio::after,.opt.wrong .opt-radio::after{opacity:1;}
+
+/* FEEDBACK */
+.feedback{display:none;border-radius:10px;padding:11px 14px;font-size:.88rem;line-height:1.6;margin-top:8px;}
+.feedback.show{display:block;}
+.feedback.fb-ok{background:var(--vert-bg);border:1px solid var(--vert-bord);color:#157f3a;}
+.feedback.fb-err{background:var(--rouge-bg);border:1px solid var(--rouge-bord);color:#b91c1c;}
+
+/* SEP */
+.sep{border:none;border-top:2px dashed var(--bord);margin:14px 0;}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.btn{border:none;border-radius:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;padding:0 20px;min-height:3rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-valider{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;box-shadow:0 4px 12px var(--day-glow);}
+.btn-valider:hover:not([disabled]){transform:translateY(-2px);}
+.btn-valider[disabled]{opacity:.45;cursor:default;transform:none;}
+.btn-suite{background:var(--vert);color:#fff;display:none;}
+.btn-suite.visible{display:flex;}
+.btn-suite:hover{transform:translateY(-2px);}
+.btn-retry{background:var(--jour-clair);color:var(--jour-fonce);border:2px solid var(--bord);}
+.btn-retry:hover{background:var(--jour-pale);}
+
+/* SUITE BLOC */
+.suite-bloc{display:none;}
+.suite-bloc.visible{display:block;animation:fadeUp .4s ease;}
+
+/* VERDICT */
+.verdict{display:none;background:#fff;border:2px solid var(--jour);border-radius:16px;padding:28px 24px;text-align:center;box-shadow:0 8px 28px var(--day-glow);margin-top:8px;position:relative;overflow:hidden;}
+.verdict.show{display:block;animation:fadeUp .5s ease;}
+.verdict-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.verdict-score{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.5rem,8vw,4rem);color:var(--jour-fonce);line-height:1;margin-bottom:6px;}
+.verdict-score small{font-size:.38em;color:var(--gris);}
+.verdict-etoiles{font-size:1.5rem;margin:8px 0;}
+.verdict-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.85rem,3vw,1.1rem);letter-spacing:2px;padding:8px 20px;border-radius:8px;display:inline-block;margin-bottom:12px;text-transform:uppercase;}
+.verdict-tampon.ok{color:#157f3a;border:2.5px solid #157f3a;}
+.verdict-tampon.moyen{color:var(--jour-fonce);border:2.5px solid var(--jour);}
+.verdict-tampon.ko{color:#b91c1c;border:2.5px solid #b91c1c;}
+.verdict-msg{font-size:.95rem;color:var(--txt);line-height:1.7;margin-bottom:18px;max-width:560px;margin-left:auto;margin-right:auto;}
+.verdict-recap{display:flex;flex-direction:column;gap:5px;text-align:left;max-width:560px;margin:0 auto 20px;}
+.recap-item{font-size:.82rem;padding:6px 10px;border-radius:8px;display:flex;align-items:center;gap:8px;}
+.recap-item.rok{background:var(--vert-bg);color:#157f3a;}
+.recap-item.rko{background:var(--rouge-bg);color:#b91c1c;}
+.btn-recommencer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;border:none;border-radius:12px;padding:0 28px;min-height:3rem;cursor:pointer;box-shadow:0 4px 14px var(--day-glow);transition:all .2s;}
+.btn-recommencer:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div id="flashIcon"></div>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div><div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 5E</div></div>
+    <div class="semaine">Semaine 4 &mdash; Jour 1</div>
+    <h1 class="titre">Je <span class="accent">m'entraîne</span></h1>
+    <div class="badge-theme">Journal de bord &middot; Lecture du poème &middot; /12</div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- COLONNE GAUCHE -->
+    <div class="col-gauche">
+
+      <!-- POÈME -->
+      <div class="poeme-card">
+        <div class="poeme-titre">En sortant de l'école</div>
+        <div class="poeme-auteur">Jacques Prévert</div>
+        <ol class="poeme-vers">
+          <li><span class="num-vers">1</span>En sortant de l'école</li>
+          <li><span class="num-vers">2</span>Nous avons rencontré</li>
+          <li><span class="num-vers">3</span>Un grand chemin de fer</li>
+          <li><span class="num-vers">4</span>Qui nous a emmenés</li>
+          <li><span class="num-vers">5</span>Tout autour de la Terre</li>
+          <li><span class="num-vers">6</span>Dans un wagon doré</li>
+          <li><span class="num-vers">7</span>Tout autour de la Terre</li>
+          <li><span class="num-vers">8</span>Nous avons rencontré</li>
+          <li><span class="num-vers">9</span>La mer qui se promenait</li>
+          <li><span class="num-vers">10</span>Avec tous ses coquillages</li>
+          <li><span class="num-vers">11</span>Les îles parfumées</li>
+          <li><span class="num-vers">12</span>Et les saumons fumés.</li>
+          <li class="sep-strophe"></li>
+          <li><span class="num-vers">13</span>Au-dessus de la mer</li>
+          <li><span class="num-vers">14</span>Nous avons rencontré</li>
+          <li><span class="num-vers">15</span>La lune et les étoiles</li>
+          <li><span class="num-vers">16</span>Sur un bateau à voiles</li>
+          <li><span class="num-vers">17</span>Partant pour le Japon</li>
+          <li><span class="num-vers">18</span>Et les trois mousquetaires</li>
+          <li><span class="num-vers">19</span>Des cinq doigts de la main</li>
+          <li><span class="num-vers">20</span>Tournant la manivelle</li>
+          <li><span class="num-vers">21</span>D'un petit sous-marin</li>
+          <li><span class="num-vers">22</span>Plongeant au fond des mers</li>
+          <li><span class="num-vers">23</span>Pour chercher des oursins.</li>
+          <li class="sep-strophe"></li>
+          <li><span class="num-vers"></span><em style="font-size:.82rem;color:var(--gris);">Jacques Prévert</em></li>
+        </ol>
+      </div>
+
+      <!-- CONTEXTE -->
+      <div class="contexte-card">
+        <div class="ctx-toggle" onclick="toggleCtx()">
+          <span class="ctx-toggle-label">Contexte &amp; Vocabulaire</span>
+          <span class="ctx-arrow open" id="ctxArrow">▲</span>
+        </div>
+        <div class="ctx-body" id="ctxBody">
+          <div class="ctx-auteur">Auteur</div>
+          <div class="ctx-texte">Jacques Prévert (1900-1977), poète français, l'un des poètes les plus lus en France. Il est connu pour ses poèmes accessibles, joyeux et engagés, souvent destinés à tous les publics, enfants et adultes. Son recueil le plus célèbre est <strong>Paroles</strong> (1946).</div>
+          <div class="ctx-auteur">Contexte de ce poème</div>
+          <div class="ctx-texte">Ce poème évoque un voyage imaginaire qui commence à la sortie de l'école. Il mêle le réel et le rêve, les objets du quotidien et les éléments les plus fantaisistes. C'est un poème de la liberté et de l'imagination enfantine.</div>
+          <div class="ctx-auteur">Vocabulaire utile</div>
+          <div class="ctx-texte">
+            <strong>Chemin de fer&nbsp;:</strong> train, voie ferrée.<br>
+            <strong>Wagon doré&nbsp;:</strong> voiture de train de couleur or, luxueuse.<br>
+            <strong>Manivelle&nbsp;:</strong> poignée ou levier que l'on tourne pour faire fonctionner une machine.<br>
+            <strong>Sous-marin&nbsp;:</strong> véhicule qui se déplace sous l'eau.<br>
+            <strong>Oursins&nbsp;:</strong> animaux marins couverts de piquants, que l'on trouve sur les fonds marins.<br>
+            <strong>Les trois mousquetaires&nbsp;:</strong> personnages célèbres du roman d'Alexandre Dumas (1844)&nbsp;; ici Prévert joue avec l'expression «&nbsp;les cinq doigts de la main&nbsp;».
+          </div>
+        </div>
+      </div>
+
+      <!-- RÉFÉRENTIEL -->
+      <div class="ref-card">
+        <div class="ref-toggle" onclick="toggleRef()">
+          <span class="ref-toggle-label">Référentiel</span>
+          <span class="ref-arrow open" id="refArrow">▲</span>
+        </div>
+        <div class="ref-body" id="refBody">
+          <div class="ref-item"><div class="ref-mot">Poème en vers</div><div class="ref-def">texte poétique organisé en vers (lignes).</div></div>
+          <div class="ref-item"><div class="ref-mot">Vers</div><div class="ref-def">chaque ligne d'un poème.</div></div>
+          <div class="ref-item"><div class="ref-mot">Rime</div><div class="ref-def">répétition d'un son à la fin de plusieurs vers.</div></div>
+          <div class="ref-item"><div class="ref-mot">Anaphore</div><div class="ref-def">répétition d'un même mot ou groupe de mots au début de plusieurs vers ou phrases consécutives.</div></div>
+          <div class="ref-item"><div class="ref-mot">Personnification</div><div class="ref-def">on prête à un objet, un animal ou une chose abstraite des actions ou des sentiments propres aux êtres humains.</div></div>
+          <div class="ref-item"><div class="ref-mot">Métaphore</div><div class="ref-def">comparaison sans outil (sans «&nbsp;comme&nbsp;»)&nbsp;; une chose est présentée directement comme une autre.</div></div>
+          <div class="ref-item"><div class="ref-mot">Comparaison</div><div class="ref-def">rapprochement de deux éléments à l'aide d'un outil (comme, tel, semblable à…).</div></div>
+          <div class="ref-item"><div class="ref-mot">Champ lexical</div><div class="ref-def">ensemble de mots liés à un même thème.</div></div>
+          <div class="ref-item"><div class="ref-mot">Voyage imaginaire</div><div class="ref-def">voyage qui n'existe pas dans la réalité mais dans l'imagination ou le rêve du personnage.</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div class="col-droite">
+
+      <!-- PROGRESSION -->
+      <div class="prog-wrap">
+        <div class="prog-head">
+          <span class="prog-label">Journal de bord</span>
+          <span class="prog-score" id="scoreAff">0 / 12</span>
+        </div>
+        <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+        <div class="entrees-dots" id="dotsCont"></div>
+      </div>
+
+      <!-- CONSIGNE -->
+      <div class="consigne-box">Lis attentivement chaque question. Pour chaque paire de questions, choisis la bonne réponse puis la citation qui la justifie.</div>
+
+      <!-- ZONE ENTRÉES -->
+      <div id="entreesZone"></div>
+
+      <!-- VERDICT -->
+      <div class="verdict" id="verdict">
+        <div class="verdict-particles" id="particles"></div>
+        <div class="verdict-score"><span id="vNum">0</span><small> / 12</small></div>
+        <div class="verdict-etoiles" id="vEtoiles"></div>
+        <div class="verdict-tampon" id="vTampon"></div>
+        <div class="verdict-msg" id="vMsg"></div>
+        <div class="verdict-recap" id="vRecap"></div>
+        <button class="btn-recommencer" onclick="recommencer()">&#8635;&nbsp;Recommencer</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ DONNÉES ══ */
+var ENTREES = [
+  {
+    titre: "Entrée 1 — La forme du poème",
+    qA: {
+      texte: "Quelle est la forme de ce poème\u00a0?",
+      opts: ["Un poème en prose.", "Une fable.", "Un poème en vers.", "Un calligramme."],
+      ans: 2,
+      fb: "Un poème en vers est organisé en lignes courtes appelées «\u00a0vers\u00a0». Ce n'est pas un texte en paragraphes comme un récit en prose, ni une fable qui a toujours une morale à la fin. Observe la mise en page du texte."
+    },
+    qB: {
+      texte: "Quelle observation justifie le mieux ta réponse\u00a0?",
+      opts: ["Le texte raconte une histoire avec une morale.", "Le texte est composé de vers et de strophes.", "Le texte est écrit en paragraphes continus.", "La forme du texte dessine un objet."],
+      ans: 1,
+      fb: "Un poème en vers se reconnaît à sa mise en page\u00a0: chaque ligne est un vers, et les vers peuvent être groupés en strophes. Observe comment le texte est présenté sur la page."
+    }
+  },
+  {
+    titre: "Entrée 2 — Le moyen de transport",
+    qA: {
+      texte: "Quel moyen de transport apparaît au début du poème\u00a0?",
+      opts: ["Un bateau à voiles.", "Un petit sous-marin.", "Un grand chemin de fer.", "Un wagon doré."],
+      ans: 2,
+      fb: "Le premier moyen de transport rencontré dans le poème apparaît dans les premiers vers. Le wagon doré est la voiture à l'intérieur du train, pas le train lui-même. Relis les vers 3 et 6."
+    },
+    qB: {
+      texte: "Quelle citation justifie le mieux ta réponse\u00a0?",
+      opts: ["\u00ab\u00a0Sur un bateau à voiles\u00a0\u00bb", "\u00ab\u00a0D'un petit sous-marin\u00a0\u00bb", "\u00ab\u00a0Un grand chemin de fer\u00a0\u00bb", "\u00ab\u00a0Dans un wagon doré\u00a0\u00bb"],
+      ans: 2,
+      fb: "La citation qui nomme le premier moyen de transport est celle qui contient le nom du véhicule lui-même, pas l'intérieur du véhicule. Cherche dans les vers 3 à 6."
+    }
+  },
+  {
+    titre: "Entrée 3 — L'espace du voyage",
+    qA: {
+      texte: "Quel espace le voyage permet-il de parcourir\u00a0?",
+      opts: ["Le village.", "Le pays.", "L'école.", "La Terre."],
+      ans: 3,
+      fb: "Le voyage ne s'arrête pas à un endroit précis\u00a0: il fait le tour de quelque chose de très grand. Relis les vers 5 et 7."
+    },
+    qB: {
+      texte: "Quelle citation justifie le mieux ta réponse\u00a0?",
+      opts: ["\u00ab\u00a0En sortant de l'école\u00a0\u00bb", "\u00ab\u00a0Tout autour de la Terre\u00a0\u00bb", "\u00ab\u00a0Au-dessus de la mer\u00a0\u00bb", "\u00ab\u00a0Partant pour le Japon\u00a0\u00bb"],
+      ans: 1,
+      fb: "La citation qui montre l'étendue du voyage dit ce que les enfants font autour d'un espace très grand. Cherche dans les vers 5 et 7."
+    }
+  },
+  {
+    titre: "Entrée 4 — Le pays nommé",
+    qA: {
+      texte: "Quel pays est nommé dans le poème\u00a0?",
+      opts: ["L'Italie.", "Le Canada.", "L'Égypte.", "Le Japon."],
+      ans: 3,
+      fb: "Un pays est nommé explicitement dans le poème, avec une majuscule. Cherche dans les vers qui parlent du bateau à voiles."
+    },
+    qB: {
+      texte: "Quelle citation justifie le mieux ta réponse\u00a0?",
+      opts: ["\u00ab\u00a0Partant pour le Japon\u00a0\u00bb", "\u00ab\u00a0Tout autour de la Terre\u00a0\u00bb", "\u00ab\u00a0Au-dessus de la mer\u00a0\u00bb", "\u00ab\u00a0Les îles parfumées\u00a0\u00bb"],
+      ans: 0,
+      fb: "La citation qui contient le nom du pays indique aussi la direction du voyage. Cherche dans le vers 17."
+    }
+  },
+  {
+    titre: "Entrée 5 — La figure de style",
+    qA: {
+      texte: "Dans le vers «\u00a0La mer qui se promenait\u00a0», quelle figure de style est utilisée\u00a0?",
+      opts: ["Une comparaison.", "Une personnification.", "Une métaphore.", "Une répétition."],
+      ans: 1,
+      fb: "Se promener est une action que font les êtres humains. Quand on prête une action humaine à un élément de la nature comme la mer, quelle figure de style utilise-t-on\u00a0?"
+    },
+    qB: {
+      texte: "Quel élément justifie le mieux ta réponse\u00a0?",
+      opts: ["La mer est comparée à un être humain.", "La mer accomplit une action humaine.", "La mer remplace un autre élément.", "Le mot «\u00a0mer\u00a0» est répété plusieurs fois."],
+      ans: 1,
+      fb: "La personnification se reconnaît à un verbe ou une expression qui prête une action humaine à quelque chose qui ne peut pas la faire dans la réalité. Lequel des éléments proposés décrit exactement cela\u00a0?"
+    }
+  },
+  {
+    titre: "Entrée 6 — Le voyage imaginaire",
+    qA: {
+      texte: "Quels éléments montrent que le voyage devient imaginaire\u00a0?",
+      opts: ["Les élèves rentrent chez eux.", "Le train traverse une gare.", "La lune et les étoiles voyagent sur un bateau.", "Les enfants montent dans un wagon."],
+      ans: 2,
+      fb: "Dans la réalité, la lune et les étoiles ne peuvent pas voyager sur un bateau. Quel élément du poème est donc impossible dans la vraie vie\u00a0?"
+    },
+    qB: {
+      texte: "Quelle citation justifie le mieux ta réponse\u00a0?",
+      opts: ["\u00ab\u00a0La lune et les étoiles / Sur un bateau à voiles\u00a0\u00bb", "\u00ab\u00a0En sortant de l'école\u00a0\u00bb", "\u00ab\u00a0Un grand chemin de fer\u00a0\u00bb", "\u00ab\u00a0Tout autour de la Terre\u00a0\u00bb"],
+      ans: 0,
+      fb: "La citation qui montre que le voyage est imaginaire contient deux éléments du ciel placés sur un bateau. Cherche dans les vers 14 à 16."
+    }
+  }
+];
+
+/* ══ ÉTAT ══ */
+var score = 0;
+var recap = [];
+var entreeCourante = 0;
+var etat = [];
+for (var i = 0; i < ENTREES.length; i++) {
+  etat.push({selA:null,selB:null,valA:false,valB:false,okA:false,okB:false});
+}
+
+/* ══ AUDIO ══ */
+var actx = null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);
+}
+function beepOk(){initA();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.12,'sine',.1);},75);}
+function beepErr(){initA();beep(220,90,.22,'sawtooth',.09);}
+function beepFinal(ok){
+  initA();
+  if(ok){[523,659,784,1047,1318].forEach(function(f,i){setTimeout(function(){beep(f,f,.22,'triangle',.14);},i*140);});}
+  else{beep(200,80,.4,'sawtooth',.11);}
+}
+document.addEventListener('pointerdown',initA,{once:true});
+
+function showFlash(ok){
+  var f=document.getElementById('flashIcon');
+  if(!f)return;
+  f.textContent=ok?'✓':'✗';
+  f.style.color=ok?'#22c55e':'#ef4444';
+  f.style.animation='none';void f.offsetWidth;
+  f.className='show';
+}
+
+/* ══ INIT ══ */
+(function init(){
+  var dc=document.getElementById('dotsCont');
+  for(var i=0;i<ENTREES.length;i++){
+    var d=document.createElement('div');
+    d.className='entree-dot'+(i===0?' active':'');
+    d.id='dot'+i;d.textContent=i+1;
+    dc.appendChild(d);
+  }
+  afficherEntree(0);
+})();
+
+function afficherEntree(idx){
+  var zone=document.getElementById('entreesZone');
+  zone.innerHTML='';
+  if(idx>=ENTREES.length){afficherVerdict();return;}
+  var e=ENTREES[idx];
+  var card=document.createElement('div');
+  card.className='entree-card';
+  card.innerHTML=buildEntreeHTML(idx);
+  zone.appendChild(card);
+  card.addEventListener('click',function(ev){
+    var t=ev.target;
+    var opt=t.closest('.opt');
+    if(opt&&!opt.hasAttribute('disabled')){
+      var phase=opt.dataset.phase;
+      var num=+opt.dataset.num;
+      card.querySelectorAll('.opt[data-phase="'+phase+'"]').forEach(function(o){o.classList.remove('selected');});
+      opt.classList.add('selected');
+      if(phase==='A') etat[idx].selA=num;
+      else etat[idx].selB=num;
+      var btn=card.querySelector('#btnVal'+phase+idx);
+      if(btn) btn.removeAttribute('disabled');
+      return;
+    }
+    if(t.id==='btnValA'+idx){validerA(idx,card);return;}
+    if(t.id==='btnSuiteA'+idx){ouvrirB(idx,card);return;}
+    if(t.id==='btnValB'+idx){validerB(idx,card);return;}
+    if(t.id==='btnSuiteB'+idx){entreeSuivante(idx);return;}
+    if(t.id==='btnRetryA'+idx){reessayerA(idx,card);return;}
+    if(t.id==='btnRetryB'+idx){reessayerB(idx,card);return;}
+  });
+}
+
+function buildEntreeHTML(idx){
+  var e=ENTREES[idx];
+  var h='<div class="entree-header">';
+  h+='<span class="entree-num">Entrée '+(idx+1)+' / '+ENTREES.length+'</span>';
+  h+='<span class="entree-titre-h">'+e.titre.replace(/^Entrée \d+ — /,'')+'</span>';
+  h+='<span class="entree-pts">2 pts</span></div>';
+  h+='<div class="entree-body">';
+  /* Q A */
+  h+='<div class="q-bloc" id="blocA'+idx+'">';
+  h+='<div class="q-etiquette"><span class="q-icone">A</span>Observation</div>';
+  h+='<div class="q-texte">'+e.qA.texte+'</div>';
+  h+='<div class="opts" id="optsA'+idx+'">';
+  e.qA.opts.forEach(function(o,i){
+    h+='<button class="opt" data-phase="A" data-num="'+i+'"><span class="opt-radio"></span>'+o+'</button>';
+  });
+  h+='</div>';
+  h+='<div class="feedback" id="fbA'+idx+'"></div>';
+  h+='<div class="btn-row">';
+  h+='<button class="btn btn-valider" id="btnValA'+idx+'" disabled>&#10003;&nbsp;Vérifier</button>';
+  h+='<button class="btn btn-retry" id="btnRetryA'+idx+'" style="display:none;">&#8635;&nbsp;Réessayer</button>';
+  h+='<button class="btn btn-suite" id="btnSuiteA'+idx+'">Suite&nbsp;&#8250;</button>';
+  h+='</div></div>';
+  /* Q B */
+  h+='<div class="suite-bloc" id="suiteBloc'+idx+'">';
+  h+='<hr class="sep">';
+  h+='<div class="q-bloc" id="blocB'+idx+'">';
+  h+='<div class="q-etiquette"><span class="q-icone">B</span>Preuve / Citation</div>';
+  h+='<div class="q-texte">'+e.qB.texte+'</div>';
+  h+='<div class="opts" id="optsB'+idx+'">';
+  e.qB.opts.forEach(function(o,i){
+    h+='<button class="opt" data-phase="B" data-num="'+i+'"><span class="opt-radio"></span>'+o+'</button>';
+  });
+  h+='</div>';
+  h+='<div class="feedback" id="fbB'+idx+'"></div>';
+  h+='<div class="btn-row">';
+  h+='<button class="btn btn-valider" id="btnValB'+idx+'" disabled>&#10003;&nbsp;Vérifier</button>';
+  h+='<button class="btn btn-retry" id="btnRetryB'+idx+'" style="display:none;">&#8635;&nbsp;Réessayer</button>';
+  h+='<button class="btn btn-suite" id="btnSuiteB'+idx+'">Entrée suivante&nbsp;&#8250;</button>';
+  h+='</div></div></div>';
+  h+='</div>';
+  return h;
+}
+
+function validerA(idx,card){
+  var e=ENTREES[idx];
+  var sel=etat[idx].selA;
+  if(sel===null||etat[idx].valA) return;
+  etat[idx].valA=true;
+  var optsA=card.querySelectorAll('.opt[data-phase="A"]');
+  optsA.forEach(function(o){
+    o.setAttribute('disabled','');
+    var n=+o.dataset.num;
+    if(n===e.qA.ans) o.classList.add('correct');
+    else if(n===sel) o.classList.add('wrong');
+  });
+  var fb=card.querySelector('#fbA'+idx);
+  var btnVal=card.querySelector('#btnValA'+idx);
+  var btnSuite=card.querySelector('#btnSuiteA'+idx);
+  var btnRetry=card.querySelector('#btnRetryA'+idx);
+  btnVal.style.display='none';
+  if(sel===e.qA.ans){
+    etat[idx].okA=true;
+    score++;
+    recap.push({label:'Entrée '+(idx+1)+' — Observation',ok:true});
+    fb.innerHTML='&#10003;&nbsp;Bonne réponse\u00a0!';
+    fb.className='feedback fb-ok show';
+    btnSuite.className='btn btn-suite visible';
+    beepOk();showFlash(true);
+  } else {
+    etat[idx].okA=false;
+    recap.push({label:'Entrée '+(idx+1)+' — Observation',ok:false});
+    fb.innerHTML='&#10007;&nbsp;'+e.qA.fb;
+    fb.className='feedback fb-err show';
+    btnRetry.style.display='flex';
+    btnSuite.className='btn btn-suite visible';
+    beepErr();showFlash(false);
+  }
+  majScore();
+}
+
+function reessayerA(idx,card){
+  etat[idx].selA=null;etat[idx].valA=false;etat[idx].okA=false;
+  var optsA=card.querySelectorAll('.opt[data-phase="A"]');
+  optsA.forEach(function(o){
+    o.removeAttribute('disabled');
+    o.className='opt';
+  });
+  card.querySelector('#fbA'+idx).className='feedback';
+  card.querySelector('#btnValA'+idx).style.display='flex';
+  card.querySelector('#btnValA'+idx).setAttribute('disabled','');
+  card.querySelector('#btnRetryA'+idx).style.display='none';
+  card.querySelector('#btnSuiteA'+idx).className='btn btn-suite';
+  /* Retirer le dernier recap */
+  recap.pop();
+}
+
+function ouvrirB(idx,card){
+  var suite=card.querySelector('#suiteBloc'+idx);
+  if(suite) suite.className='suite-bloc visible';
+  card.querySelector('#btnSuiteA'+idx).style.display='none';
+}
+
+function validerB(idx,card){
+  var e=ENTREES[idx];
+  var sel=etat[idx].selB;
+  if(sel===null||etat[idx].valB) return;
+  etat[idx].valB=true;
+  var optsB=card.querySelectorAll('.opt[data-phase="B"]');
+  optsB.forEach(function(o){
+    o.setAttribute('disabled','');
+    var n=+o.dataset.num;
+    if(n===e.qB.ans) o.classList.add('correct');
+    else if(n===sel) o.classList.add('wrong');
+  });
+  var fb=card.querySelector('#fbB'+idx);
+  var btnVal=card.querySelector('#btnValB'+idx);
+  var btnSuite=card.querySelector('#btnSuiteB'+idx);
+  var btnRetry=card.querySelector('#btnRetryB'+idx);
+  btnVal.style.display='none';
+  if(sel===e.qB.ans){
+    etat[idx].okB=true;
+    score++;
+    recap.push({label:'Entrée '+(idx+1)+' — Preuve',ok:true});
+    fb.innerHTML='&#10003;&nbsp;Bonne réponse\u00a0!';
+    fb.className='feedback fb-ok show';
+    beepOk();showFlash(true);
+  } else {
+    etat[idx].okB=false;
+    recap.push({label:'Entrée '+(idx+1)+' — Preuve',ok:false});
+    fb.innerHTML='&#10007;&nbsp;'+e.qB.fb;
+    fb.className='feedback fb-err show';
+    btnRetry.style.display='flex';
+    beepErr();showFlash(false);
+  }
+  btnSuite.className='btn btn-suite visible';
+  var dot=document.getElementById('dot'+idx);
+  if(dot){dot.className='entree-dot ok';dot.textContent='\u2713';}
+  majScore();
+}
+
+function reessayerB(idx,card){
+  etat[idx].selB=null;etat[idx].valB=false;etat[idx].okB=false;
+  var optsB=card.querySelectorAll('.opt[data-phase="B"]');
+  optsB.forEach(function(o){
+    o.removeAttribute('disabled');
+    o.className='opt';
+  });
+  card.querySelector('#fbB'+idx).className='feedback';
+  card.querySelector('#btnValB'+idx).style.display='flex';
+  card.querySelector('#btnValB'+idx).setAttribute('disabled','');
+  card.querySelector('#btnRetryB'+idx).style.display='none';
+  card.querySelector('#btnSuiteB'+idx).className='btn btn-suite';
+  recap.pop();
+}
+
+function entreeSuivante(idx){
+  var suivant=idx+1;
+  entreeCourante=suivant;
+  var dotSuiv=document.getElementById('dot'+suivant);
+  if(dotSuiv) dotSuiv.className='entree-dot active';
+  if(suivant>=ENTREES.length){afficherVerdict();return;}
+  afficherEntree(suivant);
+}
+
+function majScore(){
+  document.getElementById('scoreAff').textContent=score+' / 12';
+  document.getElementById('progFill').style.width=Math.round(score/12*100)+'%';
+}
+
+function afficherVerdict(){
+  document.getElementById('entreesZone').innerHTML='';
+  var pct=score/12;
+  var nb=pct>=.92?5:pct>=.71?4:pct>=.5?3:pct>=.28?2:1;
+  document.getElementById('vNum').textContent=score;
+  document.getElementById('vEtoiles').textContent='\u2b50'.repeat(nb)+'\u2606'.repeat(5-nb);
+  var tp=document.getElementById('vTampon');
+  var msg=document.getElementById('vMsg');
+  if(score===12){
+    tp.textContent='JOURNAL COMPLET';tp.className='verdict-tampon ok';
+    msg.textContent='Excellent\u00a0! Tu as validé toutes les entrées. Tu maîtrises parfaitement ce poème de Prévert.';
+    launchParticles();
+  } else if(score>=9){
+    tp.textContent='TRÈS BONNE LECTURE';tp.className='verdict-tampon ok';
+    msg.textContent='Très bon travail\u00a0! Tu as bien saisi les éléments essentiels du poème.';
+    launchParticles();
+  } else if(score>=6){
+    tp.textContent='LECTURE EN COURS';tp.className='verdict-tampon moyen';
+    msg.textContent='Des éléments bien identifiés\u00a0! Relis le poème et appuie-toi sur le référentiel.';
+  } else {
+    tp.textContent='À REPRENDRE';tp.className='verdict-tampon ko';
+    msg.textContent='Relis le poème lentement, vers par vers. Tu peux recommencer autant de fois que nécessaire.';
+  }
+  var rc=document.getElementById('vRecap');
+  var html='';
+  recap.forEach(function(r){
+    html+='<div class="recap-item '+(r.ok?'rok':'rko')+'">'+(r.ok?'\u2713':'\u2717')+'\u00a0'+r.label+'</div>';
+  });
+  rc.innerHTML=html;
+  document.getElementById('verdict').className='verdict show';
+  beepFinal(score>=9);
+  if(score>=9) launchParticles();
+}
+
+function launchParticles(){
+  var box=document.getElementById('particles');
+  box.innerHTML='';
+  var cols=['#f5a623','#f5c518','#22c55e','#c47a10','#f5d080','#3ab5d8'];
+  var emojis=['\u{1F686}','\u2728','\u{1F4AB}','\u26A1','\u{1F30A}','\u{1F4DA}','\u{1F686}','\u2728','\u{1F4AB}','\u26A1','\u{1F30A}','\u{1F4DA}','\u{1F686}','\u2728','\u{1F4AB}','\u26A1','\u{1F30A}','\u{1F4DA}','\u{1F686}','\u2728','\u{1F4AB}','\u26A1','\u{1F30A}','\u2728','\u{1F4DA}'];
+  for(var i=0;i<20;i++){
+    var p=document.createElement('div');
+    p.className='particle';
+    p.style.cssText='position:absolute;width:10px;height:10px;border-radius:50%;background:'+cols[i%cols.length]+';'
+      +'left:'+(6+Math.random()*88)+'%;bottom:'+(Math.random()*30)+'%;'
+      +'opacity:0;pointer-events:none;animation:particleUp '+(0.9+Math.random()*0.9)+'s ease '+(Math.random()*0.4)+'s forwards;';
+    box.appendChild(p);
+  }
+  emojis.forEach(function(em,i){
+    var e=document.createElement('div');
+    e.textContent=em;
+    e.style.cssText='position:absolute;font-size:'+(1.2+Math.random()*.8)+'rem;'
+      +'left:'+(3+Math.random()*94)+'%;bottom:'+(Math.random()*30)+'%;'
+      +'opacity:0;pointer-events:none;'
+      +'animation:particleUp '+(1+Math.random()*1.1)+'s ease '+(i*0.06+Math.random()*0.2)+'s forwards;';
+    box.appendChild(e);
+  });
+}
+
+/* TOGGLES */
+function toggleCtx(){
+  var b=document.getElementById('ctxBody');
+  var a=document.getElementById('ctxArrow');
+  b.classList.toggle('collapsed');
+  a.classList.toggle('open');
+}
+function toggleRef(){
+  var b=document.getElementById('refBody');
+  var a=document.getElementById('refArrow');
+  b.classList.toggle('collapsed');
+  a.classList.toggle('open');
+}
+
+function recommencer(){
+  score=0;recap=[];entreeCourante=0;
+  for(var i=0;i<ENTREES.length;i++){
+    etat[i]={selA:null,selB:null,valA:false,valB:false,okA:false,okB:false};
+  }
+  var dots=document.querySelectorAll('.entree-dot');
+  dots.forEach(function(d,i){
+    d.className='entree-dot'+(i===0?' active':'');
+    d.textContent=i+1;
+  });
+  majScore();
+  document.getElementById('verdict').className='verdict';
+  afficherEntree(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
