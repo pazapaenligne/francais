@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Le Grand Tournoi de la Langue</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a1020;font-family:'Nunito',sans-serif;width:100vw;min-height:100vh;overflow-x:hidden;}
+
+/* ══ RUNNER ══ */
+#runnerWrap{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;}
+#c{display:block;max-width:100vw;max-height:100vh;}
+#rTimerWrap{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);text-align:center;}
+#rTimerTxt{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:1px;margin-bottom:5px;}
+#rTimerBar{width:340px;height:10px;background:rgba(255,255,255,.1);border-radius:20px;overflow:hidden;}
+#rTimerFill{height:100%;border-radius:20px;background:linear-gradient(90deg,#f5c518,#f5a623);transition:width .1s linear;}
+#rSkip{position:absolute;bottom:18px;right:22px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.45);font-family:'Orbitron',sans-serif;font-size:10px;padding:7px 14px;border-radius:8px;cursor:pointer;letter-spacing:.5px;display:none;}
+#rSkip:hover{background:rgba(255,255,255,.15);}
+
+/* ══ QCM ══ */
+#qcmWrap{display:none;min-height:100vh;flex-direction:column;}
+
+/* Barre de progression pleine largeur */
+.prog-bar-wrap{background:#13161e;border-bottom:2px solid rgba(185,64,64,.3);padding:10px 18px 12px;}
+.prog-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.prog-title{font-family:'Orbitron',sans-serif;font-size:.82rem;font-weight:900;color:#b94040;letter-spacing:.5px;}
+.prog-score{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:#fff;}
+.prog-score span{color:rgba(255,255,255,.3);}
+.prog-zones{display:grid;grid-template-columns:14fr 4fr 7fr;gap:8px;align-items:center;}
+.prog-zone{display:flex;flex-direction:column;gap:3px;}
+.pz-label{font-family:'Orbitron',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.5px;display:flex;justify-content:space-between;}
+.pz-track{height:14px;border-radius:20px;overflow:hidden;border:1px solid;}
+.pz-fill{height:100%;border-radius:20px;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+.pz-dots{display:flex;gap:2px;margin-top:2px;flex-wrap:wrap;}
+.pz-dot{width:14px;height:14px;border-radius:50%;border:1px solid;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+
+/* Corps QCM */
+.qcm-body{flex:1;max-width:860px;width:100%;margin:0 auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:14px;}
+
+/* Phrase support */
+.phrase-box{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:#e8f4fc;line-height:1.85;white-space:pre-line;font-weight:700;}
+
+/* Consigne épreuve */
+.ep-consigne{font-size:.9rem;color:rgba(220,238,255,.92);line-height:1.75;font-weight:700;}
+.ep-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 14px;font-family:'Orbitron',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:8px;border:1.5px solid;}
+.ep-bloc{background:linear-gradient(135deg,#0a2040,#0d2a52);border:2.5px solid #3ab5d8;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 20px rgba(58,181,216,.18),inset 0 1px 0 rgba(255,255,255,.06);}
+.ep-bloc-sep{height:1px;background:rgba(58,181,216,.35);}
+
+/* Carte question */
+.qcard{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.qcard-hdr{padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:2px solid;}
+.ql{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.88rem;flex-shrink:0;font-family:'JetBrains Mono',monospace;color:#fff;}
+.qcard-hdr .qt{font-size:.68rem;color:#666;text-transform:uppercase;letter-spacing:1px;font-family:'Orbitron',sans-serif;}
+.qcard-body{padding:14px 18px 16px;}
+.qtxt{font-size:1.05rem;font-weight:800;line-height:1.6;color:#1a2030;margin-bottom:14px;white-space:pre-line;}
+.qtxt.locked{color:#bbb;font-style:italic;font-weight:400;font-size:.88rem;}
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt{min-height:52px;background:#fffdf7;border:2px solid #e0ddd5;border-radius:10px;padding:12px 16px;font-size:.98rem;font-family:'Nunito',sans-serif;font-weight:700;text-align:left;cursor:pointer;transition:all .15s;line-height:1.45;color:#1a2030;}
+.opt:hover:not(:disabled){background:#e8f6fc;border-color:#3ab5d8;transform:translateY(-2px);box-shadow:0 3px 10px rgba(58,181,216,.15);}
+.opt:disabled{cursor:default;}
+.opt.cok{background:#f0fdf4;border-color:#22c55e;color:#166534;}
+.opt.cko{background:#fef2f2;border-color:#ef4444;color:#991b1b;}
+.fb{margin-top:12px;padding:12px 14px;background:#fff8ee;border-left:4px solid #ef4444;border-radius:8px;font-size:.88rem;color:#7a3a1a;line-height:1.8;white-space:pre-line;}
+.fb .fbl{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:#ef4444;font-family:'JetBrains Mono',monospace;margin-bottom:4px;font-weight:700;}
+.retry-btn{margin-top:9px;min-height:2.4rem;background:#fff;border:2px solid #3ab5d8;color:#0e3a52;border-radius:9px;padding:0 16px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:.3px;}
+.retry-btn:hover{background:#e8f6fc;}
+.okmsg{display:flex;align-items:center;gap:7px;color:#22c55e;font-weight:800;font-size:.92rem;margin-top:10px;}
+
+/* Stepper SOUS les blocs */
+.stepper{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 14px;}
+.snav{min-width:44px;height:44px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;font-weight:800;font-family:'Orbitron',sans-serif;padding:0 10px;}
+.snav:disabled{opacity:.3;cursor:default;}
+.snav:hover:not(:disabled){background:rgba(255,255,255,.14);}
+#sNxt{background:#f5a623;color:#3a1800;border-color:#c87800;min-width:120px;font-size:.76rem;box-shadow:0 3px 0 #8a4a00;letter-spacing:.3px;}
+#sNxt:disabled{background:#e8d9a0;color:#9a8040;box-shadow:none;border-color:#d0c080;}
+#sNxt:hover:not(:disabled){filter:brightness(1.05);}
+.sdots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap;}
+.sdot{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-family:'JetBrains Mono',monospace;}
+.sdot.cur{border-color:#f5a623;color:#f5a623;box-shadow:0 0 7px rgba(245,166,35,.4);transform:scale(1.12);}
+.sdot.done{background:#22c55e;border-color:#22c55e;color:#fff;}
+.sdot.part{background:#f5a623;border-color:#f5a623;color:#3a1800;}
+
+/* Référentiel en bas */
+.ref-acc{background:rgba(255,255,255,.04);border:1px solid rgba(58,181,216,.2);border-radius:12px;overflow:hidden;}
+.ref-btn{width:100%;background:rgba(58,181,216,.1);border:none;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;color:#3ab5d8;letter-spacing:.5px;}
+.ref-btn:hover{background:rgba(58,181,216,.18);}
+.ref-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.ref-body.open{max-height:700px;}
+.ref-inner{padding:14px 16px;font-size:.88rem;line-height:1.9;color:rgba(200,225,245,.85);}
+.ref-inner strong{color:#3ab5d8;font-family:'Orbitron',sans-serif;font-size:.72rem;display:block;margin-top:8px;margin-bottom:2px;}
+.ref-inner strong:first-child{margin-top:0;}
+
+/* Flash victoire */
+#winFlash{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;pointer-events:none;background:rgba(0,0,0,.82);}
+#winFlash .wf-msg{font-family:'Orbitron',sans-serif;font-size:clamp(1.4rem,4vw,2.4rem);font-weight:900;text-shadow:0 0 30px currentColor;text-align:center;}
+#winFlash .wf-sub{font-family:'Orbitron',sans-serif;font-size:.8rem;color:rgba(255,255,255,.65);letter-spacing:1px;text-align:center;}
+
+/* Bilan */
+.bilan{background:#fff;border-radius:14px;padding:20px;text-align:center;}
+.bilan h2{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:#13161e;margin-bottom:8px;}
+.bilan .bsc{font-family:'JetBrains Mono',monospace;font-size:2.8rem;font-weight:700;color:#b94040;line-height:1;}
+.bilan .btit{font-family:'Orbitron',sans-serif;font-size:.78rem;color:#444;margin:10px 0;line-height:1.5;}
+.bilan .bdet{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0;}
+.bdet-box{background:#f8f8f8;border-radius:9px;padding:10px 6px;border:1px solid #eee;}
+.bdet-n{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;}
+.bdet-l{font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:.5px;font-family:'Orbitron',sans-serif;margin-top:2px;}
+.retry-all{margin-top:14px;background:#b94040;color:#fff;border:none;border-radius:10px;padding:11px 22px;font-family:'Orbitron',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;letter-spacing:.5px;}
+.retry-all:hover{background:#952020;}
+</style>
+</head>
+<body>
+
+<!-- ══ RUNNER ══ -->
+<div id="runnerWrap">
+  <canvas id="c"></canvas>
+  <div id="rTimerWrap" style="display:none;">
+    <div id="rTimerTxt"></div>
+    <div id="rTimerBar"><div id="rTimerFill" style="width:100%"></div></div>
+  </div>
+  <button id="rSkip">Passer →</button>
+</div>
+
+<!-- ══ QCM ══ -->
+<div id="qcmWrap">
+  <!-- Barre de progression pleine largeur -->
+  <div class="prog-bar-wrap">
+    <div class="prog-hdr">
+      <div class="prog-title">Le Grand Tournoi de la Langue · S3J2</div>
+      <div class="prog-score" id="gscoreEl">0 <span>/ 25</span></div>
+    </div>
+    <div class="prog-zones">
+      <div class="prog-zone">
+        <div class="pz-label" style="color:#3ab5d8;"><span>Épreuve 1 · Analyse</span><span id="sc1">0/14</span></div>
+        <div class="pz-track" style="background:#071525;border-color:#1a5a80;">
+          <div class="pz-fill" id="fill1" style="background:linear-gradient(90deg,#1a5a80,#3ab5d8);width:0%;"></div>
+        </div>
+        <div class="pz-dots" id="dots1"></div>
+      </div>
+      <div class="prog-zone">
+        <div class="pz-label" style="color:#8dc63f;"><span>Épreuve 2</span><span id="sc2">🔒</span></div>
+        <div class="pz-track" id="track2" style="background:#051408;border-color:#2a6018;opacity:.3;">
+          <div class="pz-fill" id="fill2" style="background:linear-gradient(90deg,#2a6018,#8dc63f);width:0%;"></div>
+        </div>
+        <div class="pz-dots" id="dots2"></div>
+      </div>
+      <div class="prog-zone">
+        <div class="pz-label" style="color:#e05050;"><span>Épreuve 3</span><span id="sc3">🔒</span></div>
+        <div class="pz-track" id="track3" style="background:#180808;border-color:#7a2020;opacity:.3;">
+          <div class="pz-fill" id="fill3" style="background:linear-gradient(90deg,#7a2020,#e05050);width:0%;"></div>
+        </div>
+        <div class="pz-dots" id="dots3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Corps -->
+  <div class="qcm-body">
+    <div id="epBadge"></div>
+    <div id="qContainer"></div>
+    <!-- Stepper TOUJOURS SOUS LES BLOCS A/B -->
+    <div class="stepper">
+      <button class="snav" id="sPrv">◂</button>
+      <div class="sdots" id="sDots"></div>
+      <button class="snav" id="sNxt">Suivant ▸</button>
+    </div>
+    <!-- Référentiel en bas -->
+    <div class="ref-acc">
+      <button class="ref-btn" id="refBtn">Référentiel — Types et formes de phrases <span id="refArr">▾</span></button>
+      <div class="ref-body" id="refBody">
+        <div class="ref-inner">
+          <strong>TYPES (3) :</strong>
+          <strong>Déclaratif :</strong> donne une information. Se termine par un point.
+          <strong>Interrogatif :</strong> pose une question. Se termine par un point d'interrogation.
+          <strong>Injonctif :</strong> exprime un ordre, un conseil, une interdiction. Verbe à l'impératif ou à l'infinitif. Se termine par un point ou un point d'exclamation.
+          <strong>FORMES :</strong>
+          <strong>Affirmative / Négative</strong> (ne… pas, ne… plus, ne… jamais, ne… rien…)
+          <strong>Neutre / Exclamative</strong> (quel, quelle, que, comme… + point d'exclamation)
+          <strong>Active / Passive</strong> (être + participe passé ; sujet subit l'action)
+          <strong>Personnelle / Impersonnelle</strong> (il impersonnel sans référent : il pleut, il faut, il est nécessaire…)
+          <strong>RÈGLE FONDAMENTALE :</strong> Une phrase combine toujours un TYPE et une ou plusieurs FORMES. Ex. : « N'attendez plus ! » → Type : injonctif. → Formes : négative + exclamative.
+        </div>
+      </div>
+    </div>
+    <div id="bilanZone"></div>
+  </div>
+</div>
+
+<!-- Flash victoire -->
+<div id="winFlash">
+  <div class="wf-msg" id="wfMsg"></div>
+  <div class="wf-sub" id="wfSub"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DONNÉES — MOT POUR MOT
+// ══════════════════════════════════════════
+const DEFIS=[
+{ep:1,phrase:'[1] La bibliothèque du collège a été rénovée cet été.',
+ qA:{q:'Question A — Type :',opts:['Interrogatif','Injonctif','Déclaratif'],ok:2,fb:"La phrase donne une information : elle constate un fait. Elle se termine par un point."},
+ qB:{q:'Question B — Forme(s) :',opts:['Affirmative et active','Affirmative et passive','Négative et passive'],ok:1,fb:"La bibliothèque subit l'action d'être rénovée : construction a été rénovée (être + participe passé) → forme passive. Pas de négation → affirmative."}},
+
+{ep:1,phrase:'[2] Comme elle est lumineuse maintenant !',
+ qA:{q:'Question A — Type :',opts:['Injonctif','Déclaratif','Interrogatif'],ok:1,fb:"Attention au piège : le point d'exclamation ne change pas le type. La phrase donne une information (exprime un ressenti, un constat) : → déclaratif. La forme exclamative s'ajoute au type déclaratif."},
+ qB:{q:'Question B — Forme(s) :',opts:['Négative et exclamative','Affirmative et neutre','Affirmative et exclamative'],ok:2,fb:"Pas de négation → affirmative. Le mot exclamatif comme et le point d'exclamation expriment l'admiration : → exclamative."}},
+
+{ep:1,phrase:'[3] De nouveaux livres ont été commandés par la direction.',
+ qA:{q:'Question A — Type :',opts:['Interrogatif','Déclaratif','Injonctif'],ok:1,fb:"La phrase donne une information. Elle se termine par un point. → type déclaratif."},
+ qB:{q:'Question B — Forme(s) :',opts:['Affirmative et active','Négative et passive','Affirmative et passive'],ok:2,fb:"De nouveaux livres subit l'action d'être commandé : ont été commandés (être + participe passé) ; complément d'agent : par la direction. → forme passive. Pas de négation → affirmative."}},
+
+{ep:1,phrase:"[4] N'hésitez pas à en emprunter !",
+ qA:{q:'Question A — Type :',opts:['Déclaratif','Interrogatif','Injonctif'],ok:2,fb:"Le verbe hésitez est à l'impératif présent (2e pers. plur.) : la phrase exprime un conseil. → type injonctif."},
+ qB:{q:'Question B — Forme(s) :',opts:['Affirmative et exclamative','Négative et exclamative','Négative et neutre'],ok:1,fb:"La négation ne… pas encadre le verbe à l'impératif : → forme négative. Le point d'exclamation marque l'insistance du conseil : → forme exclamative."}},
+
+{ep:1,phrase:'[5] Savez-vous que certains ouvrages ne sont disponibles que dans cette bibliothèque ?',
+ qA:{q:'Question A — Type :',opts:['Déclaratif','Injonctif','Interrogatif'],ok:2,fb:"La phrase pose une question par inversion du sujet (savez-vous) et se termine par un point d'interrogation. → type interrogatif."},
+ qB:{q:'Question B — Forme(s) :',opts:['Affirmative et personnelle','Négative et personnelle','Affirmative et impersonnelle'],ok:1,fb:"La négation ne… que est une négation restrictive : → forme négative. Le sujet vous renvoie à des personnes identifiables : → forme personnelle. Il n'y a pas de il impersonnel."}},
+
+{ep:1,phrase:'[6] Il est interdit de manger ou de boire dans cet espace.',
+ qA:{q:'Question A — Type :',opts:['Interrogatif','Déclaratif','Injonctif'],ok:1,fb:"Attention au piège : bien que la phrase exprime une interdiction, le verbe n'est pas à l'impératif ni à l'infinitif. Il est interdit est un verbe impersonnel à l'indicatif. → type déclaratif."},
+ qB:{q:'Question B — Forme(s) :',opts:['Affirmative et personnelle','Négative et impersonnelle','Affirmative et impersonnelle'],ok:2,fb:"Pas de négation → affirmative. Le pronom il ne renvoie à aucun être précis : c'est le il impersonnel de il est interdit, comme il pleut ou il faut. → forme impersonnelle."}},
+
+{ep:1,phrase:'[7] Les élèves respectent les règles : ils ne font jamais de bruit.',
+ qA:{q:'Question A — Type :',opts:['Injonctif','Interrogatif','Déclaratif'],ok:2,fb:"Les deux propositions donnent des informations : → type déclaratif pour l'ensemble. Pas de question ni d'ordre."},
+ qB:{q:'Question B — Forme(s) (pour la deuxième proposition « ils ne font jamais de bruit ») :',opts:['Affirmative et personnelle','Négative et impersonnelle','Négative et personnelle'],ok:2,fb:"La deuxième proposition contient ne… jamais : → forme négative. Le sujet ils renvoie aux élèves (identifiables) : → forme personnelle."}},
+
+{ep:2,
+ qA:{q:"Q15 — Phrase de départ :\n« Les archéologues ont découvert des vestiges importants. »\n\nContraintes : Type : déclaratif. Formes : passive + affirmative.\n\nQuelle réécriture respecte ces deux contraintes ?",
+  opts:['« Des vestiges importants ont-ils été découverts par les archéologues ? »','« Des vestiges importants ont été découverts par les archéologues. »','« Des vestiges importants n\'ont pas été découverts par les archéologues. »'],ok:1,
+  fb:"La contrainte impose :\n— type déclaratif : pas de point d'interrogation, pas d'impératif.\n— forme passive : être + participe passé ; des vestiges importants devient sujet.\n— forme affirmative : pas de négation.\nLa proposition A est interrogative (point d'interrogation) : ≠ type déclaratif. La proposition C est négative (n'ont pas) : ≠ affirmative."}},
+
+{ep:2,
+ qA:{q:"Q16 — Phrase de départ :\n« Vous lisez ce roman. »\n\nContraintes : Type : injonctif. Formes : affirmative + exclamative.\n\nQuelle réécriture respecte ces deux contraintes ?",
+  opts:['« Lisez ce roman ! »','« Ne lisez pas ce roman ! »','« Lisez-vous ce roman ? »'],ok:0,
+  fb:"La contrainte impose :\n— type injonctif : verbe à l'impératif, sans pronom sujet exprimé.\n— forme affirmative : pas de négation.\n— forme exclamative : point d'exclamation.\nLa proposition B est négative (ne… pas) : ≠ affirmative. La proposition C est interrogative (inversion du sujet + ?) et garde le pronom sujet vous : ≠ type injonctif."}},
+
+{ep:2,
+ qA:{q:"Q17 — Phrase de départ :\n« Il pleut sur la ville. »\n\nContraintes : Type : déclaratif. Formes : affirmative + impersonnelle + exclamative.\n\nQuelle réécriture respecte ces trois contraintes ?",
+  opts:['« Comme il pleut sur la ville ! »','« Est-ce qu\'il pleut sur la ville ? »','« Il ne pleut pas sur la ville ! »'],ok:0,
+  fb:"La contrainte impose :\n— type déclaratif.\n— forme affirmative : pas de négation.\n— forme impersonnelle : il impersonnel (il pleut = pas de référent).\n— forme exclamative : point d'exclamation et/ou mot exclamatif.\nLa proposition A place le mot exclamatif comme en tête et ajoute le point d'exclamation : toutes les contraintes sont respectées. La proposition B est interrogative. La proposition C est négative."}},
+
+{ep:2,
+ qA:{q:"Q18 — Phrase de départ :\n« On a réparé les canalisations de l'école. »\n\nContraintes : Type : déclaratif. Formes : passive + affirmative. Complément d'agent : absent.\n\nQuelle réécriture respecte ces contraintes ?",
+  opts:['« L\'école a réparé les canalisations. »','« Les canalisations de l\'école ont été réparées. »','« Les canalisations de l\'école n\'ont pas été réparées. »'],ok:1,
+  fb:"La contrainte impose :\n— forme passive : les canalisations de l'école devient sujet ; être + participe passé.\n— affirmative : pas de négation.\n— complément d'agent absent : on ne mentionne pas par qui l'action est faite.\nAccord du participe : les canalisations (fém. plur.) → réparées.\nLa proposition A reste active. La proposition C est négative."}},
+
+{ep:3,
+ qA:{q:"Q19 — « Ne pas laisser ce médicament à la portée des enfants. »\n\nQuelle analyse est correcte ?",
+  opts:['Type : déclaratif. Forme : négative.','Type : interrogatif. Forme : négative.','Type : injonctif. Forme : négative.'],ok:2,
+  fb:"La phrase exprime une interdiction. Le verbe est à l'infinitif (laisser) précédé de ne pas : c'est l'une des deux constructions de la phrase injonctive (infinitif à la place de l'impératif), fréquente dans les notices, les règlements, les consignes. → type injonctif. La négation ne… pas encadre le verbe : → forme négative."}},
+
+{ep:3,
+ qA:{q:"Q20 — « Quelle opportunité il a eue ! »\n\nCette phrase est-elle de type déclaratif ou injonctif ?",
+  opts:['Injonctif','Déclaratif','Interrogatif'],ok:1,
+  fb:"Le mot quel peut prêter à confusion avec les mots interrogatifs. Ici, quelle est un mot exclamatif, pas interrogatif : la phrase ne pose pas une question, elle exprime un ressenti (l'admiration ou la surprise). Elle se termine par un point d'exclamation et donne une information : → type déclaratif."},
+ qB:{q:"Et quelle est sa forme ?",opts:['Affirmative et neutre','Négative et exclamative','Affirmative et exclamative'],ok:2,
+  fb:"Pas de négation → affirmative. Le mot exclamatif quelle et le point d'exclamation : → forme exclamative."}},
+
+{ep:3,
+ qA:{q:"Q21 — Observe ces deux phrases :\n\nPhrase A : « Il convient de relire son travail avant de le rendre. »\nPhrase B : « Marie relit son travail avant de le rendre. »\n\nCes deux phrases sont-elles du même type ?",
+  opts:['Non : la phrase A est injonctive et la phrase B est déclarative.','Oui : toutes les deux sont déclaratives.','Non : la phrase A est déclarative et la phrase B est injonctive.'],ok:1,
+  fb:"La phrase A utilise il convient de + infinitif. Même si elle donne un conseil, il convient est un verbe à l'indicatif, pas à l'impératif. Elle donne une information → déclaratif, comme la phrase B. Le type injonctif nécessite un verbe à l'impératif (relis, relisez) ou à l'infinitif de manière directe (relire son travail)."},
+ qB:{q:"Quelle différence de forme les distingue ?",opts:['La phrase A est passive ; la phrase B est active.','La phrase A est exclamative ; la phrase B est neutre.','La phrase A est impersonnelle ; la phrase B est personnelle.'],ok:2,
+  fb:"La phrase A : le pronom il ne renvoie à aucune personne : il convient = il impersonnel, comme il faut ou il est utile. → forme impersonnelle. La phrase B : Marie est un sujet identifiable, une vraie personne. → forme personnelle."}},
+
+{ep:3,
+ qA:{q:"Q22 — Voici une phrase :\n« Par qui ce texte a-t-il été écrit ? »\n\nQuelle est l'analyse complète de cette phrase ?",
+  opts:['Type : interrogatif. Formes : affirmative et passive.','Type : déclaratif. Formes : affirmative et passive.','Type : interrogatif. Formes : négative et active.'],ok:0,
+  fb:"La phrase pose une question (par qui… + inversion du sujet a-t-il + point d'interrogation) : → type interrogatif. Pas de négation → affirmative. Le sujet ce texte subit l'action d'être écrit : construction a été écrit (être + participe passé) : → forme passive. Cette phrase prouve qu'une phrase interrogative peut aussi être à la forme passive : type et formes sont toujours indépendants."}},
+
+{ep:3,
+ qA:{q:"Q23 — Phrase :\n« Quel beau travail vous avez fourni ! »\n\nRéécris cette phrase en conservant le même sens, mais en changeant :\n— le type → déclaratif ;\n— les formes → affirmative, active, personnelle, neutre.\n\nQuelle réécriture est correcte ?",
+  opts:['« Vous n\'avez pas fourni un beau travail. »','« Vous avez fourni un beau travail. »','« Un beau travail a été fourni par vous. »'],ok:1,
+  fb:"La contrainte impose :\n— type déclaratif : pas d'impératif, pas de ?.\n— affirmative : pas de négation.\n— active : le sujet vous fait l'action.\n— personnelle : vous renvoie à des personnes identifiables.\n— neutre : pas de mot exclamatif, pas de !\nLa proposition A est négative. La proposition C est passive (a été fourni par vous) : ≠ forme active demandée."}},
+];
+
+const TOTAL=25;
+let cur=0;
+let stA=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+let stB=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+let pA=[],pB=[];
+
+function ep1Score(){let s=0;DEFIS.forEach((d,i)=>{if(d.ep===1){if(stA[i].ok)s++;if(d.qB&&stB[i].ok)s++;}});return s;}
+function ep2Score(){let s=0;DEFIS.forEach((d,i)=>{if(d.ep===2&&stA[i].ok)s++;});return s;}
+function ep3Score(){let s=0;DEFIS.forEach((d,i)=>{if(d.ep===3){if(stA[i].ok)s++;if(d.qB&&stB[i].ok)s++;}});return s;}
+function totalScore(){return ep1Score()+ep2Score()+ep3Score();}
+function getQPts(d){return(d.ep===3&&d.qB)?2:1;}
+function ep2Unlocked(){return ep1Score()>=10;}
+function ep3Unlocked(){return ep2Score()>=3;}
+function defiDone(i){return stA[i].ok&&(!DEFIS[i].qB||stB[i].ok);}
+function allDone(){return DEFIS.every((_,i)=>defiDone(i));}
+
+function mkP(n,ok,pos){
+  const oth=[];for(let i=0;i<n;i++)if(i!==ok)oth.push(i);
+  for(let i=oth.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[oth[i],oth[j]]=[oth[j],oth[i]];}
+  const p=[];let di=0;for(let i=0;i<n;i++)p.push(i===pos?ok:oth[di++]);return p;
+}
+function initPerm(){DEFIS.forEach((d,i)=>{pA[i]=mkP(d.qA.opts.length,d.qA.ok,Math.floor(Math.random()*d.qA.opts.length));if(d.qB)pB[i]=mkP(d.qB.opts.length,d.qB.ok,Math.floor(Math.random()*d.qB.opts.length));});}
+function reshuf(l,i){const d=DEFIS[i],q=l==='A'?d.qA:d.qB;if(!q)return;const pm=l==='A'?pA:pB;const prev=pm[i].indexOf(q.ok);let np;do{np=Math.floor(Math.random()*q.opts.length);}while(np===prev&&q.opts.length>1);if(l==='A')pA[i]=mkP(q.opts.length,q.ok,np);else pB[i]=mkP(q.opts.length,q.ok,np);}
+initPerm();
+
+function epColor(ep){return ep===1?'#3ab5d8':ep===2?'#8dc63f':'#e05050';}
+function epBg(ep){return ep===1?'rgba(58,181,216,.15)':ep===2?'rgba(141,198,63,.15)':'rgba(224,80,80,.15)';}
+
+// ══ RUNNER ══
+const C=document.getElementById('c');
+const ctx=C.getContext('2d');
+const W=1280,H=440;
+C.width=W;C.height=H;
+C.style.maxWidth='100vw';C.style.maxHeight='100vh';
+C.style.width='min(100vw,'+(W/H*100)+'vh)';
+C.style.height='min(100vh,'+(H/W*100)+'vw)';
+
+let AX=null;
+function initAudio(){if(AX)return;try{AX=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f,d,tp='sine',vol=0.1,dl=0){if(!AX)return;const t=AX.currentTime+dl;const o=AX.createOscillator(),g=AX.createGain();o.type=tp;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0.001,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(g);g.connect(AX.destination);o.start(t);o.stop(t+d+0.05);}
+function sndJump(){tone(320,0.08,'square',0.08);tone(480,0.12,'square',0.06,0.08);}
+function sndHit(){tone(180,0.18,'sawtooth',0.12);tone(120,0.22,'sawtooth',0.1,0.1);}
+function sndWin(){[523,659,784,1046,1318].forEach((f,i)=>tone(f,0.18,'sine',0.12,i*0.09));}
+function sndStart(){[400,500,700,900].forEach((f,i)=>tone(f,0.12,'sine',0.1,i*0.07));}
+
+const GROUND_Y=H-90;
+const ZONES_R=[
+  {sky1:'#0a1428',sky2:'#0e2040',ground:'#1a3a60',accent:'#3ab5d8',accent2:'#6ad0f0'},
+  {sky1:'#081408',sky2:'#0e2010',ground:'#1a4020',accent:'#8dc63f',accent2:'#b0e060'},
+  {sky1:'#180808',sky2:'#280e0e',ground:'#3a1010',accent:'#e05050',accent2:'#f08080'},
+];
+
+const stars=[];
+for(let i=0;i<100;i++)stars.push({x:Math.random()*W,y:Math.random()*H*0.7,r:Math.random()*1.6+0.3,a:Math.random()*0.6+0.3});
+const mountains=[];
+for(let i=0;i<10;i++)mountains.push({x:i*(W/6)+Math.random()*60,h:50+Math.random()*80,w:70+Math.random()*100,spd:0.5+Math.random()*0.4});
+
+// État runner PERSISTANT entre sessions
+let rState={
+  frame:0, speed:5,
+  playerY:0, playerVY:0, playerGrounded:true, playerJC:0,
+  playerSquash:1, playerSquashV:0, playerTilt:0, playerTrail:[],
+  obstacles:[], obsTimer:0,
+  stars_c:[], starTimer:0, starsCollected:0,
+  particles:[], lives:3, invincible:0,
+  flashA:0, flashCol:'#fff',
+  bgDecors:[], decorTimer:0,
+  laneOff:0, initialized:false
+};
+
+function initRState(){
+  rState.playerY=GROUND_Y-40;rState.playerVY=0;rState.playerGrounded=true;rState.playerJC=0;
+  rState.playerSquash=1;rState.playerSquashV=0;rState.playerTilt=0;rState.playerTrail=[];
+  rState.obstacles=[];rState.obsTimer=0;rState.stars_c=[];rState.starTimer=0;rState.starsCollected=0;rState.particles=[];rState.lives=3;rState.invincible=0;
+  rState.flashA=0;rState.bgDecors=[];rState.decorTimer=0;rState.laneOff=0;rState.frame=0;rState.speed=5;
+  rState.initialized=true;
+}
+
+let rPlaying=false;
+let rTimer=0;
+const RUN_SECS=10;
+let rZone=0;
+let rLoopId=null;
+let titleShown=true;
+
+function curZone(){const s1=ep1Score();if(s1<14)return 0;const s2=ep2Score();if(s2<4)return 1;return 2;}
+
+function doJumpR(){
+  if(!rPlaying)return;
+  if(rState.playerJC<2){
+    rState.playerVY=(-15)-(rState.playerJC*2);
+    rState.playerGrounded=false;rState.playerJC++;
+    rState.playerSquash=0.72;rState.playerSquashV=0.1;
+    sndJump();
+  }
+}
+
+const OBS_TYPES=[
+  // Haies — petite (franchir en sautant bas), moyenne, grande (saut plein)
+  {w:28,h:28,c:'#c84040',c2:'#e06060',sh:'hurdle',lbl:'S'},
+  {w:28,h:48,c:'#c84040',c2:'#e06060',sh:'hurdle',lbl:'M'},
+  {w:28,h:72,c:'#c84040',c2:'#e06060',sh:'hurdle',lbl:'L'},
+  // Blocs — bas (passer dessus ou sauter), moyen, haut
+  {w:44,h:22,c:'#9040c8',c2:'#b870e8',sh:'block',lbl:'S'},
+  {w:44,h:38,c:'#9040c8',c2:'#b870e8',sh:'block',lbl:'M'},
+  {w:44,h:58,c:'#9040c8',c2:'#b870e8',sh:'block',lbl:'L'},
+  // Pics — fin petit, moyen, grand
+  {w:18,h:38,c:'#c87820',c2:'#e8a040',sh:'spike',lbl:'S'},
+  {w:22,h:62,c:'#c87820',c2:'#e8a040',sh:'spike',lbl:'M'},
+  {w:26,h:90,c:'#c87820',c2:'#e8a040',sh:'spike',lbl:'L'},
+];
+
+// spawnObsOrStar : 1 fois sur 3 → étoile à hauteur atteignable, sinon obstacle
+let _spawnCount=0;
+function spawnObsOrStar(){
+  _spawnCount++;
+  if(_spawnCount%3===0){
+    // Étoile : uniquement sol (atteignable sans saut) ou 1er saut (atteignable avec saut simple)
+    // GROUND_Y-40 = hauteur du joueur au sol → étoile à hauteur joueur = GROUND_Y-60 (sol)
+    // saut simple monte à ≈ GROUND_Y-40-120 = GROUND_Y-160
+    const heights=[GROUND_Y-55, GROUND_Y-55, GROUND_Y-100, GROUND_Y-145];
+    const y=heights[Math.floor(Math.random()*heights.length)];
+    rState.stars_c.push({x:W+20, y, phase:Math.random()*Math.PI*2, collected:false});
+  } else {
+    const t=OBS_TYPES[Math.floor(Math.random()*OBS_TYPES.length)];
+    rState.obstacles.push({x:W+20,y:GROUND_Y-t.h,type:t,hit:false});
+  }
+}
+function spawnDecor(){rState.bgDecors.push({x:W+30,type:['lamp','pylon'][Math.floor(Math.random()*2)]});}
+function spawnRP(x,y,col,n){for(let i=0;i<n;i++){const a=(Math.PI*2/n)*i;const spd=2+Math.random()*3;rState.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-1.5,life:1,dec:0.04,r:3+Math.random()*3,color:col});}}
+
+function updateRunner(){
+  // Gestion transition inter-épreuve
+  if(rTransition){
+    rTransition.timer--;
+    rState.frame++;
+    if(rTransition.timer<=0){rTransition=null;launchRun();}
+    return;
+  }
+  if(!rPlaying)return;
+  const rs=rState;
+  rs.frame++;
+  // Épreuve 3 : base plus rapide + accélération plus forte
+  const zoneBoost=rZone===2?3.5:rZone===1?1.2:0;
+  rs.speed=Math.min(rZone===2?18:12, 5+zoneBoost+rs.frame*(rZone===2?0.010:0.004)+totalScore()*0.08);
+
+  rTimer--;
+  const secLeft=Math.ceil(rTimer/60);
+  document.getElementById('rTimerTxt').textContent='COURSE LIBRE · '+secLeft+'s';
+  document.getElementById('rTimerFill').style.width=Math.max(0,(rTimer/(RUN_SECS*60))*100)+'%';
+  if(rTimer<=0){endRunner();return;}
+
+  // Physique joueur
+  const GRAVITY=0.72;
+  if(!rs.playerGrounded)rs.playerVY+=GRAVITY;
+  rs.playerTilt=rs.playerGrounded?0:rs.playerVY*0.014;
+  rs.playerY+=rs.playerVY;
+  if(rs.playerY>=GROUND_Y-40){
+    rs.playerY=GROUND_Y-40;rs.playerVY=0;rs.playerGrounded=true;rs.playerJC=0;rs.playerTilt=0;
+    if(rs.playerSquash<0.9){rs.playerSquash=0.76;rs.playerSquashV=0.06;}
+  }
+  rs.playerSquash+=rs.playerSquashV;
+  rs.playerSquashV-=(rs.playerSquash-1)*0.2;rs.playerSquashV*=0.85;
+  rs.playerSquash=Math.max(0.5,Math.min(1.4,rs.playerSquash));
+  if(rs.invincible>0)rs.invincible--;
+  if(rs.flashA>0)rs.flashA-=0.05;
+
+  // Obstacles et étoiles — timer unifié, 1 spawn sur 3 = étoile
+  rs.obsTimer++;
+  if(rs.obsTimer>=Math.max(55,100-rs.frame*0.04)){rs.obsTimer=0;spawnObsOrStar();}
+  rs.obstacles.forEach(o=>o.x-=rs.speed);
+  rs.obstacles=rs.obstacles.filter(o=>o.x>-80);
+
+  // Étoiles
+  rs.stars_c.forEach(s=>s.x-=rs.speed);
+  rs.stars_c=rs.stars_c.filter(s=>s.x>-40&&!s.collected);
+  rs.stars_c.forEach(s=>{
+    if(s.collected)return;
+    if(140-16<s.x+14&&140+16>s.x-14&&rs.playerY-16<s.y+14&&rs.playerY+40>s.y-14){
+      s.collected=true;rs.starsCollected++;
+      tone(784,0.07,'sine',0.12);tone(1046,0.10,'sine',0.10,0.07);
+      spawnRP(s.x,s.y,ZONES_R[rZone]?.accent||'#f5c518',14);
+      rs.playerSquash=0.78;rs.playerSquashV=0.09;
+    }
+  });
+
+  // Décors
+  rs.decorTimer++;
+  if(rs.decorTimer>=95){rs.decorTimer=0;spawnDecor();}
+  rs.bgDecors.forEach(d=>d.x-=rs.speed*0.7);
+  rs.bgDecors=rs.bgDecors.filter(d=>d.x>-60);
+
+  // Trail
+  rs.playerTrail.push({x:140-8,y:rs.playerY+20,a:0.5});
+  if(rs.playerTrail.length>10)rs.playerTrail.shift();
+
+  // Particules
+  rs.particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life-=p.dec;});
+  rs.particles=rs.particles.filter(p=>p.life>0);
+
+  // Laneoff
+  rs.laneOff=(rs.laneOff+rs.speed)%(W/4);
+
+  // Collision
+  const px=140-14,py=rs.playerY,pw=28,ph=36;
+  rs.obstacles.forEach(ob=>{
+    if(ob.hit)return;
+    if(px<ob.x+ob.type.w&&px+pw>ob.x&&py<ob.y+ob.type.h&&py+ph>ob.y){
+      if(rs.invincible<=0){
+        rs.lives--;rs.invincible=70;rs.flashA=0.5;rs.flashCol='#ff2020';
+        sndHit();spawnRP(140,rs.playerY+20,'#ff4040',10);ob.hit=true;
+      }
+    }
+  });
+}
+
+function drawRunnerFrame(){
+  const rs=rState;
+  const z=ZONES_R[rZone]||ZONES_R[0];
+  // Sky
+  const sg=ctx.createLinearGradient(0,0,0,GROUND_Y);
+  sg.addColorStop(0,z.sky1);sg.addColorStop(1,z.sky2);
+  ctx.fillStyle=sg;ctx.fillRect(0,0,W,GROUND_Y);
+  // Stars
+  stars.forEach(s=>{
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.a*(0.6+0.4*Math.sin(rs.frame*0.05+s.x))})`;ctx.fill();
+    s.x-=s.r*0.12;if(s.x<0){s.x=W;s.y=Math.random()*H*0.65;}
+  });
+  // Mountains
+  mountains.forEach(m=>{
+    ctx.fillStyle='rgba(255,255,255,0.04)';ctx.beginPath();
+    ctx.moveTo(m.x,GROUND_Y);ctx.lineTo(m.x+m.w/2,GROUND_Y-m.h);ctx.lineTo(m.x+m.w,GROUND_Y);ctx.fill();
+    m.x-=m.spd*(rs.speed/5);if(m.x+m.w<0)m.x=W+m.w;
+  });
+  // Décors
+  rs.bgDecors.forEach(d=>{
+    ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=2;
+    if(d.type==='lamp'){ctx.beginPath();ctx.moveTo(d.x,GROUND_Y);ctx.lineTo(d.x,GROUND_Y-70);ctx.lineTo(d.x+14,GROUND_Y-70);ctx.stroke();ctx.beginPath();ctx.arc(d.x+14,GROUND_Y-68,4,0,Math.PI*2);ctx.fillStyle='rgba(255,240,180,0.35)';ctx.fill();}
+    else{ctx.beginPath();ctx.moveTo(d.x,GROUND_Y);ctx.lineTo(d.x,GROUND_Y-90);ctx.stroke();[0.3,0.6,0.9].forEach(t=>{ctx.beginPath();ctx.moveTo(d.x-12*(1-t),GROUND_Y-90*t);ctx.lineTo(d.x+12*(1-t),GROUND_Y-90*t);ctx.stroke();});}
+  });
+  // Ground
+  const gg=ctx.createLinearGradient(0,GROUND_Y,0,H);gg.addColorStop(0,z.ground);gg.addColorStop(1,'#060c14');
+  ctx.fillStyle=gg;ctx.fillRect(0,GROUND_Y,W,H-GROUND_Y);
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fillRect(0,GROUND_Y,W,2);
+  for(let i=0;i<5;i++){const lx=i*(W/4)-rs.laneOff;ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.setLineDash([18,16]);ctx.beginPath();ctx.moveTo(lx,GROUND_Y+2);ctx.lineTo(lx,H);ctx.stroke();ctx.setLineDash([]);}
+  // Étoiles à attraper
+  rs.stars_c.forEach(s=>{
+    if(s.collected)return;
+    ctx.save();
+    ctx.translate(s.x, s.y+Math.sin(rs.frame*0.08+s.phase)*5);
+    ctx.rotate(rs.frame*0.03);
+    const ac=ZONES_R[rZone]?.accent||'#f5c518';
+    ctx.shadowBlur=18;ctx.shadowColor=ac;
+    const R=13,r=5,pts=5;
+    ctx.beginPath();
+    for(let i=0;i<pts*2;i++){
+      const rad=i%2===0?R:r;
+      const a=(Math.PI/pts)*i-Math.PI/2;
+      i===0?ctx.moveTo(Math.cos(a)*rad,Math.sin(a)*rad):ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad);
+    }
+    ctx.closePath();ctx.fillStyle=ac;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,3,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+  // Obstacles
+  rs.obstacles.forEach(ob=>{
+    const t=ob.type;
+    ctx.save();ctx.shadowBlur=10;ctx.shadowColor=t.c;
+    if(t.sh==='hurdle'){
+      // Montants
+      ctx.fillStyle=t.c;
+      ctx.fillRect(ob.x,ob.y,5,t.h);
+      ctx.fillRect(ob.x+t.w-5,ob.y,5,t.h);
+      // Barre(s) : 1 pour S/M, 2 pour L
+      ctx.fillRect(ob.x,ob.y,t.w,7);
+      if(t.lbl==='L') ctx.fillRect(ob.x,ob.y+t.h*0.45,t.w,6);
+      ctx.fillStyle=t.c2;ctx.fillRect(ob.x+5,ob.y+2,t.w-10,2);
+    } else if(t.sh==='block'){
+      ctx.fillStyle=t.c;ctx.beginPath();ctx.roundRect(ob.x,ob.y,t.w,t.h,5);ctx.fill();
+      ctx.strokeStyle=t.c2;ctx.lineWidth=1.5;ctx.stroke();
+      // Reflet
+      ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fillRect(ob.x+5,ob.y+5,t.w*0.35,4);
+      // Croix sur le grand bloc
+      if(t.lbl==='L'){ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(ob.x+t.w/2,ob.y+5);ctx.lineTo(ob.x+t.w/2,ob.y+t.h-5);ctx.stroke();}
+    } else {
+      ctx.fillStyle=t.c;ctx.beginPath();
+      ctx.moveTo(ob.x+t.w/2,ob.y);ctx.lineTo(ob.x+t.w,ob.y+t.h);ctx.lineTo(ob.x,ob.y+t.h);
+      ctx.closePath();ctx.fill();ctx.strokeStyle=t.c2;ctx.lineWidth=1.5;ctx.stroke();
+      // Double pic pour L
+      if(t.lbl==='L'){
+        ctx.fillStyle=t.c+'cc';ctx.beginPath();
+        ctx.moveTo(ob.x+t.w*0.5,ob.y+t.h*0.3);ctx.lineTo(ob.x+t.w*0.75,ob.y+t.h);ctx.lineTo(ob.x+t.w*0.25,ob.y+t.h);
+        ctx.closePath();ctx.fill();
+      }
+    }
+    ctx.restore();
+  });
+  // Trail
+  rs.playerTrail.forEach((t,i)=>{const prog=i/rs.playerTrail.length;ctx.beginPath();ctx.arc(t.x,t.y,9*prog,0,Math.PI*2);ctx.fillStyle=z.accent+Math.round(prog*65).toString(16).padStart(2,'0');ctx.fill();});
+  // Player
+  const pw=32*rs.playerSquash,ph=40/rs.playerSquash;
+  const cx=140,cy=rs.playerY+ph/2;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(rs.playerTilt);
+  ctx.fillStyle='rgba(0,0,0,0.28)';ctx.beginPath();ctx.ellipse(0,ph/2+3,pw*0.44,5,0,0,Math.PI*2);ctx.fill();
+  if(!(rs.invincible>0&&Math.floor(rs.invincible/4)%2===0)){
+    const w2=pw/2,h2=ph/2;
+    ctx.shadowBlur=16;ctx.shadowColor=z.accent;
+    ctx.beginPath();ctx.moveTo(0,-h2);ctx.lineTo(w2*0.65,-h2*0.4);ctx.lineTo(w2*0.65,h2*0.3);ctx.lineTo(0,h2);ctx.lineTo(-w2*0.65,h2*0.3);ctx.lineTo(-w2*0.65,-h2*0.4);ctx.closePath();
+    const bg=ctx.createLinearGradient(-w2,-h2,w2,h2);bg.addColorStop(0,z.accent2);bg.addColorStop(1,z.accent+'88');
+    ctx.fillStyle=bg;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,0.55)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,-h2*0.55);ctx.lineTo(0,h2*0.45);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-w2*0.38,0);ctx.lineTo(w2*0.38,0);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,3.5,0,Math.PI*2);ctx.fill();
+    if(!rs.playerGrounded){ctx.strokeStyle=z.accent+'99';ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(0,0,w2+5+Math.sin(rs.frame*0.3)*2,0,Math.PI*2);ctx.stroke();}
+  }
+  ctx.restore();ctx.shadowBlur=0;
+  // Particules
+  rs.particles.forEach(p=>{ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();ctx.restore();});
+  // HUD
+  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,48);
+  ctx.fillStyle=z.accent+'55';ctx.fillRect(0,46,W,2);
+  ctx.font='700 13px Orbitron';ctx.fillStyle=z.accent;ctx.fillText('COURSE LIBRE — ÉVITE LES OBSTACLES !',18,22);
+  ctx.font='500 10px Orbitron';ctx.fillStyle='rgba(255,255,255,0.38)';ctx.fillText('ESPACE / ↑ = sauter · attrape les étoiles !',18,38);
+  // Compteur étoiles
+  ctx.font='700 13px Orbitron';ctx.fillStyle='#f5c518';
+  ctx.fillText('★ '+rs.starsCollected, W/2-30, 28);
+  for(let i=0;i<3;i++){const hx=W-150+i*40;ctx.beginPath();ctx.moveTo(hx+12,18);ctx.lineTo(hx+22,28);ctx.lineTo(hx+12,38);ctx.lineTo(hx+2,28);ctx.closePath();ctx.fillStyle=i<rs.lives?'#e05050':'rgba(255,255,255,0.1)';ctx.fill();}
+  ctx.font='700 11px JetBrains Mono';ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fillText('SCORE : '+totalScore()+' / '+TOTAL,W-150,45);
+  if(rs.flashA>0){ctx.fillStyle=rs.flashCol;ctx.globalAlpha=rs.flashA;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+
+  // Écran de transition inter-épreuve
+  if(rTransition){
+    const tr=rTransition;
+    const prog=1-(tr.timer/150); // 0→1
+    const alpha=Math.min(1, prog*3);
+    ctx.fillStyle=`rgba(0,0,0,${Math.min(0.88,alpha*0.88)})`;
+    ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    // BRAVO
+    ctx.save();
+    ctx.shadowBlur=40;ctx.shadowColor=tr.color;
+    ctx.globalAlpha=Math.min(1,prog*4);
+    ctx.font='900 80px Orbitron';ctx.fillStyle=tr.color;
+    ctx.fillText(tr.msg1,W/2,H*0.3);
+    ctx.restore();
+    // Épreuve terminée
+    ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.15)*5));
+    ctx.font='700 28px Orbitron';ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.fillText(tr.msg2,W/2,H*0.3+54);
+    // Séparateur
+    ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.25)*5));
+    ctx.fillStyle=`rgba(255,255,255,0.2)`;
+    ctx.fillRect(W/2-160,H*0.5-1,320,2);
+    // Nouvelle épreuve
+    ctx.save();
+    ctx.shadowBlur=20;ctx.shadowColor=tr.color2;
+    ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.35)*4));
+    ctx.font='900 22px Orbitron';ctx.fillStyle=tr.color2;
+    ctx.fillText(tr.msg3,W/2,H*0.5+34);
+    ctx.restore();
+    ctx.font='500 14px Orbitron';ctx.fillStyle='rgba(200,220,240,0.7)';
+    ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.45)*4));
+    ctx.fillText(tr.sub,W/2,H*0.5+62);
+    // Barre de compte à rebours
+    const barW=300,barX=W/2-barW/2;
+    ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.5)*4));
+    ctx.fillStyle='rgba(255,255,255,0.1)';ctx.beginPath();ctx.roundRect(barX,H-55,barW,8,4);ctx.fill();
+    const barProg=1-(tr.timer/150);
+    ctx.fillStyle=tr.color2;ctx.beginPath();ctx.roundRect(barX,H-55,barW*barProg,8,4);ctx.fill();
+    ctx.font='700 11px Orbitron';ctx.fillStyle='rgba(255,255,255,0.45)';
+    ctx.fillText('La course reprend dans un instant…',W/2,H-30);
+    ctx.globalAlpha=1;ctx.textAlign='left';
+    return;
+  }
+
+  // Titre si pas encore démarré
+  if(titleShown&&!rPlaying){
+    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#050a14');grad.addColorStop(1,'#0a1828');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a*0.5})`;ctx.fill();});
+    ctx.textAlign='center';
+    ctx.save();ctx.shadowBlur=28;ctx.shadowColor='#3ab5d8';
+    ctx.font='900 72px Orbitron';ctx.fillStyle='#3ab5d8';ctx.fillText('LE GRAND TOURNOI',W/2,H*0.28);ctx.restore();
+    ctx.font='900 28px Orbitron';ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillText('DE LA LANGUE',W/2,H*0.28+52);
+    ctx.font='700 18px Orbitron';ctx.fillStyle='rgba(200,230,255,0.92)';ctx.fillText('Types et formes de phrases · 3 épreuves · 25 points',W/2,H*0.28+90);
+    ctx.save();ctx.translate(W/2,H*0.62);
+    const p=1+0.06*Math.sin(rState.frame*0.07);ctx.scale(p,p);ctx.shadowBlur=20;ctx.shadowColor='#3ab5d8';
+    ctx.beginPath();ctx.moveTo(0,-20);ctx.lineTo(13,-7);ctx.lineTo(13,9);ctx.lineTo(0,20);ctx.lineTo(-13,9);ctx.lineTo(-13,-7);ctx.closePath();
+    const dg=ctx.createLinearGradient(-13,-20,13,20);dg.addColorStop(0,'#6ad0f0');dg.addColorStop(1,'#1a6aaa');
+    ctx.fillStyle=dg;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,3.5,0,Math.PI*2);ctx.fill();ctx.restore();
+    const p2=0.5+0.5*Math.sin(rState.frame*0.06);
+    ctx.font='900 20px Orbitron';ctx.fillStyle=`rgba(245,198,24,${p2})`;ctx.fillText('APPUIE SUR ESPACE OU CLIQUE POUR COMMENCER',W/2,H-58);
+    ctx.font='700 15px Orbitron';ctx.fillStyle='rgba(255,255,255,0.75)';ctx.fillText('ESPACE / ↑ = sauter  ·  double saut disponible',W/2,H-28);
+    ctx.textAlign='left';
+  }
+}
+
+function rLoop(){
+  rLoopId=requestAnimationFrame(rLoop);
+  if(rFinal){updateFinal();ctx.clearRect(0,0,W,H);drawFinal();return;}
+  updateRunner();ctx.clearRect(0,0,W,H);drawRunnerFrame();
+}
+
+// Transition entre épreuves
+let rTransition=null; // {msg, sub, color, timer}
+
+function startRunner(prevZone){
+  const newZone=curZone();
+  rZone=newZone;
+  if(!rState.initialized)initRState();
+  rPlaying=false;
+  document.getElementById('runnerWrap').style.display='flex';
+  document.getElementById('qcmWrap').style.display='none';
+  document.getElementById('rTimerWrap').style.display='none';
+  document.getElementById('rSkip').style.display='none';
+
+  // Afficher transition si changement d'épreuve
+  const epNames=['Épreuve 1','Épreuve 2','Épreuve 3'];
+  const epColors=[ZONES_R[0].accent, ZONES_R[1].accent, ZONES_R[2].accent];
+  const epSubs=['Analyse complète · 14 points','Réécriture sous contraintes · 4 points','Défi d\'expert · 7 points'];
+
+  if(prevZone!==undefined && prevZone!==newZone){
+    // Transition : félicitation + annonce nouvelle épreuve
+    rTransition={
+      msg1:'BRAVO !',
+      msg2:epNames[prevZone]+' terminée !',
+      msg3:'▶ '+epNames[newZone]+' débloquée',
+      sub:epSubs[newZone],
+      color:epColors[prevZone],
+      color2:epColors[newZone],
+      timer:150 // ~2.5s à 60fps
+    };
+  } else {
+    rTransition=null;
+    launchRun();
+  }
+}
+
+function launchRun(){
+  rTimer=RUN_SECS*60;rPlaying=true;
+  rZone=curZone();
+  document.getElementById('rTimerWrap').style.display='block';
+  document.getElementById('rSkip').style.display='block';
+  sndStart();
+}
+
+// ── État bilan final ──
+let rFinal=null; // {frame, scoreCount, tot, s1, s2, s3, titre, stars}
+
+function endRunner(){
+  rPlaying=false;
+  document.getElementById('rTimerWrap').style.display='none';
+  document.getElementById('rSkip').style.display='none';
+  if(allDone()){
+    showBilanCanvas();
+  } else {
+    document.getElementById('runnerWrap').style.display='none';
+    document.getElementById('qcmWrap').style.display='flex';
+    advanceCur();renderQCM();
+  }
+}
+
+function showBilanCanvas(){
+  const tot=totalScore();
+  const titles=[
+    {min:22,t:'CHAMPION DE LA LANGUE',sub:'Analyse irréprochable — performance maximale.'},
+    {min:17,t:'FINALISTE',sub:'Très bonne maîtrise des types et des formes.'},
+    {min:12,t:'DEMI-FINALISTE',sub:'Bonne progression — reprends les épreuves signalées.'},
+    {min:0, t:'RETOUR À L\'ATELIER',sub:'Reprends les activités du parcours avant de retenter.'}
+  ];
+  const td=titles.find(t=>tot>=t.min);
+  rFinal={
+    frame:0, scoreCount:0, tot,
+    s1:ep1Score(), s2:ep2Score(), s3:ep3Score(),
+    titre:td.t, sub:td.sub,
+    stars:rState.starsCollected||0,
+    fireworks:[], fwTimer:0
+  };
+  document.getElementById('runnerWrap').style.display='flex';
+  document.getElementById('qcmWrap').style.display='none';
+  sndFinal(tot);
+}
+
+function sndFinal(tot){
+  if(tot>=17){
+    [523,659,784,880,1046,1318,1568].forEach((f,i)=>tone(f,0.2,'sine',0.13,i*0.1));
+    setTimeout(()=>{tone(1568,0.5,'sine',0.15);},750);
+  } else {
+    [392,330,294,262].forEach((f,i)=>tone(f,0.25,'sawtooth',0.10,i*0.12));
+  }
+}
+
+// Feux d'artifice
+function spawnFw(x,y,col){
+  const fw={x,y,particles:[]};
+  for(let i=0;i<28;i++){
+    const a=(Math.PI*2/28)*i+Math.random()*0.3;
+    const spd=3+Math.random()*5;
+    fw.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,col,r:3+Math.random()*3});
+  }
+  return fw;
+}
+
+function updateFinal(){
+  if(!rFinal)return;
+  const f=rFinal;
+  f.frame++;
+  // Compte le score
+  if(f.scoreCount<f.tot && f.frame%3===0) f.scoreCount++;
+  // Feux d'artifice
+  f.fwTimer++;
+  if(f.fwTimer>=22){
+    f.fwTimer=0;
+    const cols=['#f5c518','#3ab5d8','#e05050','#8dc63f','#f5a623','#fff'];
+    f.fireworks.push(spawnFw(
+      120+Math.random()*(W-240),
+      50+Math.random()*(H*0.55),
+      cols[Math.floor(Math.random()*cols.length)]
+    ));
+  }
+  f.fireworks.forEach(fw=>{
+    fw.particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.vx*=0.97;p.life-=0.018;
+    });
+    fw.particles=fw.particles.filter(p=>p.life>0);
+  });
+  f.fireworks=f.fireworks.filter(fw=>fw.particles.length>0);
+}
+
+function drawFinal(){
+  if(!rFinal)return;
+  const f=rFinal;
+  const tot=f.tot;
+  const isChamp=tot>=17;
+
+  // Fond
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,isChamp?'#0a0a1a':'#1a0808');
+  grad.addColorStop(1,isChamp?'#0e1430':'#260e0e');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+  // Étoiles de fond
+  stars.forEach(s=>{
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.a*0.4})`;ctx.fill();
+  });
+
+  // Feux d'artifice
+  f.fireworks.forEach(fw=>{
+    fw.particles.forEach(p=>{
+      ctx.save();ctx.globalAlpha=p.life;
+      ctx.fillStyle=p.col;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+  });
+
+  ctx.textAlign='center';
+  const prog=Math.min(1,f.frame/60);
+
+  // Titre champion
+  ctx.save();
+  ctx.shadowBlur=isChamp?50:20;
+  ctx.shadowColor=isChamp?'#f5c518':'#e05050';
+  ctx.globalAlpha=Math.min(1,prog*2);
+  ctx.font='900 '+(isChamp?'54':'42')+'px Orbitron';
+  ctx.fillStyle=isChamp?'#f5c518':'#e05050';
+  ctx.fillText(f.titre,W/2,H*0.18);
+  ctx.restore();
+
+  // Sous-titre
+  ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.2)*2.5));
+  ctx.font='500 15px Orbitron';
+  ctx.fillStyle='rgba(220,230,255,0.75)';
+  ctx.fillText(f.sub,W/2,H*0.18+36);
+
+  // Gros score animé
+  ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.1)*2));
+  ctx.save();
+  const pulse=1+0.04*Math.sin(f.frame*0.12);
+  ctx.translate(W/2,H*0.46);ctx.scale(pulse,pulse);
+  ctx.shadowBlur=30;ctx.shadowColor=isChamp?'#f5c518':'#e05050';
+  ctx.font='900 96px JetBrains Mono';
+  ctx.fillStyle='#fff';
+  ctx.fillText(f.scoreCount,0,0);
+  ctx.font='700 28px JetBrains Mono';
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.fillText('/ '+TOTAL,0,38);
+  ctx.restore();
+
+  // Barres détail par épreuve
+  ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.4)*2.5));
+  const barData=[
+    {lbl:'Épreuve 1 · Analyse',sc:f.s1,max:14,col:'#3ab5d8'},
+    {lbl:'Épreuve 2 · Réécriture',sc:f.s2,max:4,col:'#8dc63f'},
+    {lbl:'Épreuve 3 · Expert',sc:f.s3,max:7,col:'#e05050'},
+  ];
+  const barW=320,barH=18,barX=W/2-barW/2,startY=H*0.63;
+  barData.forEach((b,i)=>{
+    const y=startY+i*38;
+    // Fond barre
+    ctx.fillStyle='rgba(255,255,255,0.07)';ctx.beginPath();ctx.roundRect(barX,y,barW,barH,9);ctx.fill();
+    // Remplissage animé
+    const fill=Math.min(b.sc/b.max, Math.min(1,(f.frame-60*(0.4+i*0.15))/50));
+    if(fill>0){
+      ctx.fillStyle=b.col;ctx.beginPath();ctx.roundRect(barX,y,barW*fill,barH,9);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.roundRect(barX+2,y+3,barW*fill-4,5,4);ctx.fill();
+    }
+    // Label
+    ctx.font='700 11px Orbitron';ctx.fillStyle='rgba(255,255,255,0.7)';ctx.textAlign='left';
+    ctx.fillText(b.lbl,barX,y-4);
+    ctx.font='700 11px JetBrains Mono';ctx.fillStyle=b.col;ctx.textAlign='right';
+    ctx.fillText(b.sc+' / '+b.max,barX+barW,y-4);
+    ctx.textAlign='center';
+  });
+
+  // Étoiles collectées
+  ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.6)*3));
+  ctx.font='700 13px Orbitron';ctx.fillStyle='#f5c518';
+  ctx.fillText('★ '+f.stars+' étoile'+(f.stars>1?'s':'')+' collectée'+(f.stars>1?'s':'')+' en course',W/2,H-58);
+
+  // Bouton Rejouer
+  ctx.globalAlpha=Math.min(1,Math.max(0,(prog-0.7)*4));
+  const bpulse=0.5+0.5*Math.sin(f.frame*0.07);
+  ctx.font='700 14px Orbitron';
+  ctx.fillStyle=`rgba(245,198,24,${bpulse})`;
+  ctx.fillText('ESPACE ou CLIC — Rejouer',W/2,H-28);
+
+  ctx.globalAlpha=1;ctx.textAlign='left';
+}
+
+function showBilan(){
+  // Appelé depuis renderQCM si allDone — on redirige vers le canvas
+  showBilanCanvas();
+}
+
+document.getElementById('rSkip').addEventListener('click',()=>{rTimer=0;});
+
+function handleRunnerInput(){
+  initAudio();
+  const rw=document.getElementById('runnerWrap');
+  if(rw.style.display==='none')return;
+  // Écran final → rejouer
+  if(rFinal&&rFinal.frame>80){rFinal=null;resetAll();return;}
+  if(titleShown&&!rPlaying){
+    titleShown=false;rPlaying=false;
+    rw.style.display='none';
+    document.getElementById('qcmWrap').style.display='flex';
+    if(!rState.initialized)initRState();
+    renderQCM();
+  } else {
+    doJumpR();
+  }
+}
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();handleRunnerInput();}});
+// Clic uniquement sur le canvas runner — pas sur le QCM
+document.getElementById('c').addEventListener('click',()=>handleRunnerInput());
+document.getElementById('c').addEventListener('touchstart',e=>{e.preventDefault();handleRunnerInput();},{passive:false});
+
+// Flash victoire
+function showWinFlash(msg,sub,color,cb){
+  const wf=document.getElementById('winFlash');
+  document.getElementById('wfMsg').textContent=msg;document.getElementById('wfMsg').style.color=color;
+  document.getElementById('wfSub').textContent=sub;
+  wf.style.display='flex';sndWin();
+  setTimeout(()=>{wf.style.display='none';if(cb)cb();},1600);
+}
+
+// Référentiel
+let refOpen=false;
+document.getElementById('refBtn').addEventListener('click',()=>{
+  refOpen=!refOpen;
+  document.getElementById('refBody').classList.toggle('open',refOpen);
+  document.getElementById('refArr').textContent=refOpen?'▴':'▾';
+});
+
+// ══ QCM ══
+function advanceCur(){
+  for(let i=1;i<=DEFIS.length;i++){
+    const idx=(cur+i)%DEFIS.length;
+    const d=DEFIS[idx];
+    if(d.ep===2&&!ep2Unlocked())continue;
+    if(d.ep===3&&!ep3Unlocked())continue;
+    if(!defiDone(idx)){cur=idx;return;}
+  }
+}
+
+function renderQCM(){
+  updateProg();updateStepper();
+  const d=DEFIS[cur];
+  const col=epColor(d.ep);
+  const locked2=d.ep===2&&!ep2Unlocked();
+  const locked3=d.ep===3&&!ep3Unlocked();
+
+  const consignes={
+    1:'Voici un court texte composé de sept phrases numérotées.\nPour chaque phrase, tu dois indiquer : 1. son type ; 2. sa ou ses formes.',
+    2:'Chaque phrase doit être réécrite en respectant les contraintes indiquées.\nTu choisis la réécriture correcte parmi les propositions.',
+    3:'Ces questions portent sur des cas moins courants ou plus complexes.\nLis attentivement chaque phrase avant de répondre.'
+  };
+
+  const eb=document.getElementById('epBadge');
+  eb.innerHTML=`<div class="ep-bloc">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="ep-badge" style="color:${col};border-color:${col};background:${epBg(d.ep)};">
+        Épreuve ${d.ep} · ${d.ep===1?'Analyse':d.ep===2?'Réécriture':'Expert'}
+      </div>
+    </div>
+    <div class="ep-consigne" style="white-space:pre-line;">${consignes[d.ep]}</div>
+    ${d.phrase?`<div class="ep-bloc-sep"></div><div class="phrase-box">${d.phrase}</div>`:''}
+  </div>`;
+
+  const qc=document.getElementById('qContainer');qc.innerHTML='';
+  if(locked2||locked3){
+    qc.innerHTML=`<div style="background:rgba(255,255,255,.05);border-radius:12px;padding:20px;text-align:center;color:rgba(255,255,255,.5);font-family:'Orbitron',sans-serif;font-size:.78rem;">🔒 Épreuve verrouillée — valide les questions précédentes pour débloquer.</div>`;
+  } else {
+    qc.appendChild(mkQCard('A',cur,d.qA,stA[cur],pA[cur],col,false));
+    if(d.qB)qc.appendChild(mkQCard('B',cur,d.qB,stB[cur],pB[cur],col,!stA[cur].ok));
+  }
+  document.getElementById('gscoreEl').innerHTML=totalScore()+' <span>/ '+TOTAL+'</span>';
+  if(allDone())showBilan();
+}
+
+function mkQCard(ltr,i,q,st,perm,col,locked){
+  const div=document.createElement('div');div.className='qcard';div.id='qcard'+ltr+i;
+  const hdrCol=ltr==='A'?col:'#607080';
+  div.innerHTML=`<div class="qcard-hdr" style="background:${hdrCol}18;border-color:${hdrCol}30;">
+    <div class="ql" style="background:${hdrCol};">${ltr}</div>
+    <span class="qt">${ltr==='A'?'Interprétation / Analyse':'Justification / Suite'}</span>
+  </div><div class="qcard-body" id="qcbody${ltr}${i}"></div>`;
+  const body=div.querySelector('#qcbody'+ltr+i);
+  if(locked){
+    body.innerHTML='<div class="qtxt locked">↳ Valide la question A pour accéder à cette question.</div>';
+  } else {
+    let html=`<div class="qtxt">${q.q.replace(/\n/g,'<br>')}</div><div class="opts" id="opts${ltr}${i}">`;
+    perm.forEach(oi=>{
+      const dis=st.ok||st.tried?'disabled':'';
+      const cls=st.ok&&oi===q.ok?'cok':st.tried&&!st.ok&&oi===q.ok?'cok':'';
+      html+=`<button class="opt ${cls}" ${dis} data-oi="${oi}">${q.opts[oi].replace(/\n/g,'<br>')}</button>`;
+    });
+    html+='</div>';
+    if(st.ok)html+=`<div class="okmsg">✔ Bonne réponse !</div>`;
+    if(st.tried&&!st.ok)html+=`<div class="fb"><span class="fbl">À revoir</span>${q.fb.replace(/\n/g,'<br>')}</div><button class="retry-btn" id="retry${ltr}${i}">Réessayer</button>`;
+    body.innerHTML=html;
+    body.querySelectorAll('.opt:not([disabled])').forEach(btn=>{
+      btn.addEventListener('click',()=>answer(ltr,i,parseInt(btn.dataset.oi)));
+    });
+    const rb=body.querySelector('#retry'+ltr+i);
+    if(rb)rb.addEventListener('click',()=>{reshuf(ltr,i);if(ltr==='A')stA[i].tried=false;else stB[i].tried=false;renderQCM();});
+  }
+  return div;
+}
+
+function answer(ltr,i,oi){
+  const st=ltr==='A'?stA[i]:stB[i];
+  if(st.busy||st.ok)return;st.busy=true;
+  const q=ltr==='A'?DEFIS[i].qA:DEFIS[i].qB;
+  st.tried=true;
+  if(oi===q.ok){
+    st.ok=true;st.busy=false;
+    renderQCM();
+    if(defiDone(i)){
+      const d=DEFIS[i];const pts=getQPts(d);
+      const zoneAvant=curZone();
+      showWinFlash(
+        '+'+pts+' point'+(pts>1?'s':'')+' !',
+        '🏃 Lance la course — '+(RUN_SECS)+'s de jeu !',
+        epColor(d.ep),
+        ()=>startRunner(zoneAvant)
+      );
+    }
+  } else {
+    st.busy=false;renderQCM();
+  }
+}
+
+function updateProg(){
+  const s1=ep1Score(),s2=ep2Score(),s3=ep3Score();
+  const u2=ep2Unlocked(),u3=ep3Unlocked();
+  document.getElementById('sc1').textContent=s1+'/14';
+  document.getElementById('fill1').style.width=(s1/14*100)+'%';
+  buildPzDots('dots1',14,s1,'#3ab5d8');
+  document.getElementById('track2').style.opacity=u2?'1':'0.28';
+  document.getElementById('sc2').textContent=u2?s2+'/4':'🔒';
+  document.getElementById('fill2').style.width=(s2/4*100)+'%';
+  if(u2)buildPzDots('dots2',4,s2,'#8dc63f');
+  document.getElementById('track3').style.opacity=u3?'1':'0.28';
+  document.getElementById('sc3').textContent=u3?s3+'/7':'🔒';
+  document.getElementById('fill3').style.width=(s3/7*100)+'%';
+  if(u3)buildPzDots('dots3',7,s3,'#e05050');
+  document.getElementById('gscoreEl').innerHTML=totalScore()+' <span>/ '+TOTAL+'</span>';
+}
+
+function buildPzDots(id,total,done,col){
+  const el=document.getElementById(id);if(!el)return;el.innerHTML='';
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');d.className='pz-dot';
+    d.style.background=i<done?col:'rgba(255,255,255,0.05)';
+    d.style.borderColor=i<done?col:'rgba(255,255,255,0.12)';
+    d.style.color=i<done?'#fff':'rgba(255,255,255,0.15)';
+    d.textContent=i+1;el.appendChild(d);
+  }
+}
+
+function updateStepper(){
+  const dots=document.getElementById('sDots');dots.innerHTML='';
+  DEFIS.forEach((d,i)=>{
+    const lk=(d.ep===2&&!ep2Unlocked())||(d.ep===3&&!ep3Unlocked());
+    if(lk)return;
+    const dot=document.createElement('div');dot.className='sdot';
+    if(defiDone(i))dot.classList.add('done');
+    else if(stA[i].ok||stB[i].ok)dot.classList.add('part');
+    if(i===cur)dot.classList.add('cur');
+    dot.textContent=i+1;
+    dot.addEventListener('click',()=>{cur=i;renderQCM();});
+    dots.appendChild(dot);
+  });
+  document.getElementById('sPrv').disabled=cur===0;
+  const nxt=document.getElementById('sNxt');
+  nxt.disabled=allDone();
+  nxt.textContent=allDone()?'✓ Bilan':'Suivant ▸';
+  document.getElementById('sPrv').onclick=()=>{if(cur>0){cur--;renderQCM();}};
+  nxt.onclick=()=>{if(!allDone()){advanceCur();renderQCM();}else showBilan();};
+}
+
+function showBilan(){
+  const s1=ep1Score(),s2=ep2Score(),s3=ep3Score(),tot=totalScore();
+  const titles=[{min:22,t:'🏆 Champion de la Langue — Analyse irréprochable.'},{min:17,t:'Finaliste — Très bonne maîtrise des types et des formes.'},{min:12,t:'Demi-finaliste — Bonne progression ; reprends les épreuves signalées.'},{min:0,t:"Retour à l'atelier — Reprends les activités du parcours avant de retenter."}];
+  const titre=titles.find(t=>tot>=t.min).t;
+  document.getElementById('bilanZone').innerHTML=`<div class="bilan">
+    <h2>Bilan final — Le Grand Tournoi</h2>
+    <div class="bsc">${tot} / ${TOTAL}</div>
+    <div class="btit">${titre}</div>
+    <div class="bdet">
+      <div class="bdet-box"><div class="bdet-n" style="color:#3ab5d8">${s1}/14</div><div class="bdet-l">Épreuve 1</div></div>
+      <div class="bdet-box"><div class="bdet-n" style="color:#8dc63f">${s2}/4</div><div class="bdet-l">Épreuve 2</div></div>
+      <div class="bdet-box"><div class="bdet-n" style="color:#e05050">${s3}/7</div><div class="bdet-l">Épreuve 3</div></div>
+    </div>
+    <button class="retry-all" onclick="resetAll()">Retenter le défi</button>
+  </div>`;
+}
+
+function resetAll(){
+  stA=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+  stB=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+  initPerm();cur=0;initRState();rFinal=null;rTransition=null;titleShown=true;
+  document.getElementById('bilanZone').innerHTML='';
+  document.getElementById('runnerWrap').style.display='flex';
+  document.getElementById('qcmWrap').style.display='none';
+}
+
+// ══ INIT ══
+rLoop();
+// Écran titre runner au démarrage
+document.getElementById('runnerWrap').style.display='flex';
+document.getElementById('qcmWrap').style.display='none';
+</script>
+</body>
+</html>
