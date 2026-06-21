@@ -351,15 +351,18 @@ function initRState(){
   rState.playerSquash=1;rState.playerSquashV=0;rState.playerTilt=0;rState.playerTrail=[];
   rState.obstacles=[];rState.obsTimer=0;rState.stars_c=[];rState.starTimer=0;rState.starsCollected=0;rState.particles=[];rState.lives=3;rState.invincible=0;
   rState.flashA=0;rState.bgDecors=[];rState.decorTimer=0;rState.laneOff=0;rState.frame=0;rState.speed=5;
+  rState.qmark=null; // point d'interrogation final
   rState.initialized=true;
 }
 
 let rPlaying=false;
 let rTimer=0;
-const RUN_SECS=10;
+const RUN_SECS=20;
 let rZone=0;
 let rLoopId=null;
 let titleShown=true;
+let isFirstRun=true;
+let showJumpMsg=false; // afficher "APPUIE SUR ESPACE" pendant les 3 premières secondes du 1er jeu
 
 function curZone(){const s1=ep1Score();if(s1<14)return 0;const s2=ep2Score();if(s2<4)return 1;return 2;}
 
@@ -428,6 +431,19 @@ function updateRunner(){
   document.getElementById('rTimerFill').style.width=Math.max(0,(rTimer/(RUN_SECS*60))*100)+'%';
   if(rTimer<=0){endRunner();return;}
 
+  // Phase finale : à 4s restantes → stop obstacles, spawn qmark
+  const QMARK_SEC=4;
+  const isQmarkPhase=rTimer<=QMARK_SEC*60;
+
+  if(isQmarkPhase){
+    // Vider obstacles et étoiles restants
+    rs.obstacles=[];rs.stars_c=[];
+    // Spawner le qmark si pas encore là
+    if(!rs.qmark){
+      rs.qmark={x:W+40,y:GROUND_Y-80,pulse:0,collected:false,isCadeau:allDone()};
+    }
+  }
+
   // Physique joueur
   const GRAVITY=0.72;
   if(!rs.playerGrounded)rs.playerVY+=GRAVITY;
@@ -443,9 +459,11 @@ function updateRunner(){
   if(rs.invincible>0)rs.invincible--;
   if(rs.flashA>0)rs.flashA-=0.05;
 
-  // Obstacles et étoiles — timer unifié, 1 spawn sur 3 = étoile
-  rs.obsTimer++;
-  if(rs.obsTimer>=Math.max(55,100-rs.frame*0.04)){rs.obsTimer=0;spawnObsOrStar();}
+  // Obstacles et étoiles — uniquement hors phase finale
+  if(!isQmarkPhase){
+    rs.obsTimer++;
+    if(rs.obsTimer>=Math.max(35,65-rs.frame*0.04)){rs.obsTimer=0;spawnObsOrStar();}
+  }
   rs.obstacles.forEach(o=>o.x-=rs.speed);
   rs.obstacles=rs.obstacles.filter(o=>o.x>-80);
 
@@ -461,6 +479,30 @@ function updateRunner(){
       rs.playerSquash=0.78;rs.playerSquashV=0.09;
     }
   });
+
+  // Qmark — se dirige OBLIGATOIREMENT vers le pion (x fixe 140, y suit le joueur)
+  if(rs.qmark&&!rs.qmark.collected){
+    rs.qmark.x-=6;
+    rs.qmark.pulse=(rs.qmark.pulse||0)+0.12;
+    // Y suit progressivement la position du joueur
+    const targetY=rs.playerY+rs.playerY*0-40; // hauteur centre pion
+    rs.qmark.y+=(rs.playerY-10-rs.qmark.y)*0.08;
+    // Collision
+    const qr=30;
+    const dist=Math.sqrt(Math.pow(rs.qmark.x-140,2)+Math.pow(rs.qmark.y-(rs.playerY+20),2));
+    if(dist<qr+18){
+      rs.qmark.collected=true;
+      tone(523,0.08,'sine',0.14);tone(659,0.08,'sine',0.12,0.08);tone(784,0.15,'sine',0.13,0.16);
+      spawnRP(rs.qmark.x,rs.qmark.y,'#f5c518',20);
+      rs.playerSquash=0.65;rs.playerSquashV=0.14;
+      rTimer=0; // déclenche endRunner via le timer
+    }
+    // Sécurité : si le qmark dépasse le pion sans collision → forcer endRunner
+    if(rs.qmark.x<80&&!rs.qmark.collected){
+      rs.qmark.collected=true;
+      rTimer=0;
+    }
+  }
 
   // Décors
   rs.decorTimer++;
@@ -575,6 +617,36 @@ function drawRunnerFrame(){
     }
     ctx.restore();
   });
+  // Point d'interrogation final (ou cadeau si allDone)
+  if(rs.qmark&&!rs.qmark.collected){
+    const qx=rs.qmark.x, qy=rs.qmark.y;
+    const pulse=1+0.12*Math.sin(rs.qmark.pulse||0);
+    const isCadeau=rs.qmark.isCadeau||false;
+    ctx.save();
+    ctx.translate(qx,qy);ctx.scale(pulse,pulse);
+    ctx.shadowBlur=30;ctx.shadowColor=isCadeau?'#f5c518':'#f5c518';
+    // Cercle fond
+    ctx.fillStyle=isCadeau?'#f5c518':'#f5c518';ctx.beginPath();ctx.arc(0,0,28,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#1a1000';ctx.beginPath();ctx.arc(0,0,22,0,Math.PI*2);ctx.fill();
+    // Symbole
+    ctx.shadowBlur=0;
+    ctx.font='900 '+(isCadeau?'28':'32')+'px Orbitron';
+    ctx.fillStyle='#f5c518';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(isCadeau?'🎁':'?',0,isCadeau?2:1);
+    ctx.textBaseline='alphabetic';ctx.textAlign='left';
+    // Anneau tournant
+    ctx.strokeStyle='rgba(245,197,24,.5)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(0,0,34+Math.sin(rs.qmark.pulse||0)*3,0,Math.PI*1.6);ctx.stroke();
+    ctx.restore();ctx.shadowBlur=0;
+    // Flèche indicatrice au-dessus
+    ctx.save();ctx.translate(qx,qy-50);
+    const bounce=Math.sin((rs.qmark.pulse||0)*1.5)*6;
+    ctx.translate(0,bounce);
+    ctx.fillStyle='#f5c518';ctx.beginPath();
+    ctx.moveTo(-10,-10);ctx.lineTo(10,-10);ctx.lineTo(0,6);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
   // Trail
   rs.playerTrail.forEach((t,i)=>{const prog=i/rs.playerTrail.length;ctx.beginPath();ctx.arc(t.x,t.y,9*prog,0,Math.PI*2);ctx.fillStyle=z.accent+Math.round(prog*65).toString(16).padStart(2,'0');ctx.fill();});
   // Player
@@ -602,6 +674,26 @@ function drawRunnerFrame(){
   ctx.fillStyle=z.accent+'55';ctx.fillRect(0,46,W,2);
   ctx.font='700 13px Orbitron';ctx.fillStyle=z.accent;ctx.fillText('COURSE LIBRE — ÉVITE LES OBSTACLES !',18,22);
   ctx.font='500 10px Orbitron';ctx.fillStyle='rgba(255,255,255,0.38)';ctx.fillText('ESPACE / ↑ = sauter · attrape les étoiles !',18,38);
+  // Message ESPACE — 1ère course uniquement, 3 premières secondes
+  if(showJumpMsg){
+    const elapsed=RUN_SECS*60-rTimer; // frames écoulées
+    if(elapsed<180){ // 3s à 60fps
+      const pal=0.6+0.4*Math.sin(rs.frame*0.18);
+      const fadeOut=Math.max(0,1-(elapsed/180));
+      ctx.save();ctx.shadowBlur=22;ctx.shadowColor='#f5c518';ctx.globalAlpha=fadeOut;
+      ctx.font='900 24px Orbitron';ctx.fillStyle=`rgba(245,197,24,${pal})`;
+      ctx.textAlign='center';ctx.fillText('APPUIE SUR ESPACE POUR SAUTER !',W/2,H/2+10);
+      ctx.restore();ctx.textAlign='left';ctx.globalAlpha=1;
+    } else {
+      showJumpMsg=false;
+    }
+  }
+  // Alerte phase finale
+  if(rs.qmark&&!rs.qmark.collected){
+    const pal=0.6+0.4*Math.sin(rs.frame*0.25);
+    ctx.font='900 15px Orbitron';ctx.fillStyle=`rgba(245,197,24,${pal})`;
+    ctx.textAlign='center';ctx.fillText(rs.qmark.isCadeau?'⚡ ATTRAPE LE 🎁 POUR TERMINER !':'⚡ ATTRAPE LE  ?  POUR DÉCLENCHER LA QUESTION !',W/2,H-16);ctx.textAlign='left';
+  }
   // Compteur étoiles
   ctx.font='700 13px Orbitron';ctx.fillStyle='#f5c518';
   ctx.fillText('★ '+rs.starsCollected, W/2-30, 28);
@@ -719,13 +811,11 @@ function startRunner(prevZone){
   document.getElementById('rTimerWrap').style.display='none';
   document.getElementById('rSkip').style.display='none';
 
-  // Afficher transition si changement d'épreuve
   const epNames=['Épreuve 1','Épreuve 2','Épreuve 3'];
   const epColors=[ZONES_R[0].accent, ZONES_R[1].accent, ZONES_R[2].accent];
   const epSubs=['Analyse complète · 14 points','Réécriture sous contraintes · 4 points','Défi d\'expert · 7 points'];
 
   if(prevZone!==undefined && prevZone!==newZone){
-    // Transition : félicitation + annonce nouvelle épreuve
     rTransition={
       msg1:'BRAVO !',
       msg2:epNames[prevZone]+' terminée !',
@@ -733,7 +823,7 @@ function startRunner(prevZone){
       sub:epSubs[newZone],
       color:epColors[prevZone],
       color2:epColors[newZone],
-      timer:150 // ~2.5s à 60fps
+      timer:150
     };
   } else {
     rTransition=null;
@@ -744,6 +834,15 @@ function startRunner(prevZone){
 function launchRun(){
   rTimer=RUN_SECS*60;rPlaying=true;
   rZone=curZone();
+  rState.qmark=null;
+  rState.playerJC=0;
+  rState.playerGrounded=true;
+  rState.playerVY=0;
+  rState.playerY=GROUND_Y-40;
+  rState.playerSquash=1;rState.playerSquashV=0;rState.playerTilt=0;
+  rState.playerTrail=[];
+  rState.invincible=0;
+  if(isFirstRun){showJumpMsg=true;isFirstRun=false;}
   document.getElementById('rTimerWrap').style.display='block';
   document.getElementById('rSkip').style.display='block';
   sndStart();
@@ -1073,6 +1172,23 @@ function mkQCard(ltr,i,q,st,perm,col,locked){
   return div;
 }
 
+// Groupes précalculés : évite qu'une question soit seule
+// 16 défis → [3,3,3,3,4] si total%3===1
+function calcGroupTriggers(){
+  const total=DEFIS.length; // 16
+  const groupes=[];
+  let r=total;
+  while(r>0){
+    if(r===1){groupes[groupes.length-1]+=1;r=0;}
+    else{groupes.push(3);r-=3;}
+  }
+  return groupes.reduce((acc,g,i)=>{acc.push((acc[i-1]||0)+g);return acc;},[]);
+}
+const RUN_TRIGGERS=calcGroupTriggers(); // [3,6,9,12,16]
+
+// Compteur de défis résolus (indépendant de l'index)
+let _defisDone=0;
+
 function answer(ltr,i,oi){
   const st=ltr==='A'?stA[i]:stB[i];
   if(st.busy||st.ok)return;st.busy=true;
@@ -1082,14 +1198,28 @@ function answer(ltr,i,oi){
     st.ok=true;st.busy=false;
     renderQCM();
     if(defiDone(i)){
+      _defisDone++;
       const d=DEFIS[i];const pts=getQPts(d);
       const zoneAvant=curZone();
-      showWinFlash(
-        '+'+pts+' point'+(pts>1?'s':'')+' !',
-        '🏃 Lance la course — '+(RUN_SECS)+'s de jeu !',
-        epColor(d.ep),
-        ()=>startRunner(zoneAvant)
-      );
+      const zoneChange=curZone()!==zoneAvant;
+      const isRunTrigger=RUN_TRIGGERS.includes(_defisDone)||zoneChange||allDone();
+      if(isRunTrigger){
+        showWinFlash(
+          '+'+pts+' point'+(pts>1?'s':'')+' !',
+          '⚡ BONNE RÉPONSE ! '+RUN_SECS+' secondes de course t\'attendent !',
+          epColor(d.ep),
+          ()=>startRunner(zoneAvant)
+        );
+      } else {
+        const prochainTrigger=RUN_TRIGGERS.find(t=>t>_defisDone)||(_defisDone+1);
+        const manque=prochainTrigger-_defisDone;
+        showWinFlash(
+          '+'+pts+' point'+(pts>1?'s':'')+' !',
+          'Encore '+manque+' bonne'+(manque>1?'s':'')+' réponse'+(manque>1?'s':'')+' pour la course !',
+          epColor(d.ep),
+          null
+        );
+      }
     }
   } else {
     st.busy=false;renderQCM();
@@ -1166,7 +1296,7 @@ function resetAll(){
   stA=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
   stB=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
   initPerm();cur=0;initRState();rFinal=null;rTransition=null;titleShown=true;
-  document.getElementById('bilanZone').innerHTML='';
+  _defisDone=0;isFirstRun=true;showJumpMsg=false;
   document.getElementById('runnerWrap').style.display='flex';
   document.getElementById('qcmWrap').style.display='none';
 }
