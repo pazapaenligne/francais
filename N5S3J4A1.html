@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S3 J4 – 5e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;
+      --day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f5c518;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* INTRO */
+    .intro{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-color);border-radius:var(--radius);
+      padding:.85rem 1.1rem;margin-bottom:1rem;position:relative;z-index:1;}
+    .intro-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.3rem;}
+    .intro-texte{font-size:.95rem;color:var(--text);line-height:1.6;font-weight:600;}
+
+    /* DASHBOARD */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5a8a9a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#5a8a9a;
+      text-transform:uppercase;letter-spacing:.08em;}
+
+    /* PROGRESSION */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.65rem .8rem;}
+    .ref-cell-titre{font-size:.8rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .ref-cell-body{font-size:.82rem;color:var(--text);line-height:1.6;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* ZONE ÉTIQUETTES */
+    .etiq-section{width:100%;max-width:720px;position:relative;z-index:1;margin-bottom:1.3rem;}
+    .etiq-titre{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.6rem;}
+    .etiq-pool{display:flex;flex-wrap:wrap;gap:.5rem;min-height:3rem;
+      background:var(--day-light);border:2px dashed var(--day-border);
+      border-radius:12px;padding:.6rem .75rem;}
+    .etiq{display:inline-flex;align-items:center;padding:.45rem .9rem;border-radius:8px;
+      background:var(--day-dark);color:#fff;font-size:.95rem;font-weight:700;
+      cursor:grab;user-select:none;border:2px solid transparent;
+      transition:transform .15s,box-shadow .15s;touch-action:none;
+      font-family:Arial,sans-serif;white-space:nowrap;}
+    .etiq:active{cursor:grabbing;}
+    .etiq.dragging{opacity:.45;transform:scale(.97);}
+    .etiq.used{opacity:.35;cursor:default;pointer-events:none;}
+
+    /* PHRASES */
+    .phrases-section{width:100%;max-width:720px;position:relative;z-index:1;}
+    .phrase-card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:.8rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;}
+    .phrase-card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .phrase-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.45rem;}
+    .phrase-texte{font-size:1rem;font-style:italic;color:var(--text);line-height:1.7;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:9px;
+      padding:.6rem .85rem;margin-bottom:.65rem;}
+    .drop-zone{min-height:2.8rem;border:2px dashed var(--day-border);border-radius:9px;
+      display:flex;align-items:center;justify-content:center;padding:.35rem .6rem;
+      background:var(--day-light);transition:all .2s;position:relative;}
+    .drop-zone.over{border-color:var(--day-color);background:#d0eef8;border-style:solid;}
+    .drop-zone.correct{border-color:var(--green);background:var(--green-pale);border-style:solid;}
+    .drop-zone.wrong{border-color:var(--red);background:var(--red-pale);border-style:solid;}
+    .drop-hint{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
+      pointer-events:none;user-select:none;}
+    .drop-zone .etiq{cursor:default;pointer-events:none;}
+    .drop-zone.correct .etiq{background:var(--green);border-color:var(--green);}
+    .drop-zone.wrong .etiq{background:var(--red);border-color:var(--red);}
+    .fb-drop{font-size:.85rem;font-family:'JetBrains Mono',monospace;
+      padding:.45rem .75rem;border-radius:8px;margin-top:.5rem;display:none;line-height:1.55;}
+    .fb-drop.show{display:block;}
+    .fb-drop.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+    .fb-drop.ok-fb{background:var(--green-pale);border:1px solid var(--green);color:#14532d;}
+
+    /* BOUTON VALIDER */
+    .valider-wrap{width:100%;max-width:720px;position:relative;z-index:1;
+      display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;}
+
+    /* BOUTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.45;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* RÉSULTATS GLOBAL */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#5a8a9a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#88c8d8;margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.05);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+
+    @media(max-width:540px){
+      .ref-grid{grid-template-columns:1fr;}
+      .btn-dark,.btn-primary{flex:1;}
+    }
+  </style>
+</head>
+<body>
+<div class="bub1"></div>
+<div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 3 &ndash; Jour 4</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Les valeurs du pr&eacute;sent</span></h1>
+</header>
+
+<!-- INTRO -->
+<div class="intro">
+  <div class="intro-label">&#128218; Parcours &mdash; Mission flash</div>
+  <div class="intro-texte">Glisse chaque &eacute;tiquette vers la phrase correspondante. Quel pr&eacute;sent est-ce&nbsp;?</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash">
+  <div class="dash-titre">&#9881; Tableau de bord &mdash; 5 phrases</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">En cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/5</div>
+      <div class="dash-score-label">R&eacute;ponses valid&eacute;es</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 5 phrases</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">V&eacute;rit&eacute; g&eacute;n&eacute;rale</div>
+      <div class="ref-cell-body">Exprime un fait toujours vrai, une loi, une r&egrave;gle universelle.<br><em>Ex.</em>&nbsp;: La Terre tourne autour du Soleil.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Habitude</div>
+      <div class="ref-cell-body">Exprime une action r&eacute;p&eacute;t&eacute;e, r&eacute;guli&egrave;re. Souvent avec <em>chaque jour, toujours, tous les matins</em>&hellip;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">&Eacute;nonciation</div>
+      <div class="ref-cell-body">Action qui se passe au moment m&ecirc;me o&ugrave; on parle ou &eacute;crit. Souvent avec <em>actuellement, en ce moment</em>&hellip;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">Narration</div>
+      <div class="ref-cell-body">Dans un r&eacute;cit, rend une action pass&eacute;e plus vivante. Souvent avec <em>soudain, alors, tout &agrave; coup</em>&hellip;</div>
+    </div>
+    <div class="ref-cell" style="grid-column:1/-1;">
+      <div class="ref-cell-titre">Valeur du futur proche</div>
+      <div class="ref-cell-body">Exprime une action &agrave; venir, souvent accompagn&eacute;e d&rsquo;un compl&eacute;ment de temps futur.<br><em>Ex.</em>&nbsp;: Je pars demain.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ÉTIQUETTES -->
+<div class="etiq-section">
+  <div class="etiq-titre">&#127991; &Eacute;tiquettes &mdash; glisse vers la bonne phrase</div>
+  <div class="etiq-pool" id="etiq-pool"></div>
+</div>
+
+<!-- PHRASES -->
+<div class="phrases-section" id="phrases-section"></div>
+
+<!-- VALIDER -->
+<div class="valider-wrap">
+  <button class="btn btn-primary" id="btn-valider" onclick="validerTout()" disabled>
+    &#10003;&nbsp;Valider les r&eacute;ponses
+  </button>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#9881; Correction rapide</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/5</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;">
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   DONNÉES
+═══════════════════════════════ */
+var PHRASES=[
+  {id:'p1',
+   texte:'Les chats ont peur de l\u2019eau.',
+   rep:'V\u00e9rit\u00e9 g\u00e9n\u00e9rale',
+   fb:'C\u2019est un fait toujours vrai \u2014 une v\u00e9rit\u00e9 g\u00e9n\u00e9rale.'},
+  {id:'p2',
+   texte:'Chaque matin, Ahmed prend le bus pour aller au coll\u00e8ge.',
+   rep:'Habitude',
+   fb:'\u00ab\u00a0Chaque matin\u00a0\u00bb indique une action r\u00e9p\u00e9t\u00e9e \u2014 pr\u00e9sent d\u2019habitude.'},
+  {id:'p3',
+   texte:'J\u2019\u00e9cris actuellement mon devoir de fran\u00e7ais.',
+   rep:'\u00c9nonciation',
+   fb:'\u00ab\u00a0Actuellement\u00a0\u00bb indique que l\u2019action se passe au moment o\u00f9 on parle \u2014 pr\u00e9sent d\u2019\u00e9nonciation.'},
+  {id:'p4',
+   texte:'Soudain, le chevalier ouvre la porte et d\u00e9couvre un tr\u00e9sor.',
+   rep:'Narration',
+   fb:'\u00ab\u00a0Soudain\u00a0\u00bb dans un r\u00e9cit rend l\u2019action pass\u00e9e vivante \u2014 pr\u00e9sent de narration.'},
+  {id:'p5',
+   texte:'Je me rends, cet apr\u00e8s-midi, chez le m\u00e9decin.',
+   rep:'Futur proche',
+   fb:'\u00ab\u00a0Cet apr\u00e8s-midi\u00a0\u00bb indique une action \u00e0 venir \u2014 pr\u00e9sent \u00e0 valeur de futur proche.'}
+];
+
+var ETIQUETTES=['V\u00e9rit\u00e9 g\u00e9n\u00e9rale','Habitude','\u00c9nonciation','Narration','Futur proche'];
+
+/* ═══════════════════════════════
+   ÉTAT
+═══════════════════════════════ */
+var drops={};      /* id phrase → étiquette posée */
+var validated=false;
+var scoreOk=0;
+var dragSrc=null;  /* élément en cours de drag */
+
+/* ═══════════════════════════════
+   SONS
+═══════════════════════════════ */
+function jouerOk(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(520,ctx.currentTime);
+    o.frequency.setValueAtTime(660,ctx.currentTime+.08);
+    o.frequency.setValueAtTime(800,ctx.currentTime+.16);
+    g.gain.setValueAtTime(.15,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}
+}
+function jouerErreur(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(280,ctx.currentTime);
+    o.frequency.setValueAtTime(220,ctx.currentTime+.12);
+    g.gain.setValueAtTime(.15,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}
+}
+
+/* ═══════════════════════════════
+   PROGRESSION
+═══════════════════════════════ */
+function majProg(){
+  var done=Object.keys(drops).length;
+  var pct=Math.round(done/5*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 5 phrases';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-statut').textContent=
+    done===5?'Toutes les phrases remplies \u2014 valide\u00a0!':'Phrase '+(done+1)+' en attente\u2026';
+  document.getElementById('btn-valider').disabled=(done<5||validated);
+}
+
+/* ═══════════════════════════════
+   BUILD UI
+═══════════════════════════════ */
+function build(){
+  /* pool étiquettes */
+  var pool=document.getElementById('etiq-pool');pool.innerHTML='';
+  var melange=ETIQUETTES.slice().sort(function(){return Math.random()-.5;});
+  melange.forEach(function(txt){
+    var e=document.createElement('div');
+    e.className='etiq';e.textContent=txt;e.dataset.val=txt;
+    e.draggable=true;
+    e.addEventListener('dragstart',onDragStart);
+    e.addEventListener('dragend',onDragEnd);
+    /* touch */
+    e.addEventListener('touchstart',onTouchStart,{passive:false});
+    pool.appendChild(e);
+  });
+
+  /* phrases */
+  var sec=document.getElementById('phrases-section');sec.innerHTML='';
+  PHRASES.forEach(function(p,i){
+    var card=document.createElement('div');card.className='phrase-card';card.id='card-'+p.id;
+    var stripe=document.createElement('div');stripe.className='phrase-card-stripe';card.appendChild(stripe);
+    var num=document.createElement('div');num.className='phrase-num';
+    num.textContent='Phrase '+(i+1);card.appendChild(num);
+    var txt=document.createElement('div');txt.className='phrase-texte';
+    txt.textContent='\u00ab\u00a0'+p.texte+'\u00a0\u00bb';card.appendChild(txt);
+    /* drop zone */
+    var dz=document.createElement('div');dz.className='drop-zone';dz.id='dz-'+p.id;
+    dz.dataset.pid=p.id;
+    var hint=document.createElement('span');hint.className='drop-hint';
+    hint.textContent='D\u00e9pose une \u00e9tiquette ici';dz.appendChild(hint);
+    dz.addEventListener('dragover',onDragOver);
+    dz.addEventListener('dragleave',onDragLeave);
+    dz.addEventListener('drop',onDrop);
+    card.appendChild(dz);
+    /* feedback */
+    var fb=document.createElement('div');fb.className='fb-drop';fb.id='fb-'+p.id;card.appendChild(fb);
+    sec.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════
+   DRAG & DROP — SOURIS
+═══════════════════════════════ */
+function onDragStart(e){
+  if(validated)return;
+  dragSrc=this;
+  this.classList.add('dragging');
+  e.dataTransfer.setData('text/plain',this.dataset.val);
+  e.dataTransfer.effectAllowed='move';
+}
+function onDragEnd(){
+  this.classList.remove('dragging');
+  dragSrc=null;
+}
+function onDragOver(e){
+  if(validated)return;
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  this.classList.add('over');
+}
+function onDragLeave(){this.classList.remove('over');}
+function onDrop(e){
+  e.preventDefault();
+  if(validated)return;
+  this.classList.remove('over');
+  var val=e.dataTransfer.getData('text/plain');
+  if(!val)return;
+  poserEtiquette(this.dataset.pid,val,dragSrc);
+}
+
+/* ═══════════════════════════════
+   TOUCH — glisser mobile
+═══════════════════════════════ */
+var _ghost=null,_touchSrc=null,_touchVal=null;
+function onTouchStart(e){
+  if(validated)return;
+  e.preventDefault();
+  _touchSrc=this;_touchVal=this.dataset.val;
+  /* créer fantôme */
+  _ghost=this.cloneNode(true);
+  _ghost.style.cssText='position:fixed;z-index:9999;opacity:.85;pointer-events:none;transition:none;transform:scale(1.05);';
+  var r=this.getBoundingClientRect();
+  var t=e.touches[0];
+  _ghost.style.left=(t.clientX-r.width/2)+'px';
+  _ghost.style.top=(t.clientY-r.height/2)+'px';
+  document.body.appendChild(_ghost);
+  document.addEventListener('touchmove',onTouchMove,{passive:false});
+  document.addEventListener('touchend',onTouchEnd);
+}
+function onTouchMove(e){
+  e.preventDefault();
+  if(!_ghost)return;
+  var t=e.touches[0];
+  var r=_ghost.getBoundingClientRect();
+  _ghost.style.left=(t.clientX-r.width/2)+'px';
+  _ghost.style.top=(t.clientY-r.height/2)+'px';
+  /* highlight drop zone sous le doigt */
+  _ghost.style.display='none';
+  var el=document.elementFromPoint(t.clientX,t.clientY);
+  _ghost.style.display='';
+  document.querySelectorAll('.drop-zone').forEach(function(dz){dz.classList.remove('over');});
+  if(el){var dz=el.closest('.drop-zone');if(dz)dz.classList.add('over');}
+}
+function onTouchEnd(e){
+  document.removeEventListener('touchmove',onTouchMove);
+  document.removeEventListener('touchend',onTouchEnd);
+  document.querySelectorAll('.drop-zone').forEach(function(dz){dz.classList.remove('over');});
+  if(_ghost){_ghost.remove();_ghost=null;}
+  if(!_touchVal)return;
+  var t=e.changedTouches[0];
+  var ghost2=document.createElement('div');
+  ghost2.style.cssText='position:fixed;z-index:-1;width:1px;height:1px;';
+  ghost2.style.left=t.clientX+'px';ghost2.style.top=t.clientY+'px';
+  document.body.appendChild(ghost2);
+  var el=document.elementFromPoint(t.clientX,t.clientY);
+  ghost2.remove();
+  if(el){
+    var dz=el.closest('.drop-zone');
+    if(dz)poserEtiquette(dz.dataset.pid,_touchVal,_touchSrc);
+  }
+  _touchSrc=null;_touchVal=null;
+}
+
+/* ═══════════════════════════════
+   POSER UNE ÉTIQUETTE
+═══════════════════════════════ */
+function poserEtiquette(pid,val,srcEl){
+  if(validated)return;
+  /* si la zone a déjà une étiquette, la remettre dans le pool */
+  if(drops[pid]){
+    remettreDansPool(drops[pid]);
+  }
+  drops[pid]=val;
+  /* marquer l'étiquette source comme utilisée */
+  if(srcEl&&srcEl.parentNode){
+    srcEl.classList.add('used');
+  } else {
+    /* chercher dans le pool */
+    document.querySelectorAll('#etiq-pool .etiq').forEach(function(e){
+      if(e.dataset.val===val&&!e.classList.contains('used'))e.classList.add('used');
+    });
+  }
+  /* afficher dans la drop zone */
+  var dz=document.getElementById('dz-'+pid);
+  dz.innerHTML='';
+  var badge=document.createElement('div');
+  badge.className='etiq';badge.textContent=val;badge.dataset.val=val;
+  /* clic pour retirer */
+  badge.addEventListener('click',function(){
+    if(validated)return;
+    retirerDeDZ(pid,val);
+  });
+  dz.appendChild(badge);
+  majProg();
+}
+
+function retirerDeDZ(pid,val){
+  delete drops[pid];
+  var dz=document.getElementById('dz-'+pid);
+  dz.innerHTML='<span class="drop-hint">D\u00e9pose une \u00e9tiquette ici</span>';
+  remettreDansPool(val);
+  majProg();
+}
+
+function remettreDansPool(val){
+  document.querySelectorAll('#etiq-pool .etiq').forEach(function(e){
+    if(e.dataset.val===val&&e.classList.contains('used')){
+      e.classList.remove('used');
+    }
+  });
+}
+
+/* ═══════════════════════════════
+   VALIDER
+═══════════════════════════════ */
+function validerTout(){
+  if(validated)return;
+  validated=true;
+  scoreOk=0;
+  document.getElementById('btn-valider').disabled=true;
+
+  PHRASES.forEach(function(p){
+    var dz=document.getElementById('dz-'+p.id);
+    var card=document.getElementById('card-'+p.id);
+    var fb=document.getElementById('fb-'+p.id);
+    var pose=drops[p.id];
+    var ok=(pose===p.rep);
+    if(ok){
+      scoreOk++;
+      dz.classList.add('correct');
+      fb.className='fb-drop show ok-fb';
+      fb.textContent='\u2713 '+p.fb;
+      jouerOk();
+    } else {
+      dz.classList.add('wrong');
+      fb.className='fb-drop show ko-fb';
+      fb.textContent='\u2717 R\u00e9ponse attendue\u00a0: '+p.rep+'. '+p.fb;
+      jouerErreur();
+    }
+    /* animation carte */
+    card.classList.remove('anim-ok','anim-ko');void card.offsetWidth;
+    card.classList.add(ok?'anim-ok':'anim-ko');
+  });
+
+  document.getElementById('dash-total').textContent=scoreOk;
+  document.getElementById('dash-statut').textContent='Correction termin\u00e9e.';
+  majProg();
+
+  setTimeout(function(){afficherVerdict();},600);
+}
+
+/* ═══════════════════════════════
+   VERDICT
+═══════════════════════════════ */
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===5?5:total>=4?4:total>=3?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===5){
+    badge='<div class="badge-ok">\u2713 Mission accomplie\u00a0!</div>';
+    msg='Tu ma\u00eetrises les 5 valeurs du pr\u00e9sent.';
+  } else if(total>=4){
+    badge='<div class="badge-ok">\u2713 Tr\u00e8s bien\u00a0!</div>';
+    msg='Un point \u00e0 revoir dans le r\u00e9f\u00e9rentiel.';
+  } else if(total>=3){
+    badge='<div class="badge-ko">Bien \u2014 quelques points \u00e0 consolider.</div>';
+    msg='Relis le r\u00e9f\u00e9rentiel sur les valeurs signal\u00e9es.';
+  } else {
+    badge='<div class="badge-ko">Relis le r\u00e9f\u00e9rentiel et recommence.</div>';
+    msg='Prends le temps de revoir chaque valeur dans le r\u00e9f\u00e9rentiel.';
+  }
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+/* ═══════════════════════════════
+   RESET
+═══════════════════════════════ */
+function resetTout(){
+  drops={};validated=false;scoreOk=0;
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('dash-total').textContent='0';
+  majProg();
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* INIT */
+build();majProg();
+</script>
+</body>
+</html>
