@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne – Valeurs du présent – 5e S3 J4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#3ab5d8;--jour-fonce:#1a6e88;--jour-clair:#e8f6fb;--jour-pale:#9dd4e8;
+  --day-glow:rgba(58,181,216,.28);
+  --bg:#fffdf7;
+  --vert:#22c55e;--vert-bg:#e7faec;--vert-bord:#86efac;
+  --rouge:#ef4444;--rouge-bg:#fdeaea;--rouge-bord:#fca5a5;
+  --txt:#0a1f2d;--gris:#4a7a8a;
+  --bord:#9dd4e8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}100%{box-shadow:0 0 0 10px rgba(34,197,94,0)}}
+@keyframes glowErr{0%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}100%{box-shadow:0 0 0 10px rgba(239,68,68,0)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1)}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* BULLES */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.22;}
+.bubble.b1{width:120px;height:120px;background:var(--jour-pale);top:-30px;right:-30px;}
+.bubble.b2{width:80px;height:80px;background:var(--jour);bottom:20px;left:-20px;}
+.bubble.b3{width:60px;height:60px;background:#f5a623;top:38%;right:-18px;}
+.bubble.b4{width:70px;height:70px;background:#8dc63f;top:20%;left:-24px;}
+
+#flashIcon{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:4.5rem;z-index:9999;pointer-events:none;opacity:0;}
+#flashIcon.show{animation:flashPop .9s ease forwards;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:16px 14px 80px;position:relative;z-index:2;}
+
+/* HEADER */
+.header{text-align:center;padding:18px 0 14px;animation:fadeUp .5s ease;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:12px;letter-spacing:1.2px;padding:7px 16px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);margin-bottom:12px;}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#1a6e88;}
+.logo-badge .pts i:nth-child(2){background:#9dd4e8;}
+.logo-badge .pts i:nth-child(3){background:#f5c518;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,5vw,2rem);color:var(--txt);line-height:1.15;margin-bottom:8px;}
+.titre .accent{color:var(--jour-fonce);}
+.header-badge{display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;padding:6px 18px;border-radius:22px;box-shadow:0 3px 12px var(--day-glow);}
+
+/* SCORE BAR */
+.score-bar-wrap{background:#fff;border:1px solid var(--bord);border-radius:12px;padding:12px 16px;margin-bottom:14px;}
+.score-bar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.score-bar-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;}
+.score-bar-val{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--jour-fonce);}
+.score-bar-bg{background:var(--jour-clair);border-radius:99px;height:8px;overflow:hidden;}
+.score-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+.dots-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--bord);background:var(--jour-clair);font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--gris);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
+.dot.ok{background:var(--vert-bg);border-color:var(--vert-bord);color:#157f3a;}
+.dot.ko{background:var(--rouge-bg);border-color:var(--rouge-bord);color:#b91c1c;}
+
+/* ÉTAPES NAV */
+.etapes-nav{display:flex;gap:8px;margin-bottom:14px;}
+.etape-tab{flex:1;padding:10px 8px;border-radius:11px;border:2px solid var(--bord);background:var(--jour-clair);text-align:center;cursor:default;}
+.etape-tab.active{border-color:var(--jour-fonce);background:var(--jour-pale);}
+.etape-tab.done{border-color:var(--vert-bord);background:var(--vert-bg);}
+.etape-tab.locked{opacity:.5;}
+.etape-tab .tab-num{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:900;letter-spacing:1px;color:var(--gris);display:block;text-transform:uppercase;}
+.etape-tab.active .tab-num,.etape-tab.done .tab-num{color:var(--jour-fonce);}
+.etape-tab.done .tab-num{color:#157f3a;}
+.etape-tab .tab-label{font-family:'Orbitron',sans-serif;font-size:.58rem;font-weight:700;color:var(--txt);display:block;margin-top:2px;}
+
+/* CARTE ÉTAPE */
+.etape-card{background:#fff;border:1.5px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 3px 16px rgba(58,181,216,.1);animation:fadeUp .4s ease;}
+.etape-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:13px 18px;}
+.etape-header-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.etape-nom{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.78rem;letter-spacing:1.5px;color:#fff;text-transform:uppercase;}
+.etape-pts{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.8);}
+.etape-sous-titre{font-family:'IM Fell English',serif;font-style:italic;font-size:.9rem;color:rgba(255,255,255,.88);margin-top:4px;}
+.etape-body{padding:16px 18px 20px;}
+
+/* CONSIGNE */
+.consigne-box{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 9px 9px 0;padding:10px 14px;font-size:.92rem;color:var(--jour-fonce);font-style:italic;margin-bottom:16px;line-height:1.6;}
+
+/* CATÉGORIES (étape 1) */
+.categories-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:18px;}
+.cat-btn{padding:10px 12px;border:2px solid var(--bord);border-radius:10px;background:var(--jour-clair);font-family:'Orbitron',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.5px;color:var(--jour-fonce);text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:center;min-height:3rem;}
+.cat-btn:hover{border-color:var(--jour-fonce);background:var(--jour-pale);}
+.cat-btn.selected{border-color:var(--jour-fonce);background:var(--jour-fonce);color:#fff;animation:pulse .4s ease;}
+.cat-btn.correct{border-color:var(--vert);background:var(--vert-bg);color:#157f3a;animation:glowOk .5s ease;}
+.cat-btn.wrong{border-color:var(--rouge);background:var(--rouge-bg);color:#b91c1c;animation:glowErr .5s ease;}
+.cat-btn[disabled]{cursor:default;}
+
+/* PHRASE BLOC */
+.phrase-bloc{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--jour-clair);}
+.phrase-bloc:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.phrase-num{display:inline-flex;align-items:center;gap:6px;font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1px;color:var(--gris);margin-bottom:8px;text-transform:uppercase;}
+.phrase-badge{width:22px;height:22px;border-radius:50%;background:var(--jour-fonce);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:900;flex-shrink:0;}
+.phrase-texte{font-family:'IM Fell English',serif;font-size:1rem;color:var(--txt);background:var(--jour-clair);border-radius:8px;padding:10px 14px;margin-bottom:10px;line-height:1.6;}
+
+/* FEEDBACK */
+.feedback{display:none;border-radius:9px;padding:9px 13px;font-size:.86rem;line-height:1.6;margin-top:8px;}
+.feedback.show{display:block;}
+.feedback.fb-ok{background:var(--vert-bg);border:1px solid var(--vert-bord);color:#157f3a;}
+.feedback.fb-err{background:var(--rouge-bg);border:1px solid var(--rouge-bord);color:#7a1f1f;}
+
+/* BOUTONS */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.btn{border:none;border-radius:10px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;padding:0 18px;min-height:3rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-valider{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;box-shadow:0 4px 12px var(--day-glow);}
+.btn-valider:hover:not([disabled]){transform:translateY(-2px);}
+.btn-valider[disabled]{opacity:.4;cursor:default;transform:none;}
+.btn-suite{background:var(--vert);color:#fff;}
+.btn-suite:hover{transform:translateY(-2px);}
+.btn-rec{background:var(--jour-clair);color:var(--jour-fonce);border:2px solid var(--bord);}
+
+/* SAISIE LIBRE (étape 2) */
+.indice-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.indice-label{font-size:.85rem;color:var(--gris);white-space:nowrap;}
+.indice-input{flex:1;min-width:120px;border:2px solid var(--bord);border-radius:8px;padding:8px 12px;font-size:.92rem;font-family:Arial,sans-serif;color:var(--txt);background:#fafeff;outline:none;transition:border-color .15s;}
+.indice-input:focus{border-color:var(--jour-fonce);}
+.indice-input.ok{border-color:var(--vert);background:var(--vert-bg);}
+.indice-input.ko{border-color:var(--rouge);background:var(--rouge-bg);}
+.indice-input[disabled]{cursor:default;}
+.valeur-affichee{font-family:'Orbitron',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;background:var(--jour-clair);border-radius:6px;padding:4px 10px;margin-bottom:8px;display:inline-block;}
+
+/* SEP */
+.sep{border:none;border-top:2px dashed var(--bord);margin:16px 0;}
+
+/* SOUS-SCORE */
+.sous-score{background:var(--jour-clair);border:1px solid var(--bord);border-radius:10px;padding:12px 16px;text-align:center;margin-top:14px;display:none;}
+.sous-score-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.4rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:'Orbitron',sans-serif;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+/* BILAN */
+.bilan{display:none;background:#fff;border:2px solid var(--jour-fonce);border-radius:16px;padding:28px 24px;text-align:center;box-shadow:0 8px 28px var(--day-glow);position:relative;overflow:hidden;margin-top:14px;}
+.bilan.show{display:block;animation:fadeUp .5s ease;}
+.bilan-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.bilan-global{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,9vw,4.5rem);color:var(--jour-fonce);line-height:1;margin-bottom:4px;}
+.bilan-global small{font-size:.32em;color:var(--gris);}
+.bilan-etoiles{font-size:1.6rem;margin:8px 0;}
+.bilan-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.75rem,2.5vw,.92rem);letter-spacing:2px;padding:7px 20px;border-radius:8px;display:inline-block;margin-bottom:12px;text-transform:uppercase;}
+.bilan-tampon.ok{color:#157f3a;border:2.5px solid #157f3a;}
+.bilan-tampon.moyen{color:var(--jour-fonce);border:2.5px solid var(--jour-fonce);}
+.bilan-tampon.ko{color:#7a1f1f;border:2.5px solid #7a1f1f;}
+.bilan-msg{font-size:.95rem;color:var(--txt);line-height:1.7;margin-bottom:20px;max-width:520px;margin-left:auto;margin-right:auto;}
+.bilan-detail{display:flex;flex-direction:column;gap:6px;max-width:460px;margin:0 auto 22px;text-align:left;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:9px;font-size:.88rem;}
+.bilan-ligne.ok{background:var(--vert-bg);color:#157f3a;}
+.bilan-ligne.moyen{background:#fffbeb;color:#8a6000;}
+.bilan-ligne.ko{background:var(--rouge-bg);color:#7a1f1f;}
+.bilan-ligne-label{font-size:.82rem;}
+.bilan-ligne-score{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.btn-recommencer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;border:none;border-radius:12px;padding:0 28px;min-height:3rem;cursor:pointer;box-shadow:0 4px 14px var(--day-glow);transition:all .2s;}
+.btn-recommencer:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div id="flashIcon"></div>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="logo-badge">
+        <span class="pts"><i></i><i></i><i></i></span>
+        PAZAPA &middot; FRANÇAIS &middot; 5E
+      </div>
+    </div>
+    <div class="semaine">Semaine 3 &mdash; Jour 4</div>
+    <h1 class="titre">Je <span class="accent">m'entraîne</span></h1>
+    <div class="header-badge">Analyste des valeurs du présent &middot; /20</div>
+  </div>
+
+  <!-- SCORE BAR -->
+  <div class="score-bar-wrap">
+    <div class="score-bar-head">
+      <span class="score-bar-label" id="scoreLabel">Étape 1 — Classer</span>
+      <span class="score-bar-val" id="scoreVal">0 / 10</span>
+    </div>
+    <div class="score-bar-bg"><div class="score-bar-fill" id="scoreFill"></div></div>
+    <div class="dots-row" id="dotsRow"></div>
+  </div>
+
+  <!-- ÉTAPES NAV -->
+  <div class="etapes-nav">
+    <div class="etape-tab active" id="tab0">
+      <span class="tab-num">Étape 1</span>
+      <span class="tab-label">Classer les phrases</span>
+    </div>
+    <div class="etape-tab locked" id="tab1">
+      <span class="tab-num">Étape 2</span>
+      <span class="tab-label">Justifier le choix</span>
+    </div>
+  </div>
+
+  <!-- ZONE PRINCIPALE -->
+  <div id="zoneMain"></div>
+
+  <!-- BILAN -->
+  <div class="bilan" id="bilan">
+    <div class="bilan-particles" id="bilanParticles"></div>
+    <div class="bilan-global"><span id="bGlobal">0</span><small> / 20</small></div>
+    <div class="bilan-etoiles" id="bEtoiles"></div>
+    <div class="bilan-tampon" id="bTampon"></div>
+    <div class="bilan-msg" id="bMsg"></div>
+    <div class="bilan-detail" id="bDetail"></div>
+    <button class="btn-recommencer" onclick="recommencer()">&#8635;&nbsp;Recommencer</button>
+  </div>
+
+</div>
+
+<script>
+/* ══ DONNÉES ══ */
+var PHRASES = [
+  {
+    num: 1,
+    texte: 'Je vous explique la règle maintenant.',
+    valeur: 'Présent d\'énonciation',
+    indices: ['maintenant']
+  },
+  {
+    num: 2,
+    texte: 'Tous les jours, il prend le métro.',
+    valeur: 'Présent d\'habitude',
+    indices: ['tous les jours']
+  },
+  {
+    num: 3,
+    texte: 'L\'eau bout à 100°C.',
+    valeur: 'Présent de vérité générale',
+    indices: ['vérité générale', 'verite generale', '100', '100°c', 'bout']
+  },
+  {
+    num: 4,
+    texte: 'Le détective entre et découvre un indice.',
+    valeur: 'Présent de narration',
+    indices: ['entre', 'découvre', 'decouvre', 'il raconte', 'raconte']
+  },
+  {
+    num: 5,
+    texte: 'Nous allons commencer l\'exercice.',
+    valeur: 'Futur proche',
+    indices: ['allons', 'aller', 'allons commencer']
+  },
+  {
+    num: 6,
+    texte: 'Les nourrissons dorment beaucoup.',
+    valeur: 'Présent de vérité générale',
+    indices: ['vérité générale', 'verite generale']
+  },
+  {
+    num: 7,
+    texte: 'Soudain, la lumière s\'éteint.',
+    valeur: 'Présent de narration',
+    indices: ['soudain', 'il raconte', 'raconte']
+  },
+  {
+    num: 8,
+    texte: 'Je vais partir dans cinq minutes.',
+    valeur: 'Futur proche',
+    indices: ['vais', 'aller', 'cinq minutes', 'dans cinq', 'vais partir']
+  },
+  {
+    num: 9,
+    texte: 'Elle comprend enfin la consigne.',
+    valeur: 'Présent d\'énonciation',
+    indices: ['enfin']
+  },
+  {
+    num: 10,
+    texte: 'Les plantes ont besoin de lumière pour vivre.',
+    valeur: 'Présent de vérité générale',
+    indices: ['vérité générale', 'verite generale']
+  }
+];
+
+var CATEGORIES = [
+  'Présent d\'énonciation',
+  'Présent d\'habitude',
+  'Présent de vérité générale',
+  'Présent de narration',
+  'Futur proche'
+];
+
+/* ══ ÉTAT ══ */
+var etape = 1; /* 1 ou 2 */
+var scoreEtape1 = 0;
+var scoreEtape2 = 0;
+var etat1 = {}; /* num → {sel, val, ok} */
+var etat2 = {}; /* num → {val, ok} */
+
+/* ══ AUDIO ══ */
+var actx = null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+  o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);
+}
+function beepOk(){initA();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.12,'sine',.1);},75);}
+function beepErr(){initA();beep(220,90,.22,'sawtooth',.09);}
+function beepFinal(ok){
+  initA();
+  if(ok){[523,659,784,1047,1318].forEach(function(f,i){setTimeout(function(){beep(f,f,.22,'triangle',.14);},i*140);});}
+  else{beep(200,80,.4,'sawtooth',.11);}
+}
+document.addEventListener('pointerdown',initA,{once:true});
+
+function showFlash(ok){
+  var f=document.getElementById('flashIcon');
+  if(!f)return;
+  f.textContent=ok?'✓':'✗';
+  f.style.color=ok?'#22c55e':'#ef4444';
+  f.style.animation='none';void f.offsetWidth;
+  f.className='show';
+}
+
+/* ══ NORMALISATION ══ */
+function norm(s){
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9 °]/g,'')
+    .trim()
+    .replace(/\s+/g,' ');
+}
+
+function checkIndice(saisie, indices){
+  var s = norm(saisie);
+  for(var i=0;i<indices.length;i++){
+    if(s===norm(indices[i])) return true;
+    if(s.indexOf(norm(indices[i]))!==-1) return true;
+  }
+  return false;
+}
+
+/* ══ INIT ══ */
+(function init(){
+  buildDots(10);
+  renderEtape1();
+})();
+
+function buildDots(n){
+  var row=document.getElementById('dotsRow');
+  row.innerHTML='';
+  for(var i=0;i<n;i++){
+    var d=document.createElement('div');
+    d.className='dot';d.id='dot_'+i;d.textContent=i+1;
+    row.appendChild(d);
+  }
+}
+
+function markDot(idx,ok){
+  var d=document.getElementById('dot_'+idx);
+  if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}
+}
+
+function updateBar(score,total,label){
+  document.getElementById('scoreVal').textContent=score+' / '+total;
+  document.getElementById('scoreFill').style.width=Math.round(score/total*100)+'%';
+  document.getElementById('scoreLabel').textContent=label;
+}
+
+function updateTabs(){
+  var t0=document.getElementById('tab0');
+  var t1=document.getElementById('tab1');
+  if(etape===1){
+    t0.className='etape-tab active';
+    t1.className='etape-tab locked';
+  } else {
+    t0.className='etape-tab done';
+    t1.className='etape-tab active';
+  }
+}
+
+/* ══ ÉTAPE 1 ══ */
+function renderEtape1(){
+  etape=1;
+  updateTabs();
+  buildDots(10);
+  updateBar(scoreEtape1,10,'Étape 1 — Classer les phrases');
+  var zone=document.getElementById('zoneMain');
+  zone.innerHTML='';
+  document.getElementById('bilan').className='bilan';
+  var card=document.createElement('div');
+  card.className='etape-card';
+  var html='<div class="etape-header">';
+  html+='<div class="etape-header-top"><span class="etape-nom">🎯 Étape 1</span><span class="etape-pts">10 pts</span></div>';
+  html+='<div class="etape-sous-titre">Classe les phrases — Identifie la valeur du présent</div>';
+  html+='</div><div class="etape-body">';
+  html+='<div class="consigne-box">Clique sur la catégorie qui correspond à chaque phrase.</div>';
+
+  PHRASES.forEach(function(p, idx){
+    html+='<div class="phrase-bloc" id="pb_'+p.num+'">';
+    html+='<div class="phrase-num"><span class="phrase-badge">'+p.num+'</span>Phrase '+p.num+'</div>';
+    html+='<div class="phrase-texte">'+p.texte+'</div>';
+    html+='<div class="categories-grid" id="cats_'+p.num+'">';
+    var ordres={
+      1:[2,4,0,3,1],2:[3,1,4,0,2],3:[1,3,4,2,0],4:[0,2,3,1,4],5:[2,0,4,3,1],
+      6:[4,2,1,0,3],7:[1,4,0,3,2],8:[3,0,4,2,1],9:[2,3,0,4,1],10:[0,3,4,2,1]
+    };
+    var ordre=ordres[p.num]||[0,1,2,3,4];
+    ordre.forEach(function(ci){
+      html+='<button class="cat-btn" data-pnum="'+p.num+'" data-cat="'+ci+'">'+CATEGORIES[ci]+'</button>';
+    });
+    html+='</div>';
+    html+='<div class="feedback" id="fb1_'+p.num+'"></div>';
+    html+='<div class="btn-row"><button class="btn btn-valider" id="btnVal1_'+p.num+'" data-pnum="'+p.num+'" data-dotidx="'+idx+'" disabled>✓&nbsp;Vérifier</button></div>';
+    html+='</div>';
+    if(idx<PHRASES.length-1) html+='<hr class="sep">';
+  });
+
+  html+='<div class="sous-score" id="sousScore1" style="display:none;">';
+  html+='<div class="sous-score-val" id="sousScoreVal1">0 / 10</div>';
+  html+='<div class="sous-score-label">Score Étape 1</div></div>';
+  html+='<div class="btn-row" id="suiteRow1" style="display:none;margin-top:14px;">';
+  html+='<button class="btn btn-suite" onclick="lancerEtape2()">Étape 2&nbsp;›</button></div>';
+  html+='</div>';
+  card.innerHTML=html;
+  zone.appendChild(card);
+
+  card.addEventListener('click',function(ev){
+    var t=ev.target;
+    var btn=t.closest('.cat-btn');
+    if(btn&&!btn.hasAttribute('disabled')){
+      var pnum=+btn.dataset.pnum;
+      var ci=+btn.dataset.cat;
+      card.querySelectorAll('.cat-btn[data-pnum="'+pnum+'"]').forEach(function(b){b.classList.remove('selected');});
+      btn.classList.add('selected');
+      if(!etat1[pnum]) etat1[pnum]={sel:null,val:false,ok:false};
+      etat1[pnum].sel=ci;
+      var bv=card.querySelector('#btnVal1_'+pnum);
+      if(bv) bv.removeAttribute('disabled');
+      return;
+    }
+    var bv2=t.closest('.btn-valider');
+    if(bv2&&!bv2.hasAttribute('disabled')){
+      valider1(+bv2.dataset.pnum,+bv2.dataset.dotidx,card);
+    }
+  });
+}
+
+function valider1(pnum,dotIdx,card){
+  var p=null;PHRASES.forEach(function(pp){if(pp.num===pnum)p=pp;});
+  if(!p||!etat1[pnum]||etat1[pnum].sel===null||etat1[pnum].val) return;
+  etat1[pnum].val=true;
+  var sel=etat1[pnum].sel;
+  var ok=CATEGORIES[sel]===p.valeur;
+  etat1[pnum].ok=ok;
+
+  /* Colorer boutons */
+  card.querySelectorAll('.cat-btn[data-pnum="'+pnum+'"]').forEach(function(b){
+    b.setAttribute('disabled','');
+    var ci=+b.dataset.cat;
+    if(CATEGORIES[ci]===p.valeur) b.classList.add('correct');
+    else if(ci===sel) b.classList.add('wrong');
+  });
+
+  var fb=card.querySelector('#fb1_'+pnum);
+  if(ok){
+    fb.innerHTML='✓&nbsp;Bonne réponse&nbsp;!';
+    fb.className='feedback fb-ok show';
+    beepOk();showFlash(true);
+    scoreEtape1++;
+  } else {
+    fb.innerHTML='✗&nbsp;La bonne réponse est&nbsp;: <strong>'+p.valeur+'</strong>.';
+    fb.className='feedback fb-err show';
+    beepErr();showFlash(false);
+  }
+  card.querySelector('#btnVal1_'+pnum).style.display='none';
+  markDot(dotIdx,ok);
+  updateBar(scoreEtape1,10,'Étape 1 — Classer les phrases');
+
+  /* Fin étape 1 ? */
+  var validees=0;
+  PHRASES.forEach(function(pp){if(etat1[pp.num]&&etat1[pp.num].val)validees++;});
+  if(validees===PHRASES.length){
+    document.getElementById('sousScoreVal1').textContent=scoreEtape1+' / 10';
+    document.getElementById('sousScore1').style.display='block';
+    document.getElementById('suiteRow1').style.display='flex';
+    beepFinal(scoreEtape1>=7);
+  }
+}
+
+/* ══ ÉTAPE 2 ══ */
+function lancerEtape2(){
+  etape=2;
+  scoreEtape2=0;
+  updateTabs();
+  buildDots(10);
+  updateBar(0,10,'Étape 2 — Justifier le choix');
+  var zone=document.getElementById('zoneMain');
+  zone.innerHTML='';
+  var card=document.createElement('div');
+  card.className='etape-card';
+  var html='<div class="etape-header">';
+  html+='<div class="etape-header-top"><span class="etape-nom">🧠 Étape 2</span><span class="etape-pts">10 pts</span></div>';
+  html+='<div class="etape-sous-titre">Justifie ton choix — Trouve l\'indice</div>';
+  html+='</div><div class="etape-body">';
+  html+='<div class="consigne-box">Pour chaque phrase, écris le mot de la phrase qui t\'a aidé à identifier la valeur, ou si c\'est un fait universel, écris&nbsp;: <strong>vérité générale</strong>.</div>';
+
+  PHRASES.forEach(function(p,idx){
+    html+='<div class="phrase-bloc" id="pb2_'+p.num+'">';
+    html+='<div class="phrase-num"><span class="phrase-badge">'+p.num+'</span>Phrase '+p.num+'</div>';
+    html+='<div class="phrase-texte">'+p.texte+'</div>';
+    html+='<div class="valeur-affichee">'+p.valeur+'</div>';
+    html+='<div class="indice-wrap">';
+    html+='<span class="indice-label">👉 Indice qui m\'a aidé&nbsp;:</span>';
+    html+='<input class="indice-input" type="text" id="indice_'+p.num+'" placeholder="Écris l\'indice…" autocomplete="off" autocorrect="off" spellcheck="false">';
+    html+='</div>';
+    html+='<div class="feedback" id="fb2_'+p.num+'"></div>';
+    html+='<div class="btn-row"><button class="btn btn-valider" id="btnVal2_'+p.num+'" data-pnum="'+p.num+'" data-dotidx="'+idx+'">✓&nbsp;Vérifier</button></div>';
+    html+='</div>';
+    if(idx<PHRASES.length-1) html+='<hr class="sep">';
+  });
+
+  html+='<div class="sous-score" id="sousScore2" style="display:none;">';
+  html+='<div class="sous-score-val" id="sousScoreVal2">0 / 10</div>';
+  html+='<div class="sous-score-label">Score Étape 2</div></div>';
+  html+='<div class="btn-row" id="suiteRow2" style="display:none;margin-top:14px;">';
+  html+='<button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan&nbsp;›</button></div>';
+  html+='</div>';
+  card.innerHTML=html;
+  zone.appendChild(card);
+
+  /* Valider sur Entrée */
+  PHRASES.forEach(function(p){
+    var inp=card.querySelector('#indice_'+p.num);
+    if(inp){
+      inp.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){
+          var bv=card.querySelector('#btnVal2_'+p.num);
+          if(bv&&!bv.hasAttribute('disabled')) valider2(p.num,card);
+        }
+      });
+    }
+  });
+
+  card.addEventListener('click',function(ev){
+    var bv=ev.target.closest('.btn-valider');
+    if(bv&&!bv.hasAttribute('disabled')){
+      valider2(+bv.dataset.pnum,card);
+    }
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function valider2(pnum,card){
+  var p=null;PHRASES.forEach(function(pp){if(pp.num===pnum)p=pp;});
+  if(!p||etat2[pnum]) return;
+  var inp=card.querySelector('#indice_'+pnum);
+  if(!inp) return;
+  var saisie=inp.value.trim();
+  if(!saisie) return;
+
+  etat2[pnum]=true;
+  var ok=checkIndice(saisie,p.indices);
+
+  inp.className='indice-input '+(ok?'ok':'ko');
+  inp.setAttribute('disabled','');
+
+  var fb=card.querySelector('#fb2_'+pnum);
+  var dotIdx=p.num-1;
+
+  if(ok){
+    fb.innerHTML='✓&nbsp;Bonne réponse&nbsp;!';
+    fb.className='feedback fb-ok show';
+    beepOk();showFlash(true);
+    scoreEtape2++;
+    markDot(dotIdx,true);
+  } else {
+    fb.innerHTML='✗&nbsp;Indice attendu&nbsp;: <strong>'+p.indices[0]+'</strong>.';
+    fb.className='feedback fb-err show';
+    beepErr();showFlash(false);
+    markDot(dotIdx,false);
+  }
+
+  card.querySelector('#btnVal2_'+pnum).style.display='none';
+  updateBar(scoreEtape2,10,'Étape 2 — Justifier le choix');
+
+  /* Fin étape 2 ? */
+  var validees=Object.keys(etat2).length;
+  if(validees===PHRASES.length){
+    document.getElementById('sousScoreVal2').textContent=scoreEtape2+' / 10';
+    document.getElementById('sousScore2').style.display='block';
+    document.getElementById('suiteRow2').style.display='flex';
+    beepFinal(scoreEtape2>=7);
+  }
+}
+
+/* ══ BILAN ══ */
+function afficherBilan(){
+  document.getElementById('zoneMain').innerHTML='';
+  var total=scoreEtape1+scoreEtape2;
+  document.getElementById('bGlobal').textContent=total;
+  var pct=total/20;
+  var nb=pct>=.9?5:pct>=.7?4:pct>=.5?3:pct>=.3?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon');
+  var msg=document.getElementById('bMsg');
+  if(total>=18){
+    tp.textContent='ANALYSTE CONFIRMÉ';tp.className='bilan-tampon ok';
+    msg.textContent='Excellent\u00a0! Tu maîtrises parfaitement les valeurs du présent et leurs indices.';
+  } else if(total>=14){
+    tp.textContent='TRÈS BON TRAVAIL';tp.className='bilan-tampon ok';
+    msg.textContent='Tu identifies bien les valeurs du présent. Quelques indices à affiner.';
+  } else if(total>=10){
+    tp.textContent='EN BONNE VOIE';tp.className='bilan-tampon moyen';
+    msg.textContent='Bonne progression\u00a0! Revois les valeurs les plus difficiles et leurs marqueurs.';
+  } else {
+    tp.textContent='À CONSOLIDER';tp.className='bilan-tampon ko';
+    msg.textContent='Revois le cours sur les valeurs du présent et recommence\u00a0!';
+  }
+  var detail=document.getElementById('bDetail');
+  var html='';
+  var lignes=[
+    {label:'Étape 1 — Classer',score:scoreEtape1,total:10},
+    {label:'Étape 2 — Justifier',score:scoreEtape2,total:10},
+  ];
+  lignes.forEach(function(l){
+    var cl=l.score/l.total>=.7?'ok':l.score/l.total>=.4?'moyen':'ko';
+    html+='<div class="bilan-ligne '+cl+'"><span class="bilan-ligne-label">'+l.label+'</span><span class="bilan-ligne-score">'+l.score+' / '+l.total+'</span></div>';
+  });
+  detail.innerHTML=html;
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(total>=14);
+  if(total>=14) launchEmojis();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* PLUIE D'EMOJI — thème analyse / écriture */
+function launchEmojis(){
+  var box=document.getElementById('bilanParticles');
+  box.innerHTML='';
+  var emojis=['🔍','📝','✨','🎯','💡','✅','📖','🔎','🎯','📝','✨','💡','✅','🔍','📖','🎯','✨','💡','📝','✅','🔍','🎯','📖','✨','💡'];
+  emojis.forEach(function(em,i){
+    var e=document.createElement('div');
+    e.textContent=em;
+    e.style.cssText='position:absolute;font-size:'+(1.2+Math.random()*.9)+'rem;'
+      +'left:'+(3+Math.random()*94)+'%;bottom:'+(Math.random()*30)+'%;'
+      +'opacity:0;pointer-events:none;'
+      +'animation:particleUp '+(1+Math.random()*1.1)+'s ease '+(i*0.07+Math.random()*0.2)+'s forwards;';
+    box.appendChild(e);
+  });
+}
+
+/* ══ RECOMMENCER ══ */
+function recommencer(){
+  scoreEtape1=0;scoreEtape2=0;
+  etat1={};etat2={};
+  document.getElementById('bilan').className='bilan';
+  renderEtape1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
