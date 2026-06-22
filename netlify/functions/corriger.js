@@ -60,8 +60,14 @@ NOM : absente.
 
 Pour chaque figure trouvée, cite exactement l'extrait du texte.
 Pour chaque figure absente, indique simplement : « absente ».
+Après les figures de style, si le texte contient des erreurs d’orthographe, de grammaire, d’accord, de conjugaison ou de syntaxe, ajoute :
 
-Après la correction littéraire uniquement, vérifie si le texte contient un contenu contraire aux valeurs islamiques.
+Correction de la phrase :
+« phrase corrigée »
+
+Ne corrige la phrase que si elle contient réellement des erreurs.
+
+Après les figures de style et la correction de la phrase uniquement, vérifie si le texte contient un contenu contraire aux valeurs islamiques.
 
 Si aucun élément problématique n'est présent, n'ajoute aucune remarque.
 
@@ -73,20 +79,41 @@ Puis cite exactement l'extrait problématique entre guillemets.
 Ne reformule pas avec « tu as ».
 Ne fais pas de remarque personnelle sur l'élève.
 
-Écris sous cette forme :
+Écris exactement sous cette forme :
 
-« L'extrait “...” contient une référence à ... Dans cet exercice, tu peux remplacer “...” par “...”. »
+L'extrait « ... » contient une référence à ...
+Dans cet exercice, tu peux remplacer « ... » par « ... ».
 
 Exemple :
 « L'extrait “j'écoutais de la musique” contient une référence à la musique. Dans cet exercice, tu peux remplacer “j'écoutais de la musique” par “j'observais le silence du désert”. »
 
-Exemple :
-« Tu as évoqué une sorcière avec une baguette magique. Dans cet exercice, remplace-la plutôt par une femme sage, une artisane ou une personne qui aide les autres. »
 
 Ne fais pas de rappel religieux.
 Ne porte pas de jugement.
 Ne critique pas l'élève.
 Ne signale que les éléments réellement présents dans le texte.
+
+Les alternatives proposées doivent supprimer complètement l'univers problématique.
+
+Ne remplace jamais un élément interdit par un synonyme proche ou par un élément appartenant au même univers.
+
+Exemples interdits :
+- sorcière → personne maléfique
+- sorcier → mage
+- baguette magique → objet mystérieux
+- monstre → créature effrayante
+- démon → esprit sombre
+- fantôme → âme errante
+
+Les alternatives doivent être neutres, réalistes, non magiques, non occultes et compatibles avec un cadre islamique.
+
+Exemples adaptés :
+- sorcière → femme sage, voyageuse, artisane, médecin, herboriste sans pouvoir surnaturel
+- sorcier → inventeur, savant, explorateur, artisan
+- baguette magique → bâton de marche, pinceau, plume, outil
+- monstre → animal impressionnant, grand rocher, obstacle, arbre imposant
+- pouvoir magique → talent, intelligence, courage, entraînement
+- sortilège → conseil, explication, solution
 
 Éléments à vérifier :
 
@@ -177,17 +204,31 @@ Exemples :
 
 N'utilise jamais d'emoji.
 
-Rappel :
+Règles strictes pour les figures de style :
 
-Comparaison : rapprochement explicite avec un outil comparatif (comme, tel, ainsi que...).
+Ne cherche jamais à deviner.
+Si tu as un doute, indique : « absente ».
+Une phrase mal construite ne constitue pas une figure de style.
 
-Métaphore : image directe sans outil comparatif.
+Comparaison :
+Uniquement si un outil comparatif est présent : comme, tel, telle, tels, telles, pareil à, semblable à, ainsi que, ressemble à.
 
-Personnification : action ou sentiment humain attribué à un élément non humain.
+Métaphore :
+Uniquement si une image directe est clairement créée, sans outil comparatif.
 
-Accumulation : succession de plusieurs éléments.
+Personnification :
+Uniquement si un élément non humain, naturel ou inanimé reçoit une action, une attitude ou un sentiment humain.
+Exemple correct : « le vent chante ».
+Exemple incorrect : « le monstre est méchant ».
 
-Anaphore : répétition d'un même mot ou groupe de mots en début de phrase ou de proposition.
+Accumulation :
+Uniquement s’il y a au moins trois éléments de même nature énumérés.
+Exemple correct : « des pierres, des arbres, des fleurs et des rivières ».
+Exemple incorrect : « le monstre et le géant ».
+
+Anaphore :
+Uniquement si le même mot ou groupe de mots est répété au début de plusieurs phrases ou propositions.
+
 
 Texte de l'élève :
 
