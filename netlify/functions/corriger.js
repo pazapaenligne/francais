@@ -185,9 +185,14 @@ Si tu as un doute, indique : « absente ».
 Une phrase mal construite ne constitue pas une figure de style.
 
 Comparaison : uniquement si un outil comparatif est présent : comme, tel, telle, tels, telles, pareil à, semblable à, ainsi que, ressemble à, aussi ... que.
+
 Métaphore : uniquement si une image directe est clairement créée, sans outil comparatif.
-Personnification : uniquement si un élément non humain, naturel ou inanimé reçoit une action, une attitude ou un sentiment humain.
+
+Personnification : uniquement si un élément non humain, naturel ou inanimé reçoit une action, une attitude ou un sentiment humain.Une comparaison avec un être humain ou fantastique n'est pas une personnification.
+La personnification s'applique uniquement à un élément naturel ou inanimé qui reçoit une qualité humaine directement, sans outil comparatif.
+
 Accumulation : uniquement s'il y a au moins trois éléments de même nature énumérés.
+
 Anaphore : uniquement si le même mot ou groupe de mots est répété au début de plusieurs phrases ou propositions.
 
 Texte de l'élève :
