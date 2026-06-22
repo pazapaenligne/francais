@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa - Manuscrit des phrases perdues - 5e S4 J3</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#8dc63f;--day-dark:#3d7a10;--day-dark2:#1a4005;
+  --day-light:#f0faeb;--day-border:#b8e07a;--day-glow:rgba(141,198,63,.25);
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#f5fdf0;--border:#e8e4d9;
+  --yellow:#f5c518;--pink:#f28b82;--pink-light:#fff0ef;--pink-dark:#c0392b;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.1;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+  width:260px;height:260px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.wrap{width:100%;max-width:680px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.4rem;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;
+  font-weight:700;color:#1a1d23;margin-bottom:.75rem;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+h1{font-size:clamp(1.25rem,4vw,1.8rem);font-weight:900;line-height:1.25;}
+h1 .hl{color:var(--day-dark);}
+.prog-wrap{width:100%;background:var(--border);border-radius:99px;height:6px;
+  margin-bottom:1.4rem;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.secret-panel{background:var(--surface);border-radius:var(--radius);
+  padding:.9rem 1rem 1rem;margin-bottom:1.4rem;
+  border:1.5px solid var(--border);text-align:center;}
+.secret-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.12em;
+  display:block;margin-bottom:.65rem;}
+.secret-letters{display:flex;gap:4px;justify-content:center;align-items:center;flex-wrap:wrap;}
+.sl-gap{width:12px;}
+.sl{width:30px;height:36px;border-radius:6px;border:1.5px dashed var(--border);
+  background:var(--surface2);font-family:'JetBrains Mono',monospace;
+  font-size:.9rem;font-weight:700;color:transparent;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .4s ease;}
+.sl.lit{color:var(--day-dark);border:1.5px solid var(--day-border);
+  background:var(--day-light);box-shadow:0 2px 8px var(--day-glow);
+  animation:popL .35s ease;}
+@keyframes popL{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+.score-bar{display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.65rem 1rem;margin-bottom:1rem;}
+.score-txt{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+.score-num{font-size:1.6rem;font-weight:900;color:var(--day-dark);}
+.col-legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:.5rem;}
+.col-legend div{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.3rem;border-radius:6px;}
+.cl-s{background:var(--day-light);color:var(--day-dark);}
+.cl-c{background:#fff8e8;color:#7a4f00;}
+.cl-v{background:var(--day-light);color:var(--day-dark);}
+.puzzle-zone{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.2rem;}
+.prow{display:flex;align-items:stretch;}
+.prow.locked-row{pointer-events:none;}
+.piece{flex:1;cursor:pointer;transition:transform .15s;}
+.piece:active{transform:scale(.97);}
+.piece canvas{display:block;width:100%;height:68px;pointer-events:none;}
+.feedback{border-radius:var(--radius-sm);padding:.8rem 1rem;
+  font-size:clamp(.9rem,2.5vw,1rem);line-height:1.65;
+  margin-bottom:1rem;display:none;border:1.5px solid;}
+.feedback.ok{background:var(--day-light);color:var(--day-dark);border-color:var(--day);}
+.feedback.err{background:var(--pink-light);color:var(--pink-dark);border-color:var(--pink);}
+.btn-row{display:flex;justify-content:center;margin-bottom:1rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;
+  border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.9rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.8rem;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-primary{background:var(--day-dark);color:#fff;}
+.btn-primary:hover:not(:disabled){background:var(--day-dark2);}
+.card{background:var(--surface);border-radius:var(--radius);
+  border:1.5px solid var(--border);overflow:hidden;margin-bottom:1.2rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.card-inner{padding:1.1rem 1.3rem;}
+.act-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
+.theme-badge{display:inline-block;font-size:.63rem;font-weight:800;padding:.15rem .6rem;
+  border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.ms-body{display:flex;flex-direction:column;gap:.4rem;min-height:24px;}
+.ms-line{font-size:clamp(.9rem,2.5vw,1.05rem);line-height:1.65;color:var(--text);
+  border-bottom:1px solid var(--border);padding-bottom:.35rem;animation:slideIn .3s ease;}
+.ms-line:last-child{border-bottom:none;padding-bottom:0;}
+.ms-line .ps{color:var(--day-dark);font-weight:700;}
+.ms-line .pc{color:#7a4f00;}
+.ms-line .pv{color:var(--day-dark);font-weight:700;}
+.ms-empty{font-size:.9rem;color:var(--muted);font-style:italic;}
+.victory-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(10,6,2,.9);align-items:center;justify-content:center;padding:1.5rem;}
+.victory-overlay.show{display:flex;}
+.victory-card{background:var(--surface);border:3px solid var(--day);
+  border-radius:22px;padding:2.5rem 2rem;text-align:center;max-width:440px;width:100%;}
+.v-secret{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;
+  color:var(--day-dark);letter-spacing:.18em;margin:1rem 0;padding:.75rem;
+  background:var(--day-light);border-radius:var(--radius-sm);border:1.5px solid var(--day-border);}
+.v-score{font-size:3.5rem;font-weight:900;color:var(--day-dark);line-height:1;}
+.v-stars{font-size:1.8rem;letter-spacing:.08em;margin:.4rem 0;}
+.v-msg{font-size:.95rem;color:var(--muted);margin:.4rem 0 1.5rem;line-height:1.6;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+@keyframes confFall{from{transform:translateY(0) rotate(0deg);opacity:1;}to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;">&#9679;</span>
+    <span style="color:#8dc63f;">&#9679;</span>
+    <span style="color:#3ab5d8;">&#9679;</span>
+    &nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 5e
+  </div>
+  <div class="week-label">Semaine&nbsp;4 &ndash; Jour&nbsp;3</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">Accord sujet-verbe</span></h1>
+</header>
+<div class="prog-wrap"><div class="prog-fill" id="prog"></div></div>
+<div class="secret-panel">
+  <span class="secret-lbl">Message cach&eacute; &mdash; 1 lettre r&eacute;v&eacute;l&eacute;e par phrase valid&eacute;e</span>
+  <div class="secret-letters">
+    
+    <div class="sl" id="sl0">A</div>
+    <div class="sl" id="sl1">C</div>
+    <div class="sl" id="sl2">C</div>
+    <div class="sl" id="sl3">O</div>
+    <div class="sl" id="sl4">R</div>
+    <div class="sl" id="sl5">D</div>
+    <div class="sl" id="sl6">S</div>
+    <div class="sl-gap"></div>
+    <div class="sl" id="sl7">P</div>
+    <div class="sl" id="sl8">E</div>
+    <div class="sl" id="sl9">R</div>
+    <div class="sl" id="sl10">F</div>
+    <div class="sl" id="sl11">A</div>
+    <div class="sl" id="sl12">I</div>
+    <div class="sl" id="sl13">T</div>
+    <div class="sl" id="sl14">S</div>
+    
+  </div>
+</div>
+<div class="score-bar">
+  <span class="score-txt">Phrases reconstitu&eacute;es</span>
+  <span class="score-num" id="sc">0<span style="font-size:.85rem;color:var(--muted);font-weight:400"> / 15</span></span>
+</div>
+<div class="col-legend">
+  <div class="cl-s">&#9670; Sujet</div>
+  <div class="cl-c">&#9670; Compl&eacute;ment</div>
+  <div class="cl-v">&#9670; Verbe</div>
+</div>
+<div class="puzzle-zone" id="zone"></div>
+<div class="btn-row">
+  <button class="btn btn-primary" id="btnV" disabled onclick="validate()">
+    &#10003;&nbsp;Valider la phrase s&eacute;lectionn&eacute;e
+  </button>
+</div>
+<div class="feedback" id="fb"></div>
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="card-inner">
+    <div class="act-num">Manuscrit reconstitu&eacute;</div>
+    <div class="theme-badge">&#128221; Phrases valid&eacute;es</div>
+    <div class="ms-body" id="ms">
+      <div class="ms-empty">Les phrases valid&eacute;es appara&icirc;tront ici&hellip;</div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="victory-overlay" id="victory">
+  <div class="victory-card">
+    <div style="font-size:2rem;margin:.5rem 0;">&#9998;</div>
+    <div style="font-size:1.5rem;font-weight:900;margin-bottom:.5rem;">Manuscrit reconstitu&eacute;&nbsp;!</div>
+    <div class="v-secret">ACCORDS PARFAITS</div>
+    <div class="v-score" id="v-sc">15<span style="font-size:1.4rem;font-weight:400;color:var(--muted)"> / 15</span></div>
+    <div class="v-stars" id="v-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+    <div class="v-msg" id="v-msg">Ma&icirc;trise parfaite&nbsp;!</div>
+    <button class="btn btn-primary" onclick="restart()" style="width:100%;justify-content:center;margin-top:.5rem;">
+      &#8635;&nbsp;Nouveau tirage
+    </button>
+  </div>
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+var DATA=[
+  {id:1,s:"Le chat noir",c:"sur le vieux fauteuil",v:"dort profond\u00e9ment",sp:0,vp:0},
+  {id:2,s:"Les enfants curieux",c:"dans la cour de r\u00e9cr\u00e9ation",v:"observent un papillon",sp:1,vp:1},
+  {id:3,s:"La ma\u00eetresse",c:"devant le tableau noir",v:"explique la le\u00e7on",sp:0,vp:0},
+  {id:4,s:"Mes voisins",c:"chaque samedi matin",v:"arrosent leur jardin",sp:1,vp:1},
+  {id:5,s:"Le vent l\u00e9ger",c:"ce matin",v:"caresse les feuilles",sp:0,vp:0},
+  {id:6,s:"Les vieux ch\u00eanes de la for\u00eat",c:"depuis des centaines d\u2019ann\u00e9es",v:"r\u00e9sistent aux temp\u00eates",sp:1,vp:1},
+  {id:7,s:"Le gardien du phare",c:"malgr\u00e9 la temp\u00eate qui gronde",v:"surveille la mer",sp:0,vp:0},
+  {id:8,s:"Les \u00e9l\u00e8ves de la classe de 5e",c:"pendant la sortie au mus\u00e9e",v:"d\u00e9couvrent des \u0153uvres anciennes",sp:1,vp:1},
+  {id:9,s:"La petite s\u0153ur de L\u00e9a",c:"sans faire le moindre bruit",v:"grimpe l\u2019escalier",sp:0,vp:0},
+  {id:10,s:"Les oiseaux migrateurs",c:"au-dessus de l\u2019oc\u00e9an d\u00e9cha\u00een\u00e9",v:"volent vers le sud",sp:1,vp:1},
+  {id:11,s:"Le groupe de touristes",c:"malgr\u00e9 la chaleur \u00e9crasante",v:"visite le ch\u00e2teau",sp:0,vp:0},
+  {id:12,s:"Chacun des correspondants \u00e9trangers",c:"avant la fin du s\u00e9jour",v:"\u00e9crit une lettre de remerciement",sp:0,vp:0},
+  {id:13,s:"La plupart des spectateurs",c:"d\u00e8s la fin du spectacle",v:"remercient chaleureusement",sp:1,vp:1},
+  {id:14,s:"Le metteur en sc\u00e8ne et son \u00e9quipe",c:"tout au long des r\u00e9p\u00e9titions",v:"pr\u00e9parent la premi\u00e8re repr\u00e9sentation",sp:1,vp:1},
+  {id:15,s:"Le bouquet de roses rouges",c:"sur la table du salon",v:"embellit la pi\u00e8ce",sp:0,vp:0}
+];
+var PC={
+  s:{fill:"#e8f7fc",stroke:"#1a6e88",txt:"#0d3a47",selfill:"#bee8f5",selstroke:"#3ab5d8"},
+  c:{fill:"#fff8e8",stroke:"#c07800",txt:"#5a3600",selfill:"#ffe8a0",selstroke:"#f5c518"},
+  v:{fill:"#f0faeb",stroke:"#3d7a10",txt:"#1a4005",selfill:"#c8f0a0",selstroke:"#8dc63f"}
+};
+var score=0,sel={s:null,c:null,v:null},revealed=[];
+function iA(){if(window._ac)return;try{window._ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function bp(f1,f2,d,t,v){var ac=window._ac;if(!ac)return;var o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=t;o.frequency.setValueAtTime(f1,ac.currentTime);o.frequency.exponentialRampToValueAtTime(f2,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}
+function sOk(){iA();bp(480,880,.08,'sine',.15);setTimeout(function(){bp(660,1320,.2,'sine',.1);},80);}
+function sErr(){iA();bp(220,110,.18,'sawtooth',.15);}
+function sVic(){iA();[523,659,784,1046].forEach(function(f,i){setTimeout(function(){bp(f,f*1.2,.25,'sine',.13);},i*130);});}
+function shuf(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function checkSecret(){
+  var idx=score-1;
+  if(idx>=0&&idx<=12&&!revealed[idx]){revealed[idx]=true;var el=$('sl'+idx);if(el)el.classList.add('lit');}
+  if(score===15){[13,14].forEach(function(i){if(!revealed[i]){revealed[i]=true;var el=$('sl'+i);if(el)el.classList.add('lit');}});}
+}
+function drawPiece(canvas,txt,col,type,isSel,isDone){
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  var W=canvas.parentElement?canvas.parentElement.getBoundingClientRect().width:0;
+  if(!W||W<10){W=canvas.closest('.wrap')?canvas.closest('.wrap').offsetWidth/3-8:200;}
+  var H=68;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  var pc=PC[col];
+  var fill=isDone?'#d4f0e0':(isSel?pc.selfill:pc.fill);
+  var stroke=isDone?'#5acc88':(isSel?pc.selstroke:pc.stroke);
+  var tc=isDone?'#085041':pc.txt;
+  var B=9,m=2;
+  ctx.beginPath();
+  if(type==='left'){
+    ctx.moveTo(m,m);ctx.lineTo(W-m,m);
+    ctx.lineTo(W-m,H/2-B);ctx.bezierCurveTo(W-m,H/2-B,W-m-B*1.8,H/2-B/2,W-m-B*1.8,H/2);
+    ctx.bezierCurveTo(W-m-B*1.8,H/2+B/2,W-m,H/2+B,W-m,H/2+B);
+    ctx.lineTo(W-m,H-m);ctx.lineTo(m,H-m);ctx.lineTo(m,m);
+  } else if(type==='mid'){
+    ctx.moveTo(m,m);ctx.lineTo(W-m,m);
+    ctx.lineTo(W-m,H/2-B);ctx.bezierCurveTo(W-m,H/2-B,W-m-B*1.8,H/2-B/2,W-m-B*1.8,H/2);
+    ctx.bezierCurveTo(W-m-B*1.8,H/2+B/2,W-m,H/2+B,W-m,H/2+B);
+    ctx.lineTo(W-m,H-m);ctx.lineTo(m,H-m);
+    ctx.lineTo(m,H/2+B);ctx.bezierCurveTo(m,H/2+B,m+B*1.8,H/2+B/2,m+B*1.8,H/2);
+    ctx.bezierCurveTo(m+B*1.8,H/2-B/2,m,H/2-B,m,H/2-B);ctx.lineTo(m,m);
+  } else {
+    ctx.moveTo(m,m);ctx.lineTo(W-m,m);ctx.lineTo(W-m,H-m);ctx.lineTo(m,H-m);
+    ctx.lineTo(m,H/2+B);ctx.bezierCurveTo(m,H/2+B,m+B*1.8,H/2+B/2,m+B*1.8,H/2);
+    ctx.bezierCurveTo(m+B*1.8,H/2-B/2,m,H/2-B,m,H/2-B);ctx.lineTo(m,m);
+  }
+  ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+  ctx.strokeStyle=stroke;ctx.lineWidth=isSel?2.5:1.5;ctx.stroke();
+  ctx.fillStyle=tc;ctx.font=(isSel?'700 ':'600 ')+'11px Arial,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  var words=txt.split(' '),lines=[],cur='';
+  words.forEach(function(w){var t=cur?cur+' '+w:w;if(ctx.measureText(t).width>W-28&&cur){lines.push(cur);cur=w;}else cur=t;});
+  if(cur)lines.push(cur);
+  var lh=14,totalH=lines.length*lh;
+  lines.forEach(function(l,i){ctx.fillText(l,W/2,H/2-totalH/2+lh*i+lh/2);});
+}
+function redraw(pw){var cv=pw.querySelector('canvas');if(cv)drawPiece(cv,pw.dataset.txt,pw.dataset.col,pw.dataset.type,pw.classList.contains('sel'),pw.classList.contains('done-p'));}
+function build(){
+  var zone=$('zone');zone.innerHTML='';
+  var si=shuf([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]);
+  var ci=shuf([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]);
+  var vi=shuf([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]);
+  DATA.forEach(function(_,r){
+    var row=document.createElement('div');row.className='prow';
+    row.appendChild(mkP(DATA[si[r]],'s','left'));
+    row.appendChild(mkP(DATA[ci[r]],'c','mid'));
+    row.appendChild(mkP(DATA[vi[r]],'v','right'));
+    zone.appendChild(row);
+  });
+  requestAnimationFrame(function(){requestAnimationFrame(function(){document.querySelectorAll('.piece').forEach(function(pw){redraw(pw);});});});
+}
+function mkP(d,col,type){
+  var pw=document.createElement('div');pw.className='piece';
+  pw.dataset.id=d.id;pw.dataset.col=col;pw.dataset.type=type;
+  pw.dataset.txt=col==='s'?d.s:col==='c'?d.c:d.v;
+  pw.appendChild(document.createElement('canvas'));
+  pw.addEventListener('click',function(){clickP(pw);});
+  return pw;
+}
+function clickP(el){
+  iA();
+  if(el.classList.contains('done-p')||el.closest('.locked-row'))return;
+  var col=el.dataset.col;
+  if(sel[col]===el){el.classList.remove('sel');sel[col]=null;}
+  else{if(sel[col]){sel[col].classList.remove('sel');redraw(sel[col]);}sel[col]=el;el.classList.add('sel');}
+  redraw(el);
+  $('btnV').disabled=!(sel.s&&sel.c&&sel.v);
+  $('fb').style.display='none';
+}
+function clearSel(){['s','c','v'].forEach(function(k){if(sel[k]){sel[k].classList.remove('sel');redraw(sel[k]);}});sel={s:null,c:null,v:null};$('btnV').disabled=true;}
+function validate(){
+  if(!sel.s||!sel.c||!sel.v)return;
+  var sid=parseInt(sel.s.dataset.id),cid=parseInt(sel.c.dataset.id),vid=parseInt(sel.v.dataset.id);
+  var sd=DATA.find(function(x){return x.id===sid;});
+  var cd=DATA.find(function(x){return x.id===cid;});
+  var vd=DATA.find(function(x){return x.id===vid;});
+  var fb=$('fb');fb.style.display='block';
+  if(sd.sp===vd.vp){
+    var isOff=(sid===cid&&cid===vid);
+    fb.className='feedback ok';
+    fb.innerHTML=(isOff?'✓ Parfait !':'✓ Bon accord ! Phrase acceptée.')
+      +' <em>« '+sd.s+', '+cd.c+', '+vd.v+'. »</em>'
+      +(isOff?'':'<br><small>→ Prof : <em>'+sd.s+', '+sd.c+', '+sd.v+'.</em></small>');
+    [sel.s,sel.c,sel.v].forEach(function(pw){pw.classList.remove('sel');pw.classList.add('done-p');redraw(pw);});
+    [sel.s,sel.c,sel.v].forEach(function(pw){var ro=pw.closest('.prow');if(ro)ro.classList.add('locked-row');});
+    var ms=$('ms');var em=ms.querySelector('.ms-empty');if(em)em.remove();
+    var line=document.createElement('div');line.className='ms-line';
+    var corr=isOff?'':' <small style="color:var(--muted);font-size:.82em">(→ prof : <em>'+sd.c+', '+sd.v+'</em>)</small>';
+    line.innerHTML='<span class="ps">'+sd.s+'</span>, <span class="pc">'+cd.c+'</span>, <span class="pv">'+vd.v+'</span>.'+corr;
+    ms.appendChild(line);
+    score++;
+    $('sc').innerHTML=score+'<span style="font-size:.85rem;color:var(--muted);font-weight:400"> / 15</span>';
+    $('prog').style.width=Math.round(score/15*100)+'%';
+    checkSecret();clearSel();sOk();
+    if(score===15)setTimeout(showVic,900);
+  } else {
+    fb.className='feedback err';
+    fb.textContent='✗ Le sujet et le verbe ne s’accordent pas en nombre. Retrouve le vrai sujet !';
+    sErr();
+  }
+}
+function showVic(){
+  sVic();confetti();
+  $('v-sc').innerHTML=score+'<span style="font-size:1.4rem;font-weight:400;color:var(--muted)"> / 15</span>';
+  var st=score>=14?5:score>=11?4:score>=8?3:score>=5?2:1;
+  $('v-stars').textContent='⭐'.repeat(st)+'☆'.repeat(5-st);
+  var m=['','','','','','','','','Bien !','','','Excellent !','','Quasi parfait !','Quasi parfait !','Maîtrise parfaite !'];
+  $('v-msg').textContent=m[score]||'Bravo !';
+  $('victory').classList.add('show');
+}
+function confetti(){
+  var cols=['#8dc63f','#3d7a10','#f5c518','#f5a623'];
+  for(var i=0;i<20;i++)(function(i){setTimeout(function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;top:-10px;left:'+(5+Math.random()*90)+'%;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:9999;background:'+cols[i%4]+';animation:confFall '+(0.8+Math.random()*.6)+'s '+(Math.random()*.4)+'s ease-in forwards;';
+    document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},1500);
+  },i*60);})(i);
+}
+function restart(){
+  score=0;sel={s:null,c:null,v:null};revealed=[];
+  $('sc').innerHTML='0<span style="font-size:.85rem;color:var(--muted);font-weight:400"> / 15</span>';
+  $('prog').style.width='0%';$('fb').style.display='none';
+  $('ms').innerHTML='<div class="ms-empty">Les phrases validées apparaîtront ici…</div>';
+  $('btnV').disabled=true;$('victory').classList.remove('show');
+  for(var i=0;i<15;i++){var el=$('sl'+i);if(el)el.classList.remove('lit');}
+  build();window.scrollTo({top:0,behavior:'smooth'});
+}
+window.addEventListener('resize',function(){document.querySelectorAll('.piece').forEach(function(pw){redraw(pw);});});
+document.addEventListener('pointerdown',iA,{once:true});
+build();
+</script>
+</body>
+</html>
