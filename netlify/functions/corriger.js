@@ -1,9 +1,16 @@
-exports.handler = async (event) => {
-  const { texte } = JSON.parse(event.body);
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+Texte de l'élève :
+
+"${texte}"`
+      }]
+    })
+  });
+  const data = await response.json();
+  return {
+    statusCode: 200,
+    headers: { "Access-Control-Allow-Origin": "*" },
+    body: JSON.stringify({ correction: data.content[0].text })
+  };
+};
       "x-api-key": process.env.ANTHROPIC_API_KEY,
       "anthropic-version": "2023-06-01"
     },
@@ -64,12 +71,13 @@ Après les figures de style, si le texte contient des erreurs d’orthographe, d
 Correction de la phrase :
 « phrase corrigée avec les mots corrigés en gras »
 
-Dans la phrase corrigée, mets en gras uniquement les mots qui ont été corrigés.
+Dans la phrase corrigée, mets en gras uniquement les mots corrigés avec des balises HTML <strong>...</strong>.
+N’utilise jamais les symboles **.
 
 Exemples :
 Texte élève : « Les enfant joue dehors. »
 Correction de la phrase :
-« Les **enfants** **jouent** dehors. »
+« Les <strong>enfants</strong> <strong>jouent</strong> dehors. »
 
 Si le texte ne contient aucune erreur, n’ajoute pas la rubrique « Correction de la phrase ».
 
