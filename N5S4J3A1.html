@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S4 J3 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+      --orange:#f5a623;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f5c518;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* ALERTE INTRO */
+    .alerte{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--day-color);
+      border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;}
+    .alerte::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .alerte-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-border);margin-bottom:.35rem;}
+    .alerte-texte{font-size:.95rem;color:#c8d8b8;line-height:1.65;}
+    .alerte-consigne{font-size:.9rem;color:#a8c888;margin-top:.5rem;line-height:1.6;font-weight:600;}
+
+    /* DASHBOARD */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5a8a5a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#5a8a5a;
+      text-transform:uppercase;letter-spacing:.08em;}
+
+    /* PROGRESSION */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* CARTES */
+    .cards-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .card.state-ok{border-color:var(--green);background:var(--green-pale);}
+    .card.state-ko{border-color:var(--red);background:var(--red-pale);}
+
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{font-size:1.05rem;font-style:italic;color:var(--text);line-height:1.8;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:9px;
+      padding:.7rem .95rem;margin-bottom:.8rem;}
+
+    /* BOUTONS CHOIX */
+    .choix-row{display:flex;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap;}
+    .choix-btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;
+      gap:.5rem;padding:.65rem .75rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:.95rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .18s;min-height:3rem;-webkit-tap-highlight-color:transparent;
+      position:relative;overflow:hidden;}
+    .choix-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .choix-btn:disabled{cursor:default;}
+    .choix-btn.btn-correct{border-color:var(--green);background:var(--green-pale);color:#14532d;}
+    .choix-btn.btn-erreur{border-color:var(--orange);background:#fff5e0;color:#7a3c00;}
+    .choix-btn.sel-correct{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .choix-btn.sel-erreur{background:#fff5e0;border-color:var(--orange);color:#7a3c00;}
+
+    /* GYROPHARE */
+    .gyro{display:inline-block;font-size:1.2rem;margin-right:.3rem;transition:transform .1s;}
+    .gyro.spin{animation:gyroSpin .35s linear infinite;}
+    @keyframes gyroSpin{0%{transform:rotate(-15deg);}25%{transform:rotate(15deg);}50%{transform:rotate(-15deg);}75%{transform:rotate(15deg);}100%{transform:rotate(-15deg);}}
+
+    /* ZONE CORRECTION */
+    .correction-zone{display:none;animation:fadeUp .3s ease both;margin-top:.1rem;}
+    .correction-zone.show{display:block;}
+    .correction-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.4rem;}
+    .correction-input{width:100%;padding:.6rem .85rem;border-radius:9px;
+      border:2px solid var(--day-border);background:#fff;font-size:1rem;
+      font-family:Arial,sans-serif;color:var(--text);outline:none;
+      transition:border-color .15s;}
+    .correction-input:focus{border-color:var(--day-color);}
+    .correction-input:disabled{background:#f5f5f5;color:var(--muted);}
+    .valider-btn{margin-top:.5rem;display:inline-flex;align-items:center;justify-content:center;
+      padding:.55rem 1.1rem;border-radius:9px;background:var(--day-dark);color:#fff;
+      font-weight:700;font-size:.95rem;border:none;cursor:pointer;min-height:2.8rem;
+      transition:transform .12s;-webkit-tap-highlight-color:transparent;font-family:Arial,sans-serif;}
+    .valider-btn:active{transform:scale(.96);}
+    .valider-btn:hover:not(:disabled){background:var(--day-color);color:#222;}
+    .valider-btn:disabled{background:#ccc;cursor:default;}
+
+    /* FEEDBACK */
+    .fb{font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      padding:.5rem .8rem;border-radius:8px;margin-top:.5rem;display:none;line-height:1.6;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border:1px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* RÉSULTATS */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#7a9a6a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#a8c888;margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .btn-dark{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:1.5px solid var(--dark3);
+      background:var(--dark2);color:#fff;min-height:3rem;margin:.5rem auto 0;
+      -webkit-tap-highlight-color:transparent;transition:transform .12s;}
+    .btn-dark:active{transform:scale(.96);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.04);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:480px){.choix-row{flex-direction:column;}.choix-btn{min-width:0;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 3</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Accord sujet / verbe</span></h1>
+</header>
+
+<!-- ALERTE INTRO -->
+<div class="alerte">
+  <div class="alerte-label">&#128680; Alerte radar</div>
+  <div class="alerte-texte">Des erreurs se sont gliss&eacute;es dans certaines phrases. Active ton radar et pars &agrave; leur recherche&nbsp;!</div>
+  <div class="alerte-consigne">&#127919;&nbsp;Consigne&nbsp;: Dans chaque phrase, rep&egrave;re les erreurs d&rsquo;accord entre le sujet et le verbe. Puis r&eacute;&eacute;cris la phrase correctement.</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash">
+  <div class="dash-titre">&#128270; Chasse aux erreurs &mdash; 8 phrases</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Phrase 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Valid&eacute;es</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 phrases</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- CARTES -->
+<div class="cards-wrap" id="cards-wrap"></div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#128270; Bilan de la chasse</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DONNÉES
+═══════════════════════════════════════ */
+var PHRASES=[
+  {id:'p1', phrase:'Les \u00e9l\u00e8ves \u00e9coute attentivement la consigne.',
+   hasError:true, correction:'Les \u00e9l\u00e8ves \u00e9coutent attentivement la consigne.'},
+  {id:'p2', phrase:'Ali et Karim joue dans le jardin.',
+   hasError:true, correction:'Ali et Karim jouent dans le jardin.'},
+  {id:'p3', phrase:'Nous pr\u00e9paront un exercice difficile.',
+   hasError:true, correction:'Nous pr\u00e9parons un exercice difficile.'},
+  {id:'p4', phrase:'Les fleurs du jardin s\u2019\u00e9panouit au printemps.',
+   hasError:true, correction:'Les fleurs du jardin s\u2019\u00e9panouissent au printemps.'},
+  {id:'p5', phrase:'Tu comprend la r\u00e8gle facilement.',
+   hasError:true, correction:'Tu comprends la r\u00e8gle facilement.'},
+  {id:'p6', phrase:'Mon fr\u00e8re et moi regardont par la fen\u00eatre.',
+   hasError:true, correction:'Mon fr\u00e8re et moi regardons par la fen\u00eatre.'},
+  {id:'p7', phrase:'Les adolescents prenne leur petit-d\u00e9jeuner \u00e0 10h.',
+   hasError:true, correction:'Les adolescents prennent leur petit-d\u00e9jeuner \u00e0 10h.'},
+  {id:'p8', phrase:'La classe travaillent en silence.',
+   hasError:true, correction:'La classe travaille en silence.'}
+];
+
+/* ═══════════════════════════════════════
+   ÉTAT
+═══════════════════════════════════════ */
+var scoreOk=0, done={};
+
+function jouerOk(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(700,ctx.currentTime+.1);o.frequency.setValueAtTime(880,ctx.currentTime+.2);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(220,ctx.currentTime+.12);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}}
+
+function majProg(){
+  var n=Object.keys(done).length;
+  var pct=Math.round(n/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=n+' / 8 phrases';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+  document.getElementById('dash-statut').textContent=
+    n<8?'Phrase '+(n+1)+' en cours\u2026':'Chasse termin\u00e9e\u00a0!';
+}
+
+/* ═══════════════════════════════════════
+   BUILD
+═══════════════════════════════════════ */
+function build(){
+  var wrap=document.getElementById('cards-wrap');wrap.innerHTML='';
+  PHRASES.forEach(function(p,i){
+    var card=document.createElement('div');card.className='card';card.id='card-'+p.id;
+    var stripe=document.createElement('div');stripe.className='card-stripe';card.appendChild(stripe);
+
+    /* Numéro */
+    var num=document.createElement('div');num.className='q-num';
+    num.textContent='Phrase '+(i+1);card.appendChild(num);
+
+    /* Texte */
+    var ph=document.createElement('div');ph.className='q-phrase';
+    ph.textContent='\u00ab\u00a0'+p.phrase+'\u00a0\u00bb';card.appendChild(ph);
+
+    /* Boutons choix */
+    var row=document.createElement('div');row.className='choix-row';
+
+    var btnC=document.createElement('button');btnC.className='choix-btn btn-correct';
+    btnC.id='btn-correct-'+p.id;
+    btnC.innerHTML='&#10003;&nbsp;Phrase correcte';
+
+    var btnE=document.createElement('button');btnE.className='choix-btn btn-erreur';
+    btnE.id='btn-erreur-'+p.id;
+    /* Gyrophare */
+    var gyro=document.createElement('span');gyro.className='gyro';gyro.id='gyro-'+p.id;
+    gyro.textContent='\uD83D\uDEA8';
+    btnE.appendChild(gyro);
+    var btnEtxt=document.createTextNode('\u00a0Erreur d\u00e9tect\u00e9e\u00a0!');
+    btnE.appendChild(btnEtxt);
+
+    row.appendChild(btnC);row.appendChild(btnE);card.appendChild(row);
+
+    /* Zone correction (cachée) */
+    var corrZone=document.createElement('div');corrZone.className='correction-zone';
+    corrZone.id='corr-'+p.id;
+    var corrLabel=document.createElement('div');corrLabel.className='correction-label';
+    corrLabel.textContent='R\u00e9\u00e9cris la phrase correctement\u00a0:';
+    corrZone.appendChild(corrLabel);
+    var corrInput=document.createElement('input');
+    corrInput.type='text';corrInput.className='correction-input';corrInput.id='input-'+p.id;
+    corrInput.placeholder='Ta correction ici\u2026';corrInput.autocomplete='off';
+    corrZone.appendChild(corrInput);
+    var valBtn=document.createElement('button');valBtn.className='valider-btn';
+    valBtn.textContent='Valider la correction';
+    valBtn.addEventListener('click',function(){validerCorrection(p,corrInput,valBtn,btnC,btnE);});
+    corrInput.addEventListener('keydown',function(e){if(e.key==='Enter')valBtn.click();});
+    corrZone.appendChild(valBtn);
+    var fb=document.createElement('div');fb.className='fb';fb.id='fb-'+p.id;
+    corrZone.appendChild(fb);
+    card.appendChild(corrZone);
+
+    /* Feedback choix (phrase correcte — erreur dans ce jeu toutes ont erreur) */
+    var fbChoix=document.createElement('div');fbChoix.className='fb';fbChoix.id='fbc-'+p.id;
+    card.appendChild(fbChoix);
+
+    wrap.appendChild(card);
+
+    /* Events boutons */
+    btnE.addEventListener('click',function(){clickErreur(p,btnC,btnE,gyro,corrZone);});
+    btnC.addEventListener('click',function(){clickCorrect(p,btnC,btnE,fbChoix,corrZone,gyro);});
+  });
+}
+
+/* Clic "Erreur détectée" */
+function clickErreur(p,btnC,btnE,gyro,corrZone){
+  if(done[p.id]) return;
+  /* Gyrophare animé */
+  gyro.classList.add('spin');
+  setTimeout(function(){gyro.classList.remove('spin');},1200);
+  /* Désactiver les deux boutons de choix */
+  btnC.disabled=true;btnE.disabled=true;
+  /* Montrer zone correction */
+  corrZone.classList.add('show');
+  var inp=document.getElementById('input-'+p.id);
+  setTimeout(function(){inp.focus();},200);
+}
+
+/* Clic "Phrase correcte" — toutes les phrases ont une erreur dans ce jeu */
+function clickCorrect(p,btnC,btnE,fbChoix,corrZone,gyro){
+  if(done[p.id]) return;
+  /* Pas de done[p.id]=false ici — l'élève peut encore corriger */
+  btnC.disabled=true;
+  var card=document.getElementById('card-'+p.id);
+  card.classList.remove('anim-ok','anim-ko');void card.offsetWidth;card.classList.add('anim-ko');
+  fbChoix.className='fb show ko-fb';
+  fbChoix.textContent='\u2717 Attention\u00a0! Cette phrase contient bien une erreur. Clique sur \u00ab\u00a0Erreur d\u00e9tect\u00e9e\u00a0!\u00bb et corrige-la.';
+  jouerErreur();
+  /* Réactiver le bouton erreur pour qu'il puisse encore répondre */
+  btnE.disabled=false;
+}
+
+/* Valider la correction saisie */
+function validerCorrection(p,inp,valBtn,btnC,btnE){
+  if(done[p.id]) return;
+  var saisie=inp.value.trim();
+  if(!saisie) return;
+  /* Vérif longueur : toute la phrase requise */
+  var mots=saisie.replace(/[«»]/g,"").trim().split(/\s+/).filter(function(m){return m.length>0;});
+  var corrMots=p.correction.trim().split(/\s+/).length;
+  if(mots.length < Math.max(3, corrMots-1)){
+    var fb=document.getElementById("fb-"+p.id);
+    fb.className="fb show ko-fb";
+    fb.textContent="\u26a0\ufe0f Attention\u00a0: tu dois r\u00e9\u00e9crire toute la phrase, pas seulement 1 mot.";
+    return;
+  }
+  /* Normalise : retire guillemets éventuels, trim */
+  function norm(s){return s.replace(/[\u00ab\u00bb\u201c\u201d\u2018\u2019«»""'']/g,'').trim().toLowerCase();}
+  var ok=norm(saisie)===norm(p.correction);
+  done[p.id]=ok;
+  if(ok) scoreOk++;
+  inp.disabled=true;valBtn.disabled=true;
+  var card=document.getElementById('card-'+p.id);
+  var fb=document.getElementById('fb-'+p.id);
+  if(ok){
+    card.classList.add('state-ok');
+    fb.className='fb show ok-fb';
+    fb.textContent='\u2713 Parfait\u00a0! \u00ab\u00a0'+p.correction+'\u00a0\u00bb';
+    jouerOk();
+  } else {
+    card.classList.add('state-ko');
+    fb.className='fb show ko-fb';
+    fb.textContent='\u2717 Pas tout \u00e0 fait. Correction attendue\u00a0: \u00ab\u00a0'+p.correction+'\u00a0\u00bb';
+    jouerErreur();
+  }
+  card.classList.remove('anim-ok','anim-ko');void card.offsetWidth;
+  card.classList.add(ok?'anim-ok':'anim-ko');
+  majProg();
+  checkAllDone();
+}
+
+function checkAllDone(){
+  if(Object.keys(done).length===8) setTimeout(afficherVerdict,700);
+}
+
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===8){badge='<div class="badge-ok">\u2713 Radar parfait\u00a0! 8/8</div>';msg='Toutes les erreurs trouv\u00e9es et\ncorrig\u00e9es. Excellent travail\u00a0!';}
+  else if(total>=6){badge='<div class="badge-ok">\u2713 Tr\u00e8s bien\u00a0! '+total+'/8</div>';msg='Tr\u00e8s bon radar\u00a0!\nQuelques accords \u00e0 revoir.';}
+  else if(total>=4){badge='<div class="badge-ko">Bon d\u00e9but \u2014 '+total+'/8</div>';msg='Continue\u00a0! Relis les r\u00e8gles\nd\u2019accord sujet/verbe.';}
+  else{badge='<div class="badge-ko">'+total+'/8 \u2014 \u00e0 retravailler</div>';msg='Relis attentivement les r\u00e8gles\nd\u2019accord et recommence.';}
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;done={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('dash-total').textContent='0';
+  majProg();
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+build();majProg();
+</script>
+</body>
+</html>
