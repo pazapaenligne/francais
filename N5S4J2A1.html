@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S4 J2 – 5e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#b94040;--day-dark:#7a1f1f;
+      --day-light:#f7eded;--day-border:#e2a3a3;
+      --day-glow:rgba(185,64,64,.22);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f5a623;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#000;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* UNIVERS */
+    .univers{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-left:5px solid var(--day-color);border-radius:var(--radius);
+      padding:.9rem 1.2rem;margin-bottom:1rem;position:relative;z-index:1;overflow:hidden;}
+    .univers::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .univers-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-border);margin-bottom:.35rem;}
+    .univers-texte{font-size:.95rem;color:#c8b0b0;line-height:1.65;}
+
+    /* DASHBOARD */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a0a0;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#9a7a7a;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#9a7a7a;
+      text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);
+      border:1.5px solid var(--dark3);border-radius:8px;padding:.28rem .7rem;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;transition:all .4s;color:var(--muted);}
+
+    /* PROGRESSION */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    @media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.65rem .8rem;}
+    .ref-cell.full{grid-column:1/-1;}
+    .ref-cell-titre{font-size:.8rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .ref-cell-body{font-size:.82rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* BLOCS PARTIES */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),#f5a623);}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.55;}
+    .q-consigne{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:9px;
+      padding:.6rem .85rem;margin-bottom:.75rem;font-size:.9rem;
+      color:var(--day-dark);font-weight:700;line-height:1.55;}
+
+    /* SURLIGNAGE */
+    .surlignage-texte{font-size:1.05rem;line-height:2.1;color:var(--text);
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.85rem 1rem;margin-bottom:.75rem;cursor:default;}
+    .seg{border-radius:4px;padding:1px 2px;cursor:pointer;transition:background .15s,box-shadow .12s;
+      -webkit-tap-highlight-color:transparent;}
+    .seg:hover{background:rgba(185,64,64,.12);}
+    .seg.sel-comp{background:#fde68a;box-shadow:0 0 0 2px #f5c518;}
+    .seg.sel-pers{background:#bfdbfe;box-shadow:0 0 0 2px #3b82f6;}
+    .seg.correct-comp{background:#bbf7d0;box-shadow:0 0 0 2px var(--green);cursor:default;}
+    .seg.correct-pers{background:#bfdbfe;box-shadow:0 0 0 2px #3b82f6;cursor:default;}
+    .seg.wrong{background:var(--red-pale);box-shadow:0 0 0 2px var(--red);cursor:default;}
+
+    .legende{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:.65rem;font-size:.82rem;}
+    .legende-item{display:flex;align-items:center;gap:.4rem;}
+    .legende-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+    .legende-comp{background:#fde68a;border:1.5px solid #f5c518;}
+    .legende-pers{background:#bfdbfe;border:1.5px solid #3b82f6;}
+
+    .surlig-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;}
+    .surlig-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s;
+      min-height:2.6rem;font-family:Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
+    .surlig-btn.active-comp{background:#fde68a;border-color:#f5c518;color:#92400e;}
+    .surlig-btn.active-pers{background:#bfdbfe;border-color:#3b82f6;color:#1e3a8a;}
+    .surlig-btn:hover:not(:disabled){border-color:var(--day-color);}
+    .surlig-btn:disabled{opacity:.5;cursor:default;}
+
+    /* QCM */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* FEEDBACK */
+    .fb{font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      padding:.55rem .85rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.65;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+    .fb.ok-fb{background:var(--green-pale);border:1px solid var(--green);color:#14532d;}
+
+    /* RÉSULTATS PARTIE */
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;
+      max-width:720px;width:100%;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-border);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:#c8a0a0;margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* BOUTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:#fff;}
+    .btn-primary:disabled{opacity:.45;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* RÉSULTATS GLOBAL */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a0a0;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#9a7a7a;}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:#c8a0a0;margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;
+      font-family:'JetBrains Mono',monospace;}
+    .deblocage{display:inline-block;background:rgba(185,64,64,.15);color:var(--day-border);
+      border:2px solid var(--day-color);border-radius:10px;padding:.5rem 1rem;
+      font-size:.88rem;font-weight:700;margin-top:.6rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-dark,.btn-primary{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 2</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Figures de style</span></h1>
+</header>
+
+<!-- UNIVERS -->
+<div class="univers">
+  <div class="univers-label">&#127912; L&rsquo;Atelier du Peintre de Mots</div>
+  <div class="univers-texte">Tu entres dans l&rsquo;atelier d&rsquo;un &eacute;crivain qui peint avec des mots plut&ocirc;t qu&rsquo;avec des couleurs. 8&nbsp;indices &agrave; rep&eacute;rer pour comprendre ses outils.</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash">
+  <div class="dash-titre">&#127912; Dossier &mdash; 8 questions</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Partie 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Valid&eacute;es</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Partie&nbsp;1</span><span id="nb-s-p1" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Partie&nbsp;2</span><span id="nb-s-p2" style="font-weight:900;">0/4</span></div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">COMPARAISON</div>
+      <div class="ref-cell-body">Rapprochement de deux &eacute;l&eacute;ments &agrave; l&rsquo;aide d&rsquo;un outil comparatif (<em>comme, tel, semblable &agrave;, pareil &agrave;&hellip;</em>).<br><em>Ex.</em>&nbsp;: &laquo;&nbsp;Son sourire brille comme un rayon de lune.&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">M&Eacute;TAPHORE</div>
+      <div class="ref-cell-body">Comparaison sans outil&nbsp;; le compar&eacute; est pr&eacute;sent&eacute; directement comme le comparant.<br><em>Ex.</em>&nbsp;: &laquo;&nbsp;Ce vieux ch&ecirc;ne, g&eacute;ant silencieux, veille sur la clairière.&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">PERSONNIFICATION</div>
+      <div class="ref-cell-body">Attribution d&rsquo;actions ou de sentiments humains &agrave; un &ecirc;tre non humain.<br><em>Ex.</em>&nbsp;: &laquo;&nbsp;La rivi&egrave;re chantonnait doucement entre les pierres.&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">ACCUMULATION</div>
+      <div class="ref-cell-body">&Eacute;num&eacute;ration de plusieurs mots ou groupes de mots pour amplifier une description.<br><em>Ex.</em>&nbsp;: &laquo;&nbsp;Des coquillages, des galets, des algues et du sable fin couvraient la plage.&nbsp;&raquo;</div>
+    </div>
+    <div class="ref-cell full">
+      <div class="ref-cell-titre">ANAPHORE</div>
+      <div class="ref-cell-body">R&eacute;p&eacute;tition d&rsquo;un m&ecirc;me mot ou groupe de mots en d&eacute;but de phrase ou de vers, pour cr&eacute;er un effet d&rsquo;insistance.<br><em>Ex.</em>&nbsp;: &laquo;&nbsp;Partout des arbres, Partout des fleurs, Partout le chant des oiseaux.&nbsp;&raquo;</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIE 1 -->
+<div class="bloc-partie" id="bloc-p1">
+  <div class="partie-header">
+    <div class="part-icon">&#127912;</div>
+    <div>
+      <div class="part-titre">Partie 1 &mdash; Surlignage et rep&eacute;rage</div>
+      <div class="part-sous">4 questions &mdash; Q1 &agrave; Q4</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/4</div>
+  </div>
+  <div id="cards-p1"></div>
+  <div class="part-result" id="res-p1">
+    <div class="part-score" id="score-p1"></div>
+    <div class="part-msg" id="msg-p1"></div>
+    <div id="btn-p1"></div>
+  </div>
+</div>
+
+<!-- PARTIE 2 -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#9881;</div>
+    <div>
+      <div class="part-titre">Partie 2 &mdash; Identifier la figure de style</div>
+      <div class="part-sous">4 questions &mdash; Q5 &agrave; Q8</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/4</div>
+  </div>
+  <div id="cards-p2"></div>
+  <div class="part-result" id="res-p2">
+    <div class="part-score" id="score-p2"></div>
+    <div class="part-msg" id="msg-p2"></div>
+    <div id="btn-p2"></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#127912; Bilan de l&rsquo;atelier</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <div id="res-deblocage"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;R&eacute;essayer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DONNÉES PARTIE 1 — Surlignage + QCM mixte
+═══════════════════════════════════════ */
+
+/* Q1 : surlignage double (comparaison + personnification) */
+var Q1_SEGMENTS=[
+  {id:'s0', text:'Des gouttes de pluie '},
+  {id:'s1', text:'brillaient comme des perles de cristal', comp:true},
+  {id:'s2', text:' sur les feuilles du jardin, tandis que '},
+  {id:'s3', text:'les nuages semblaient se murmurer des secrets', pers:true},
+  {id:'s4', text:' dans le ciel.'}
+];
+
+/* Q2, Q3, Q4 : QCM */
+var P1_QCM=[
+  {id:'q2',qNum:2,
+   phrase:'\u00ab\u00a0On aurait dit que la nuit et le silence s\u2019\u00e9taient donn\u00e9 la main pour envelopper la maison d\u2019un calme presque palpable.\u00a0\u00bb',
+   texte:'Quelle figure de style peut-on identifier ici\u00a0?',
+   opts:[{t:'Une comparaison',ok:false},{t:'Une anaphore',ok:false},{t:'Une personnification',ok:true}],
+   fb:'La nuit et le silence sont pr\u00e9sent\u00e9s comme deux \u00eatres capables de \u00ab\u00a0se donner la main\u00a0\u00bb\u00a0: c\u2019est une action humaine pr\u00eat\u00e9e \u00e0 des \u00e9l\u00e9ments abstraits. C\u2019est une personnification. Il n\u2019y a pas d\u2019outil comparatif (\u2260 comparaison) et pas de r\u00e9p\u00e9tition en t\u00eate de phrase (\u2260 anaphore).'},
+  {id:'q3',qNum:3,
+   phrase:'\u00ab\u00a0Sur le march\u00e9, on trouvait des paniers d\u2019osier, des \u00e9tals de l\u00e9gumes color\u00e9s, des cageots de fruits m\u00fbrs et des bottes de fleurs fra\u00eeches.\u00a0\u00bb',
+   texte:'Quelle figure de style domine cette phrase\u00a0?',
+   opts:[{t:'Une m\u00e9taphore',ok:false},{t:'Une accumulation',ok:true},{t:'Une anaphore',ok:false}],
+   fb:'Plusieurs \u00e9l\u00e9ments diff\u00e9rents sont \u00e9num\u00e9r\u00e9s \u00e0 la suite\u00a0: paniers, \u00e9tals, cageots, bottes. Cette \u00e9num\u00e9ration donne une impression d\u2019abondance et de richesse du march\u00e9. C\u2019est une accumulation.'},
+  {id:'q4',qNum:4,
+   phrase:'\u00ab\u00a0Partout des \u00e9toiles, partout le silence de la nuit, partout cette paix que rien ne semblait troubler.\u00a0\u00bb',
+   texte:'Quelle figure de style peut-on observer ici\u00a0?',
+   opts:[{t:'Une accumulation',ok:false},{t:'Une anaphore',ok:true},{t:'Une comparaison',ok:false}],
+   fb:'Le mot \u00ab\u00a0partout\u00a0\u00bb est r\u00e9p\u00e9t\u00e9 trois fois en t\u00eate de phrase (ou de groupe). Cette r\u00e9p\u00e9tition en d\u00e9but de construction cr\u00e9e un effet d\u2019insistance sur l\u2019immensit\u00e9 du silence et de la paix. C\u2019est une anaphore.'}
+];
+
+/* ═══════════════════════════════════════
+   DONNÉES PARTIE 2 — QCM
+═══════════════════════════════════════ */
+var P2=[
+  {id:'q5',qNum:5,
+   phrase:'\u00ab\u00a0Ce vieux pont de pierre, gardien fid\u00e8le de la rivi\u00e8re, r\u00e9sistait aux assauts du temps.\u00a0\u00bb',
+   texte:'Quelle figure de style est utilis\u00e9e\u00a0?',
+   opts:[{t:'Une comparaison.',ok:false},{t:'Une m\u00e9taphore.',ok:true},{t:'Une accumulation.',ok:false}],
+   fb:'Le pont est appel\u00e9 directement \u00ab\u00a0gardien fid\u00e8le\u00a0\u00bb, sans outil comparatif comme \u00ab\u00a0comme\u00a0\u00bb ou \u00ab\u00a0tel\u00a0\u00bb. Le compar\u00e9 (le pont) est identifi\u00e9 directement au comparant (un gardien). C\u2019est une m\u00e9taphore. Si la phrase avait \u00e9t\u00e9 \u00ab\u00a0Ce pont r\u00e9sistait comme un gardien fid\u00e8le\u00a0\u00bb, ce serait une comparaison.'},
+  {id:'q6',qNum:6,
+   phrase:'\u00ab\u00a0Le vent sifflait \u00e0 travers les branches comme une plainte lointaine.\u00a0\u00bb',
+   texte:'Quelle figure de style est utilis\u00e9e\u00a0?',
+   opts:[{t:'Une comparaison',ok:true},{t:'Une m\u00e9taphore',ok:false},{t:'Une personnification',ok:false}],
+   fb:'Le mot \u00ab\u00a0comme\u00a0\u00bb introduit un rapprochement explicite entre le sifflement du vent (compar\u00e9) et une plainte lointaine (comparant). La pr\u00e9sence de l\u2019outil comparatif \u00ab\u00a0comme\u00a0\u00bb signale une comparaison, et non une m\u00e9taphore (qui n\u2019a pas d\u2019outil) ni une personnification (qui pr\u00eaterait une action humaine directement, sans comparaison).'},
+  {id:'q7',qNum:7,
+   phrase:'\u00ab\u00a0Le grenier conservait des malles poussi\u00e9reuses, de vieux jouets oubli\u00e9s, des lettres jaunies et des photographies fan\u00e9es.\u00a0\u00bb',
+   texte:'Quelle figure de style est utilis\u00e9e\u00a0?',
+   opts:[{t:'Une personnification',ok:false},{t:'Une accumulation',ok:true},{t:'Une anaphore',ok:false}],
+   fb:'Plusieurs objets sont \u00e9num\u00e9r\u00e9s les uns apr\u00e8s les autres\u00a0: malles, jouets, lettres, photographies. Cette accumulation sugg\u00e8re la richesse et le d\u00e9sordre du grenier, charg\u00e9 de souvenirs. Il n\u2019y a pas de r\u00e9p\u00e9tition en d\u00e9but de phrase (\u2260 anaphore) ni d\u2019action humaine pr\u00eat\u00e9e \u00e0 un objet (\u2260 personnification).'},
+  {id:'q8',qNum:8,
+   phrase:'\u00ab\u00a0Chaque matin le soleil se l\u00e8ve, chaque matin les oiseaux chantent, chaque matin je vais \u00e0 l\u2019\u00e9cole.\u00a0\u00bb',
+   texte:'Quelle figure de style est utilis\u00e9e\u00a0?',
+   opts:[{t:'Une anaphore',ok:true},{t:'Une accumulation',ok:false},{t:'Une m\u00e9taphore',ok:false}],
+   fb:'L\u2019expression \u00ab\u00a0chaque matin\u00a0\u00bb est r\u00e9p\u00e9t\u00e9e trois fois en t\u00eate de chaque proposition. Cette r\u00e9p\u00e9tition structur\u00e9e cr\u00e9e un effet de rythme et insiste sur la r\u00e9gularit\u00e9 du cycle d\u00e9crit. C\u2019est une anaphore. Une accumulation \u00e9num\u00e9rerait des \u00e9l\u00e9ments diff\u00e9rents sans n\u00e9cessairement les r\u00e9p\u00e9ter en d\u00e9but de construction.'}
+];
+
+/* ═══════════════════════════════════════
+   ÉTAT GLOBAL
+═══════════════════════════════════════ */
+var scoreOk=0;
+var p1Ok=0, p1Res={};  /* q1,q2,q3,q4 */
+var p2Ok=0, p2Res={};
+var q1CompSel=null, q1PersSel=null, q1Done=false;
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+function jouerOk(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function jouerErreur(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(220,ctx.currentTime+.12);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}}
+
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 8 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+}
+function majBadge(id,ok,total){
+  var sc=document.getElementById('nb-s-'+id),b=document.getElementById('nb-'+id);
+  if(!sc||!b)return;
+  sc.textContent=ok+'/'+total;
+  if(ok===total){b.style.background='rgba(34,197,94,.2)';b.style.borderColor='var(--green)';sc.style.color='#4ade80';}
+  else if(ok>0){b.style.background='rgba(185,64,64,.15)';b.style.borderColor='var(--day-color)';sc.style.color='var(--day-border)';}
+}
+
+/* ═══════════════════════════════════════
+   PARTIE 1
+═══════════════════════════════════════ */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';
+  p1Res={};p1Ok=0;q1CompSel=null;q1PersSel=null;q1Done=false;
+
+  /* Q1 — Surlignage */
+  buildQ1(wrap);
+
+  /* Q2, Q3, Q4 — QCM */
+  P1_QCM.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-consigne');ph.textContent=q.phrase;card.appendChild(ph);
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    /* Mélange options */
+    var optsM=q.opts.slice().sort(function(){return Math.random()-.5;});
+    var opts=mkEl('div','opts');
+    optsM.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selP1QCM(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function buildQ1(wrap){
+  var card=mkEl('div','card');card.id='c-q1';
+  card.appendChild(mkEl('div','card-stripe'));
+  var lbl=mkEl('div','q-label');lbl.textContent='Question 1 \u2014 Surlignage';card.appendChild(lbl);
+
+  var cons=mkEl('div','q-consigne');
+  cons.innerHTML='Surligne dans cette phrase deux figures de style diff\u00e9rentes\u00a0: une <b>comparaison</b> et une <b>personnification</b>.';
+  card.appendChild(cons);
+
+  /* Légende */
+  var leg=mkEl('div','legende');
+  leg.innerHTML='<div class="legende-item"><div class="legende-dot legende-comp"></div><span>Comparaison</span></div>'
+    +'<div class="legende-item"><div class="legende-dot legende-pers"></div><span>Personnification</span></div>';
+  card.appendChild(leg);
+
+  /* Boutons de mode */
+  var acts=mkEl('div','surlig-actions');
+  var btnC=document.createElement('button');btnC.className='surlig-btn';btnC.id='btn-mode-comp';
+  btnC.innerHTML='&#128449;&nbsp;Mode&nbsp;: Comparaison';
+  var btnP=document.createElement('button');btnP.className='surlig-btn';btnP.id='btn-mode-pers';
+  btnP.innerHTML='&#128449;&nbsp;Mode&nbsp;: Personnification';
+  acts.appendChild(btnC);acts.appendChild(btnP);
+  card.appendChild(acts);
+
+  var mode='none'; /* 'comp' | 'pers' | 'none' */
+  function setMode(m){
+    mode=m;
+    btnC.className='surlig-btn'+(m==='comp'?' active-comp':'');
+    btnP.className='surlig-btn'+(m==='pers'?' active-pers':'');
+  }
+  btnC.addEventListener('click',function(){if(!q1Done)setMode(mode==='comp'?'none':'comp');});
+  btnP.addEventListener('click',function(){if(!q1Done)setMode(mode==='pers'?'none':'pers');});
+
+  /* Texte segmenté */
+  var texteDiv=mkEl('div','surlignage-texte');
+  Q1_SEGMENTS.forEach(function(seg){
+    var span=document.createElement('span');
+    span.className='seg';span.id='seg-'+seg.id;span.dataset.comp=seg.comp?'1':'0';span.dataset.pers=seg.pers?'1':'0';
+    span.textContent=seg.text;
+    span.addEventListener('click',function(){
+      if(q1Done||mode==='none') return;
+      if(mode==='comp'){
+        if(q1CompSel){document.getElementById('seg-'+q1CompSel).className='seg';}
+        q1CompSel=seg.id;span.className='seg sel-comp';
+      } else {
+        if(q1PersSel){document.getElementById('seg-'+q1PersSel).className='seg';}
+        q1PersSel=seg.id;span.className='seg sel-pers';
+      }
+      checkQ1Ready();
+    });
+    texteDiv.appendChild(span);
+  });
+  card.appendChild(texteDiv);
+
+  var fb=mkEl('div','fb');fb.id='fb-q1';card.appendChild(fb);
+
+  /* Bouton valider Q1 */
+  var valWrap=document.createElement('div');valWrap.style.marginTop='.65rem';
+  var valBtn=document.createElement('button');valBtn.className='btn btn-primary';valBtn.id='btn-val-q1';
+  valBtn.textContent='Valider';valBtn.disabled=true;
+  valBtn.addEventListener('click',function(){validerQ1(btnC,btnP,valBtn);});
+  valWrap.appendChild(valBtn);card.appendChild(valWrap);
+
+  wrap.appendChild(card);
+
+  function checkQ1Ready(){
+    document.getElementById('btn-val-q1').disabled=!(q1CompSel&&q1PersSel);
+  }
+}
+
+function validerQ1(btnC,btnP,valBtn){
+  if(q1Done) return;
+  q1Done=true;
+  valBtn.disabled=true;
+  btnC.disabled=true;btnP.disabled=true;
+  /* Vérif */
+  var compOk=Q1_SEGMENTS.find(function(s){return s.id===q1CompSel&&s.comp;});
+  var persOk=Q1_SEGMENTS.find(function(s){return s.id===q1PersSel&&s.pers;});
+  var ok=!!(compOk&&persOk);
+  /* Colorier résultat */
+  Q1_SEGMENTS.forEach(function(seg){
+    var sp=document.getElementById('seg-'+seg.id);
+    sp.style.cursor='default';
+    if(seg.comp) sp.className='seg correct-comp';
+    else if(seg.pers) sp.className='seg correct-pers';
+    else sp.className='seg';
+  });
+  if(!ok){
+    var fb=document.getElementById('fb-q1');fb.className='fb show ko-fb';
+    fb.textContent='La comparaison se reconna\u00eet \u00e0 l\u2019outil \u00ab\u00a0comme\u00a0\u00bb\u00a0: les gouttes (compar\u00e9) sont rapproch\u00e9es des perles de cristal (comparant). La personnification se reconna\u00eet \u00e0 l\u2019action humaine murmurer attribu\u00e9e aux nuages, qui ne peuvent pas parler.';
+    jouerErreur();
+  } else {
+    jouerOk();
+  }
+  if(ok){scoreOk++;p1Ok++;}
+  p1Res['q1']=ok;
+  animerCard('q1',ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/4';
+  majBadge('p1',p1Ok,4);
+  majProg(Object.keys(p1Res).length);
+  document.getElementById('dash-statut').textContent='Partie 1 \u2014 question 2/4\u2026';
+  checkDoneP1();
+}
+
+function selP1QCM(q,btn,optsEl){
+  if(p1Res[q.id]!==undefined) return;
+  var ok=btn.dataset.ok==='1';
+  p1Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p1Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/4';
+  majBadge('p1',p1Ok,4);
+  var done=Object.keys(p1Res).length;
+  majProg(done);
+  document.getElementById('dash-statut').textContent=done<4?'Partie 1 \u2014 question '+(done+1)+'/4\u2026':'Partie 1 termin\u00e9e';
+  checkDoneP1();
+}
+
+function checkDoneP1(){
+  if(Object.keys(p1Res).length===4) showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 4';
+  document.getElementById('msg-p1').textContent=p1Ok===4?'\u2713 Partie 1 r\u00e9ussie \u2014 Partie 2 d\u00e9bloqu\u00e9e.':
+    p1Ok>=3?'Bien \u2014 Partie 2 d\u00e9bloqu\u00e9e.':'Continue \u2014 Partie 2 d\u00e9bloqu\u00e9e.';
+  document.getElementById('btn-p1').innerHTML=
+    '<button class="btn btn-primary" onclick="debP2()">Partie 2 \u2192</button>';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  document.getElementById('dash-statut').textContent='Partie 2 en cours\u2026';
+  buildP2();
+}
+
+/* ═══════════════════════════════════════
+   PARTIE 2 — QCM
+═══════════════════════════════════════ */
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Res={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-consigne');ph.textContent=q.phrase;card.appendChild(ph);
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    var optsM=q.opts.slice().sort(function(){return Math.random()-.5;});
+    var opts=mkEl('div','opts');
+    optsM.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selP2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Res[q.id]!==undefined) return;
+  var ok=btn.dataset.ok==='1';
+  p2Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreOk++;p2Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/4';
+  majBadge('p2',p2Ok,4);
+  var done=Object.keys(p2Res).length;
+  majProg(4+done);
+  document.getElementById('dash-statut').textContent=done<4?'Partie 2 \u2014 question '+(done+1)+'/4\u2026':'S\u00e9ance termin\u00e9e';
+  if(done===4) showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 4';
+  document.getElementById('msg-p2').textContent=p2Ok===4?'\u2713 Partie 2 parfaite\u00a0!':
+    p2Ok>=3?'Tr\u00e8s bien\u00a0!':p2Ok>=2?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML=
+    '<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+}
+
+/* ═══════════════════════════════════════
+   VERDICT
+═══════════════════════════════════════ */
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===8){badge='<div class="badge-ok">\u2713 Atelier ma\u00eetris\u00e9\u00a0!</div>';msg='Tu rep\u00e8res parfaitement\nles cinq figures de style.';}
+  else if(total>=6){badge='<div class="badge-ok">\u2713 Tr\u00e8s bon travail\u00a0!</div>';msg='Tr\u00e8s bon travail\u00a0!\nUn point \u00e0 consolider.';}
+  else if(total>=4){badge='<div class="badge-ko">Bon d\u00e9but \u2014 relis le r\u00e9f\u00e9rentiel.</div>';msg='Bon d\u00e9but\u00a0!\nRelis le r\u00e9f\u00e9rentiel.';}
+  else{badge='<div class="badge-ko">Relis le r\u00e9f\u00e9rentiel et retente.</div>';msg='Relis le r\u00e9f\u00e9rentiel\net retente.';}
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+/* ═══════════════════════════════════════
+   RESET
+═══════════════════════════════════════ */
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Res={};p2Ok=0;p2Res={};
+  q1CompSel=null;q1PersSel=null;q1Done=false;
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/4';
+  document.getElementById('badge-p2').textContent='0/4';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Partie 1 en cours\u2026';
+  ['p1','p2'].forEach(function(id){
+    var b=document.getElementById('nb-'+id),s=document.getElementById('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    if(s){s.textContent='0/4';s.style.color='';}
+  });
+  document.getElementById('cards-p2').innerHTML='';
+  majProg(0);
+  buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildP1();majProg(0);
+</script>
+</body>
+</html>
