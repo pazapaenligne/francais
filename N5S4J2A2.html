@@ -694,51 +694,21 @@ async function validerRedac(){
   if(!texte||texte.length<20) return;
   $('btnValid').disabled=true;
   $('btnValid').textContent='Correction en cours…';
-
-  // Afficher l'exemple modèle dans tous les cas
   $('modele-wrap').classList.add('show');
-
-  // Clé API encodée
-  const _k=atob('c2stYW50LWFwaTAzLS1hWnhCMm1sZUJtaE5JMmZJMS02Rnc3dXJGMy15Z2ZiTlZQSjVnS3RDc1dVQjdxZXktTUNKc3hHakstV19xWm1rNnlGRG1ZUnJ4UEs0dFFBSmNhWlpnLWk5SGp6QUFB');
-
-  // Appel IA
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    const resp = await fetch('/.netlify/functions/corriger',{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':_k,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:600,
-        system:`Tu es un professeur de français bienveillant pour des élèves de 5e (11-12 ans) dans une école musulmane.
-Règles absolues : aucune référence à la musique, l'alcool, les jeux de hasard, le cinéma, les relations amoureuses, ou tout contenu contraire aux valeurs islamiques.
-Tu corriges une courte description de paysage en cherchant 5 figures de style : comparaison, métaphore, personnification, accumulation, anaphore.
-Réponds en français uniquement. Sois encourageant, précis, concis (5-8 lignes maximum).
-Format de ta réponse :
-- Pour chaque figure trouvée : ✓ NOM : cite l'extrait exact
-- Pour chaque figure absente : → NOM : une suggestion courte
-- Termine par une phrase d'encouragement`,
-        messages:[{role:'user',content:`Voici ma description de paysage :\n\n"${texte}"\n\nPeux-tu identifier les figures de style que j'ai utilisées ?`}]
-      })
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({texte})
     });
-    if(!resp.ok){
-      const err=await resp.json().catch(()=>({}));
-      throw new Error(err?.error?.message||resp.status);
-    }
+    if(!resp.ok) throw new Error(resp.status);
     const data = await resp.json();
-    const txt = data.content[0].text;
-    $('ia-text').innerHTML=txt.replace(/\n/g,'<br>');
+    $('ia-text').innerHTML=data.correction.replace(/\n/g,'<br>');
     $('ia-feedback').style.display='block';
-    $('ia-feedback').scrollIntoView({behavior:'smooth',block:'start'});
   } catch(e) {
     // Fallback silencieux — l'exemple modèle est déjà affiché
-    console.warn('IA indisponible:',e.message);
   }
-
+  $('btnValid').disabled=false;
   $('btnValid').textContent='Corriger ▸';
   showBilan();
 }
