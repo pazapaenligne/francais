@@ -713,7 +713,7 @@ async function validerRedac(){
       },
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
-        max_tokens:400,
+        max_tokens:600,
         system:`Tu es un professeur de français bienveillant pour des élèves de 5e (11-12 ans) dans une école musulmane.
 Règles absolues : aucune référence à la musique, l'alcool, les jeux de hasard, le cinéma, les relations amoureuses, ou tout contenu contraire aux valeurs islamiques.
 Tu corriges une courte description de paysage en cherchant 5 figures de style : comparaison, métaphore, personnification, accumulation, anaphore.
@@ -722,10 +722,13 @@ Format de ta réponse :
 - Pour chaque figure trouvée : ✓ NOM : cite l'extrait exact
 - Pour chaque figure absente : → NOM : une suggestion courte
 - Termine par une phrase d'encouragement`,
-        messages:[{role:'user',content:`Voici ma description de paysage :\n\n"${texte}"\n\nPeut-tu identifier les figures de style que j'ai utilisées ?`}]
+        messages:[{role:'user',content:`Voici ma description de paysage :\n\n"${texte}"\n\nPeux-tu identifier les figures de style que j'ai utilisées ?`}]
       })
     });
-    if(!resp.ok) throw new Error('API indisponible');
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message||resp.status);
+    }
     const data = await resp.json();
     const txt = data.content[0].text;
     $('ia-text').innerHTML=txt.replace(/\n/g,'<br>');
@@ -733,6 +736,7 @@ Format de ta réponse :
     $('ia-feedback').scrollIntoView({behavior:'smooth',block:'start'});
   } catch(e) {
     // Fallback silencieux — l'exemple modèle est déjà affiché
+    console.warn('IA indisponible:',e.message);
   }
 
   $('btnValid').textContent='Corriger ▸';
@@ -821,4 +825,4 @@ document.addEventListener('pointerdown',initA,{once:true});
 updScore();go(0);
 </script>
 </body>
-</html>
+</html>clé
