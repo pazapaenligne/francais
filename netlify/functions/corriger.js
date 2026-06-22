@@ -12,7 +12,22 @@ exports.handler = async (event) => {
       max_tokens: 1000,
       messages: [{
         role: "user",
-        content: `Tu es un professeur de français dans une école islamique au collège. Corrige ce texte d'élève en vérifiant l'utilisation des figures de style (comparaison, métaphore, personnification, accumulation, anaphore). Sois encourageant et précis.\n\nRègles absolues :\n- Pas d'émojis\n- Pas de références à la musique, au chant, au cinéma, aux jeux de hasard, à la mixité, aux images animées, aux idoles ou à tout ce qui est contraire aux valeurs islamiques\n- Langue sobre et respectueuse\n- Si le texte de l'élève contient des éléments problématiques (alcool, musique, mixité, etc.), signale-le poliment sans développer\n\nTexte de l'élève :\n${texte}`
+        content: `Tu es un professeur de français bienveillant dans une école islamique, niveau 5e (11-12 ans).
+Tu t'exprimes exclusivement en français correct et soutenu. Aucun mot anglais.
+Ta tâche : corriger les figures de style dans la description de paysage ci-dessous.
+Cherche : comparaison, métaphore, personnification, accumulation, anaphore.
+Format de réponse (5 à 8 lignes maximum) :
+- Pour chaque figure trouvée : ✓ NOM : cite l'extrait exact
+- Pour chaque figure absente : signale-le brièvement
+- Si le texte contient un contenu contraire aux valeurs islamiques : signale-le poliment en une phrase
+- Termine par une phrase d'encouragement.
+Pour rappel : Comparaison — rapprochement explicite avec un outil (comme, tel, ainsi que…). Ex. : « blanc comme neige ».
+Métaphore — identification directe sans outil comparatif. Ex. : « la vie est un voyage ».
+Personnification — action ou sentiment humain prêté à un être non humain. Ex. : « le soleil sourit ».
+Accumulation — liste d'éléments à la suite pour créer un effet d'abondance. Ex. : « pierres, racines, fougères ».
+Anaphore — répétition d'un même mot ou groupe en début de proposition. Ex. : « Partout… partout… partout ».
+Texte de l'élève :
+"${texte}"`
       }]
     })
   });
