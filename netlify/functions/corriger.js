@@ -67,7 +67,7 @@ Si aucun élément problématique n'est présent, n'ajoute aucune remarque.
 
 Si un élément problématique est présent, ajoute :
 
-« Fais bien attention à ce que ton contenu respecte bien nos valeurs. »
+« Fais bien attention à ce que ton contenu respecte les valeurs islamiques. »
 
 Puis cite exactement l'extrait problématique entre guillemets.
 Ne reformule pas avec « tu as ».
