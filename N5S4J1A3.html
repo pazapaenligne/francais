@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Le Grand Voyage — Je relève le défi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fffdf7;--sur:#fff;--ln:#e8dfc8;--txt:#2b2b2b;--mut:#8a7a5a;
+  --j:#f5a623;--jd:#8a4a00;--jl:#fff8ee;--jm:#f5d090;
+  --ok:#22c55e;--okbg:#f0fdf4;--okbd:#86efac;
+  --ko:#ef4444;--kobg:#fef2f2;--kobd:#fca5a5;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;line-height:1.6;}
+
+/* ─── PHASE 1 ─── */
+#p1{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;
+  background:linear-gradient(180deg,#0a1e30 0%,#0d2a42 40%,#0a3a5a 70%,#062840 100%);}
+#p1.out{animation:p1out .65s ease-in forwards;}
+@keyframes p1out{to{opacity:0;transform:scale(1.03);visibility:hidden;}}
+
+/* Bulles */
+#wcloud{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.bubble{position:absolute;bottom:-40px;border-radius:50%;background:rgba(120,200,255,.15);
+  border:1px solid rgba(120,200,255,.25);animation:bubblerise linear infinite;}
+@keyframes bubblerise{0%{opacity:0;transform:translateY(0) scale(1);}10%{opacity:.8;}80%{opacity:.4;}100%{opacity:0;transform:translateY(-110vh) scale(1.3);}}
+
+/* Rayons lumineux sous-marins */
+.ray{position:absolute;top:0;width:60px;background:linear-gradient(180deg,rgba(100,200,255,.08),transparent);
+  transform-origin:top center;pointer-events:none;}
+
+/* Sous-marin SVG */
+#submarine-wrap{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);pointer-events:none;
+  animation:subFloat 4s ease-in-out infinite;}
+@keyframes subFloat{0%,100%{transform:translateX(-50%) translateY(0) rotate(-1deg);}
+  50%{transform:translateX(-50%) translateY(-18px) rotate(1deg);}}
+.brief{position:relative;z-index:2;max-width:560px;width:100%;text-align:center;
+  background:rgba(10,40,80,.25);backdrop-filter:blur(14px);
+  border:1px solid rgba(120,180,240,.2);border-radius:22px;padding:28px 26px;
+  box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.brief .pbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,253,247,.96);
+  border:2px solid var(--j);border-radius:999px;padding:6px 16px;margin-bottom:10px;
+  box-shadow:0 2px 16px rgba(245,166,35,.3);}
+.pbadge .dots{font-size:14px;letter-spacing:3px;}
+.r{color:#ef6f6c;}.y{color:#f5a623;}.g{color:#6cc04a;}
+.pbadge .lab{font-size:12px;font-weight:800;color:#7a3a00;}
+.brief .pwk{color:rgba(180,220,255,.7);font-size:.88rem;margin-bottom:8px;}
+.brief h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5.5vw,2.6rem);
+  color:#e8f4ff;font-weight:700;margin-bottom:6px;text-shadow:0 2px 20px rgba(0,0,0,.5);}
+.brief h1 em{color:var(--j);font-style:normal;}
+.brief .pby{font-family:'Playfair Display',serif;font-style:italic;
+  color:rgba(180,220,255,.65);font-size:.9rem;margin-bottom:16px;}
+.brief .pmission{font-family:'Playfair Display',serif;font-style:italic;
+  color:rgba(220,240,255,.95);font-size:clamp(1rem,3vw,1.15rem);
+  line-height:1.75;margin-bottom:20px;}
+.brief .pbtn{display:block;width:100%;min-height:3rem;
+  background:linear-gradient(135deg,#b06010,var(--j) 50%,#b06010);
+  background-size:200% 100%;color:#3a1800;border:none;border-radius:13px;
+  font-family:'Playfair Display',serif;font-weight:700;
+  font-size:clamp(1rem,2.8vw,1.12rem);cursor:pointer;
+  box-shadow:0 5px 0 #7a3a00,0 7px 20px rgba(245,166,35,.35);
+  animation:btngl 2s ease-in-out infinite;}
+@keyframes btngl{0%,100%{box-shadow:0 5px 0 #7a3a00,0 7px 20px rgba(245,166,35,.35);}
+  50%{box-shadow:0 5px 0 #7a3a00,0 7px 30px rgba(245,166,35,.55),0 0 0 6px rgba(245,166,35,.12);}}
+.pbtn:active{transform:translateY(3px);}
+
+/* ─── PHASE 2 ─── */
+#p2{opacity:0;visibility:hidden;transition:opacity .6s;}
+#p2.in{opacity:1;visibility:visible;}
+.hdr{text-align:center;padding:16px 20px 12px;background:var(--bg);border-bottom:2px solid var(--j);}
+.hdr .badge{display:inline-flex;align-items:center;gap:8px;background:#fefdf8;
+  border:2px solid var(--j);border-radius:999px;padding:6px 15px;margin-bottom:6px;
+  box-shadow:0 2px 8px rgba(245,166,35,.2);}
+.hdr .badge .lab{font-size:13px;font-weight:800;color:#7a3a00;letter-spacing:.4px;}
+.pdot{width:10px;height:10px;border-radius:50%;background:#f5a623;box-shadow:0 0 7px rgba(245,166,35,.8);display:inline-block;}
+.hdr .wk{font-size:.88rem;color:#8a7a5a;margin-bottom:5px;font-weight:500;}
+.hdr h1{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4.5vw,2rem);
+  font-weight:900;color:var(--jd);margin-bottom:2px;}
+.hdr .sub{color:var(--mut);font-size:.86rem;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:13px 16px;}
+.xpw{height:20px;background:#f0e4c0;border:1px solid var(--jm);border-radius:30px;
+  overflow:hidden;position:relative;margin-bottom:13px;}
+.xpf{height:100%;background:linear-gradient(90deg,#b06010,var(--j),#f0d070,var(--j),#b06010);
+  background-size:300% 100%;animation:xps 3s linear infinite;border-radius:30px;
+  transition:width .7s cubic-bezier(.34,1.56,.64,1);width:0%;}
+@keyframes xps{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+.xpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:900;color:#5a3d00;font-family:'JetBrains Mono',monospace;}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start;}
+.col-l{position:sticky;top:13px;align-self:start;display:flex;flex-direction:column;gap:11px;}
+.fcards{background:#fff;border:1px solid var(--ln);border-radius:12px;padding:11px 13px;
+  box-shadow:0 2px 6px rgba(0,0,0,.04);}
+.slbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;
+  letter-spacing:2px;color:var(--jd);margin-bottom:8px;}
+.sf{display:flex;align-items:center;gap:9px;background:#fffbeb;border:1px solid var(--jm);
+  border-radius:9px;padding:8px 11px;margin-bottom:6px;cursor:pointer;transition:all .3s;}
+.sf:last-child{margin-bottom:0;}
+.sf.active{border-color:var(--jd);box-shadow:0 2px 8px rgba(200,120,30,.2);}
+.sf.done{background:var(--okbg);border-color:var(--okbd);}
+.sfn{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--mut);width:18px;flex:0 0 auto;}
+.sf.done .sfn{color:var(--ok);}
+.sft{font-size:.82rem;color:var(--mut);flex:1;line-height:1.3;}
+.sf.active .sft{color:var(--jd);font-weight:700;}
+.sf.done .sft{color:#166534;font-weight:700;}
+.sfab{display:flex;gap:4px;}
+.ab{width:19px;height:19px;border-radius:4px;background:#f0e8d0;border:1px solid var(--jm);
+  font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  color:var(--mut);transition:all .3s;}
+.ab.ok{background:var(--ok);border-color:var(--ok);color:#fff;}
+.ab.ko{background:var(--kobg);border-color:var(--kobd);color:var(--ko);}
+.sfst{font-size:.56rem;font-weight:900;color:var(--ok);border:1.5px solid var(--ok);
+  border-radius:4px;padding:2px 4px;letter-spacing:1px;opacity:0;transform:scale(0) rotate(-10deg);
+  transition:none;white-space:nowrap;margin-left:2px;}
+.sf.done .sfst{opacity:1;transform:scale(1) rotate(-4deg);
+  transition:opacity .3s,transform .55s cubic-bezier(.34,1.56,.64,1);}
+.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.sc-box{background:#fff;border:1px solid var(--ln);border-radius:10px;padding:10px 6px;
+  text-align:center;box-shadow:0 2px 5px rgba(0,0,0,.04);}
+.sc-num{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;line-height:1;}
+.sc-num.ok{color:var(--ok);}.sc-num.ko{color:var(--ko);}.sc-num.rs{color:var(--jd);}
+.sc-lbl{font-size:.62rem;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.stars{display:flex;justify-content:center;gap:2px;font-size:1rem;}
+.str{opacity:.2;transition:all .4s;filter:grayscale(1);}
+.str.on{opacity:1;filter:none;color:var(--j);animation:stpop .5s;}
+@keyframes stpop{0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+/* Col droite */
+.col-r{}
+.acc{background:#fff;border:1px solid var(--ln);border-radius:12px;
+  margin-bottom:11px;box-shadow:0 2px 6px rgba(0,0,0,.04);overflow:hidden;}
+.acc-btn{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;cursor:pointer;user-select:none;border:none;
+  background:linear-gradient(90deg,var(--jl),#fff8e0);
+  width:100%;font-family:'Segoe UI',Arial,sans-serif;font-size:1rem;font-weight:800;
+  color:var(--jd);min-height:50px;}
+.acc-btn:hover{background:var(--jm);}
+.acc-arr{font-size:.9rem;transition:transform .3s;color:var(--jd);}
+.acc-btn.open .acc-arr{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.acc-body.open{max-height:900px;}
+.acc-inner{padding:10px 18px 16px;}
+.ptitle{font-family:'Playfair Display',serif;font-weight:700;font-size:.96rem;
+  color:var(--jd);text-align:center;margin-bottom:8px;}
+.ptxt{font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;
+  line-height:2.1;color:#2a1a0a;white-space:pre-line;letter-spacing:.01em;}
+.ri{margin-bottom:6px;font-size:.82rem;line-height:1.5;}
+.ri:last-child{margin-bottom:0;}
+.rk{color:var(--jd);font-weight:800;}.rv{color:#5a4a3a;}
+
+/* Stepper */
+.stepper{display:flex;align-items:center;gap:10px;margin-bottom:13px;}
+.snav{min-width:44px;height:44px;border-radius:10px;background:#fff;border:1px solid var(--ln);
+  color:var(--jd);font-size:1rem;cursor:pointer;font-weight:800;
+  font-family:'Segoe UI',Arial,sans-serif;padding:0 10px;box-shadow:0 2px 4px rgba(0,0,0,.05);}
+.snav:disabled{opacity:.4;cursor:default;}
+.snav:hover:not(:disabled){background:var(--jl);}
+#sNxt{background:var(--j);color:#3a1800;border-color:var(--jm);min-width:130px;
+  font-size:.95rem;box-shadow:0 4px 0 var(--jd);}
+#sNxt:disabled{background:#e8d9a0;color:#9a8040;border-color:#e0d090;box-shadow:none;}
+#sNxt:hover:not(:disabled){filter:brightness(1.05);}
+#sNxt.pulse{animation:nbp 1s ease-in-out 3;}
+@keyframes nbp{50%{box-shadow:0 4px 0 var(--jd),0 0 0 6px rgba(245,166,35,.28);transform:scale(1.03);}}
+.sdots{display:flex;gap:6px;flex:1;justify-content:center;}
+.sdot{width:26px;height:26px;border-radius:50%;border:1px solid var(--jm);background:#f0e8d0;
+  color:var(--mut);font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .25s;}
+.sdot.cur{border-color:var(--jd);color:var(--jd);box-shadow:0 0 7px rgba(245,166,35,.4);transform:scale(1.1);}
+.sdot.done{background:var(--ok);border-color:var(--ok);color:#fff;}
+.sdot.part{background:var(--j);border-color:var(--j);color:#3a1800;}
+
+/* Question */
+.annum{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;
+  letter-spacing:2px;color:var(--jd);margin-bottom:3px;}
+.antit{font-family:'Playfair Display',serif;font-size:1.08rem;color:var(--jd);
+  margin-bottom:13px;padding-bottom:9px;border-bottom:2px solid var(--jm);}
+.dq{display:flex;flex-direction:column;gap:12px;}
+.qb{background:#fff;border:1px solid var(--ln);border-top:4px solid var(--j);
+  border-radius:14px;padding:15px;box-shadow:0 3px 10px rgba(0,0,0,.04);}
+.qb.dok{border-top-color:var(--ok);}.qb.dko{border-top-color:var(--ko);}
+.qb.flash{animation:qfl .6s ease-out;}
+@keyframes qfl{30%{box-shadow:0 0 0 5px rgba(34,197,94,.22);}100%{box-shadow:0 3px 10px rgba(0,0,0,.04);}}
+.qb.shake{animation:qsh .42s;}
+@keyframes qsh{20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+.qbadge{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.ql{width:26px;height:26px;border-radius:7px;background:var(--j);color:#3a1800;
+  font-weight:900;font-size:.8rem;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;}
+.qB .ql{background:#7c3aed;color:#fff;}
+.qt{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--mut);}
+.qtxt{font-size:clamp(.95rem,2.6vw,1.06rem);font-weight:700;line-height:1.55;color:var(--txt);margin-bottom:13px;}
+.qtxt.lk{color:#bbb;font-style:italic;font-weight:400;font-size:.88rem;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{min-height:50px;background:#fffdf7;color:var(--txt);border:2px solid var(--ln);
+  border-radius:10px;padding:11px 14px;font-size:clamp(.88rem,2.3vw,.97rem);
+  font-family:'Segoe UI',Arial,sans-serif;text-align:left;cursor:pointer;
+  transition:transform .12s,background .18s,border-color .18s;line-height:1.45;}
+.opt:hover:not(:disabled){background:var(--jl);transform:translateY(-2px);border-color:var(--j);}
+.opt:disabled{cursor:default;}
+.opt.cok{background:var(--okbg);border-color:var(--ok);color:#166534;font-weight:700;}
+.opt.cko{background:var(--kobg);border-color:var(--ko);color:#991b1b;animation:sh .4s;}
+@keyframes sh{25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.fb{margin-top:11px;padding:10px 12px;background:#fffbef;border-left:4px solid var(--ko);
+  border-radius:8px;font-size:.86rem;color:#7a3a1a;line-height:1.7;animation:fdin .4s;}
+@keyframes fdin{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+.fb .fbl{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:1px;
+  color:var(--ko);font-family:'JetBrains Mono',monospace;margin-bottom:3px;}
+.retry{margin-top:8px;min-height:2.5rem;background:#fff;color:var(--jd);
+  border:2px solid var(--j);border-radius:8px;padding:0 15px;font-size:.86rem;
+  font-weight:800;cursor:pointer;font-family:'Segoe UI',Arial,sans-serif;}
+.retry:hover{background:var(--jl);}
+.okmsg{display:inline-flex;align-items:center;gap:6px;color:var(--ok);font-weight:800;
+  font-size:.88rem;margin-top:9px;animation:pop .5s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+
+/* Résultat */
+.res{display:none;text-align:center;background:#fff;border:2px solid var(--jm);
+  border-radius:16px;padding:24px 18px;margin-top:14px;box-shadow:0 8px 24px rgba(245,166,35,.12);}
+.res.show{display:block;animation:fdin .5s;}
+.resc{font-size:3.2rem;margin-bottom:6px;}
+.ress{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,8vw,3.5rem);color:var(--jd);font-weight:700;}
+.rest{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--jd);margin:5px 0;}
+.resm{font-size:.9rem;color:var(--mut);margin-bottom:13px;line-height:1.65;}
+.resr{text-align:left;max-width:420px;margin:0 auto 13px;background:var(--jl);
+  border:1px solid var(--jm);border-radius:10px;padding:11px 13px;}
+.resr h3{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--jd);
+  font-family:'JetBrains Mono',monospace;margin-bottom:7px;}
+.resi{font-size:.8rem;color:#5a4a2a;padding:3px 0;border-bottom:1px solid #f0e0c0;display:flex;gap:7px;}
+.resi:last-child{border:none;}
+.resp{display:inline-block;margin-top:11px;background:var(--jl);border:2px solid var(--j);
+  color:var(--jd);border-radius:10px;padding:10px 16px;font-weight:800;animation:pop .6s;font-size:.9rem;}
+
+/* ── Overlay final ── */
+#finalOverlay{display:none;position:fixed;inset:0;z-index:9000;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%,#0a2a4a,#030d18 80%);
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;}
+#finalOverlay.show{display:flex;animation:fdin .7s;}
+.final-terre{font-size:clamp(7rem,22vw,12rem);animation:terreSpin 6s linear infinite;
+  filter:drop-shadow(0 0 40px rgba(100,180,255,.5));margin-bottom:10px;}
+@keyframes terreSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.final-bravo{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,9vw,5rem);
+  font-weight:700;color:#f5a623;text-shadow:0 0 40px rgba(245,166,35,.6);
+  margin-bottom:8px;animation:bravoIn .8s cubic-bezier(.34,1.56,.64,1) .3s both;}
+@keyframes bravoIn{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+.final-score{font-family:'JetBrains Mono',monospace;font-size:clamp(1.4rem,5vw,2.2rem);
+  color:#e8f4ff;margin-bottom:8px;animation:fdin .6s .6s both;}
+.final-msg{font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1rem,3vw,1.3rem);color:rgba(200,230,255,.85);
+  max-width:480px;line-height:1.75;margin-bottom:22px;animation:fdin .6s .9s both;}
+.final-btn{background:var(--j);color:#3a1800;border:none;border-radius:14px;
+  padding:13px 32px;font-family:'Playfair Display',serif;font-weight:700;
+  font-size:1.1rem;cursor:pointer;box-shadow:0 5px 0 var(--jd);animation:fdin .6s 1.2s both;}
+.final-btn:hover{filter:brightness(1.08);}
+.final-btn:active{transform:translateY(3px);}
+.final-stars-wrap{display:flex;gap:6px;font-size:1.6rem;margin-bottom:14px;animation:fdin .6s .7s both;}
+.snd{position:fixed;top:13px;right:13px;z-index:300;background:rgba(255,253,247,.9);
+  border:1px solid var(--jm);color:var(--jd);font-size:1rem;width:40px;height:40px;
+  border-radius:10px;cursor:pointer;backdrop-filter:blur(4px);}
+
+/* Flash emoji bonne réponse */
+.emoji-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:9999;pointer-events:none;
+  animation:emojiPop 1.8s ease-out forwards;}
+@keyframes emojiPop{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:0;}
+  20%{transform:translate(-50%,-50%) scale(1.3);opacity:1;}
+  60%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(0.8);opacity:0;}
+}
+.wfall{position:fixed;inset:0;pointer-events:none;z-index:500;overflow:hidden;}
+.wfall i{position:absolute;font-family:'Playfair Display',serif;font-style:italic;
+  color:var(--jd);opacity:0;animation:wf linear forwards;}
+@keyframes wf{0%{opacity:0;transform:translateY(-30px);}8%{opacity:.8;}88%{opacity:.5;}100%{opacity:0;transform:translateY(110vh);}}
+@media(max-width:860px){.layout{grid-template-columns:1fr;}.col-l{position:static;}}
+@media(max-width:500px){.opt{font-size:.88rem;min-height:44px;}}
+</style>
+</head>
+<body>
+<button class="snd" id="sndBtn">🔊</button>
+<div class="wfall" id="wfall"></div>
+
+<!-- ═══ PHASE 1 ═══ -->
+<div id="p1">
+  <div id="wcloud"></div>
+
+  <!-- Rayons lumineux -->
+  <div class="ray" style="left:15%;height:60%;transform:rotate(-8deg);"></div>
+  <div class="ray" style="left:35%;height:80%;transform:rotate(-3deg);width:80px;"></div>
+  <div class="ray" style="left:55%;height:70%;transform:rotate(4deg);"></div>
+  <div class="ray" style="left:75%;height:55%;transform:rotate(9deg);width:50px;"></div>
+
+  <!-- Sous-marin -->
+  <div id="submarine-wrap">
+    <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hélice -->
+      <g id="helice" style="transform-origin:292px 68px;animation:spin 1.2s linear infinite;">
+        @keyframes spin{to{transform:rotate(360deg);}}
+        <ellipse cx="292" cy="56" rx="5" ry="14" fill="#c8a030" opacity=".85" transform="rotate(-30,292,68)"/>
+        <ellipse cx="292" cy="80" rx="5" ry="14" fill="#c8a030" opacity=".85" transform="rotate(30,292,68)"/>
+        <ellipse cx="280" cy="68" rx="14" ry="5" fill="#c8a030" opacity=".85"/>
+        <circle cx="292" cy="68" r="5" fill="#e8c060"/>
+      </g>
+      <!-- Corps principal -->
+      <ellipse cx="148" cy="68" rx="148" ry="38" fill="#1a4a6a"/>
+      <!-- Reflet haut -->
+      <ellipse cx="130" cy="52" rx="100" ry="12" fill="rgba(100,180,255,.12)"/>
+      <!-- Bande centrale -->
+      <rect x="20" y="62" width="256" height="12" rx="4" fill="#1e5a80"/>
+      <!-- Tourelle -->
+      <rect x="110" y="30" width="60" height="32" rx="8" fill="#1a4a6a"/>
+      <rect x="110" y="28" width="60" height="8" rx="4" fill="#1e5a80"/>
+      <!-- Périscope -->
+      <rect x="136" y="8" width="6" height="24" rx="3" fill="#c8a030"/>
+      <rect x="126" y="6" width="22" height="6" rx="3" fill="#c8a030"/>
+      <!-- Hublots -->
+      <circle cx="80" cy="68" r="13" fill="#0a2a3a" stroke="#c8a030" stroke-width="2.5"/>
+      <circle cx="80" cy="68" r="9" fill="#0d3a50" stroke="#e8d080" stroke-width="1"/>
+      <circle cx="77" cy="65" r="3" fill="rgba(150,220,255,.3)"/>
+      <circle cx="155" cy="68" r="10" fill="#0a2a3a" stroke="#c8a030" stroke-width="2"/>
+      <circle cx="155" cy="68" r="7" fill="#0d3a50" stroke="#e8d080" stroke-width="1"/>
+      <circle cx="225" cy="68" r="8" fill="#0a2a3a" stroke="#c8a030" stroke-width="2"/>
+      <circle cx="225" cy="68" r="5" fill="#0d3a50"/>
+      <!-- Aileron bas -->
+      <path d="M60,104 L90,82 L120,104 Z" fill="#164060"/>
+      <!-- Décorations bord -->
+      <rect x="18" y="58" width="4" height="20" rx="2" fill="#c8a030"/>
+      <rect x="276" y="58" width="4" height="20" rx="2" fill="#c8a030"/>
+      <!-- Bulles de propulsion -->
+      <circle cx="305" cy="60" r="3" fill="rgba(150,220,255,.4)" style="animation:bub1 1.5s ease-in-out infinite;"/>
+      <circle cx="315" cy="70" r="2" fill="rgba(150,220,255,.3)" style="animation:bub1 1.5s ease-in-out infinite .4s;"/>
+      <circle cx="308" cy="76" r="4" fill="rgba(150,220,255,.25)" style="animation:bub1 1.5s ease-in-out infinite .8s;"/>
+    </svg>
+  </div>
+
+  <style>
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes bub1{0%{opacity:.6;transform:translate(0,0);}100%{opacity:0;transform:translate(20px,-30px);}}
+  </style>
+
+  <div class="brief">
+    <div class="pbadge"><span class="dots"><span class="r">●</span><span class="y">●</span><span class="g">●</span></span><span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span></div>
+    <div class="pwk">Semaine 4 — Jour 1</div>
+    <h1>🌍 Le Grand <em>Voyage</em></h1>
+    <p class="pby">Je relève le défi · En sortant de l'école — Jacques Prévert</p>
+    <p class="pmission">L'élève poursuit le voyage avec les enfants du poème. Il ne s'agit plus de repérer ce qui est écrit, mais de comprendre ce que Prévert a voulu dire.</p>
+    <button class="pbtn" id="startBtn">🚢 Embarquer ▸</button>
+  </div>
+</div>
+
+<!-- ═══ PHASE 2 ═══ -->
+<div id="p2">
+  <div class="hdr">
+    <div class="badge"><span class="pdot"></span><span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span></div>
+    <div class="wk">Semaine 4 — Jour 1</div>
+    <h1>🌍 Le Grand Voyage</h1>
+    <p class="sub">Je relève le défi · En sortant de l'école, Jacques Prévert · 6 étapes d'interprétation</p>
+  </div>
+  <div class="wrap">
+    <div class="xpw"><div class="xpf" id="xpf"></div><div class="xpt" id="xpt">0 / 10</div></div>
+    <div class="layout">
+
+      <!-- COL GAUCHE -->
+      <aside class="col-l">
+        <div class="fcards">
+          <div class="slbl">🗺️ Étapes du voyage</div>
+          <div id="fiches"></div>
+        </div>
+        <div class="scoreboard">
+          <div class="sc-box"><div class="sc-num ok" id="scOk">0</div><div class="sc-lbl">Validés</div></div>
+          <div class="sc-box"><div class="sc-num rs" id="scRs">10</div><div class="sc-lbl">Restants</div></div>
+          <div class="sc-box"><div class="sc-num ko" id="scKo">0</div><div class="sc-lbl">À revoir</div></div>
+        </div>
+        <div class="stars" id="stars"></div>
+      </aside>
+
+      <!-- COL DROITE -->
+      <main class="col-r">
+
+        <!-- Texte du poème -->
+        <div class="acc">
+          <button class="acc-btn" id="btnPoeme">📖 Texte — En sortant de l'école <span class="acc-arr">▾</span></button>
+          <div class="acc-body" id="bodyPoeme">
+            <div class="acc-inner">
+              <div class="ptitle">En sortant de l'école — Jacques Prévert</div>
+              <div class="ptxt">En sortant de l'école
+nous avons rencontré
+un grand chemin de fer
+qui nous a emmenés
+tout autour de la terre
+
+dans un wagon doré
+tout autour de la terre
+nous avons rencontré
+la mer qui se promenait
+avec tous ses coquillages
+ses îles parfumées
+et puis des matelots
+qui chantaient en dormant
+
+Partant pour le Japon
+partant pour la Norvège
+et partant en vitesse
+pour le pays des neiges
+
+et la lune et les étoiles
+sur un bateau à voiles
+nous avons rencontré
+la lune et ses étoiles
+qui nous ont emmenés
+tout autour de la lune
+tout autour des étoiles
+
+En rentrant à la maison
+nous avons rencontré
+le printemps qui revenait
+de son long voyage en Chine
+
+Et puis il nous a dit
+en passant vite
+que c'est bien d'être jeune
+et d'avoir des amis</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Référentiel -->
+        <div class="acc">
+          <button class="acc-btn" id="btnRef">📋 Référentiel — Outils d'interprétation <span class="acc-arr">▾</span></button>
+          <div class="acc-body" id="bodyRef">
+            <div class="acc-inner">
+              <div class="ri"><span class="rk">Personnification</span><span class="rv"> — donner des actions humaines à un être non humain (la mer qui se promène).</span></div>
+              <div class="ri"><span class="rk">Imaginaire / réel</span><span class="rv"> — distinguer ce qui peut exister dans la réalité et ce qui relève du rêve ou de l'imagination.</span></div>
+              <div class="ri"><span class="rk">Sentiment dominant</span><span class="rv"> — l'émotion principale qui se dégage d'un texte (joie, tristesse, peur, émerveillement…).</span></div>
+              <div class="ri"><span class="rk">Regard du poète</span><span class="rv"> — comment le poète perçoit son sujet : avec admiration, nostalgie, ironie, tendresse…</span></div>
+              <div class="ri"><span class="rk">Titre</span><span class="rv"> — le titre donne souvent une clé de lecture du poème (point de départ, thème, cadre).</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consigne -->
+        <div style="background:linear-gradient(135deg,#fff8ee,#fffdf7);border:1px solid var(--jm);border-radius:12px;padding:12px 16px;margin-bottom:13px;font-size:.92rem;color:#5a3a00;line-height:1.75;font-style:italic;">
+          « Réfléchis maintenant au sens du poème et aux choix du poète. »
+        </div>
+
+        <!-- Zone question -->
+        <div id="anNum" class="annum"></div>
+        <div id="anTit" class="antit"></div>
+        <div class="dq" id="dq"></div>
+
+        <!-- Stepper SOUS les blocs -->
+        <div class="stepper">
+          <button class="snav" id="sPrv">◂</button>
+          <div class="sdots" id="sDots"></div>
+          <button class="snav" id="sNxt">Suivant ▸</button>
+        </div>
+
+        <!-- Résultat -->
+        <div class="res" id="res"></div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay final -->
+<div id="finalOverlay">
+  <div class="final-terre">🌍</div>
+  <div class="final-bravo" id="finalBravo"></div>
+  <div class="final-stars-wrap" id="finalStarsWrap"></div>
+  <div class="final-score" id="finalScore"></div>
+  <div class="final-msg" id="finalMsg"></div>
+  <button class="final-btn" onclick="document.getElementById('finalOverlay').classList.remove('show')">✓ Voir le bilan détaillé</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let cur=0,son=true,actx=null;
+
+/* ══════════════════════════════════════════
+   DONNÉES — MOT POUR MOT
+══════════════════════════════════════════ */
+const DEFIS=[
+  {
+    titre:"Sentiment dominant",
+    simple:false,
+    qA:{
+      consigne:"Quel sentiment domine dans ce voyage ?",
+      opts:["La peur et la tristesse.","La joie et l'émerveillement.","La mélancolie et la douleur.","La colère et le bonheur."],
+      ok:1,
+      fb:"Le poème ne raconte pas une histoire triste ou effrayante. Les enfants voyagent, rencontrent des choses merveilleuses, la mer, la lune, les étoiles. Quel sentiment cela inspire-t-il ?"
+    },
+    qB:{
+      consigne:"Quel élément soutient le mieux cette interprétation ?",
+      opts:["Le voyage emmène les enfants « tout autour de la Terre ».","Les enfants restent dans la classe avant de sortir de l'école.","Le voyage voyage rapidement pour revenir à l'école.","Le poème décrit un voyage à la sortie de l'école."],
+      ok:0,
+      fb:"L'élément qui montre le mieux la grandeur du voyage est celui qui dit jusqu'où les enfants sont partis. Cherche l'expression qui parle de l'étendue du voyage."
+    }
+  },
+  {
+    titre:"Le voyage imaginaire",
+    simple:false,
+    qA:{
+      consigne:"Que représente le voyage dans ce poème ?",
+      opts:["Une simple sortie scolaire.","Une aventure née de l'imagination.","Un voyage historique qui a marqué les esprits.","Une exploration en plein dans la nature."],
+      ok:1,
+      fb:"Dans la réalité, on ne peut pas rencontrer la lune sur un bateau. Ce voyage ne peut donc pas être réel. D'où vient-il alors ?"
+    },
+    qB:{
+      consigne:"Quel vers soutient le mieux cette interprétation ?",
+      opts:["« La lune et les étoiles / Sur un bateau à voiles »","« En sortant de l'école »","« Tout autour de la Terre »","« Partant pour le Japon »"],
+      ok:0,
+      fb:"Le vers qui montre le mieux que le voyage est imaginaire est celui qui contient quelque chose d'impossible dans la réalité. Cherche ce qui ne peut pas vraiment exister."
+    }
+  },
+  {
+    titre:"La personnification de la mer",
+    simple:false,
+    qA:{
+      consigne:"Pourquoi le poète personnifie-t-il la mer dans le vers 'La mer qui se promenait' ?",
+      opts:["Pour montrer que la mer est dangereuse.","Pour donner une explication scientifique.","Pour rendre le monde vivant et merveilleux.","Pour décrire un paysage réel et sublime."],
+      ok:2,
+      fb:"La personnification ne sert pas à expliquer quelque chose de scientifique. Elle sert à transformer le monde en quelque chose d'animé, de vivant. Dans ce poème, la mer n'est pas menaçante : elle se promène, elle est joyeuse. Quel effet cela produit-il ?"
+    },
+    qB:{
+      consigne:"Quel élément du poème confirme cette interprétation ?",
+      opts:["Les enfants restent à l'école.","Le voyage se déroule dans une ville.","La lune et les étoiles deviennent aussi des voyageurs.","Le train suit un itinéraire précis."],
+      ok:2,
+      fb:"Si la mer peut se promener, d'autres éléments du poème font aussi des choses impossibles. Cherche un autre exemple de personnification dans le poème."
+    }
+  },
+  {
+    titre:"Le regard du poète",
+    simple:false,
+    qA:{
+      consigne:"Quel regard le poète semble-t-il porter sur l'enfance ?",
+      opts:["Un regard critique et réflexif.","Un regard admiratif et nostalgique.","Un regard indifférent et distant.","Un regard sévère et critique."],
+      ok:1,
+      fb:"Prévert ne critique pas les enfants. Il ne les ignore pas non plus. Il prend leur monde au sérieux : il leur offre un voyage imaginaire qui part d'un geste ordinaire, sortir de l'école. Quel sentiment cela traduit-il de la part du poète ?"
+    },
+    qB:{
+      consigne:"Quel élément justifie le mieux cette réponse ?",
+      opts:["Une simple sortie d'école devient une aventure extraordinaire.","Les enfants sont réunis à l'école.","Le poème critique l'école de manière subjective.","Les enfants sont décrits comme désobéissants."],
+      ok:0,
+      fb:"L'élément qui justifie le mieux l'admiration et la nostalgie du poète pour l'enfance est celui qui montre comment un moment ordinaire devient quelque chose d'extraordinaire. Lequel ?"
+    }
+  },
+  {
+    titre:"L'importance du titre",
+    simple:true,
+    qA:{
+      consigne:"Pourquoi le titre 'En sortant de l'école' est-il important ?",
+      opts:["Il annonce une leçon à la suite d'une histoire.","Il révèle la destination finale du voyage.","Il montre que l'imagination transforme le quotidien.","Il indique le nom du train avant son départ."],
+      ok:2,
+      fb:"Le titre ne parle pas d'une destination ni d'un train. Il désigne un moment très ordinaire : la sortie de l'école. Mais dans le poème, ce moment ordinaire devient le point de départ d'un voyage extraordinaire. Qu'est-ce que cela dit sur le rôle de l'imagination ?"
+    }
+  },
+  {
+    titre:"L'image poétique",
+    simple:true,
+    qA:{
+      consigne:"Que suggère l'image 'La lune et les étoiles / Sur un bateau à voiles' ?",
+      opts:["Une description réaliste du ciel.","Une explication expérimentaliste.","Un univers poétique."],
+      ok:2,
+      fb:"La lune et les étoiles ne peuvent pas voyager sur un bateau dans la réalité. Cette image ne cherche donc pas à décrire la réalité ni à l'expliquer. Elle crée quelque chose d'autre, de plus grand. Quoi ?"
+    }
+  }
+];
+
+const N=DEFIS.length;
+const TOTAL=10; // 4×2 + 2×1
+
+/* États */
+let stA=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+let stB=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+
+/* Permutations */
+let pA=[],pB=[];
+function mkPerm(n,ok){
+  const oth=[];for(let i=0;i<n;i++)if(i!==ok)oth.push(i);
+  for(let i=oth.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[oth[i],oth[j]]=[oth[j],oth[i]];}
+  const pos=Math.floor(Math.random()*n);const p=[];let di=0;
+  for(let i=0;i<n;i++)p.push(i===pos?ok:oth[di++]);return p;
+}
+function initPerms(){
+  DEFIS.forEach((d,i)=>{
+    pA[i]=mkPerm(d.qA.opts.length,d.qA.ok);
+    if(!d.simple)pB[i]=mkPerm(d.qB.opts.length,d.qB.ok);
+  });
+}
+function reshuf(letter,i){
+  const q=letter==='A'?DEFIS[i].qA:DEFIS[i].qB;
+  const prev=(letter==='A'?pA:pB)[i].indexOf(q.ok);
+  let np;do{np=Math.floor(Math.random()*q.opts.length);}while(np===prev&&q.opts.length>1);
+  if(letter==='A')pA[i]=mkPerm(q.opts.length,q.ok);
+  else pB[i]=mkPerm(q.opts.length,q.ok);
+}
+initPerms();
+
+/* Score */
+function score(){let s=0;
+  stA.forEach((sa,i)=>{if(sa.ok)s++;if(!DEFIS[i].simple&&stB[i].ok)s++;});return s;}
+function errs(){let e=0;
+  stA.forEach((sa,i)=>{if(sa.tried&&!sa.ok)e++;if(!DEFIS[i].simple&&stB[i].tried&&!stB[i].ok)e++;});return e;}
+
+/* Stars */
+function buildStars(){const w=$('stars');w.innerHTML='';for(let i=0;i<TOTAL;i++){
+  const s=document.createElement('span');s.className='str';s.textContent='★';s.id='str'+i;w.appendChild(s);}}
+buildStars();
+function updateStars(n){for(let i=0;i<TOTAL;i++){const s=$('str'+i);if(s)s.classList.toggle('on',i<n);}}
+
+/* Fiches latérales */
+function buildFiches(){const w=$('fiches');w.innerHTML='';
+  DEFIS.forEach((d,i)=>{const f=document.createElement('div');f.className='sf';f.id='sf'+i;
+    const hasB=!d.simple;
+    f.innerHTML='<span class="sfn">'+(i+1)+'</span><span class="sft">'+d.titre+'</span>'+
+      '<div class="sfab"><div class="ab" id="abA'+i+'">A</div>'+(hasB?'<div class="ab" id="abB'+i+'">B</div>':'')+'</div>'+
+      '<div class="sfst">OK</div>';
+    f.addEventListener('click',()=>go(i));w.appendChild(f);});}
+function updFiches(){DEFIS.forEach((d,i)=>{const f=$('sf'+i);if(!f)return;
+  const done=stA[i].ok&&(d.simple||stB[i].ok);
+  f.classList.toggle('active',i===cur);f.classList.toggle('done',done);
+  $('abA'+i).classList.toggle('ok',stA[i].ok);$('abA'+i).classList.toggle('ko',stA[i].tried&&!stA[i].ok);
+  if(!d.simple){$('abB'+i).classList.toggle('ok',stB[i].ok);$('abB'+i).classList.toggle('ko',stB[i].tried&&!stB[i].ok);}});}
+
+/* Stepper */
+function buildDots(){const w=$('sDots');w.innerHTML='';
+  DEFIS.forEach((_,i)=>{const d=document.createElement('div');d.className='sdot';d.id='sdot'+i;
+    d.textContent=(i+1);d.addEventListener('click',()=>go(i));w.appendChild(d);});}
+function updDots(){DEFIS.forEach((d,i)=>{const dot=$('sdot'+i);if(!dot)return;
+  const done=stA[i].ok&&(d.simple||stB[i].ok);const any=stA[i].ok||(stB[i]&&stB[i].ok);
+  dot.classList.toggle('cur',i===cur);dot.classList.toggle('done',done);dot.classList.toggle('part',!done&&any);});}
+
+/* Score display */
+function updScore(){const ok=score(),ko=errs(),rs=TOTAL-ok;
+  $('scOk').textContent=ok;$('scRs').textContent=rs;$('scKo').textContent=ko;
+  const pct=Math.round((ok/TOTAL)*100);$('xpf').style.width=pct+'%';$('xpt').textContent=ok+' / '+TOTAL;
+  updateStars(ok);}
+
+/* Render question */
+function renderA(i){const d=DEFIS[i];
+  $('anNum').textContent='QUESTION '+(i+1)+' / '+N;
+  $('anTit').textContent=d.titre;
+  const dq=$('dq');dq.innerHTML='';
+  dq.appendChild(mkB('A',i,d.qA,stA[i],pA[i]));
+  if(!d.simple)dq.appendChild(mkB('B',i,d.qB,stB[i],pB[i]));}
+
+function mkB(letter,i,q,st,perm){
+  const locked=letter==='B'&&!stA[i].ok;
+  const div=document.createElement('div');
+  div.className='qb'+(letter==='B'?' qB':'');div.id='qb'+letter+i;
+  if(st.ok)div.classList.add('dok');else if(st.tried&&!st.ok)div.classList.add('dko');
+  div.innerHTML='<div class="qbadge"><div class="ql">'+letter+'</div>'+
+    '<div class="qt">'+(letter==='A'?'Interprétation':'Élément justificatif')+'</div></div>'+
+    '<div class="qtxt'+(locked?' lk':'')+'">'+
+    (locked?'⟳ Valide la question A pour accéder à cet élément.':q.consigne)+'</div>'+
+    '<div class="opts" id="opts'+letter+i+'"></div><div id="fb'+letter+i+'"></div>';
+  if(!locked){
+    const box=div.querySelector('#opts'+letter+i);
+    perm.forEach(oi=>{const b=document.createElement('button');b.className='opt';b.textContent=q.opts[oi];
+      if(st.ok||st.tried){b.disabled=true;if(oi===q.ok)b.classList.add('cok');}
+      if(!st.ok&&!st.tried)b.addEventListener('click',()=>ans(letter,i,oi));box.appendChild(b);});
+    const qtxtEl=div.querySelector('.qtxt');
+    if(st.ok&&qtxtEl)qtxtEl.insertAdjacentHTML('afterend','<div class="okmsg">✔ Réponse validée.</div>');
+    if(st.tried&&!st.ok){const fb=div.querySelector('#fb'+letter+i);
+      fb.innerHTML='<div class="fb"><span class="fbl">À revoir</span>'+q.fb+'</div><button class="retry">Réessayer</button>';
+      fb.querySelector('.retry').addEventListener('click',()=>{
+        reshuf(letter,i);
+        if(letter==='A')stA[i].tried=false;else stB[i].tried=false;
+        renderA(i);});}}
+  return div;}
+
+function ans(letter,i,oi){
+  const st=letter==='A'?stA[i]:stB[i];if(st.busy||st.ok)return;st.busy=true;
+  const q=letter==='A'?DEFIS[i].qA:DEFIS[i].qB;st.tried=true;
+  const bl=$('qb'+letter+i);bl.classList.remove('dok','dko','flash','shake');void bl.offsetWidth;
+  if(oi===q.ok){st.ok=true;okSound();flashEmoji();bl.classList.add('flash');updScore();updFiches();updDots();
+    setTimeout(()=>{const n=$('sNxt');if(n){n.classList.remove('pulse');void n.offsetWidth;n.classList.add('pulse');}},350);
+    renderA(i);}
+  else{denySound();bl.classList.add('shake');updScore();updFiches();renderA(i);}
+  st.busy=false;
+  // Vérifier si tout est fini
+  const allDone=stA.every((sa,idx)=>sa.ok&&(DEFIS[idx].simple||stB[idx].ok));
+  if(allDone)setTimeout(showRes,800);}
+
+function go(i){cur=Math.max(0,Math.min(N-1,i));
+  $('sPrv').disabled=(cur===0);
+  $('sNxt').textContent=(cur===N-1)?'✓ Voir le bilan':'Suivant ▸';
+  updDots();updFiches();renderA(cur);}
+
+/* Bilan */
+function showRes(){const ok=score();
+  const msgs={
+    10:{bravo:"Bravo !",m:"Voyage accompli avec mention ! Tu as saisi la profondeur du monde poétique de Prévert."},
+    9:{bravo:"Excellent !",m:"Très belle interprétation. Ta lecture est fine et argumentée."},
+    7:{bravo:"Bien joué !",m:"Bonne progression. Quelques nuances à approfondir sur l'imaginaire et la personnification."},
+    low:{bravo:"Continue !",m:"Reprends le référentiel et relis attentivement le poème avant de retenter."}
+  };
+  const {bravo,m}=ok===10?msgs[10]:ok===9?msgs[9]:ok>=7?msgs[7]:msgs.low;
+  // Stars
+  let stars='';for(let i=0;i<TOTAL;i++)stars+='<span style="color:'+(i<ok?'#f5a623':'rgba(255,255,255,.2)'+'">')+'★</span>';
+  $('finalBravo').textContent=bravo;
+  $('finalStarsWrap').innerHTML=stars;
+  $('finalScore').textContent=ok+' / '+TOTAL;
+  $('finalMsg').textContent=m;
+  $('finalOverlay').classList.add('show');
+  // Bilan interne
+  const r=$('res');
+  r.innerHTML='<div class="ress">'+ok+' / '+TOTAL+'</div>'+
+    '<div class="rest">Bilan du voyage</div>'+
+    '<div class="resm">'+m+'</div>'+
+    '<div class="resp">🌍 Parcours S4J1 accompli — En sortant de l\'école, Jacques Prévert.</div>';
+  r.classList.add('show');
+  if(ok>=9)wordsFall();victorySound();}
+
+function wordsFall(){const host=$('wfall');
+  ['voyage','Japon','étoiles','lune','mer','école','Prévert','imagination','bateau','amis','jeune','printemps'].forEach((m,i)=>{
+    const el=document.createElement('i');el.textContent=m;
+    el.style.cssText='left:'+(5+Math.random()*90)+'%;top:-30px;font-size:'+(0.75+Math.random()*.5).toFixed(2)+'rem;animation-duration:'+(3+Math.random()*3).toFixed(1)+'s;animation-delay:'+(i*0.15).toFixed(2)+'s;';
+    host.appendChild(el);setTimeout(()=>el.remove(),8000);});}
+
+/* Flash emoji bonne réponse — séquence dans l'ordre du poème */
+const EMOJIS_SEQ=['🌙','⭐','🚂','🚢','🌍','🐚','⛵'];
+let emojiIdx=0;
+function flashEmoji(){
+  const em=EMOJIS_SEQ[emojiIdx%EMOJIS_SEQ.length];emojiIdx++;
+  const el=document.createElement('div');el.className='emoji-flash';el.textContent=em;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1900);
+}
+
+/* Sons */
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){if(!actx||!son)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();o.type=tp||'sine';
+  o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+0.03);}
+function okSound(){initA();tone(523,784,.15,'sine',.12,0);tone(784,1046,.13,'sine',.10,.09);}
+function denySound(){initA();tone(240,140,.2,'sine',.11,0);}
+function bootSound(){initA();[330,415,523,659].forEach((f,k)=>tone(f,f,.28,'sine',.09,k*.08));tone(784,784,.4,'sine',.11,.32);}
+function victorySound(){initA();if(!actx||!son)return;
+  [523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.25,'sine',.12,k*.09));}
+
+/* Accordéons */
+let poOpen=false,rfOpen=false;
+$('btnPoeme').addEventListener('click',()=>{poOpen=!poOpen;$('bodyPoeme').classList.toggle('open',poOpen);$('btnPoeme').classList.toggle('open',poOpen);});
+$('btnRef').addEventListener('click',()=>{rfOpen=!rfOpen;$('bodyRef').classList.toggle('open',rfOpen);$('btnRef').classList.toggle('open',rfOpen);});
+
+/* Bulles sous-marines phase 1 */
+(function(){const host=$('wcloud');if(!host)return;
+  for(let i=0;i<22;i++){
+    const b=document.createElement('div');b.className='bubble';
+    const sz=6+Math.random()*28;
+    b.style.cssText='left:'+(Math.random()*100)+'%;width:'+sz+'px;height:'+sz+'px;'+
+      'animation-duration:'+(5+Math.random()*8).toFixed(1)+'s;'+
+      'animation-delay:'+(Math.random()*6).toFixed(1)+'s;';
+    host.appendChild(b);}})();
+
+/* Init */
+buildFiches();buildDots();updScore();go(0);
+$('startBtn').addEventListener('click',()=>{initA();if(actx&&actx.state==='suspended')actx.resume();bootSound();
+  $('p1').classList.add('out');setTimeout(()=>{$('p1').style.display='none';},680);$('p2').classList.add('in');});
+$('sPrv').addEventListener('click',()=>go(cur-1));
+$('sNxt').addEventListener('click',()=>{if(cur<N-1)go(cur+1);else showRes();});
+$('sndBtn').addEventListener('click',()=>{son=!son;initA();if(actx&&actx.state==='suspended')actx.resume();$('sndBtn').textContent=son?'🔊':'🔇';});
+document.addEventListener('pointerdown',initA,{once:true});
+</script>
+</body>
+</html>
