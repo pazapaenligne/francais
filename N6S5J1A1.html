@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – L'Appel de la forêt – 6ème</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623;
+      --day-dark:#c47a10;
+      --day-light:#fff5e0;
+      --day-border:#f5d080;
+      --day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;max-width:800px;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:#f5c518;box-shadow:0 2px 8px rgba(245,197,24,.45);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;
+    }
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    .main-layout{display:flex;gap:1.2rem;width:100%;max-width:900px;
+      align-items:flex-start;position:relative;z-index:1;}
+    .col-left{flex:1 1 0;min-width:0;}
+    .col-right{width:240px;flex-shrink:0;}
+
+    .card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;margin-bottom:1.2rem;}
+    .card:last-child{margin-bottom:0;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--pink));}
+    .card-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.9rem;}
+
+    /* ── Texte support ── */
+    .texte-body{font-size:.97rem;line-height:1.75;color:var(--text);}
+    .texte-body p{margin-bottom:.9rem;}
+    .texte-body p:last-child{margin-bottom:0;}
+    .texte-intro{font-size:.88rem;line-height:1.65;color:var(--muted);
+      border-left:3px solid var(--day-border);padding:.5rem .85rem;margin-bottom:1rem;
+      background:var(--day-light);border-radius:0 8px 8px 0;}
+    .notes{font-size:.82rem;color:var(--muted);margin-top:1rem;line-height:1.7;
+      border-top:1px solid var(--border);padding-top:.7rem;}
+    sup{font-size:.65rem;line-height:0;position:relative;top:-.5em;}
+
+    /* ── Tokens ── */
+    .tok{
+      display:inline;cursor:pointer;border-radius:3px;padding:1px 2px;
+      transition:background .12s,color .12s;
+      -webkit-user-select:none;user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .tok:hover{background:rgba(245,166,35,.18);}
+    .tok.correct{background:rgba(141,198,63,.35);color:#1a4a00;font-weight:700;}
+    .tok.wrong{background:rgba(232,0,45,.18);color:#8b0000;font-weight:700;}
+
+    /* ── Iceberg SVG ── */
+    .iceberg-card{text-align:center;}
+    .iceberg-wrap{display:flex;justify-content:center;margin:.4rem 0 .6rem;}
+    .iceberg-svg{width:90px;height:110px;}
+    .ice-layer{transition:opacity .5s ease;opacity:.12;}
+    .ice-layer.revealed{opacity:1;}
+    .iceberg-bar-wrap{width:100%;background:#eee;border-radius:99px;height:8px;margin-top:.2rem;overflow:hidden;}
+    .iceberg-bar{height:8px;border-radius:99px;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+    .iceberg-score{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-top:.4rem;}
+
+    /* ── Référentiel ── */
+    .ref-item{margin-bottom:.65rem;font-size:.88rem;line-height:1.6;color:var(--text);}
+    .ref-item:last-child{margin-bottom:0;}
+    .ref-term{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);
+      display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.1rem;}
+
+    /* ── Question ── */
+    .q-progress{display:flex;gap:.35rem;margin-bottom:.9rem;flex-wrap:wrap;}
+    .q-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);
+      background:#fff;display:flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--muted);
+      transition:all .3s;}
+    .q-dot.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+    .q-dot.done-ok{border-color:var(--green);background:rgba(141,198,63,.15);color:#1a4a00;}
+    .q-dot.done-ko{border-color:var(--pink);background:rgba(242,139,130,.15);color:#8b0000;}
+
+    .q-label{font-size:.75rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+      letter-spacing:.1em;color:var(--day-dark);font-weight:700;margin-bottom:.35rem;}
+    .q-text{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.7rem;}
+
+    .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;
+      display:inline-flex;align-items:center;gap:.4rem;
+      transition:transform .15s,box-shadow .15s;}
+    .btn:active{transform:scale(.96);}
+    .btn-next{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-next:hover{box-shadow:0 5px 18px var(--day-glow);}
+    .btn-retry{background:var(--bg);color:var(--text);border:2px solid var(--border);}
+    .btn-retry:hover{border-color:var(--day-color);}
+
+    .q-feedback{display:none;margin-top:.75rem;padding:.65rem .85rem;border-radius:8px;
+      font-size:.9rem;line-height:1.6;border-left:4px solid;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ko{background:rgba(242,139,130,.1);border-color:var(--pink);color:#7a0000;}
+
+    /* ── Score final ── */
+    .score-card{display:none;text-align:center;}
+    .score-card.show{display:block;}
+    .score-big{font-size:3rem;font-weight:900;color:var(--day-color);line-height:1;}
+    .score-sub{font-size:1rem;color:var(--muted);margin-top:.3rem;}
+    .score-msg{font-size:.95rem;color:var(--text);margin-top:.8rem;line-height:1.55;}
+
+    /* ── Flash central ── */
+    .flash-pop{
+      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+      z-index:500;font-size:3.5rem;pointer-events:none;opacity:0;
+      animation:none;
+    }
+    .flash-pop.run-ok{animation:flashPopOk .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+    .flash-pop.run-err{animation:flashPopErr .5s cubic-bezier(.34,1.56,.64,1) forwards;}
+    @keyframes flashPopOk{
+      0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.8);}
+    }
+    @keyframes flashPopErr{
+      0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      40%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.6);}
+    }
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .card{animation:fadeUp .4s ease both;}
+
+    @media(max-width:680px){
+      .main-layout{flex-direction:column;}
+      .col-right{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<!-- Flash central -->
+<div class="flash-pop" id="flashpop"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 1</div>
+  <h1>J&rsquo;explore &middot; <span class="hl">London, L&rsquo;Appel de la for&ecirc;t</span></h1>
+</header>
+
+<div class="main-layout">
+
+  <!-- ═══ COLONNE GAUCHE ═══ -->
+  <div class="col-left">
+
+    <!-- Question active -->
+    <div class="card" id="qcard">
+      <div class="card-stripe"></div>
+      <div class="card-title">Question en cours</div>
+      <div class="q-progress" id="qdots"></div>
+      <div class="q-label" id="qlabel">Q1 / 6</div>
+      <div class="q-text" id="qtext"></div>
+      <div class="q-feedback" id="qfb"></div>
+      <div id="qactions" style="margin-top:.75rem;display:flex;gap:.6rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Score final -->
+    <div class="card score-card" id="scorecard">
+      <div class="card-stripe"></div>
+      <div class="score-big" id="scoreval"></div>
+      <div class="score-sub">sur 6 questions</div>
+      <div class="score-msg" id="scoremsg"></div>
+    </div>
+
+    <!-- Texte support -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Texte support</div>
+      <div class="texte-intro">
+        Dans le grand Nord canadien, de nombreuses expéditions sont menées pour trouver des gisements<sup>1</sup> d&rsquo;or qui n&rsquo;ont pas encore été exploités. Ce récit est fait du point de vue d&rsquo;un chien de traîneau qui accompagne les hommes dans la Ruée vers l&rsquo;or.
+      </div>
+      <div class="texte-body" id="texte"></div>
+      <div class="notes">
+        <sup>1</sup> gisements : endroits où se trouvent des minerais ou métaux dans le sol.<br>
+        <sup>2</sup> flânaient : se promenaient sans but, paresseusement.<br>
+        <sup>3</sup> cimes : sommets de montagnes.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ COLONNE DROITE ═══ -->
+  <div class="col-right">
+
+    <!-- Iceberg -->
+    <div class="card iceberg-card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Exploration</div>
+      <div class="iceberg-wrap">
+        <svg class="iceberg-svg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+          <!-- Ciel / fond -->
+          <rect x="0" y="0" width="90" height="55" rx="0" fill="#e8f6fb"/>
+          <!-- Mer -->
+          <rect x="0" y="52" width="90" height="58" fill="#3ab5d8" opacity=".18"/>
+          <!-- Ligne de flottaison -->
+          <line x1="0" y1="54" x2="90" y2="54" stroke="#3ab5d8" stroke-width="1.5" opacity=".5"/>
+
+          <!-- Partie visible de l'iceberg (au-dessus de l'eau) — 6 couches révélées une par une -->
+          <!-- Couche 1 : pointe -->
+          <polygon id="ice0" class="ice-layer"
+            points="45,8 36,28 54,28"
+            fill="#cce9f5" stroke="#9dd4e8" stroke-width="1"/>
+          <!-- Couche 2 -->
+          <polygon id="ice1" class="ice-layer"
+            points="34,26 30,42 60,42 56,26"
+            fill="#b8dff0" stroke="#9dd4e8" stroke-width="1"/>
+          <!-- Couche 3 -->
+          <polygon id="ice2" class="ice-layer"
+            points="28,40 22,54 68,54 62,40"
+            fill="#a0d3ea" stroke="#9dd4e8" stroke-width="1"/>
+          <!-- Partie immergée (sous l'eau) — plus large -->
+          <!-- Couche 4 -->
+          <polygon id="ice3" class="ice-layer"
+            points="20,54 14,68 76,68 70,54"
+            fill="#7bbedd" stroke="#9dd4e8" stroke-width="1" opacity=".8"/>
+          <!-- Couche 5 -->
+          <polygon id="ice4" class="ice-layer"
+            points="12,66 8,82 82,82 78,66"
+            fill="#5aaed4" stroke="#9dd4e8" stroke-width="1" opacity=".7"/>
+          <!-- Couche 6 : base -->
+          <polygon id="ice5" class="ice-layer"
+            points="6,80 10,98 80,98 84,80"
+            fill="#3a9ec8" stroke="#9dd4e8" stroke-width="1" opacity=".6"/>
+
+          <!-- Étoile polaire -->
+          <text x="72" y="18" font-family="Arial" font-size="10" fill="#f5d080">&#9733;</text>
+        </svg>
+      </div>
+      <div class="iceberg-bar-wrap"><div class="iceberg-bar" id="icebergbar"></div></div>
+      <div class="iceberg-score" id="icebergscore">0 / 6 rep&egrave;res</div>
+    </div>
+
+    <!-- Référentiel -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">R&eacute;f&eacute;rentiel</div>
+      <div class="ref-item">
+        <span class="ref-term">Champ lexical</span>
+        Ensemble de mots li&eacute;s &agrave; un m&ecirc;me th&egrave;me.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Adjectif qualificatif</span>
+        Mot qui d&eacute;crit ou qualifie un nom.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Personnification</span>
+        Action humaine pr&ecirc;t&eacute;e &agrave; un objet ou un animal.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Connecteur temporel</span>
+        Mot ou groupe qui indique le temps ou la progression.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Point de vue</span>
+        Angle depuis lequel le r&eacute;cit est raconté.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   TEXTE TOKENISÉ
+   Chaque paragraphe = un tableau de tokens.
+   Les tokens non cliquables (ponctuation lourde,
+   exposants, mots hors réponse) sont marqués nc:true.
+══════════════════════════════════════════ */
+
+/* Structure : paragraphes avec tokens */
+var PARAGRAPHES = [
+  /* §1 */
+  [
+    {id:'p1t0',w:'Pendant'},{id:'p1t1',w:'des'},{id:'p1t2',w:'semaines'},{id:'p1t3',w:'entières,'},
+    {id:'p1t4',w:'on'},{id:'p1t5',w:'marchait'},{id:'p1t6',w:'du'},{id:'p1t7',w:'matin'},
+    {id:'p1t8',w:'au'},{id:'p1t9',w:'soir'},{id:'p1t10',w:';'},{id:'p1t11',w:'pendant'},
+    {id:'p1t12',w:"d'autres,"},{id:'p1t13',w:'au'},{id:'p1t14',w:'contraire,'},{id:'p1t15',w:'on'},
+    {id:'p1t16',w:'semblait'},{id:'p1t17',w:'vouloir'},{id:'p1t18',w:'prendre'},
+    {id:'p1t19',w:'racine'},{id:'p1t20',w:'en'},{id:'p1t21',w:'quelque'},{id:'p1t22',w:'lieu'},
+    {id:'p1t23',w:'solitaire,'},{id:'p1t24',w:'on'},{id:'p1t25',w:'dressait'},{id:'p1t26',w:'le'},
+    {id:'p1t27',w:'camp'},{id:'p1t28',w:';'},{id:'p1t29',w:'les'},{id:'p1t30',w:'chiens'},
+    {id:'p1t31',w:'flânaient',nc:true},{id:'p1t32',w:','},{id:'p1t33',w:'et'},{id:'p1t34',w:'les'},
+    {id:'p1t35',w:'hommes,'},{id:'p1t36',w:'pratiquant'},{id:'p1t37',w:'des'},{id:'p1t38',w:'trous'},
+    {id:'p1t39',w:'dans'},{id:'p1t40',w:'la'},{id:'p1t41',w:'terre'},{id:'p1t42',w:'ou'},{id:'p1t43',w:'le'},
+    {id:'p1t44',w:'gravier'},{id:'p1t45',w:'gelé,'},{id:'p1t46',w:'lavaient'},{id:'p1t47',w:'près'},
+    {id:'p1t48',w:'du'},{id:'p1t49',w:'feu'},{id:'p1t50',w:'de'},{id:'p1t51',w:'grandes'},
+    {id:'p1t52',w:'écuelles'},{id:'p1t53',w:'de'},{id:'p1t54',w:'boue'},{id:'p1t55',w:'dorée.'},
+    {id:'p1t56',w:'Tantôt'},{id:'p1t57',w:'on'},{id:'p1t58',w:'avait'},{id:'p1t59',w:'faim,'},
+    {id:'p1t60',w:'tantôt'},{id:'p1t61',w:'on'},{id:'p1t62',w:'faisait'},{id:'p1t63',w:'bonne'},
+    {id:'p1t64',w:'chère,'},{id:'p1t65',w:'suivant'},{id:'p1t66',w:'les'},{id:'p1t67',w:'hasards'},
+    {id:'p1t68',w:'de'},{id:'p1t69',w:'la'},{id:'p1t70',w:'chasse'},{id:'p1t71',w:'et'},{id:'p1t72',w:'les'},
+    {id:'p1t73',w:'caprices'},{id:'p1t74',w:'du'},{id:'p1t75',w:'gibier.'}
+  ],
+  /* §2 */
+  [
+    {id:'p2t0',w:"L'été"},{id:'p2t1',w:'arriva'},{id:'p2t2',w:';'},{id:'p2t3',w:'alors'},
+    {id:'p2t4',w:'hommes'},{id:'p2t5',w:'et'},{id:'p2t6',w:'chiens'},{id:'p2t7',w:'traversèrent'},
+    {id:'p2t8',w:'en'},{id:'p2t9',w:'radeau'},{id:'p2t10',w:'les'},{id:'p2t11',w:'lacs'},
+    {id:'p2t12',w:'bleus'},{id:'p2t13',w:'des'},{id:'p2t14',w:'montagnes,'},{id:'p2t15',w:'remontèrent'},
+    {id:'p2t16',w:'ou'},{id:'p2t17',w:'descendirent'},{id:'p2t18',w:'des'},{id:'p2t19',w:'rivières'},
+    {id:'p2t20',w:'inconnues,'},{id:'p2t21',w:'sur'},{id:'p2t22',w:'les'},{id:'p2t23',w:'frêles'},
+    {id:'p2t24',w:'barques'},{id:'p2t25',w:'taillées'},{id:'p2t26',w:'dans'},{id:'p2t27',w:'les'},
+    {id:'p2t28',w:'arbres'},{id:'p2t29',w:'des'},{id:'p2t30',w:'forêts'},{id:'p2t31',w:'environnantes.'},
+    {id:'p2t32',w:'Les'},{id:'p2t33',w:'mois'},{id:'p2t34',w:'passaient,'},{id:'p2t35',w:'tandis'},
+    {id:'p2t36',w:"qu'ils"},{id:'p2t37',w:'erraient'},{id:'p2t38',w:'ainsi'},{id:'p2t39',w:'dans'},
+    {id:'p2t40',w:'la'},{id:'p2t41',w:'vaste'},{id:'p2t42',w:'étendue'},{id:'p2t43',w:'dont'},
+    {id:'p2t44',w:'nulle'},{id:'p2t45',w:'main'},{id:'p2t46',w:"n'avait"},{id:'p2t47',w:'tracé'},
+    {id:'p2t48',w:'la'},{id:'p2t49',w:'carte'},{id:'p2t50',w:'pour'},{id:'p2t51',w:'les'},
+    {id:'p2t52',w:'guider,'},{id:'p2t53',w:'mais'},{id:'p2t54',w:'que'},{id:'p2t55',w:'des'},
+    {id:'p2t56',w:'pas'},{id:'p2t57',w:'humains'},{id:'p2t58',w:'avaient'},{id:'p2t59',w:'foulée'},
+    {id:'p2t60',w:'jadis,'},{id:'p2t61',w:'si'},{id:'p2t62',w:'la'},{id:'p2t63',w:'tradition'},
+    {id:'p2t64',w:'disait'},{id:'p2t65',w:'vrai.'}
+  ],
+  /* §3 */
+  [
+    {id:'p3t0',w:'Ils'},{id:'p3t1',w:'subirent'},{id:'p3t2',w:'de'},{id:'p3t3',w:'violents'},
+    {id:'p3t4',w:'orages,'},{id:'p3t5',w:'tourmentes'},{id:'p3t6',w:'de'},{id:'p3t7',w:'neige'},
+    {id:'p3t8',w:'en'},{id:'p3t9',w:'plein'},{id:'p3t10',w:'été,'},{id:'p3t11',w:'vents'},
+    {id:'p3t12',w:'cinglants,'},{id:'p3t13',w:'éclairs'},{id:'p3t14',w:'aveuglants'},
+    {id:'p3t15',w:':'},{id:'p3t16',w:'souvent'},{id:'p3t17',w:'il'},{id:'p3t18',w:'vient'},
+    {id:'p3t19',w:'tomber'},{id:'p3t20',w:'la'},{id:'p3t21',w:'foudre'},{id:'p3t22',w:'à'},
+    {id:'p3t23',w:'leurs'},{id:'p3t24',w:'côtés'},{id:'p3t25',w:';'},{id:'p3t26',w:'ils'},
+    {id:'p3t27',w:'frissonnèrent'},{id:'p3t28',w:'au'},{id:'p3t29',w:'soleil'},{id:'p3t30',w:'de'},
+    {id:'p3t31',w:'minuit'},{id:'p3t32',w:'sur'},{id:'p3t33',w:'les'},{id:'p3t34',w:'hautes'},
+    {id:'p3t35',w:'cimes',nc:true},{id:'p3t36',w:';'},{id:'p3t37',w:'à'},{id:'p3t38',w:'la'},
+    {id:'p3t39',w:'limite'},{id:'p3t40',w:'des'},{id:'p3t41',w:'neiges'},{id:'p3t42',w:'éternelles'},
+    {id:'p3t43',w:';'},{id:'p3t44',w:'redescendirent'},{id:'p3t45',w:'dans'},{id:'p3t46',w:'les'},
+    {id:'p3t47',w:'chaudes'},{id:'p3t48',w:'vallées'},{id:'p3t49',w:'infestées'},{id:'p3t50',w:'de'},
+    {id:'p3t51',w:'moustiques'},{id:'p3t52',w:';'},{id:'p3t53',w:'cueillirent'},{id:'p3t54',w:'à'},
+    {id:'p3t55',w:"l'ombre"},{id:'p3t56',w:'des'},{id:'p3t57',w:'glaciers'},{id:'p3t58',w:'des'},
+    {id:'p3t59',w:'fruits'},{id:'p3t60',w:'comparables'},{id:'p3t61',w:'aux'},{id:'p3t62',w:'plus'},
+    {id:'p3t63',w:'beaux'},{id:'p3t64',w:'de'},{id:'p3t65',w:'creux'},{id:'p3t66',w:"qu'on"},
+    {id:'p3t67',w:'goûte'},{id:'p3t68',w:'dans'},{id:'p3t69',w:'le'},{id:'p3t70',w:'Sud.'}
+  ],
+  /* §4 */
+  [
+    {id:'p4t0',w:'Vers'},{id:'p4t1',w:'la'},{id:'p4t2',w:'fin'},{id:'p4t3',w:'de'},
+    {id:'p4t4',w:"l'année,"},{id:'p4t5',w:'les'},{id:'p4t6',w:'voyageurs'},{id:'p4t7',w:'pénétrèrent'},
+    {id:'p4t8',w:'dans'},{id:'p4t9',w:'une'},{id:'p4t10',w:'région'},{id:'p4t11',w:'triste'},
+    {id:'p4t12',w:'et'},{id:'p4t13',w:'fantastique,'},{id:'p4t14',w:'coupée'},{id:'p4t15',w:'de'},
+    {id:'p4t16',w:'lacs,'},{id:'p4t17',w:'où'},{id:'p4t18',w:'le'},{id:'p4t19',w:'gibier'},
+    {id:'p4t20',w:"d'eau"},{id:'p4t21',w:'avait'},{id:'p4t22',w:'vécu,'},{id:'p4t23',w:'mais'},
+    {id:'p4t24',w:'dont'},{id:'p4t25',w:'le'},{id:'p4t26',w:'silence'},{id:'p4t27',w:"n'était"},
+    {id:'p4t28',w:'plus'},{id:'p4t29',w:'troublé'},{id:'p4t30',w:'que'},{id:'p4t31',w:'par'},
+    {id:'p4t32',w:'le'},{id:'p4t33',w:'souffle'},{id:'p4t34',w:'glacé'},{id:'p4t35',w:'du'},
+    {id:'p4t36',w:'vent'},{id:'p4t37',w:'et'},{id:'p4t38',w:'le'},{id:'p4t39',w:'brisement'},
+    {id:'p4t40',w:'mélancolique'},{id:'p4t41',w:'des'},{id:'p4t42',w:'vagues'},{id:'p4t43',w:'sur'},
+    {id:'p4t44',w:'des'},{id:'p4t45',w:'grèves'},{id:'p4t46',w:'solitaires.'}
+  ],
+  /* §5 */
+  [
+    {id:'p5t0',w:'Pendant'},{id:'p5t1',w:'tout'},{id:'p5t2',w:'un'},{id:'p5t3',w:'hiver'},
+    {id:'p5t4',w:'encore,'},{id:'p5t5',w:'les'},{id:'p5t6',w:'explorateurs'},{id:'p5t7',w:'suivirent'},
+    {id:'p5t8',w:'les'},{id:'p5t9',w:'traces'},{id:'p5t10',w:'à'},{id:'p5t11',w:'demi'},
+    {id:'p5t12',w:'effacées'},{id:'p5t13',w:'de'},{id:'p5t14',w:'ceux'},{id:'p5t15',w:'qui'},
+    {id:'p5t16',w:'les'},{id:'p5t17',w:'avaient'},{id:'p5t18',w:'précédés.'},{id:'p5t19',w:'Ce'},
+    {id:'p5t20',w:'fut'},{id:'p5t21',w:"d'abord"},{id:'p5t22',w:'une'},{id:'p5t23',w:'voie'},
+    {id:'p5t24',w:'pratiquée'},{id:'p5t25',w:'dans'},{id:'p5t26',w:'la'},{id:'p5t27',w:'forêt,'},
+    {id:'p5t28',w:'et'},{id:'p5t29',w:'qui'},{id:'p5t30',w:'semblait'},{id:'p5t31',w:'devoir'},
+    {id:'p5t32',w:'aboutir'},{id:'p5t33',w:'à'},{id:'p5t34',w:'la'},{id:'p5t35',w:'cabane'},
+    {id:'p5t36',w:'perdue'},{id:'p5t37',w:';'},{id:'p5t38',w:'mais'},{id:'p5t39',w:'cette'},
+    {id:'p5t40',w:'route,'},{id:'p5t41',w:'sans'},{id:'p5t42',w:'commencement'},{id:'p5t43',w:'et'},
+    {id:'p5t44',w:'sans'},{id:'p5t45',w:'but,'},{id:'p5t46',w:'demeura'},{id:'p5t47',w:'mystérieuse'},
+    {id:'p5t48',w:'comme'},{id:'p5t49',w:'la'},{id:'p5t50',w:'destinée'},{id:'p5t51',w:'et'},
+    {id:'p5t52',w:'la'},{id:'p5t53',w:'pensée'},{id:'p5t54',w:'de'},{id:'p5t55',w:'celui'},
+    {id:'p5t56',w:'qui'},{id:'p5t57',w:"l'avait"},{id:'p5t58',w:'tracée.'}
+  ]
+];
+
+/* ══ QUESTIONS ══ */
+var QUESTIONS = [
+  {
+    num:1,
+    text:"Clique sur la phrase qui montre que les explorateurs ne savaient pas toujours où ils allaient.",
+    groups:[['p2t39','p2t40','p2t41','p2t42','p2t43','p2t44','p2t45','p2t46','p2t47','p2t48','p2t49','p2t50','p2t51','p2t52']],
+    answers:['p2t39','p2t40','p2t41','p2t42','p2t43','p2t44','p2t45','p2t46','p2t47','p2t48','p2t49','p2t50','p2t51','p2t52'],
+    fb_ok:null,
+    fb_ko:"Cette phrase indique que les explorateurs n'avaient pas de carte pour se repérer : personne n'avait encore cartographié cette région. Ils avançaient donc dans l'inconnu."
+  },
+  {
+    num:2,
+    text:"Clique sur les mots qui décrivent les dangers du temps qu'il faisait pendant l'expédition.",
+    groups:[['p3t3','p3t4','p3t5','p3t6','p3t7','p3t8','p3t9','p3t10','p3t11','p3t12','p3t13','p3t14']],
+    answers:['p3t3','p3t4','p3t5','p3t6','p3t7','p3t8','p3t9','p3t10','p3t11','p3t12','p3t13','p3t14'],
+    fb_ok:null,
+    fb_ko:"Ces mots désignent des phénomènes météo-rologiques dangereux que les explorateurs ont affrontés : orages, neige en été, vent fort et éclairs. Le mot cinglants signifie qui font très mal, comme un coup de fouet."
+  },
+  {
+    num:3,
+    text:"Clique sur la phrase qui montre comment les explorateurs se déplaçaient sur l'eau en été.",
+    groups:[['p2t3','p2t4','p2t5','p2t6','p2t7','p2t8','p2t9','p2t10','p2t11','p2t12','p2t13','p2t14','p2t15','p2t16','p2t17','p2t18','p2t19','p2t20','p2t21','p2t22','p2t23','p2t24','p2t25','p2t26','p2t27','p2t28','p2t29','p2t30','p2t31']],
+    answers:['p2t3','p2t4','p2t5','p2t6','p2t7','p2t8','p2t9','p2t10','p2t11','p2t12','p2t13','p2t14','p2t15','p2t16','p2t17','p2t18','p2t19','p2t20','p2t21','p2t22','p2t23','p2t24','p2t25','p2t26','p2t27','p2t28','p2t29','p2t30','p2t31'],
+    fb_ok:null,
+    fb_ko:"Les explorateurs utilisaient des radeaux et de petites barques qu'ils fabriquaient eux-mêmes en taillant des arbres de la forêt pour traverser les lacs et remonter les rivières."
+  },
+  {
+    num:4,
+    text:"Clique sur les mots qui décrivent la région dans laquelle les voyageurs arrivent vers la fin de l'année.",
+    groups:[['p4t9','p4t10','p4t11','p4t12','p4t13']],
+    answers:['p4t9','p4t10','p4t11','p4t12','p4t13'],
+    fb_ok:null,
+    fb_ko:"Ces deux adjectifs (triste et fantastique) résument l'atmosphère de cette nouvelle région. Fantastique ne signifie pas ici \"merveilleux\", mais étrange, presque irréel."
+  },
+  {
+    num:5,
+    text:"Clique sur la phrase qui décrit le silence inquiétant de cette région.",
+    groups:[['p4t25','p4t26','p4t27','p4t28','p4t29','p4t30','p4t31','p4t32','p4t33','p4t34','p4t35','p4t36','p4t37','p4t38','p4t39','p4t40','p4t41','p4t42','p4t43','p4t44','p4t45','p4t46']],
+    answers:['p4t25','p4t26','p4t27','p4t28','p4t29','p4t30','p4t31','p4t32','p4t33','p4t34','p4t35','p4t36','p4t37','p4t38','p4t39','p4t40','p4t41','p4t42','p4t43','p4t44','p4t45','p4t46'],
+    fb_ok:null,
+    fb_ko:"Cette phrase décrit un silence presque total, interrompu seulement par le vent et les vagues. Le mot mélancolique signifie triste, comme chargé de tristesse. Les grèves sont des plages de sable ou de gravier."
+  },
+  {
+    num:6,
+    text:"Clique sur la phrase qui montre que d'autres personnes étaient passées avant eux.",
+    groups:[['p5t5','p5t6','p5t7','p5t8','p5t9','p5t10','p5t11','p5t12','p5t13','p5t14','p5t15','p5t16','p5t17','p5t18']],
+    answers:['p5t5','p5t6','p5t7','p5t8','p5t9','p5t10','p5t11','p5t12','p5t13','p5t14','p5t15','p5t16','p5t17','p5t18'],
+    fb_ok:null,
+    fb_ko:"Les explorateurs trouvent des traces laissées par d'autres voyageurs qui étaient passés avant eux. Ces traces sont \"à demi effacées\", c'est-à-dire qu'elles ont presque disparu avec le temps."
+  }
+];
+
+/* ══ État ══ */
+var curQ = 0;
+var groupsValidated = [];
+var results = [];
+var done = false;
+var audioCtx = null;
+
+/* ══ Init AudioContext sur premier pointerdown ══ */
+document.addEventListener('pointerdown', function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  }
+  document.removeEventListener('pointerdown', initAudio);
+}, {once:true});
+
+/* ══ Init ══ */
+window.addEventListener('DOMContentLoaded', function() {
+  buildTexte();
+  buildDots();
+  showQuestion(0);
+});
+
+/* ══ Construire le texte tokenisé ══ */
+function buildTexte() {
+  var container = document.getElementById('texte');
+  PARAGRAPHES.forEach(function(para) {
+    var p = document.createElement('p');
+    para.forEach(function(tok, i) {
+      if (i > 0 && tok.w !== ',' && tok.w !== ';' && tok.w !== ':' && tok.w !== '.' && tok.w !== '!') {
+        p.appendChild(document.createTextNode(' '));
+      }
+      if (tok.nc) {
+        var s = document.createElement('span');
+        s.textContent = tok.w;
+        p.appendChild(s);
+      } else {
+        var s = document.createElement('span');
+        s.className = 'tok';
+        s.id = tok.id;
+        s.textContent = tok.w;
+        s.addEventListener('click', function() { onTok(tok.id); });
+        p.appendChild(s);
+      }
+    });
+    container.appendChild(p);
+  });
+}
+
+/* ══ Dots ══ */
+function buildDots() {
+  var wrap = document.getElementById('qdots');
+  QUESTIONS.forEach(function(q, i) {
+    var d = document.createElement('div');
+    d.className = 'q-dot';
+    d.id = 'dot' + i;
+    d.textContent = q.num;
+    wrap.appendChild(d);
+  });
+}
+
+function updateDots() {
+  QUESTIONS.forEach(function(q, i) {
+    var d = document.getElementById('dot' + i);
+    d.className = 'q-dot';
+    if (i < curQ) d.classList.add(results[i] ? 'done-ok' : 'done-ko');
+    else if (i === curQ) d.classList.add('active');
+  });
+}
+
+/* ══ Afficher question ══ */
+function showQuestion(idx) {
+  var q = QUESTIONS[idx];
+  groupsValidated = [];
+  document.getElementById('qlabel').textContent = 'Q' + q.num + ' / 6';
+  document.getElementById('qtext').textContent = q.text;
+  var fb = document.getElementById('qfb');
+  fb.className = 'q-feedback';
+  fb.textContent = '';
+  clearMarks();
+  updateDots();
+  renderActions(false, false);
+}
+
+/* ══ Boutons ══ */
+function renderActions(answered, isOk) {
+  var wrap = document.getElementById('qactions');
+  wrap.innerHTML = '';
+  if (!answered) return;
+  if (!isOk) {
+    var br = document.createElement('button');
+    br.className = 'btn btn-retry';
+    br.textContent = 'Réessayer';
+    br.onclick = reessayer;
+    wrap.appendChild(br);
+  }
+  var label = curQ < QUESTIONS.length - 1 ? 'Question suivante \u2192' : 'Voir le résultat';
+  var bn = document.createElement('button');
+  bn.className = 'btn btn-next';
+  bn.textContent = label;
+  bn.onclick = curQ < QUESTIONS.length - 1 ? suivant : showScore;
+  wrap.appendChild(bn);
+}
+
+/* ══ Clic token ══ */
+function onTok(id) {
+  if (done) return;
+  var fb = document.getElementById('qfb');
+  if (fb.classList.contains('show') && results[curQ] !== undefined) return;
+
+  var q = QUESTIONS[curQ];
+  var groupIdx = -1;
+  q.groups.forEach(function(grp, gi) {
+    if (grp.indexOf(id) !== -1) groupIdx = gi;
+  });
+
+  if (groupIdx === -1) { validerErreur(); return; }
+
+  if (groupsValidated.indexOf(groupIdx) === -1) {
+    groupsValidated.push(groupIdx);
+    q.groups[groupIdx].forEach(function(tid) {
+      var el = document.getElementById(tid);
+      if (el) el.classList.add('correct');
+    });
+  }
+  if (groupsValidated.length === q.groups.length) validerSucces();
+}
+
+/* ══ Succès ══ */
+function validerSucces() {
+  var q = QUESTIONS[curQ];
+  results[curQ] = true;
+  q.answers.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove('wrong'); el.classList.add('correct'); }
+  });
+  flashPop(true);
+  beepOk();
+  updateIceberg(results.filter(Boolean).length);
+  renderActions(true, true);
+}
+
+/* ══ Erreur ══ */
+function validerErreur() {
+  var q = QUESTIONS[curQ];
+  results[curQ] = false;
+  q.answers.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('correct');
+  });
+  var fb = document.getElementById('qfb');
+  fb.textContent = q.fb_ko;
+  fb.className = 'q-feedback show ko';
+  flashPop(false);
+  beepErr();
+  updateIceberg(results.filter(Boolean).length);
+  renderActions(true, false);
+}
+
+/* ══ Réessayer ══ */
+function reessayer() {
+  groupsValidated = [];
+  results[curQ] = undefined;
+  clearMarks();
+  var fb = document.getElementById('qfb');
+  fb.className = 'q-feedback';
+  fb.textContent = '';
+  renderActions(false, false);
+}
+
+/* ══ Suivant ══ */
+function suivant() {
+  curQ++;
+  showQuestion(curQ);
+  document.getElementById('qcard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ══ Score final ══ */
+function showScore() {
+  done = true;
+  document.getElementById('qcard').style.display = 'none';
+  var sc = document.getElementById('scorecard');
+  sc.classList.add('show');
+  var score = results.filter(Boolean).length;
+  document.getElementById('scoreval').textContent = score + ' / 6';
+  var msg = '';
+  if (score === 6) msg = 'Carnet complété ! Tu as bien repéré tous les passages clés du texte.';
+  else if (score >= 4) msg = 'Bon repérage ! Relis les passages signalés.';
+  else msg = 'Relis attentivement le texte et retente.';
+  document.getElementById('scoremsg').textContent = msg;
+  updateIceberg(score);
+  updateDots();
+  beepFinal(score);
+  if (score >= 5) { launchEmojis(); }
+}
+
+/* ══ Iceberg ══ */
+function updateIceberg(score) {
+  var pct = Math.round((score / 6) * 100);
+  document.getElementById('icebergbar').style.width = pct + '%';
+  document.getElementById('icebergscore').textContent = score + ' / 6 rep\u00e8res';
+  for (var i = 0; i < 6; i++) {
+    var layer = document.getElementById('ice' + i);
+    if (layer) {
+      if (i < score) layer.classList.add('revealed');
+      else layer.classList.remove('revealed');
+    }
+  }
+}
+
+/* ══ Nettoyer ══ */
+function clearMarks() {
+  document.querySelectorAll('.tok').forEach(function(el) {
+    el.classList.remove('correct', 'wrong');
+  });
+}
+
+/* ══ Flash central ══ */
+function flashPop(isOk) {
+  var el = document.getElementById('flashpop');
+  el.textContent = isOk ? '\u2713' : '\u2715';
+  el.style.color = isOk ? '#8dc63f' : '#e8002d';
+  el.className = 'flash-pop';
+  void el.offsetWidth;
+  el.classList.add(isOk ? 'run-ok' : 'run-err');
+}
+
+/* ══ Sons ══ */
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ return null; }
+  }
+  return audioCtx;
+}
+
+function beepOk() {
+  var ctx = getCtx(); if (!ctx) return;
+  [[600,.08],[900,.12]].forEach(function(pair, i) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = pair[0];
+    var t = ctx.currentTime + i * 0.13;
+    g.gain.setValueAtTime(0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+    o.start(t); o.stop(t + 0.2);
+  });
+}
+
+function beepErr() {
+  var ctx = getCtx(); if (!ctx) return;
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = 'sawtooth'; o.frequency.value = 280;
+  g.gain.setValueAtTime(0.18, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+  o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.32);
+}
+
+function beepFinal(score) {
+  var ctx = getCtx(); if (!ctx) return;
+  if (score >= 5) {
+    [523,659,784,880,1047].forEach(function(freq, i) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = freq;
+      var t = ctx.currentTime + i * 0.17;
+      g.gain.setValueAtTime(0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.01, t + 0.28);
+      o.start(t); o.stop(t + 0.3);
+    });
+  } else {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = 220;
+    g.gain.setValueAtTime(0.18, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.55);
+  }
+}
+
+/* ══ Pluie d'emojis ══ */
+function launchEmojis() {
+  var pool = ['\uD83C\uDF0A','\uD83D\uDCA7','\u26F5','\uD83D\uDD2D','\uD83D\uDDFA\uFE0F','\uD83C\uDF27\uFE0F','\uD83D\uDCAB','\u2693'];
+  for (var i = 0; i < 25; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.textContent = pool[Math.floor(Math.random() * pool.length)];
+        el.style.cssText = [
+          'position:fixed','pointer-events:none','z-index:999',
+          'font-size:' + (1.3 + Math.random() * 1.3) + 'rem',
+          'left:' + (Math.random() * 96) + 'vw',
+          'top:-2rem','opacity:1',
+          'transition:transform ' + (1.5 + Math.random() * 1.3) + 's linear, opacity .4s linear ' + (1.3 + Math.random() * .9) + 's'
+        ].join(';');
+        document.body.appendChild(el);
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            el.style.transform = 'translateY(' + (window.innerHeight + 60) + 'px) rotate(' + (Math.random()*360) + 'deg)';
+            el.style.opacity = '0';
+          });
+        });
+        setTimeout(function() { el.remove(); }, 3200);
+      }, idx * 100 + Math.random() * 80);
+    })(i);
+  }
+}
+</script>
+</body>
+</html>
