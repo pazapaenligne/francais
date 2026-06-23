@@ -17,15 +17,15 @@
 body{background:var(--bg);color:var(--txt);font-family:'Nunito',Arial,sans-serif;min-height:100vh;padding:0 0 60px;}
 
 /* HEADER */
-.hdr{text-align:center;padding:14px 20px 10px;background:var(--bg);border-bottom:2px solid var(--j);}
-.badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--j);
-  border-radius:999px;padding:5px 15px;margin-bottom:6px;}
+.hdr{text-align:center;padding:14px 20px 12px;background:var(--bg);border-bottom:3px solid var(--j);}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;border:none;
+  border-radius:999px;padding:5px 15px;margin-bottom:8px;box-shadow:0 2px 10px rgba(245,197,24,.3);}
 .pdot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-.badge .lab{font-size:12px;font-weight:800;color:var(--jd);font-family:'Orbitron',sans-serif;letter-spacing:.5px;}
-.wk{font-size:.82rem;color:var(--mut);margin-bottom:5px;}
-.hdr h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;color:var(--jd);margin-bottom:3px;}
+.badge .lab{font-size:12px;font-weight:800;color:#1a1200;font-family:'Orbitron',sans-serif;letter-spacing:.5px;}
+.wk{font-size:.78rem;color:var(--mut);margin-bottom:6px;font-family:'Orbitron',sans-serif;letter-spacing:1px;}
+.hdr h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.1rem,4vw,1.8rem);font-weight:900;color:var(--jd);margin-bottom:4px;}
 .hdr h1 .acc{color:var(--j);}
-.hsub{color:var(--mut);font-size:.82rem;}
+.hsub{color:var(--mut);font-size:.82rem;font-family:'Nunito',sans-serif;}
 
 .wrap{max-width:1100px;margin:0 auto;padding:14px 14px 0;}
 
@@ -160,7 +160,7 @@ td{width:var(--cs);height:var(--cs);padding:0;position:relative;}
     <span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span>
   </div>
   <div class="wk">Semaine 4 — Jour 4</div>
-  <h1>🗝️ Mots croisés — <span class="acc">Conditionnel présent</span></h1>
+  <h1>Mots croisés — <span class="acc">Conditionnel présent</span></h1>
   <p class="hsub">Je relève le défi · 10 entrées · Verbes réguliers et irréguliers</p>
 </div>
 
@@ -314,7 +314,6 @@ function renderGrid(){
         inp.autocomplete='off'; inp.spellcheck=false; inp.inputMode='text';
         inp.addEventListener('input',e=>{
           let v=e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
-          // Normaliser accents courants
           v=v.replace(/[ÉÈÊË]/g,'E').replace(/[ÀÂÄ]/g,'A').replace(/[ÙÛÜ]/g,'U')
              .replace(/[ÎÏ]/g,'I').replace(/[ÔÖ]/g,'O').replace(/Ç/g,'C');
           e.target.value=v;
@@ -322,14 +321,40 @@ function renderGrid(){
         });
         inp.addEventListener('keydown',e=>{
           if(e.key==='Enter'){e.preventDefault();if(activeKey)checkWord(activeKey);}
-          else if(e.key==='Backspace'&&!e.target.value){retreatCursor(r,c,activeKey);}
-          else if(e.key==='ArrowRight'||e.key==='ArrowDown') advanceCursor(r,c,activeKey);
-          else if(e.key==='ArrowLeft'||e.key==='ArrowUp') retreatCursor(r,c,activeKey);
+          else if(e.key==='Backspace'){
+            e.preventDefault();
+            if(e.target.value){
+              // Effacer la case courante
+              e.target.value='';
+            } else {
+              // Case déjà vide: reculer
+              retreatCursor(r,c,activeKey);
+            }
+          }
+          else if(e.key==='ArrowRight') advanceCursor(r,c,activeKey);
+          else if(e.key==='ArrowLeft') retreatCursor(r,c,activeKey);
+          else if(e.key==='ArrowDown'){
+            // Flèche bas: si case croisée, basculer sur le mot V
+            if(ldata.keys.length===2){
+              const vkey=ldata.keys.find(k=>DEFS[k].dir==='V');
+              if(vkey&&vkey!==activeKey) setActive(vkey);
+              else advanceCursor(r,c,activeKey);
+            } else advanceCursor(r,c,activeKey);
+          }
+          else if(e.key==='ArrowUp') retreatCursor(r,c,activeKey);
         });
         inp.addEventListener('focus',()=>{
-          if(ldata.keys.length===1){setActive(ldata.keys[0]);}
-          else if(ldata.keys.length===2){
-            // Alterner entre les deux mots au clic
+          // Ne changer activeKey que si la case n'appartient pas au mot actif
+          const belongsToActive = activeKey && ldata.keys.includes(activeKey);
+          if(!belongsToActive){
+            // Priorité au mot H s'il existe, sinon V
+            const hkey = ldata.keys.find(k=>DEFS[k].dir==='H');
+            setActive(hkey || ldata.keys[0]);
+          }
+        });
+        // Double-clic sur case croisée: basculer direction
+        inp.addEventListener('dblclick',()=>{
+          if(ldata.keys.length===2){
             const other=ldata.keys.find(k=>k!==activeKey)||ldata.keys[0];
             setActive(other);
           }
