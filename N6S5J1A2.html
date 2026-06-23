@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – L'Appel de la forêt – 6e S5 J1</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-dark:#b86e00;--day-dark2:#7a4800;
+  --day-light:#fff4e0;--day-border:#f5c97a;--day-glow:rgba(245,166,35,.25);
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#fffbf0;--border:#e8e0d0;
+  --yellow:#f5c518;
+  --ok-bg:#e8f7fc;--ok-text:#1a6e88;--ok-bd:#7dd4e8;
+  --err-bg:#fff0ef;--err-text:#c0392b;--err-bd:#f28b82;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:680px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:260px;height:260px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1.4rem;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.3);margin-bottom:.55rem;}
+.logo-badge span{font-family:monospace;font-size:13px;font-weight:bold;color:#1a1d23;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;}
+h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:900;line-height:1.25;}
+h1 .hl{color:var(--day-dark);}
+
+/* PROGRESS */
+.prog-wrap{width:100%;margin-bottom:.8rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.prog-bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;width:0%;transition:width .5s ease;}
+
+/* TEXTE SUPPORT */
+.texte-wrap{background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;}
+.texte-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.texte-toggle{display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.1rem;cursor:pointer;user-select:none;transition:background .2s;}
+.texte-toggle:hover{background:var(--surface2);}
+.texte-toggle-title{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  color:var(--day-dark);text-transform:uppercase;letter-spacing:.08em;}
+.texte-arrow{font-size:1rem;color:var(--day-dark);transition:transform .3s;}
+.texte-arrow.open{transform:rotate(180deg);}
+.texte-body{display:none;padding:.9rem 1.2rem 1.1rem;border-top:1px solid var(--border);}
+.texte-body.open{display:block;}
+.texte-intro{font-size:.85rem;color:var(--muted);font-style:italic;
+  border-left:3px solid var(--day-border);padding:.5rem .8rem;margin-bottom:.9rem;
+  background:var(--surface2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;line-height:1.6;}
+.texte-content{font-size:.97rem;line-height:1.85;color:var(--text);}
+.texte-content p{margin-bottom:.8rem;}
+.texte-content p:last-child{margin-bottom:0;}
+.note{font-size:.78rem;color:var(--muted);}
+
+/* CARTE */
+.phase-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:0 0 1.1rem;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.card-head{padding:.9rem 1.2rem .6rem;}
+.act-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;}
+.theme-badge{display:inline-block;font-size:.63rem;font-weight:800;padding:.15rem .6rem;
+  border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.phase-consigne{font-size:.95rem;color:var(--muted);line-height:1.65;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+/* SELECT */
+.q-wrap{padding:0 1.2rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--day-dark);
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.q-para{font-size:.88rem;color:var(--muted);font-style:italic;line-height:1.6;
+  background:var(--surface2);border-left:3px solid var(--day-border);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:.55rem .9rem;margin-bottom:.75rem;}
+.q-label{font-size:.92rem;color:var(--text);font-weight:700;margin-bottom:.55rem;}
+.sel-wrap{position:relative;margin-bottom:.75rem;}
+.sel-wrap select{width:100%;padding:.7rem 2.5rem .7rem 1rem;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--surface);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);
+  cursor:pointer;appearance:none;-webkit-appearance:none;line-height:1.4;min-height:50px;}
+.sel-wrap select:focus{outline:none;border-color:var(--day);}
+.sel-wrap::after{content:'▾';position:absolute;right:.9rem;top:50%;transform:translateY(-50%);
+  color:var(--day-dark);pointer-events:none;font-size:1rem;}
+.sel-wrap select.correct{border-color:var(--ok-bd);background:var(--ok-bg);color:var(--ok-text);}
+.sel-wrap select.wrong{border-color:var(--err-bd);background:var(--err-bg);color:var(--err-text);}
+
+/* QUESTIONS QCM */
+.opts{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem;}
+.opt-btn{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;
+  border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);
+  font-family:Arial,Helvetica,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);
+  color:var(--text);cursor:pointer;text-align:left;line-height:1.45;
+  min-height:50px;width:100%;transition:border-color .15s,background .15s;}
+.opt-btn:hover:not(:disabled){border-color:var(--day);background:var(--day-light);}
+.opt-btn.correct{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-text);font-weight:700;}
+.opt-btn.wrong{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-text);}
+.opt-btn:disabled{cursor:default;}
+.opt-circle{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;font-weight:700;transition:all .15s;}
+.opt-btn.correct .opt-circle{background:var(--ok-bd);border-color:var(--ok-bd);color:#fff;}
+.opt-btn.wrong .opt-circle{background:var(--err-bd);border-color:var(--err-bd);color:#fff;}
+
+/* FEEDBACK */
+.fb{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:.93rem;
+  line-height:1.7;display:none;margin-bottom:.75rem;border:1.5px solid;}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-text);}
+.fb.err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-text);}
+.fb.shown{display:block;}
+.q-sep{height:1px;background:var(--border);margin:.9rem 0;}
+
+/* BTN */
+.btn-row{padding:0 1.2rem;margin-top:.5rem;}
+.btn-next{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;
+  padding:.65rem 1.2rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  min-height:2.8rem;background:var(--day-dark);color:#fff;
+  transition:transform .12s,background .15s;-webkit-tap-highlight-color:transparent;}
+.btn-next:hover{background:var(--day-dark2);}
+.btn-next:active{transform:scale(.96);}
+.btn-next:disabled{opacity:.35;cursor:not-allowed;}
+
+/* BTN VALIDER select */
+.btn-val{display:flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.55rem 1.2rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.85rem,2.3vw,.93rem);font-weight:800;cursor:pointer;border:none;
+  min-height:2.6rem;background:var(--day);color:#fff;
+  transition:transform .12s,background .15s;margin-bottom:.6rem;width:100%;}
+.btn-val:hover{background:var(--day-dark);}
+.btn-val:active{transform:scale(.96);}
+.btn-val:disabled{opacity:.35;cursor:not-allowed;}
+
+/* SCORE */
+.score-inter{text-align:center;padding:1.2rem 1.2rem .5rem;}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  color:var(--day-dark);margin:.4rem 0 .2rem;}
+.v-stars{font-size:1.8rem;letter-spacing:.08em;margin:.4rem 0;}
+.score-msg{font-size:.95rem;color:var(--text);margin:.5rem 0 .3rem;line-height:1.55;}
+
+/* BILAN */
+.bilan-card{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.9rem 1rem;margin:.6rem 1.2rem 0;text-align:left;}
+.bilan-row{font-size:.88rem;color:var(--muted);line-height:1.7;}
+.bilan-row b{color:var(--day-dark);}
+
+/* VICTOIRE */
+.victory-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(10,6,2,.88);align-items:center;justify-content:center;padding:1.5rem;}
+.victory-overlay.show{display:flex;}
+.victory-card{background:var(--surface);border:3px solid var(--day);
+  border-radius:22px;padding:2.5rem 2rem;text-align:center;max-width:460px;width:100%;}
+.v-badge{display:inline-block;background:var(--day-light);color:var(--day-dark);
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;padding:.3rem .9rem;
+  border-radius:99px;border:1.5px solid var(--day-border);margin-bottom:.75rem;}
+.v-score{font-size:3.5rem;font-weight:900;color:var(--day-dark);line-height:1;margin:.5rem 0;}
+.v-msg{font-size:.95rem;color:var(--muted);margin:.4rem 0 1.5rem;line-height:1.6;}
+.hidden{display:none!important;}
+@keyframes confFall{from{transform:translateY(0) rotate(0deg);opacity:1;}
+  to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span>&nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 6e</span>
+  </div>
+  <div class="week-label">Semaine&nbsp;5 &ndash; Jour&nbsp;1</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">L&rsquo;Appel de la for&ecirc;t</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">Partie A &mdash; Paragraphe 1 / 4</span>
+    <span id="prog-score">0 pt</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<!-- TEXTE SUPPORT -->
+<div class="texte-wrap">
+  <div class="texte-stripe"></div>
+  <div class="texte-toggle" onclick="toggleTexte()">
+    <span class="texte-toggle-title">&#128214; Texte support &mdash; J. London</span>
+    <span class="texte-arrow" id="texte-arrow">&#9660;</span>
+  </div>
+  <div class="texte-body" id="texte-body">
+    <div class="texte-intro">Dans le grand Nord canadien, de nombreuses exp&eacute;ditions sont men&eacute;es pour trouver des gisements d&rsquo;or qui n&rsquo;ont pas encore &eacute;t&eacute; exploit&eacute;s. Ce r&eacute;cit est fait du point de vue d&rsquo;un chien de tra&icirc;neau qui accompagne les hommes dans la Ru&eacute;e vers l&rsquo;or.</div>
+    <div class="texte-content">
+      <p>Pendant des semaines enti&egrave;res, on marchait du matin au soir&nbsp;; pendant d&rsquo;autres, au contraire, on semblait vouloir prendre racine en quelque lieu solitaire, on dressait le camp&nbsp;; les chiens fl&acirc;naient, et les hommes, pratiquant des trous dans la terre ou le gravier gel&eacute;, lavaient pr&egrave;s du feu de grandes &eacute;cuelles de boue dor&eacute;e. Tant&ocirc;t on avait faim, tant&ocirc;t on faisait bonne ch&egrave;re, suivant les hasards de la chasse et les caprices du gibier.</p>
+      <p>L&rsquo;&eacute;t&eacute; arriva&nbsp;; alors hommes et chiens travers&egrave;rent en radeau les lacs bleus des montagnes, remont&egrave;rent ou descendirent des rivi&egrave;res inconnues, sur les fr&ecirc;les barques taill&eacute;es dans les arbres des for&ecirc;ts environnantes. Les mois passaient, tandis qu&rsquo;ils erraient ainsi dans la vaste &eacute;tendue dont nulle main n&rsquo;avait trac&eacute; la carte pour les guider, mais que des pas humains avaient foul&eacute;e jadis, si la tradition disait vrai.</p>
+      <p>Ils subirent de violents orages, tourments de neige en plein &eacute;t&eacute;, vents cinglants, &eacute;clairs aveuglants&nbsp;: souvent il vient tomber la foudre &agrave; leurs c&ocirc;t&eacute;s&nbsp;; ils frissonn&egrave;rent au soleil de minuit sur les hautes cimes&nbsp;; &agrave; la limite des neiges &eacute;ternelles&nbsp;; redescendirent dans les chaudes vall&eacute;es infest&eacute;es de moustiques&nbsp;; cueillirent &agrave; l&rsquo;ombre des glaciers des fruits comparables aux plus beaux de creux qu&rsquo;on go&ucirc;te dans le Sud.</p>
+      <p>Vers la fin de l&rsquo;ann&eacute;e, les voyageurs p&eacute;n&eacute;tr&egrave;rent dans une r&eacute;gion triste et fantastique, coup&eacute;e de lacs, o&ugrave; le gibier d&rsquo;eau avait v&eacute;cu, mais dont le silence n&rsquo;&eacute;tait plus troubl&eacute; que par le souffle glac&eacute; du vent et le brisement m&eacute;lancolique des vagues sur des gr&egrave;ves solitaires.</p>
+      <p>Pendant tout un hiver encore, les explorateurs suivirent les traces &agrave; demi effac&eacute;es de ceux qui les avaient pr&eacute;c&eacute;d&eacute;s. Ce fut d&rsquo;abord une voie pratiqu&eacute;e dans la for&ecirc;t, et qui semblait devoir aboutir &agrave; la cabane perdue&nbsp;; mais cette route, sans commencement et sans but, demeura myst&eacute;rieuse comme la destin&eacute;e et la pens&eacute;e de celui qui l&rsquo;avait trac&eacute;e.</p>
+      <p class="note"><em>J. London, L&rsquo;Appel de la for&ecirc;t</em></p>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIE A -->
+<div class="phase-card" id="card-a">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Partie A &mdash; R&eacute;sumer les paragraphes</div>
+    </div>
+  <div class="phase-consigne">
+    Chaque paragraphe raconte une &eacute;tape diff&eacute;rente de l&rsquo;exp&eacute;dition. Pour chacun, choisis dans le menu d&eacute;roulant le r&eacute;sum&eacute; qui correspond le mieux.
+  </div>
+  <div id="qa-wrap" class="q-wrap"></div>
+</div>
+
+<!-- SCORE A -->
+<div class="phase-card hidden" id="card-score-a">
+  <div class="card-stripe"></div>
+  <div class="score-inter" id="score-a-content"></div>
+  <div class="btn-row" style="margin-bottom:.5rem;">
+    <button class="btn-next" id="btn-goto-b" onclick="startB()">Partie B &#8594;</button>
+  </div>
+</div>
+
+<!-- PARTIE B -->
+<div class="phase-card hidden" id="card-b">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Partie B &mdash; Questions de compr&eacute;hension</div>
+    <div class="theme-badge">&#128269; 6 doubles questions</div>
+  </div>
+  <div class="phase-consigne">
+    R&eacute;ponds &agrave; chaque question, puis choisis la phrase du texte qui justifie ta r&eacute;ponse.
+  </div>
+  <div id="qb-wrap" class="q-wrap"></div>
+</div>
+
+<!-- VICTOIRE -->
+<div class="victory-overlay" id="victory">
+  <div class="victory-card">
+    <div class="v-badge">&#9670; Pazapa &middot; Lecture accomplie</div>
+    <div class="v-score" id="v-sc">16&thinsp;/&thinsp;16</div>
+    <div class="v-stars" id="v-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+    <div class="v-msg" id="v-msg"></div>
+    <button class="btn-next" onclick="restart()" style="margin-top:.5rem;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+</div>
+<script>
+var $=function(id){return document.getElementById(id);};
+
+/* ══ TEXTE TOGGLE ══ */
+function toggleTexte(){
+  var b=$('texte-body'),a=$('texte-arrow');
+  b.classList.toggle('open');a.classList.toggle('open');
+}
+
+/* ══ DONNÉES PARTIE A ══ */
+var PA=[
+  {
+    para:"Pendant des semaines enti\u00e8res, on marchait du matin au soir\u00a0; pendant d\u2019autres, au contraire, on semblait vouloir prendre racine en quelque lieu solitaire, on dressait le camp\u00a0; les chiens fl\u00e2naient, et les hommes, pratiquant des trous dans la terre ou le gravier gel\u00e9, lavaient pr\u00e8s du feu de grandes \u00e9cuelles de boue dor\u00e9e. Tant\u00f4t on avait faim, tant\u00f4t on faisait bonne ch\u00e8re, suivant les hasards de la chasse et les caprices du gibier.",
+    opts:[
+      "Les explorateurs visitent une grande ville au bord d\u2019un fleuve.",
+      "Les explorateurs marchent ou s\u2019arr\u00eatent selon les jours, mangent quand ils trouvent du gibier.",
+      "Les explorateurs rentrent chez eux apr\u00e8s une longue exp\u00e9dition."
+    ],
+    ans:1,
+    fb:"Ce premier paragraphe d\u00e9crit le rythme de vie de l\u2019exp\u00e9dition\u00a0: parfois on marche toute la journ\u00e9e, parfois on s\u2019installe. On mange quand la chasse est bonne, on a faim quand elle l\u2019est moins."
+  },
+  {
+    para:"L\u2019\u00e9t\u00e9 arriva\u00a0; alors hommes et chiens travers\u00e8rent en radeau les lacs bleus des montagnes, remont\u00e8rent ou descendirent des rivi\u00e8res inconnues, sur les fr\u00eales barques taill\u00e9es dans les arbres des for\u00eats environnantes. Les mois passaient, tandis qu\u2019ils erraient ainsi dans la vaste \u00e9tendue dont nulle main n\u2019avait trac\u00e9 la carte pour les guider, mais que des pas humains avaient foul\u00e9e jadis, si la tradition disait vrai.",
+    opts:[
+      "En \u00e9t\u00e9, les explorateurs se d\u00e9placent sur l\u2019eau dans une r\u00e9gion sans carte.",
+      "En \u00e9t\u00e9, les explorateurs d\u00e9cident de construire un village au bord d\u2019un lac.",
+      "En \u00e9t\u00e9, les explorateurs retrouvent d\u2019autres voyageurs qui leur donnent une carte."
+    ],
+    ans:0,
+    fb:"Ce paragraphe raconte les d\u00e9placements en \u00e9t\u00e9\u00a0: les explorateurs traversent les lacs et remontent les rivi\u00e8res sur des radeaux et des barques qu\u2019ils fabriquent eux-m\u00eames. Personne n\u2019a de carte de cette r\u00e9gion."
+  },
+  {
+    para:"Ils subirent de violents orages, tourments de neige en plein \u00e9t\u00e9, vents cinglants, \u00e9clairs aveuglants\u00a0: souvent il vient tomber la foudre \u00e0 leurs c\u00f4t\u00e9s\u00a0; ils frissonn\u00e8rent au soleil de minuit sur les hautes cimes\u00a0; \u00e0 la limite des neiges \u00e9ternelles\u00a0; redescendirent dans les chaudes vall\u00e9es infest\u00e9es de moustiques\u00a0; cueillirent \u00e0 l\u2019ombre des glaciers des fruits comparables aux plus beaux de creux qu\u2019on go\u00fbte dans le Sud.",
+    opts:[
+      "Les explorateurs profitent d\u2019un temps magnifique et font beaucoup de randonn\u00e9es.",
+      "Les explorateurs vivent des moments calmes au bord d\u2019un lac de montagne.",
+      "Les explorateurs font face \u00e0 de nombreux dangers\u00a0: temp\u00eates, froid, mais aussi de belles surprises comme des fruits."
+    ],
+    ans:2,
+    fb:"Ce paragraphe m\u00e9lange les dangers (orages, neige, vent, foudre) et des moments plus agr\u00e9ables (des fruits d\u00e9licieux cueillis pr\u00e8s des glaciers). L\u2019exp\u00e9dition n\u2019est pas que difficile\u00a0: elle r\u00e9serve aussi des surprises."
+  },
+  {
+    para:"Vers la fin de l\u2019ann\u00e9e, les voyageurs p\u00e9n\u00e9tr\u00e8rent dans une r\u00e9gion triste et fantastique, coup\u00e9e de lacs, o\u00f9 le gibier d\u2019eau avait v\u00e9cu, mais dont le silence n\u2019\u00e9tait plus troubl\u00e9 que par le souffle glac\u00e9 du vent et le brisement m\u00e9lancolique des vagues sur des gr\u00e8ves solitaires. Pendant tout un hiver encore, les explorateurs suivirent les traces \u00e0 demi effac\u00e9es de ceux qui les avaient pr\u00e9c\u00e9d\u00e9s. Ce fut d\u2019abord une voie pratiqu\u00e9e dans la for\u00eat, et qui semblait devoir aboutir \u00e0 la cabane perdue\u00a0; mais cette route, sans commencement et sans but, demeura myst\u00e9rieuse comme la destin\u00e9e et la pens\u00e9e de celui qui l\u2019avait trac\u00e9e.",
+    opts:[
+      "Les explorateurs arrivent dans une ville anim\u00e9e et d\u00e9cident d\u2019y passer l\u2019hiver.",
+      "Les explorateurs entrent dans une r\u00e9gion triste et myst\u00e9rieuse o\u00f9 ils suivent des traces \u00e9nigmatiques.",
+      "Les explorateurs trouvent enfin la cabane qu\u2019ils cherchaient et s\u2019y installent pour l\u2019hiver."
+    ],
+    ans:1,
+    fb:"Ce dernier paragraphe d\u00e9crit une r\u00e9gion silencieuse et inqui\u00e9tante. Les explorateurs suivent des traces laiss\u00e9es par d\u2019autres avant eux, mais la route qu\u2019ils trouvent ne m\u00e8ne nulle part. Tout reste myst\u00e9rieux."
+  }
+];
+
+/* ══ DONNÉES PARTIE B ══ */
+var PB=[
+  {
+    qA:"O\u00f9 se passe cette sc\u00e8ne\u00a0? Dans quel type d\u2019endroit\u00a0?",
+    optsA:["Dans une grande ville avec des maisons et des rues.","Dans une nature sauvage et loin de toute civilisation.","Dans un village tranquille au bord de la mer."],ansA:1,
+    fbA:"L\u2019exp\u00e9dition se d\u00e9roule dans des espaces sauvages et inconnus\u00a0: montagnes, for\u00eats, lacs, rivi\u00e8res. Il n\u2019y a aucune ville, aucun village.",
+    qB:"Quelle phrase du texte le montre\u00a0?",
+    optsB:["\u00ab\u00a0Tant\u00f4t on avait faim, tant\u00f4t on faisait bonne ch\u00e8re\u00a0\u00bb","\u00ab\u00a0dans la vaste \u00e9tendue dont nulle main n\u2019avait trac\u00e9 la carte pour les guider\u00a0\u00bb","\u00ab\u00a0les explorateurs suivirent les traces \u00e0 demi effac\u00e9es\u00a0\u00bb"],ansB:1,
+    fbB:"Cette phrase indique qu\u2019aucune carte n\u2019existait pour cette r\u00e9gion\u00a0: c\u2019est la preuve que les explorateurs sont loin de tout endroit civilis\u00e9."
+  },
+  {
+    qA:"Quels sont les deux moyens de transport utilis\u00e9s par les explorateurs dans ce texte\u00a0?",
+    optsA:["Le cheval et le bateau \u00e0 voiles.","La marche \u00e0 pied et les embarcations sur l\u2019eau.","Le tra\u00eeneau \u00e0 chiens et l\u2019avion."],ansA:1,
+    fbA:"Les explorateurs marchent une grande partie du temps, et utilisent aussi des radeaux et des barques pour se d\u00e9placer sur les lacs et les rivi\u00e8res.",
+    qB:"Quelle phrase du texte le montre\u00a0?",
+    optsB:["\u00ab\u00a0les hommes pratiquant des trous dans la terre ou le gravier gel\u00e9\u00a0\u00bb","\u00ab\u00a0on marchait du matin au soir\u00a0\u00bb","\u00ab\u00a0travers\u00e8rent en radeau les lacs bleus des montagnes\u2026 sur les fr\u00eales barques taill\u00e9es dans les arbres\u00a0\u00bb"],ansB:[1,2],
+    fbB:"Cette phrase d\u00e9crit pr\u00e9cis\u00e9ment les deux types de d\u00e9placement sur l\u2019eau\u00a0: les radeaux et les barques fabriqu\u00e9es avec les arbres de la for\u00eat."
+  },
+  {
+    qA:"Cite trois difficult\u00e9s rencontr\u00e9es par les explorateurs dans ce texte.",
+    optsA:["La chaleur, les lions et le manque d\u2019eau.","Les orages, la neige en plein \u00e9t\u00e9 et les moustiques.","La boue, les crues des rivi\u00e8res et les loups."],ansA:1,
+    fbA:"Le texte mentionne plusieurs difficult\u00e9s\u00a0: les orages, la neige tombant en \u00e9t\u00e9, les vents forts, les \u00e9clairs, la foudre, et les moustiques dans les vall\u00e9es chaudes.",
+    qB:"Quelle phrase du texte cite ces difficult\u00e9s\u00a0?",
+    optsB:["\u00ab\u00a0une r\u00e9gion triste et fantastique, coup\u00e9e de lacs\u00a0\u00bb","\u00ab\u00a0Ils subirent de violents orages, tourments de neige en plein \u00e9t\u00e9\u2026 vall\u00e9es infest\u00e9es de moustiques\u00a0\u00bb","\u00ab\u00a0le silence n\u2019\u00e9tait plus troubl\u00e9 que par le souffle glac\u00e9 du vent\u00a0\u00bb"],ansB:1,
+    fbB:"Cette phrase du texte liste directement toutes les difficult\u00e9s m\u00e9t\u00e9orologiques et naturelles affront\u00e9es par les explorateurs."
+  },
+  {
+    qA:"Que signifie le mot \u00ab\u00a0fantastique\u00a0\u00bb dans la phrase \u00ab\u00a0une r\u00e9gion triste et fantastique\u00a0\u00bb\u00a0?",
+    optsA:["Tr\u00e8s agr\u00e9able et magnifique.","\u00c9trange, presque irr\u00e9el, qui fait peur.","Tr\u00e8s chaude et ensoleill\u00e9e."],ansA:1,
+    fbA:"Ici, fantastique ne veut pas dire \u00ab\u00a0merveilleux\u00a0\u00bb comme dans la vie courante. Cela signifie que la r\u00e9gion est \u00e9trange, silencieuse et un peu effrayante, presque irr\u00e9elle.",
+    qB:"Quelle phrase du texte explique pourquoi cette r\u00e9gion semble \u00e9trange et inqui\u00e9tante\u00a0?",
+    optsB:["\u00ab\u00a0hommes et chiens travers\u00e8rent en radeau les lacs bleus des montagnes\u00a0\u00bb","\u00ab\u00a0le silence n\u2019\u00e9tait plus troubl\u00e9 que par le souffle glac\u00e9 du vent et le brisement m\u00e9lancolique des vagues sur des gr\u00e8ves solitaires\u00a0\u00bb","\u00ab\u00a0cette route, sans commencement et sans but, demeura myst\u00e9rieuse\u00a0\u00bb"],ansB:1,
+    fbB:"Cette phrase d\u00e9crit une r\u00e9gion presque morte\u00a0: il n\u2019y a plus que le vent et les vagues pour rompre le silence. C\u2019est ce silence pesant qui rend le lieu si inqui\u00e9tant."
+  },
+  {
+    qA:"Les explorateurs sont-ils les premiers \u00e0 passer dans ces r\u00e9gions\u00a0?",
+    optsA:["Oui, ils sont les tout premiers humains \u00e0 passer par l\u00e0.","Non, d\u2019autres personnes sont pass\u00e9es avant eux, mais tr\u00e8s longtemps auparavant.","Oui, car personne ne vit dans ces r\u00e9gions sauvages."],ansA:1,
+    fbA:"Le texte indique que d\u2019autres personnes sont pass\u00e9es avant eux\u00a0: les traces sont \u00ab\u00a0\u00e0 demi effac\u00e9es\u00a0\u00bb, ce qui signifie qu\u2019elles datent de tr\u00e8s longtemps.",
+    qB:"Quelle phrase du texte le montre\u00a0?",
+    optsB:["\u00ab\u00a0dont nulle main n\u2019avait trac\u00e9 la carte pour les guider\u00a0\u00bb","\u00ab\u00a0les explorateurs suivirent les traces \u00e0 demi effac\u00e9es de ceux qui les avaient pr\u00e9c\u00e9d\u00e9s\u00a0\u00bb","\u00ab\u00a0cette route, sans commencement et sans but, demeura myst\u00e9rieuse\u00a0\u00bb"],ansB:1,
+    fbB:"Cette phrase montre que d\u2019autres explorateurs ont march\u00e9 avant eux dans ces r\u00e9gions, mais leurs traces ont presque disparu avec le temps."
+  },
+  {
+    qA:"Comment se termine le texte\u00a0?",
+    optsA:["Les explorateurs trouvent la cabane et rentrent chez eux.","Les explorateurs trouvent une route dans la for\u00eat qui reste myst\u00e9rieuse et ne m\u00e8ne nulle part.","Les explorateurs d\u00e9cident d\u2019arr\u00eater l\u2019exp\u00e9dition et d\u2019attendre le printemps."],ansA:1,
+    fbA:"La fin du texte est volontairement myst\u00e9rieuse\u00a0: les explorateurs trouvent une route dans la for\u00eat, mais cette route ne m\u00e8ne nulle part et ne semble avoir aucun sens. Tout reste une \u00e9nigme.",
+    qB:"Quelle phrase du texte le montre\u00a0?",
+    optsB:["\u00ab\u00a0les explorateurs suivirent les traces \u00e0 demi effac\u00e9es\u00a0\u00bb","\u00ab\u00a0cette route, sans commencement et sans but, demeura myst\u00e9rieuse comme la destin\u00e9e\u00a0\u00bb","\u00ab\u00a0le silence n\u2019\u00e9tait plus troubl\u00e9 que par le souffle glac\u00e9 du vent\u00a0\u00bb"],ansB:1,
+    fbB:"Cette phrase finale r\u00e9sume bien la fin du texte\u00a0: la route est \u00ab\u00a0sans commencement et sans but\u00a0\u00bb, ce qui signifie qu\u2019on ne sait ni d\u2019o\u00f9 elle vient, ni o\u00f9 elle m\u00e8ne. C\u2019est une fin myst\u00e9rieuse."
+  }
+];
+
+/* ══ ÉTAT ══ */
+var scA=0,scB=0,curB=0,doneA=false,doneB=false;
+
+/* ══ AUDIO ══ */
+var _ac=null;
+function iA(){if(_ac)return;try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function bp(f1,f2,d,t,v){var ac=_ac;if(!ac)return;var o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=t;o.frequency.setValueAtTime(f1,ac.currentTime);o.frequency.exponentialRampToValueAtTime(f2,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}
+function sOk(){iA();bp(480,880,.08,'sine',.15);setTimeout(function(){bp(660,1320,.18,'sine',.1);},80);}
+function sKo(){iA();bp(280,160,.18,'sawtooth',.14);}
+function sVic(){iA();[523,659,784,1046].forEach(function(f,i){setTimeout(function(){bp(f,f*1.2,.25,'sine',.13);},i*130);});}
+
+/* ══ SHUFFLE ══ */
+function shuf(opts,ans){
+  var ord=[0,1,2];
+  for(var i=2;i>0;i--){var j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);var t=ord[i];ord[i]=ord[j];ord[j]=t;}
+  return{opts:ord.map(function(k){return opts[k];}),ans:ord.indexOf(ans)};
+}
+
+/* ══ PROGRESS ══ */
+function updProg(done,tot,lbl){
+  $('prog-label').textContent=lbl;
+  $('prog-score').textContent=done+'\u00a0pt'+(done>1?'s':'');
+  $('prog-fill').style.width=Math.round(done/tot*100)+'%';
+}
+
+/* ══ PARTIE A — SELECTS ══ */
+function buildA(){
+  var wrap=$('qa-wrap');wrap.innerHTML='';
+  scA=0;
+  PA.forEach(function(q,i){
+    var num=document.createElement('div');num.className='q-num';
+    num.textContent='Paragraphe '+(i+1);
+    wrap.appendChild(num);
+    var para=document.createElement('div');para.className='q-para';
+    para.textContent=q.para;
+    wrap.appendChild(para);
+    var lbl=document.createElement('div');lbl.className='q-label';
+    lbl.textContent='Choisis le bon r\u00e9sum\u00e9\u00a0:';
+    wrap.appendChild(lbl);
+
+    /* Shuffle */
+    var s=shuf(q.opts,q.ans);
+
+    var sw=document.createElement('div');sw.className='sel-wrap';
+    var sel=document.createElement('select');
+    sel.id='sel'+i;sel.dataset.ans=s.ans;
+    var def=document.createElement('option');def.value='';def.textContent='\u2014 Choisis un r\u00e9sum\u00e9 \u2014';def.disabled=true;def.selected=true;
+    sel.appendChild(def);
+    s.opts.forEach(function(txt,k){
+      var opt=document.createElement('option');opt.value=k;opt.textContent=txt;
+      sel.appendChild(opt);
+    });
+    sw.appendChild(sel);
+    wrap.appendChild(sw);
+
+    var fb=document.createElement('div');fb.className='fb';fb.id='fb'+i;
+    wrap.appendChild(fb);
+
+    if(i<3){var sep=document.createElement('div');sep.className='q-sep';wrap.appendChild(sep);}
+  });
+
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var btn=document.createElement('button');btn.className='btn-next';
+  btn.textContent='Valider la Partie A \u2192';
+  btn.onclick=function(){validerA(btn);};
+  row.appendChild(btn);wrap.appendChild(row);
+  updProg(0,16,'Partie\u00a0A \u2014 4 paragraphes');
+}
+
+function validerA(btn){
+  iA();
+  var allDone=true;
+  PA.forEach(function(q,i){
+    var sel=$('sel'+i);
+    if(sel.value===''){allDone=false;}
+  });
+  if(!allDone){
+    var fb=document.createElement('div');
+    fb.style.cssText='padding:.6rem 1rem;color:var(--err-text);font-size:.88rem;margin:0 1.2rem .5rem;';
+    fb.textContent='R\u00e9ponds \u00e0 tous les paragraphes avant de valider.';
+    var existing=$('warn-all');
+    if(!existing){fb.id='warn-all';btn.parentElement.before(fb);}
+    return;
+  }
+  var w=$('warn-all');if(w)w.remove();
+  scA=0;
+  PA.forEach(function(q,i){
+    var sel=$('sel'+i);
+    var chosen=parseInt(sel.value);
+    var correct=parseInt(sel.dataset.ans);
+    var fb=$('fb'+i);
+    sel.disabled=true;
+    if(chosen===correct){
+      sel.classList.add('correct');
+      fb.className='fb ok shown';fb.textContent='\u2713 Bonne r\u00e9ponse\u00a0!';
+      scA++;
+    } else {
+      sel.classList.add('wrong');
+      fb.className='fb err shown';fb.textContent=q.fb;
+    }
+  });
+  sOk();
+  btn.style.display='none';
+  updProg(scA,16,'Partie\u00a0A termin\u00e9e');
+  setTimeout(function(){showScoreA();},900);
+}
+
+function showScoreA(){
+  $('card-a').classList.add('hidden');
+  var ok=scA>=3;
+  var st=scA===4?5:scA===3?4:scA===2?3:2;
+  $('score-a-content').innerHTML=
+    '<div class="act-num">R\u00e9sultat Partie A</div>'
+    +'<div class="score-big">'+scA+'<span style="font-size:2rem;color:var(--muted)"> / 4</span></div>'
+    +'<div class="v-stars">'+'\u2b50'.repeat(st)+'\u2606'.repeat(5-st)+'</div>'
+    +(ok
+      ?'<div class="score-msg" style="color:var(--ok-text);font-weight:700;">Bravo\u00a0! Tu peux passer \u00e0 la Partie B.</div>'
+      :'<div class="score-msg" style="color:var(--err-text);">Tu dois recommencer la Partie A avant de continuer.</div>');
+  var btn=$('btn-goto-b');
+  if(ok){btn.textContent='Partie\u00a0B \u2192';btn.onclick=function(){startB();};}
+  else{btn.textContent='Recommencer la Partie A';btn.onclick=function(){restartA();};}
+  $('card-score-a').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartA(){
+  $('card-score-a').classList.add('hidden');
+  $('card-a').classList.remove('hidden');
+  buildA();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ PARTIE B ══ */
+function startB(){
+  $('card-score-a').classList.add('hidden');
+  $('card-b').classList.remove('hidden');
+  buildB(0);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildB(idx){
+  var q=PB[idx];var wrap=$('qb-wrap');wrap.innerHTML='';
+  curB=idx;doneA=false;doneB=false;
+  updProg(scA+scB,16,'Partie\u00a0B \u2014 Question '+(idx+1)+'\u00a0/\u00a06');
+
+  var num=document.createElement('div');num.className='q-num';
+  num.textContent='Question '+(idx+1)+'\u00a0/\u00a06';
+  wrap.appendChild(num);
+
+  /* QA */
+  var lblA=document.createElement('div');lblA.className='q-label';lblA.textContent=q.qA;wrap.appendChild(lblA);
+  var sA=shuf(q.optsA,q.ansA);
+  var optsAEl=document.createElement('div');optsAEl.className='opts';
+  var fbAEl=document.createElement('div');fbAEl.className='fb';fbAEl.id='fba';
+  sA.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-circle">'+(i===0?'A':i===1?'B':'C')+'</span><span>'+txt+'</span>';
+    btn.onclick=function(){ansB_A(i,sA.ans,q.fbA,optsAEl,fbAEl,nextBtn);};
+    optsAEl.appendChild(btn);
+  });
+  wrap.appendChild(optsAEl);wrap.appendChild(fbAEl);
+
+  var sep=document.createElement('div');sep.className='q-sep';wrap.appendChild(sep);
+
+  /* QB */
+  var lblB=document.createElement('div');lblB.className='q-label';lblB.textContent=q.qB;wrap.appendChild(lblB);
+  var sB=shuf(q.optsB,q.ansB);
+  var optsBEl=document.createElement('div');optsBEl.className='opts';
+  var fbBEl=document.createElement('div');fbBEl.className='fb';fbBEl.id='fbb';
+  sB.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-circle">'+(i===0?'A':i===1?'B':'C')+'</span><span>'+txt+'</span>';
+    btn.onclick=function(){ansB_B(i,sB.ans,q.fbB,optsBEl,fbBEl,nextBtn);};
+    optsBEl.appendChild(btn);
+  });
+  wrap.appendChild(optsBEl);wrap.appendChild(fbBEl);
+
+  /* Bouton suivant */
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';
+  nextBtn.disabled=true;
+  nextBtn.textContent=idx<5?'Question suivante \u2192':'Voir le bilan \u2192';
+  nextBtn.onclick=function(){idx<5?buildB(idx+1):showVictory();};
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+function ansB_A(chosen,correct,fb,optsEl,fbEl,nextBtn){
+  iA();var btns=optsEl.querySelectorAll('.opt-btn');
+  btns.forEach(function(b){b.disabled=true;});
+  var ok=chosen===correct;
+  btns[chosen].classList.add(ok?'correct':'wrong');
+  if(!ok){var _ca=Array.isArray(correct)?correct:[correct];_ca.forEach(function(ci){btns[ci].classList.add('correct');});}
+  var _ca2=Array.isArray(correct)?correct:[correct];btns.forEach(function(b,i){b.querySelector('.opt-circle').textContent=_ca2.indexOf(i)>=0?'\u2713':(i===chosen&&!ok?'\u2717':'');});
+  if(ok){fbEl.className='fb ok shown';fbEl.textContent='\u2713 Bonne r\u00e9ponse\u00a0!';scB++;sOk();}
+  else{fbEl.className='fb err shown';fbEl.textContent=fb;sKo();}
+  doneA=true;if(doneB)nextBtn.disabled=false;
+  updProg(scA+scB,16,'Partie\u00a0B \u2014 Question '+(curB+1)+'\u00a0/\u00a06');
+}
+
+function ansB_B(chosen,correct,fb,optsEl,fbEl,nextBtn){
+  var ok=Array.isArray(correct)?correct.indexOf(chosen)>=0:chosen===correct;
+  iA();var btns=optsEl.querySelectorAll('.opt-btn');
+  btns.forEach(function(b){b.disabled=true;});
+  btns[chosen].classList.add(ok?'correct':'wrong');
+  if(!ok){var _ca=Array.isArray(correct)?correct:[correct];_ca.forEach(function(ci){btns[ci].classList.add('correct');});}
+  var _ca2=Array.isArray(correct)?correct:[correct];btns.forEach(function(b,i){b.querySelector('.opt-circle').textContent=_ca2.indexOf(i)>=0?'\u2713':(i===chosen&&!ok?'\u2717':'');});
+  if(ok){fbEl.className='fb ok shown';fbEl.textContent='\u2713 Bonne justification\u00a0!';scB++;sOk();}
+  else{fbEl.className='fb err shown';fbEl.textContent=fb;sKo();}
+  doneB=true;if(doneA)nextBtn.disabled=false;
+  updProg(scA+scB,16,'Partie\u00a0B \u2014 Question '+(curB+1)+'\u00a0/\u00a06');
+}
+
+/* ══ VICTOIRE ══ */
+function showVictory(){
+  sVic();confetti();
+  var tot=scA+scB;
+  $('v-sc').innerHTML=tot+'<span style="font-size:1.5rem;font-weight:400;color:var(--muted)">\u00a0/\u00a016</span>';
+  var st=tot>=15?5:tot>=11?4:tot>=7?3:tot>=4?2:1;
+  $('v-stars').textContent='\u2b50'.repeat(st)+'\u2606'.repeat(5-st);
+  var msg=tot>=15?'Excellente compr\u00e9hension\u00a0!':tot>=11?'Tr\u00e8s bonne compr\u00e9hension.':tot>=7?'Bonne lecture. Relis les passages signal\u00e9s.':'Relis le texte attentivement avant de retenter.';
+  $('v-msg').innerHTML=msg+'<br><small style="color:var(--muted)">Partie\u00a0A\u00a0: '+scA+'/4 \u2014 Partie\u00a0B\u00a0: '+scB+'/12</small>';
+  $('victory').classList.add('show');
+}
+
+function confetti(){
+  var cols=['#f5a623','#b86e00','#f5c518','#e8f7fc'];
+  for(var i=0;i<22;i++)(function(i){setTimeout(function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;top:-10px;left:'+(4+Math.random()*92)+'%;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:9999;background:'+cols[i%4]+';animation:confFall '+(0.8+Math.random()*.7)+'s '+(Math.random()*.5)+'s ease-in forwards;';
+    document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},1600);
+  },i*55);})(i);
+}
+
+function restart(){
+  scA=0;scB=0;curB=0;doneA=false;doneB=false;
+  $('victory').classList.remove('show');
+  $('card-b').classList.add('hidden');
+  $('card-score-a').classList.add('hidden');
+  $('card-a').classList.remove('hidden');
+  var btn=$('btn-goto-b');btn.textContent='Partie\u00a0B \u2192';btn.onclick=function(){startB();};
+  buildA();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',iA,{once:true});
+buildA();
+</script>
+</body>
+</html>
