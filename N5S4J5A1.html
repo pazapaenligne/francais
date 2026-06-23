@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S4 J5 – 5e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5c518;--day-dark:#8a6000;
+      --day-light:#fffbeb;--day-border:#f5e08a;
+      --day-glow:rgba(245,197,24,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:#f5a623;top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;background:#3a2c00;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.1rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    /* INTRO */
+    .intro{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-dark);border-radius:var(--radius);
+      padding:.9rem 1.2rem;margin-bottom:1rem;position:relative;z-index:1;}
+    .intro-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.35rem;}
+    .intro-texte{font-size:.95rem;color:var(--text);line-height:1.65;font-weight:600;}
+
+    /* DASHBOARD */
+    .dash{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;
+      color:var(--day-dark);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--day-light);
+      border:1.5px solid var(--day-border);border-radius:8px;padding:.28rem .7rem;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;transition:all .4s;color:var(--muted);}
+
+    /* PROGRESSION */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    @media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.65rem .8rem;}
+    .ref-cell.full{grid-column:1/-1;}
+    .ref-cell-titre{font-size:.8rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+    .ref-cell-body{font-size:.82rem;color:var(--text);line-height:1.7;}
+    .ref-cell-body em{font-style:normal;color:var(--day-dark);font-weight:700;}
+
+    /* BLOCS PARTIES */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-dark);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),#f5a623);}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-dark);border-radius:10px;
+      padding:.75rem 1rem;margin-bottom:.7rem;font-size:1.05rem;
+      color:var(--text);line-height:1.85;font-style:italic;}
+    .q-texte{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.5;}
+
+    /* VF */
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--surface);font-size:1.05rem;font-weight:700;
+      font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    /* QCM */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:1rem;font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:3rem;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* FEEDBACK */
+    .fb{font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      padding:.55rem .85rem;border-radius:8px;margin-top:.4rem;display:none;line-height:1.65;}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);border:1px solid var(--red);color:#7f1d1d;}
+
+    /* RÉSULTATS PARTIE */
+    .part-result{display:none;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.2rem;text-align:center;margin-top:.7rem;
+      max-width:720px;width:100%;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2.2rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.92rem;color:var(--day-dark);margin:.3rem 0 .9rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* BOUTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:1rem;font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover{background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* PARTIE 2 — MINE */
+    .mine-intro{width:100%;max-width:720px;background:var(--day-light);
+      border:2px solid var(--day-border);border-left:5px solid var(--day-dark);
+      border-radius:var(--radius);padding:.85rem 1.1rem;margin-bottom:1rem;
+      position:relative;z-index:1;font-size:.95rem;color:var(--text);line-height:1.65;font-weight:600;}
+    .mine-wrap{width:100%;max-width:720px;position:relative;z-index:1;margin-bottom:1rem;}
+    .mine-iframe-container{width:100%;border-radius:14px;overflow:hidden;
+      border:2px solid var(--day-border);box-shadow:0 4px 20px rgba(0,0,0,.12);}
+    .mine-iframe-container iframe{width:100%;height:420px;border:none;display:block;}
+    @media(max-width:540px){.mine-iframe-container iframe{height:360px;}}
+
+    /* RÉSULTATS GLOBAL */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--surface);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.5rem,10vw,5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);}
+    .stars{font-size:2rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:1rem;color:var(--day-dark);margin-bottom:.9rem;line-height:1.7;
+      font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#15803d;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#c0392b;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.95rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-dark,.btn-primary{width:100%;}.vf-row{gap:.4rem;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot"></span>
+    <span class="logo-dot" style="opacity:.6"></span>
+    <span class="logo-dot" style="opacity:.3"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 4 &ndash; Jour 5</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Conditionnel &amp; Accord sujet-verbe</span></h1>
+</header>
+
+<!-- INTRO -->
+<div class="intro">
+  <div class="intro-label">&#128193; Dossiers de contr&ocirc;le</div>
+  <div class="intro-texte">V&eacute;rifie tes deux dossiers avant d&rsquo;entrer en salle de dict&eacute;e&nbsp;: Dossier 1 &rarr; Conditionnel pr&eacute;sent &nbsp;&bull;&nbsp; Dossier 2 &rarr; Accord sujet-verbe. 8 points de contr&ocirc;le.</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash">
+  <div class="dash-titre">&#9881; Tableau de bord &mdash; 8 questions</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Dossier 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/4</div>
+      <div class="dash-score-label">Dossier 1</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Dossier&nbsp;1</span><span id="nb-s-p1" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Dossier&nbsp;2</span><span id="nb-s-p2" style="font-weight:900;">Mine</span></div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 4 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; R&eacute;f&eacute;rentiel</div>
+  <div class="ref-grid">
+    <div class="ref-cell">
+      <div class="ref-cell-titre">CONDITIONNEL PR&Eacute;SENT</div>
+      <div class="ref-cell-body">Radical du futur simple + terminaisons de l&rsquo;imparfait (-ais, -ais, -ait, -ions, -iez, -aient).<br>
+      <em>Ex.</em>&nbsp;: finir &rarr; je finirais.<br>
+      Irr&eacute;guliers&nbsp;: &ecirc;tre &rarr; serais&nbsp;; avoir &rarr; aurais&nbsp;; aller &rarr; irais&nbsp;; faire &rarr; ferais&nbsp;; pouvoir &rarr; pourrais.</div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-titre">ACCORD SUJET-VERBE</div>
+      <div class="ref-cell-body">R&egrave;gle g&eacute;n&eacute;rale&nbsp;: le verbe s&rsquo;accorde en personne et en nombre avec son sujet.<br><br>
+      <em>Sujet invers&eacute;</em>&nbsp;: accord avec le sujet plac&eacute; apr&egrave;s le verbe.<br>
+      <em>Sujets multiples (et)</em>&nbsp;: verbe au pluriel.<br>
+      <em>Sujet &eacute;loign&eacute;</em>&nbsp;: rep&eacute;rer le noyau du sujet.<br>
+      <em>Nom collectif + compl&eacute;ment</em>&nbsp;: accord avec le compl&eacute;ment.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIE 1 — Conditionnel présent -->
+<div class="bloc-partie" id="bloc-p1">
+  <div class="partie-header">
+    <div class="part-icon">&#128193;</div>
+    <div>
+      <div class="part-titre">Dossier 1 &mdash; Conditionnel pr&eacute;sent</div>
+      <div class="part-sous">4 questions &mdash; Vrai/Faux et QCM</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/4</div>
+  </div>
+  <div id="cards-p1"></div>
+  <div class="part-result" id="res-p1">
+    <div class="part-score" id="score-p1"></div>
+    <div class="part-msg" id="msg-p1"></div>
+    <div id="btn-p1"></div>
+  </div>
+</div>
+
+<!-- PARTIE 2 — Mine accord sujet-verbe -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#9881;</div>
+    <div>
+      <div class="part-titre">Dossier 2 &mdash; Accord sujet-verbe</div>
+      <div class="part-sous">4 barrières dans la mine</div>
+    </div>
+    <div class="part-badge" id="badge-p2">Mine</div>
+  </div>
+  <div class="mine-intro">
+    &#9881;&nbsp;Ton wagon fonce dans la mine&nbsp;! Collecte les pi&egrave;ces d&rsquo;or sur les rails. Aux barri&egrave;res, r&eacute;ponds correctement aux questions d&rsquo;accord sujet-verbe&nbsp;: bonne r&eacute;ponse = acc&egrave;s d&eacute;bloqu&eacute;&nbsp;; mauvaise r&eacute;ponse = passage bloqu&eacute;, impossible de continuer. <em>Espace</em> pour sauter.
+  </div>
+  <div class="mine-wrap">
+    <div class="mine-iframe-container">
+      <iframe id="mine-frame" src="N5S4J5A1_mine.html" scrolling="no" allowfullscreen></iframe>
+    </div>
+  </div>
+  <div class="part-result" id="res-p2">
+    <div class="part-score" id="score-p2">&#128218; Dossier 2 termin&eacute;</div>
+    <div class="part-msg" id="msg-p2">Consulte ton score dans la mine ci-dessus.</div>
+    <div id="btn-p2"></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS GLOBAL -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#128193; Bilan des dossiers</div>
+    <div class="res-score" id="res-score-txt">&#10003;</div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DONNÉES PARTIE 1 — Conditionnel présent
+═══════════════════════════════════════ */
+var P1=[
+  {id:'q1',qNum:1,type:'vf',
+   phrase:'\u00ab\u00a0Le conditionnel pr\u00e9sent du verbe pouvoir \u00e0 la 1re personne du singulier est je pourrais, avec deux r.\u00a0\u00bb',
+   rep:true,
+   fb:'Pouvoir est irr\u00e9gulier au futur et au conditionnel\u00a0: le radical est pourr- (avec deux r), pas pouv-. Je pourrais\u00a0: pourr- + -ais. Attention \u00e0 ne pas oublier le second r, erreur fr\u00e9quente.'},
+  {id:'q2',qNum:2,type:'vf',
+   phrase:'\u00ab\u00a0Au conditionnel pr\u00e9sent, le verbe aller donne j\u2019allerais.\u00a0\u00bb',
+   rep:false,
+   fb:'Aller est enti\u00e8rement irr\u00e9gulier\u00a0: son radical au futur et au conditionnel est ir-, pas all-. La forme correcte est j\u2019irais, pas \u00ab\u00a0j\u2019allerais\u00a0\u00bb (forme inexistante).'},
+  {id:'q3',qNum:3,type:'qcm',
+   phrase:'\u00ab\u00a0Si l\u2019orage \u00e9clatait cette nuit, les habitants du village __ leurs volets ferm\u00e9s.\u00a0\u00bb\n(garder \u2014 3e pers. plur.)',
+   texte:'Quelle forme convient\u00a0?',
+   opts:[{t:'garderont',ok:false},{t:'gardaient',ok:false},{t:'garderaient',ok:true}],
+   fb:'La principale exprime une cons\u00e9quence qui d\u00e9pend d\u2019une condition introduite par si + imparfait (si l\u2019orage \u00e9clatait). La cons\u00e9quence se met au conditionnel pr\u00e9sent\u00a0: garderaient. Radical garder- (futur) + terminaison -aient (imparfait).'},
+  {id:'q4',qNum:4,type:'qcm',
+   phrase:'\u00ab\u00a0__ -tu m\u2019aider \u00e0 porter ce carton jusqu\u2019\u00e0 la salle des professeurs\u00a0?\u00a0\u00bb\n(pouvoir \u2014 2e pers. sing.)',
+   texte:'Quelle forme convient\u00a0?',
+   opts:[{t:'Pourrais',ok:true},{t:'Pouvais',ok:false},{t:'Pourras',ok:false}],
+   fb:'Cette phrase est une demande formul\u00e9e poliment\u00a0: c\u2019est une valeur de politesse du conditionnel. Pouvoir au conditionnel pr\u00e9sent, 2e pers. sing.\u00a0: radical pourr- + -ais \u2192 Pourrais. Pouvais est l\u2019imparfait\u00a0; Pourras est le futur simple.'}
+];
+
+var scoreP1=0,p1Res={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+function jouerOk(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(700,ctx.currentTime+.1);o.frequency.setValueAtTime(880,ctx.currentTime+.2);g.gain.setValueAtTime(.14,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function jouerErreur(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(220,ctx.currentTime+.12);g.gain.setValueAtTime(.14,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}}
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/4*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 4 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreP1;
+}
+function majBadgeP1(ok){
+  var sc=document.getElementById('nb-s-p1'),b=document.getElementById('nb-p1');
+  sc.textContent=ok+'/4';
+  if(ok===4){b.style.background='rgba(34,197,94,.15)';b.style.borderColor='var(--green)';sc.style.color='#15803d';}
+  else if(ok>0){b.style.background='rgba(245,197,24,.15)';b.style.borderColor='var(--day-color)';sc.style.color='var(--day-dark)';}
+}
+
+/* ── BUILD P1 ── */
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Res={};scoreP1=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');
+    lbl.textContent='Question '+q.qNum+(q.type==='vf'?' \u2014 Vrai ou faux\u00a0?':'');
+    card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.style.whiteSpace='pre-line';ph.textContent=q.phrase;card.appendChild(ph);
+    if(q.type==='vf'){
+      var row=mkEl('div','vf-row');
+      ['Vrai','Faux'].forEach(function(txt){
+        var btn=document.createElement('button');btn.className='vf-btn';
+        var isV=txt==='Vrai';
+        btn.innerHTML=(isV?'&#10003;':'&#10007;')+' '+txt;
+        btn.dataset.val=isV?'true':'false';
+        btn.addEventListener('click',function(){selVF(q,btn,row);});
+        row.appendChild(btn);
+      });
+      card.appendChild(row);
+    } else {
+      var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+      var optsM=q.opts.slice().sort(function(){return Math.random()-.5;});
+      var opts=mkEl('div','opts');
+      optsM.forEach(function(opt,oi){
+        var btn=document.createElement('button');btn.className='opt-btn';
+        btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+        btn.dataset.ok=opt.ok?'1':'0';
+        btn.addEventListener('click',function(){selQCM(q,btn,opts);});
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+    }
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Res[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Res[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreP1++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=scoreP1+'/4';
+  majBadgeP1(scoreP1);
+  var done=Object.keys(p1Res).length;
+  majProg(done);
+  document.getElementById('dash-statut').textContent=done<4?'Dossier 1 \u2014 question '+(done+1)+'/4\u2026':'Dossier 1 termin\u00e9';
+  if(done===4)showResP1();
+}
+
+function selQCM(q,btn,optsEl){
+  if(p1Res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p1Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.textContent=q.fb;}
+  if(ok){scoreP1++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=scoreP1+'/4';
+  majBadgeP1(scoreP1);
+  var done=Object.keys(p1Res).length;
+  majProg(done);
+  document.getElementById('dash-statut').textContent=done<4?'Dossier 1 \u2014 question '+(done+1)+'/4\u2026':'Dossier 1 termin\u00e9';
+  if(done===4)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=scoreP1+' / 4';
+  document.getElementById('msg-p1').textContent=scoreP1===4?'\u2713 Dossier 1 valid\u00e9 \u2014 Dossier 2 d\u00e9bloqu\u00e9.':
+    scoreP1>=3?'Bien \u2014 Dossier 2 d\u00e9bloqu\u00e9.':'Continue \u2014 Dossier 2 d\u00e9bloqu\u00e9.';
+  document.getElementById('btn-p1').innerHTML='<button class="btn btn-primary" onclick="debP2()">Dossier 2 \u2192 La Mine</button>';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  document.getElementById('dash-statut').textContent='Dossier 2 \u2014 Mine en cours\u2026';
+  var nb=document.getElementById('nb-p2');
+  nb.style.background='rgba(245,197,24,.15)';nb.style.borderColor='var(--day-color)';
+  /* Afficher bouton bilan après un délai raisonnable */
+  setTimeout(function(){
+    var r=document.getElementById('res-p2');r.classList.add('show');
+    document.getElementById('btn-p2').innerHTML='<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+  },3000);
+}
+
+/* ── VERDICT ── */
+function afficherVerdict(){
+  document.getElementById('results-global').classList.add('show');
+  var score=scoreP1;
+  var stars=score===4?5:score>=3?4:score>=2?3:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(score===4){badge='<div class="badge-ok">\u2713 V\u00e9rification parfaite.</div>';msg='V\u00e9rification parfaite.\nTu entres en salle de dict\u00e9e\naves une ma\u00eetrise totale.';}
+  else if(score>=3){badge='<div class="badge-ok">\u2713 Tr\u00e8s bonne v\u00e9rification.</div>';msg='Tr\u00e8s bonne v\u00e9rification.\nReste vigilant sur les points signal\u00e9s.';}
+  else if(score>=2){badge='<div class="badge-ko">V\u00e9rification partielle.</div>';msg='V\u00e9rification partielle.\nRevois les r\u00e8gles avant la dict\u00e9e.';}
+  else{badge='<div class="badge-ko">Reprends les parcours de la semaine.</div>';msg='Reprends les parcours\nde la semaine avant la dict\u00e9e.';}
+  document.getElementById('res-score-txt').textContent=score+'/4';
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+  document.getElementById('dash-statut').textContent='S\u00e9ance termin\u00e9e.';
+}
+
+/* ── RESET ── */
+function resetTout(){
+  scoreP1=0;p1Res={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/4';
+  document.getElementById('nb-s-p1').textContent='0/4';
+  document.getElementById('nb-s-p1').style.color='';
+  var b1=document.getElementById('nb-p1');b1.style.background='';b1.style.borderColor='';
+  var b2=document.getElementById('nb-p2');b2.style.background='';b2.style.borderColor='';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Dossier 1 en cours\u2026';
+  majProg(0);
+  /* Recharger la mine */
+  var iframe=document.getElementById('mine-frame');
+  if(iframe) iframe.src=iframe.src;
+  buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildP1();majProg(0);
+</script>
+</body>
+</html>
