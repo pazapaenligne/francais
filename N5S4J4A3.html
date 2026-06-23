@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mots croisés — Conditionnel présent — 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fffdf7;--j:#3ab5d8;--jd:#0e3a52;--jl:#e8f6fc;--jm:#90d8f0;
+  --ok:#22c55e;--okbg:#f0fdf4;--okbd:#86efac;
+  --ko:#ef4444;--kobg:#fef2f2;--kobd:#fca5a5;
+  --txt:#2b2b2b;--mut:#5a6a7a;--ln:#d0e8f0;--sur:#fff;
+  --cs:clamp(26px,5vw,36px);
+}
+body{background:var(--bg);color:var(--txt);font-family:'Nunito',Arial,sans-serif;min-height:100vh;padding:0 0 60px;}
+
+/* HEADER */
+.hdr{text-align:center;padding:14px 20px 10px;background:var(--bg);border-bottom:2px solid var(--j);}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--j);
+  border-radius:999px;padding:5px 15px;margin-bottom:6px;}
+.pdot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.badge .lab{font-size:12px;font-weight:800;color:var(--jd);font-family:'Orbitron',sans-serif;letter-spacing:.5px;}
+.wk{font-size:.82rem;color:var(--mut);margin-bottom:5px;}
+.hdr h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;color:var(--jd);margin-bottom:3px;}
+.hdr h1 .acc{color:var(--j);}
+.hsub{color:var(--mut);font-size:.82rem;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:14px 14px 0;}
+
+/* Consigne */
+.consigne-box{background:var(--jl);border:1px solid var(--jm);border-radius:10px;
+  padding:10px 14px;font-size:.88rem;color:var(--jd);line-height:1.7;font-style:italic;margin-bottom:12px;}
+
+/* Référentiel */
+.ref-card{background:var(--sur);border:1px solid var(--ln);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.ref-btn{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;
+  cursor:pointer;background:var(--jl);border:none;width:100%;font-family:'Nunito',sans-serif;
+  font-size:.88rem;font-weight:800;color:var(--jd);}
+.ref-arr{transition:transform .3s;}.ref-btn.open .ref-arr{transform:rotate(180deg);}
+.ref-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.ref-body.open{max-height:400px;}
+.ref-inner{padding:10px 14px;border-top:1px solid var(--ln);}
+.ri{margin-bottom:5px;font-size:.83rem;line-height:1.55;}
+.rk{color:var(--jd);font-weight:800;}.rv{color:#3a4a5a;}
+
+/* Layout principal */
+.layout{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;}
+@media(max-width:860px){.layout{grid-template-columns:1fr;}}
+
+/* COL GRILLE */
+.grille-col{display:flex;flex-direction:column;gap:10px;}
+
+/* Score */
+.score-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.sc-box{background:var(--sur);border:1px solid var(--ln);border-radius:10px;
+  padding:7px 14px;text-align:center;min-width:68px;}
+.sc-n{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;line-height:1.1;}
+.sc-n.ok{color:var(--ok);}.sc-n.bl{color:var(--j);}.sc-n.ko{color:var(--ko);}
+.sc-l{font-size:.58rem;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+
+/* Barre progression */
+.prog-wrap{background:#e0f0f8;border-radius:20px;height:8px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--j),#7dd8f0);
+  border-radius:20px;transition:width .5s cubic-bezier(.34,1.3,.64,1);width:0%;}
+
+/* Stars */
+.stars{display:flex;justify-content:center;gap:2px;font-size:.85rem;}
+.str{opacity:.2;transition:all .4s;}.str.on{opacity:1;color:var(--j);animation:stpop .5s;}
+@keyframes stpop{0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+/* Grille */
+.grid-outer{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.grid-wrap{display:inline-block;background:var(--sur);border:2px solid var(--j);
+  border-radius:14px;padding:8px;box-shadow:0 4px 14px rgba(58,181,216,.12);}
+table{border-collapse:collapse;}
+td{width:var(--cs);height:var(--cs);padding:0;position:relative;}
+.cell{width:var(--cs);height:var(--cs);background:#fff;border:1.5px solid #b0cde0;
+  display:flex;align-items:center;justify-content:center;position:relative;transition:background .2s,border-color .2s;}
+.cell.empty{background:var(--jd);border-color:var(--jd);}
+.cell.active{border-color:var(--j);box-shadow:0 0 0 2px rgba(58,181,216,.4);}
+.cell.hlword{background:var(--jl);}
+.cell.ok{background:var(--okbg);border-color:var(--ok);}
+.cell.ko{background:var(--kobg);border-color:var(--ko);}
+.cell.solution{background:#fff3cd;border-color:#f5a623;}
+.num{position:absolute;top:1px;left:2px;font-size:clamp(6px,1.2vw,9px);
+  font-weight:900;color:var(--jd);font-family:'JetBrains Mono',monospace;line-height:1;z-index:2;pointer-events:none;}
+.cell input{width:100%;height:100%;border:none;background:transparent;
+  text-align:center;font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.95rem);
+  font-weight:700;color:var(--jd);text-transform:uppercase;outline:none;cursor:pointer;padding:0;
+  caret-color:transparent;}
+.cell.ok input{color:var(--ok);cursor:default;}
+.cell.ko input{color:var(--ko);}
+.cell.solution input{color:#b06000;}
+
+/* Boutons */
+.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.btn{min-height:36px;border-radius:8px;padding:0 16px;font-family:'Orbitron',sans-serif;
+  font-size:.7rem;font-weight:700;cursor:pointer;border:none;letter-spacing:.5px;transition:filter .15s;}
+.btn-check{background:var(--j);color:#0e3a52;box-shadow:0 3px 0 #0e3a52;}
+.btn-check:hover{filter:brightness(1.08);}
+.btn-reset{background:#fff;color:var(--jd);border:1.5px solid var(--jm);}
+.btn-reset:hover{background:var(--jl);}
+.btn-sol{background:#fff3cd;color:#7a4a00;border:1.5px solid #f5c518;}
+.btn-sol:hover{background:#ffe898;}
+
+/* COL DÉFINITIONS */
+.defs-col{display:flex;flex-direction:column;gap:12px;}
+.def-section{background:var(--sur);border:1px solid var(--ln);border-radius:12px;overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,.04);}
+.def-title{background:var(--jd);color:#fff;padding:7px 13px;font-family:'Orbitron',sans-serif;
+  font-size:.68rem;letter-spacing:1.5px;display:flex;align-items:center;gap:8px;}
+.def-list{padding:8px 0;}
+.def-item{padding:8px 13px;border-bottom:1px solid var(--ln);cursor:pointer;transition:background .15s;}
+.def-item:last-child{border:none;}
+.def-item:hover{background:var(--jl);}
+.def-item.hl{background:var(--jl);border-left:3px solid var(--j);}
+.def-item.done{background:var(--okbg);}
+.def-item.err{background:var(--kobg);}
+.def-num{font-family:'JetBrains Mono',monospace;font-size:.66rem;font-weight:700;
+  color:var(--j);margin-bottom:2px;}
+.def-item.done .def-num{color:var(--ok);}
+.def-item.err .def-num{color:var(--ko);}
+.def-verb{font-size:.82rem;font-weight:800;color:var(--jd);margin-bottom:2px;}
+.def-ctx{font-size:.78rem;color:var(--mut);font-style:italic;line-height:1.5;}
+.def-person{display:inline-block;background:var(--jl);border:1px solid var(--jm);
+  border-radius:4px;padding:1px 7px;font-size:.68rem;font-weight:800;color:var(--jd);margin-left:4px;}
+.def-item.done .def-verb,.def-item.done .def-ctx{color:#15803d;}
+.fb-zone{margin-top:5px;padding:6px 9px;border-radius:7px;font-size:.76rem;line-height:1.6;display:none;}
+.fb-zone.show{display:block;}
+.fb-zone.ok{background:var(--okbg);border-left:3px solid var(--ok);color:#15803d;}
+.fb-zone.ko{background:var(--kobg);border-left:3px solid var(--ko);color:#991b1b;}
+.btn-retry{margin-top:5px;background:#fff;border:1.5px solid var(--j);color:var(--jd);
+  border-radius:5px;padding:3px 10px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;}
+.btn-check-word{display:inline-flex;align-items:center;gap:5px;background:var(--j);color:#fff;
+  border:none;border-radius:7px;padding:5px 13px;font-size:.76rem;font-weight:800;
+  cursor:pointer;font-family:'Nunito',sans-serif;margin-top:5px;}
+.btn-check-word:hover{filter:brightness(1.08);}
+
+/* Bilan */
+#bilan{display:none;background:var(--sur);border:2px solid var(--j);border-radius:16px;
+  padding:20px;text-align:center;margin-top:12px;box-shadow:0 4px 16px rgba(58,181,216,.1);}
+#bilan.show{display:block;animation:fdin .5s;}
+@keyframes fdin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.bil-icon{font-size:2.8rem;margin-bottom:6px;}
+.bil-score{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--jd);}
+.bil-titre{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--j);margin:5px 0;}
+.bil-msg{font-size:.85rem;color:var(--mut);line-height:1.7;max-width:380px;margin:0 auto 12px;}
+.btn-retry-g{background:var(--j);color:#fff;border:none;border-radius:9px;
+  padding:9px 22px;font-weight:800;font-size:.85rem;cursor:pointer;font-family:'Orbitron',sans-serif;}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="badge">
+    <span class="pdot" style="background:#e05050;"></span>
+    <span class="pdot" style="background:#f5a623;"></span>
+    <span class="pdot" style="background:#8dc63f;"></span>
+    <span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span>
+  </div>
+  <div class="wk">Semaine 4 — Jour 4</div>
+  <h1>🗝️ Mots croisés — <span class="acc">Conditionnel présent</span></h1>
+  <p class="hsub">Je relève le défi · 10 entrées · Verbes réguliers et irréguliers</p>
+</div>
+
+<div class="wrap">
+  <div class="consigne-box">« Conjugue chaque verbe au conditionnel présent, à la personne indiquée. Écris ta réponse en majuscules, sans accent. »</div>
+  <div class="ref-card">
+    <button class="ref-btn" id="btnRef">📋 Référentiel — Conditionnel présent <span class="ref-arr">▾</span></button>
+    <div class="ref-body" id="bodyRef">
+      <div class="ref-inner">
+        <div class="ri"><span class="rk">Formation</span><span class="rv"> : radical du futur + terminaisons de l'imparfait (-ais, -ais, -ait, -ions, -iez, -aient).</span></div>
+        <div class="ri"><span class="rk">Verbes réguliers</span><span class="rv"> : aimer → aimer- | finir → finir-</span></div>
+        <div class="ri"><span class="rk">Irréguliers fréquents</span><span class="rv"> : être → ser- | avoir → aur- | aller → ir- | venir → viendr- | voir → verr- | pouvoir → pourr- | devoir → devr- | savoir → saur-</span></div>
+        <div class="ri"><span class="rk">Exemple</span><span class="rv"> : Il <em>aimerait</em> voyager. Nous <em>serions</em> ravis.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="grille-col">
+      <div class="score-row">
+        <div class="sc-box"><div class="sc-n ok" id="scOk">0</div><div class="sc-l">Trouvés</div></div>
+        <div class="sc-box"><div class="sc-n bl" id="scRs">10</div><div class="sc-l">Restants</div></div>
+        <div class="sc-box"><div class="sc-n ko" id="scKo">0</div><div class="sc-l">Erreurs</div></div>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+      <div class="stars" id="stars"></div>
+      <div class="grid-outer"><div class="grid-wrap"><table id="tbl"></table></div></div>
+      <div class="btns">
+        <button class="btn btn-check" onclick="checkAll()">✓ Vérifier tout</button>
+        <button class="btn btn-reset" onclick="restart()">↺ Recommencer</button>
+        <button class="btn btn-sol" onclick="showSolution()">👁 Solution</button>
+      </div>
+      <div id="bilan">
+        <div class="bil-icon" id="bilIcon"></div>
+        <div class="bil-score" id="bilScore"></div>
+        <div class="bil-titre" id="bilTitre"></div>
+        <div class="bil-msg" id="bilMsg"></div>
+        <button class="btn-retry-g" onclick="restart()">🔄 Retenter la grille</button>
+      </div>
+    </div>
+
+    <div class="defs-col">
+      <div class="def-section">
+        <div class="def-title">→ HORIZONTALES</div>
+        <div class="def-list" id="defH"></div>
+      </div>
+      <div class="def-section">
+        <div class="def-title">↓ VERTICALES</div>
+        <div class="def-list" id="defV"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DONNÉES — MOT POUR MOT (doc source)
+══════════════════════════════════════ */
+const DEFS={
+  H1:{mot:'SERIONS',dir:'H',row:11,col:0,num:8,
+    verbe:'être',personne:'nous',
+    ctx:'« Nous … ravis de vous accueillir pour cette sortie. »',
+    fb:"Être est entièrement irrégulier au conditionnel. Nous serions : radical ser- (futur) + terminaison -ions (imparfait). s-e-r-i-o-n-s."},
+  H2:{mot:'AIMERAIS',dir:'H',row:13,col:1,num:9,
+    verbe:'aimer',personne:'tu',
+    ctx:'« Tu … sûrement visiter ce musée avec ta classe. »',
+    fb:"Aimer est régulier du 1er groupe. Tu aimerais : radical aimer- + terminaison -ais. a-i-m-e-r-a-i-s."},
+  H3:{mot:'DEVRAIT',dir:'H',row:7,col:6,num:7,
+    verbe:'devoir',personne:'il',
+    ctx:'« Il … réviser davantage avant le contrôle de demain. »',
+    fb:"Devoir est irrégulier au futur et au conditionnel. Il devrait : radical devr- (futur) + terminaison -ait. d-e-v-r-a-i-t. Ne pas confondre avec \"devait\" (imparfait, sans le r du futur)."},
+  H4:{mot:'SAURIEZ',dir:'H',row:5,col:6,num:4,
+    verbe:'savoir',personne:'vous',
+    ctx:"« … -vous me dire l'heure exacte du départ ? »",
+    fb:"Savoir est irrégulier au conditionnel. Vous sauriez : radical saur- (futur) + terminaison -iez. s-a-u-r-i-e-z."},
+  H5:{mot:'VERRAIENT',dir:'H',row:2,col:0,num:2,
+    verbe:'voir',personne:'ils',
+    ctx:"« S'ils insistaient un peu, ils … sûrement la différence. »",
+    fb:"Voir est irrégulier au futur et au conditionnel. Ils verraient : radical verr- (futur, avec deux r) + terminaison -aient. v-e-r-r-a-i-e-n-t."},
+  V1:{mot:'AURAIS',dir:'V',row:2,col:4,num:3,
+    verbe:'avoir',personne:"j'",
+    ctx:"« J' … besoin de ton aide pour ce projet, si tu es disponible. »",
+    fb:"Avoir est entièrement irrégulier au conditionnel. J'aurais : radical aur- (futur) + terminaison -ais. a-u-r-a-i-s. Ne pas confondre avec \"avais\" (imparfait)."},
+  V2:{mot:'VIENDRIONS',dir:'V',row:2,col:0,num:2,
+    verbe:'venir',personne:'nous',
+    ctx:'« Nous … volontiers à votre fête si nous étions invités. »',
+    fb:"Venir est irrégulier au futur et au conditionnel. Nous viendrions : radical viendr- (futur) + terminaison -ions. v-i-e-n-d-r-i-o-n-s."},
+  V3:{mot:'POURRAIS',dir:'V',row:7,col:2,num:6,
+    verbe:'pouvoir',personne:'je',
+    ctx:"« Je … t'accompagner demain, si tu le souhaites. »",
+    fb:"Pouvoir est irrégulier au futur et au conditionnel. Je pourrais : radical pourr- (futur, avec deux r) + terminaison -ais. p-o-u-r-r-a-i-s."},
+  V4:{mot:'FINIRAIENT',dir:'V',row:0,col:7,num:1,
+    verbe:'finir',personne:'elles',
+    ctx:"« Elles … leur exposé à temps si elles s'organisaient mieux. »",
+    fb:"Finir est régulier du 2e groupe. Elles finiraient : radical finir- + terminaison -aient. f-i-n-i-r-a-i-e-n-t."},
+  V5:{mot:'IRAIT',dir:'V',row:5,col:10,num:5,
+    verbe:'aller',personne:'on',
+    ctx:'« Si le temps le permettait, on … se promener au parc. »',
+    fb:"Aller est entièrement irrégulier au conditionnel. On irait (= il irait) : radical ir- (futur, pas all-) + terminaison -ait. i-r-a-i-t."}
+};
+
+const ROWS=15, COLS=13;
+let okCount=0,errCount=0,validated={},activeKey=null,solShown=false;
+
+/* Construction de la grille logique */
+function buildLogicGrid(){
+  const g={};
+  Object.entries(DEFS).forEach(([k,d])=>{
+    for(let i=0;i<d.mot.length;i++){
+      const r=d.dir==='H'?d.row:d.row+i;
+      const c=d.dir==='H'?d.col+i:d.col;
+      if(!g[`${r},${c}`]) g[`${r},${c}`]={letter:d.mot[i],keys:[]};
+      g[`${r},${c}`].keys.push(k);
+    }
+  });
+  return g;
+}
+
+/* Numéros de départ */
+function buildNums(){
+  const nums={};
+  Object.entries(DEFS).forEach(([k,d])=>{
+    const key=`${d.row},${d.col}`;
+    if(!nums[key]) nums[key]=new Set();
+    nums[key].add(d.num);
+  });
+  return nums;
+}
+
+/* Render table */
+let logicGrid, numMap;
+function renderGrid(){
+  logicGrid=buildLogicGrid(); numMap=buildNums();
+  const tbl=document.getElementById('tbl'); tbl.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    const tr=document.createElement('tr');
+    for(let c=0;c<COLS;c++){
+      const td=document.createElement('td');
+      const cell=document.createElement('div'); cell.className='cell';
+      const ldata=logicGrid[`${r},${c}`];
+      if(!ldata){cell.classList.add('empty');}
+      else{
+        const nk=`${r},${c}`;
+        if(numMap[nk]){
+          const n=document.createElement('div'); n.className='num';
+          n.textContent=[...numMap[nk]].sort().join('/');
+          cell.appendChild(n);
+        }
+        const inp=document.createElement('input');
+        inp.maxLength=1; inp.id=`c${r}_${c}`;
+        inp.autocomplete='off'; inp.spellcheck=false; inp.inputMode='text';
+        inp.addEventListener('input',e=>{
+          let v=e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+          // Normaliser accents courants
+          v=v.replace(/[ÉÈÊË]/g,'E').replace(/[ÀÂÄ]/g,'A').replace(/[ÙÛÜ]/g,'U')
+             .replace(/[ÎÏ]/g,'I').replace(/[ÔÖ]/g,'O').replace(/Ç/g,'C');
+          e.target.value=v;
+          if(v&&activeKey) advanceCursor(r,c,activeKey);
+        });
+        inp.addEventListener('keydown',e=>{
+          if(e.key==='Enter'){e.preventDefault();if(activeKey)checkWord(activeKey);}
+          else if(e.key==='Backspace'&&!e.target.value){retreatCursor(r,c,activeKey);}
+          else if(e.key==='ArrowRight'||e.key==='ArrowDown') advanceCursor(r,c,activeKey);
+          else if(e.key==='ArrowLeft'||e.key==='ArrowUp') retreatCursor(r,c,activeKey);
+        });
+        inp.addEventListener('focus',()=>{
+          if(ldata.keys.length===1){setActive(ldata.keys[0]);}
+          else if(ldata.keys.length===2){
+            // Alterner entre les deux mots au clic
+            const other=ldata.keys.find(k=>k!==activeKey)||ldata.keys[0];
+            setActive(other);
+          }
+        });
+        cell.addEventListener('click',()=>inp.focus());
+        cell.appendChild(inp);
+      }
+      td.appendChild(cell); tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+function getCell(r,c){return document.getElementById(`c${r}_${c}`);}
+function getCellDiv(r,c){const el=getCell(r,c);return el?el.parentElement:null;}
+
+function advanceCursor(r,c,key){
+  if(!key) return;
+  const d=DEFS[key];
+  const nr=d.dir==='H'?r:r+1, nc=d.dir==='H'?c+1:c;
+  const nx=getCell(nr,nc); if(nx&&!nx.disabled) nx.focus();
+}
+function retreatCursor(r,c,key){
+  if(!key) return;
+  const d=DEFS[key];
+  const nr=d.dir==='H'?r:r-1, nc=d.dir==='H'?c-1:c;
+  const nx=getCell(nr,nc); if(nx&&!nx.disabled) nx.focus();
+}
+
+function setActive(key){
+  document.querySelectorAll('.cell.active,.cell.hlword').forEach(el=>{
+    if(!el.classList.contains('ok')&&!el.classList.contains('ko')&&!el.classList.contains('solution'))
+      el.classList.remove('active','hlword');
+  });
+  activeKey=key;
+  const d=DEFS[key];
+  for(let i=0;i<d.mot.length;i++){
+    const r=d.dir==='H'?d.row:d.row+i, c=d.dir==='H'?d.col+i:d.col;
+    const cv=getCellDiv(r,c);
+    if(cv&&!cv.classList.contains('ok')&&!cv.classList.contains('ko')) cv.classList.add(i===0?'active':'hlword');
+  }
+  document.querySelectorAll('.def-item').forEach(el=>el.classList.remove('hl'));
+  const di=document.getElementById('def_'+key); if(di){di.classList.add('hl');di.scrollIntoView({block:'nearest'});}
+}
+
+function checkWord(key){
+  if(validated[key]||solShown) return;
+  const d=DEFS[key];
+  let saisie='';
+  for(let i=0;i<d.mot.length;i++){
+    const r=d.dir==='H'?d.row:d.row+i, c=d.dir==='H'?d.col+i:d.col;
+    const inp=getCell(r,c); saisie+=inp?inp.value.toUpperCase():'';
+  }
+  const fb=document.getElementById('fb_'+key);
+  if(saisie===d.mot){
+    validated[key]=true; okCount++;
+    for(let i=0;i<d.mot.length;i++){
+      const r=d.dir==='H'?d.row:d.row+i, c=d.dir==='H'?d.col+i:d.col;
+      const inp=getCell(r,c); const cv=getCellDiv(r,c);
+      if(inp){inp.value=d.mot[i];inp.disabled=true;}
+      if(cv){cv.classList.remove('active','hlword','ko');cv.classList.add('ok');}
+    }
+    if(fb){fb.className='fb-zone ok show';fb.innerHTML='✓ Correct !';}
+    document.getElementById('def_'+key).classList.add('done');
+    document.getElementById('def_'+key).classList.remove('err');
+    updScore();
+    if(okCount===10) setTimeout(showBilan,600);
+  } else {
+    errCount++;
+    for(let i=0;i<d.mot.length;i++){
+      const r=d.dir==='H'?d.row:d.row+i, c=d.dir==='H'?d.col+i:d.col;
+      const cv=getCellDiv(r,c);
+      if(cv&&!cv.classList.contains('ok'))cv.classList.add('ko');
+    }
+    if(fb){fb.className='fb-zone ko show';
+      fb.innerHTML='<b>À revoir :</b> '+d.fb+'<br><button class="btn-retry" onclick="retryWord(\''+key+'\')">Réessayer</button>';}
+    document.getElementById('def_'+key).classList.add('err');
+    updScore();
+  }
+}
+
+function retryWord(key){
+  if(validated[key]) return;
+  const d=DEFS[key];
+  for(let i=0;i<d.mot.length;i++){
+    const r=d.dir==='H'?d.row:d.row+i, c=d.dir==='H'?d.col+i:d.col;
+    const inp=getCell(r,c); const cv=getCellDiv(r,c);
+    if(inp&&!inp.disabled){inp.value=''; if(cv)cv.classList.remove('ko','active','hlword');}
+  }
+  const fb=document.getElementById('fb_'+key); if(fb){fb.className='fb-zone';fb.innerHTML='';}
+  document.getElementById('def_'+key).classList.remove('err');
+  setActive(key);
+  // Focus première case
+  const d2=DEFS[key];
+  const inp0=getCell(d2.row,d2.col); if(inp0)inp0.focus();
+}
+
+function checkAll(){
+  Object.keys(DEFS).forEach(k=>{if(!validated[k])checkWord(k);});
+}
+
+function showSolution(){
+  solShown=true;
+  Object.keys(DEFS).forEach(k=>{
+    if(validated[k]) return;
+    const d=DEFS[k];
+    for(let i=0;i<d.mot.length;i++){
+      const r=d.dir==='H'?d.row:d.row+i, c=d.dir==='H'?d.col+i:d.col;
+      const inp=getCell(r,c); const cv=getCellDiv(r,c);
+      if(inp&&!inp.disabled){inp.value=d.mot[i];inp.disabled=true;}
+      if(cv&&!cv.classList.contains('ok')){cv.classList.remove('ko','active','hlword');cv.classList.add('solution');}
+    }
+  });
+}
+
+function updScore(){
+  document.getElementById('scOk').textContent=okCount;
+  document.getElementById('scRs').textContent=10-okCount;
+  document.getElementById('scKo').textContent=errCount;
+  document.getElementById('progFill').style.width=(okCount/10*100)+'%';
+  for(let i=0;i<10;i++){const s=document.getElementById('str'+i);if(s)s.classList.toggle('on',i<okCount);}
+}
+
+function buildStars(){
+  const w=document.getElementById('stars'); w.innerHTML='';
+  for(let i=0;i<10;i++){const s=document.createElement('span');s.className='str';s.id='str'+i;s.textContent='★';w.appendChild(s);}
+}
+
+/* Définitions */
+function buildDefs(){
+  ['H','V'].forEach(dir=>{
+    const container=document.getElementById('def'+dir);
+    // Tri par numéro
+    const items=Object.entries(DEFS).filter(([k,d])=>d.dir===dir).sort(([,a],[,b])=>a.num-b.num);
+    items.forEach(([key,d])=>{
+      const item=document.createElement('div'); item.className='def-item'; item.id='def_'+key;
+      item.innerHTML=`<div class="def-num">${d.num}${dir==='H'?'→':'↓'}</div>
+        <div class="def-verb">${d.verbe}<span class="def-person">${d.personne}</span></div>
+        <div class="def-ctx">${d.ctx}</div>
+        <div class="fb-zone" id="fb_${key}"></div>
+        <button class="btn-check-word" onclick="checkWord('${key}')">✓ Vérifier</button>`;
+      item.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')setActive(key);});
+      container.appendChild(item);
+    });
+  });
+}
+
+function showBilan(){
+  const msgs={
+    10:{icon:'🗝️',titre:'Grille du conditionnel complétée !',msg:'Tu maîtrises les formes régulières et irrégulières.'},
+    9:{icon:'🥇',titre:'Très bonne grille !',msg:'Un ou deux verbes à revoir.'},
+    7:{icon:'🥈',titre:'Bonne tentative.',msg:'Revois les formes irrégulières.'},
+    0:{icon:'📖',titre:'',msg:'Relis le référentiel et retente la grille.'}
+  };
+  const k=okCount===10?10:okCount>=9?9:okCount>=7?7:0;
+  const m=msgs[k];
+  document.getElementById('bilIcon').textContent=m.icon;
+  document.getElementById('bilScore').textContent=okCount+' / 10 pts';
+  document.getElementById('bilTitre').textContent=m.titre;
+  document.getElementById('bilMsg').textContent=m.msg;
+  const bilan=document.getElementById('bilan');
+  bilan.classList.add('show');
+  bilan.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function restart(){
+  okCount=0;errCount=0;validated={};activeKey=null;solShown=false;
+  document.getElementById('bilan').classList.remove('show');
+  document.querySelectorAll('.def-item').forEach(el=>el.classList.remove('done','err','hl'));
+  document.querySelectorAll('.fb-zone').forEach(el=>{el.className='fb-zone';el.innerHTML='';});
+  renderGrid(); buildStars(); updScore();
+}
+
+/* Référentiel */
+let rfOpen=false;
+document.getElementById('btnRef').addEventListener('click',()=>{
+  rfOpen=!rfOpen;
+  document.getElementById('bodyRef').classList.toggle('open',rfOpen);
+  document.getElementById('btnRef').classList.toggle('open',rfOpen);
+});
+
+/* Init */
+renderGrid(); buildDefs(); buildStars(); updScore();
+document.getElementById('btnRef').click();
+</script>
+</body>
+</html>
