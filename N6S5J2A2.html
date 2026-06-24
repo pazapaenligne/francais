@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – COD et COI – 6e S5 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#e05a5a;--day-dark:#b94040;--day-dark2:#7a2020;
+  --day-light:#fdeaea;--day-border:#e8a0a0;--day-glow:rgba(185,64,64,.22);
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#fff5f5;--border:#eedada;
+  --yellow:#f5c518;
+  --ok-bg:#e8f7fc;--ok-text:#1a6e88;--ok-bd:#7dd4e8;
+  --err-bg:#fff0ef;--err-text:#c0392b;--err-bd:#f28b82;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:260px;height:260px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+header{text-align:center;margin-bottom:1.4rem;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.3);margin-bottom:.55rem;}
+.logo-badge span{font-family:monospace;font-size:13px;font-weight:bold;color:#1a1d23;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;}
+h1{font-size:clamp(1.2rem,4vw,1.9rem);font-weight:900;line-height:1.25;}
+h1 .hl{color:var(--day-dark);}
+.prog-wrap{width:100%;margin-bottom:.8rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.prog-bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;width:0%;transition:width .5s ease;}
+/* REFERENTIEL */
+.ref-wrap{background:var(--day-dark2);border-radius:var(--radius);
+  border:1.5px solid var(--day-dark);overflow:hidden;margin-bottom:1.2rem;
+  animation:refPulse 2.8s ease-in-out infinite;}
+.ref-wrap.open-state{animation:none;border-color:var(--day);}
+@keyframes refPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(185,64,64,0);}
+  50%{box-shadow:0 0 0 5px rgba(185,64,64,.25);}
+}
+.ref-toggle{display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.1rem;cursor:pointer;user-select:none;transition:background .25s;}
+.ref-toggle.open{background:rgba(224,90,90,.15);}
+.ref-toggle-title{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  color:var(--day-border);text-transform:uppercase;letter-spacing:.08em;}
+.ref-arrow{font-size:1rem;color:var(--day-border);transition:transform .3s;}
+.ref-arrow.open{transform:rotate(180deg);}
+.ref-body{display:none;padding:0 1.1rem 1rem;border-top:1px solid rgba(185,64,64,.2);}
+.ref-body.open{display:block;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.75rem;}
+@media(max-width:479px){.ref-grid{grid-template-columns:1fr;}}
+.ref-item{background:rgba(185,64,64,.08);border:1px solid rgba(185,64,64,.2);
+  border-radius:var(--radius-sm);padding:.65rem .9rem;}
+.ref-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;
+  color:var(--day-border);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;}
+.ref-def{font-size:.83rem;color:rgba(255,240,240,.88);line-height:1.6;}
+.ref-ex{font-size:.78rem;color:rgba(235,160,160,.85);font-style:italic;margin-top:.3rem;}
+/* CARTE */
+.phase-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:0 0 1.1rem;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.card-head{padding:.9rem 1.2rem .6rem;}
+.act-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;}
+.theme-badge{display:inline-block;font-size:.63rem;font-weight:800;padding:.15rem .6rem;
+  border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.phase-consigne{font-size:.95rem;color:var(--muted);line-height:1.65;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+/* QUESTION */
+.q-wrap{padding:0 1.2rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--day-dark);
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.q-phrase{font-size:1.05rem;font-style:italic;line-height:1.75;
+  background:var(--surface2);border-left:3px solid var(--day-border);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:.7rem 1rem;margin-bottom:.6rem;}
+.q-phrase .souligne{text-decoration:underline;font-weight:700;font-style:normal;color:var(--day-dark);}
+.q-label{font-size:.92rem;color:var(--text);font-weight:700;margin-bottom:.55rem;}
+.opts{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem;}
+.opt-btn{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;
+  border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);
+  font-family:Arial,Helvetica,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);
+  color:var(--text);cursor:pointer;text-align:left;line-height:1.45;
+  min-height:50px;width:100%;transition:border-color .15s,background .15s;}
+.opt-btn:hover:not(:disabled){border-color:var(--day);background:var(--day-light);}
+.opt-btn.correct{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-text);font-weight:700;}
+.opt-btn.wrong{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-text);}
+.opt-btn:disabled{cursor:default;}
+.opt-circle{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;}
+.opt-btn.correct .opt-circle{background:var(--ok-bd);border-color:var(--ok-bd);color:#fff;}
+.opt-btn.wrong .opt-circle{background:var(--err-bd);border-color:var(--err-bd);color:#fff;}
+.fb{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.9rem,2.5vw,1rem);
+  line-height:1.7;display:none;margin-bottom:.75rem;border:1.5px solid;}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-text);}
+.fb.err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-text);}
+.fb.shown{display:block;}
+.q-sep{height:1px;background:var(--border);margin:.9rem 0;}
+/* BTN */
+.btn-row{padding:0 1.2rem;margin-top:.5rem;}
+.btn-next{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;
+  padding:.65rem 1.2rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  min-height:2.8rem;background:var(--day-dark);color:#fff;
+  transition:transform .12s,background .15s;}
+.btn-next:hover{background:var(--day-dark2);}
+.btn-next:active{transform:scale(.96);}
+.btn-next:disabled{opacity:.35;cursor:not-allowed;}
+/* SCORE */
+.score-inter{text-align:center;padding:1.2rem 1.2rem .5rem;}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  color:var(--day-dark);margin:.4rem 0 .2rem;}
+.v-stars{font-size:1.8rem;letter-spacing:.08em;margin:.4rem 0;}
+.score-msg{font-size:.95rem;color:var(--text);margin:.5rem 0 .3rem;line-height:1.55;}
+/* VICTOIRE */
+.victory-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(10,6,2,.88);align-items:center;justify-content:center;padding:1.5rem;}
+.victory-overlay.show{display:flex;}
+.victory-card{background:var(--surface);border:3px solid var(--day);
+  border-radius:22px;padding:2.5rem 2rem;text-align:center;max-width:460px;width:100%;}
+.v-badge{display:inline-block;background:var(--day-light);color:var(--day-dark);
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;padding:.3rem .9rem;
+  border-radius:99px;border:1.5px solid var(--day-border);margin-bottom:.75rem;}
+.v-score{font-size:3.5rem;font-weight:900;color:var(--day-dark);line-height:1;margin:.5rem 0;}
+.v-msg{font-size:.95rem;color:var(--muted);margin:.4rem 0 1.5rem;line-height:1.6;}
+.hidden{display:none!important;}
+@keyframes confFall{from{transform:translateY(0) rotate(0deg);opacity:1;}
+  to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span>&nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 6e</span>
+  </div>
+  <div class="week-label">Semaine&nbsp;5 &ndash; Jour&nbsp;2</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">COD et COI</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">Atelier&nbsp;1 &mdash; Question 1&thinsp;/&thinsp;4</span>
+    <span id="prog-score">0 pt</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="ref-wrap" id="ref-wrap">
+  <div class="ref-toggle" onclick="toggleRef()" id="ref-toggle">
+    <span class="ref-toggle-title">&#9670; R&eacute;f&eacute;rentiel &mdash; COD et COI</span>
+    <span class="ref-arrow" id="ref-arrow">&#9660;</span>
+  </div>
+  <div class="ref-body" id="ref-body">
+    <div class="ref-grid">
+      <div class="ref-item">
+        <div class="ref-label">COD &mdash; Compl&eacute;ment d&rsquo;objet direct</div>
+        <div class="ref-def">Se construit <strong>sans pr&eacute;position</strong>. R&eacute;pond aux questions <em>qui ?</em> ou <em>quoi ?</em> pos&eacute;es apr&egrave;s le verbe.</div>
+        <div class="ref-ex">&laquo;&nbsp;Ahmed lit <u>une BD</u>.&nbsp;&raquo; &rarr; lit quoi ? = COD</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">COI &mdash; Compl&eacute;ment d&rsquo;objet indirect</div>
+        <div class="ref-def">Se construit <strong>avec une pr&eacute;position</strong> (<em>&agrave;, de, en&hellip;</em>). R&eacute;pond aux questions <em>&agrave; qui ? &agrave; quoi ? de qui ? de quoi ?</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Il joue <u>au ballon</u>.&nbsp;&raquo; &rarr; joue &agrave; quoi ? = COI</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">Astuce : le test de la question</div>
+        <div class="ref-def">1. Pose la question apr&egrave;s le verbe.<br>2. Y a-t-il une pr&eacute;position (<em>&agrave;</em> ou <em>de</em>) devant le compl&eacute;ment ?<br>&#8594; Non = COD &nbsp;/&nbsp; Oui = COI</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">Attention aux contractions</div>
+        <div class="ref-def"><em>au</em> = &agrave; + le &rarr; COI<br><em>aux</em> = &agrave; + les &rarr; COI<br><em>du</em> = de + le &rarr; COI<br><em>des</em> = de + les &rarr; COI</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ATELIER 1 -->
+<div class="phase-card" id="card-a1">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Atelier 1 &mdash; Identifier le compl&eacute;ment</div>
+    <div class="theme-badge">&#9670; 4 questions &mdash; QCM</div>
+  </div>
+  <div class="phase-consigne">Dans chaque phrase, un compl&eacute;ment est soulign&eacute;. Dis s&rsquo;il s&rsquo;agit d&rsquo;un COD ou d&rsquo;un COI.</div>
+  <div id="qa1-wrap" class="q-wrap"></div>
+</div>
+
+<!-- SCORE A1 -->
+<div class="phase-card hidden" id="card-score1">
+  <div class="card-stripe"></div>
+  <div class="score-inter" id="score1-content"></div>
+  <div class="btn-row" style="margin-bottom:.5rem;">
+    <button class="btn-next" id="btn-goto-a2" onclick="startA2()">Atelier&nbsp;2 &#8594;</button>
+  </div>
+</div>
+
+<!-- ATELIER 2 -->
+<div class="phase-card hidden" id="card-a2">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Atelier 2 &mdash; Poser la bonne question</div>
+    <div class="theme-badge">&#9670; 4 questions &mdash; QCM</div>
+  </div>
+  <div class="phase-consigne">Quelle question faut-il poser pour trouver le compl&eacute;ment soulign&eacute;&nbsp;?</div>
+  <div id="qa2-wrap" class="q-wrap"></div>
+</div>
+
+<!-- SCORE A2 -->
+<div class="phase-card hidden" id="card-score2">
+  <div class="card-stripe"></div>
+  <div class="score-inter" id="score2-content"></div>
+  <div class="btn-row" style="margin-bottom:.5rem;">
+    <button class="btn-next" id="btn-goto-a3" onclick="startA3()">Atelier&nbsp;3 &#8594;</button>
+  </div>
+</div>
+
+<!-- ATELIER 3 -->
+<div class="phase-card hidden" id="card-a3">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Atelier 3 &mdash; COD et COI dans la m&ecirc;me phrase</div>
+    <div class="theme-badge">&#9670; 4 phrases &mdash; Double QCM</div>
+  </div>
+  <div class="phase-consigne">Certaines phrases ont &agrave; la fois un COD et un COI. Pour chaque question, identifie le bon compl&eacute;ment.</div>
+  <div id="qa3-wrap" class="q-wrap"></div>
+</div>
+
+<!-- VICTOIRE -->
+<div class="victory-overlay" id="victory">
+  <div class="victory-card">
+    <div class="v-badge">&#9670; Pazapa &middot; Trois ateliers termin&eacute;s</div>
+    <div class="v-score" id="v-sc">16&thinsp;/&thinsp;16</div>
+    <div class="v-stars" id="v-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+    <div class="v-msg" id="v-msg"></div>
+    <button class="btn-next" onclick="restart()" style="margin-top:.5rem;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+</div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+
+/* ══ REF ══ */
+function toggleRef(){
+  var b=$('ref-body'),a=$('ref-arrow'),t=$('ref-toggle'),w=$('ref-wrap');
+  b.classList.toggle('open');a.classList.toggle('open');
+  t.classList.toggle('open');w.classList.toggle('open-state');
+}
+
+/* ══ DONNÉES ══ */
+var A1=[
+  {
+    phrase:'Ahmed lit <span class="souligne">une bande dessin\u00e9e</span> dans sa chambre.',
+    opts:['COD.','COI.','Je ne sais pas.'],ans:0,
+    fb:'Test\u00a0: Ahmed lit QUOI\u00a0? \u2192 une bande dessin\u00e9e. Pas de pr\u00e9position devant une bande dessin\u00e9e \u2192 COD.'
+  },
+  {
+    phrase:'Mon fr\u00e8re joue <span class="souligne">au ballon</span> avec ses amis.',
+    opts:['COD.','COI.','Je ne sais pas.'],ans:1,
+    fb:'Test\u00a0: Mon fr\u00e8re joue \u00c0 QUOI\u00a0? \u2192 au ballon (\u00e0\u00a0+\u00a0le ballon). La pr\u00e9position \u00e0 est pr\u00e9sente \u2192 COI.'
+  },
+  {
+    phrase:'La ma\u00eetresse f\u00e9licite <span class="souligne">les \u00e9l\u00e8ves</span>.',
+    opts:['COD.','COI.','Je ne sais pas.'],ans:0,
+    fb:'Test\u00a0: La ma\u00eetresse f\u00e9licite QUI\u00a0? \u2192 les \u00e9l\u00e8ves. Pas de pr\u00e9position devant les \u00e9l\u00e8ves \u2192 COD.'
+  },
+  {
+    phrase:'Yanis se souvient <span class="souligne">de son premier jour d\u2019\u00e9cole</span>.',
+    opts:['COD.','COI.','Je ne sais pas.'],ans:1,
+    fb:'Test\u00a0: Yanis se souvient DE QUOI\u00a0? \u2192 de son premier jour d\u2019\u00e9cole. La pr\u00e9position de est pr\u00e9sente \u2192 COI.'
+  }
+];
+
+var A2=[
+  {
+    phrase:'Ma m\u00e8re pr\u00e9pare <span class="souligne">un g\u00e2teau au chocolat</span>.',
+    opts:['Ma m\u00e8re pr\u00e9pare pour qui\u00a0?','Ma m\u00e8re pr\u00e9pare quoi\u00a0?','Ma m\u00e8re pr\u00e9pare \u00e0 quoi\u00a0?'],ans:1,
+    fb:'Un g\u00e2teau au chocolat n\u2019est pas pr\u00e9c\u00e9d\u00e9 d\u2019une pr\u00e9position\u00a0: c\u2019est un COD. On pose donc la question \u00ab\u00a0quoi\u00a0?\u00a0\u00bb directement apr\u00e8s le verbe.'
+  },
+  {
+    phrase:'Karim r\u00e9pond <span class="souligne">\u00e0 la question du professeur</span>.',
+    opts:['Karim r\u00e9pond quoi\u00a0?','Karim r\u00e9pond de quoi\u00a0?','Karim r\u00e9pond \u00e0 quoi\u00a0?'],ans:2,
+    fb:'La pr\u00e9position \u00e0 est pr\u00e9sente devant \u00ab\u00a0la question du professeur\u00a0\u00bb\u00a0: c\u2019est un COI. On pose donc la question \u00ab\u00a0\u00e0 quoi\u00a0?\u00a0\u00bb apr\u00e8s le verbe.'
+  },
+  {
+    phrase:'Cet enfant ob\u00e9it <span class="souligne">\u00e0 ses parents</span>.',
+    opts:['Cet enfant ob\u00e9it qui\u00a0?','Cet enfant ob\u00e9it \u00e0 qui\u00a0?','Cet enfant ob\u00e9it de qui\u00a0?'],ans:1,
+    fb:'La pr\u00e9position \u00e0 est pr\u00e9sente devant \u00ab\u00a0ses parents\u00a0\u00bb\u00a0: c\u2019est un COI. On pose donc la question \u00ab\u00a0\u00e0 qui\u00a0?\u00a0\u00bb apr\u00e8s le verbe.'
+  },
+  {
+    phrase:'Nous regardons <span class="souligne">les \u00e9toiles filantes</span>.',
+    opts:['Nous regardons quoi\u00a0?','Nous regardons \u00e0 qui\u00a0?','Nous regardons de quoi\u00a0?'],ans:0,
+    fb:'Pas de pr\u00e9position devant \u00ab\u00a0les \u00e9toiles filantes\u00a0\u00bb\u00a0: c\u2019est un COD. On pose donc la question \u00ab\u00a0quoi\u00a0?\u00a0\u00bb directement apr\u00e8s le verbe.'
+  }
+];
+
+var A3=[
+  {
+    phrase:'Le professeur montre les images \u00e0 la classe.',
+    qCOD:'Quel est le COD de cette phrase\u00a0?',
+    optsCOD:['\u00e0 la classe','les images','le professeur'],ansCOD:1,
+    fbCOD:'Test\u00a0: Le professeur montre QUOI\u00a0? \u2192 les images. Pas de pr\u00e9position \u2192 COD.',
+    qCOI:'Quel est le COI de cette phrase\u00a0?',
+    optsCOI:['les images','le professeur','\u00e0 la classe'],ansCOI:2,
+    fbCOI:'Test\u00a0: Le professeur montre \u00c0 QUI\u00a0? \u2192 \u00e0 la classe. Pr\u00e9position \u00e0 pr\u00e9sente \u2192 COI.'
+  },
+  {
+    phrase:'Jade offre un dessin \u00e0 sa maman.',
+    qCOD:'Quel est le COD de cette phrase\u00a0?',
+    optsCOD:['\u00e0 sa maman','un dessin','Jade'],ansCOD:1,
+    fbCOD:'Test\u00a0: Jade offre QUOI\u00a0? \u2192 un dessin. Pas de pr\u00e9position \u2192 COD.',
+    qCOI:'Quel est le COI de cette phrase\u00a0?',
+    optsCOI:['un dessin','\u00e0 sa maman','Jade'],ansCOI:1,
+    fbCOI:'Test\u00a0: Jade offre \u00c0 QUI\u00a0? \u2192 \u00e0 sa maman. Pr\u00e9position \u00e0 pr\u00e9sente \u2192 COI.'
+  },
+  {
+    phrase:'Le journaliste parle du tremblement de terre aux t\u00e9l\u00e9spectateurs.',
+    qCOD:'Quel est le COI introduit par \u00ab\u00a0de\u00a0\u00bb dans cette phrase\u00a0?',
+    optsCOD:['aux t\u00e9l\u00e9spectateurs','du tremblement de terre','le journaliste'],ansCOD:1,
+    fbCOD:'Test\u00a0: Le journaliste parle DE QUOI\u00a0? \u2192 du tremblement de terre (de\u00a0+\u00a0le\u00a0=\u00a0du). Pr\u00e9position de pr\u00e9sente \u2192 COI.',
+    qCOI:'Quel est l\u2019autre COI introduit par \u00ab\u00a0\u00e0\u00a0\u00bb\u00a0?',
+    optsCOI:['du tremblement de terre','le journaliste','aux t\u00e9l\u00e9spectateurs'],ansCOI:2,
+    fbCOI:'Test\u00a0: Le journaliste parle \u00c0 QUI\u00a0? \u2192 aux t\u00e9l\u00e9spectateurs (\u00e0\u00a0+\u00a0les\u00a0=\u00a0aux). Pr\u00e9position \u00e0 pr\u00e9sente \u2192 COI.'
+  },
+  {
+    phrase:'Mon oncle raconte une histoire \u00e0 ma petite s\u0153ur.',
+    qCOD:'Quel est le COD\u00a0?',
+    optsCOD:['\u00e0 ma petite s\u0153ur','une histoire','Mon oncle'],ansCOD:1,
+    fbCOD:'Test\u00a0: Mon oncle raconte QUOI\u00a0? \u2192 une histoire. Pas de pr\u00e9position \u2192 COD.',
+    qCOI:'Quel est le COI\u00a0?',
+    optsCOI:['une histoire','Mon oncle','\u00e0 ma petite s\u0153ur'],ansCOI:2,
+    fbCOI:'Test\u00a0: Mon oncle raconte \u00c0 QUI\u00a0? \u2192 \u00e0 ma petite s\u0153ur. Pr\u00e9position \u00e0 pr\u00e9sente \u2192 COI.'
+  }
+];
+
+/* ══ ÉTAT ══ */
+var sc1=0,sc2=0,sc3=0,doneQ1=false,doneQ2=false;
+
+/* ══ AUDIO ══ */
+var _ac=null;
+function iA(){if(_ac)return;try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function bp(f1,f2,d,t,v){var ac=_ac;if(!ac)return;var o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=t;o.frequency.setValueAtTime(f1,ac.currentTime);o.frequency.exponentialRampToValueAtTime(f2,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}
+function sOk(){iA();bp(480,880,.08,'sine',.15);setTimeout(function(){bp(660,1320,.18,'sine',.1);},80);}
+function sKo(){iA();bp(280,160,.18,'sawtooth',.14);}
+function sVic(){iA();[523,659,784,1046].forEach(function(f,i){setTimeout(function(){bp(f,f*1.2,.25,'sine',.13);},i*130);});}
+
+/* ══ SHUFFLE ══ */
+function shuf(opts,ans){
+  var ord=[0,1,2];
+  for(var i=2;i>0;i--){var j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);var t=ord[i];ord[i]=ord[j];ord[j]=t;}
+  return{opts:ord.map(function(k){return opts[k];}),ans:ord.indexOf(ans)};
+}
+
+/* ══ PROGRESS ══ */
+function updProg(done,lbl){
+  $('prog-label').textContent=lbl;
+  $('prog-score').textContent=done+'\u00a0pt'+(done>1?'s':'');
+  $('prog-fill').style.width=Math.round(done/16*100)+'%';
+}
+
+/* ══ BUILD GÉNÉRIQUE QCM ══ */
+function buildQCM(wrap,data,qLabel,phrase,opts,ans,fb,nextBtn,onCorrect){
+  var lbl=document.createElement('div');lbl.className='q-label';lbl.textContent=qLabel;
+  wrap.appendChild(lbl);
+  var pEl=document.createElement('div');pEl.className='q-phrase';pEl.innerHTML=phrase;
+  wrap.appendChild(pEl);
+  var s=shuf(opts,ans);
+  var optsEl=document.createElement('div');optsEl.className='opts';
+  var fbEl=document.createElement('div');fbEl.className='fb';
+  s.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-circle">'+(i===0?'A':i===1?'B':'C')+'</span><span>'+txt+'</span>';
+    btn.onclick=function(){
+      iA();
+      var btns=optsEl.querySelectorAll('.opt-btn');btns.forEach(function(b){b.disabled=true;});
+      var ok=i===s.ans;
+      btns[i].classList.add(ok?'correct':'wrong');
+      if(!ok)btns[s.ans].classList.add('correct');
+      btns.forEach(function(b,k){b.querySelector('.opt-circle').textContent=k===s.ans?'\u2713':(k===i&&!ok?'\u2717':'');});
+      if(ok){fbEl.className='fb ok shown';fbEl.textContent='\u2713 Bonne r\u00e9ponse\u00a0!';sOk();if(onCorrect)onCorrect();}
+      else{fbEl.className='fb err shown';fbEl.textContent=fb;sKo();}
+      if(nextBtn)nextBtn();
+    };
+    optsEl.appendChild(btn);
+  });
+  wrap.appendChild(optsEl);wrap.appendChild(fbEl);
+}
+
+/* ══ ATELIER 1 ══ */
+function buildA1(idx){
+  var q=A1[idx];var wrap=$('qa1-wrap');wrap.innerHTML='';
+  updProg(sc1,'Atelier\u00a01 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+  var num=document.createElement('div');num.className='q-num';num.textContent='Question '+(idx+1)+'\u00a0/\u00a04';wrap.appendChild(num);
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';nextBtn.disabled=true;
+  nextBtn.textContent=idx<3?'Question suivante \u2192':'Voir mon score \u2192';
+  nextBtn.onclick=function(){idx<3?buildA1(idx+1):showScore1();};
+  buildQCM(wrap,q,'',q.phrase,q.opts,q.ans,q.fb,function(){nextBtn.disabled=false;},function(){sc1++;updProg(sc1,'Atelier\u00a01 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');});
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+function showScore1(){
+  $('card-a1').classList.add('hidden');
+  var st=sc1===4?5:sc1===3?4:sc1===2?3:2;
+  $('score1-content').innerHTML=
+    '<div class="act-num">R\u00e9sultat Atelier 1</div>'
+    +'<div class="score-big">'+sc1+'<span style="font-size:2rem;color:var(--muted)"> / 4</span></div>'
+    +'<div class="v-stars">'+'\u2b50'.repeat(st)+'\u2606'.repeat(5-st)+'</div>'
+    +'<div class="score-msg">'+(sc1>=3?'Bravo\u00a0! Tu identifies bien les COD et COI.':'Relis le r\u00e9f\u00e9rentiel et retente.')+'</div>';
+  $('card-score1').classList.remove('hidden');
+}
+
+/* ══ ATELIER 2 ══ */
+function startA2(){
+  $('card-score1').classList.add('hidden');
+  $('card-a2').classList.remove('hidden');
+  buildA2(0);
+}
+
+function buildA2(idx){
+  var q=A2[idx];var wrap=$('qa2-wrap');wrap.innerHTML='';
+  updProg(sc1+sc2,'Atelier\u00a02 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+  var num=document.createElement('div');num.className='q-num';num.textContent='Question '+(idx+1)+'\u00a0/\u00a04';wrap.appendChild(num);
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';nextBtn.disabled=true;
+  nextBtn.textContent=idx<3?'Question suivante \u2192':'Voir mon score \u2192';
+  nextBtn.onclick=function(){idx<3?buildA2(idx+1):showScore2();};
+  buildQCM(wrap,q,'',q.phrase,q.opts,q.ans,q.fb,function(){nextBtn.disabled=false;},function(){sc2++;updProg(sc1+sc2,'Atelier\u00a02 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');});
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+function showScore2(){
+  $('card-a2').classList.add('hidden');
+  var st=sc2===4?5:sc2===3?4:sc2===2?3:2;
+  $('score2-content').innerHTML=
+    '<div class="act-num">R\u00e9sultat Atelier 2</div>'
+    +'<div class="score-big">'+sc2+'<span style="font-size:2rem;color:var(--muted)"> / 4</span></div>'
+    +'<div class="v-stars">'+'\u2b50'.repeat(st)+'\u2606'.repeat(5-st)+'</div>'
+    +'<div class="score-msg">'+(sc2>=3?'Bravo\u00a0! Tu poses bien les questions.':'Relis le r\u00e9f\u00e9rentiel et retente.')+'</div>';
+  $('card-score2').classList.remove('hidden');
+}
+
+/* ══ ATELIER 3 ══ */
+function startA3(){
+  $('card-score2').classList.add('hidden');
+  $('card-a3').classList.remove('hidden');
+  buildA3(0);
+}
+
+function buildA3(idx){
+  var q=A3[idx];var wrap=$('qa3-wrap');wrap.innerHTML='';
+  doneQ1=false;doneQ2=false;
+  updProg(sc1+sc2+sc3,'Atelier\u00a03 \u2014 Phrase '+(idx+1)+'\u00a0/\u00a04');
+  var num=document.createElement('div');num.className='q-num';num.textContent='Phrase '+(idx+1)+'\u00a0/\u00a04';wrap.appendChild(num);
+  /* Phrase (non souligné, les deux compléments sont à trouver) */
+  var pEl=document.createElement('div');pEl.className='q-phrase';pEl.textContent=q.phrase;wrap.appendChild(pEl);
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';nextBtn.disabled=true;
+  nextBtn.textContent=idx<3?'Phrase suivante \u2192':'Voir le bilan final \u2192';
+  nextBtn.onclick=function(){idx<3?buildA3(idx+1):showVictory();};
+  function checkNext(){if(doneQ1&&doneQ2)nextBtn.disabled=false;}
+  /* QCM COD */
+  buildQCM(wrap,q,q.qCOD,'',q.optsCOD,q.ansCOD,q.fbCOD,
+    function(){doneQ1=true;checkNext();},
+    function(){sc3++;updProg(sc1+sc2+sc3,'Atelier\u00a03 \u2014 Phrase '+(idx+1)+'\u00a0/\u00a04');}
+  );
+  var sep=document.createElement('div');sep.className='q-sep';wrap.appendChild(sep);
+  /* QCM COI */
+  buildQCM(wrap,q,q.qCOI,'',q.optsCOI,q.ansCOI,q.fbCOI,
+    function(){doneQ2=true;checkNext();},
+    function(){sc3++;updProg(sc1+sc2+sc3,'Atelier\u00a03 \u2014 Phrase '+(idx+1)+'\u00a0/\u00a04');}
+  );
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+/* ══ VICTOIRE ══ */
+function showVictory(){
+  sVic();confetti();
+  var tot=sc1+sc2+sc3;
+  $('v-sc').innerHTML=tot+'<span style="font-size:1.5rem;font-weight:400;color:var(--muted)">\u00a0/\u00a016</span>';
+  var st=tot>=15?5:tot>=11?4:tot>=7?3:tot>=4?2:1;
+  $('v-stars').textContent='\u2b50'.repeat(st)+'\u2606'.repeat(5-st);
+  var msg=tot>=15?'Trois ateliers ma\u00eetris\u00e9s\u00a0! Tu distingues parfaitement le COD et le COI.':tot>=11?'Tr\u00e8s bon entra\u00eenement. Un atelier \u00e0 revoir.':tot>=7?'Bon entra\u00eenement. Reprends les ateliers signal\u00e9s.':'Reprends le r\u00e9f\u00e9rentiel et retente.';
+  $('v-msg').innerHTML=msg+'<br><small style="color:var(--muted)">A1\u00a0: '+sc1+'/4 \u2014 A2\u00a0: '+sc2+'/4 \u2014 A3\u00a0: '+sc3+'/8</small>';
+  $('victory').classList.add('show');
+}
+
+function confetti(){
+  var cols=['#e05a5a','#b94040','#f5c518','#fdeaea'];
+  for(var i=0;i<22;i++)(function(i){setTimeout(function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;top:-10px;left:'+(4+Math.random()*92)+'%;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:9999;background:'+cols[i%4]+';animation:confFall '+(0.8+Math.random()*.7)+'s '+(Math.random()*.5)+'s ease-in forwards;';
+    document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},1600);
+  },i*55);})(i);
+}
+
+function restart(){
+  sc1=0;sc2=0;sc3=0;doneQ1=false;doneQ2=false;
+  $('victory').classList.remove('show');
+  ['card-a2','card-score1','card-score2','card-a3'].forEach(function(id){$(id).classList.add('hidden');});
+  $('card-a1').classList.remove('hidden');
+  buildA1(0);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',iA,{once:true});
+buildA1(0);
+</script>
+</body>
+</html>
