@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>COD et COI — Je relève le défi — 6e S5 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@500;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fffdf7;--j:#b94040;--jd:#6a1010;--jl:#fdf0f0;--jm:#e88888;
+  --ok:#22c55e;--okbg:#f0fdf4;
+  --ko:#ef4444;--kobg:#fef2f2;
+  --txt:#1a1a2e;--mut:#5a6a7a;--ln:#e8d8d8;--sur:#fff;
+  --cyan:#35d0c0;--dark:#070b11;--dark2:#0b141c;--dark3:#0c1b22;
+}
+body{background:var(--bg);color:var(--txt);font-family:"Nunito",Arial,sans-serif;min-height:100vh;}
+
+/* BULLES DÉCO */
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.3;}
+.b1{width:120px;height:120px;background:var(--j);top:-28px;right:-22px;}
+.b2{width:88px;height:88px;background:#4040b9;bottom:22px;left:-20px;}
+.b3{width:66px;height:66px;background:#8dc63f;top:42%;right:-22px;}
+.b4{width:76px;height:76px;background:#f9c0bb;top:24%;left:-26px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+@keyframes rainFall{0%{opacity:1;transform:translateY(-40px) rotate(0);}100%{opacity:0;transform:translateY(110vh) rotate(var(--rot));}}
+@keyframes shake{25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+@keyframes stpop{0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);}}
+@keyframes fdin{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+@keyframes unlockFlash{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* FLASH VERDICT */
+.flash-v{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.3);
+  font-size:3.5rem;font-weight:900;z-index:9999;pointer-events:none;opacity:0;}
+.flash-v.pop{animation:flashPop 1s ease-out forwards;}
+
+/* HEADER */
+.hdr{text-align:center;padding:14px 20px 10px;background:var(--bg);border-bottom:2px solid var(--j);}
+.badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;border-radius:999px;padding:5px 15px;margin-bottom:7px;}
+.badge .dots{display:flex;gap:4px;}
+.badge .dots i{width:8px;height:8px;border-radius:50%;display:block;}
+.badge .dots i:nth-child(1){background:#e05050;}
+.badge .dots i:nth-child(2){background:#7a3d00;}
+.badge .dots i:nth-child(3){background:#3d7a10;}
+.badge .lab{font-family:"Orbitron",sans-serif;font-size:11px;font-weight:800;color:#3a1800;letter-spacing:.5px;}
+.wk{font-size:.78rem;color:var(--mut);font-family:"Orbitron",sans-serif;letter-spacing:1px;margin-bottom:5px;}
+.hdr h1{font-family:"Orbitron",sans-serif;font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;color:var(--jd);margin-bottom:2px;}
+.hdr h1 .acc{color:var(--j);}
+.hsub{color:var(--mut);font-size:.8rem;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:13px 14px 60px;}
+
+/* XP BAR */
+.xpw{height:18px;background:#e8d8d8;border:1px solid var(--jm);border-radius:30px;overflow:hidden;
+  position:relative;margin-bottom:12px;}
+.xpf{height:100%;background:linear-gradient(90deg,var(--jd),var(--j),#f08080);
+  border-radius:30px;transition:width .7s cubic-bezier(.34,1.56,.64,1);width:0%;}
+.xpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:900;color:var(--jd);font-family:"JetBrains Mono",monospace;}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px;align-items:start;}
+@media(max-width:820px){.layout{grid-template-columns:1fr;}}
+
+/* COL GAUCHE */
+.col-l{position:sticky;top:12px;display:flex;flex-direction:column;gap:10px;}
+
+/* SVG cybersécurité */
+.cyber-wrap{background:var(--dark);border:2px solid var(--j);border-radius:16px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(185,64,64,.2);}
+.cyber-lbl{font-family:"Orbitron",sans-serif;font-size:.58rem;letter-spacing:2px;color:var(--j);
+  text-align:center;padding:7px 0 5px;background:rgba(0,0,0,.4);}
+#cyber{width:100%;height:auto;display:block;max-width:440px;margin:0 auto;}
+.bar{margin:4px 8px 6px;}
+.bar .lab{font-family:"JetBrains Mono",monospace;font-size:.62rem;color:var(--jm);
+  letter-spacing:1px;margin-bottom:3px;display:flex;justify-content:space-between;}
+.track{height:8px;background:#0c1b22;border:1px solid #3a1a1a;border-radius:6px;overflow:hidden;}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--jd),var(--j),#f08080);
+  border-radius:6px;transition:width .6s ease;}
+
+/* Anneaux CSS */
+.ring{transform-box:fill-box;transform-origin:center;transition:opacity .55s ease,transform .55s ease;}
+.ring polygon{stroke:#b94040;transition:stroke .25s ease;}
+.ring.down{opacity:0;transform:scale(1.18);}
+.ring.down polygon{stroke:#ff4d5e;}
+.ring.locked polygon{stroke:#3a1a1a;stroke-opacity:.5;}
+.core polygon{stroke:#ff5a4d;transition:stroke .5s ease;}
+.core.open polygon{stroke:#38e08b;}
+.coreglow{opacity:0;transition:opacity .9s ease;}
+.core.open .coreglow{opacity:1;}
+.srv{transition:opacity .4s ease;}
+.core.open .srv{opacity:0;}
+.openic{opacity:0;transition:opacity .5s ease .3s;}
+.core.open .openic{opacity:1;}
+
+/* Score boxes */
+.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.sc-box{background:var(--sur);border:1px solid var(--ln);border-radius:10px;padding:9px 5px;text-align:center;}
+.sc-n{font-family:"JetBrains Mono",monospace;font-size:1.4rem;font-weight:700;line-height:1.1;}
+.sc-n.ok{color:var(--ok);}.sc-n.rs{color:var(--j);}.sc-n.ko{color:var(--ko);}
+.sc-l{font-size:.58rem;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.stars{display:flex;justify-content:center;gap:2px;font-size:.85rem;}
+.str{opacity:.18;transition:all .35s;}.str.on{opacity:1;color:var(--j);animation:stpop .5s;}
+
+/* Texte accordéon */
+.acc-card{background:var(--sur);border:1px solid var(--ln);border-radius:12px;overflow:hidden;}
+.acc-btn{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;
+  cursor:pointer;background:var(--jl);border:none;width:100%;
+  font-family:"Nunito",sans-serif;font-size:.86rem;font-weight:800;color:var(--jd);}
+.acc-btn:hover{filter:brightness(.96);}
+.acc-arr{transition:transform .3s;}.acc-btn.open .acc-arr{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.acc-body.open{max-height:600px;}
+.acc-inner{padding:12px 14px;border-top:1px solid var(--ln);font-size:.88rem;
+  font-family:"IM Fell English",Georgia,serif;line-height:2;color:#3a1a1a;}
+
+/* COL DROITE */
+/* Étape badge */
+.etape-badge{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.etape-num{font-family:"Orbitron",sans-serif;font-size:.65rem;letter-spacing:2px;color:var(--j);
+  background:var(--jl);border:1px solid var(--jm);border-radius:6px;padding:4px 10px;}
+.etape-titre{font-family:"Orbitron",sans-serif;font-size:.82rem;font-weight:900;color:var(--jd);}
+.etape-score{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--mut);margin-left:auto;}
+
+/* Dots étape */
+.edots{display:flex;gap:5px;margin-bottom:12px;}
+.edot{width:22px;height:22px;border-radius:50%;border:2px solid var(--jm);background:#f8e8e8;
+  color:var(--mut);font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  font-family:"JetBrains Mono",monospace;transition:all .25s;}
+.edot.ok{background:var(--ok);border-color:var(--ok);color:#fff;}
+.edot.ko{background:var(--ko);border-color:var(--ko);color:#fff;}
+.edot.cur{border-color:var(--jd);color:var(--jd);box-shadow:0 0 6px rgba(185,64,64,.3);transform:scale(1.1);}
+.edot.locked{opacity:.35;cursor:not-allowed;}
+
+/* Carte question */
+.qcard{background:var(--dark2);border:1px solid #3a1a1a;border-radius:14px;
+  padding:18px;box-shadow:0 4px 20px rgba(185,64,64,.1);animation:fdin .4s;}
+.qnum{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--j);letter-spacing:1.5px;margin-bottom:6px;}
+.qtext{font-size:clamp(.92rem,2.5vw,1.05rem);font-weight:700;line-height:1.6;color:#f0e0e0;margin-bottom:14px;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{min-height:46px;background:#11212c;color:#cfeee9;border:1.5px solid #3a2a2a;
+  border-radius:10px;padding:10px 14px;font-size:clamp(.88rem,2.3vw,.98rem);
+  font-family:"JetBrains Mono",monospace;text-align:left;cursor:pointer;
+  transition:all .14s;line-height:1.4;}
+.opt:hover:not(:disabled){background:#1f1420;border-color:var(--j);transform:translateY(-1px);}
+.opt:disabled{cursor:default;}
+.opt.cok{background:#1f4a3d;border-color:var(--ok);color:#a0ffb0;}
+.opt.cko{background:#4a1f20;border-color:var(--ko);color:#ffb0b0;animation:shake .4s;}
+.fb-zone{margin-top:12px;padding:10px 12px;background:#1a0c0c;border-left:3px solid var(--ko);
+  border-radius:8px;font-size:.82rem;color:#ffb8b8;line-height:1.7;display:none;animation:fdin .4s;}
+.fb-zone.show{display:block;}
+.fb-lbl{display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;
+  color:var(--ko);font-family:"JetBrains Mono",monospace;margin-bottom:4px;}
+.btn-retry{margin-top:8px;min-height:2.3rem;background:var(--dark2);color:var(--j);
+  border:1.5px solid var(--j);border-radius:8px;padding:0 14px;font-size:.82rem;
+  font-weight:800;cursor:pointer;font-family:"Nunito",sans-serif;}
+.btn-retry:hover{background:#1a0c0c;}
+
+/* UNLOCK interstitiel */
+.unlock-screen{display:none;background:var(--dark);border:2px solid var(--j);border-radius:16px;
+  padding:26px;text-align:center;margin-bottom:12px;animation:fdin .5s;}
+.unlock-screen.show{display:block;}
+.unlock-icon{font-size:2.8rem;margin-bottom:8px;animation:unlockFlash .6s 3;}
+.unlock-titre{font-family:"Orbitron",sans-serif;font-size:1rem;font-weight:900;color:var(--j);margin-bottom:5px;}
+.unlock-msg{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:#f0e0e0;line-height:1.7;margin-bottom:14px;}
+.btn-unlock{min-height:3rem;background:linear-gradient(135deg,var(--jd),var(--j));color:#fff;
+  border:none;border-radius:10px;padding:0 24px;font-family:"Orbitron",sans-serif;
+  font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.5px;
+  box-shadow:0 4px 0 var(--jd);}
+.btn-unlock:hover{filter:brightness(1.08);}
+
+/* Bilan */
+.res{display:none;background:var(--dark);border:2px solid var(--j);border-radius:16px;
+  padding:22px;text-align:center;margin-top:12px;box-shadow:0 6px 24px rgba(185,64,64,.15);}
+.res.show{display:block;animation:fdin .5s;}
+.res-icon{font-size:3rem;margin-bottom:6px;}
+.res-score{font-family:"JetBrains Mono",monospace;font-size:2rem;font-weight:700;color:var(--j);}
+.res-titre{font-family:"Orbitron",sans-serif;font-size:.82rem;color:var(--j);margin:5px 0;}
+.res-msg{font-size:.85rem;color:#f0e0e0;line-height:1.7;max-width:380px;margin:0 auto 12px;}
+.btn-retry-g{background:var(--j);color:#fff;border:none;border-radius:10px;padding:9px 22px;
+  font-weight:900;font-size:.85rem;cursor:pointer;font-family:"Orbitron",sans-serif;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div>
+<div class="bubble b3"></div><div class="bubble b4"></div>
+<div class="flash-v" id="flashV"></div>
+
+<div class="hdr">
+  <div class="badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 6ÈME</span></div>
+  <div class="wk">Semaine 5 — Jour 2</div>
+  <h1>Je relève le <span class="acc">Défi</span></h1>
+  <p class="hsub">COD et COI · 2 étapes · 10 questions · 10 pts</p>
+</div>
+
+<div class="wrap">
+  <div class="xpw"><div class="xpf" id="xpf"></div><div class="xpt" id="xpt">0 / 10</div></div>
+  <div class="layout">
+
+    <!-- COL GAUCHE -->
+    <aside class="col-l">
+      <div class="cyber-wrap">
+        <div class="cyber-lbl">Système de sécurité grammatical</div>
+        <svg id="cyber" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="bar">
+          <div class="lab"><span>ANALYSE EN COURS</span><span id="pct">0%</span></div>
+          <div class="track"><div class="fill" id="fill"></div></div>
+        </div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="sc-box"><div class="sc-n ok" id="scOk">0</div><div class="sc-l">Validés</div></div>
+        <div class="sc-box"><div class="sc-n rs" id="scRs">10</div><div class="sc-l">Restants</div></div>
+        <div class="sc-box"><div class="sc-n ko" id="scKo">0</div><div class="sc-l">Erreurs</div></div>
+      </div>
+      <div class="stars" id="starsRow"></div>
+
+      <div class="acc-card">
+        <button class="acc-btn" id="btnAcc">📖 Texte de Nour <span class="acc-arr">▾</span></button>
+        <div class="acc-body" id="bodyAcc">
+          <div class="acc-inner">
+            « Ce matin-là, Nour prépare ses affaires pour l'école. Elle range ses cahiers dans son cartable, puis pense à ses amies. En chemin, elle rencontre Camille et lui donne son goûter. Au collège, la professeure distribue les copies aux élèves. Nour obtient une bonne note et téléphone à sa mère pour lui annoncer la nouvelle. »
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- COL DROITE -->
+    <main>
+      <div class="etape-badge">
+        <div class="etape-num" id="etapeNum">ÉTAPE 1 / 2</div>
+        <div class="etape-titre" id="etapeTitre">Identifier COD et COI</div>
+        <div class="etape-score" id="etapeScore">0 / 6</div>
+      </div>
+      <div class="edots" id="edots"></div>
+
+      <!-- Unlock interstitiel -->
+      <div class="unlock-screen" id="unlockScreen">
+        <div class="unlock-icon">🔓</div>
+        <div class="unlock-titre">Étape 1 validée !</div>
+        <div class="unlock-msg">Tu as identifié tous les COD et COI du texte.<br>L'étape 2 est maintenant débloquée.</div>
+        <button class="btn-unlock" id="btnUnlock">Accéder à l'étape 2 ▸</button>
+      </div>
+
+      <div class="qcard" id="qcard">
+        <div class="qnum" id="qnum"></div>
+        <div class="qtext" id="qtext"></div>
+        <div class="opts" id="opts"></div>
+        <div class="fb-zone" id="fbZone"><span class="fb-lbl">À revoir</span><span id="fbTxt"></span></div>
+        <div id="btnRetryWrap"></div>
+      </div>
+
+      <div class="res" id="res"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let actx=null, okCount=0, errCount=0, etape=1, curQ=0, busy=false;
+let st1=new Array(6).fill(null); // null=intact, true=ok, false=ko
+let st2=new Array(4).fill(null);
+const TOTAL=10, N1=6, N2=4;
+
+/* ══ DONNÉES — MOT POUR MOT ══ */
+const E1=[
+  {
+    num:'Q1',
+    txt:'« Nour prépare ses affaires pour l\'école. »\nQuel est le COD de cette phrase ?',
+    opts:['pour l\'école','ses affaires','Nour'],
+    ok:1,
+    fb:'Test : Nour prépare QUOI ? → ses affaires. Pas de préposition → COD.'
+  },
+  {
+    num:'Q2',
+    txt:'« Elle range ses cahiers dans son cartable. »\n"Ses cahiers" est-il un COD ou un COI ?',
+    opts:['COD','COI'],
+    ok:0,
+    fb:'Test : Elle range QUOI ? → ses cahiers. Pas de préposition → COD.'
+  },
+  {
+    num:'Q3',
+    txt:'« Elle pense à ses amies. »\n"À ses amies" est-il un COD ou un COI ?',
+    opts:['COD','COI'],
+    ok:1,
+    fb:'Test : Elle pense À QUI ? → à ses amies. La préposition à est présente → COI.'
+  },
+  {
+    num:'Q4',
+    txt:'« Elle rencontre Camille et lui donne son goûter. »\nQuel est le COD de "donne" dans cette phrase ?',
+    opts:['lui','Camille','son goûter'],
+    ok:2,
+    fb:'Test : Elle donne QUOI ? → son goûter. Pas de préposition → COD. "Lui" est aussi un complément de "donne", mais il répond à la question "à qui ?" → COI (pronom COI).'
+  },
+  {
+    num:'Q5',
+    txt:'« La professeure distribue les copies aux élèves. »\nQuel est le COI de cette phrase ?',
+    opts:['les copies','la professeure','aux élèves'],
+    ok:2,
+    fb:'Test : La professeure distribue À QUI ? → aux élèves (à + les = aux). Préposition à présente → COI.'
+  },
+  {
+    num:'Q6',
+    txt:'« Nour téléphone à sa mère pour lui annoncer la nouvelle. »\n"À sa mère" est-il un COD ou un COI ?',
+    opts:['COD','COI'],
+    ok:1,
+    fb:'Test : Nour téléphone À QUI ? → à sa mère. La préposition à est présente → COI.'
+  }
+];
+
+const E2=[
+  {
+    num:'D1',
+    txt:'Complète avec un COD :\n« Mon cousin apporte … »',
+    opts:['des cadeaux','à ses parents','de sa réussite'],
+    ok:0,
+    fb:'Un COD répond à "quoi ?" et n\'a pas de préposition. "Des cadeaux" est la seule proposition sans préposition : c\'est le bon COD.'
+  },
+  {
+    num:'D2',
+    txt:'Complète avec un COI :\n« Les enfants profitent … »',
+    opts:['le beau soleil','une longue journée','du beau soleil'],
+    ok:2,
+    fb:'Un COI a toujours une préposition (à ou de). "Du beau soleil" (de + le) est la seule proposition avec une préposition : c\'est le bon COI. Test : Les enfants profitent DE QUOI ? → du beau soleil.'
+  },
+  {
+    num:'D3',
+    txt:'Complète avec un COD :\n« La directrice félicite … »',
+    opts:['aux gagnants','les gagnants','des gagnants'],
+    ok:1,
+    fb:'Un COD n\'a pas de préposition. "Les gagnants" est la seule proposition sans préposition : c\'est le bon COD. Test : La directrice félicite QUI ? → les gagnants.'
+  },
+  {
+    num:'D4',
+    txt:'Complète avec un COI :\n« Ibrahim pense … »',
+    opts:['que sa famille','la famille','à sa famille'],
+    ok:2,
+    fb:'Un COI a toujours une préposition. "À sa famille" est la seule proposition avec une préposition : c\'est le bon COI. Test : Ibrahim pense À QUI ? → à sa famille.'
+  }
+];
+
+/* ── SVG CYBER ── */
+const CX=240, CY=240;
+function hexpts(cx,cy,r){
+  let p=[];
+  for(let k=0;k<6;k++){const a=(-90+60*k)*Math.PI/180;p.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}
+  return p.join(' ');
+}
+function buildCyber(){
+  const base=52, step=17; // 10 anneaux dans 480px
+  let s='';
+  s+='<defs>';
+  s+='<radialGradient id="coreG"><stop offset="0" stop-color="#b94040" stop-opacity="0.9"/><stop offset="1" stop-color="#b94040" stop-opacity="0"/></radialGradient>';
+  s+='<radialGradient id="coreGok"><stop offset="0" stop-color="#38e08b" stop-opacity="0.9"/><stop offset="1" stop-color="#38e08b" stop-opacity="0"/></radialGradient>';
+  s+='</defs>';
+  s+='<rect width="480" height="480" fill="#070b11"/>';
+  // Grille
+  for(let g=0;g<480;g+=24){s+='<line x1="'+g+'" y1="0" x2="'+g+'" y2="480" stroke="#b94040" stroke-opacity="0.05"/><line x1="0" y1="'+g+'" x2="480" y2="'+g+'" stroke="#b94040" stroke-opacity="0.05"/>';}
+  // 10 anneaux : i=0 externe (Q1) → i=9 interne (D4)
+  // Externes (E1, rouge vif) i=9..4, internes (E2, rouge foncé) i=3..0
+  for(let i=9;i>=0;i--){
+    const r=base+i*step;
+    const isE1=i>=4; // E1: anneaux 4-9, E2: anneaux 0-3
+    const col=isE1?'#b94040':'#7a2060';
+    const tx=CX, ty=CY-r;
+    s+='<g class="ring" id="ring'+i+'">'
+      +'<polygon points="'+hexpts(CX,CY,r)+'" fill="none" stroke="'+col+'" stroke-width="2"/>'
+      +'<circle cx="'+tx+'" cy="'+ty+'" r="8" fill="#0c1b22" stroke="'+col+'" stroke-width="1.8"/>'
+      +'<rect x="'+(tx-2.5)+'" y="'+(ty-.5)+'" width="5" height="5" rx="1" fill="'+col+'"/>'
+      +'<path d="M'+(tx-2.5)+','+(ty-.5)+' v-2.5 a2.5,2.5 0 0 1 5,0 v2.5" fill="none" stroke="'+col+'" stroke-width="1.4"/>'
+      +'</g>';
+  }
+  // Coeur
+  s+='<g class="core" id="core">'
+    +'<circle class="coreglow" cx="'+CX+'" cy="'+CY+'" r="55" fill="url(#coreG)" id="coreGlowEl"/>'
+    +'<polygon points="'+hexpts(CX,CY,32)+'" fill="#0c1b22" stroke="#b94040" stroke-width="2.5"/>'
+    +'<g class="srv">';
+  [-8,0,8].forEach(dy=>{s+='<rect x="'+(CX-12)+'" y="'+(CY+dy-2.5)+'" width="24" height="6" rx="1.5" fill="#1d1a3a" stroke="#b94040" stroke-width="1.2"/><circle cx="'+(CX-7)+'" cy="'+(CY+dy+.5)+'" r="1.3" fill="#b94040"/>';});
+  s+='</g><text class="openic" x="'+CX+'" y="'+(CY+10)+'" text-anchor="middle" font-size="24">🔓</text>';
+  s+='</g>';
+  $('cyber').innerHTML=s;
+}
+
+/* ── RENDER STATE CYBER ── */
+// openedTotal = nb de bonnes réponses
+// Anneaux: ring9=Q1, ring8=Q2, ..., ring4=Q6, ring3=D1, ..., ring0=D4
+// i.e. ring(9-q) pour Q1..Q6 et ring(3-(q-6)) pour D1..D4
+function ringIndex(qIdx){ // qIdx 0..9
+  return 9-qIdx;
+}
+function renderCyber(ok){
+  for(let q=0;q<10;q++){
+    const r=$('ring'+ringIndex(q));if(!r)continue;
+    const st=(q<6?st1[q]:st2[q-6]);
+    if(st===true){ // correct → anneau "down" (franchi)
+      r.classList.add('down');
+      r.classList.remove('locked');
+    } else if(etape===1&&q>=6){ // E2 verrouillée
+      r.classList.add('locked');
+    } else {
+      r.classList.remove('down','locked');
+    }
+  }
+  $('core').classList.toggle('open', okCount===10);
+  $('fill').style.width=(okCount/10*100)+'%';
+  $('pct').textContent=Math.round(okCount/10*100)+'%';
+}
+
+/* ── DOTS ── */
+function buildDots(){
+  const w=$('edots');w.innerHTML='';
+  const arr=etape===1?E1:E2;
+  arr.forEach((_,i)=>{
+    const d=document.createElement('div');d.className='edot';d.id='edot'+i;
+    d.textContent=i+1;w.appendChild(d);
+  });
+}
+function updDots(){
+  const st=etape===1?st1:st2;
+  st.forEach((v,i)=>{
+    const d=$('edot'+i);if(!d)return;
+    d.classList.remove('ok','ko','cur');
+    if(v===true)d.classList.add('ok');
+    else if(v===false)d.classList.add('ko');
+    else if(i===curQ)d.classList.add('cur');
+  });
+}
+
+/* ── SCORE ── */
+function buildStars(){
+  const w=$('starsRow');w.innerHTML='';
+  for(let i=0;i<10;i++){const s=document.createElement('span');s.className='str';s.id='str'+i;s.textContent='★';w.appendChild(s);}
+}
+function updScore(){
+  $('scOk').textContent=okCount;
+  $('scRs').textContent=10-okCount;
+  $('scKo').textContent=errCount;
+  $('xpf').style.width=(okCount/10*100)+'%';
+  $('xpt').textContent=okCount+' / 10';
+  for(let i=0;i<10;i++){const s=$('str'+i);if(s)s.classList.toggle('on',i<okCount);}
+  // Étape score
+  if(etape===1){$('etapeScore').textContent=st1.filter(v=>v===true).length+' / 6';}
+  else{$('etapeScore').textContent=st2.filter(v=>v===true).length+' / 4';}
+}
+
+/* ── RENDER QUESTION ── */
+function renderQ(){
+  const arr=etape===1?E1:E2;
+  const q=arr[curQ];
+  if(!q){return;}
+  $('qnum').textContent=(etape===1?'ÉTAPE 1 — ':'ÉTAPE 2 — ')+q.num;
+  $('qtext').textContent=q.txt;
+  const st=etape===1?st1:st2;
+  const opts=$('opts');opts.innerHTML='';
+  $('fbZone').classList.remove('show');
+  $('btnRetryWrap').innerHTML='';
+
+  q.opts.forEach((txt,i)=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=txt;
+    if(st[curQ]!==null){
+      b.disabled=true;
+      if(i===q.ok)b.classList.add('cok');
+      else if(st[curQ]===false&&i!==q.ok)b.classList.add('cko');
+    } else {
+      b.addEventListener('click',()=>ans(i));
+    }
+    opts.appendChild(b);
+  });
+
+  if(st[curQ]===false){
+    $('fbTxt').textContent=q.fb;
+    $('fbZone').classList.add('show');
+    const rb=document.createElement('button');rb.className='btn-retry';rb.textContent='Réessayer';
+    rb.addEventListener('click',()=>retry());
+    $('btnRetryWrap').appendChild(rb);
+  }
+  updDots();
+}
+
+/* ── RÉPONSE ── */
+function ans(i){
+  if(busy)return;busy=true;
+  const arr=etape===1?E1:E2;
+  const st=etape===1?st1:st2;
+  const q=arr[curQ];
+  if(i===q.ok){
+    st[curQ]=true;okCount++;
+    okS();flashV(true);
+    updScore();renderCyber(okCount);
+    // Marquer ok et avancer
+    $('opts').querySelectorAll('.opt').forEach((b,idx)=>{b.disabled=true;if(idx===i)b.classList.add('cok');});
+    $('fbZone').classList.remove('show');
+    busy=false;
+    // Fin étape 1
+    if(etape===1&&st1.every(v=>v===true)){
+      setTimeout(showUnlock,600);return;
+    }
+    // Fin étape 2
+    if(etape===2&&st2.every(v=>v===true)){
+      setTimeout(showBilan,600);return;
+    }
+    // Passer à la suivante
+    setTimeout(()=>{
+      curQ++;
+      if((etape===1&&curQ<N1)||(etape===2&&curQ<N2)) renderQ();
+    },500);
+  } else {
+    errCount++;
+    errS();flashV(false);
+    st[curQ]=false;
+    updScore();
+    $('opts').querySelectorAll('.opt').forEach((b,idx)=>{
+      b.disabled=true;
+      if(idx===q.ok)b.classList.add('cok');
+      else if(idx===i)b.classList.add('cko');
+    });
+    $('fbTxt').textContent=q.fb;
+    $('fbZone').classList.add('show');
+    const rb=document.createElement('button');rb.className='btn-retry';rb.textContent='Réessayer';
+    rb.addEventListener('click',()=>retry());
+    $('btnRetryWrap').appendChild(rb);
+    busy=false;
+  }
+}
+
+/* ── RETRY ── */
+function retry(){
+  const st=etape===1?st1:st2;
+  st[curQ]=null;
+  renderQ();
+}
+
+/* ── UNLOCK ÉTAPE 2 ── */
+function showUnlock(){
+  unlockS();
+  $('qcard').style.display='none';
+  $('unlockScreen').classList.add('show');
+}
+$('btnUnlock').addEventListener('click',()=>{
+  etape=2;curQ=0;
+  $('unlockScreen').classList.remove('show');
+  $('qcard').style.display='block';
+  $('etapeNum').textContent='ÉTAPE 2 / 2';
+  $('etapeTitre').textContent='Compléter les phrases';
+  buildDots();renderQ();updScore();
+  // Reset dots pour étape 2
+  renderCyber(okCount);
+});
+
+/* ── BILAN ── */
+function showBilan(){
+  const msgs={
+    10:{icon:'🏆',titre:'Grand Défi réussi !',msg:'Tu maîtrises le COD et le COI.'},
+    8:{icon:'🥇',titre:'Très bon résultat !',msg:'Quelques nuances à revoir.'},
+    5:{icon:'🥈',titre:'Bon résultat.',msg:'Reprends les ateliers précédents.'},
+    0:{icon:'📖',titre:'',msg:'Reprends le référentiel et retente.'}
+  };
+  const k=okCount===10?10:okCount>=7?8:okCount>=4?5:0;
+  const m=msgs[k];
+  $('res').innerHTML=
+    '<div class="res-icon">'+m.icon+'</div>'+
+    '<div class="res-score">'+okCount+' / 10 pts</div>'+
+    '<div class="res-titre">'+m.titre+'</div>'+
+    '<div class="res-msg">'+m.msg+'</div>'+
+    '<button class="btn-retry-g" onclick="restart()">🔄 Recommencer</button>';
+  $('res').classList.add('show');
+  if(okCount>=9){finalOkS();rainEmojis();}else finalKoS();
+  $('res').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function restart(){
+  okCount=0;errCount=0;etape=1;curQ=0;busy=false;
+  st1=new Array(6).fill(null);st2=new Array(4).fill(null);
+  $('res').classList.remove('show');$('res').innerHTML='';
+  $('unlockScreen').classList.remove('show');
+  $('qcard').style.display='block';
+  $('etapeNum').textContent='ÉTAPE 1 / 2';
+  $('etapeTitre').textContent='Identifier COD et COI';
+  buildDots();renderQ();updScore();buildStars();renderCyber(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── FLASH ── */
+function flashV(ok){
+  const el=$('flashV');
+  el.textContent=ok?'✓':'✗';
+  el.style.color=ok?'#22c55e':'#ef4444';
+  el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+}
+
+/* ── PLUIE ── */
+const RAIN=['🌊','💧','⛵','🔭','🗺️','🌧️','💫','⚓'];
+function rainEmojis(){
+  for(let i=0;i<25;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+      el.style.cssText='position:fixed;top:-40px;left:'+(Math.random()*100)+'vw;'+
+        'font-size:'+(1.1+Math.random()*1.4).toFixed(2)+'rem;z-index:9998;pointer-events:none;'+
+        '--rot:'+(Math.random()*60-30)+'deg;'+
+        'animation:rainFall '+(1.8+Math.random()*1.4).toFixed(2)+'s ease-in forwards;';
+      document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
+    },i*85);
+  }
+}
+
+/* ── WEB AUDIO ── */
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){
+  if(!actx)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+.012);g.gain.exponentialRampToValueAtTime(.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.03);
+}
+function okS(){initA();tone(523,784,.14,'sine',.12,0);tone(784,1046,.12,'sine',.10,.08);}
+function errS(){initA();tone(280,160,.22,'sine',.11,0);}
+function unlockS(){initA();[523,659,784,880,1046].forEach((f,k)=>tone(f,f,.15,'sine',.13,k*.06));}
+function finalOkS(){initA();[523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.22,'sine',.13,k*.09));}
+function finalKoS(){initA();tone(300,160,.4,'sine',.13,0);tone(200,120,.3,'sine',.10,.35);}
+
+/* ── ACCORDÉON ── */
+let accOpen=false;
+$('btnAcc').addEventListener('click',()=>{
+  accOpen=!accOpen;
+  $('bodyAcc').classList.toggle('open',accOpen);
+  $('btnAcc').classList.toggle('open',accOpen);
+});
+
+/* ── INIT ── */
+document.addEventListener('pointerdown',initA,{once:true});
+buildCyber();buildDots();buildStars();updScore();renderQ();renderCyber(0);
+</script>
+</body>
+</html>
