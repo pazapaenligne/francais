@@ -9,8 +9,7 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:#08040f;display:flex;flex-direction:column;align-items:center;
        justify-content:center;min-height:100vh;font-family:Arial,sans-serif}
-  #wrap{position:relative;width:100%;max-width:850px;margin:0 auto}
-  #gw{position:relative;width:100%;overflow:hidden;background:#06060f}
+  #wrap{position:relative;width:850px}
   #hud{width:850px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
        align-items:center;padding:7px 14px;background:#0a0614;
        border:2px solid #e5c417;border-bottom:none;border-radius:8px 8px 0 0;
@@ -29,8 +28,9 @@
   #cv{display:block;border:2px solid #e5c417;border-radius:0 0 8px 8px;
       box-shadow:0 0 30px rgba(229,196,23,0.25)}
   /* Overlay question */
-  #qov{display:none;position:absolute;top:0;left:0;width:100%;height:100%;
-       background:radial-gradient(ellipse at 50% 0%,#0a1a3a 0%,#040c20 60%,#020810 100%);z-index:30;padding:20px 24px;box-sizing:border-box}
+  #qov{display:none;position:absolute;top:54px;left:0;width:850px;
+       background:radial-gradient(ellipse at 50% 0%,#0a1a3a 0%,#040c20 60%,#020810 100%);border:2px solid #e5c417;border-top:none;
+       border-radius:0 0 8px 8px;z-index:30;padding:20px 24px;box-sizing:border-box}
   #qov .qtop{display:flex;align-items:center;gap:12px;margin-bottom:12px;justify-content:center}
   #qov .qbadge{background:#e5c417;color:#1a0e08;font-family:'Orbitron',monospace;
                font-size:10px;padding:4px 10px;border-radius:4px;letter-spacing:1px}
@@ -79,31 +79,27 @@
       <span class="hval green" id="hprog">0 / 5</span>
     </div>
   </div>
-  <div id="gw" style="position:relative;width:100%;overflow:hidden;">
-  <canvas id="cv" width="850" height="480" style="display:block;width:100%;height:auto;"></canvas>
-  <div id="ov" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#0a1a3a 0%,#040c20 60%,#020810 100%);z-index:40;padding:28px 20px;box-sizing:border-box;min-height:320px;">
-  <canvas id="ovStars" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
-  <div id="ovInner" style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;">
-
+  <canvas id="cv" width="850" height="480"></canvas>
+  <div id="qov">
     <div class="qtop">
       <span class="qbadge">❓ QUESTION</span>
     </div>
     <div class="qtext" id="qtext"></div>
     <div class="choices" id="qchoices"></div>
   </div>
-  <div id="ov">
+  <div id="ov" style="overflow:hidden;">
   <canvas id="ovStars" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
-  <div id="ovInner" style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;">
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:100%;">
     <div class="ph">MISSION CIEL</div>
     <div class="ps">PAZAPA EN LIGNE</div>
     <p>
       🕹️ Pilote ton avion avec <b style="color:#e5c417">↑ ↓</b><br><br>
       <b style="color:#f0c040">⭐ Étoiles</b> — Attrape-les pour augmenter ton score.<br>
-      <b style="color:#e5c417">❓ Points d'interrogation</b> — Attrape-les pour répondre à une question.<br>
-      <b style="color:#e74c3c">💣 Bombes</b> — Évite-les ou détruis-les !<br>
+      <b style="color:#e5c417">❓ Points d’interrogation</b> — Attrape-les pour répondre à une question.<br>
+      <b style="color:#e74c3c">💣 Bombes</b> — Évite-les ou détruis-les !<br>
       <b style="color:#ff4466">❤️ Cœurs</b> — Attrape-les pour récupérer une vie.<br><br>
       <b style="color:#89c843">Espace</b> — Lance un missile pour détruire les bombes.<br><br>
-      <span style="opacity:.6;font-size:11px">Meilleur score : <span id="best_display">0</span></span>
+      <span style="opacity:.6;font-size:11px">Meilleur score : <span id="best_display">0</span></span>
     </p>
     <button class="btn" onclick="startGame()">✈ Décoller !</button>
   </div>
@@ -113,16 +109,16 @@
    ① QUESTIONS
    ════════════════════════════════ */
 const QUESTIONS=[
-  {q:"B1 — « Le chevalier __ son épée d’un geste vif. » (saisir — 3ᵉ pers. sing.)",
+  {q:"B1 — Le chevalier __ son épée d’un geste vif. (saisir — 3ᵉ pers. sing.)",
    ch:["saisissait","saisit","a saisi"],a:1,
-   fb:"Saisir (2ᵉ groupe) au passé simple, 3ᵉ pers. sing. : il saisit, terminaison -it. Saisissait est l’imparfait ; a saisi est le passé composé."},
-  {q:"B2 — « Les explorateurs __ la montagne en silence. » (gravir — 3ᵉ pers. plur.)",
+   fb:"Saisir (2e groupe) au passé simple, 3e pers. sing. : il saisit, terminaison -it. Saisissait est l’imparfait ; a saisi est le passé composé."},
+  {q:"B2 — Les explorateurs __ la montagne en silence. (gravir — 3ᵉ pers. plur.)",
    ch:["gravissaient","ont gravi","gravirent"],a:2,
-   fb:"Gravir (2ᵉ groupe) au passé simple, 3ᵉ pers. plur. : ils gravirent, terminaison -irent. Gravissaient est l’imparfait."},
-  {q:"B3 — « La dame __ son stylo et devint pensive. » (lever — 3ᵉ pers. sing.)",
+   fb:"Gravir (2e groupe) au passé simple, 3e pers. plur. : ils gravirent, terminaison -irent. Gravissaient est l’imparfait."},
+  {q:"B3 — La dame __ son stylo et devint pensive. (lever — 3ᵉ pers. sing.)",
    ch:["levait","leva","a levé"],a:1,
-   fb:"Lever (1ᵉʳ groupe) au passé simple, 3ᵉ pers. sing. : elle leva, terminaison -a. Levait est l’imparfait."},
-  {q:"B4 — « Soudain, le prince __ une lumière au fond de la forêt. » (voir — 3ᵉ pers. sing.)",
+   fb:"Lever (1er groupe) au passé simple, 3e pers. sing. : elle leva, terminaison -a. Levait est l’imparfait."},
+  {q:"B4 — Soudain, le prince __ une lumière au fond de la forêt. (voir — 3ᵉ pers. sing.)",
    ch:["voyait","a vu","vit"],a:2,
    fb:"Voir est irrégulier : il vit. Voyait est l’imparfait. A vu est le passé composé."},
 ];
@@ -136,7 +132,7 @@ const TOTAL_Q=QUESTIONS.length;
 const OBJ_SPEED_MIN=180,OBJ_SPEED_MAX=280;
 const SPAWN_INTERVAL=900;
 const MAX_LIVES=3;
-const GIFT_SPEED_MIN=120,GIFT_SPEED_MAX=160;
+const GIFT_SPEED_MIN=150,GIFT_SPEED_MAX=180;
 const PLANE_SPEED=260;
 const MAX_ENERGY=100; // legacy
 
@@ -275,12 +271,9 @@ function spawnObject(){
   const rand=Math.random();
   const y=50+Math.random()*(CH-100);
 
-  if(rand<0.06){
+  if(rand<0.07&&lives<MAX_LIVES){
     /* CŒUR récupérable */
-    if(lives<MAX_LIVES){
-      objects.push({type:'heart',x:CW+40,y,r:16,
-        speed:140+Math.random()*60,phase:Math.random()*Math.PI*2,collected:false});
-    }
+    objects.push({type:'heart',x:CW+40,y,r:16,speed:140+Math.random()*60,phase:Math.random()*Math.PI*2,collected:false});
   } else if(rand<0.38){
     /* BOMBE à éviter */
     const speed=200+Math.random()*180;
@@ -327,9 +320,10 @@ function updateObjects(elapsed){
       const targetY=plane.y+plane.h/2-o.h/2;
       const dy=targetY-o.y;
       if(o.vy===undefined) o.vy=0;
-      o.vy+=dy*0.008;
-      o.vy*=0.9;
+      o.vy+=dy*0.045;
+      o.vy*=0.82;
       o.y+=o.vy;
+      o.y=Math.max(30,Math.min(CH-30,o.y));
       o.y=Math.max(10, Math.min(CH-o.h-10, o.y));
     }
     return o.x>-100&&!o.collected;
@@ -395,7 +389,7 @@ function checkCols(){
 /* ── Questions ── */
 function showQuestion(qi){
   paused=true;qPending=true;
-  if(spawnId){clearInterval(spawnId);spawnId=null;}if(giftId){clearInterval(giftId);giftId=null;}
+  if(spawnId){clearInterval(spawnId);spawnId=null;}
   const q=QUESTIONS[qi];
   document.getElementById('qtext').textContent=q.q;
   const div=document.getElementById('qchoices');div.innerHTML='';
@@ -434,15 +428,8 @@ function answerQ(i,a){
       },1200);
     }
   } else {
-    /* Feedback erreur prof */
-    const fbQ=QUESTIONS[qIdx>=0&&qIdx<QUESTIONS.length?qIdx:QUESTIONS.length-1];
-    if(fbQ&&fbQ.fb){
-      const fbEl=document.createElement('div');
-      fbEl.style.cssText='margin-top:10px;padding:9px 13px;background:rgba(231,76,60,.18);border:1px solid #e74c3c;border-radius:8px;font-size:13px;color:#ffaaaa;max-width:420px;line-height:1.7;text-align:left;';
-      fbEl.textContent=fbQ.fb;
-      document.getElementById('qov').appendChild(fbEl);
-      setTimeout(function(){if(fbEl.parentNode)fbEl.parentNode.removeChild(fbEl);},4500);
-    }
+    const _fbq=QUESTIONS[qIdx<QUESTIONS.length?qIdx:QUESTIONS.length-1];
+    if(_fbq&&_fbq.fb){const _d=document.createElement('div');_d.style.cssText='margin-top:10px;padding:9px 13px;background:rgba(231,76,60,.2);border:1px solid #e74c3c;border-radius:8px;font-size:13px;color:#ffaaaa;max-width:420px;line-height:1.7;text-align:left;';_d.textContent=_fbq.fb;document.getElementById('qov').appendChild(_d);setTimeout(()=>{if(_d.parentNode)_d.parentNode.removeChild(_d);},4500);}
     beepWrong();
     lives=Math.max(0,lives-1);
     shakeTimer=18;
@@ -506,9 +493,7 @@ function endGame(won){
     '<br><br><span style="opacity:.5;font-size:11px">Meilleur : '+bestScore+'</span></p>'+
     '<button class="btn" onclick="startGame()">✈ Rejouer</button>';
   ov.style.display='flex';
-  /* Score → page parente */
-  var pts=Math.min(progress,4);
-  try{window.parent.postMessage({type:'pazapaScore',score:pts},'*');}catch(e){}
+  try{window.parent.postMessage({type:'pazapaScore',score:Math.min(progress,4)},'*');}catch(e){}
 }
 
 /* ════════════════════════════════
@@ -682,13 +667,10 @@ function drawBomb(o){
 /* ── Cadeau ── */
 function drawHeart(o){
   ctx.save();ctx.translate(o.x,o.y);
-  const s=0.9+Math.sin(tick*.12+o.phase)*.1;
-  ctx.scale(s,s);
+  const s=0.9+Math.sin(tick*.12+o.phase)*.1;ctx.scale(s,s);
   const r=o.r;
-  /* Halo */
   ctx.save();ctx.globalAlpha=.18+Math.sin(tick*.1+o.phase)*.12;
   ctx.fillStyle='#ff4466';ctx.beginPath();ctx.arc(0,0,r+10,0,Math.PI*2);ctx.fill();ctx.restore();
-  /* Cœur */
   ctx.beginPath();
   ctx.moveTo(0,r*.3);
   ctx.bezierCurveTo(0,0,-r,0,-r,-r*.4);
@@ -871,20 +853,18 @@ function startGame(){
   /* Spawn initial immédiat + intervalle */
   for(let i=0;i<4;i++) setTimeout(spawnObject,i*300);
   spawnId=setInterval(spawnObject,900);
-  /* 1 cadeau ❓ toutes les 20 secondes */
-  if(giftId){clearInterval(giftId);giftId=null;}
+  if(typeof giftId!=='undefined'&&giftId){clearInterval(giftId);}
+  giftId=null;
   setTimeout(()=>{
     if(!gameRunning)return;
-    function spawnGift(){
+    function _spawnGift(){
       if(!gameRunning||paused||progress>=TOTAL_Q)return;
       const y=60+Math.random()*(CH-120);
       const speed=GIFT_SPEED_MIN+Math.random()*(GIFT_SPEED_MAX-GIFT_SPEED_MIN);
-      objects.push({type:'gift',x:CW+60,y,w:48,h:48,speed,
-        phase:Math.random()*Math.PI*2,qi:qIdx%QUESTIONS.length,
-        collected:false,life:800,vy:0});
+      objects.push({type:'gift',x:CW+60,y,w:48,h:48,speed,phase:Math.random()*Math.PI*2,qi:qIdx%QUESTIONS.length,collected:false,life:1800,vy:0});
     }
-    spawnGift();
-    giftId=setInterval(spawnGift,20000);
+    _spawnGift();
+    giftId=setInterval(_spawnGift,20000);
   },3000);
 }
 
@@ -892,43 +872,38 @@ function startGame(){
 drawSky();
 
 /* ── Étoiles overlay ov ── */
-(function initOvStars(){
+(function(){
   var oc=document.getElementById('ovStars');
   if(!oc)return;
-  var ow=850,oh=400;
+  var ow=850,oh=480;
   oc.width=ow;oc.height=oh;
   var octx=oc.getContext('2d');
   var stars=[];
   for(var i=0;i<80;i++){
-    stars.push({x:Math.random()*ow,y:Math.random()*oh,
-      r:.4+Math.random()*1.6,phase:Math.random()*Math.PI*2,
-      speed:.02+Math.random()*.05});
+    stars.push({x:Math.random()*ow,y:Math.random()*oh,r:.4+Math.random()*1.6,phase:Math.random()*Math.PI*2,speed:.02+Math.random()*.05});
   }
-  var ovTick=0,rafId=null;
-  function drawOvStars(){
+  var t=0,raf=null;
+  function draw(){
     octx.clearRect(0,0,ow,oh);
     stars.forEach(function(s){
-      var a=Math.max(0,.15+Math.sin(ovTick*s.speed+s.phase)*.3);
-      octx.save();octx.globalAlpha=a;
-      octx.fillStyle='#ffffff';
-      octx.beginPath();octx.arc(s.x,s.y,s.r,0,Math.PI*2);octx.fill();
-      octx.restore();
+      var a=Math.max(0,.15+Math.sin(t*s.speed+s.phase)*.3);
+      octx.save();octx.globalAlpha=a;octx.fillStyle='#fff';
+      octx.beginPath();octx.arc(s.x,s.y,s.r,0,Math.PI*2);octx.fill();octx.restore();
     });
-    ovTick++;
-    if(document.getElementById('ov').style.display!=='none')
-      rafId=requestAnimationFrame(drawOvStars);
+    t++;
+    var ov=document.getElementById('ov');
+    if(ov&&ov.style.display!=='none') raf=requestAnimationFrame(draw);
+    else raf=null;
   }
-  /* Observer visibilité #ol */
-  var observer=new MutationObserver(function(){
-    if(document.getElementById('ov').style.display!=='none'){
-      if(!rafId) drawOvStars();
-    } else {
-      if(rafId){cancelAnimationFrame(rafId);rafId=null;}
-    }
-  });
-  observer.observe(document.getElementById('ov'),{attributes:true,attributeFilter:['style']});
-  /* Démarrer au chargement (#ol visible par défaut) */
-  drawOvStars();
+  var ov=document.getElementById('ov');
+  if(ov){
+    new MutationObserver(function(){
+      var ov2=document.getElementById('ov');
+      if(ov2&&ov2.style.display!=='none'){if(!raf)draw();}
+      else{if(raf){cancelAnimationFrame(raf);raf=null;}}
+    }).observe(ov,{attributes:true,attributeFilter:['style']});
+    draw();
+  }
 })();
 </script>
 </body>
