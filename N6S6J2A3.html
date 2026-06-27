@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Compléments circonstanciels — Je relève le défi — 6e S6 J2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#b94040;--jour-fonce:#6a1010;--jour-clair:#fdf0f0;--jour-pale:#e8a0a0;
+  --day-glow:rgba(185,64,64,.32);
+  --surface:#fff;--border:#e8d8d8;
+  --vert:#22c55e;--vert-neon:#4ade80;--rouge:#ef4444;
+  --txt:#2b2b2b;--gris:#8b8b8b;
+  --bg:#fffdf7;--dark:#1a1010;--dark2:#2a1a1a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Nunito",Arial,sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100vh;overflow-x:hidden;padding:16px 12px 50px;}
+
+/* Bulles */
+.bulle{position:fixed;border-radius:50%;filter:blur(6px);opacity:.45;z-index:0;pointer-events:none;}
+.b1{width:200px;height:200px;background:#f5c518;top:-60px;right:-50px;}
+.b2{width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px;}
+.b3{width:150px;height:150px;background:#b94040;top:45%;right:-70px;opacity:.25;}
+.b4{width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px;}
+
+.wrap{position:relative;z-index:1;max-width:1020px;margin:0 auto;width:100%;}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;align-items:start;}
+@media(max-width:768px){.layout{grid-template-columns:1fr;}}
+.col-left{display:flex;flex-direction:column;gap:14px;}
+
+/* Header */
+.header{text-align:center;margin-bottom:18px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;color:#3a1800;
+  font-family:"Orbitron",sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;
+  padding:6px 14px;border-radius:20px;box-shadow:0 3px 10px rgba(245,197,24,.4);margin-bottom:10px;}
+.logo-badge .dots{display:inline-flex;gap:3px;}
+.logo-badge .dots i{width:7px;height:7px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#e05050;}
+.logo-badge .dots i:nth-child(2){background:#7a3d00;}
+.logo-badge .dots i:nth-child(3){background:#3d7a10;}
+.semaine{font-family:"Orbitron",sans-serif;font-size:.75rem;letter-spacing:3px;color:var(--gris);
+  text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:"Orbitron",sans-serif;font-weight:900;font-size:clamp(1.3rem,5vw,2.1rem);
+  line-height:1.15;color:var(--txt);margin-bottom:6px;}
+.titre .accent{color:var(--jour);}
+.sous-titre{font-family:"Orbitron",sans-serif;font-size:clamp(.62rem,2vw,.78rem);letter-spacing:1.5px;
+  color:var(--gris);margin-bottom:12px;}
+.badge-theme{display:inline-block;background:var(--jour);color:#fff;font-family:"Orbitron",sans-serif;
+  font-weight:700;font-size:clamp(.7rem,2.2vw,.8rem);letter-spacing:1px;padding:8px 20px;
+  border-radius:22px;box-shadow:0 4px 14px var(--day-glow);}
+
+/* Encart game */
+.game{background:var(--dark);border:2px solid var(--jour);border-radius:18px;
+  padding:14px;box-shadow:0 0 24px rgba(185,64,64,.18),inset 0 0 40px rgba(0,0,0,.3);}
+.game-label{font-family:"JetBrains Mono",monospace;font-size:.62rem;font-weight:700;
+  letter-spacing:2px;color:var(--jour);opacity:.85;margin-bottom:10px;text-align:center;}
+
+/* Scène arbre */
+.scene{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:12px;
+  margin-bottom:12px;border:1px solid rgba(255,255,255,.08);isolation:isolate;
+  background:linear-gradient(180deg,#7ec0ee 0%,#a9d6f0 38%,#d8eefb 54%,#cfeecb 60%,#b9e3a6 100%);}
+.ground-band{position:absolute;left:0;bottom:0;width:100%;height:16%;
+  background:linear-gradient(180deg,#8a3030,#5a1818);z-index:1;}
+.tree{position:absolute;left:0;bottom:0;width:100%;height:100%;z-index:2;}
+#t-sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite;}
+@keyframes sway{0%,100%{transform:rotate(-1.1deg);}50%{transform:rotate(1.1deg);}}
+#t-seed,#t-sprout,#t-trunk,#t-branches,#t-canopy,#t-fruits,#t-sun{
+  transform-box:fill-box;transition:transform .85s cubic-bezier(.34,1.25,.5,1),opacity .6s ease;}
+#t-sprout,#t-trunk,#t-branches,#t-canopy{transform-origin:50% 100%;}
+#t-seed,#t-fruits,#t-sun{transform-origin:50% 50%;}
+.leaves{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;}
+.leaves i{position:absolute;width:9px;height:9px;border-radius:50% 0 50% 50%;transform:rotate(45deg);}
+.leaves b{position:absolute;line-height:1;}
+
+/* Scoreboard */
+.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.score-col{background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  padding:10px 4px;text-align:center;}
+.score-num{font-family:"Orbitron",sans-serif;font-weight:900;font-size:clamp(1.4rem,5vw,2.2rem);line-height:1;}
+.score-col.reussis .score-num{color:var(--vert-neon);text-shadow:0 0 10px rgba(74,222,128,.6);}
+.score-col.restants .score-num{color:var(--jour);text-shadow:0 0 10px var(--day-glow);}
+.score-col.erreurs .score-num{color:var(--rouge);text-shadow:0 0 10px rgba(239,68,68,.5);}
+.score-lbl{font-family:"JetBrains Mono",monospace;font-size:.52rem;font-weight:500;
+  letter-spacing:1px;color:rgba(255,255,255,.5);margin-top:4px;text-transform:uppercase;}
+
+/* XP */
+.xp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.xp-head span:first-child{font-family:"Orbitron",sans-serif;font-size:.58rem;letter-spacing:1px;color:var(--jour);opacity:.85;}
+.xp-head span:last-child{font-family:"Orbitron",sans-serif;font-size:.65rem;font-weight:700;color:var(--jour);}
+.xp-bar{height:9px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;}
+.xp-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f08080);
+  box-shadow:0 0 10px var(--jour);border-radius:8px;transition:width .6s cubic-bezier(.22,1,.36,1);}
+.defi-count{text-align:center;margin-top:8px;font-family:"JetBrains Mono",monospace;
+  font-size:.72rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.65);}
+
+/* Étoiles */
+.etoiles{text-align:center;margin-bottom:10px;font-size:clamp(1rem,3.5vw,1.4rem);letter-spacing:4px;}
+.etoiles .star{color:rgba(255,255,255,.2);transition:.3s;display:inline-block;}
+.etoiles .star.on{color:var(--jour);text-shadow:0 0 12px var(--jour),0 0 20px var(--jour);
+  animation:pop .5s cubic-bezier(.18,.89,.32,1.6);}
+@keyframes pop{0%{transform:scale(0);}60%{transform:scale(1.5);}100%{transform:scale(1);}}
+
+/* Étape badge */
+.etape-badge{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.etape-num{font-family:"Orbitron",sans-serif;font-size:.62rem;letter-spacing:2px;color:#fff;
+  background:var(--jour);border-radius:6px;padding:4px 10px;}
+.etape-titre{font-family:"Nunito",sans-serif;font-size:.9rem;font-weight:900;color:var(--jour-fonce);}
+.etape-score{font-family:"JetBrains Mono",monospace;font-size:.7rem;color:var(--gris);margin-left:auto;}
+
+/* Card question */
+.card{background:#fff;border-radius:18px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);}
+.rainbow{height:5px;background:linear-gradient(90deg,#b94040,#f5a623,#8dc63f,#3ab5d8,#a884ff,#b94040);
+  background-size:300%;animation:slide 4s linear infinite;}
+@keyframes slide{0%{background-position:0%;}100%{background-position:300%;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.card{animation:fadeUp .4s ease both;}
+.card-body{padding:16px 14px 18px;}
+.q-num{font-family:"Orbitron",sans-serif;font-size:.65rem;letter-spacing:1.5px;
+  color:var(--jour);margin-bottom:6px;}
+.q-cc{font-family:"JetBrains Mono",monospace;font-size:1rem;font-weight:700;
+  color:var(--jour-fonce);background:var(--jour-clair);border:1.5px solid var(--jour-pale);
+  border-radius:8px;padding:7px 14px;display:inline-block;margin-bottom:10px;font-style:italic;}
+.q-txt{font-family:"Nunito",sans-serif;font-size:clamp(.9rem,3vw,1.02rem);font-weight:800;
+  color:var(--txt);margin-bottom:13px;line-height:1.5;}
+.q-context{font-family:"Georgia",serif;font-size:.84rem;font-style:italic;color:#7a5a5a;
+  background:#fff8f8;border-left:3px solid var(--jour);padding:6px 11px;border-radius:0 8px 8px 0;
+  margin-bottom:12px;line-height:1.6;}
+
+/* Choix */
+.choix{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+.choix-btn{text-align:left;font-family:"Nunito",sans-serif;font-size:clamp(.88rem,2.8vw,.97rem);
+  font-weight:700;padding:11px 14px;border:2px solid #e8d8d8;background:#fffdf7;
+  border-radius:12px;cursor:pointer;transition:.14s;color:var(--txt);
+  display:flex;align-items:center;gap:10px;min-height:44px;}
+.choix-btn:hover:not(.locked){border-color:var(--jour);background:var(--jour-clair);}
+.lettre{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:.75rem;
+  color:var(--jour-fonce);background:var(--jour-clair);border:1px solid var(--jour-pale);
+  border-radius:6px;padding:2px 7px;flex-shrink:0;}
+.choix-btn.selected{border-color:var(--jour);background:var(--jour-clair);}
+.choix-btn.good{border-color:var(--vert);background:#e7faec;color:#157f3a;}
+.choix-btn.good .lettre{background:#e7faec;border-color:var(--vert);color:#157f3a;}
+.choix-btn.bad{border-color:var(--rouge);background:#fdeaea;color:#c0392b;}
+.choix-btn.locked{cursor:default;}
+
+/* Feedback */
+.feedback{display:none;margin-top:13px;padding:12px 14px;border-radius:10px;
+  font-size:clamp(.86rem,2.8vw,.96rem);line-height:1.6;font-family:"Nunito",sans-serif;}
+.feedback.show{display:block;animation:pop .4s cubic-bezier(.18,.89,.32,1.6);}
+.feedback.ok{background:#e7faec;color:#157f3a;border:1px solid #9be7a5;font-weight:700;}
+.feedback.ko{background:#fdeaea;color:#c0392b;border:1px solid #f5b5b5;}
+
+/* Boutons */
+.btns{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 4px;}
+.btn{font-family:"Orbitron",sans-serif;font-weight:700;font-size:clamp(.7rem,2.3vw,.8rem);
+  letter-spacing:1px;padding:11px 16px;border:none;border-radius:10px;cursor:pointer;
+  transition:transform .12s;color:#fff;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:active{transform:scale(.96);}
+.btn-valider{background:var(--vert);animation:nv 1.4s ease-in-out infinite;}
+@keyframes nv{0%,100%{box-shadow:0 0 6px rgba(34,197,94,.5);}50%{box-shadow:0 0 18px rgba(34,197,94,.95);}}
+.btn-suivant{background:var(--jour);display:none;animation:nj 1.4s ease-in-out infinite;}
+@keyframes nj{0%,100%{box-shadow:0 0 6px var(--day-glow);}50%{box-shadow:0 0 18px rgba(185,64,64,.8);}}
+.btn-suivant.visible{display:inline-flex;}
+.btn:disabled{background:#d8d8d8!important;color:#fff!important;cursor:not-allowed;animation:none!important;box-shadow:none!important;}
+
+/* Nav retour */
+.nav{display:flex;justify-content:flex-start;margin-top:14px;}
+.nav button{font-family:"Orbitron",sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.5px;
+  padding:9px 14px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;color:#888;cursor:pointer;min-height:40px;}
+.nav button:not(:disabled):hover{background:#eee;color:#555;}
+.nav button:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Unlock interstitiel */
+.unlock-card{display:none;background:var(--jour-clair);border:2px solid var(--jour);border-radius:16px;
+  padding:22px;text-align:center;margin-bottom:14px;animation:fadeUp .5s;}
+.unlock-card.show{display:block;}
+.unlock-icon{font-size:2.4rem;margin-bottom:7px;}
+.unlock-titre{font-family:"Orbitron",sans-serif;font-size:.9rem;font-weight:900;color:var(--jour-fonce);margin-bottom:5px;}
+.unlock-msg{font-size:.88rem;color:var(--gris);line-height:1.7;margin-bottom:12px;}
+.btn-unlock{min-height:2.8rem;background:var(--jour);color:#fff;border:none;border-radius:10px;
+  padding:0 22px;font-family:"Orbitron",sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 0 var(--jour-fonce);}
+.btn-unlock:hover{filter:brightness(1.08);}
+
+/* XP pop */
+.xp-pop{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.5);
+  font-family:"Orbitron",sans-serif;font-weight:900;font-size:2.5rem;color:var(--jour);
+  text-shadow:0 0 20px var(--jour);z-index:50;opacity:0;pointer-events:none;}
+.xp-pop.go{animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes xpfly{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.25);}70%{opacity:1;transform:translate(-50%,-80%) scale(1);}100%{opacity:0;transform:translate(-50%,-130%) scale(.9);}}
+
+/* Résultats */
+.results{display:none;}
+.results.show{display:block;animation:pop .5s ease;}
+.res-mission{font-family:"Orbitron",sans-serif;font-weight:900;font-size:clamp(1rem,4vw,1.5rem);
+  text-align:center;color:var(--jour-fonce);letter-spacing:2px;margin-bottom:6px;}
+.res-score{font-family:"Orbitron",sans-serif;font-weight:900;font-size:clamp(1.8rem,8vw,3rem);
+  text-align:center;color:var(--jour);text-shadow:0 0 16px var(--day-glow);margin:8px 0;}
+.res-stars{text-align:center;font-size:clamp(1.1rem,4vw,1.5rem);letter-spacing:4px;
+  color:var(--jour);margin-bottom:8px;}
+.res-gg{text-align:center;font-family:"Orbitron",sans-serif;font-size:clamp(.76rem,2.2vw,.86rem);
+  color:var(--vert);font-weight:700;letter-spacing:1px;margin-bottom:16px;}
+.recap{background:#faf7ef;border-radius:12px;padding:12px 14px;margin-bottom:16px;}
+.recap-item{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;
+  border-bottom:1px solid #ece4cf;font-size:clamp(.76rem,2.2vw,.84rem);gap:10px;}
+.recap-item:last-child{border-bottom:none;}
+.recap-item .eq{font-weight:600;color:var(--txt);flex:1;}
+.recap-item .st{font-size:1rem;flex-shrink:0;}
+.btn-rejouer{display:block;width:100%;font-family:"Orbitron",sans-serif;font-weight:700;
+  font-size:clamp(.86rem,2.8vw,.98rem);letter-spacing:1px;padding:14px;border:none;
+  border-radius:12px;color:#fff;background:var(--jour);cursor:pointer;min-height:44px;
+  animation:nj 1.4s ease-in-out infinite;}
+
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+@keyframes rainFall{0%{opacity:1;transform:translateY(-40px) rotate(0);}100%{opacity:0;transform:translateY(110vh) rotate(var(--rot));}}
+.flash-v{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.3);
+  font-size:3.5rem;font-weight:900;z-index:9999;pointer-events:none;opacity:0;}
+.flash-v.pop{animation:flashPop 1s ease-out forwards;}
+</style>
+</head>
+<body>
+<div class="bulle b1"></div><div class="bulle b2"></div>
+<div class="bulle b3"></div><div class="bulle b4"></div>
+<div class="flash-v" id="flashV"></div>
+<div class="xp-pop" id="xpPop">+1</div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 6ÈME</div>
+    <div class="semaine">Semaine 6 — Jour 2</div>
+    <h1 class="titre">Je relève le <span class="accent">Défi</span></h1>
+    <div class="sous-titre">Les compléments circonstanciels · 2 étapes · 11 pts</div>
+    <div class="badge-theme">CC de temps · lieu · manière · moyen · but · cause</div>
+  </div>
+
+  <div class="layout">
+    <!-- COL GAUCHE -->
+    <div class="col-left">
+      <div class="game">
+        <div class="game-label">TON ARBRE DU SAVOIR GRANDIT</div>
+        <div class="scene" id="scene">
+          <div class="leaves" id="leaves"></div>
+          <div class="ground-band"></div>
+                    <svg class="tree" id="tree" viewBox="0 0 320 280" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+            <!-- soleil (apparaît à la fin) -->
+            <g id="t-sun">
+              <circle cx="58" cy="52" r="20" fill="#ffd54a"/>
+              <g stroke="#ffd54a" stroke-width="3" stroke-linecap="round">
+                <line x1="58" y1="22" x2="58" y2="10"/><line x1="58" y1="94" x2="58" y2="82"/>
+                <line x1="28" y1="52" x2="16" y2="52"/><line x1="100" y1="52" x2="88" y2="52"/>
+                <line x1="37" y1="31" x2="28" y2="22"/><line x1="79" y1="73" x2="88" y2="82"/>
+                <line x1="79" y1="31" x2="88" y2="22"/><line x1="37" y1="73" x2="28" y2="82"/>
+              </g>
+              <circle cx="58" cy="52" r="20" fill="#ffe27a"/>
+            </g>
+            <!-- sol -->
+            <ellipse cx="160" cy="256" rx="150" ry="24" fill="#7a4a25"/>
+            <ellipse cx="160" cy="249" rx="150" ry="18" fill="#3f7d2f"/>
+            <ellipse cx="160" cy="247" rx="146" ry="14" fill="#4e9a37"/>
+            <!-- plante (oscille doucement) -->
+            <g id="t-sway">
+              <g id="t-trunk">
+                <path d="M150,250 C152,206 154,176 155,150 L165,150 C166,176 168,206 170,250 Z" fill="#7a4a25"/>
+                <path d="M156,250 C157,206 158,176 159,150 L162,150 C162,176 163,206 164,250 Z" fill="#8a5a30" opacity="0.6"/>
+              </g>
+              <g id="t-branches">
+                <path d="M158,160 C140,150 122,140 108,124" stroke="#7a4a25" stroke-width="7" fill="none" stroke-linecap="round"/>
+                <path d="M162,158 C182,150 198,140 214,126" stroke="#7a4a25" stroke-width="7" fill="none" stroke-linecap="round"/>
+                <path d="M160,158 L160,96" stroke="#7a4a25" stroke-width="7" fill="none" stroke-linecap="round"/>
+              </g>
+              <g id="t-canopy">
+                <ellipse cx="160" cy="104" rx="72" ry="56" fill="#4e9a31"/>
+                <ellipse cx="116" cy="122" rx="46" ry="40" fill="#5fae3a"/>
+                <ellipse cx="206" cy="120" rx="48" ry="42" fill="#5fae3a"/>
+                <ellipse cx="160" cy="82" rx="52" ry="42" fill="#6cc24a"/>
+                <ellipse cx="138" cy="96" rx="30" ry="26" fill="#7fce58" opacity="0.7"/>
+                <ellipse cx="186" cy="100" rx="28" ry="24" fill="#7fce58" opacity="0.6"/>
+              </g>
+              <g id="t-fruits">
+                <g fill="#e23b3b"><circle cx="128" cy="116" r="6"/><circle cx="182" cy="98" r="6"/><circle cx="206" cy="128" r="6"/><circle cx="150" cy="86" r="6"/><circle cx="192" cy="134" r="6"/><circle cx="160" cy="120" r="6"/></g>
+                <g fill="#ff7d6b"><circle cx="126" cy="114" r="2"/><circle cx="180" cy="96" r="2"/><circle cx="204" cy="126" r="2"/><circle cx="148" cy="84" r="2"/><circle cx="190" cy="132" r="2"/><circle cx="158" cy="118" r="2"/></g>
+              </g>
+              <g id="t-sprout">
+                <path d="M160,244 L160,206" stroke="#4e9a31" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M160,214 C146,212 140,200 142,194 C152,196 160,204 160,214 Z" fill="#5fae3a"/>
+                <path d="M160,214 C174,212 180,200 178,194 C168,196 160,204 160,214 Z" fill="#6cc24a"/>
+              </g>
+              <g id="t-seed"><ellipse cx="160" cy="236" rx="7" ry="5" fill="#5a3a1a"/></g>
+            </g>
+          </svg>
+        </div>
+
+        <div class="scoreboard">
+          <div class="score-col reussis"><div class="score-num" id="scR">0</div><div class="score-lbl">Réussis</div></div>
+          <div class="score-col restants"><div class="score-num" id="scN">11</div><div class="score-lbl">Restants</div></div>
+          <div class="score-col erreurs"><div class="score-num" id="scE">0</div><div class="score-lbl">Erreurs</div></div>
+        </div>
+        <div class="etoiles" id="etoiles"></div>
+        <div class="xp-head"><span>PROGRESSION</span><span id="xpPct">0 %</span></div>
+        <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+        <div class="defi-count" id="defiCount">QUESTION 1 / 11</div>
+      </div>
+
+    </div>
+
+    <!-- COL DROITE -->
+    <div class="col-right">
+      <!-- Étape 1 -->
+      <div id="zone-etape1">
+        <div class="etape-badge">
+          <div class="etape-num">ÉTAPE 1 / 2</div>
+          <div class="etape-titre">Identifier le type de CC</div>
+          <div class="etape-score" id="sc1">0 / 8</div>
+        </div>
+        <div id="card-zone1">
+          <div class="card" id="exo-card">
+            <div class="rainbow"></div>
+            <div class="card-body">
+              <div class="q-num" id="qnum"></div>
+              <div class="phrase-box" style="background:var(--dark);border:1.5px solid var(--jour);border-radius:10px;padding:10px 13px;margin-bottom:12px;">
+                <div style="font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:1.5px;color:var(--jour);margin-bottom:6px;">TEXTE SUPPORT</div>
+                <div style="font-family:'Georgia',serif;font-size:.88rem;line-height:2;color:#f0e0e0;">
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">1</span> Tôt le matin, Nadia quitta sa maison
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">2</span> à la hâte.
+                  Elle se rendait à l'école
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">3</span> à vélo
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">4</span> pour ne pas être en retard.
+                  Ce jour-là, elle pédalait
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">5</span> vite car elle était
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">6</span> en retard.
+                  Elle arriva enfin
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">7</span> dans la cour
+                  et attacha son vélo
+                  <span style="display:inline-block;background:var(--jour);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;vertical-align:middle;margin:0 1px;">8</span> avec un cadenas.
+                </div>
+              </div>
+              <div class="q-cc" id="qcc"></div>
+              <div class="q-txt" id="qtxt"></div>
+              <div class="choix" id="choix"></div>
+              <div class="feedback" id="feedback"></div>
+              <div class="btns">
+                <button class="btn btn-valider" id="btnVal" disabled>✓ Valider</button>
+                <button class="btn btn-suivant" id="btnSuiv">Suivant →</button>
+              </div>
+              <div class="nav"><button id="btnRet" disabled>← Retour</button></div>
+            </div>
+          </div>
+        </div>
+        <!-- Unlock -->
+        <div class="unlock-card" id="unlock1">
+          <div class="unlock-icon">🌿</div>
+          <div class="unlock-titre">Étape 1 validée !</div>
+          <div class="unlock-msg">Tu as identifié les 8 compléments circonstanciels.<br>L'étape 2 est débloquée : justifie par la question.</div>
+          <button class="btn-unlock" onclick="startEtape2()">Passer à l'étape 2 ▸</button>
+        </div>
+      </div>
+
+      <!-- Étape 2 (masquée) -->
+      <div id="zone-etape2" style="display:none;">
+        <div class="etape-badge">
+          <div class="etape-num">ÉTAPE 2 / 2</div>
+          <div class="etape-titre">Justifier par la question</div>
+          <div class="etape-score" id="sc2">0 / 3</div>
+        </div>
+        <div class="card" id="exo-card2">
+          <div class="rainbow"></div>
+          <div class="card-body">
+            <div class="q-num" id="qnum2"></div>
+              <div style="background:var(--dark);border:1.5px solid var(--jour);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-family:'Georgia',serif;font-size:.88rem;line-height:2;color:#f0e0e0;">
+                <div style="font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:1.5px;color:var(--jour);margin-bottom:6px;">TEXTE SUPPORT</div>
+                <span class="cc-num">1</span> Tôt le matin, Nadia quitta sa maison
+                <span class="cc-num">2</span> à la hâte. Elle se rendait à l'école
+                <span class="cc-num">3</span> à vélo
+                <span class="cc-num">4</span> pour ne pas être en retard. Ce jour-là, elle pédalait
+                <span class="cc-num">5</span> vite car elle était
+                <span class="cc-num">6</span> en retard. Elle arriva enfin
+                <span class="cc-num">7</span> dans la cour et attacha son vélo
+                <span class="cc-num">8</span> avec un cadenas.
+              </div>
+            <div class="q-cc" id="qcc2"></div>
+            <div class="q-txt" id="qtxt2"></div>
+            <div class="choix" id="choix2"></div>
+            <div class="feedback" id="feedback2"></div>
+            <div class="btns">
+              <button class="btn btn-valider" id="btnVal2" disabled>✓ Valider</button>
+              <button class="btn btn-suivant" id="btnSuiv2">Suivant →</button>
+            </div>
+            <div class="nav"><button id="btnRet2" disabled>← Retour</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Résultats -->
+      <div class="results" id="results-card">
+        <div class="card">
+          <div class="rainbow"></div>
+          <div class="card-body">
+            <div class="res-mission">BILAN FINAL</div>
+            <div class="res-score" id="resScore"></div>
+            <div class="res-stars" id="resStars"></div>
+            <div class="res-gg" id="resGg"></div>
+            <div class="recap" id="resRecap"></div>
+            <button class="btn-rejouer" onclick="rejouer()">🔄 Recommencer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   N6S6J2 — CC — 6e S6 J2
+   Étape 1 : 8 identifications (QCM)
+   Étape 2 : 3 justifications (QCM)
+   Total : 11 pts
+   ══════════════════════════════════════ */
+
+/* ── DONNÉES MOT POUR MOT ── */
+const E1=[
+  {cc:'"Tôt le matin"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de lieu','CC de temps','CC de manière'],ok:1,
+   fb:'Test : Nadia quitta sa maison QUAND ? → tôt le matin. → CC de temps.'},
+  {cc:'"à la hâte"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de cause','CC de temps','CC de manière'],ok:2,
+   fb:'Test : Nadia quitta sa maison COMMENT ? → à la hâte. → CC de manière.'},
+  {cc:'"à vélo"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de lieu','CC de moyen','CC de but'],ok:1,
+   fb:'Test : Elle se rendait à l\'école AVEC QUEL MOYEN DE TRANSPORT ? → à vélo. → CC de moyen.'},
+  {cc:'"pour ne pas être en retard"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de cause','CC de temps','CC de but'],ok:2,
+   fb:'Test : Elle se rendait à l\'école DANS QUEL BUT ? → pour ne pas être en retard. → CC de but.'},
+  {cc:'"vite"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de temps','CC de manière','CC de lieu'],ok:1,
+   fb:'Test : Elle pédalait COMMENT ? → vite. → CC de manière.'},
+  {cc:'"car elle était en retard"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de but','CC de temps','CC de cause'],ok:2,
+   fb:'Test : Elle pédalait vite POURQUOI ? → car elle était en retard. → CC de cause.'},
+  {cc:'"dans la cour"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de lieu','CC de temps','CC de cause'],ok:0,
+   fb:'Test : Elle arriva OÙ ? → dans la cour. → CC de lieu.'},
+  {cc:'"avec un cadenas"',
+   q:'Pour chaque CC numéroté, dis de quel type il est.',
+   opts:['CC de lieu','CC de but','CC de moyen'],ok:2,
+   fb:'Test : Elle attacha son vélo AVEC QUOI ? → avec un cadenas. → CC de moyen.'},
+];
+
+const E2=[
+  {cc:'"à la hâte" (CC de manière)',
+   q:'Quelle question as-tu posée ?',
+   opts:['Nadia quitta sa maison quand ?','Nadia quitta sa maison comment ?','Nadia quitta sa maison pourquoi ?'],ok:1,
+   fb:'À la hâte dit comment elle est partie : la question "Comment ?" est celle du CC de manière.'},
+  {cc:'"pour ne pas être en retard" (CC de but)',
+   q:'Quelle question as-tu posée ?',
+   opts:['Elle se rendait à l\'école pourquoi ?','Elle se rendait à l\'école comment ?','Elle se rendait à l\'école dans quel but ?'],ok:2,
+   fb:'Pour ne pas être en retard dit dans quel but elle se rendait à l\'école : la question "Dans quel but ?" est celle du CC de but.'},
+  {cc:'"car elle était en retard" (CC de cause)',
+   q:'Quelle question as-tu posée ?',
+   opts:['Elle pédalait vite dans quel but ?','Elle pédalait vite pourquoi ?','Elle pédalait vite comment ?'],ok:1,
+   fb:'Car elle était en retard dit pourquoi elle pédalait vite : la question "Pourquoi ?" est celle du CC de cause.'},
+];
+
+const TOTAL=11;
+let reussis=0,erreurs=0;
+let idx1=0,idx2=0,etape=1;
+let sel1=null,sel2=null;
+let st1=E1.map(()=>({val:false,ok:false,picked:null}));
+let st2=E2.map(()=>({val:false,ok:false,picked:null}));
+
+/* ── ARBRE ── */
+function ss(g,a,b){const t=Math.max(0,Math.min(1,(g-a)/(b-a)));return t*t*(3-2*t);}
+function setG(id,s,o){const e=document.getElementById(id);if(!e)return;e.style.transform='scale('+s.toFixed(3)+')';e.style.opacity=o.toFixed(3);}
+function growTree(p){
+  setG('t-seed',1,1-ss(p,0,0.12));
+  setG('t-sprout',ss(p,0.02,0.20),ss(p,0.02,0.18)*(1-ss(p,0.30,0.46)));
+  setG('t-trunk',ss(p,0.12,0.40),1);
+  setG('t-branches',ss(p,0.32,0.58),1);
+  setG('t-canopy',ss(p,0.36,0.78),1);
+  setG('t-fruits',ss(p,0.80,1.0),ss(p,0.80,1.0));
+  setG('t-sun',1,ss(p,0.84,1.0));
+}
+function leafBurst(){
+  const host=document.getElementById('leaves');if(!host)return;
+  const cols=['#c84848','#e06060','#b94040','#f08080','#f5c518'];
+  for(let i=0;i<10;i++){
+    const d=document.createElement('i');
+    d.style.background=cols[i%cols.length];
+    d.style.left=(38+Math.random()*24)+'%';d.style.top=(20+Math.random()*26)+'%';
+    host.appendChild(d);
+    const dx=(Math.random()*2-1)*55,dy=-28-Math.random()*50,rot=(Math.random()*2-1)*180;
+    d.animate([{opacity:1,transform:'translate(0,0) rotate(0deg)'},{opacity:0,transform:`translate(${dx}px,${dy}px) rotate(${rot}deg)`}],
+      {duration:1000+Math.random()*600,easing:'ease-out'}).onfinish=()=>d.remove();
+  }
+}
+function sparkleBurst(){
+  const host=document.getElementById('leaves');if(!host)return;
+  for(let i=0;i<18;i++){
+    const s=document.createElement('b');s.textContent='✨';
+    s.style.left=(20+Math.random()*60)+'%';s.style.top=(12+Math.random()*50)+'%';
+    s.style.fontSize=(10+Math.random()*14)+'px';
+    host.appendChild(s);
+    s.animate([{opacity:0,transform:'scale(.3)'},{opacity:1,transform:'scale(1.1)'},{opacity:0,transform:'translateY(-28px) scale(.8)'}],
+      {duration:1600+Math.random()*800,easing:'ease-out'}).onfinish=()=>s.remove();
+  }
+}
+
+/* ── SCORE ── */
+function updScore(){
+  document.getElementById('scR').textContent=reussis;
+  document.getElementById('scN').textContent=TOTAL-reussis-erreurs;
+  document.getElementById('scE').textContent=erreurs;
+  const pct=Math.round(reussis/TOTAL*100);
+  document.getElementById('xpFill').style.width=pct+'%';
+  document.getElementById('xpPct').textContent=pct+' %';
+  growTree(reussis/TOTAL);
+  // étoiles
+  const w=document.getElementById('etoiles');
+  w.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<reussis));
+  // scores étapes
+  document.getElementById('sc1').textContent=st1.filter(s=>s.ok).length+' / 8';
+  document.getElementById('sc2').textContent=st2.filter(s=>s.ok).length+' / 3';
+}
+function buildEtoiles(){
+  const w=document.getElementById('etoiles');w.innerHTML='';
+  for(let i=0;i<TOTAL;i++){const s=document.createElement('span');s.className='star';s.textContent='★';w.appendChild(s);}
+}
+function fireXP(){const p=document.getElementById('xpPop');p.classList.remove('go');void p.offsetWidth;p.classList.add('go');}
+function flashV(ok){
+  const el=document.getElementById('flashV');el.textContent=ok?'✓':'✗';
+  el.style.color=ok?'#22c55e':'#ef4444';
+  el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+}
+
+/* ── RENDER ÉTAPE 1 ── */
+function renderQ1(){
+  const d=E1[idx1],st=st1[idx1];
+  sel1=null;
+  document.getElementById('qnum').textContent='Question '+(idx1+1)+' / 8 — CC ['+(idx1+1)+']';
+  document.getElementById('qcc').textContent='['+(idx1+1)+'] '+d.cc;
+  document.getElementById('qtxt').textContent=d.q;
+  document.getElementById('defiCount').textContent='QUESTION '+(idx1+1)+' / '+TOTAL;
+  const cont=document.getElementById('choix');cont.innerHTML='';
+  const LETTRES=['A','B','C'];
+  d.opts.forEach((txt,i)=>{
+    const b=document.createElement('button');b.className='choix-btn';
+    b.innerHTML='<span class="lettre">'+LETTRES[i]+'</span><span>'+txt+'</span>';
+    if(st.val){
+      b.classList.add('locked');
+      if(i===d.ok)b.classList.add('good');
+      if(i===st.picked&&i!==d.ok)b.classList.add('bad');
+    } else {
+      b.addEventListener('click',()=>{
+        sel1=i;cont.querySelectorAll('.choix-btn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');document.getElementById('btnVal').disabled=false;
+      });
+    }
+    cont.appendChild(b);
+  });
+  const fb=document.getElementById('feedback');
+  if(st.val&&!st.ok){fb.className='feedback ko show';fb.textContent=d.fb;}
+  else if(st.val&&st.ok){fb.className='feedback ok show';fb.textContent='✔ Bonne réponse !';}
+  else{fb.className='feedback';}
+  const bv=document.getElementById('btnVal');bv.disabled=!st.val&&sel1===null||st.val;bv.style.display=st.val?'none':'';
+  const bs=document.getElementById('btnSuiv');
+  if(st.val){bs.classList.add('visible');bs.disabled=false;
+    bs.textContent=idx1===7?'Voir l\'étape 2 →':'Suivant →';}
+  else{bs.classList.remove('visible');bs.disabled=true;}
+  document.getElementById('btnRet').disabled=idx1===0;
+}
+
+function valider1(){
+  const d=E1[idx1],st=st1[idx1];
+  if(st.val||sel1===null)return;
+  st.val=true;st.picked=sel1;st.ok=(sel1===d.ok);
+  if(st.ok){reussis++;leafBurst();fireXP();flashV(true);}
+  else{erreurs++;flashV(false);}
+  updScore();renderQ1();
+}
+function suivant1(){
+  if(!st1[idx1].val)return;
+  if(idx1<7){idx1++;renderQ1();}
+  else showUnlock1();
+}
+function retour1(){if(idx1>0){idx1--;renderQ1();}}
+
+function showUnlock1(){
+  document.getElementById('exo-card').style.display='none';
+  document.getElementById('unlock1').classList.add('show');
+  unlockS();
+}
+function startEtape2(){
+  document.getElementById('zone-etape1').style.display='none';
+  document.getElementById('zone-etape2').style.display='block';
+  etape=2;renderQ2();
+}
+
+/* ── RENDER ÉTAPE 2 ── */
+function renderQ2(){
+  const d=E2[idx2],st=st2[idx2];
+  sel2=null;
+  document.getElementById('qnum2').textContent='Question '+(8+idx2+1)+' / 11 — Justification';
+  document.getElementById('qcc2').textContent='['+(8+idx2+1)+'] '+d.cc;
+  document.getElementById('qtxt2').textContent=d.q;
+  document.getElementById('defiCount').textContent='QUESTION '+(8+idx2+1)+' / '+TOTAL;
+  const cont=document.getElementById('choix2');cont.innerHTML='';
+  const LETTRES=['A','B','C'];
+  d.opts.forEach((txt,i)=>{
+    const b=document.createElement('button');b.className='choix-btn';
+    b.innerHTML='<span class="lettre">'+LETTRES[i]+'</span><span>'+txt+'</span>';
+    if(st.val){
+      b.classList.add('locked');
+      if(i===d.ok)b.classList.add('good');
+      if(i===st.picked&&i!==d.ok)b.classList.add('bad');
+    } else {
+      b.addEventListener('click',()=>{
+        sel2=i;cont.querySelectorAll('.choix-btn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');document.getElementById('btnVal2').disabled=false;
+      });
+    }
+    cont.appendChild(b);
+  });
+  const fb=document.getElementById('feedback2');
+  if(st.val&&!st.ok){fb.className='feedback ko show';fb.textContent=d.fb;}
+  else if(st.val&&st.ok){fb.className='feedback ok show';fb.textContent='✔ Bonne réponse !';}
+  else{fb.className='feedback';}
+  const bv=document.getElementById('btnVal2');bv.disabled=st.val;bv.style.display=st.val?'none':'';
+  const bs=document.getElementById('btnSuiv2');
+  if(st.val){bs.classList.add('visible');bs.disabled=false;
+    bs.textContent=idx2===2?'Voir le bilan →':'Suivant →';}
+  else{bs.classList.remove('visible');bs.disabled=true;}
+  document.getElementById('btnRet2').disabled=idx2===0;
+}
+
+function valider2(){
+  const d=E2[idx2],st=st2[idx2];
+  if(st.val||sel2===null)return;
+  st.val=true;st.picked=sel2;st.ok=(sel2===d.ok);
+  if(st.ok){reussis++;leafBurst();fireXP();flashV(true);}
+  else{erreurs++;flashV(false);}
+  updScore();renderQ2();
+}
+function suivant2(){
+  if(!st2[idx2].val)return;
+  if(idx2<2){idx2++;renderQ2();}
+  else showResults();
+}
+function retour2(){if(idx2>0){idx2--;renderQ2();}}
+
+/* ── BILAN ── */
+function showResults(){
+  document.getElementById('zone-etape2').style.display='none';
+  document.getElementById('results-card').classList.add('show');
+  growTree(1);setTimeout(sparkleBurst,700);setTimeout(sparkleBurst,1700);
+  if(reussis>=9){finalOkS();rainEmojis();}else finalKoS();
+  document.getElementById('resScore').textContent=reussis+' / '+TOTAL;
+  let stars='';for(let i=0;i<TOTAL;i++)stars+=(i<reussis)?'★':'☆';
+  document.getElementById('resStars').textContent=stars;
+  let msg;
+  if(reussis===11)msg='🏆 Bravo ! Tu identifies et justifies parfaitement les CC.';
+  else if(reussis>=8)msg='Excellent travail !';
+  else if(reussis>=5)msg='Bon travail. Relis les types signalés.';
+  else msg='Poursuis tes efforts ! Reprends le parcours et retente.';
+  document.getElementById('resGg').textContent=msg;
+  let html='';
+  E1.forEach((d,i)=>html+='<div class="recap-item"><span class="eq">CC '+(i+1)+' — '+d.cc+'</span><span class="st">'+(st1[i].ok?'✓':'✗')+'</span></div>');
+  E2.forEach((d,i)=>html+='<div class="recap-item"><span class="eq">Justification — '+d.cc+'</span><span class="st">'+(st2[i].ok?'✓':'✗')+'</span></div>');
+  document.getElementById('resRecap').innerHTML=html;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function rejouer(){
+  reussis=0;erreurs=0;idx1=0;idx2=0;etape=1;sel1=null;sel2=null;
+  st1=E1.map(()=>({val:false,ok:false,picked:null}));
+  st2=E2.map(()=>({val:false,ok:false,picked:null}));
+  document.getElementById('results-card').classList.remove('show');
+  document.getElementById('zone-etape1').style.display='block';
+  document.getElementById('zone-etape2').style.display='none';
+  document.getElementById('exo-card').style.display='block';
+  document.getElementById('unlock1').classList.remove('show');
+  growTree(0);buildEtoiles();updScore();renderQ1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── AUDIO ── */
+let actx=null;
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){
+  if(!actx)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+.012);g.gain.exponentialRampToValueAtTime(.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.03);
+}
+function unlockS(){initA();[523,659,784,880,1046].forEach((f,k)=>tone(f,f,.15,'sine',.13,k*.06));}
+function finalOkS(){initA();[523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.22,'sine',.13,k*.09));}
+function finalKoS(){initA();tone(300,160,.4,'sine',.13,0);tone(200,120,.3,'sine',.10,.35);}
+
+/* ── PLUIE ── */
+const RAIN=['🌊','💧','⛵','🔭','🗺️','🌧️','💫','⚓'];
+function rainEmojis(){
+  for(let i=0;i<25;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+      el.style.cssText='position:fixed;top:-40px;left:'+(Math.random()*100)+'vw;'
+        +'font-size:'+(1.1+Math.random()*1.4).toFixed(2)+'rem;z-index:9998;pointer-events:none;'
+        +'--rot:'+(Math.random()*60-30)+'deg;'
+        +'animation:rainFall '+(1.8+Math.random()*1.4).toFixed(2)+'s ease-in forwards;';
+      document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
+    },i*85);
+  }
+}
+
+/* ── EVENT LISTENERS ── */
+document.getElementById('btnVal').addEventListener('click',valider1);
+document.getElementById('btnSuiv').addEventListener('click',suivant1);
+document.getElementById('btnRet').addEventListener('click',retour1);
+document.getElementById('btnVal2').addEventListener('click',valider2);
+document.getElementById('btnSuiv2').addEventListener('click',suivant2);
+document.getElementById('btnRet2').addEventListener('click',retour2);
+document.addEventListener('pointerdown',initA,{once:true});
+
+/* ── INIT ── */
+buildEtoiles();updScore();renderQ1();growTree(0);
+</script>
+</body>
+</html>
