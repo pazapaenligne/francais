@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – Compléments circonstanciels – 6e S6 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f28b82;--day-dark:#c0392b;--day-dark2:#7a1f1f;
+  --day-light:#fff0ef;--day-border:#f9c0bb;--day-glow:rgba(242,139,130,.25);
+  --bg:#fffdf7;--surface:#ffffff;--surface2:#fff8f7;--border:#f0dede;
+  --yellow:#f5c518;
+  --ok-bg:#e8f7fc;--ok-text:#1a6e88;--ok-bd:#7dd4e8;
+  --err-bg:#fff0ef;--err-text:#c0392b;--err-bd:#f28b82;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.wrap{width:100%;max-width:660px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:260px;height:260px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+
+/* HEADER */
+header{text-align:center;margin-bottom:1.4rem;}
+.logo-badge{display:inline-block;background:var(--yellow);border-radius:50px;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.3);margin-bottom:.55rem;}
+.logo-badge span{font-family:monospace;font-size:13px;font-weight:bold;color:#1a1d23;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.25;}
+h1 .hl{color:var(--day-dark);}
+
+/* PROGRESS */
+.prog-wrap{width:100%;margin-bottom:.8rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;}
+.prog-bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;width:0%;transition:width .5s ease;}
+
+/* RÉFÉRENTIEL */
+.ref-wrap{background:var(--day-dark2);border-radius:var(--radius);
+  border:1.5px solid var(--day-dark);overflow:hidden;margin-bottom:1.2rem;
+  animation:refPulse 2.8s ease-in-out infinite;}
+.ref-wrap.open-state{animation:none;border-color:var(--day);}
+@keyframes refPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(242,139,130,0);}
+  50%{box-shadow:0 0 0 5px rgba(242,139,130,.28);}
+}
+.ref-toggle{display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.1rem;cursor:pointer;user-select:none;transition:background .25s;}
+.ref-toggle.open{background:rgba(242,139,130,.15);}
+.ref-toggle-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+  color:var(--day-border);text-transform:uppercase;letter-spacing:.08em;}
+.ref-arrow{font-size:1rem;color:var(--day-border);transition:transform .3s;}
+.ref-arrow.open{transform:rotate(180deg);}
+.ref-body{display:none;padding:0 1.1rem 1rem;border-top:1px solid rgba(242,139,130,.2);}
+.ref-body.open{display:block;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.75rem;}
+@media(max-width:479px){.ref-grid{grid-template-columns:1fr;}}
+.ref-item{background:rgba(242,139,130,.08);border:1px solid rgba(242,139,130,.2);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;}
+.ref-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-border);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem;}
+.ref-def{font-size:.9rem;color:rgba(255,245,244,.9);line-height:1.65;}
+.ref-ex{font-size:.85rem;color:rgba(249,192,187,.85);font-style:italic;margin-top:.3rem;}
+
+/* CARTE */
+.phase-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:0 0 1.1rem;overflow:hidden;margin-bottom:1rem;}
+.card-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--yellow),var(--day-dark));}
+.card-head{padding:.9rem 1.2rem .6rem;}
+.act-num{font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;}
+.theme-badge{display:inline-block;font-size:.72rem;font-weight:800;padding:.15rem .6rem;
+  border-radius:99px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;
+  background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.phase-consigne{font-size:.9rem;color:var(--muted);line-height:1.65;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+/* QUESTION */
+.q-wrap{padding:0 1.2rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--day-dark);
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.q-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;line-height:1.75;
+  background:var(--surface2);border-left:3px solid var(--day-border);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:.7rem 1rem;margin-bottom:.85rem;}
+.q-phrase .souligne{text-decoration:underline;color:var(--day-dark);font-style:normal;}
+.q-label{font-size:clamp(1rem,3vw,1.15rem);color:var(--text);font-weight:700;margin-bottom:.55rem;}
+.q-sep{height:1px;background:var(--border);margin:.9rem 0;}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.75rem;}
+.opt-btn{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;
+  border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);
+  font-family:Arial,Helvetica,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);
+  color:var(--text);cursor:pointer;text-align:left;line-height:1.45;
+  min-height:50px;width:100%;transition:border-color .15s,background .15s;}
+.opt-btn:hover:not(:disabled){border-color:var(--day);background:var(--day-light);}
+.opt-btn.correct{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-text);font-weight:700;}
+.opt-btn.wrong{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-text);}
+.opt-btn:disabled{cursor:default;}
+.opt-circle{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;}
+.opt-btn.correct .opt-circle{background:var(--ok-bd);border-color:var(--ok-bd);color:#fff;}
+.opt-btn.wrong .opt-circle{background:var(--err-bd);border-color:var(--err-bd);color:#fff;}
+
+/* FEEDBACK */
+.fb{padding:.85rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.9rem,2.5vw,1rem);
+  line-height:1.8;display:none;margin-bottom:.75rem;border:1.5px solid;}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok-text);}
+.fb.err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-text);}
+.fb.shown{display:block;}
+
+/* BOUTONS */
+.btn-row{padding:0 1.2rem;margin-top:.5rem;}
+.btn-next{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;
+  padding:.65rem 1.2rem;border-radius:var(--radius-sm);font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+  min-height:2.8rem;background:var(--day-dark);color:#fff;transition:transform .12s,background .15s;}
+.btn-next:hover{background:var(--day-dark2);}
+.btn-next:active{transform:scale(.96);}
+.btn-next:disabled{opacity:.35;cursor:not-allowed;}
+
+/* SCORE INTERMÉDIAIRE */
+.score-inter{text-align:center;padding:1.2rem 1.2rem .5rem;}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;line-height:1;
+  color:var(--day-dark);margin:.4rem 0 .2rem;}
+.v-stars{font-size:1.9rem;letter-spacing:.08em;margin:.4rem 0;}
+.score-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--text);margin:.5rem 0 .3rem;line-height:1.6;}
+
+/* VICTOIRE */
+.victory-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(10,6,2,.88);align-items:center;justify-content:center;padding:1.5rem;}
+.victory-overlay.show{display:flex;}
+.victory-card{background:var(--surface);border:3px solid var(--day);
+  border-radius:22px;padding:2.5rem 2rem;text-align:center;max-width:460px;width:100%;}
+.v-badge{display:inline-block;background:var(--day-light);color:var(--day-dark);
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;padding:.3rem .9rem;
+  border-radius:99px;border:1.5px solid var(--day-border);margin-bottom:.75rem;}
+.v-score{font-size:3.5rem;font-weight:900;color:var(--day-dark);line-height:1;margin:.5rem 0;}
+.v-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--muted);margin:.4rem 0 1.5rem;line-height:1.6;}
+.hidden{display:none!important;}
+@keyframes confFall{from{transform:translateY(0) rotate(0deg);opacity:1;}
+  to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <span style="color:#e8002d;font-size:14px;">&#9679;</span>
+    <span style="color:#8dc63f;font-size:14px;">&#9679;</span>
+    <span style="color:#3ab5d8;font-size:14px;">&#9679;</span>
+    <span>&nbsp;Pazapa &middot; Fran&ccedil;ais &middot; 6e</span>
+  </div>
+  <div class="week-label">Semaine&nbsp;6 &ndash; Jour&nbsp;2</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">Les CC</span></h1>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span id="prog-label">Atelier&nbsp;1 &mdash; Question 1&thinsp;/&thinsp;4</span>
+    <span id="prog-score">0 pt</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="ref-wrap" id="ref-wrap">
+  <div class="ref-toggle" onclick="toggleRef()" id="ref-toggle">
+    <span class="ref-toggle-title">&#9670; R&eacute;f&eacute;rentiel &mdash; Les CC</span>
+    <span class="ref-arrow" id="ref-arrow">&#9660;</span>
+  </div>
+  <div class="ref-body" id="ref-body">
+    <div class="ref-grid">
+      <div class="ref-item">
+        <div class="ref-label">CC de lieu</div>
+        <div class="ref-def">R&eacute;pond &agrave; la question <em>&laquo;&nbsp;O&ugrave;&nbsp;?&nbsp;&raquo;</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Il joue <u>dans le jardin</u>.&nbsp;&raquo;</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">CC de temps</div>
+        <div class="ref-def">R&eacute;pond &agrave; la question <em>&laquo;&nbsp;Quand&nbsp;?&nbsp;&raquo;</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Elle part <u>demain matin</u>.&nbsp;&raquo;</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">CC de mani&egrave;re</div>
+        <div class="ref-def">R&eacute;pond &agrave; la question <em>&laquo;&nbsp;Comment&nbsp;?&nbsp;&raquo;</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Il parle <u>doucement</u>.&nbsp;&raquo;</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">CC de cause</div>
+        <div class="ref-def">R&eacute;pond &agrave; la question <em>&laquo;&nbsp;Pourquoi&nbsp;?&nbsp;&raquo;</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Elle pleure <u>&agrave; cause du vent</u>.&nbsp;&raquo;</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">CC de but</div>
+        <div class="ref-def">R&eacute;pond &agrave; <em>&laquo;&nbsp;Dans quel but&nbsp;?&nbsp;&raquo;</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Il court <u>pour gagner</u>.&nbsp;&raquo;</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-label">CC de moyen</div>
+        <div class="ref-def">R&eacute;pond &agrave; <em>&laquo;&nbsp;Avec quoi&nbsp;?&nbsp;&raquo;</em></div>
+        <div class="ref-ex">&laquo;&nbsp;Elle &eacute;crit <u>avec un stylo rouge</u>.&nbsp;&raquo;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ATELIER 1 -->
+<div class="phase-card" id="card-a1">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Atelier 1 &mdash; Identifier le CC et son type</div>
+    <div class="theme-badge">&#9670; 4 questions &mdash; Double QCM</div>
+  </div>
+  <div class="phase-consigne">Pour chaque phrase, identifie le CC soulign&eacute; puis dis de quel type il est.</div>
+  <div id="qa1-wrap" class="q-wrap"></div>
+</div>
+
+<!-- SCORE A1 -->
+<div class="phase-card hidden" id="card-score1">
+  <div class="card-stripe"></div>
+  <div class="score-inter" id="score1-content"></div>
+  <div class="btn-row" style="margin-bottom:.5rem;">
+    <button class="btn-next" id="btn-goto-a2" onclick="startA2()">Atelier&nbsp;2 &#8594;</button>
+  </div>
+</div>
+
+<!-- ATELIER 2 -->
+<div class="phase-card hidden" id="card-a2">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Atelier 2 &mdash; Poser la bonne question</div>
+    <div class="theme-badge">&#9670; 3 questions &mdash; QCM</div>
+  </div>
+  <div class="phase-consigne">Quelle question faut-il poser pour trouver le CC soulign&eacute;&nbsp;?</div>
+  <div id="qa2-wrap" class="q-wrap"></div>
+</div>
+
+<!-- SCORE A2 -->
+<div class="phase-card hidden" id="card-score2">
+  <div class="card-stripe"></div>
+  <div class="score-inter" id="score2-content"></div>
+  <div class="btn-row" style="margin-bottom:.5rem;">
+    <button class="btn-next" id="btn-goto-a3" onclick="startA3()">Atelier&nbsp;3 &#8594;</button>
+  </div>
+</div>
+
+<!-- ATELIER 3 -->
+<div class="phase-card hidden" id="card-a3">
+  <div class="card-stripe"></div>
+  <div class="card-head">
+    <div class="act-num">Atelier 3 &mdash; Plusieurs CC dans la m&ecirc;me phrase</div>
+    <div class="theme-badge">&#9670; 4 questions &mdash; QCM</div>
+  </div>
+  <div class="phase-consigne">Ces phrases contiennent plusieurs CC. Pour chaque CC soulign&eacute;, dis de quel type il est.</div>
+  <div id="qa3-wrap" class="q-wrap"></div>
+</div>
+
+<!-- VICTOIRE -->
+<div class="victory-overlay" id="victory">
+  <div class="victory-card">
+    <div class="v-badge">&#9670; Pazapa &middot; Trois ateliers termin&eacute;s</div>
+    <div class="v-score" id="v-sc">15&thinsp;/&thinsp;15</div>
+    <div class="v-stars" id="v-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+    <div class="v-msg" id="v-msg"></div>
+    <button class="btn-next" onclick="restart()" style="margin-top:.5rem;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+</div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+
+function toggleRef(){
+  var b=$('ref-body'),a=$('ref-arrow'),t=$('ref-toggle'),w=$('ref-wrap');
+  b.classList.toggle('open');a.classList.toggle('open');
+  t.classList.toggle('open');w.classList.toggle('open-state');
+}
+
+/* ── DONNÉES ATELIER 1 (double QCM) ── */
+var A1=[
+  {
+    phraseHTML:"Les enfants jouent dehors <span class=\"souligne\">depuis ce matin</span>.",
+    q1:"<span class=\"souligne\">Depuis ce matin</span> est-il un CC\u00a0?",
+    opts1:["Oui","Non"],ans1:0,
+    fb1:"Depuis ce matin donne une information sur les circonstances de l\u2019action\u00a0: quand les enfants jouent. C\u2019est bien un CC.",
+    q2:"De quel type est-il\u00a0?",
+    opts2:["CC de lieu","CC de temps","CC de mani\u00e8re"],ans2:1,
+    fb2:"Test\u00a0: Les enfants jouent dehors QUAND\u00a0? \u2192 depuis ce matin. \u2192 CC de temps."
+  },
+  {
+    phraseHTML:"Elle a r\u00e9ussi son examen <span class=\"souligne\">gr\u00e2ce \u00e0 son travail</span>.",
+    q1:"<span class=\"souligne\">Gr\u00e2ce \u00e0 son travail</span> est-il un CC\u00a0?",
+    opts1:["Oui","Non"],ans1:0,
+    fb1:"Gr\u00e2ce \u00e0 son travail donne une information sur la raison de sa r\u00e9ussite. C\u2019est bien un CC.",
+    q2:"De quel type est-il\u00a0?",
+    opts2:["CC de but","CC de temps","CC de cause"],ans2:2,
+    fb2:"Test\u00a0: Elle a r\u00e9ussi POURQUOI\u00a0? \u00c0 CAUSE DE QUOI\u00a0? \u2192 gr\u00e2ce \u00e0 son travail. \u2192 CC de cause. Attention\u00a0: gr\u00e2ce \u00e0 exprime une cause positive, mais c\u2019est bien une cause."
+  },
+  {
+    phraseHTML:"Il dessine <span class=\"souligne\">avec un crayon noir</span>.",
+    q1:"<span class=\"souligne\">Avec un crayon noir</span> est-il un CC\u00a0?",
+    opts1:["Oui","Non"],ans1:0,
+    fb1:"Avec un crayon noir pr\u00e9cise l\u2019outil utilis\u00e9 pour l\u2019action. C\u2019est bien un CC.",
+    q2:"De quel type est-il\u00a0?",
+    opts2:["CC de lieu","CC de moyen","CC de but"],ans2:1,
+    fb2:"Test\u00a0: Il dessine AVEC QUOI\u00a0? \u2192 avec un crayon noir. \u2192 CC de moyen."
+  },
+  {
+    phraseHTML:"Il s\u2019entra\u00eene dur <span class=\"souligne\">pour participer aux Jeux olympiques</span>.",
+    q1:"<span class=\"souligne\">Pour participer aux Jeux olympiques</span> est-il un CC\u00a0?",
+    opts1:["Oui","Non"],ans1:0,
+    fb1:"Pour participer aux Jeux olympiques pr\u00e9cise le but de l\u2019entra\u00eenement. C\u2019est bien un CC.",
+    q2:"De quel type est-il\u00a0?",
+    opts2:["CC de cause","CC de temps","CC de but"],ans2:2,
+    fb2:"Test\u00a0: Il s\u2019entra\u00eene DANS QUEL BUT\u00a0? \u2192 pour participer aux Jeux olympiques. \u2192 CC de but."
+  }
+];
+
+/* ── DONNÉES ATELIER 2 (QCM simple) ── */
+var A2=[
+  {
+    phraseHTML:"Il marche <span class=\"souligne\">doucement</span> dans la rue.",
+    q:"Quelle question faut-il poser pour trouver <span class=\"souligne\">doucement</span>\u00a0?",
+    opts:["Il marche quand\u00a0?","Il marche comment\u00a0?","Il marche o\u00f9\u00a0?"],ans:1,
+    fb:"Doucement dit comment il marche\u00a0: c\u2019est la question \u00ab\u00a0Comment\u00a0?\u00a0\u00bb qui permet de l\u2019identifier. \u2192 CC de mani\u00e8re."
+  },
+  {
+    phraseHTML:"Elle pleure <span class=\"souligne\">\u00e0 cause de la nouvelle</span>.",
+    q:"Quelle question faut-il poser pour trouver <span class=\"souligne\">\u00e0 cause de la nouvelle</span>\u00a0?",
+    opts:["Elle pleure comment\u00a0?","Elle pleure o\u00f9\u00a0?","Elle pleure pourquoi\u00a0?"],ans:2,
+    fb:"\u00c0 cause de la nouvelle dit pourquoi elle pleure\u00a0: c\u2019est la question \u00ab\u00a0Pourquoi\u00a0?\u00a0\u00bb qui permet de l\u2019identifier. \u2192 CC de cause."
+  },
+  {
+    phraseHTML:"Ils se retrouvent <span class=\"souligne\">au parc</span> chaque samedi.",
+    q:"Quelle question faut-il poser pour trouver <span class=\"souligne\">au parc</span>\u00a0?",
+    opts:["Ils se retrouvent o\u00f9\u00a0?","Ils se retrouvent quand\u00a0?","Ils se retrouvent comment\u00a0?"],ans:0,
+    fb:"Au parc dit o\u00f9 ils se retrouvent\u00a0: c\u2019est la question \u00ab\u00a0O\u00f9\u00a0?\u00a0\u00bb qui permet de l\u2019identifier. \u2192 CC de lieu. (Chaque samedi serait le CC de temps dans cette m\u00eame phrase.)"
+  }
+];
+
+/* ── DONNÉES ATELIER 3 (QCM simple, même phrase) ── */
+var PHRASE_C = "Hier soir, Ali a couru <span class=\"souligne-v\">vite</span> jusqu\u2019au stade pour retrouver ses amis.";
+
+var A3=[
+  {
+    cc:"hier soir",
+    phraseHTML:"<span class=\"souligne\">Hier soir</span>, Ali a couru vite jusqu\u2019au stade pour retrouver ses amis.",
+    q:"Quel est le type de <span class=\"souligne\">hier soir</span>\u00a0?",
+    opts:["CC de lieu","CC de temps","CC de but"],ans:1,
+    fb:"Test\u00a0: Ali a couru QUAND\u00a0? \u2192 hier soir. \u2192 CC de temps."
+  },
+  {
+    cc:"jusqu\u2019au stade",
+    phraseHTML:"Hier soir, Ali a couru vite <span class=\"souligne\">jusqu\u2019au stade</span> pour retrouver ses amis.",
+    q:"Quel est le type de <span class=\"souligne\">jusqu\u2019au stade</span>\u00a0?",
+    opts:["CC de temps","CC de cause","CC de lieu"],ans:2,
+    fb:"Test\u00a0: Ali a couru O\u00d9\u00a0? \u2192 jusqu\u2019au stade. \u2192 CC de lieu."
+  },
+  {
+    cc:"vite",
+    phraseHTML:"Hier soir, Ali a couru <span class=\"souligne\">vite</span> jusqu\u2019au stade pour retrouver ses amis.",
+    q:"Quel est le type de <span class=\"souligne\">vite</span>\u00a0?",
+    opts:["CC de mani\u00e8re","CC de temps","CC de moyen"],ans:0,
+    fb:"Test\u00a0: Ali a couru COMMENT\u00a0? \u2192 vite. \u2192 CC de mani\u00e8re."
+  },
+  {
+    cc:"pour retrouver ses amis",
+    phraseHTML:"Hier soir, Ali a couru vite jusqu\u2019au stade <span class=\"souligne\">pour retrouver ses amis</span>.",
+    q:"Quel est le type de <span class=\"souligne\">pour retrouver ses amis</span>\u00a0?",
+    opts:["CC de cause","CC de but","CC de temps"],ans:1,
+    fb:"Test\u00a0: Ali a couru DANS QUEL BUT\u00a0? \u2192 pour retrouver ses amis. \u2192 CC de but."
+  }
+];
+
+/* ── ÉTAT ── */
+var sc1=0,sc2=0,sc3=0,doneQ1=false,doneQ2=false;
+
+/* ── AUDIO ── */
+var _ac=null;
+function iA(){if(_ac)return;try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function bp(f1,f2,d,t,v){var ac=_ac;if(!ac)return;var o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=t;o.frequency.setValueAtTime(f1,ac.currentTime);o.frequency.exponentialRampToValueAtTime(f2,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}
+function sOk(){iA();bp(480,880,.08,'sine',.15);setTimeout(function(){bp(660,1320,.18,'sine',.1);},80);}
+function sKo(){iA();bp(280,160,.18,'sawtooth',.14);}
+function sVic(){iA();[523,659,784,1046].forEach(function(f,i){setTimeout(function(){bp(f,f*1.2,.25,'sine',.13);},i*130);});}
+
+/* ── SHUFFLE ── */
+function shuf(opts,ans){
+  var ord=[0,1,2].slice(0,opts.length);
+  for(var i=ord.length-1;i>0;i--){var j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);var t=ord[i];ord[i]=ord[j];ord[j]=t;}
+  return{opts:ord.map(function(k){return opts[k];}),ans:ord.indexOf(ans)};
+}
+
+/* ── PROGRESS ── */
+function updProg(done,lbl){
+  $('prog-label').textContent=lbl;
+  $('prog-score').textContent=done+'\u00a0pt'+(done>1?'s':'');
+  $('prog-fill').style.width=Math.round(done/15*100)+'%';
+}
+
+/* ── BUILD QCM générique ── */
+function buildQCM(wrap,labelHTML,opts,ans,fb,onDone){
+  var lbl=document.createElement('div');lbl.className='q-label';lbl.innerHTML=labelHTML;wrap.appendChild(lbl);
+  var s=shuf(opts,ans);
+  var optsEl=document.createElement('div');optsEl.className='opts';
+  var fbEl=document.createElement('div');fbEl.className='fb';
+  s.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-circle">'+(opts.length===2?['A','B'][i]:['A','B','C'][i])+'</span><span>'+txt+'</span>';
+    btn.onclick=function(){
+      iA();
+      var btns=optsEl.querySelectorAll('.opt-btn');btns.forEach(function(b){b.disabled=true;});
+      var ok=i===s.ans;
+      btns[i].classList.add(ok?'correct':'wrong');
+      if(!ok)btns[s.ans].classList.add('correct');
+      btns.forEach(function(b,k){b.querySelector('.opt-circle').textContent=k===s.ans?'\u2713':(k===i&&!ok?'\u2717':'');});
+      if(ok){fbEl.className='fb ok shown';fbEl.textContent='\u2713 Bonne r\u00e9ponse\u00a0!';sOk();}
+      else{fbEl.className='fb err shown';fbEl.textContent=fb;sKo();}
+      if(onDone)onDone(ok);
+    };
+    optsEl.appendChild(btn);
+  });
+  wrap.appendChild(optsEl);wrap.appendChild(fbEl);
+}
+
+/* ── ATELIER 1 ── */
+function buildA1(idx){
+  var q=A1[idx];var wrap=$('qa1-wrap');wrap.innerHTML='';
+  doneQ1=false;doneQ2=false;
+  updProg(sc1,'Atelier\u00a01 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+
+  var num=document.createElement('div');num.className='q-num';
+  num.textContent='Question '+(idx+1)+'\u00a0/\u00a04';wrap.appendChild(num);
+
+  var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=q.phraseHTML;wrap.appendChild(ph);
+
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';nextBtn.disabled=true;
+  nextBtn.textContent=idx<3?'Question suivante \u2192':'Voir mon score \u2192';
+  nextBtn.onclick=function(){idx<3?buildA1(idx+1):showScore1();};
+
+  buildQCM(wrap,q.q1,q.opts1,q.ans1,q.fb1,function(ok){
+    if(ok)sc1++;doneQ1=true;if(doneQ2)nextBtn.disabled=false;
+    updProg(sc1,'Atelier\u00a01 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+  });
+
+  var sep=document.createElement('div');sep.className='q-sep';wrap.appendChild(sep);
+
+  buildQCM(wrap,q.q2,q.opts2,q.ans2,q.fb2,function(ok){
+    if(ok)sc1++;doneQ2=true;if(doneQ1)nextBtn.disabled=false;
+    updProg(sc1,'Atelier\u00a01 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+  });
+
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+function showScore1(){
+  $('card-a1').classList.add('hidden');
+  var st=sc1===8?5:sc1>=6?4:sc1>=4?3:sc1>=2?2:1;
+  $('score1-content').innerHTML=
+    '<div class="act-num">R\u00e9sultat Atelier 1</div>'
+    +'<div class="score-big">'+sc1+'<span style="font-size:2rem;color:var(--muted)"> / 8</span></div>'
+    +'<div class="v-stars">'+'\u2b50'.repeat(st)+'\u2606'.repeat(5-st)+'</div>'
+    +'<div class="score-msg">'+(sc1>=6?'Bravo\u00a0! Tu passes \u00e0 l\u2019Atelier\u00a02.':'Relis le r\u00e9f\u00e9rentiel et retente si besoin.')+'</div>';
+  if(sc1<4){var btn=$('btn-goto-a2');btn.textContent='Recommencer l\u2019Atelier\u00a01';btn.onclick=function(){restartA1();};}
+  $('card-score1').classList.remove('hidden');
+}
+
+function restartA1(){sc1=0;$('card-score1').classList.add('hidden');$('card-a1').classList.remove('hidden');buildA1(0);}
+
+/* ── ATELIER 2 ── */
+function startA2(){
+  $('card-score1').classList.add('hidden');$('card-a2').classList.remove('hidden');buildA2(0);
+}
+
+function buildA2(idx){
+  var q=A2[idx];var wrap=$('qa2-wrap');wrap.innerHTML='';
+  updProg(sc1+sc2,'Atelier\u00a02 \u2014 Question '+(idx+1)+'\u00a0/\u00a03');
+
+  var num=document.createElement('div');num.className='q-num';
+  num.textContent='Question '+(idx+1)+'\u00a0/\u00a03';wrap.appendChild(num);
+
+  var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=q.phraseHTML;wrap.appendChild(ph);
+
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';nextBtn.disabled=true;
+  nextBtn.textContent=idx<2?'Question suivante \u2192':'Voir mon score \u2192';
+  nextBtn.onclick=function(){idx<2?buildA2(idx+1):showScore2();};
+
+  buildQCM(wrap,q.q,q.opts,q.ans,q.fb,function(ok){
+    if(ok)sc2++;nextBtn.disabled=false;
+    updProg(sc1+sc2,'Atelier\u00a02 \u2014 Question '+(idx+1)+'\u00a0/\u00a03');
+  });
+
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+function showScore2(){
+  $('card-a2').classList.add('hidden');
+  var st=sc2===3?5:sc2===2?4:sc2===1?2:1;
+  $('score2-content').innerHTML=
+    '<div class="act-num">R\u00e9sultat Atelier 2</div>'
+    +'<div class="score-big">'+sc2+'<span style="font-size:2rem;color:var(--muted)"> / 3</span></div>'
+    +'<div class="v-stars">'+'\u2b50'.repeat(st)+'\u2606'.repeat(5-st)+'</div>'
+    +'<div class="score-msg">'+(sc2>=2?'Bravo\u00a0! Tu passes \u00e0 l\u2019Atelier\u00a03.':'Relis le r\u00e9f\u00e9rentiel et retente si besoin.')+'</div>';
+  if(sc2<2){var btn=$('btn-goto-a3');btn.textContent='Recommencer l\u2019Atelier\u00a02';btn.onclick=function(){restartA2();};}
+  $('card-score2').classList.remove('hidden');
+}
+
+function restartA2(){sc2=0;$('card-score2').classList.add('hidden');$('card-a2').classList.remove('hidden');buildA2(0);}
+
+/* ── ATELIER 3 ── */
+function startA3(){
+  $('card-score2').classList.add('hidden');$('card-a3').classList.remove('hidden');buildA3(0);
+}
+
+function buildA3(idx){
+  var q=A3[idx];var wrap=$('qa3-wrap');wrap.innerHTML='';
+  updProg(sc1+sc2+sc3,'Atelier\u00a03 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+
+  var num=document.createElement('div');num.className='q-num';
+  num.textContent='Question '+(idx+1)+'\u00a0/\u00a04';wrap.appendChild(num);
+
+  var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=q.phraseHTML;wrap.appendChild(ph);
+
+  var row=document.createElement('div');row.className='btn-row';row.style.marginTop='.8rem';
+  var nextBtn=document.createElement('button');nextBtn.className='btn-next';nextBtn.disabled=true;
+  nextBtn.textContent=idx<3?'Question suivante \u2192':'Voir le bilan final \u2192';
+  nextBtn.onclick=function(){idx<3?buildA3(idx+1):showVictory();};
+
+  buildQCM(wrap,q.q,q.opts,q.ans,q.fb,function(ok){
+    if(ok)sc3++;nextBtn.disabled=false;
+    updProg(sc1+sc2+sc3,'Atelier\u00a03 \u2014 Question '+(idx+1)+'\u00a0/\u00a04');
+  });
+
+  row.appendChild(nextBtn);wrap.appendChild(row);
+}
+
+/* ── VICTOIRE ── */
+function showVictory(){
+  sVic();confetti();
+  var tot=sc1+sc2+sc3;
+  $('v-sc').innerHTML=tot+'<span style="font-size:1.5rem;font-weight:400;color:var(--muted)">\u00a0/\u00a015</span>';
+  var st=tot>=14?5:tot>=10?4:tot>=6?3:tot>=3?2:1;
+  $('v-stars').textContent='\u2b50'.repeat(st)+'\u2606'.repeat(5-st);
+  var msg=tot>=14?'Trois ateliers ma\u00eetris\u00e9s\u00a0! Tu identifies parfaitement les CC.':tot>=10?'Tr\u00e8s bon entra\u00eenement. Un atelier \u00e0 revoir.':tot>=6?'Bon entra\u00eenement. Reprends les ateliers signal\u00e9s.':'Reprends le r\u00e9f\u00e9rentiel et retente.';
+  $('v-msg').innerHTML=msg+'<br><small style="color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:.82rem">A1\u00a0: '+sc1+'/8 \u2014 A2\u00a0: '+sc2+'/3 \u2014 A3\u00a0: '+sc3+'/4</small>';
+  $('victory').classList.add('show');
+}
+
+function confetti(){
+  var cols=['#f28b82','#c0392b','#f5c518','#f9c0bb'];
+  for(var i=0;i<22;i++)(function(i){setTimeout(function(){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;top:-10px;left:'+(4+Math.random()*92)+'%;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:9999;background:'+cols[i%4]+';animation:confFall '+(0.8+Math.random()*.7)+'s '+(Math.random()*.5)+'s ease-in forwards;';
+    document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},1600);
+  },i*55);})(i);
+}
+
+function restart(){
+  sc1=0;sc2=0;sc3=0;doneQ1=false;doneQ2=false;
+  $('victory').classList.remove('show');
+  ['card-a2','card-score1','card-score2','card-a3'].forEach(function(id){$(id).classList.add('hidden');});
+  $('card-a1').classList.remove('hidden');
+  var b2=$('btn-goto-a2');b2.textContent='Atelier\u00a02 \u2192';b2.onclick=function(){startA2();};
+  var b3=$('btn-goto-a3');b3.textContent='Atelier\u00a03 \u2192';b3.onclick=function(){startA3();};
+  buildA1(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.addEventListener('pointerdown',iA,{once:true});
+buildA1(0);
+</script>
+</body>
+</html>
