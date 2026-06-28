@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Escape Game — Le coffre des six temps — 6e S6 J4</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --j:#3ab5d8;--jd:#0e3a52;--jl:#e8f6fc;--jp:#90d8f0;
+  --ok:#22c55e;--ko:#ef4444;
+  --bg:#0d1520;--bg2:#111f2e;--bg3:#162030;
+  --card:#0f1c2c;--bord:#1e3550;
+  --gold:#e8c468;--gold2:#f5d98a;
+  --txt:#ddeeff;--mut:#7a9ab8;
+  --door:#8b6914;--door2:#c8a030;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Nunito',Arial,sans-serif;min-height:100vh;padding:0 0 60px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);}}
+@keyframes shake{20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}100%{transform:none;}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+@keyframes rainFall{0%{opacity:1;transform:translateY(-40px) rotate(0);}100%{opacity:0;transform:translateY(110vh) rotate(var(--rot));}}
+@keyframes glow{0%,100%{text-shadow:0 0 10px var(--gold);}50%{text-shadow:0 0 28px var(--gold),0 0 50px var(--gold);}}
+@keyframes doorOpen{0%{transform:perspective(600px) rotateY(0);}100%{transform:perspective(600px) rotateY(-75deg);}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(58,181,216,.4);}50%{box-shadow:0 0 0 8px rgba(58,181,216,0);}}
+@keyframes flicker{0%,100%{opacity:1;}50%{opacity:.85;}}
+
+.flash-v{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.3);
+  font-size:3rem;font-weight:900;z-index:9999;pointer-events:none;opacity:0;}
+.flash-v.pop{animation:flashPop .9s ease-out forwards;}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(180deg,#050c18,var(--bg2));padding:10px 18px 8px;
+  border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:#f5c518;color:#3a1800;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:1px;
+  padding:4px 11px;border-radius:15px;}
+.logo-badge .dots{display:flex;gap:3px;}.logo-badge .dots i{width:6px;height:6px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#e05050;}.logo-badge .dots i:nth-child(2){background:#7a3d00;}.logo-badge .dots i:nth-child(3){background:#3d7a10;}
+.hdr-titre{font-family:'Orbitron',sans-serif;font-size:clamp(.8rem,3vw,1.1rem);font-weight:900;color:var(--j);}
+.son-btn{background:var(--card);border:1px solid var(--bord);color:var(--txt);font-size:.9rem;
+  width:32px;height:32px;border-radius:7px;cursor:pointer;flex-shrink:0;}
+
+/* ── WRAP ── */
+.wrap{max-width:820px;margin:0 auto;padding:14px 12px;}
+
+/* ── ÉCRAN DÉMARRAGE ── */
+.start-screen{text-align:center;background:var(--card);border:2px solid var(--gold);border-radius:18px;
+  padding:28px 22px;max-width:500px;margin:20px auto;animation:fadeUp .5s;}
+.start-icon{font-size:3.5rem;margin-bottom:10px;}
+.start-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,4vw,1.4rem);
+  color:var(--gold);margin-bottom:6px;animation:glow 2.5s infinite;}
+.start-sous{font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:2px;color:var(--j);margin-bottom:14px;}
+.start-desc{font-size:.88rem;color:var(--mut);line-height:1.8;margin-bottom:20px;}
+.start-rooms{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;}
+.start-room{background:var(--bg3);border:1.5px solid var(--bord);border-radius:10px;padding:10px 14px;
+  font-size:.8rem;color:var(--txt);display:flex;align-items:center;gap:8px;}
+.start-room-n{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
+  color:var(--j);background:var(--jd);border-radius:5px;padding:2px 8px;}
+.btn-start{display:block;width:100%;min-height:46px;background:linear-gradient(135deg,var(--jd),var(--j));
+  color:#fff;border:none;border-radius:12px;font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:.9rem;letter-spacing:1.5px;cursor:pointer;box-shadow:0 5px 0 var(--jd);animation:pulse 2s infinite;}
+.btn-start:hover{filter:brightness(1.1);}
+
+/* ── MAP DES PIÈCES ── */
+.map-section{display:none;}
+.map-section.show{display:block;animation:fadeUp .4s;}
+.map-card{background:var(--card);border:1.5px solid var(--bord);border-radius:16px;overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);margin-bottom:14px;}
+.map-lbl{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--j);
+  text-align:center;padding:7px;background:rgba(0,0,0,.4);}
+#mapSvg{display:block;width:100%;}
+.map-legende{display:flex;gap:16px;padding:8px 14px;background:rgba(0,0,0,.3);flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--mut);font-family:'JetBrains Mono',monospace;}
+.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+
+/* ── ZONE QUESTION ── */
+.q-section{display:none;}
+.q-section.show{display:block;animation:fadeUp .35s;}
+.q-hdr{background:linear-gradient(90deg,var(--jd),var(--bg3));border:1.5px solid var(--bord);
+  border-radius:14px 14px 0 0;padding:11px 16px;display:flex;align-items:center;gap:12px;}
+.q-room-badge{font-family:'Orbitron',sans-serif;font-size:.68rem;font-weight:700;color:var(--j);
+  background:rgba(58,181,216,.12);border:1px solid var(--j);border-radius:6px;padding:3px 10px;}
+.q-room-titre{font-family:'Orbitron',sans-serif;font-size:clamp(.75rem,2.5vw,.88rem);font-weight:900;color:#fff;}
+.q-progress{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--mut);}
+.q-body{background:var(--card);border:1.5px solid var(--bord);border-top:none;border-radius:0 0 14px 14px;padding:16px;}
+.q-num{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:1.5px;color:var(--j);margin-bottom:5px;}
+.q-phrase{font-family:'Georgia',serif;font-size:clamp(.92rem,2.8vw,1.05rem);line-height:1.9;
+  color:var(--txt);margin-bottom:6px;}
+.q-cible-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  color:var(--j);background:rgba(58,181,216,.1);border:1px solid var(--j);
+  border-radius:6px;padding:3px 10px;margin-bottom:12px;font-style:italic;}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{background:var(--bg3);border:1.5px solid var(--bord);border-radius:9px;
+  padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:clamp(.82rem,2.3vw,.92rem);
+  font-weight:600;color:var(--txt);cursor:pointer;transition:.14s;text-align:left;
+  display:flex;align-items:center;gap:9px;min-height:42px;}
+.opt:hover:not(:disabled){border-color:var(--j);background:var(--bg2);}
+.opt:disabled{cursor:default;}
+.opt.good{border-color:var(--ok);background:#0a2018;color:#7fe0a0;}
+.opt.bad{border-color:var(--ko);background:#200a0a;color:#ff9b9b;animation:shake .4s;}
+.opt-l{font-size:.62rem;font-family:'Orbitron',sans-serif;letter-spacing:.5px;color:var(--mut);
+  padding:1px 5px;background:var(--bg);border-radius:3px;border:1px solid var(--bord);flex-shrink:0;}
+.q-fb{margin-top:10px;padding:9px 12px;border-radius:8px;font-size:.82rem;line-height:1.6;
+  font-family:'Nunito',sans-serif;display:none;}
+.q-fb.show.ok{display:block;background:#0a2018;border-left:3px solid var(--ok);color:#7fe0a0;}
+.q-fb.show.ko{display:block;background:#200a0a;border-left:3px solid var(--ko);color:#ff9b9b;}
+.q-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn-suiv{min-height:40px;background:linear-gradient(135deg,var(--jd),var(--j));color:#fff;
+  border:none;border-radius:9px;padding:0 20px;font-family:'Orbitron',sans-serif;
+  font-size:.72rem;font-weight:700;cursor:pointer;display:none;animation:pulse 1.5s infinite;}
+.btn-suiv.show{display:inline-flex;align-items:center;gap:6px;}
+.btn-back-map{min-height:38px;background:transparent;color:var(--mut);border:1px solid var(--bord);
+  border-radius:8px;padding:0 14px;font-family:'Orbitron',sans-serif;font-size:.65rem;cursor:pointer;}
+.btn-back-map:hover{color:var(--j);border-color:var(--j);}
+
+/* ── PIÈCE OUVERTE ── */
+.room-clear{display:none;background:linear-gradient(135deg,#0a2018,#112a20);border:2px solid var(--ok);
+  border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;}
+.room-clear.show{display:block;animation:fadeUp .4s;}
+.room-clear-icon{font-size:2.5rem;margin-bottom:7px;}
+.room-clear-titre{font-family:'Orbitron',sans-serif;font-size:.92rem;color:var(--ok);font-weight:900;margin-bottom:5px;}
+.room-clear-msg{font-size:.84rem;color:#6ad0a0;margin-bottom:14px;line-height:1.6;}
+.btn-map{min-height:42px;background:linear-gradient(135deg,#0a2018,var(--ok));color:#fff;
+  border:none;border-radius:10px;padding:0 22px;font-family:'Orbitron',sans-serif;
+  font-size:.75rem;font-weight:700;cursor:pointer;}
+.btn-map:hover{filter:brightness(1.1);}
+
+/* ── COFFRE FINAL ── */
+.coffre-section{display:none;}
+.coffre-section.show{display:block;animation:fadeUp .5s;}
+.coffre-card{background:var(--card);border:2px solid var(--gold);border-radius:16px;
+  padding:22px;text-align:center;box-shadow:0 0 40px rgba(232,196,104,.15);}
+.coffre-icon{font-size:3rem;margin-bottom:8px;}
+.coffre-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.5vw,1.4rem);
+  color:var(--gold);margin-bottom:5px;animation:glow 2s infinite;}
+.coffre-msg{font-size:.88rem;color:var(--mut);margin-bottom:16px;line-height:1.7;}
+.coffre-score{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--j);margin-bottom:16px;}
+.btn-retry{background:linear-gradient(135deg,var(--jd),var(--j));color:#fff;border:none;
+  border-radius:10px;padding:11px 26px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;}
+
+/* ── COFFRE ANIMÉ VICTOIRE ── */
+.victory-overlay{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:radial-gradient(circle,rgba(32,22,8,.96),rgba(5,7,14,.98));
+  z-index:200;opacity:0;pointer-events:none;transition:opacity .35s ease;
+}
+.victory-overlay.show{opacity:1;pointer-events:auto;}
+.victory-card{width:min(520px,94vw);text-align:center;position:relative;}
+.victory-title{opacity:0;transform:translateY(14px);font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.2rem,4vw,2rem);color:#fff4c8;
+  text-shadow:0 0 24px rgba(245,197,24,.55);margin-top:14px;}
+.victory-score-txt{opacity:0;transform:translateY(14px);color:rgba(255,248,220,.8);
+  font-family:'JetBrains Mono',monospace;font-size:1.1rem;margin-top:8px;}
+.victory-overlay.open .victory-title{animation:vtextIn .55s ease 1.1s forwards;}
+.victory-overlay.open .victory-score-txt{animation:vtextIn .55s ease 1.28s forwards;}
+@keyframes vtextIn{to{opacity:1;transform:translateY(0);}}
+.chest-stage{position:relative;height:300px;display:flex;align-items:flex-end;
+  justify-content:center;perspective:900px;}
+.vglow{position:absolute;bottom:70px;width:270px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,197,24,.75),rgba(245,197,24,.16) 42%,transparent 70%);
+  filter:blur(12px);opacity:0;transform:scale(.45);}
+.victory-overlay.open .vglow{animation:vglowBurst 1.1s ease .45s forwards;}
+@keyframes vglowBurst{0%{opacity:0;transform:scale(.45);}45%{opacity:1;transform:scale(1.1);}100%{opacity:.55;transform:scale(1.35);}}
+.vchest{position:relative;width:270px;height:170px;transform-style:preserve-3d;
+  animation:vchestIdle 2.2s ease-in-out infinite;}
+.victory-overlay.open .vchest{animation:vchestPop .45s ease forwards;}
+@keyframes vchestIdle{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+@keyframes vchestPop{0%{transform:scale(.94);}65%{transform:scale(1.06) translateY(-6px);}100%{transform:scale(1);}}
+.vchest-base{position:absolute;left:0;right:0;bottom:0;height:112px;
+  border-radius:16px 16px 24px 24px;
+  background:linear-gradient(90deg,rgba(255,255,255,.10),transparent 22%,transparent 78%,rgba(0,0,0,.18)),linear-gradient(180deg,#b56d25,#7a4217);
+  border:5px solid #4b2a12;
+  box-shadow:inset 0 14px 0 rgba(255,255,255,.12),inset 0 -14px 0 rgba(0,0,0,.18),0 20px 35px rgba(0,0,0,.45);
+  overflow:hidden;}
+.vchest-base::before{content:"";position:absolute;inset:28px 0 auto 0;height:8px;background:rgba(75,42,18,.6);}
+.vchest-base::after{content:"";position:absolute;left:50%;top:34px;width:52px;height:58px;
+  transform:translateX(-50%);border-radius:10px;
+  background:linear-gradient(180deg,#ffe38c,#c98010);border:4px solid #55310e;
+  box-shadow:inset 0 4px 0 rgba(255,255,255,.35);}
+.vkeyhole{position:absolute;left:50%;top:66px;width:14px;height:22px;transform:translateX(-50%);z-index:4;}
+.vkeyhole::before{content:"";display:block;width:14px;height:14px;border-radius:50%;background:#35200b;}
+.vkeyhole::after{content:"";display:block;width:7px;height:12px;background:#35200b;margin:-2px auto 0;border-radius:0 0 4px 4px;}
+.vchest-lid{position:absolute;left:5px;bottom:92px;width:260px;height:86px;
+  border-radius:120px 120px 18px 18px;
+  background:linear-gradient(90deg,rgba(255,255,255,.16),transparent 24%,transparent 80%,rgba(0,0,0,.22)),linear-gradient(180deg,#c9822b,#8b4c18);
+  border:5px solid #4b2a12;transform-origin:50% 100%;
+  box-shadow:inset 0 12px 0 rgba(255,255,255,.14);z-index:5;}
+.vchest-lid::before{content:"";position:absolute;left:50%;top:-5px;transform:translateX(-50%);
+  width:48px;height:86px;background:linear-gradient(180deg,#ffe38c,#c98010);
+  border-left:4px solid #55310e;border-right:4px solid #55310e;}
+.victory-overlay.open .vchest-lid{animation:vlidOpen .9s cubic-bezier(.2,1.25,.35,1) .35s forwards;}
+@keyframes vlidOpen{0%{transform:rotateX(0);}40%{transform:rotateX(-45deg) translateY(-8px);}100%{transform:rotateX(-76deg) translateY(-18px);}}
+.vcoins{position:absolute;left:50%;bottom:98px;width:1px;height:1px;pointer-events:none;z-index:3;}
+.vcoin{--x:0px;--y:-120px;--r:0deg;position:absolute;left:0;top:0;width:22px;height:22px;
+  margin:-11px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff4ad 0 14%,#ffd44f 15% 48%,#d9940b 49% 100%);
+  border:2px solid #8f5708;box-shadow:0 0 14px rgba(245,197,24,.55);opacity:0;}
+.vcoin::after{content:"";position:absolute;inset:5px;border-radius:50%;border:2px solid rgba(143,87,8,.45);}
+.victory-overlay.open .vcoin{animation:vcoinBurst 1.35s cubic-bezier(.16,.9,.32,1) forwards;animation-delay:calc(.48s + var(--d));}
+@keyframes vcoinBurst{0%{opacity:0;transform:translate(0,0) scale(.2) rotate(0);}12%{opacity:1;}70%{opacity:1;transform:translate(var(--x),var(--y)) scale(1) rotate(var(--r));}100%{opacity:0;transform:translate(calc(var(--x)*1.05),calc(var(--y)+85px)) scale(.9) rotate(calc(var(--r)+120deg));}}
+.vspark{--x:0px;--y:-100px;position:absolute;left:50%;bottom:112px;width:7px;height:7px;
+  border-radius:50%;background:#fff7b0;box-shadow:0 0 14px #fff1a0;opacity:0;z-index:8;}
+.victory-overlay.open .vspark{animation:vsparkFly 1s ease forwards;animation-delay:calc(.55s + var(--d));}
+@keyframes vsparkFly{0%{opacity:0;transform:translate(0,0) scale(.3);}15%{opacity:1;}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(0);}}
+.vclose-btn{margin-top:18px;opacity:0;background:linear-gradient(135deg,var(--gold),#d99114);
+  color:#251400;border:none;border-radius:10px;padding:11px 26px;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;
+  box-shadow:0 5px 0 #8f5708;}
+.victory-overlay.open .vclose-btn{animation:vtextIn .55s ease 1.45s forwards;}
+</style>
+</head>
+<body>
+<div class="flash-v" id="flashV"></div>
+<div class="hdr">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA · 6ÈME · S6 J4</div>
+  <div class="hdr-titre">🔐 Le coffre des six temps</div>
+  <button class="son-btn" id="sonBtn">🔊</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ÉCRAN DÉMARRAGE -->
+  <div class="start-screen" id="startScreen">
+    <div class="start-icon">🔐</div>
+    <div class="start-titre">Le coffre des six temps</div>
+    <div class="start-sous">Escape Game · Semaine 6 · Jour 4</div>
+    <p class="start-desc">Explore les <strong>3 pièces</strong> du manoir. Résous chaque énigme pour en débloquer la porte. Quand les trois pièces sont ouvertes… le coffre s'ouvre !</p>
+    <div class="start-rooms">
+      <div class="start-room"><span class="start-room-n">1</span>Le texte détérioré</div>
+      <div class="start-room"><span class="start-room-n">2</span>L'intrus temporel</div>
+      <div class="start-room"><span class="start-room-n">3</span>Le code secret</div>
+    </div>
+    <button class="btn-start" onclick="demarrer()">⚡ Commencer</button>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-section" id="mapSection">
+    <div class="map-card">
+      <div class="map-lbl">🗺️ PLAN DU MANOIR — clique sur une pièce déverrouillée</div>
+      <svg id="mapSvg" viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="map-legende">
+        <div class="leg"><div class="leg-dot" style="background:#3ab5d8;"></div>Pièce disponible</div>
+        <div class="leg"><div class="leg-dot" style="background:#22c55e;"></div>Pièce ouverte</div>
+        <div class="leg"><div class="leg-dot" style="background:#3a4a5c;"></div>Pièce verrouillée</div>
+        <div class="leg"><div class="leg-dot" style="background:#c8a040;"></div>Coffre</div>
+      </div>
+    </div>
+    <div class="room-clear" id="roomClear">
+      <div class="room-clear-icon" id="clearIcon"></div>
+      <div class="room-clear-titre" id="clearTitre"></div>
+      <div class="room-clear-msg" id="clearMsg"></div>
+      <button class="btn-map" onclick="showMap()">🗺️ Retourner à la carte</button>
+    </div>
+  </div>
+
+  <!-- ZONE QUESTION -->
+  <div class="q-section" id="qSection">
+    <div class="q-hdr">
+      <span class="q-room-badge" id="qRoomBadge">PIÈCE 1</span>
+      <span class="q-room-titre" id="qRoomTitre">Le texte détérioré</span>
+      <span class="q-progress" id="qProgress">1/6</span>
+    </div>
+    <div class="q-body">
+      <div class="q-num" id="qNum"></div>
+      <p class="q-phrase" id="qPhrase"></p>
+      <div class="q-cible-tag" id="qCible" style="display:none;"></div>
+      <div class="opts" id="qOpts"></div>
+      <div class="q-fb" id="qFb"></div>
+      <div class="q-btns">
+        <button class="btn-suiv" id="btnSuiv" onclick="nextQ()">Suivant ▸</button>
+        <button class="btn-back-map" onclick="showMap()">← Carte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COFFRE FINAL -->
+  <div class="coffre-section" id="coffreSection">
+    <div class="coffre-card">
+      <div class="coffre-icon">🏆</div>
+      <div class="coffre-titre">Coffre ouvert !</div>
+      <div class="coffre-msg">Tu as exploré les 3 pièces et résolu toutes les énigmes.<br>Le coffre des six temps t'a révélé ses secrets !</div>
+      <div class="coffre-score" id="coffreScore"></div>
+      <button class="btn-retry" onclick="restart()">🔄 Recommencer</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════════════════════════════════════
+   N6S6J4 — Escape Game — Le coffre des six temps
+   3 pièces sur une carte → coffre final
+   ══════════════════════════════════════════ */
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+/* ══ DONNÉES ══ */
+const ROOMS = [
+  {
+    id:0, nom:'Pièce 1', titre:'Le texte détérioré',
+    icon:'📜', couleur:'#3ab5d8',
+    questions:[
+      {phrase:"Jadis, un jeune marin ___ près de la mer.", cible:"vivre — imparfait",
+       opts:["vivait","vivra","a vécu","vivrait"], ok:"vivait",
+       fb:"Jadis → imparfait. Vivre → il vivait."},
+      {phrase:"Un jour, il ___ une vieille carte.", cible:"découvrir — passé simple",
+       opts:["découvrira","découvrit","découvrait","a découvert"], ok:"découvrit",
+       fb:"Un jour → passé simple. Découvrir → il découvrit."},
+      {phrase:"Depuis cette aventure, il ___ son histoire à tout le monde.", cible:"raconter — présent",
+       opts:["raconte","racontait","racontera","a raconté"], ok:"raconte",
+       fb:"Depuis → présent. Raconter → il raconte."},
+      {phrase:"Il ___ déjà ___ plusieurs trésors.", cible:"trouver — passé composé",
+       opts:["a trouvé","avait trouvé","aura trouvé","trouvera"], ok:"a trouvé",
+       fb:"Déjà + auxiliaire → passé composé. Il a trouvé."},
+      {phrase:"Demain, il ___ vers une nouvelle île.", cible:"partir — futur simple",
+       opts:["partira","partirait","part","partait"], ok:"partira",
+       fb:"Demain → futur simple. Partir → il partira."},
+      {phrase:"Lorsqu\u2019il ___ son navire, il lèvera l\u2019ancre.", cible:"préparer — futur antérieur",
+       opts:["aura préparé","avait préparé","a préparé","allait préparer"], ok:"aura préparé",
+       fb:"Lorsqu\u2019il\u2026 il lèvera → futur antérieur. Il aura préparé."},
+    ]
+  },
+  {
+    id:1, nom:'Pièce 2', titre:"L'intrus temporel",
+    icon:'🔍', couleur:'#a855f7',
+    questions:[
+      {phrase:"Série A — Trouve l'intrus :", cible:null,
+       opts:["regardait","jouait","courait","a couru"], ok:"a couru",
+       fb:"Intrus : a couru (passé composé) dans une série d\u2019imparfait."},
+      {phrase:"Série B — Trouve l'intrus :", cible:null,
+       opts:["partira","arrivera","découvrira","a découvert"], ok:"a découvert",
+       fb:"Intrus : a découvert (passé composé) dans une série de futur simple."},
+      {phrase:"Série C — Trouve l'intrus :", cible:null,
+       opts:["auront fini","aura trouvé","avons gagné","aurez réussi"], ok:"avons gagné",
+       fb:"Intrus : avons gagné (passé composé) dans une série de futur antérieur."},
+    ]
+  },
+  {
+    id:2, nom:'Pièce 3', titre:'Le code secret',
+    icon:'🔑', couleur:'#f59e0b',
+    questions:[
+      {phrase:"Quel est le temps de ce verbe ?\nnous avons gagné", cible:null,
+       opts:shuffle(["passé composé","futur simple","imparfait","futur antérieur","présent","passé simple"]), ok:"passé composé",
+       fb:"nous avons gagné → passé composé. Lettre : M"},
+      {phrase:"Quel est le temps de ce verbe ?\nje voyagerai", cible:null,
+       opts:shuffle(["futur simple","passé composé","imparfait","futur antérieur","présent","passé simple"]), ok:"futur simple",
+       fb:"je voyagerai → futur simple. Lettre : A"},
+      {phrase:"Quel est le temps de ce verbe ?\nils jouaient", cible:null,
+       opts:shuffle(["imparfait","passé composé","futur simple","futur antérieur","présent","passé simple"]), ok:"imparfait",
+       fb:"ils jouaient → imparfait. Lettre : N"},
+      {phrase:"Quel est le temps de ce verbe ?\ntu auras terminé", cible:null,
+       opts:shuffle(["futur antérieur","passé composé","futur simple","imparfait","présent","passé simple"]), ok:"futur antérieur",
+       fb:"tu auras terminé → futur antérieur. Lettre : I\n\n🎉 Tu as découvert les 4 lettres M-A-N-I ! Remets-les dans l\u2019ordre pour trouver le mot secret : _ _ _ _"},
+    ]
+  }
+];
+
+/* ── ÉTAT ── */
+let roomsDone = [false,false,false];
+let scores = [0,0,0];
+let curRoom = -1, curQ = 0;
+let son=true, actx=null;
+const $=id=>document.getElementById(id);
+
+/* ══ MAP SVG ══ */
+const ROOM_POS = [{x:120,y:100},{x:350,y:90},{x:580,y:100}];
+const COFFRE_POS = {x:350,y:260};
+
+function buildMap(){
+  const svg=$('mapSvg');
+  const allDone=roomsDone.every(Boolean);
+  let s='';
+
+  // Fond
+  s+='<rect width="700" height="340" fill="#10180e"/>';
+  // Lames parquet horizontales
+  for(let y=22;y<318;y+=18)
+    s+=`<line x1="32" y1="${y}" x2="668" y2="${y}" stroke="#182214" stroke-width=".8"/>`;
+
+  // ── MURS EXTÉRIEURS ──
+  const EX=32,EY=22,EW=636,EH=296;
+  s+=`<rect x="${EX}" y="${EY}" width="${EW}" height="${EH}" fill="none" stroke="#9a8a60" stroke-width="6"/>`;
+
+  // ── 3 PIÈCES : x=32..244 | 244..456 | 456..668 | hauteur y=22..212 ──
+  const PX=[32,244,456], PW=212, PH=190, PY=22;
+  // Murs séparateurs verticaux
+  s+=`<line x1="244" y1="${PY}" x2="244" y2="${PY+PH}" stroke="#9a8a60" stroke-width="4"/>`;
+  s+=`<line x1="456" y1="${PY}" x2="456" y2="${PY+PH}" stroke="#9a8a60" stroke-width="4"/>`;
+
+  // ── COULOIR : y=212..318 ──
+  const CY=212,CH=106;
+  s+=`<line x1="${EX}" y1="${CY}" x2="${EX+EW}" y2="${CY}" stroke="#9a8a60" stroke-width="4"/>`;
+
+  // Portes (ouvertures dans le mur couloir)
+  // Chaque porte : ouverture de 50px centrée sur la pièce
+  PX.forEach((px,i)=>{
+    const cx=px+PW/2;
+    const door_x=cx-25;
+    // Effacer le mur sur 50px (simulé par rect fond)
+    s+=`<rect x="${door_x}" y="${CY-3}" width="50" height="6" fill="#10180e"/>`;
+    // Arc de porte
+    s+=`<path d="M${door_x},${CY} Q${door_x},${CY+30} ${door_x+30},${CY+25}" fill="none" stroke="#9a8a60" stroke-width="1.5" opacity=".7"/>`;
+    s+=`<line x1="${door_x}" y1="${CY}" x2="${door_x+30}" y2="${CY}" stroke="#c8a040" stroke-width="2.5"/>`;
+  });
+
+  // ── CONTENU DES PIÈCES ──
+  ROOMS.forEach((r,i)=>{
+    const px=PX[i], pw=PW, ph=PH, py=PY;
+    const cx=px+pw/2, cy=py+ph/2;
+    const isDone=roomsDone[i];
+    const isAvail=i===0||(i===1&&roomsDone[0])||(i===2&&roomsDone[1]);
+
+    // Fond pièce
+    const fill=isDone?'rgba(8,30,15,.9)':isAvail?'rgba(8,18,30,.9)':'rgba(8,12,16,.9)';
+    s+=`<rect x="${px+2}" y="${py+2}" width="${pw-4}" height="${ph-4}" fill="${fill}"/>`;
+
+    // Hachures si verrouillée
+    if(!isAvail){
+      s+=`<pattern id="hatch${i}" patternUnits="userSpaceOnUse" width="12" height="12">
+        <path d="M0,12 L12,0" stroke="#1a2a1a" stroke-width="1.2"/>
+      </pattern>`;
+      s+=`<rect x="${px+2}" y="${py+2}" width="${pw-4}" height="${ph-4}" fill="url(#hatch${i})" opacity=".5"/>`;
+    }
+
+    // Badge numéro coin haut-gauche
+    const badgeCol=isDone?'#22c55e':isAvail?r.couleur:'#2a4050';
+    s+=`<rect x="${px+8}" y="${py+8}" width="28" height="20" rx="4" fill="${badgeCol}" opacity=".85"/>`;
+    s+=`<text x="${px+22}" y="${py+22}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" fill="#fff" font-weight="700">${i+1}</text>`;
+
+    // Icône
+    s+=`<text x="${cx}" y="${cy-28}" text-anchor="middle" font-size="30">${isDone?'✅':isAvail?r.icon:'🔒'}</text>`;
+
+    // Nom pièce
+    s+=`<text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="13" fill="${isDone?'#22c55e':isAvail?r.couleur:'#2a4050'}" font-weight="700">${r.nom}</text>`;
+
+    // Titre pièce
+    const titreWords=r.titre.split(' ');
+    // Max 2 lignes
+    if(titreWords.length<=3){
+      s+=`<text x="${cx}" y="${cy+24}" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" fill="${isDone?'#4aaa70':isAvail?'#88bbd8':'#2a4050'}" font-weight="700">${r.titre}</text>`;
+    } else {
+      const mid=Math.ceil(titreWords.length/2);
+      s+=`<text x="${cx}" y="${cy+20}" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" fill="${isDone?'#4aaa70':isAvail?'#88bbd8':'#2a4050'}" font-weight="700">${titreWords.slice(0,mid).join(' ')}</text>`;
+      s+=`<text x="${cx}" y="${cy+35}" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" fill="${isDone?'#4aaa70':isAvail?'#88bbd8':'#2a4050'}" font-weight="700">${titreWords.slice(mid).join(' ')}</text>`;
+    }
+
+    // Score ou "Entrer"
+    if(isDone){
+      s+=`<text x="${cx}" y="${cy+52}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#22c55e">${scores[i]}/${r.questions.length} pts ✓</text>`;
+    } else if(isAvail){
+      s+=`<rect x="${cx-30}" y="${cy+44}" width="60" height="20" rx="5" fill="${r.couleur}" opacity=".2" stroke="${r.couleur}" stroke-width="1"/>`;
+      s+=`<text x="${cx}" y="${cy+58}" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="10" fill="${r.couleur}" font-weight="700">▶ ENTRER</text>`;
+    }
+
+    // Zone de clic
+    if(isAvail&&!isDone){
+      s+=`<rect x="${px+2}" y="${py+2}" width="${pw-4}" height="${ph-4}" fill="transparent" style="cursor:pointer;" onclick="clickRoom(${i})"/>`;
+    }
+  });
+
+  // ── COULOIR ──
+  s+=`<rect x="32" y="212" width="636" height="106" fill="rgba(6,12,8,.7)"/>`;
+  s+=`<text x="150" y="272" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#2a4a2a" letter-spacing="4">— COULOIR —</text>`;
+
+  // ── COFFRE centre couloir ──
+  const cofx=530, cofy=258;
+  const cf_fill=allDone?'rgba(40,28,4,.95)':'rgba(8,16,10,.9)';
+  const cf_stroke=allDone?'#e8c468':'#2a5035';
+  const cf_sw=allDone?3:1.5;
+  s+=`<rect x="${cofx-55}" y="${cofy-28}" width="110" height="56" rx="8" fill="${cf_fill}" stroke="${cf_stroke}" stroke-width="${cf_sw}"/>`;
+  s+=`<text x="${cofx}" y="${cofy+2}" text-anchor="middle" font-size="20">${allDone?'🔓':'🔐'}</text>`;
+  s+=`<text x="${cofx}" y="${cofy+20}" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="13" fill="${allDone?'#e8c468':'#2a5035'}" font-weight="700" letter-spacing="2">COFFRE</text>`;
+  if(allDone){
+    s+=`<rect x="${cofx-55}" y="${cofy-28}" width="110" height="56" rx="8" fill="none" stroke="#e8c468" stroke-width="1.5" opacity=".5"/>`;
+    s+=`<text x="${cofx}" y="${cofy-36}" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#e8c468">✨ Cliquer pour ouvrir</text>`;
+    s+=`<rect x="${cofx-55}" y="${cofy-28}" width="110" height="56" rx="8" fill="transparent" style="cursor:pointer;" onclick="showCoffre()"/>`;
+  }
+
+  // Boussole déco
+  s+=`<circle cx="650" cy="50" r="20" fill="#0d1810" stroke="#3a5a3a" stroke-width="1.5"/>`;
+  s+=`<polygon points="650,32 645,50 650,44 655,50" fill="#8a3020"/>`;
+  s+=`<polygon points="650,68 645,50 650,56 655,50" fill="#2a4a2a"/>`;
+  s+=`<text x="650" y="28" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#4a7a4a">N</text>`;
+
+  svg.innerHTML=s;
+}
+
+function clickRoom(i){
+  const avail=i===0||(i===1&&roomsDone[0])||(i===2&&roomsDone[1]);
+  if(!avail) return;
+  if(roomsDone[i]) return; // déjà faite
+  startRoom(i);
+}
+
+/* ══ QUESTIONS ══ */
+function startRoom(i){
+  curRoom=i; curQ=0;
+  showSection('qSection');
+  loadQ();
+}
+
+function loadQ(){
+  const room=ROOMS[curRoom], q=room.questions[curQ];
+  const LETTRES=['A','B','C','D','E','F'];
+  $('qRoomBadge').textContent=room.nom;
+  $('qRoomTitre').textContent=room.titre;
+  $('qProgress').textContent=(curQ+1)+'/'+room.questions.length;
+  $('qNum').textContent='Question '+(curQ+1)+' / '+room.questions.length;
+  $('qPhrase').textContent=q.phrase;
+  const cibleEl=$('qCible');
+  if(q.cible){cibleEl.style.display='';cibleEl.textContent='('+q.cible+')';}
+  else cibleEl.style.display='none';
+  // Mélanger les options (ordre aléatoire à chaque question)
+  const shuffledOpts=shuffle([...q.opts]);
+  const optsEl=$('qOpts'); optsEl.innerHTML='';
+  shuffledOpts.forEach((opt,li)=>{
+    const b=document.createElement('button'); b.className='opt';
+    b.innerHTML=`<span class="opt-l">${LETTRES[li]}</span>${opt}`;
+    b.addEventListener('click',()=>answerQ(opt,q,b,optsEl,shuffledOpts));
+    optsEl.appendChild(b);
+  });
+  $('qFb').className='q-fb';
+  $('btnSuiv').classList.remove('show');
+}
+
+function answerQ(val,q,btn,optsEl,shuffledOpts){
+  const correct=(val===q.ok);
+  optsEl.querySelectorAll('.opt').forEach((b,li)=>{
+    b.disabled=true;
+    if(shuffledOpts[li]===q.ok) b.classList.add('good');
+  });
+  btn.classList.add(correct?'good':'bad');
+  const fb=$('qFb');
+  fb.className='q-fb show '+(correct?'ok':'ko');
+  fb.textContent=(correct?'✓ ':' ')+q.fb;
+  if(correct){scores[curRoom]++;beepOk();}else beepErr();
+  flashV(correct);
+  const isLast=(curQ===ROOMS[curRoom].questions.length-1);
+  $('btnSuiv').textContent=isLast?'Ouvrir la pièce ▸':'Question suivante ▸';
+  $('btnSuiv').classList.add('show');
+}
+
+function nextQ(){
+  curQ++;
+  if(curQ<ROOMS[curRoom].questions.length){
+    loadQ();
+  } else {
+    // Pièce terminée
+    roomsDone[curRoom]=true;
+    showRoomClear(curRoom);
+  }
+}
+
+function showRoomClear(i){
+  const room=ROOMS[i];
+  showSection('mapSection');
+  $('clearIcon').textContent='✅';
+  $('clearTitre').textContent=room.titre+' — ouverte !';
+  $('clearMsg').textContent='Tu as obtenu '+scores[i]+' / '+room.questions.length+' points dans cette pièce.';
+  $('roomClear').classList.add('show');
+  lockSound(); buildMap();
+  // Toutes les pièces ouvertes ?
+  if(roomsDone.every(Boolean)){
+    setTimeout(showCoffre, 1200);
+  }
+}
+
+function showMap(){
+  $('roomClear').classList.remove('show');
+  showSection('mapSection');
+  buildMap();
+}
+
+function showCoffre(){
+  const total=scores.reduce((a,b)=>a+b,0);
+  const max=ROOMS.reduce((a,r)=>a+r.questions.length,0);
+  showVictory(total,max);
+  rainEmojis();
+}
+
+function showSection(id){
+  ['startScreen','mapSection','qSection','coffreSection'].forEach(s=>{
+    const el=$(s);
+    if(el) el.style.display=(s===id)?'':'none';
+    if(el) el.classList.remove('show');
+  });
+  const el=$(id);
+  if(el){el.style.display='';el.classList.add('show');}
+}
+
+/* ── DÉMARRAGE ── */
+function demarrer(){
+  initA(); footsteps();
+  showSection('mapSection');
+  buildMap();
+}
+
+/* ── RESTART ── */
+function restart(){
+  roomsDone=[false,false,false]; scores=[0,0,0]; curRoom=-1; curQ=0;
+  $('roomClear').classList.remove('show');
+  showSection('startScreen');
+}
+
+/* ── FLASH ── */
+function flashV(ok){
+  const el=$('flashV');el.textContent=ok?'✓':'✗';el.style.color=ok?'#22c55e':'#ef4444';
+  el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+}
+
+/* ── PLUIE ── */
+const RAIN=['🔐','💎','🗝️','⚓','✨','🏆','🔑','🌟'];
+function rainEmojis(){
+  for(let i=0;i<25;i++){setTimeout(()=>{
+    const el=document.createElement('div');el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+    el.style.cssText='position:fixed;top:-40px;left:'+(Math.random()*100)+'vw;font-size:'+(1+Math.random()*1.3).toFixed(2)+'rem;z-index:9998;pointer-events:none;--rot:'+(Math.random()*60-30)+'deg;animation:rainFall '+(1.8+Math.random()*1.4).toFixed(2)+'s ease-in forwards;';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
+  },i*85);}
+}
+
+/* ── AUDIO ── */
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){
+  if(!actx||!son)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+.012);g.gain.exponentialRampToValueAtTime(.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.03);
+}
+function beepOk(){initA();tone(523,784,.12,'sine',.1,0);tone(784,1046,.1,'sine',.08,.07);}
+function beepErr(){initA();tone(220,140,.22,'sawtooth',.1,0);}
+function lockSound(){
+  initA();if(!actx||!son)return;
+  [0,.06,.12,.18].forEach(dl=>{tone(800,200,.08,'square',.18,dl);tone(400,100,.06,'sawtooth',.12,dl+.02);});
+  setTimeout(()=>tone(1200,400,.3,'sine',.2,0),280);
+}
+function footsteps(){
+  initA();if(!actx||!son)return;
+  [0,.22,.44,.66,.88].forEach(dl=>{
+    const t=actx.currentTime+dl;
+    const buf=actx.createBuffer(1,Math.floor(actx.sampleRate*.08),actx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*Math.exp(-i/(data.length*.3));
+    const src=actx.createBufferSource(),g=actx.createGain(),lp=actx.createBiquadFilter();
+    src.buffer=buf;g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);
+    lp.type='lowpass';lp.frequency.value=300;
+    src.connect(lp);lp.connect(g);g.connect(actx.destination);src.start(t);
+  });
+}
+function boom(){initA();tone(260,60,.5,'triangle',.25,0);tone(520,180,.4,'sine',.18,.08);[523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.22,'sine',.13,.3+k*.09));}
+
+$('sonBtn').addEventListener('click',()=>{son=!son;initA();if(actx&&actx.state==='suspended')actx.resume();$('sonBtn').textContent=son?'🔊':'🔇';});
+document.addEventListener('pointerdown',initA,{once:true});
+
+
+/* ── COFFRE ANIMÉ ── */
+function createVCoins(){
+  const c=document.getElementById('vcoins'); c.innerHTML='';
+  for(let i=0;i<44;i++){
+    const el=document.createElement('span'); el.className='vcoin';
+    const angle=-160+Math.random()*140, dist=55+Math.random()*170;
+    el.style.setProperty('--x',(Math.cos(angle*Math.PI/180)*dist).toFixed(0)+'px');
+    el.style.setProperty('--y',(-70-Math.random()*155).toFixed(0)+'px');
+    el.style.setProperty('--r',(Math.floor(Math.random()*620-310))+'deg');
+    el.style.setProperty('--d',(Math.random()*.38).toFixed(2)+'s');
+    c.appendChild(el);
+  }
+}
+function createVSparks(){
+  const s=document.getElementById('vsparks'); s.innerHTML='';
+  for(let i=0;i<28;i++){
+    const el=document.createElement('span'); el.className='vspark';
+    el.style.setProperty('--x',(-150+Math.random()*300).toFixed(0)+'px');
+    el.style.setProperty('--y',(-65-Math.random()*185).toFixed(0)+'px');
+    el.style.setProperty('--d',(Math.random()*.55).toFixed(2)+'s');
+    s.appendChild(el);
+  }
+}
+function showVictory(score,total){
+  document.getElementById('victoryScore').textContent='Score final : '+score+' / '+total+' pts';
+  createVCoins(); createVSparks();
+  const ov=document.getElementById('victoryOverlay');
+  ov.classList.add('show');
+  ov.classList.remove('open'); void ov.offsetWidth; ov.classList.add('open');
+  boom();
+}
+function hideVictory(){
+  document.getElementById('victoryOverlay').classList.remove('show','open');
+  restart();
+}
+
+/* ── INIT ── */
+showSection('startScreen');
+</script>
+
+<!-- COFFRE ANIMÉ VICTOIRE -->
+<div class="victory-overlay" id="victoryOverlay">
+  <div class="victory-card">
+    <div class="chest-stage">
+      <div class="vglow"></div>
+      <div class="vcoins" id="vcoins"></div>
+      <div id="vsparks"></div>
+      <div class="vchest">
+        <div class="vchest-lid"></div>
+        <div class="vchest-base"><div class="vkeyhole"></div></div>
+      </div>
+    </div>
+    <h2 class="victory-title">Coffre ouvert !</h2>
+    <div class="victory-score-txt" id="victoryScore"></div>
+    <button class="vclose-btn" onclick="hideVictory()">🔄 Recommencer</button>
+  </div>
+</div>
+
+</body>
+</html>
