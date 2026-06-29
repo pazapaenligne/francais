@@ -64,6 +64,25 @@ Ton texte doit contenir :
 — au moins deux phrases complexes ;
 — éventuellement une phrase non verbale. »
 
+Exemple de production attendue :
+« Le grenier sentait la poussière et le bois ancien. Silence absolu. Une lucarne laissait entrer un mince filet de lumière, et des ombres se déplaçaient doucement sur les murs. Quelques cartons oubliés s'empilaient dans un coin. Lorsqu'on montait l'escalier en bois, chaque marche craquait sous les pas, comme si la maison elle-même racontait son histoire. »
+
+Analyse de l'exemple :
+Phrases simples :
+« Le grenier sentait la poussière et le bois ancien. »
+« Quelques cartons oubliés s'empilaient dans un coin. »
+
+Phrase non verbale :
+« Silence absolu. »
+
+Phrases complexes :
+« Une lucarne laissait entrer un mince filet de lumière, et des ombres se déplaçaient doucement sur les murs. » — 2 verbes conjugués.
+« Lorsqu'on montait l'escalier en bois, chaque marche craquait sous les pas, comme si la maison elle-même racontait son histoire. » — 3 verbes conjugués.
+
+Cet exemple sert uniquement de modèle d'analyse.
+Ne recopie jamais cet exemple dans ta réponse.
+Analyse uniquement le texte de l'élève.
+
 Définitions strictes :
 
 Phrase simple :
