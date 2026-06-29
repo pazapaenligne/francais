@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Phrase simple et complexe — 5e S5 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#b94040;--jour-fonce:#7a1f1f;--jour-clair:#f7eded;--jour-pale:#e2a3a3;
+  --day-glow:rgba(185,64,64,.22);
+  --bg:#fffdf7;--txt:#1a0000;--gris:#6a3333;--bord:#dda0a0;
+  --vert:#22c55e;--vert-bg:#e7faec;--vert-bord:#86efac;
+  --rouge:#ef4444;--rouge-bg:#fdeaea;--rouge-bord:#fca5a5;
+  --lock:#d1c4c4;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-80px) scale(1)}}
+@keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes unlock{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(3px);opacity:.16;}
+.bubble.b1{width:130px;height:130px;background:var(--jour-pale);top:-30px;right:-25px;}
+.bubble.b2{width:85px;height:85px;background:var(--jour);bottom:25px;left:-20px;}
+.bubble.b3{width:60px;height:60px;background:#f5a623;top:40%;right:-15px;}
+#flashIcon{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:5rem;z-index:9999;pointer-events:none;opacity:0;}
+#flashIcon.show{animation:flashPop .85s ease forwards;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:860px;margin:0 auto;padding:14px 13px 80px;position:relative;z-index:2;}
+
+/* ── HEADER ── */
+.header{text-align:center;padding:14px 0 12px;animation:fadeUp .5s ease;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#fff;font-family:Orbitron,sans-serif;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 18px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);margin-bottom:10px;}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#fff;}
+.logo-badge .pts i:nth-child(3){background:var(--jour-pale);}
+.semaine{font-family:Orbitron,sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(1.2rem,4vw,1.85rem);color:var(--txt);line-height:1.15;margin-bottom:8px;}
+.titre .accent{color:var(--jour-fonce);}
+.header-badge{display:inline-block;background:var(--jour);color:#fff;font-family:Orbitron,sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;padding:5px 16px;border-radius:20px;}
+
+/* ── RÉFÉRENTIEL ── */
+.ref-card{background:#fff;border:1.5px solid var(--bord);border-radius:13px;overflow:hidden;margin-bottom:14px;box-shadow:0 3px 12px var(--day-glow);}
+.ref-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.ref-header-title{font-family:Orbitron,sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1.5px;color:#fff;text-transform:uppercase;}
+.ref-toggle-btn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:7px;color:#fff;font-family:Orbitron,sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1px;padding:3px 10px;cursor:pointer;white-space:nowrap;}
+.ref-body{padding:13px 16px;font-size:.88rem;line-height:1.75;color:var(--txt);transition:max-height .35s ease,padding .35s ease;max-height:400px;overflow:hidden;}
+.ref-body.collapsed{max-height:0;padding-top:0;padding-bottom:0;}
+.ref-item{margin-bottom:6px;padding-left:12px;border-left:3px solid var(--jour-pale);}
+.ref-item strong{color:var(--jour-fonce);}
+
+/* ── SCORE GLOBAL ── */
+.score-global{background:#fff;border:1px solid var(--bord);border-radius:12px;padding:11px 14px;margin-bottom:14px;}
+.score-g-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.score-g-label{font-family:Orbitron,sans-serif;font-size:.63rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;}
+.score-g-val{font-family:JetBrains Mono,monospace;font-size:.9rem;font-weight:700;color:var(--jour-fonce);}
+.score-g-bg{background:var(--jour-clair);border-radius:99px;height:8px;overflow:hidden;}
+.score-g-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+.ateliers-chips{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;}
+.atelier-chip{flex:1;min-width:100px;background:var(--jour-clair);border:1.5px solid var(--bord);border-radius:9px;padding:6px 10px;text-align:center;}
+.atelier-chip.done{background:var(--vert-bg);border-color:var(--vert-bord);}
+.atelier-chip-label{font-family:Orbitron,sans-serif;font-size:.55rem;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:1px;display:block;}
+.atelier-chip.done .atelier-chip-label{color:#157f3a;}
+.atelier-chip-val{font-family:JetBrains Mono,monospace;font-size:.85rem;font-weight:700;color:var(--jour-fonce);display:block;margin-top:2px;}
+.atelier-chip.done .atelier-chip-val{color:#157f3a;}
+
+/* ── ATELIER CARD ── */
+.atelier-card{background:#fff;border:1.5px solid var(--bord);border-radius:14px;overflow:hidden;margin-bottom:13px;box-shadow:0 3px 14px var(--day-glow);animation:fadeUp .4s ease;}
+.atelier-card.locked{opacity:.55;filter:grayscale(.4);}
+.atelier-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.atelier-card.locked .atelier-header{background:linear-gradient(135deg,#888,#aaa);}
+.atelier-nom{font-family:Orbitron,sans-serif;font-weight:900;font-size:.75rem;letter-spacing:1.5px;color:#fff;text-transform:uppercase;}
+.atelier-pts{font-family:JetBrains Mono,monospace;font-size:.72rem;color:rgba(255,255,255,.85);}
+.atelier-lock-msg{font-size:.8rem;color:rgba(255,255,255,.8);font-style:italic;margin-top:3px;}
+.atelier-body{padding:14px 16px 18px;}
+.consigne-box{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 9px 9px 0;padding:9px 14px;font-size:.9rem;color:var(--jour-fonce);font-style:italic;margin-bottom:13px;line-height:1.6;}
+.texte-support{background:#fdf8f5;border:1px solid var(--bord);border-radius:9px;padding:12px 14px;font-size:.9rem;line-height:1.8;color:#2a0a0a;margin-bottom:14px;font-style:italic;}
+.dots-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--bord);background:var(--jour-clair);font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--gris);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
+.dot.ok{background:var(--vert-bg);border-color:var(--vert-bord);color:#157f3a;}
+.dot.ko{background:var(--rouge-bg);border-color:var(--rouge-bord);color:#b91c1c;}
+
+/* ── QUESTION ── */
+.q-wrap{margin-bottom:14px;}
+.q-texte{font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:700;color:var(--txt);line-height:1.6;margin-bottom:9px;}
+.q-phrase{background:#fff0f0;border-left:3px solid var(--jour);border-radius:0 8px 8px 0;padding:8px 12px;font-style:italic;font-size:.93rem;margin-bottom:9px;line-height:1.65;}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid var(--bord);border-radius:10px;background:#fffdf5;cursor:pointer;font-size:clamp(.88rem,2.2vw,.95rem);min-height:44px;transition:all .15s;text-align:left;width:100%;font-family:Arial,Helvetica,sans-serif;line-height:1.5;}
+.opt:hover:not([disabled]){border-color:var(--jour-fonce);background:var(--jour-clair);}
+.opt.selected{border-color:var(--jour-fonce);background:var(--jour-clair);}
+.opt.correct{border-color:var(--vert);background:var(--vert-bg);animation:popIn .25s ease;}
+.opt.wrong{border-color:var(--rouge);background:var(--rouge-bg);}
+.opt[disabled]{cursor:default;}
+.opt-letter{font-family:JetBrains Mono,monospace;font-size:.75rem;font-weight:700;color:var(--jour-fonce);flex-shrink:0;margin-top:2px;}
+.opt.correct .opt-letter{color:#157f3a;}
+.opt.wrong .opt-letter{color:#b91c1c;}
+.q-fb{border-radius:9px;padding:9px 13px;font-size:.88rem;line-height:1.7;display:none;margin-top:9px;}
+.q-fb.show{display:block;animation:fadeUp .3s ease;}
+.q-fb.ok{background:var(--vert-bg);border:1px solid var(--vert-bord);color:#157f3a;}
+.q-fb.ko{background:var(--rouge-bg);border:1px solid var(--rouge-bord);color:#7a1f1f;}
+.q-sep{border:none;border-top:1.5px dashed var(--bord);margin:14px 0;}
+
+/* ── BOUTONS ── */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.btn{border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:800;font-size:clamp(.8rem,2vw,.88rem);letter-spacing:1px;text-transform:uppercase;padding:0 18px;min-height:2.8rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-valider{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;box-shadow:0 4px 12px var(--day-glow);}
+.btn-valider:hover:not([disabled]){transform:translateY(-2px);}
+.btn-valider[disabled]{opacity:.35;cursor:default;}
+.btn-suite{background:var(--vert);color:#fff;}
+.btn-suite:hover{transform:translateY(-2px);}
+.sous-score{background:var(--jour-clair);border:1px solid var(--bord);border-radius:10px;padding:11px 15px;text-align:center;margin-top:13px;display:none;}
+.sous-score.show{display:block;animation:fadeUp .3s ease;}
+.sous-score-val{font-family:JetBrains Mono,monospace;font-weight:700;font-size:1.35rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+/* ── BILAN ── */
+.bilan{display:none;background:#fff;border:2px solid var(--jour-fonce);border-radius:16px;padding:26px 22px;text-align:center;box-shadow:0 8px 28px var(--day-glow);position:relative;overflow:hidden;margin-top:13px;}
+.bilan.show{display:block;animation:fadeUp .5s ease;}
+.bilan-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.bilan-score{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(2.8rem,9vw,4.5rem);color:var(--jour-fonce);line-height:1;margin-bottom:4px;}
+.bilan-score small{font-size:.3em;color:var(--gris);}
+.bilan-etoiles{font-size:1.9rem;margin:8px 0;}
+.bilan-tampon{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(.75rem,2vw,.9rem);letter-spacing:2px;padding:6px 18px;border-radius:8px;display:inline-block;margin-bottom:10px;text-transform:uppercase;}
+.bilan-tampon.ok{color:#157f3a;border:2.5px solid #157f3a;}
+.bilan-tampon.moyen{color:var(--jour-fonce);border:2.5px solid var(--jour-fonce);}
+.bilan-tampon.ko{color:#7a1f1f;border:2.5px solid #7a1f1f;}
+.bilan-msg{font-size:clamp(.88rem,2.2vw,.97rem);color:var(--txt);line-height:1.75;margin-bottom:16px;max-width:500px;margin-left:auto;margin-right:auto;}
+.bilan-detail{display:flex;flex-direction:column;gap:5px;max-width:420px;margin:0 auto 18px;text-align:left;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-radius:8px;}
+.bilan-ligne.ok{background:var(--vert-bg);color:#157f3a;}
+.bilan-ligne.moyen{background:#fff8e0;color:#8a6000;}
+.bilan-ligne.ko{background:var(--rouge-bg);color:#7a1f1f;}
+.bilan-ligne-label{font-size:.85rem;}
+.bilan-ligne-score{font-family:JetBrains Mono,monospace;font-weight:700;}
+.btn-recommencer{font-family:Orbitron,sans-serif;font-weight:900;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;border:none;border-radius:12px;padding:0 28px;min-height:2.8rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px var(--day-glow);}
+.btn-recommencer:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div id="flashIcon"></div>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
+
+<div class="wrap">
+  <div class="header">
+    <div><div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 5E</div></div>
+    <div class="semaine">Semaine 5 &mdash; Jour 2</div>
+    <h1 class="titre">Je <span class="accent">m'entraîne</span></h1>
+    <div class="header-badge">✏️ Apprenti écrivain &middot; /13</div>
+  </div>
+
+  <!-- RÉFÉRENTIEL -->
+  <div class="ref-card">
+    <div class="ref-header" onclick="toggleRef()">
+      <span class="ref-header-title">📋 Référentiel — Phrase simple et complexe</span>
+      <button class="ref-toggle-btn" id="refBtn" onclick="event.stopPropagation();toggleRef()">&#9660;&nbsp;Replier</button>
+    </div>
+    <div class="ref-body" id="refBody">
+      <div class="ref-item"><strong>Phrase simple :</strong> contient un seul verbe conjugué (une seule proposition).</div>
+      <div class="ref-item"><strong>Phrase complexe :</strong> contient au moins deux verbes conjugués (au moins deux propositions).</div>
+      <div class="ref-item"><strong>Attention :</strong> un verbe à l'infinitif ou un participe employé comme adjectif ne compte pas comme verbe conjugué.</div>
+      <div class="ref-item"><strong>Proposition :</strong> groupe de mots organisé autour d'un verbe conjugué.</div>
+      <div class="ref-item"><strong>Connecteurs fréquents :</strong> et, mais, car, parce que, quand, si, qui, que, dont…</div>
+    </div>
+  </div>
+
+  <!-- SCORE GLOBAL -->
+  <div class="score-global">
+    <div class="score-g-head">
+      <span class="score-g-label">Score global</span>
+      <span class="score-g-val" id="scoreGlobal">0 / 13</span>
+    </div>
+    <div class="score-g-bg"><div class="score-g-fill" id="scoreFill"></div></div>
+    <div class="ateliers-chips">
+      <div class="atelier-chip" id="chip0"><span class="atelier-chip-label">Atelier 1</span><span class="atelier-chip-val" id="chipVal0">— / 4</span></div>
+      <div class="atelier-chip" id="chip1"><span class="atelier-chip-label">Atelier 2</span><span class="atelier-chip-val" id="chipVal1">— / 5</span></div>
+      <div class="atelier-chip" id="chip2"><span class="atelier-chip-label">Atelier 3</span><span class="atelier-chip-val" id="chipVal2">— / 4</span></div>
+    </div>
+  </div>
+
+  <!-- ATELIER 1 -->
+  <div class="atelier-card" id="card0">
+    <div class="atelier-header">
+      <div>
+        <div class="atelier-nom">🔍 Mission 1 — Repérer les verbes</div>
+      </div>
+      <span class="atelier-pts">4 pts</span>
+    </div>
+    <div class="atelier-body">
+      <div class="consigne-box">Lis ce texte puis réponds aux questions sur les verbes conjugués.</div>
+      <div class="texte-support">
+        Quelques années passèrent encore, et le jeune garçon devint un homme accompli. Une demeure élégante fut bâtie au cœur du village. Dans cette maison neuve, on trouvait toutes sortes d'objets précieux, et chacun voulait les admirer, même les voisins qui n'habitaient pas le village et qui venaient de loin pour les observer.
+      </div>
+      <div class="dots-row" id="dots0"></div>
+      <div id="qs0"></div>
+      <div class="sous-score" id="ss0"><div class="sous-score-val" id="ssv0">0 / 4</div><div class="sous-score-label">Score Mission 1</div></div>
+      <div class="btn-row" id="suite0" style="display:none;"><button class="btn btn-suite" onclick="unlockAtelier(1)">Mission 2&nbsp;›</button></div>
+    </div>
+  </div>
+
+  <!-- ATELIER 2 -->
+  <div class="atelier-card locked" id="card1">
+    <div class="atelier-header">
+      <div>
+        <div class="atelier-nom">🗂️ Mission 2 — Trier les phrases</div>
+        <div class="atelier-lock-msg" id="lock1msg">🔒 Débloquée à 3/4 à la Mission 1</div>
+      </div>
+      <span class="atelier-pts">5 pts</span>
+    </div>
+    <div class="atelier-body" id="body1" style="display:none;">
+      <div class="consigne-box">Indique si chaque phrase est simple ou complexe.</div>
+      <div class="dots-row" id="dots1"></div>
+      <div id="qs1"></div>
+      <div class="sous-score" id="ss1"><div class="sous-score-val" id="ssv1">0 / 5</div><div class="sous-score-label">Score Mission 2</div></div>
+      <div class="btn-row" id="suite1" style="display:none;"><button class="btn btn-suite" onclick="unlockAtelier(2)">Mission 3&nbsp;›</button></div>
+    </div>
+  </div>
+
+  <!-- ATELIER 3 -->
+  <div class="atelier-card locked" id="card2">
+    <div class="atelier-header">
+      <div>
+        <div class="atelier-nom">✍️ Mission 3 — Enrichir les phrases</div>
+        <div class="atelier-lock-msg" id="lock2msg">🔒 Débloquée à 4/5 à la Mission 2</div>
+      </div>
+      <span class="atelier-pts">4 pts</span>
+    </div>
+    <div class="atelier-body" id="body2" style="display:none;">
+      <div class="consigne-box">Choisis la transformation qui ajoute une proposition pour former une phrase complexe.</div>
+      <div class="dots-row" id="dots2"></div>
+      <div id="qs2"></div>
+      <div class="sous-score" id="ss2"><div class="sous-score-val" id="ssv2">0 / 4</div><div class="sous-score-label">Score Mission 3</div></div>
+      <div class="btn-row" id="suite2" style="display:none;"><button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan&nbsp;›</button></div>
+    </div>
+  </div>
+
+  <!-- BILAN -->
+  <div class="bilan" id="bilan">
+    <div class="bilan-particles" id="bilanParticles"></div>
+    <div class="bilan-score"><span id="bScore">0</span><small> / 13</small></div>
+    <div class="bilan-etoiles" id="bEtoiles"></div>
+    <div class="bilan-tampon" id="bTampon"></div>
+    <div class="bilan-msg" id="bMsg"></div>
+    <div class="bilan-detail" id="bDetail"></div>
+    <button class="btn-recommencer" onclick="recommencer()">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ══ DONNÉES ══ */
+var ATELIERS = [
+  /* Atelier 1 — 4 questions */
+  [
+    {
+      phrase: "Quelques ann\u00e9es pass\u00e8rent encore, et le jeune gar\u00e7on devint un homme accompli.",
+      q: "Quels sont les verbes conjugu\u00e9s de cette phrase\u00a0?",
+      opts: ["pass\u00e8rent et devint", "pass\u00e8rent et accompli", "ann\u00e9es et gar\u00e7on"],
+      ans: 0,
+      fb: "Les deux verbes conjugu\u00e9s sont pass\u00e8rent (pass\u00e9 simple de passer) et devint (pass\u00e9 simple de devenir). Accompli est un adjectif, pas un verbe conjugu\u00e9 ici."
+    },
+    {
+      phrase: "Une demeure \u00e9l\u00e9gante fut b\u00e2tie au c\u0153ur du village.",
+      q: "Quel est le verbe conjugu\u00e9 de cette phrase\u00a0?",
+      opts: ["\u00e9l\u00e9gante", "fut b\u00e2tie", "c\u0153ur"],
+      ans: 1,
+      fb: "Fut b\u00e2tie est une forme verbale compos\u00e9e (auxiliaire \u00eatre au pass\u00e9 simple + participe pass\u00e9)\u00a0: c\u2019est le seul verbe conjugu\u00e9 de la phrase. \u00c9l\u00e9gante est un adjectif, c\u0153ur est un nom commun."
+    },
+    {
+      phrase: "Dans cette maison neuve, on trouvait toutes sortes d\u2019objets pr\u00e9cieux, et chacun voulait les admirer.",
+      q: "Quels sont les verbes conjugu\u00e9s de cette phrase\u00a0?",
+      opts: ["trouvait et voulait", "trouvait, voulait et admirer", "voulait et admirer"],
+      ans: 0,
+      fb: "Trouvait et voulait sont les deux verbes conjugu\u00e9s (imparfait de l\u2019indicatif). Admirer est \u00e0 l\u2019infinitif\u00a0: il ne compte pas comme un verbe conjugu\u00e9."
+    },
+    {
+      phrase: "m\u00eame les voisins qui n\u2019habitaient pas le village et qui venaient de loin pour les observer.",
+      q: "Quels sont les verbes conjugu\u00e9s de cette phrase\u00a0?",
+      opts: ["habitaient, venaient et observer", "venaient et observer", "habitaient et venaient"],
+      ans: 2,
+      fb: "Habitaient et venaient sont les deux verbes conjugu\u00e9s (imparfait de l\u2019indicatif). Observer est \u00e0 l\u2019infinitif, introduit par pour\u00a0: il ne compte pas comme un verbe conjugu\u00e9."
+    }
+  ],
+  /* Atelier 2 — 5 questions */
+  [
+    {
+      phrase: "J\u2019aime \u00e9couter les oiseaux et faire la cuisine.",
+      q: "Cette phrase est\u00a0:",
+      opts: ["Phrase simple", "Phrase complexe"],
+      ans: 0,
+      fb: "Un seul verbe conjugu\u00e9 est pr\u00e9sent\u00a0: aime. \u00c9couter et faire sont \u00e0 l\u2019infinitif, compl\u00e9ments du verbe aime. Cette phrase est donc simple, malgr\u00e9 l\u2019apparence de deux actions."
+    },
+    {
+      phrase: "Je me r\u00e9veille et m\u2019habille avant de prendre mon petit-d\u00e9jeuner.",
+      q: "Cette phrase est\u00a0:",
+      opts: ["Phrase simple", "Phrase complexe"],
+      ans: 1,
+      fb: "Deux verbes conjugu\u00e9s sont pr\u00e9sents\u00a0: me r\u00e9veille et m\u2019habille. Prendre est \u00e0 l\u2019infinitif, introduit par avant de\u00a0: il ne compte pas. Deux verbes conjugu\u00e9s \u2192 phrase complexe."
+    },
+    {
+      phrase: "Le 8 juillet 1843, dans un hameau alpin situ\u00e9 pr\u00e8s de la fronti\u00e8re, naissait une fillette pr\u00e9nomm\u00e9e Jeanne.",
+      q: "Cette phrase est\u00a0:",
+      opts: ["Phrase simple", "Phrase complexe"],
+      ans: 0,
+      fb: "Malgr\u00e9 sa longueur, cette phrase ne contient qu\u2019un seul verbe conjugu\u00e9\u00a0: naissait. Les groupes qui pr\u00e9c\u00e8dent sont des compl\u00e9ments circonstanciels, pas des propositions suppl\u00e9mentaires. C\u2019est une phrase simple, bien que longue."
+    },
+    {
+      phrase: "\u00c9puis\u00e9 par sa longue journ\u00e9e, il s\u2019endormit aussit\u00f4t apr\u00e8s le repas.",
+      q: "Cette phrase est\u00a0:",
+      opts: ["Phrase simple", "Phrase complexe"],
+      ans: 0,
+      fb: "Un seul verbe conjugu\u00e9 est pr\u00e9sent\u00a0: s\u2019endormit. \u00c9puis\u00e9 est un participe pass\u00e9 employ\u00e9 comme adjectif, pas un verbe conjugu\u00e9. C\u2019est une phrase simple."
+    },
+    {
+      phrase: "Les \u00e9l\u00e8ves rangent leurs affaires et quittent la salle en silence.",
+      q: "Cette phrase est\u00a0:",
+      opts: ["Phrase simple", "Phrase complexe"],
+      ans: 1,
+      fb: "Deux verbes conjugu\u00e9s sont pr\u00e9sents\u00a0: rangent et quittent. C\u2019est une phrase complexe."
+    }
+  ],
+  /* Atelier 3 — 4 questions */
+  [
+    {
+      phrase: "Je pense \u00e0 mon prochain voyage.",
+      q: "Ajoute une proposition reli\u00e9e par et.",
+      opts: [
+        "\u00ab\u00a0Je pense \u00e0 mon prochain voyage et je pr\u00e9pare d\u00e9j\u00e0 ma valise.\u00a0\u00bb",
+        "\u00ab\u00a0Je pense \u00e0 mon prochain voyage avec impatience et joie.\u00a0\u00bb",
+        "\u00ab\u00a0Mon prochain voyage, auquel je pense souvent, approche.\u00a0\u00bb"
+      ],
+      ans: 0,
+      fb: "Pour ajouter une proposition reli\u00e9e par et, il faut ajouter un second verbe conjugu\u00e9 apr\u00e8s cette conjonction de coordination. \u00ab\u00a0et je pr\u00e9pare d\u00e9j\u00e0 ma valise\u00a0\u00bb ajoute le verbe conjugu\u00e9 pr\u00e9pare, cr\u00e9ant une seconde proposition. Les deux autres enrichissent la phrase sans ajouter de second verbe conjugu\u00e9 reli\u00e9 par et."
+    },
+    {
+      phrase: "J\u2019ai pris un sac pour l\u2019excursion.",
+      q: "Ajoute une proposition introduite par parce que.",
+      opts: [
+        "\u00ab\u00a0J\u2019ai pris un grand sac solide pour l\u2019excursion.\u00a0\u00bb",
+        "\u00ab\u00a0J\u2019ai pris un sac pour l\u2019excursion, parce que je devais transporter beaucoup d\u2019affaires.\u00a0\u00bb",
+        "\u00ab\u00a0J\u2019ai pris, avant l\u2019excursion pr\u00e9vue ce matin, un sac.\u00a0\u00bb"
+      ],
+      ans: 1,
+      fb: "Pour ajouter une proposition introduite par parce que, il faut ajouter un second verbe conjugu\u00e9 apr\u00e8s cette conjonction. \u00ab\u00a0parce que je devais transporter beaucoup d\u2019affaires\u00a0\u00bb ajoute le verbe conjugu\u00e9 devais, cr\u00e9ant une seconde proposition de cause. Les deux autres n\u2019ajoutent aucun second verbe conjugu\u00e9."
+    },
+    {
+      phrase: "Je me demande la r\u00e9ponse \u00e0 cette question.",
+      q: "Ajoute une proposition introduite par si.",
+      opts: [
+        "\u00ab\u00a0Je me demande, avec curiosit\u00e9, la r\u00e9ponse \u00e0 cette question difficile.\u00a0\u00bb",
+        "\u00ab\u00a0Je me demande la r\u00e9ponse \u00e0 cette question depuis longtemps d\u00e9j\u00e0.\u00a0\u00bb",
+        "\u00ab\u00a0Je me demande si cette r\u00e9ponse est correcte.\u00a0\u00bb"
+      ],
+      ans: 2,
+      fb: "Pour ajouter une proposition introduite par si, il faut ajouter un second verbe conjugu\u00e9 apr\u00e8s cette conjonction. \u00ab\u00a0si cette r\u00e9ponse est correcte\u00a0\u00bb ajoute le verbe conjugu\u00e9 est, cr\u00e9ant une seconde proposition. Les deux autres enrichissent la phrase sans ajouter de second verbe conjugu\u00e9 introduit par si."
+    },
+    {
+      phrase: "J\u2019ai peur de cette \u00e9preuve.",
+      q: "Ajoute une proposition relative introduite par qui.",
+      opts: [
+        "\u00ab\u00a0J\u2019ai peur de cette \u00e9preuve que je fuis.\u00a0\u00bb",
+        "\u00ab\u00a0J\u2019ai peur de cette \u00e9preuve qui approche \u00e0 grands pas.\u00a0\u00bb",
+        "\u00ab\u00a0J\u2019ai peur de cette \u00e9preuve dont je suis \u00e9prouv\u00e9.\u00a0\u00bb"
+      ],
+      ans: 1,
+      fb: "Pour ajouter une proposition relative introduite par qui, il faut ajouter un second verbe conjugu\u00e9 apr\u00e8s ce pronom relatif. \u00ab\u00a0qui approche \u00e0 grands pas\u00a0\u00bb ajoute le verbe conjugu\u00e9 approche, cr\u00e9ant une proposition subordonn\u00e9e relative. Les deux autres n\u2019ajoutent aucun second verbe conjugu\u00e9 introduit par qui."
+    }
+  ]
+];
+
+var TOTALS = [4, 5, 4];
+var UNLOCK_MIN = [0, 3, 4]; /* seuil pour débloquer l'atelier suivant */
+var LABELS = ['A','B','C'];
+var scores = [0, 0, 0];
+var done = [false, false, false];
+var sel = [{},{},{} ];
+var validated = [[],[],[]];
+var actx = null;
+
+function rnd(){
+  try{
+    var a=new Uint32Array(1);
+    crypto.getRandomValues(a);
+    /* XOR avec horloge pour casser les patterns répétitifs */
+    var t=Date.now()&0xFFFF;
+    return ((a[0]^(t*2654435761))>>>0)/4294967296;
+  }catch(e){return Math.random();}
+}
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);}
+function beepOk(){initA();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.12,'sine',.1);},75);}
+function beepErr(){initA();beep(220,90,.22,'sawtooth',.09);}
+function beepFinal(ok){initA();if(ok){[523,659,784,1047,1318].forEach(function(f,i){setTimeout(function(){beep(f,f,.22,'triangle',.14);},i*140);});}else{beep(200,80,.4,'sawtooth',.11);}}
+document.addEventListener('pointerdown',initA,{once:true});
+function showFlash(ok){var f=document.getElementById('flashIcon');if(!f)return;f.textContent=ok?'✓':'✗';f.style.color=ok?'#22c55e':'#ef4444';f.style.animation='none';void f.offsetWidth;f.className='show';}
+
+function toggleRef(){
+  var b=document.getElementById('refBody'),btn=document.getElementById('refBtn');
+  var c=b.classList.contains('collapsed');
+  b.classList.toggle('collapsed');
+  btn.innerHTML=c?'&#9660;&nbsp;Replier':'&#9654;&nbsp;D\u00e9plier';
+}
+
+function updateGlobal(){
+  var total=scores[0]+scores[1]+scores[2];
+  var max=TOTALS[0]+TOTALS[1]+TOTALS[2];
+  document.getElementById('scoreGlobal').textContent=total+' / '+max;
+  document.getElementById('scoreFill').style.width=Math.round(total/max*100)+'%';
+  [0,1,2].forEach(function(i){
+    document.getElementById('chipVal'+i).textContent=(done[i]?scores[i]:'—')+' / '+TOTALS[i];
+    if(done[i])document.getElementById('chip'+i).classList.add('done');
+  });
+}
+
+function buildDots(atelierIdx){
+  var r=document.getElementById('dots'+atelierIdx);r.innerHTML='';
+  var n=TOTALS[atelierIdx];
+  for(var i=0;i<n;i++){
+    var d=document.createElement('div');d.className='dot';d.id='dot_'+atelierIdx+'_'+i;
+    d.textContent=i+1;r.appendChild(d);
+  }
+}
+function markDot(atelierIdx,qi,ok){
+  var d=document.getElementById('dot_'+atelierIdx+'_'+qi);
+  if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}
+}
+
+function renderAtelier(ai){
+  buildDots(ai);
+  var qs=ATELIERS[ai];
+  var wrap=document.getElementById('qs'+ai);
+  wrap.innerHTML='';
+  sel[ai]={};validated[ai]=[];
+  qs.forEach(function(q,qi){
+    if(qi>0){var sep=document.createElement('hr');sep.className='q-sep';wrap.appendChild(sep);}
+    var div=document.createElement('div');div.className='q-wrap';
+    var sh=shuffle(q.opts.map(function(o,i){return{txt:o,orig:i};}));
+    var h='';
+    if(q.phrase) h+='<div class="q-phrase">'+q.phrase+'</div>';
+    h+='<div class="q-texte">'+q.q+'</div>';
+    h+='<div class="opts" id="opts_'+ai+'_'+qi+'">';
+    sh.forEach(function(o,i){
+      h+='<button class="opt" onclick="selOpt('+ai+','+qi+','+o.orig+',this)">'
+        +'<span class="opt-letter">'+LABELS[i]+'.</span>'
+        +'<span>'+o.txt+'</span></button>';
+    });
+    h+='</div>';
+    h+='<div class="q-fb" id="fb_'+ai+'_'+qi+'"></div>';
+    h+='<div class="btn-row"><button class="btn btn-valider" id="btnVal_'+ai+'_'+qi+'" onclick="valider('+ai+','+qi+')" disabled>✓&nbsp;Valider</button></div>';
+    div.innerHTML=h;
+    wrap.appendChild(div);
+  });
+}
+
+function selOpt(ai,qi,orig,el){
+  if(validated[ai][qi])return;
+  sel[ai][qi]=orig;
+  var opts=document.querySelectorAll('#opts_'+ai+'_'+qi+' .opt');
+  opts.forEach(function(o){o.classList.remove('selected');});
+  el.classList.add('selected');
+  document.getElementById('btnVal_'+ai+'_'+qi).removeAttribute('disabled');
+}
+
+function valider(ai,qi){
+  if(validated[ai][qi])return;
+  validated[ai][qi]=true;
+  var q=ATELIERS[ai][qi];
+  var ok=(sel[ai][qi]===q.ans);
+  var btn=document.getElementById('btnVal_'+ai+'_'+qi);
+  btn.setAttribute('disabled','');
+  var opts=document.querySelectorAll('#opts_'+ai+'_'+qi+' .opt');
+  opts.forEach(function(o){
+    o.setAttribute('disabled','');
+    var m=o.getAttribute('onclick').match(/selOpt\(\d+,\d+,(\d+)/);
+    var orig=m?parseInt(m[1]):-1;
+    if(orig===q.ans) o.classList.add('correct');
+    else if(orig===sel[ai][qi]&&!ok) o.classList.add('wrong');
+  });
+  var fb=document.getElementById('fb_'+ai+'_'+qi);
+  if(ok){
+    fb.textContent='✓\u00a0Bonne r\u00e9ponse\u00a0!';
+    fb.className='q-fb ok show';
+    scores[ai]++;markDot(ai,qi,true);beepOk();showFlash(true);
+  } else {
+    fb.textContent='✗\u00a0'+q.fb;
+    fb.className='q-fb ko show';
+    markDot(ai,qi,false);beepErr();showFlash(false);
+  }
+  /* Vérifier si atelier terminé */
+  var total=ATELIERS[ai].length;
+  var done_count=Object.keys(validated[ai]).filter(function(k){return validated[ai][k];}).length;
+  if(done_count===total){
+    done[ai]=true;
+    updateGlobal();
+    document.getElementById('ssv'+ai).textContent=scores[ai]+' / '+TOTALS[ai];
+    document.getElementById('ss'+ai).classList.add('show');
+    /* Débloquer suite si seuil atteint */
+    if(ai<2 && scores[ai]>=UNLOCK_MIN[ai+1]){
+      document.getElementById('suite'+ai).style.display='flex';
+      beepFinal(true);
+    } else if(ai<2){
+      /* Score insuffisant — message */
+      var s=document.getElementById('suite'+ai);
+      s.style.display='flex';
+      s.innerHTML='<div style="font-size:.88rem;color:var(--gris);font-style:italic;">Score insuffisant pour d\u00e9bloquer la Mission suivante (minimum '
+        +UNLOCK_MIN[ai+1]+' / '+TOTALS[ai]+').\u00a0Recommence cet atelier ou continue.</div>';
+      /* Permettre quand même de passer */
+      s.innerHTML+='<button class="btn btn-suite" onclick="unlockAtelier('+(ai+1)+')">Continuer quand m\u00eame\u00a0›</button>';
+    } else {
+      /* Atelier 3 terminé */
+      document.getElementById('suite'+ai).style.display='flex';
+      beepFinal(scores[ai]>=3);
+    }
+  } else {
+    updateGlobal();
+  }
+}
+
+function unlockAtelier(ai){
+  var card=document.getElementById('card'+ai);
+  var body=document.getElementById('body'+ai);
+  var lockMsg=document.getElementById('lock'+ai+'msg');
+  card.classList.remove('locked');
+  if(lockMsg)lockMsg.style.display='none';
+  body.style.display='block';
+  renderAtelier(ai);
+  card.style.animation='none';void card.offsetWidth;card.style.animation='unlock .4s ease';
+}
+
+function afficherBilan(){
+  var total=scores[0]+scores[1]+scores[2];
+  document.getElementById('bScore').textContent=total;
+  var pct=total/13;
+  var nb=pct>=.92?5:pct>=.69?4:pct>=.46?3:pct>=.31?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(total>=12){tp.textContent='TROIS MISSIONS ACCOMPLIES\u00a0!';tp.className='bilan-tampon ok';msg.textContent='Excellente ma\u00eetrise de la phrase simple et complexe.';}
+  else if(total>=9){tp.textContent='TR\u00c8S BON ENTRA\u00cENEMENT';tp.className='bilan-tampon ok';msg.textContent='Tr\u00e8s bon entra\u00eenement. Quelques nuances \u00e0 revoir.';}
+  else if(total>=6){tp.textContent='BON ENTRA\u00cENEMENT';tp.className='bilan-tampon moyen';msg.textContent='Bon entra\u00eenement. Reprends les missions signal\u00e9es.';}
+  else{tp.textContent='\u00c0 RETRAVAILLER';tp.className='bilan-tampon ko';msg.textContent='Reprends le r\u00e9f\u00e9rentiel avant de continuer.';}
+  var detail=[
+    {label:'Mission 1 \u2014 Repérer les verbes',score:scores[0],total:4},
+    {label:'Mission 2 \u2014 Trier les phrases',score:scores[1],total:5},
+    {label:'Mission 3 \u2014 Enrichir les phrases',score:scores[2],total:4}
+  ];
+  document.getElementById('bDetail').innerHTML=detail.map(function(l){
+    var cl=l.score/l.total>=.75?'ok':l.score/l.total>=.5?'moyen':'ko';
+    return '<div class="bilan-ligne '+cl+'"><span class="bilan-ligne-label">'+l.label+'</span><span class="bilan-ligne-score">'+l.score+' / '+l.total+'</span></div>';
+  }).join('');
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(total>=9);
+  if(total>=9){
+    var box=document.getElementById('bilanParticles');box.innerHTML='';
+    ['✨','⭐','✏️','📝','✨','⭐','✏️','📝','✨','⭐','✏️','📝','✨','⭐','✏️','📝','✨','⭐','✏️','📝'].forEach(function(em,i){
+      var e=document.createElement('div');e.textContent=em;
+      e.style.cssText='position:absolute;font-size:'+(1.1+Math.random()*.8)+'rem;left:'+(3+Math.random()*94)+'%;bottom:'+(Math.random()*35)+'%;opacity:0;pointer-events:none;animation:particleUp '+(1+Math.random()*1.2)+'s ease '+(i*0.07+Math.random()*0.15)+'s forwards;';
+      box.appendChild(e);
+    });
+  }
+}
+
+function recommencer(){
+  scores=[0,0,0];done=[false,false,false];sel=[{},{},{}];validated=[[],[],[]];
+  [0,1,2].forEach(function(i){
+    document.getElementById('chip'+i).classList.remove('done');
+    document.getElementById('chipVal'+i).textContent='\u2014 / '+TOTALS[i];
+  });
+  document.getElementById('scoreGlobal').textContent='0 / 13';
+  document.getElementById('scoreFill').style.width='0%';
+  document.getElementById('bilan').className='bilan';
+  /* Remettre ateliers 1 et 2 verrouillés */
+  [1,2].forEach(function(i){
+    document.getElementById('card'+i).classList.add('locked');
+    document.getElementById('body'+i).style.display='none';
+    var lm=document.getElementById('lock'+i+'msg');
+    if(lm)lm.style.display='';
+  });
+  [0,1,2].forEach(function(i){
+    document.getElementById('ss'+i).classList.remove('show');
+    document.getElementById('suite'+i).style.display='none';
+  });
+  renderAtelier(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* INIT */
+setTimeout(function(){renderAtelier(0);},50);
+</script>
+</body>
+</html>
