@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi — Le Manoir des Connaissances — 5e S5 J3</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{ --bleu:#14324f; --bleu2:#0f2740; --mur:#eef3f9; }
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ margin:0; background:linear-gradient(160deg,#0f2740,#14324f 60%,#102c47); color:#eaf2fb;
+  font-family:'Nunito',Arial,sans-serif; min-height:100vh; padding:18px; }
+.wrap{ max-width:1000px; margin:0 auto; }
+
+/* HEADER PAZAPA */
+.hdr{ text-align:center; margin-bottom:16px; }
+.logo-badge{ display:inline-flex; align-items:center; gap:8px; background:#f5c518; border-radius:999px; padding:5px 16px; margin-bottom:8px; }
+.logo-badge .dots{ display:flex; gap:4px; }
+.logo-badge .dots i{ width:8px; height:8px; border-radius:50%; display:block; }
+.logo-badge .dots i:nth-child(1){ background:#e05050; }
+.logo-badge .dots i:nth-child(2){ background:#7a3d00; }
+.logo-badge .dots i:nth-child(3){ background:#3d7a10; }
+.logo-badge .lab{ font-family:'Orbitron',sans-serif; font-size:11px; font-weight:800; color:#1a1200; letter-spacing:.5px; }
+.wk{ font-size:.78rem; color:#7ab0d8; font-family:'Orbitron',sans-serif; letter-spacing:1px; margin-bottom:5px; }
+.hdr h1{ font-family:'Orbitron',sans-serif; font-size:clamp(1rem,3.5vw,1.7rem); font-weight:900; color:#8dc63f; margin-bottom:3px; }
+.theme-badge{ display:inline-block; background:#8dc63f; color:#fff; font-family:'Orbitron',sans-serif; font-weight:700; font-size:clamp(.62rem,2vw,.72rem); letter-spacing:1px; padding:6px 16px; border-radius:20px; margin-bottom:12px; }
+
+/* HUD */
+header{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.hud{ display:flex; align-items:center; gap:10px; }
+.score{ font-family:'JetBrains Mono',monospace; font-size:clamp(.9rem,3vw,1.05rem); background:#0c2236;
+  border:1px solid #2c4a6a; padding:8px 14px; border-radius:10px; white-space:nowrap; }
+.score #score{ color:#8dc63f; font-weight:700; }
+.sound{ background:#0c2236; border:1px solid #2c4a6a; color:#eaf2fb; font-size:1.05rem; width:42px; height:42px;
+  border-radius:10px; cursor:pointer; }
+.sound:hover{ background:#143356; }
+
+/* RÉFÉRENTIEL */
+.ref-card{ background:#0c2236; border:1px solid #2c4a6a; border-radius:12px; overflow:hidden; margin-bottom:14px; }
+.ref-btn{ display:flex; align-items:center; justify-content:space-between; padding:10px 14px; cursor:pointer;
+  background:#0e2a42; border:none; width:100%; font-family:'Nunito',sans-serif; font-size:.88rem; font-weight:800; color:#8dc63f; }
+.ref-arr{ transition:transform .3s; }
+.ref-btn.open .ref-arr{ transform:rotate(180deg); }
+.ref-body{ max-height:0; overflow:hidden; transition:max-height .4s ease; }
+.ref-body.open{ max-height:400px; }
+.ref-inner{ padding:11px 14px; border-top:1px solid #2c4a6a; font-size:.84rem; line-height:1.85; color:#c8e0f0; }
+.ri{ display:flex; gap:8px; margin-bottom:6px; align-items:baseline; }
+.rk{ font-family:'JetBrains Mono',monospace; font-weight:700; color:#8dc63f; min-width:160px; flex-shrink:0; }
+
+/* PLAN MANOIR */
+.planwrap{ background:#0c2236; border:1px solid #23456a; border-radius:14px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.35); margin-bottom:14px; }
+#plan{ width:100%; height:auto; display:block; border-radius:8px; }
+.bp{ stroke:#fff; stroke-opacity:.04; stroke-width:1; }
+.walls line{ stroke:var(--mur); stroke-width:7; stroke-linecap:round; }
+.rfill{ transition:fill .6s ease; }
+.room.locked .rfill{ fill:#21425f; }
+.room.unlocked .rfill{ fill:url(#gold); }
+.rglow{ opacity:0; transition:opacity .9s ease; }
+.room.unlocked .rglow{ opacity:1; }
+.rnum,.rname{ font-family:'Nunito',Arial,sans-serif; transition:fill .6s ease; }
+.rnum{ font-size:11px; opacity:.8; }
+.rname{ font-size:11px; font-weight:600; }
+.room.locked .rnum,.room.locked .rname{ fill:#5d7a99; }
+.room.unlocked .rnum,.room.unlocked .rname{ fill:#3d6020; }
+.rlock{ transform-box:fill-box; transform-origin:center; transition:opacity .5s ease, transform .5s ease; }
+.room.unlocked .rlock{ opacity:0; transform:scale(1.5) translateY(-8px); }
+.room.flash{ animation:flash .9s ease; }
+@keyframes flash{ 0%{filter:brightness(1.9);} 100%{filter:brightness(1);} }
+.leaf{ fill:#d8b483; stroke:#b9935f; stroke-width:1; transform-box:fill-box; transition:transform 1s cubic-bezier(.2,.85,.25,1); }
+.leaf-v{ transform-origin:50% 0%; }
+.leaf-h{ transform-origin:0% 50%; }
+.door.open .leaf-v{ transform:rotate(82deg); }
+.door.open .leaf-h{ transform:rotate(-82deg); }
+.dlock{ transform-box:fill-box; transform-origin:center; transition:opacity .5s ease, transform .5s ease; }
+.door.open .dlock{ opacity:0; transform:scale(1.7) rotate(18deg); }
+.vbody{ fill:#8a98a8; stroke:#46505e; stroke-width:2; transition:fill .6s ease; }
+.vault.open .vbody{ fill:#8dc63f; }
+.vlock{ transform-box:fill-box; transform-origin:center; transition:opacity .5s ease, transform .5s ease; }
+.vault.open .vlock{ opacity:0; transform:scale(1.7) translateY(-6px); }
+
+/* TEXTE À TROUS */
+.texte-card{ background:#0c2236; border:1px solid #23456a; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+.texte-lbl{ font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:2px; color:#8dc63f; margin-bottom:10px; }
+.texte-body{ font-family:'Nunito',Arial,sans-serif; font-size:clamp(.9rem,2.5vw,1.02rem); line-height:2.2; color:#c8e0f0; }
+.trou{ display:inline-block; min-width:90px; padding:2px 10px; border-radius:6px; font-weight:900; text-align:center; vertical-align:middle; margin:0 3px; border:2px dashed #2c4a6a; background:#0e2a42; color:#5d7a99; font-family:'JetBrains Mono',monospace; font-size:.88rem; transition:all .4s; }
+.trou.filled-ok{ border-style:solid; border-color:#8dc63f; background:#1a3a1a; color:#8dc63f; }
+.trou.filled-ko{ border-style:solid; border-color:#e06a78; background:#3a1a1a; color:#e06a78; }
+
+/* CARTE QUESTION */
+.qcard{ background:#0c2236; border:1px solid #23456a; border-radius:14px; padding:18px 18px 20px; }
+.qtarget{ font-family:'JetBrains Mono',monospace; font-size:.8rem; color:#8dc63f; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.qtext{ font-size:clamp(1rem,3.4vw,1.1rem); font-weight:700; line-height:1.5; margin-bottom:6px; color:#eaf2fb; font-family:'Nunito',Arial,sans-serif; }
+.qseg{ background:#0e2a42; border:1px solid #2c4a6a; border-radius:8px; padding:8px 12px; font-size:.95rem; font-style:italic; color:#b0d0f0; margin-bottom:14px; line-height:1.7; font-family:'Nunito',Arial,sans-serif; }
+.opts{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.opt{ background:#143356; color:#eaf2fb; border:1px solid #2f5a82; border-radius:10px; padding:14px 12px;
+  font-size:clamp(.9rem,2.5vw,1rem); font-family:'JetBrains Mono',monospace; text-align:center; cursor:pointer;
+  transition:transform .12s ease, background .2s ease, border-color .2s; min-height:44px; font-weight:700; }
+.opt:hover:not(:disabled){ background:#1b4a78; transform:translateY(-2px); border-color:#4b86bd; }
+.opt:disabled{ cursor:default; opacity:.85; }
+.opt.correct{ background:#1f7a4d; border-color:#8dc63f; color:#8dc63f; }
+.opt.wrong{ background:#7a2330; border-color:#e06a78; animation:shake .4s; color:#e06a78; }
+@keyframes shake{ 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+.feedback{ min-height:24px; margin-top:14px; font-weight:700; font-size:.95rem; }
+.feedback.ok{ color:#8dc63f; }
+.feedback.no{ color:#ff9b9b; }
+.fb-detail{ background:#0e2a42; border-left:4px solid #e06a78; border-radius:8px; padding:9px 12px;
+  font-size:.84rem; color:#f0c0c0; line-height:1.7; margin-top:8px; display:none; font-family:'Nunito',Arial,sans-serif; }
+
+/* TEXTE RECONSTITUÉ */
+.texte-final{ display:none; background:#0e2a42; border:2px solid #8dc63f; border-radius:12px; padding:16px; margin-top:14px; animation:fadeUp .5s; }
+.texte-final.show{ display:block; }
+@keyframes fadeUp{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.tf-lbl{ font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:2px; color:#8dc63f; margin-bottom:8px; }
+.tf-txt{ font-size:clamp(.9rem,2.5vw,1rem); line-height:2; color:#c8e0f0; font-family:'Nunito',Arial,sans-serif; font-style:italic; }
+.tf-msg{ font-family:'Orbitron',sans-serif; font-size:.75rem; color:#8dc63f; margin-top:10px; font-weight:700; }
+
+/* OVERLAY FINAL */
+.overlay{ position:fixed; inset:0; background:rgba(7,20,34,.88); display:none; align-items:center; justify-content:center; padding:20px; z-index:50; }
+.overlay.show{ display:flex; animation:fade .4s ease; }
+@keyframes fade{ from{opacity:0;} to{opacity:1;} }
+.modal{ background:linear-gradient(160deg,#0d2a10,#0c2236); border:3px solid #8dc63f; border-radius:20px;
+  padding:32px 28px; max-width:500px; width:100%; text-align:center; box-shadow:0 0 60px rgba(141,198,63,.4), 0 20px 50px rgba(0,0,0,.6); position:relative; overflow:hidden; }
+.modal::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 30%, rgba(141,198,63,.12), transparent 70%); pointer-events:none; }
+.trophy{ font-size:4rem; margin-bottom:4px; animation:tropPop .6s cubic-bezier(.18,.89,.32,1.6) forwards; }
+@keyframes tropPop{ 0%{transform:scale(0) rotate(-10deg);} 60%{transform:scale(1.2) rotate(3deg);} 100%{transform:scale(1) rotate(0);} }
+.modal h2{ margin:6px 0 10px; color:#8dc63f; font-family:'Orbitron',sans-serif; font-size:clamp(1rem,3vw,1.4rem); font-weight:900; text-shadow:0 0 20px rgba(141,198,63,.6); }
+.modal-score-bar{ background:#0c2236; border:1px solid #2c4a6a; border-radius:10px; padding:10px 16px; margin:0 0 12px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.modal-score-num{ font-family:'JetBrains Mono',monospace; font-size:2rem; font-weight:700; color:#8dc63f; line-height:1; }
+.modal-score-lbl{ font-size:.75rem; color:#7ab0d8; text-align:left; line-height:1.4; }
+.final-titre{ font-family:'Orbitron',sans-serif; font-size:.82rem; color:#f3d98c; margin-bottom:18px; font-weight:700; line-height:1.5; }
+.replay{ background:linear-gradient(135deg,#3d7a10,#8dc63f); color:#fff; border:none; border-radius:12px; padding:14px 28px; font-size:.9rem; font-weight:900; cursor:pointer; font-family:'Orbitron',sans-serif; box-shadow:0 5px 0 #3d7a10, 0 8px 20px rgba(141,198,63,.3); letter-spacing:.5px; }
+.replay:hover{ filter:brightness(1.1); }
+@media (max-width:560px){ .opts{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span></div>
+    <div class="wk">Semaine 5 — Jour 3</div>
+    <h1>Je relève le Défi</h1>
+    <div class="theme-badge">Le Manoir des Connaissances · Terminaisons en [e] · /8</div>
+  </div>
+
+  <!-- HUD -->
+  <header>
+    <div></div>
+    <div class="hud">
+      <div class="score">🔓 Verrous ouverts : <span id="score">0</span> / 8</div>
+      <button id="soundBtn" class="sound">🔊</button>
+    </div>
+  </header>
+
+  <!-- RÉFÉRENTIEL -->
+  <div class="ref-card">
+    <button class="ref-btn" id="btnRef">🧩 Référentiel — Terminaisons en [e] <span class="ref-arr">▾</span></button>
+    <div class="ref-body" id="bodyRef">
+      <div class="ref-inner">
+        <div class="ri"><span class="rk">Infinitif (-er)</span><span>Test : remplacer par <strong>prendre</strong>. Si ça fonctionne → infinitif en <strong>-er</strong>. Ex. : Il doit <em>manger</em> → Il doit prendre ✓</span></div>
+        <div class="ri"><span class="rk">Participe passé (-é)</span><span>Test : remplacer par <strong>pris</strong>. Si ça fonctionne → participe passé en <strong>-é</strong>. Ex. : Il a <em>mangé</em> → Il a pris ✓</span></div>
+        <div class="ri"><span class="rk">Verbe conjugué</span><span>Test de changement de personne : changer le sujet. La terminaison change selon la personne et le temps (futur, impératif, etc.).</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEXTE À TROUS -->
+  <div class="texte-card">
+    <div class="texte-lbl">TEXTE À RECONSTITUER</div>
+    <div class="texte-body" id="texteTrous">
+      « La rentrée approchait et notre classe devait
+      <span class="trou" id="t1">[1]</span>
+      une exposition sur les volcans. Le professeur nous a
+      <span class="trou" id="t2">[2]</span>
+      le sujet avec passion. «
+      <span class="trou" id="t3">[3]</span>
+      un volcan et présentez-le à vos camarades », a-t-il annoncé d'une voix enjouée. L'année dernière, un autre groupe a
+      <span class="trou" id="t4">[4]</span>
+      un volcan célèbre et a obtenu d'excellents résultats. Les élèves qui avaient déjà
+      <span class="trou" id="t5">[5]</span>
+      à ce projet en gardaient un souvenir fort. « Vous
+      <span class="trou" id="t6">[6]</span>
+      vos panneaux la semaine prochaine », avait précisé l'enseignant responsable. Personne n'avait envie de
+      <span class="trou" id="t7">[7]</span>
+      cette occasion unique de briller. « Choisissez un volcan et
+      <span class="trou" id="t8">[8]</span>
+      à vos camarades », a-t-il annoncé d'une voix enjouée. »
+    </div>
+  </div>
+
+  <!-- PLAN DU MANOIR -->
+  <div class="planwrap">
+    <svg id="plan" viewBox="0 0 798 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="glow"><stop offset="0" stop-color="#b8e87a" stop-opacity="0.55"/><stop offset="1" stop-color="#b8e87a" stop-opacity="0"/></radialGradient>
+        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4f09a"/><stop offset="1" stop-color="#a8d860"/></linearGradient>
+      </defs>
+      <!-- Fond -->
+      <rect width="798" height="200" fill="#14324f"/>
+      <!-- Grille de fond -->
+      <g opacity=".04" stroke="#fff" stroke-width="1">
+        <line x1="100" y1="0" x2="100" y2="200"/><line x1="200" y1="0" x2="200" y2="200"/>
+        <line x1="300" y1="0" x2="300" y2="200"/><line x1="400" y1="0" x2="400" y2="200"/>
+        <line x1="500" y1="0" x2="500" y2="200"/><line x1="600" y1="0" x2="600" y2="200"/>
+        <line x1="700" y1="0" x2="700" y2="200"/>
+        <line x1="0" y1="100" x2="798" y2="100"/>
+      </g>
+      <!-- 8 pièces en ligne (4+4) -->
+      <!-- RANGÉE HAUTE : rooms 0-3 -->
+      <g class="room unlocked" id="room0">
+        <rect class="rfill" x="16" y="16" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="96" cy="56" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="96" y="34" text-anchor="middle">1</text>
+        <text class="rname" x="96" y="86" text-anchor="middle">préparer</text>
+        <g class="rlock"><path d="M88,52 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="82" y="52" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="95" cy="62" r="3" fill="#5b6573"/><rect x="93.5" y="62" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <g class="room locked" id="room1">
+        <rect class="rfill" x="196" y="16" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="276" cy="56" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="276" y="34" text-anchor="middle">2</text>
+        <text class="rname" x="276" y="86" text-anchor="middle">expliqué</text>
+        <g class="rlock"><path d="M268,52 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="262" y="52" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="275" cy="62" r="3" fill="#5b6573"/><rect x="273.5" y="62" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <g class="room locked" id="room2">
+        <rect class="rfill" x="376" y="16" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="456" cy="56" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="456" y="34" text-anchor="middle">3</text>
+        <text class="rname" x="456" y="86" text-anchor="middle">Choisissez</text>
+        <g class="rlock"><path d="M448,52 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="442" y="52" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="455" cy="62" r="3" fill="#5b6573"/><rect x="453.5" y="62" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <g class="room locked" id="room3">
+        <rect class="rfill" x="556" y="16" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="636" cy="56" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="636" y="34" text-anchor="middle">4</text>
+        <text class="rname" x="636" y="86" text-anchor="middle">étudié</text>
+        <g class="rlock"><path d="M628,52 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="622" y="52" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="635" cy="62" r="3" fill="#5b6573"/><rect x="633.5" y="62" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <!-- RANGÉE BASSE : rooms 4-7 -->
+      <g class="room locked" id="room4">
+        <rect class="rfill" x="556" y="108" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="636" cy="148" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="636" y="126" text-anchor="middle">5</text>
+        <text class="rname" x="636" y="178" text-anchor="middle">participé</text>
+        <g class="rlock"><path d="M628,144 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="622" y="144" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="635" cy="154" r="3" fill="#5b6573"/><rect x="633.5" y="154" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <g class="room locked" id="room5">
+        <rect class="rfill" x="376" y="108" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="456" cy="148" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="456" y="126" text-anchor="middle">6</text>
+        <text class="rname" x="456" y="178" text-anchor="middle">présenterez</text>
+        <g class="rlock"><path d="M448,144 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="442" y="144" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="455" cy="154" r="3" fill="#5b6573"/><rect x="453.5" y="154" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <g class="room locked" id="room6">
+        <rect class="rfill" x="196" y="108" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="276" cy="148" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="276" y="126" text-anchor="middle">7</text>
+        <text class="rname" x="276" y="178" text-anchor="middle">manquer</text>
+        <g class="rlock"><path d="M268,144 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="262" y="144" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="275" cy="154" r="3" fill="#5b6573"/><rect x="273.5" y="154" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <g class="room locked" id="room7">
+        <rect class="rfill" x="16" y="108" width="160" height="80" rx="6"/>
+        <circle class="rglow" cx="96" cy="148" r="60" fill="url(#glow)"/>
+        <text class="rnum" x="96" y="126" text-anchor="middle">8</text>
+        <text class="rname" x="96" y="178" text-anchor="middle">présentez-le</text>
+        <g class="rlock"><path d="M88,144 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="#8f9aab" stroke-width="3"/><rect x="82" y="144" width="26" height="20" rx="3" fill="#cdd5df"/><circle cx="95" cy="154" r="3" fill="#5b6573"/><rect x="93.5" y="154" width="3" height="7" fill="#5b6573"/></g>
+      </g>
+      <!-- Murs -->
+      <g class="walls">
+        <line x1="16" y1="16" x2="716" y2="16"/>
+        <!-- Mur du bas rangée haute : avec ouverture pour porte entre room3 et room4 (x=556 à 616) -->
+        <line x1="16" y1="96" x2="556" y2="96"/>
+        <line x1="616" y1="96" x2="716" y2="96"/>
+        <!-- Mur du haut rangée basse : avec ouverture correspondante -->
+        <line x1="16" y1="108" x2="556" y2="108"/>
+        <line x1="616" y1="108" x2="716" y2="108"/>
+        <line x1="16" y1="188" x2="716" y2="188"/>
+        <line x1="16" y1="16" x2="16" y2="188"/>
+        <line x1="716" y1="16" x2="716" y2="188"/>
+        <!-- Séparations verticales haut -->
+        <line x1="176" y1="16" x2="176" y2="44"/><line x1="176" y1="68" x2="176" y2="96"/>
+        <line x1="356" y1="16" x2="356" y2="44"/><line x1="356" y1="68" x2="356" y2="96"/>
+        <line x1="536" y1="16" x2="536" y2="44"/><line x1="536" y1="68" x2="536" y2="96"/>
+        <!-- Séparations verticales bas -->
+        <line x1="176" y1="108" x2="176" y2="136"/><line x1="176" y1="160" x2="176" y2="188"/>
+        <line x1="356" y1="108" x2="356" y2="136"/><line x1="356" y1="160" x2="356" y2="188"/>
+        <line x1="536" y1="108" x2="536" y2="136"/><line x1="536" y1="160" x2="536" y2="188"/>
+        <!-- Murs latéraux de la zone porte (entre y=96 et y=108) -->
+        <line x1="556" y1="96" x2="556" y2="108"/>
+        <line x1="616" y1="96" x2="616" y2="108"/>
+      </g>
+      <!-- Portes haut (entre rooms 0-3) -->
+      <g class="door" id="door0"><rect class="leaf leaf-v" x="173" y="44" width="6" height="24" rx="1"/><g class="dlock"><path d="M170,51 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="167" y="51" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <g class="door" id="door1"><rect class="leaf leaf-v" x="353" y="44" width="6" height="24" rx="1"/><g class="dlock"><path d="M350,51 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="347" y="51" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <g class="door" id="door2"><rect class="leaf leaf-v" x="533" y="44" width="6" height="24" rx="1"/><g class="dlock"><path d="M530,51 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="527" y="51" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <!-- Porte entre room3 (pièce 4, rangée haute) et room4 (pièce 5, rangée basse) -->
+      <g class="door" id="door3"><rect class="leaf leaf-h" x="556" y="97" width="52" height="6" rx="1"/><g class="dlock"><path d="M576,93 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="573" y="93" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <!-- Portes bas (entre rooms 4-7) -->
+      <g class="door" id="door4"><rect class="leaf leaf-v" x="533" y="136" width="6" height="24" rx="1"/><g class="dlock"><path d="M530,143 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="527" y="143" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <g class="door" id="door5"><rect class="leaf leaf-v" x="353" y="136" width="6" height="24" rx="1"/><g class="dlock"><path d="M350,143 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="347" y="143" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <g class="door" id="door6"><rect class="leaf leaf-v" x="173" y="136" width="6" height="24" rx="1"/><g class="dlock"><path d="M170,143 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="167" y="143" width="12" height="10" rx="2" fill="#cdd5df"/></g></g>
+      <!-- Coffre final -->
+      <g class="vault locked" id="vault">
+        <rect class="vbody" x="730" y="80" width="52" height="42" rx="5"/>
+        <circle cx="756" cy="101" r="9" fill="none" stroke="#46505e" stroke-width="2.5"/>
+        <line x1="756" y1="101" x2="763" y2="95" stroke="#46505e" stroke-width="2.2"/>
+        <text x="756" y="136" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="7" fill="#5d7a99">COFFRE</text>
+        <g class="vlock"><path d="M750,65 v-5 a6,6 0 0 1 12,0 v5" fill="none" stroke="#8f9aab" stroke-width="2"/><rect x="746" y="65" width="20" height="14" rx="3" fill="#cdd5df"/></g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- CARTE QUESTION -->
+  <section class="qcard">
+    <div class="qtarget" id="qtarget">Pièce 1 / 8</div>
+    <div class="qtext" id="qtext"></div>
+    <div class="qseg" id="qseg"></div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="fb-detail" id="fbDetail"></div>
+  </section>
+
+  <!-- TEXTE FINAL RECONSTITUÉ -->
+  <div class="texte-final" id="texteFinal">
+    <div class="tf-lbl">TEXTE RECONSTITUÉ</div>
+    <div class="tf-txt">« La rentrée approchait et notre classe devait <strong>préparer</strong> une exposition sur les volcans. Le professeur nous a <strong>expliqué</strong> le sujet avec passion. « <strong>Choisissez</strong> un volcan et présentez-le à vos camarades », a-t-il annoncé d'une voix enjouée. L'année dernière, un autre groupe a <strong>étudié</strong> un volcan célèbre et a obtenu d'excellents résultats. Les élèves qui avaient déjà <strong>participé</strong> à ce projet en gardaient un souvenir fort. « Vous <strong>présenterez</strong> vos panneaux la semaine prochaine », avait précisé l'enseignant responsable. Personne n'avait envie de <strong>manquer</strong> cette occasion unique de briller. « Choisissez un volcan et <strong>présentez-le</strong> à vos camarades », a-t-il annoncé d'une voix enjouée. »</div>
+    <div class="tf-msg">Le Manoir des Connaissances est exploré ! Le texte est désormais entier et exempt de toute erreur sur les terminaisons en [e].</div>
+  </div>
+
+</div>
+
+<!-- OVERLAY FINAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">🏠</div>
+    <h2>Manoir exploré !</h2>
+    <div class="modal-score-bar">
+      <div class="modal-score-num" id="finalScore">8 / 8</div>
+      <div class="modal-score-lbl">verrous<br>ouverts</div>
+    </div>
+    <div class="final-titre" id="finalTitre"></div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   N5S5J3 — Le Manoir des Connaissances
+   Terminaisons en [e] — 5e S5 J3
+   8 questions — plan du manoir
+   ══════════════════════════════════════ */
+
+const questions = [
+  {
+    segment: "« La rentrée approchait et notre classe devait [1] une exposition sur les volcans. »",
+    trou: "t1",
+    options: ["préparer", "préparé", "préparai"],
+    answer: 0,
+    fb: "Test : « notre classe devait prendre une exposition » ✓ L'infinitif prendre fonctionne après devait → préparer (infinitif en -er)."
+  },
+  {
+    segment: "« Le professeur nous a [2] le sujet avec passion. »",
+    trou: "t2",
+    options: ["expliquer", "expliqué", "expliquez"],
+    answer: 1,
+    fb: "Test : « Le professeur nous a pris le sujet avec passion » ✓ Le participe passé pris fonctionne après a (avoir) → expliqué (participe passé en -é)."
+  },
+  {
+    segment: "« [3] un volcan et présentez-le à vos camarades », a-t-il annoncé d'une voix enjouée.",
+    trou: "t3",
+    options: ["Choisissaient", "Choisissez", "Choisissai"],
+    answer: 1,
+    fb: "Test de changement de personne : « Choisis un volcan », sans pronom sujet exprimé, confirme l'impératif présent. Choisissez est donc à l'impératif présent, 2e pers. plur."
+  },
+  {
+    segment: "« L'année dernière, un autre groupe a [4] un volcan célèbre et a obtenu d'excellents résultats. »",
+    trou: "t4",
+    options: ["étudier", "étudié", "étudiait"],
+    answer: 1,
+    fb: "Test : « L'année dernière, un autre groupe a pris un volcan » ✓ Le participe passé pris fonctionne après a (avoir) → étudié (participe passé en -é)."
+  },
+  {
+    segment: "« Les élèves qui avaient déjà [5] à ce projet en gardaient un souvenir fort. »",
+    trou: "t5",
+    options: ["participer", "participé", "participaient"],
+    answer: 1,
+    fb: "Test : « les élèves qui avaient déjà pris à ce projet » ✓ Le participe passé pris fonctionne après avaient (avoir à l'imparfait) → participé (participe passé en -é)."
+  },
+  {
+    segment: "« Vous [6] vos panneaux la semaine prochaine », avait précisé l'enseignant responsable.",
+    trou: "t6",
+    options: ["présenterez", "présenterai", "présenterais"],
+    answer: 0,
+    fb: "Test de changement de personne : « il présentera ses panneaux la semaine prochaine » confirme la terminaison du futur simple. Présenterez est donc au futur simple, 2e pers. plur."
+  },
+  {
+    segment: "« Personne n'avait envie de [7] cette occasion unique de briller. »",
+    trou: "t7",
+    options: ["manquer", "manqué", "manquaient"],
+    answer: 0,
+    fb: "Test : « Personne n'avait envie de prendre cette occasion » ✓ L'infinitif prendre fonctionne après la préposition de → manquer (infinitif en -er, complément du nom envie)."
+  },
+  {
+    segment: "« Choisissez un volcan et [8] à vos camarades », a-t-il annoncé d'une voix enjouée.",
+    trou: "t8",
+    options: ["présentez-le", "présenté-le", "présenter-le"],
+    answer: 0,
+    fb: "Test de changement de personne : « présente-le à tes camarades », sans pronom sujet exprimé, confirme l'impératif présent. Présentez-le est donc à l'impératif présent, 2e pers. plur., comme Choisissez juste avant."
+  }
+];
+
+const TOTAL = 8;
+let opened = 0;
+let busy = false;
+let actx = null, son = true;
+const $ = id => document.getElementById(id);
+
+/* Fisher-Yates pour mélanger les options */
+function shuffleOpts(q) {
+  const idx = [0, 1, 2];
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return {
+    opts: idx.map(i => q.options[i]),
+    correctIdx: idx.indexOf(q.answer)
+  };
+}
+
+function renderState() {
+  for (let i = 0; i < 8; i++) {
+    const el = $('room' + i);
+    if (!el) continue;
+    const unlocked = opened > i;
+    el.classList.toggle('unlocked', unlocked);
+    el.classList.toggle('locked', !unlocked);
+  }
+  // Portes haut : door0 entre room0-1, door1 entre room1-2, door2 entre room2-3
+  [$('door0'),$('door1'),$('door2')].forEach((d,i) => { if(d) d.classList.toggle('open', opened > i); });
+  // Portes bas : door3 entre room3-4, door4 entre room4-5, door5 entre room5-6, door6 entre room6-7
+  [$('door3'),$('door4'),$('door5'),$('door6')].forEach((d,i) => { if(d) d.classList.toggle('open', opened > i+3); });
+  $('vault').classList.toggle('open', opened >= TOTAL);
+  $('score').textContent = opened;
+}
+
+function loadQuestion() {
+  busy = false;
+  if (opened >= TOTAL) return;
+  const q = questions[opened];
+  const {opts, correctIdx} = shuffleOpts(q);
+  $('qtarget').textContent = 'Verrou ' + (opened + 1) + ' / ' + TOTAL;
+  $('qtext').textContent = 'Choisis la forme correcte pour compléter le texte :';
+  $('qseg').textContent = q.segment;
+  $('feedback').textContent = '';
+  $('feedback').className = 'feedback';
+  $('fbDetail').style.display = 'none';
+  $('fbDetail').textContent = '';
+  const optsEl = $('opts');
+  optsEl.innerHTML = '';
+  opts.forEach((txt, li) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = txt;
+    b.addEventListener('click', () => answer(li, correctIdx, txt, q, b));
+    optsEl.appendChild(b);
+  });
+}
+
+function answer(li, correctIdx, txt, q, btn) {
+  if (busy) return;
+  if (li === correctIdx) {
+    busy = true;
+    $('feedback').textContent = '✅ Verrou ouvert !';
+    $('feedback').className = 'feedback ok';
+    $('fbDetail').style.display = 'none';
+    document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+    btn.classList.add('correct');
+    // Remplir le trou dans le texte
+    const trou = $(q.trou);
+    if (trou) { trou.textContent = txt; trou.className = 'trou filled-ok'; }
+    unlockSound();
+    opened++;
+    renderState();
+    flashRoom(opened - 1);
+    if (opened >= TOTAL) {
+      setTimeout(() => { $('texteFinal').classList.add('show'); }, 400);
+      setTimeout(endGame, 1400);
+    } else {
+      setTimeout(loadQuestion, 1150);
+    }
+  } else {
+    $('feedback').textContent = '❌ Ce verrou reste fermé. Réessaie.';
+    $('feedback').className = 'feedback no';
+    $('fbDetail').textContent = q.fb;
+    $('fbDetail').style.display = 'block';
+    deniedSound();
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 500);
+  }
+}
+
+function flashRoom(i) {
+  const el = $('room' + i);
+  if (!el) return;
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 900);
+}
+
+function endGame() {
+  const titres = {
+    8: '🏠 Manoir entièrement exploré ! Tu maîtrises pleinement les terminaisons en [e].',
+    7: 'Très bonne exploration. Quelques verrous à revoir.',
+    6: 'Très bonne exploration. Quelques verrous à revoir.',
+    5: 'Exploration partielle. Reprends le référentiel et les tests appropriés.',
+    4: 'Exploration partielle. Reprends le référentiel et les tests appropriés.'
+  };
+  const k = opened >= 8 ? 8 : opened >= 6 ? 6 : opened >= 4 ? 4 : 4;
+  $('finalScore').textContent = opened + ' / ' + TOTAL;
+  $('finalTitre').textContent = titres[k] || 'Le manoir reste inexploré. Reprends les sections précédentes avant de retenter.';
+  $('overlay').classList.add('show');
+  if (opened >= 8) finalOkS(); else finalKoS();
+}
+
+function rejouer() {
+  opened = 0;
+  busy = false;
+  renderState();
+  $('overlay').classList.remove('show');
+  $('texteFinal').classList.remove('show');
+  $('feedback').textContent = '';
+  $('feedback').className = 'feedback';
+  $('fbDetail').style.display = 'none';
+  // Réinitialiser les trous
+  for (let i = 1; i <= 8; i++) {
+    const t = $('t' + i);
+    if (t) { t.textContent = '[' + i + ']'; t.className = 'trou'; }
+  }
+  loadQuestion();
+}
+
+/* ── AUDIO (repris tel quel du template) ── */
+function initA() { if (actx) return; try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+function beep(f1, f2, dur, type, vol) {
+  if (!actx || !son) return;
+  const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(f1, t);
+  o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(vol || 0.18, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function unlockSound() { initA(); beep(420, 820, 0.16, 'triangle', 0.16); setTimeout(() => beep(190, 95, 0.22, 'sine', 0.22), 70); }
+function deniedSound() { initA(); beep(150, 80, 0.22, 'sawtooth', 0.12); }
+function finalOkS() { initA(); [523,659,784,1046,1318].forEach((f,k) => setTimeout(() => beep(f,f,0.22,'sine',0.13), k*90)); }
+function finalKoS() { initA(); beep(300, 160, 0.4, 'sine', 0.13); }
+
+$('soundBtn').addEventListener('click', () => {
+  son = !son; initA();
+  if (actx && actx.state === 'suspended') actx.resume();
+  $('soundBtn').textContent = son ? '🔊' : '🔇';
+});
+document.addEventListener('pointerdown', initA, { once: true });
+
+/* ── RÉFÉRENTIEL ── */
+document.getElementById('btnRef').addEventListener('click', () => {
+  const open = document.getElementById('bodyRef').classList.contains('open');
+  document.getElementById('bodyRef').classList.toggle('open', !open);
+  document.getElementById('btnRef').classList.toggle('open', !open);
+});
+
+/* ── INIT ── */
+renderState();
+loadQuestion();
+</script>
+</body>
+</html>
