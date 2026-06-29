@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je relève le défi — Fourberies de Scapin — 5e S5 J1</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.36);
+  --bg:#fffdf7;--dark:#1a1008;--dark2:#1e1208;
+  --vert:#22c55e;--vert-bg:#e7faec;--vert-bd:#86efac;
+  --rouge:#ef4444;--rouge-bg:#fdeaea;--rouge-bd:#fca5a5;
+  --acier:#6b5a40;--acier-clair:#f5f0e8;--acier-bord:#e0cca8;
+  --txt:#2a1a04;--gris:#8a7050;--sur:#fff;--bord:#e8d8c0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;min-height:100vh;padding:0 0 60px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);}}
+@keyframes nxt{0%,100%{box-shadow:0 0 6px var(--day-glow);}50%{box-shadow:0 0 18px rgba(245,166,35,.8);}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+@keyframes rainFall{0%{opacity:1;transform:translateY(-40px) rotate(0);}100%{opacity:0;transform:translateY(110vh) rotate(var(--rot));}}
+@keyframes slide{0%{background-position:0%}100%{background-position:300%}}
+@keyframes stpop{0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+.flash-v{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.3);
+  font-size:3rem;font-weight:900;z-index:9999;pointer-events:none;opacity:0;}
+.flash-v.pop{animation:flashPop 1s ease-out forwards;}
+
+/* Bulles */
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.3;z-index:0;pointer-events:none;}
+.b1{width:130px;height:130px;background:#f5c518;top:-32px;right:-28px;}
+.b2{width:96px;height:96px;background:var(--jour);bottom:26px;left:-24px;}
+.b3{width:72px;height:72px;background:#8dc63f;top:44%;right:-28px;}
+.b4{width:82px;height:82px;background:#f9c0bb;top:26%;left:-30px;}
+
+/* HEADER */
+.hdr{text-align:center;padding:14px 20px 12px;background:var(--bg);border-bottom:3px solid var(--jour);position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;border-radius:999px;padding:5px 16px;margin-bottom:8px;}
+.logo-badge .dots{display:flex;gap:4px;}.logo-badge .dots i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#e05050;}
+.logo-badge .dots i:nth-child(2){background:#7a3d00;}
+.logo-badge .dots i:nth-child(3){background:#3d7a10;}
+.logo-badge .lab{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:800;color:#1a1200;letter-spacing:.5px;}
+.wk{font-size:.78rem;color:var(--gris);font-family:'Orbitron',sans-serif;letter-spacing:1px;margin-bottom:5px;}
+.hdr h1{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,3.5vw,1.7rem);font-weight:900;color:var(--jour-fonce);margin-bottom:3px;}
+.hdr h1 .acc{color:var(--jour);}
+.hdr-sub{font-size:.82rem;color:var(--gris);margin-bottom:7px;}
+.theme-badge{display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;
+  font-weight:700;font-size:clamp(.62rem,2vw,.72rem);letter-spacing:1px;padding:6px 16px;
+  border-radius:20px;box-shadow:0 4px 12px var(--day-glow);}
+
+/* WRAP */
+.wrap{max-width:1140px;margin:0 auto;padding:13px 14px 0;position:relative;z-index:1;}
+
+/* SCORE + PROGRESS */
+.score-row{display:flex;gap:8px;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
+.sc-box{background:var(--sur);border:1px solid var(--bord);border-radius:10px;padding:7px 14px;text-align:center;min-width:66px;}
+.sc-n{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:700;line-height:1.1;}
+.sc-n.ok{color:var(--vert);}.sc-n.rs{color:var(--jour);}.sc-n.ko{color:var(--rouge);}
+.sc-l{font-size:.56rem;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.prog-wrap{background:#e8d8c0;border-radius:20px;height:8px;overflow:hidden;margin-bottom:6px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),#f5d080);
+  border-radius:20px;transition:width .5s cubic-bezier(.34,1.3,.64,1);width:0%;}
+.stars{display:flex;justify-content:center;gap:3px;font-size:.88rem;margin-bottom:10px;}
+.str{opacity:.2;transition:all .4s;}.str.on{opacity:1;color:var(--jour);animation:stpop .5s;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start;}
+@media(max-width:860px){.layout{grid-template-columns:1fr;}}
+
+/* COL GAUCHE — TEXTE */
+.col-l{display:flex;flex-direction:column;gap:11px;}
+.texte-card{background:var(--sur);border:1px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.texte-hdr{background:var(--jour-fonce);color:#fff;padding:9px 14px;font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:1.5px;}
+.texte-body{padding:13px 15px;font-family:'IM Fell English',serif;font-size:clamp(.88rem,2.2vw,.98rem);line-height:2;color:var(--txt);}
+.texte-body .didascalie{font-style:italic;color:#7a5a30;}
+.texte-body .apart{font-style:italic;color:#8a6a40;}
+.texte-body .perso{font-family:'Orbitron',sans-serif;font-size:.68rem;font-weight:700;color:var(--jour-fonce);letter-spacing:.5px;}
+.lexique{background:var(--acier-clair);border-top:1px solid var(--bord);padding:10px 14px;font-size:.78rem;color:var(--gris);line-height:1.8;}
+.lex-titre{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:1px;color:var(--jour-fonce);margin-bottom:5px;}
+
+/* Stepper */
+.sdots{display:flex;gap:5px;justify-content:center;}
+.sdot{width:28px;height:28px;border-radius:50%;border:2px solid var(--acier-bord);background:var(--acier-clair);
+  color:var(--gris);font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .25s;font-family:'JetBrains Mono',monospace;}
+.sdot.cur{border-color:var(--jour-fonce);color:var(--jour-fonce);box-shadow:0 0 7px var(--day-glow);transform:scale(1.1);}
+.sdot.doneA{background:var(--jour-pale);border-color:var(--jour);color:var(--jour-fonce);}
+.sdot.doneAB{background:var(--vert);border-color:var(--vert);color:#fff;}
+
+/* COL DROITE — QUESTIONS */
+.col-r{}
+.q-lbl{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--jour);margin-bottom:4px;}
+.q-titre{font-family:'Orbitron',sans-serif;font-size:.82rem;font-weight:900;color:var(--jour-fonce);
+  margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--jour-pale);}
+
+.dq{display:flex;flex-direction:column;gap:10px;}
+
+/* Bloc question */
+.qb{background:var(--sur);border:2px solid var(--bord);border-top:4px solid var(--jour);
+  border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.qb.qB{border-top-color:#7c3aed;opacity:.4;pointer-events:none;filter:grayscale(.3);}
+.qb.qB.unlocked{opacity:1;pointer-events:auto;filter:none;animation:fadeUp .4s;}
+.qb.dok{border-top-color:var(--vert);}
+.qbadge{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.ql{width:26px;height:26px;border-radius:7px;background:var(--jour);color:#fff;font-weight:900;
+  font-size:.8rem;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;}
+.qb.qB .ql{background:#7c3aed;}
+.qt{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--gris);}
+.qtxt{font-size:clamp(.9rem,2.5vw,1rem);font-weight:700;line-height:1.55;color:var(--txt);margin-bottom:12px;font-style:italic;}
+
+/* Options */
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{min-height:48px;background:var(--acier-clair);color:var(--txt);border:2px solid var(--bord);
+  border-radius:10px;padding:10px 13px;font-size:clamp(.86rem,2.2vw,.94rem);
+  font-family:Arial,sans-serif;text-align:left;cursor:pointer;transition:all .14s;line-height:1.45;}
+.opt:hover:not(:disabled){background:var(--jour-clair);border-color:var(--jour);transform:translateY(-1px);}
+.opt:disabled{cursor:default;}
+.opt.cok{background:var(--vert-bg);border-color:var(--vert);color:#166534;font-weight:700;}
+.opt.cko{background:var(--rouge-bg);border-color:var(--rouge);color:#991b1b;}
+
+/* Feedback */
+.fb{margin-top:10px;padding:10px 12px;background:var(--jour-clair);border-left:4px solid var(--rouge);
+  border-radius:8px;font-size:.84rem;color:var(--jour-fonce);line-height:1.7;animation:fadeUp .4s;}
+.fb .fbl{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:1px;
+  color:var(--rouge);font-family:'JetBrains Mono',monospace;margin-bottom:3px;}
+.ok-msg{color:var(--vert);font-weight:800;font-size:.88rem;margin-top:8px;
+  display:flex;align-items:center;gap:5px;animation:pop .5s;}
+
+/* Boutons */
+.btn-nxt{min-height:2.8rem;background:var(--jour);color:#fff;border:none;border-radius:10px;
+  padding:0 22px;font-weight:900;font-size:.8rem;cursor:pointer;font-family:'Orbitron',sans-serif;
+  box-shadow:0 4px 0 var(--jour-fonce);letter-spacing:.5px;margin-top:12px;display:none;}
+.btn-nxt.show{display:inline-flex;align-items:center;gap:6px;animation:pop .4s;}
+.btn-nxt:hover:not(:disabled){filter:brightness(1.06);}
+.btn-nxt.pulse{animation:nxt 1s ease-in-out 3;}
+
+.btn-retry{background:var(--rouge-bg);color:var(--rouge);border:1.5px solid var(--rouge-bd);
+  border-radius:8px;padding:5px 14px;font-size:.78rem;font-weight:700;cursor:pointer;margin-top:8px;
+  font-family:Arial,sans-serif;display:inline-block;}
+
+/* BILAN */
+.bilan{display:none;background:var(--sur);border:2px solid var(--jour);border-radius:16px;
+  padding:24px;text-align:center;margin-top:12px;box-shadow:0 4px 16px var(--day-glow);}
+.bilan.show{display:block;animation:fadeUp .5s;}
+.bil-score{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;color:var(--jour-fonce);margin-bottom:5px;}
+.bil-titre{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--jour);margin-bottom:8px;}
+.bil-msg{font-size:.85rem;color:var(--gris);line-height:1.7;max-width:400px;margin:0 auto 14px;}
+.btn-retry-g{background:var(--jour);color:#fff;border:none;border-radius:10px;
+  padding:9px 22px;font-weight:800;font-size:.85rem;cursor:pointer;font-family:'Orbitron',sans-serif;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div>
+<div class="bubble b3"></div><div class="bubble b4"></div>
+<div class="flash-v" id="flashV"></div>
+
+<div class="hdr">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 5ÈME</span></div>
+  <div class="wk">Semaine 5 — Jour 1</div>
+  <h1>Je relève le <span class="acc">Défi</span></h1>
+  <p class="hdr-sub">Molière, <em>Les Fourberies de Scapin</em>, acte III, scène&nbsp;2, 1671</p>
+  <div class="theme-badge">Interprétation · 6 doubles questions · /12</div>
+</div>
+
+<div class="wrap">
+  <div class="score-row">
+    <div class="sc-box"><div class="sc-n ok" id="scOk">0</div><div class="sc-l">Réussis</div></div>
+    <div class="sc-box"><div class="sc-n rs" id="scRs">12</div><div class="sc-l">Restants</div></div>
+    <div class="sc-box"><div class="sc-n ko" id="scKo">0</div><div class="sc-l">Erreurs</div></div>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+  <div class="stars" id="starsRow"></div>
+
+  <div class="layout">
+    <!-- COL GAUCHE -->
+    <div class="col-l">
+      <div class="texte-card">
+        <div class="texte-hdr">TEXTE SUPPORT — Molière, Les Fourberies de Scapin, III, 2</div>
+        <div class="texte-body">
+          <p><em>Scapin veut se venger de Géronte. Il invente un stratagème et lui fait croire que plusieurs personnes sont à sa poursuite.</em></p>
+          <br>
+          <p><span class="perso">SCAPIN.</span> – Attendez. Voici une affaire que je me suis trouvée fort à propos pour vous sauver¹. Il faut que vous vous mettiez dans ce sac et que…</p>
+          <p><span class="perso">GÉRONTE,</span> <span class="didascalie">croyant voir quelqu'un.</span> – Ah&nbsp;!</p>
+          <p><span class="perso">SCAPIN.</span> – Non, non, non, non, non, ce n'est personne. Il faut, dis-je, que vous vous mettiez là-dedans, et que vous gardiez² de remuer en aucune façon. Je vous chargerai sur mon dos, comme un paquet de quelque chose, et je vous porterai ainsi au travers de vos ennemis, jusque dans votre maison, où, quand nous serons une fois, nous pourrons nous barricader, et envoyer quérir main-forte³ contre la violence.</p>
+          <p><span class="perso">GÉRONTE.</span> – L'invention est bonne.</p>
+          <p><span class="perso">SCAPIN.</span> – La meilleure du monde. Vous allez voir. <span class="apart">(À part.)</span> Tu me paieras l'imposture.</p>
+          <p><span class="perso">GÉRONTE.</span> – Eh&nbsp;?</p>
+          <p><span class="perso">SCAPIN.</span> – Je dis que vos ennemis seront bien attrapés. Mettez-vous bien jusqu'au fond, et surtout prenez garde de ne vous point montrer et de ne parler pas⁴, quelque chose que puisse arriver⁵.</p>
+          <p><span class="perso">GÉRONTE.</span> – Laissez-moi faire. Je saurai me tenir…</p>
+          <p><span class="perso">SCAPIN.</span> – Cachez-vous ; voici un spadassin⁶ qui vous cherche. […]</p>
+          <p><span class="didascalie">Scapin contrefait sa voix et se fait passer pour le spadassin. Il en profite pour donner des coups de bâton à Géronte dans le sac.</span></p>
+          <p><span class="perso">GÉRONTE,</span> <span class="didascalie">mettant la tête hors du sac.</span> – Ah&nbsp;! Scapin, je n'en puis plus&nbsp;!</p>
+          <p><span class="perso">SCAPIN.</span> – Ah&nbsp;! monsieur, je suis tout moulu⁷, et les épaules me font un mal épouvantable.</p>
+          <p><span class="perso">GÉRONTE.</span> — Comment&nbsp;? c'est sur les miennes qu'il a frappé.</p>
+          <p><span class="perso">SCAPIN.</span> — Nenni, monsieur, c'était sur mon dos qu'il frappait.</p>
+          <p><span class="perso">GÉRONTE.</span> — Que veux-tu dire&nbsp;? J'ai bien senti les coups, et les sens bien encore.</p>
+          <p><span class="perso">SCAPIN.</span> — Non, vous dis-je, ce n'est que le bout du bâton qui a été jusque sur vos épaules.</p>
+          <p><span class="perso">GÉRONTE.</span> — Tu devais donc te retirer un peu plus loin, pour m'épargner…</p>
+          <p><span class="perso">SCAPIN.</span> — Prenez garde. En voici un autre qui a la mine d'un étranger […]</p>
+          <p><span class="perso">GÉRONTE,</span> <span class="didascalie">sortant sa tête du sac.</span> — Ah&nbsp;! je suis roué¹⁰&nbsp;!</p>
+          <p><span class="perso">SCAPIN.</span> — Ah&nbsp;! je suis mort.</p>
+          <p><span class="perso">GÉRONTE.</span> — Pourquoi diantre faut-il qu'ils frappent sur mon dos&nbsp;?</p>
+          <p><span class="perso">SCAPIN,</span> <span class="didascalie">lui remettant sa tête dans le sac.</span> — Prenez garde, voici une demi-douzaine de soldats tout ensemble. <span class="didascalie">(Contrefaisant plusieurs personnes ensemble.)</span> « Allons, tâchons à trouver ce Géronte, cherchons partout. N'épargnons point pas. Courons toute la ville. N'oublions aucun lieu. Visitons tout. Furetons¹⁰ de tous les côtés. Par où irons-nous&nbsp;? Tournons par là. Non, par ici. À gauche. À droite. Nenni. Si fait. » <span class="apart">(À Géronte, avec sa voix ordinaire.)</span> Cachez-vous bien. « Ah&nbsp;! camarades, voici son valet. Allons, coquin, il faut que tu nous enseignes où est ton maître. » Eh&nbsp;! messieurs, ne me maltraitez point. « Allons, dis-nous où il est. Parle. Hâte-toi. Expédions¹¹&nbsp;! Dépêche vite. Tôt¹². » Hé&nbsp;! messieurs, doucement. <span class="didascalie">(Géronte met doucement la tête hors du sac, et aperçoit la bourberie de Scapin.)</span> « Si tu ne nous fais trouver ton maître tout à l'heure, nous allons faire pleuvoir sur toi une ondée¹³ de coups de bâton. » J'aime mieux souffrir toute chose que de vous découvrir mon maître. « Nous allons t'assommer. » Faites tout ce qu'il vous plaira. « Tu as envie d'être battu&nbsp;? » Je ne trahirai point mon maître. « Ah&nbsp;! tu veux en tâter&nbsp;? » Oh&nbsp;! <span class="didascalie">(Comme il est prêt de frapper, Géronte sort du sac, et Scapin s'enfuit.)</span></p>
+          <p><span class="perso">GÉRONTE.</span> — Ah&nbsp;! infâme&nbsp;! ah&nbsp;! traître&nbsp;! ah&nbsp;! scélérat&nbsp;! C'est ainsi que tu m'assassines&nbsp;!</p>
+          <br>
+          <p style="font-size:.82rem;color:var(--gris);font-style:italic;">Molière, <em>Les Fourberies de Scapin</em>, acte III, scène&nbsp;2, 1671.</p>
+        </div>
+        <div class="lexique">
+          <div class="lex-titre">LEXIQUE</div>
+          1.&nbsp;Une affaire où je me suis trouvé là, au bon moment, pour vous sauver. &nbsp;·&nbsp;
+          2.&nbsp;Que vous évitiez. &nbsp;·&nbsp;
+          3.&nbsp;Chercher des renforts. &nbsp;·&nbsp;
+          4.&nbsp;Ne pas bouger. &nbsp;·&nbsp;
+          5.&nbsp;Quoi qu'il arrive. &nbsp;·&nbsp;
+          6.&nbsp;Assassin. &nbsp;·&nbsp;
+          7.&nbsp;Broyé. &nbsp;·&nbsp;
+          8.&nbsp;Non. &nbsp;·&nbsp;
+          9.&nbsp;Brisé à cause des coups. &nbsp;·&nbsp;
+          10.&nbsp;Fouillons. &nbsp;·&nbsp;
+          11.&nbsp;Dépêchons. &nbsp;·&nbsp;
+          12.&nbsp;Rapidement. &nbsp;·&nbsp;
+          13.&nbsp;Pluie.
+        </div>
+      </div>
+      <div class="sdots" id="sDots"></div>
+    </div>
+
+    <!-- COL DROITE -->
+    <div class="col-r">
+      <div id="qNumLbl" class="q-lbl"></div>
+      <div id="qTitreLbl" class="q-titre"></div>
+      <div class="dq" id="dq"></div>
+      <div class="bilan" id="bilan">
+        <div class="bil-score" id="bilScore"></div>
+        <div class="bil-titre" id="bilTitre"></div>
+        <div class="bil-msg" id="bilMsg"></div>
+        <button class="btn-retry-g" onclick="restart()">Recommencer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   N5S5J1 — Fourberies de Scapin — 5e S5 J1
+   6 doubles questions (qA + qB) — /12
+   ══════════════════════════════════════ */
+
+const DEFIS = [
+  {
+    titre: "Pourquoi Scapin veut se venger",
+    qA: {
+      q: "« Pourquoi Scapin met-il ce stratagème en place contre Géronte ? »",
+      opts: [
+        "Pour obtenir de l'argent de la part de Géronte.",
+        "Pour aider Géronte à échapper à un danger réel.",
+        "Pour se venger d'une injustice que Géronte lui a fait subir."
+      ],
+      ok: 2,
+      fb: "Le chapeau introductif précise que Scapin veut se venger de Géronte. Le stratagème du sac n'est qu'un prétexte pour le punir, et non pour le protéger d'un véritable danger."
+    },
+    qB: {
+      q: "« Quelle réplique, dite à part par Scapin, révèle clairement son intention de vengeance ? »",
+      opts: [
+        "« Vous allez voir. »",
+        "« L'invention est bonne. »",
+        "« Tu me paieras l'imposture. »"
+      ],
+      ok: 2,
+      fb: "Cette réplique, dite « à part » (donc destinée au public et non à Géronte), révèle clairement l'intention de vengeance de Scapin derrière son apparente bienveillance."
+    }
+  },
+  {
+    titre: "Le comique de situation",
+    qA: {
+      q: "« Qu'est-ce qui rend cette scène comique pour le spectateur ? »",
+      opts: [
+        "La scène se déroule dans un endroit inattendu et exotique.",
+        "Géronte parle une langue étrangère incomprise de Scapin.",
+        "Le spectateur sait ce que Géronte ignore : c'est Scapin qui le frappe."
+      ],
+      ok: 2,
+      fb: "Le comique de cette scène repose sur le fait que le spectateur voit ce qui se passe réellement (Scapin qui frappe), alors que Géronte, enfermé dans le sac, ne voit rien et croit à une autre histoire. Ce décalage entre savoir du spectateur et ignorance du personnage est un ressort comique classique."
+    },
+    qB: {
+      q: "« Quelle didascalie crée ce décalage entre ce que sait le spectateur et ce que croit Géronte ? »",
+      opts: [
+        "« Il en profite pour donner des coups de bâton à Géronte dans le sac. »",
+        "« Géronte met doucement la tête hors du sac »",
+        "« Comme il est prêt de frapper »"
+      ],
+      ok: 0,
+      fb: "Cette didascalie révèle au lecteur ou au spectateur la vérité que Géronte ne peut pas voir, créant ainsi le comique de situation."
+    }
+  },
+  {
+    titre: "Le portrait de Géronte",
+    qA: {
+      q: "« Quel trait de caractère de Géronte cette scène met-elle en évidence ? »",
+      opts: [
+        "Sa grande méfiance envers les autres.",
+        "Sa naïveté et sa crédulité excessive.",
+        "Son courage face au danger."
+      ],
+      ok: 1,
+      fb: "Géronte croit sans aucun doute à l'histoire inventée par Scapin, qu'il s'agisse du sac, des ennemis ou des soldats imaginaires. Cette crédulité excessive le rend ridicule aux yeux du spectateur."
+    },
+    qB: {
+      q: "« Quelle réplique de Géronte illustre le mieux cette crédulité ? »",
+      opts: [
+        "« L'invention est bonne. »",
+        "« Je n'en puis plus ! »",
+        "« C'est ainsi que tu m'assassines ! »"
+      ],
+      ok: 0,
+      fb: "En approuvant aussitôt le plan de Scapin sans poser de questions, Géronte montre sa crédulité face à un stratagème pourtant peu vraisemblable."
+    }
+  },
+  {
+    titre: "Le théâtre dans le théâtre",
+    qA: {
+      q: "« Pourquoi peut-on dire que le passage où Scapin imite plusieurs soldats est un exemple de « théâtre dans le théâtre » ? »",
+      opts: [
+        "Parce que Scapin joue lui-même plusieurs personnages devant Géronte, comme un acteur sur une scène.",
+        "Parce que la scène se déroule devant un vrai public sur l'estrade.",
+        "Parce que Géronte devient lui-même acteur à son tour."
+      ],
+      ok: 0,
+      fb: "En imitant tour à tour plusieurs soldats imaginaires, Scapin se comporte comme un acteur qui jouerait plusieurs rôles sur une scène : il crée un spectacle à l'intérieur même de la pièce. C'est un exemple de « théâtre dans le théâtre »."
+    },
+    qB: {
+      q: "« Quelle didascalie montre que Scapin joue plusieurs rôles à la fois ? »",
+      opts: [
+        "« lui remettant sa tête dans le sac »",
+        "« Contrefaisant plusieurs personnes ensemble. »",
+        "« et Scapin s'enfuit »"
+      ],
+      ok: 1,
+      fb: "Cette didascalie indique explicitement que Scapin imite plusieurs personnes en même temps, ce qui transforme ce moment en un petit spectacle joué par un seul comédien."
+    }
+  },
+  {
+    titre: "Talent et défaut de Scapin",
+    qA: {
+      q: "« Quel talent et quel défaut de Scapin sont mis en avant dans cette scène ? »",
+      opts: [
+        "Son talent pour la ruse et son manque de courage.",
+        "Son talent pour l'improvisation théâtrale et son goût pour la cruauté envers son maître.",
+        "Son intelligence et son défaut de paresse."
+      ],
+      ok: 1,
+      fb: "Scapin invente sans cesse de nouvelles excuses face aux réactions de Géronte, preuve d'un grand talent d'improvisation. Mais il prend aussi un plaisir évident à frapper et à tromper son maître, ce qui révèle une certaine cruauté."
+    },
+    qB: {
+      q: "« Quelle réplique illustre le talent d'improvisation de Scapin face à une réaction inattendue de Géronte ? »",
+      opts: [
+        "« ce n'est que le bout du bâton qui a été jusque sur vos épaules »",
+        "« Attendez. »",
+        "« Cachez-vous bien. »"
+      ],
+      ok: 0,
+      fb: "Lorsque Géronte affirme avoir bien senti les coups, Scapin invente immédiatement une explication pour continuer sa supercherie, preuve de son talent d'improvisation."
+    }
+  },
+  {
+    titre: "Ressenti pour Scapin",
+    qA: {
+      q: "« Quel sentiment cette scène peut-elle inspirer envers Scapin, malgré sa cruauté envers Géronte ? »",
+      opts: [
+        "Une certaine admiration pour son habileté et son sens du spectacle.",
+        "Une indifférence totale face à ses actions ridicules.",
+        "Un profond dégoût dû à sa cruauté envers son maître."
+      ],
+      ok: 0,
+      fb: "Bien que Scapin se montre cruel envers Géronte, son habileté à inventer des excuses, à imiter plusieurs voix et à mener son stratagème jusqu'au bout peut susciter une forme d'admiration pour son talent comique et son sens du spectacle."
+    },
+    qB: {
+      q: "« Quelle réplique finale de Géronte montre à quel point le stratagème de Scapin a réussi à le tromper jusqu'au bout ? »",
+      opts: [
+        "« L'invention est bonne. »",
+        "« C'est ainsi que tu m'assassines ! »",
+        "« Je n'en puis plus ! »"
+      ],
+      ok: 1,
+      fb: "Cette dernière réplique de Géronte montre qu'il a été berné jusqu'au bout par Scapin, preuve de la pleine réussite du stratagème mis en place depuis le début de la scène."
+    }
+  }
+];
+
+const N = DEFIS.length; // 6
+const TOTAL = N * 2;    // 12
+let cur = 0, okCount = 0, errCount = 0;
+let stA = DEFIS.map(() => ({tried:false, ok:false, busy:false}));
+let stB = DEFIS.map(() => ({tried:false, ok:false, busy:false}));
+let permA = [], permB = [];
+let actx = null;
+
+/* ── PERMUTATIONS ── */
+function mkPerm(n, ok) {
+  const others = [];
+  for(let i=0;i<n;i++) if(i!==ok) others.push(i);
+  shuffle(others);
+  const pos = Math.floor(Math.random()*n);
+  const p = []; let di = 0;
+  for(let i=0;i<n;i++) p.push(i===pos ? ok : others[di++]);
+  return p;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+function initPerms(){
+  DEFIS.forEach((d,i)=>{
+    permA[i] = mkPerm(d.qA.opts.length, d.qA.ok);
+    permB[i] = mkPerm(d.qB.opts.length, d.qB.ok);
+  });
+}
+
+/* ── SCORE ── */
+function updScore(){
+  document.getElementById('scOk').textContent = okCount;
+  document.getElementById('scRs').textContent = Math.max(0, TOTAL - okCount - errCount);
+  document.getElementById('scKo').textContent = errCount;
+  document.getElementById('progFill').style.width = (okCount/TOTAL*100)+'%';
+  document.querySelectorAll('.str').forEach((s,i)=>s.classList.toggle('on',i<okCount));
+}
+function buildStars(){
+  const w=document.getElementById('starsRow'); w.innerHTML='';
+  for(let i=0;i<TOTAL;i++){const s=document.createElement('span');s.className='str';s.textContent='★';w.appendChild(s);}
+}
+
+/* ── DOTS STEPPER ── */
+function buildDots(){
+  const w=document.getElementById('sDots'); w.innerHTML='';
+  DEFIS.forEach((_,i)=>{
+    const d=document.createElement('div'); d.className='sdot'; d.id='dot'+i;
+    d.textContent=i+1; d.addEventListener('click',()=>go(i)); w.appendChild(d);
+  });
+}
+function updDots(){
+  DEFIS.forEach((_,i)=>{
+    const dot=document.getElementById('dot'+i); if(!dot) return;
+    dot.classList.remove('cur','doneA','doneAB');
+    if(stA[i].ok && stB[i].ok) dot.classList.add('doneAB');
+    else if(stA[i].ok) dot.classList.add('doneA');
+    else if(i===cur) dot.classList.add('cur');
+  });
+}
+
+/* ── RENDER ── */
+function renderQ(i){
+  document.getElementById('qNumLbl').textContent = 'QUESTION '+(i+1)+' / '+N;
+  document.getElementById('qTitreLbl').textContent = DEFIS[i].titre;
+  const dq = document.getElementById('dq'); dq.innerHTML='';
+  dq.appendChild(mkBlock('A', i));
+  dq.appendChild(mkBlock('B', i));
+}
+
+function mkBlock(letter, i){
+  const isB = letter==='B';
+  const d = DEFIS[i];
+  const q = isB ? d.qB : d.qA;
+  const st = isB ? stB[i] : stA[i];
+  const perm = isB ? permB[i] : permA[i];
+  const bAOk = stA[i].ok;
+
+  const div = document.createElement('div');
+  div.className = 'qb' + (isB ? ' qB' : '') + (st.ok ? ' dok' : '') + (isB && bAOk ? ' unlocked' : '');
+  div.id = 'qb'+letter+i;
+
+  const LETTRES = ['A','B','C','D'];
+  let optsHTML = '';
+  perm.forEach((oi,li)=>{
+    const txt = q.opts[oi];
+    const disabled = st.tried ? 'disabled' : '';
+    const cls = st.tried ? (oi===q.ok?'opt cok':(oi===st.picked?'opt cko':'opt')) : 'opt';
+    optsHTML += `<button class="${cls}" ${disabled} data-i="${i}" data-letter="${letter}" data-oi="${oi}" onclick="ans(event)">${LETTRES[li]}.&nbsp;${esc(txt)}</button>`;
+  });
+
+  let fbHTML = '';
+  if(st.tried && !st.ok){
+    fbHTML = `<div class="fb"><span class="fbl">À revoir</span>${esc(q.fb)}</div>
+      <button class="btn-retry" onclick="retryQ('${letter}',${i})">Réessayer</button>`;
+  } else if(st.ok){
+    fbHTML = `<div class="ok-msg">✔ Bonne réponse&nbsp;!</div>`;
+  }
+
+  // Bouton Suivant — toujours sous le bloc B
+  let suivBtn = '';
+  if(isB && stB[i].ok){
+    if(i < N-1){
+      suivBtn = `<button class="btn-nxt show" onclick="go(${i+1})">Suivant ▸</button>`;
+    } else {
+      suivBtn = `<button class="btn-nxt show" onclick="showBilan()">Voir le bilan ▸</button>`;
+    }
+  }
+
+  div.innerHTML = `
+    <div class="qbadge"><div class="ql">Q${letter}</div><div class="qt">${isB?'Justification par citation':'Interprétation'}</div></div>
+    <div class="qtxt">${esc(q.q)}</div>
+    <div class="opts">${optsHTML}</div>
+    ${fbHTML}
+    ${suivBtn}`;
+  return div;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function ans(e){
+  const btn = e.currentTarget;
+  const i = parseInt(btn.dataset.i);
+  const letter = btn.dataset.letter;
+  const oi = parseInt(btn.dataset.oi);
+  const isB = letter==='B';
+  const st = isB ? stB[i] : stA[i];
+  const q = isB ? DEFIS[i].qB : DEFIS[i].qA;
+
+  if(st.busy || st.tried) return;
+  st.busy = true;
+
+  // Bloquer si B pas encore débloqué
+  if(isB && !stA[i].ok){ st.busy=false; return; }
+
+  st.tried = true; st.picked = oi;
+  if(oi === q.ok){ st.ok = true; okCount++; beepOk(); flashV(true); }
+  else { errCount++; beepErr(); flashV(false); }
+  st.busy = false;
+  updScore(); updDots(); renderQ(i);
+  // Vérifier fin
+  if(stA.every(s=>s.ok) && stB.every(s=>s.ok)) setTimeout(showBilan, 600);
+}
+
+function retryQ(letter, i){
+  const isB = letter==='B';
+  const st = isB ? stB[i] : stA[i];
+  st.tried = false; st.ok = false; st.picked = undefined;
+  if(!isB) permA[i] = mkPerm(DEFIS[i].qA.opts.length, DEFIS[i].qA.ok);
+  else permB[i] = mkPerm(DEFIS[i].qB.opts.length, DEFIS[i].qB.ok);
+  renderQ(i);
+}
+
+function go(i){
+  cur = Math.max(0, Math.min(N-1, i));
+  updDots(); renderQ(cur);
+}
+
+/* ── BILAN ── */
+function showBilan(){
+  const msgs = {
+    12: {titre:'🎭 Critique de théâtre accompli&nbsp;! Tu as parfaitement interprété cette scène.', msg:''},
+    8:  {titre:'Très bonne interprétation.', msg:'Quelques nuances à approfondir.'},
+    6:  {titre:'Bonne analyse générale.', msg:'Relis les passages signalés.'},
+    0:  {titre:'Reprends le texte et les sections précédentes avant de retenter.', msg:''}
+  };
+  const k = okCount>=12?12:okCount>=8?8:okCount>=6?6:0;
+  const m = msgs[k];
+  document.getElementById('bilScore').textContent = okCount+' / 12 pts';
+  document.getElementById('bilTitre').innerHTML = m.titre;
+  document.getElementById('bilMsg').textContent = m.msg;
+  document.getElementById('bilan').classList.add('show');
+  if(okCount>=10){finalOkS(); rainEmojis();}else finalKoS();
+}
+
+function restart(){
+  okCount=0; errCount=0; cur=0;
+  stA=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+  stB=DEFIS.map(()=>({tried:false,ok:false,busy:false}));
+  initPerms();
+  document.getElementById('bilan').classList.remove('show');
+  buildStars(); updScore(); updDots(); go(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── FLASH ── */
+function flashV(ok){
+  const el=document.getElementById('flashV');
+  el.textContent=ok?'✓':'✗'; el.style.color=ok?'#22c55e':'#ef4444';
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+
+/* ── PLUIE ── */
+const RAIN=['🎭','📜','✨','🌟','🏆','🎬','⭐','📖'];
+function rainEmojis(){
+  for(let i=0;i<25;i++){setTimeout(()=>{
+    const el=document.createElement('div');
+    el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+    el.style.cssText='position:fixed;top:-40px;left:'+(Math.random()*100)+'vw;font-size:'+(1+Math.random()*1.3).toFixed(2)+'rem;z-index:9998;pointer-events:none;--rot:'+(Math.random()*60-30)+'deg;animation:rainFall '+(1.8+Math.random()*1.4).toFixed(2)+'s ease-in forwards;';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
+  },i*85);}
+}
+
+/* ── AUDIO ── */
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){
+  if(!actx)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+.012);g.gain.exponentialRampToValueAtTime(.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.03);
+}
+function beepOk(){initA();tone(523,784,.13,'sine',.12,0);tone(784,1046,.11,'sine',.10,.08);}
+function beepErr(){initA();tone(280,160,.2,'sine',.11,0);}
+function finalOkS(){initA();[523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.22,'sine',.13,k*.09));}
+function finalKoS(){initA();tone(300,160,.4,'sine',.13,0);tone(200,120,.3,'sine',.10,.35);}
+
+/* ── INIT ── */
+document.addEventListener('pointerdown',initA,{once:true});
+initPerms(); buildStars(); buildDots(); updScore(); go(0);
+</script>
+</body>
+</html>
