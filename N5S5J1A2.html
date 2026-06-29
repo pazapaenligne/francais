@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Les Fourberies de Scapin — 5e S5 J1</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.25);
+  --bg:#fffdf7;--txt:#1a1000;--gris:#7a5c10;--bord:#e8c870;
+  --vert:#22c55e;--vert-bg:#e7faec;--vert-bord:#86efac;
+  --rouge:#ef4444;--rouge-bg:#fdeaea;--rouge-bord:#fca5a5;
+  --theatre:#2a1a00;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-80px) scale(1)}}
+@keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.08)}100%{transform:scale(1)}}
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(3px);opacity:.18;}
+.bubble.b1{width:140px;height:140px;background:var(--jour-pale);top:-40px;right:-30px;}
+.bubble.b2{width:90px;height:90px;background:var(--jour);bottom:30px;left:-25px;}
+.bubble.b3{width:65px;height:65px;background:#c47a10;top:42%;right:-20px;}
+#flashIcon{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:5rem;z-index:9999;pointer-events:none;opacity:0;}
+#flashIcon.show{animation:flashPop .9s ease forwards;}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1100px;margin:0 auto;padding:16px 14px 80px;position:relative;z-index:2;}
+.two-col{display:flex;flex-direction:column;gap:16px;}
+
+.col-left{}
+
+/* ── HEADER ── */
+.header{text-align:center;padding:16px 0 14px;animation:fadeUp .5s ease;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#3a1800;font-family:Orbitron,sans-serif;font-weight:700;font-size:14px;letter-spacing:1.2px;padding:7px 18px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);margin-bottom:10px;}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#c47a10;}
+.logo-badge .pts i:nth-child(2){background:#fff;}
+.logo-badge .pts i:nth-child(3){background:var(--jour-pale);}
+.semaine{font-family:Orbitron,sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(1.25rem,4vw,1.9rem);color:var(--txt);line-height:1.15;margin-bottom:8px;}
+.titre .accent{color:var(--jour-fonce);}
+.header-badge{display:inline-block;background:var(--jour);color:#3a1800;font-family:Orbitron,sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;padding:5px 16px;border-radius:20px;}
+
+/* ── TEXTE THÉÂTRE ── */
+.texte-card{background:#fffdf5;border:2px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(196,122,16,.12);}
+.texte-header{background:linear-gradient(135deg,var(--theatre),#5a3010);padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none;}
+.texte-header:hover{filter:brightness(1.1);}
+.texte-toggle-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-family:Orbitron,sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.texte-corps{padding:14px 16px;font-family:Lora,Georgia,serif;font-size:.92rem;line-height:1.85;color:#2a1a00;max-height:420px;overflow-y:auto;transition:max-height .35s ease,padding .35s ease;}
+.texte-corps.collapsed{max-height:0;padding-top:0;padding-bottom:0;overflow:hidden;}
+.contexte-box{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.88rem;color:var(--jour-fonce);font-style:italic;margin:0 16px 0;line-height:1.6;transition:max-height .35s ease,margin .35s ease,padding .35s ease;}
+
+.texte-header-title{font-family:Orbitron,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--jour-pale);text-transform:uppercase;}
+.texte-header-sub{font-family:Lora,Georgia,serif;font-size:.85rem;color:rgba(245,208,128,.8);margin-top:3px;font-style:italic;}
+.texte-corps{padding:14px 16px;font-family:Lora,Georgia,serif;font-size:.92rem;line-height:1.85;color:#2a1a00;max-height:75vh;overflow-y:auto;}
+.texte-corps::-webkit-scrollbar{width:5px;}
+.texte-corps::-webkit-scrollbar-thumb{background:var(--jour-pale);border-radius:3px;}
+.didascalie{font-style:italic;color:#8a5c10;display:block;margin:.3em 0;}
+.perso{font-weight:700;color:var(--theatre);}
+.note{font-size:.78rem;color:var(--gris);margin-top:12px;padding-top:10px;border-top:1px dashed var(--bord);line-height:1.7;}
+.contexte-box{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.88rem;color:var(--jour-fonce);font-style:italic;margin:0 16px 14px;line-height:1.6;}
+
+/* ── SCORE BAR ── */
+.score-wrap{background:#fff;border:1px solid var(--bord);border-radius:12px;padding:11px 14px;margin-bottom:12px;}
+.score-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.score-label{font-family:Orbitron,sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;}
+.score-val{font-family:JetBrains Mono,monospace;font-size:.9rem;font-weight:600;color:var(--jour-fonce);}
+.score-bg{background:var(--jour-clair);border-radius:99px;height:8px;overflow:hidden;}
+.score-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+.dots-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--bord);background:var(--jour-clair);font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--gris);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
+.dot.ok{background:var(--vert-bg);border-color:var(--vert-bord);color:#157f3a;}
+.dot.ko{background:var(--rouge-bg);border-color:var(--rouge-bord);color:#b91c1c;}
+
+/* ── QUESTIONS ── */
+.questions-wrap{display:flex;flex-direction:column;gap:12px;}
+.q-card{background:#fff;border:1.5px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(196,122,16,.08);animation:fadeUp .4s ease;}
+.q-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:11px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.q-num{font-family:Orbitron,sans-serif;font-size:.65rem;font-weight:900;letter-spacing:2px;color:#fff;text-transform:uppercase;}
+.q-type{font-family:JetBrains Mono,monospace;font-size:.7rem;color:rgba(255,255,255,.8);}
+.q-body{padding:14px 16px 16px;}
+.q-texte{font-size:clamp(1rem,2.5vw,1.08rem);font-weight:700;color:var(--txt);line-height:1.6;margin-bottom:12px;}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid var(--bord);border-radius:10px;background:#fffdf5;cursor:pointer;font-size:clamp(.9rem,2.2vw,.97rem);min-height:44px;transition:all .15s;text-align:left;width:100%;font-family:Arial,Helvetica,sans-serif;line-height:1.5;}
+.opt:hover:not([disabled]){border-color:var(--jour-fonce);background:var(--jour-clair);}
+.opt.selected{border-color:var(--jour-fonce);background:var(--jour-clair);}
+.opt.correct{border-color:var(--vert);background:var(--vert-bg);animation:popIn .25s ease;}
+.opt.wrong{border-color:var(--rouge);background:var(--rouge-bg);}
+.opt[disabled]{cursor:default;}
+.opt-letter{font-family:JetBrains Mono,monospace;font-size:.75rem;font-weight:700;color:var(--jour-fonce);flex-shrink:0;margin-top:1px;}
+.opt.correct .opt-letter{color:#157f3a;}
+.opt.wrong .opt-letter{color:#b91c1c;}
+.citation{font-family:Lora,Georgia,serif;font-style:italic;font-size:.9rem;color:#5a3010;}
+.q-fb{border-radius:9px;padding:9px 13px;font-size:.9rem;line-height:1.65;display:none;margin-top:10px;}
+.q-fb.show{display:block;animation:fadeUp .3s ease;}
+.q-fb.ok{background:var(--vert-bg);border:1px solid var(--vert-bord);color:#157f3a;}
+.q-fb.ko{background:var(--rouge-bg);border:1px solid var(--rouge-bord);color:#7a1f1f;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.btn{border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:800;font-size:clamp(.82rem,2vw,.9rem);letter-spacing:1px;text-transform:uppercase;padding:0 18px;min-height:2.8rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-valider{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;box-shadow:0 4px 12px var(--day-glow);}
+.btn-valider:hover:not([disabled]){transform:translateY(-2px);}
+.btn-valider[disabled]{opacity:.35;cursor:default;}
+.btn-suite{background:var(--vert);color:#fff;}
+.btn-suite:hover{transform:translateY(-2px);}
+.qb-section{border-top:2px dashed var(--bord);margin-top:14px;padding-top:14px;display:none;}
+.qb-section.show{display:block;animation:fadeUp .35s ease;}
+.qb-label{font-family:Orbitron,sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--jour-fonce);margin-bottom:8px;}
+
+/* ── BILAN ── */
+.bilan{display:none;background:#fff;border:2px solid var(--jour-fonce);border-radius:16px;padding:28px 22px;text-align:center;box-shadow:0 8px 28px var(--day-glow);position:relative;overflow:hidden;margin-top:12px;}
+.bilan.show{display:block;animation:fadeUp .5s ease;}
+.bilan-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.bilan-score{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(2.8rem,9vw,4.5rem);color:var(--jour-fonce);line-height:1;}
+.bilan-score small{font-size:.3em;color:var(--gris);}
+.bilan-etoiles{font-size:1.9rem;margin:8px 0;}
+.bilan-tampon{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(.78rem,2vw,.92rem);letter-spacing:2px;padding:7px 18px;border-radius:8px;display:inline-block;margin-bottom:10px;text-transform:uppercase;}
+.bilan-tampon.ok{color:#157f3a;border:2.5px solid #157f3a;}
+.bilan-tampon.moyen{color:var(--jour-fonce);border:2.5px solid var(--jour-fonce);}
+.bilan-tampon.ko{color:#7a1f1f;border:2.5px solid #7a1f1f;}
+.bilan-msg{font-size:clamp(.88rem,2.2vw,.97rem);color:var(--txt);line-height:1.75;margin-bottom:18px;max-width:520px;margin-left:auto;margin-right:auto;}
+.btn-recommencer{font-family:Orbitron,sans-serif;font-weight:900;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;border:none;border-radius:12px;padding:0 28px;min-height:2.8rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px var(--day-glow);}
+.btn-recommencer:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div id="flashIcon"></div>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
+
+<div class="wrap">
+  <div class="header">
+    <div><div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 5E</div></div>
+    <div class="semaine">Semaine 5 &mdash; Jour 1</div>
+    <h1 class="titre">Je <span class="accent">m'entraîne</span></h1>
+    <div class="header-badge">🔎 Enquêteur de théâtre &middot; /12</div>
+  </div>
+
+  <div class="score-wrap">
+    <div class="score-head">
+      <span class="score-label" id="scoreLabel">Question 1 sur 6</span>
+      <span class="score-val" id="scoreVal">0 / 12</span>
+    </div>
+    <div class="score-bg"><div class="score-fill" id="scoreFill"></div></div>
+    <div class="dots-row" id="dotsRow"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="col-left">
+      <div class="texte-card">
+        <div class="texte-header" onclick="toggleTexte()">
+          <div>
+            <div class="texte-header-title">Texte support</div>
+            <div class="texte-header-sub">Molière &mdash; Les Fourberies de Scapin, acte III, scène 2, 1671</div>
+          </div>
+          <button class="texte-toggle-btn" id="toggleBtn" onclick="event.stopPropagation();toggleTexte()">&#9660;&nbsp;Replier</button>
+        </div>
+        <div class="texte-corps" id="texteCorps"><div style="background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.88rem;color:var(--jour-fonce);font-style:italic;margin-bottom:14px;line-height:1.6;">Scapin veut se venger de Géronte. Il invente un stratagème et lui fait croire que plusieurs personnes sont à sa poursuite.</div>
+<span class="perso">SCAPIN.</span> &ndash; Attendez. Voici une affaire que je me suis trouvée fort à propos pour vous sauver<sup>1</sup>. Il faut que vous vous mettiez dans ce sac et que&hellip;<br><br>
+<span class="perso">GÉRONTE,</span> <span class="didascalie">croyant voir quelqu'un.</span> Ah&nbsp;!<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Non, non, non, non, non, ce n'est personne. Il faut, dis-je, que vous vous mettiez là-dedans, et que vous gardiez<sup>2</sup> de remuer en aucune façon. Je vous chargerai sur mon dos, comme un paquet de quelque chose, et je vous porterai ainsi au travers de vos ennemis, jusque dans votre maison, où, quand nous serons une fois, nous pourrons nous barricader, et envoyer quérir main-forte<sup>3</sup> contre la violence.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; L'invention est bonne.<br><br>
+<span class="perso">SCAPIN.</span> &ndash; La meilleure du monde. Vous allez voir. <span class="didascalie">(À part.)</span> Tu me paieras l'imposture.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Eh&nbsp;?<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Je dis que vos ennemis seront bien attrapés. Mettez-vous bien jusqu'au fond, et surtout prenez garde de ne vous point montrer et de ne parler pas<sup>4</sup>, quelque chose que puisse arriver<sup>5</sup>.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Laissez-moi faire. Je saurai me tenir&hellip;<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Cachez-vous&nbsp;; voici un spadassin<sup>6</sup> qui vous cherche. [&hellip;]<br><br>
+<span class="didascalie">Scapin contrefait sa voix et se fait passer pour le spadassin. Il en profite pour donner des coups de bâton à Géronte dans le sac.</span><br><br>
+<span class="perso">GÉRONTE,</span> <span class="didascalie">mettant la tête hors du sac.</span> Ah&nbsp;! Scapin, je n'en puis plus&nbsp;!<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Ah&nbsp;! monsieur, je suis tout moulu<sup>7</sup>, et les épaules me font un mal épouvantable.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Comment&nbsp;? c'est sur les miennes qu'il a frappé.<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Nenni<sup>8</sup>, monsieur, c'était sur mon dos qu'il frappait.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Que veux-tu dire&nbsp;? J'ai bien senti les coups, et les sens bien encore.<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Non, vous dis-je, ce n'est que le bout du bâton qui a été jusque sur vos épaules.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Tu devais donc te retirer un peu plus loin, pour m'épargner&hellip;<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Prenez garde. En voici un autre qui a la mine d'un étranger [&hellip;]<br><br>
+<span class="perso">GÉRONTE,</span> <span class="didascalie">sortant sa tête du sac.</span> Ah&nbsp;! je suis roué<sup>9</sup>&nbsp;!<br><br>
+<span class="perso">SCAPIN.</span> &ndash; Ah&nbsp;! je suis mort.<br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Pourquoi diantre faut-il qu'ils frappent sur mon dos&nbsp;?<br><br>
+<span class="perso">SCAPIN,</span> <span class="didascalie">lui remettant sa tête dans le sac.</span> Prenez garde, voici une demi-douzaine de soldats tout ensemble. <span class="didascalie">(Contrefaisant plusieurs personnes ensemble.)</span> &laquo;&nbsp;Allons, tâchons à trouver ce Géronte, cherchons partout. N'épargnons point pas. Courons toute la ville. N'oublions aucun lieu. Visitons tout. Furetons<sup>10</sup> de tous les côtés. Par où irons-nous&nbsp;? Tournons par là. Non, par ici. À gauche. À droite. Nenni. Si fait.&nbsp;&raquo; <span class="didascalie">(À Géronte, avec sa voix ordinaire.)</span> Cachez-vous bien. &laquo;&nbsp;Ah&nbsp;! camarades, voici son valet. Allons, coquin, il faut que tu nous enseignes où est ton maître.&nbsp;&raquo; Eh&nbsp;! messieurs, ne me maltraitez point. &laquo;&nbsp;Allons, dis-nous où il est. Parle. Hâte-toi. Expédions<sup>11</sup>&nbsp;! Dépêche vite. Tôt<sup>12</sup>.&nbsp;&raquo; Hé&nbsp;! messieurs, doucement. <span class="didascalie">(Géronte met doucement la tête hors du sac, et aperçoit la fourberie de Scapin.)</span> &laquo;&nbsp;Si tu ne nous fais trouver ton maître tout à l'heure, nous allons faire pleuvoir sur toi une ondée<sup>13</sup> de coups de bâton.&nbsp;&raquo; J'aime mieux souffrir toute chose que de vous découvrir mon maître. &laquo;&nbsp;Nous allons t'assommer.&nbsp;&raquo; Faites tout ce qu'il vous plaira. &laquo;&nbsp;Tu as envie d'être battu&nbsp;?&nbsp;&raquo; Je ne trahirai point mon maître. &laquo;&nbsp;Ah&nbsp;! tu veux en tâter&nbsp;?&nbsp;&raquo; Oh&nbsp;! <span class="didascalie">(Comme il est prêt de frapper, Géronte sort du sac, et Scapin s'enfuit.)</span><br><br>
+<span class="perso">GÉRONTE.</span> &ndash; Ah&nbsp;! infâme&nbsp;! ah&nbsp;! traître&nbsp;! ah&nbsp;! scélérat&nbsp;! C'est ainsi que tu m'assassines&nbsp;!
+          <div class="note">
+            <b>Lexique&nbsp;:</b><br>
+            1. Une affaire où je me suis trouvé là, au bon moment, pour vous sauver. &mdash;
+            2. Que vous évitiez. &mdash;
+            3. Chercher des renforts. &mdash;
+            4. Ne pas bouger. &mdash;
+            5. Quoi qu'il arrive. &mdash;
+            6. Assassin. &mdash;
+            7. Broyé. &mdash;
+            8. Non. &mdash;
+            9. Brisé à cause des coups. &mdash;
+            10. Fouillons. &mdash;
+            11. Dépêchons. &mdash;
+            12. Rapidement. &mdash;
+            13. Pluie.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="questions-wrap" id="questionsWrap"></div>
+      <div class="bilan" id="bilan">
+        <div class="bilan-particles" id="bilanParticles"></div>
+        <div class="bilan-score"><span id="bScore">0</span><small> / 12</small></div>
+        <div class="bilan-etoiles" id="bEtoiles"></div>
+        <div class="bilan-tampon" id="bTampon"></div>
+        <div class="bilan-msg" id="bMsg"></div>
+        <button class="btn-recommencer" onclick="recommencer()">&#8635;&nbsp;Recommencer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ DONNÉES ══ */
+var QS = [
+  {
+    num:1,
+    qa:"Que demande Scapin à Géronte au tout début de la scène ?",
+    optsA:["De le suivre jusque dans sa maison.","De se cacher dans un sac.","De se barricader immédiatement."],
+    ansA:1,
+    fbA:"Dès sa première réplique, Scapin demande à Géronte de se cacher dans un sac, prétendument pour le protéger de ses ennemis.",
+    qb:"Quelle phrase du texte confirme cette demande ?",
+    optsB:["« nous pourrons nous barricader »","« Il faut que vous vous mettiez dans ce sac »","« voici un spadassin qui vous cherche »"],
+    ansB:1,
+    fbB:"La phrase « Il faut que vous vous mettiez dans ce sac » est la demande exacte formulée par Scapin au début de la scène."
+  },
+  {
+    num:2,
+    qa:"Pourquoi Géronte accepte-t-il d'entrer dans le sac ?",
+    optsA:["Parce qu'il croit que des ennemis le poursuivent.","Parce que Scapin le menace directement.","Parce qu'il veut jouer un tour à Scapin."],
+    ansA:0,
+    fbA:"Géronte croit réellement être poursuivi par des ennemis, comme Scapin le lui a fait croire. C'est pour cette raison qu'il accepte de se cacher.",
+    qb:"Quelle réplique de Géronte montre qu'il croit à cette menace ?",
+    optsB:["« L'invention est bonne. »","« Laissez-moi faire. »","« Je saurai me tenir… »"],
+    ansB:0,
+    fbB:"En disant « L'invention est bonne », Géronte approuve le plan de Scapin, preuve qu'il croit à la menace inventée."
+  },
+  {
+    num:3,
+    qa:"Que fait réellement Scapin pendant que Géronte est caché dans le sac ?",
+    optsA:["Il appelle au secours.","Il frappe Géronte avec un bâton.","Il s'enfuit immédiatement."],
+    ansA:1,
+    fbA:"Scapin profite du fait que Géronte ne peut rien voir depuis l'intérieur du sac pour le frapper lui-même avec un bâton.",
+    qb:"Quelle didascalie le précise ?",
+    optsB:["« Scapin contrefait sa voix et se fait passer pour le spadassin. »","« Il en profite pour donner des coups de bâton à Géronte dans le sac. »","« Comme il est prêt de frapper, Géronte sort du sac. »"],
+    ansB:1,
+    fbB:"Cette didascalie indique explicitement l'action de Scapin : il frappe Géronte alors que celui-ci croit être attaqué par un inconnu."
+  },
+  {
+    num:4,
+    qa:"Quand Géronte dit avoir « bien senti les coups », que lui répond Scapin ?",
+    optsA:["Il reconnaît avoir frappé Géronte par erreur.","Il affirme que seul le bout du bâton a touché Géronte.","Il propose d'arrêter immédiatement le jeu."],
+    ansA:1,
+    fbA:"Scapin minimise les coups reçus par Géronte en prétendant que seul le bout du bâton l'a légèrement touché, pour continuer à le tromper.",
+    qb:"Quelle réplique de Scapin le montre ?",
+    optsB:["« ce n'est que le bout du bâton qui a été jusque sur vos épaules »","« les épaules me font un mal épouvantable »","« voici un autre qui a la mine d'un étranger »"],
+    ansB:0,
+    fbB:"Cette réplique montre que Scapin invente une explication pour que Géronte ne se rende pas compte de la vérité."
+  },
+  {
+    num:5,
+    qa:"Comment Scapin fait-il croire à Géronte qu'une troupe de soldats le recherche ?",
+    optsA:["Il fait entrer de vrais soldats sur la scène.","Il imite plusieurs voix différentes successivement.","Il demande à Géronte de regarder par la fenêtre."],
+    ansA:1,
+    fbA:"Scapin imite à lui seul les voix de plusieurs soldats imaginaires, créant l'illusion d'une troupe entière à la recherche de Géronte.",
+    qb:"Quelle didascalie le précise exactement ?",
+    optsB:["« Contrefaisant plusieurs personnes ensemble. »","« Géronte sort du sac, et Scapin s'enfuit. »","« lui remettant sa tête dans le sac »"],
+    ansB:0,
+    fbB:"Cette didascalie précise que Scapin imite plusieurs personnages en même temps, technique théâtrale qui rend la scène particulièrement comique."
+  },
+  {
+    num:6,
+    qa:"Comment se termine la scène pour Scapin ?",
+    optsA:["Il est puni par Géronte sur scène.","Il s'enfuit avant que Géronte ne le rattrape.","Il s'excuse auprès de Géronte."],
+    ansA:1,
+    fbA:"Au moment où Géronte comprend la vérité et sort du sac pour l'attraper, Scapin prend la fuite sans être puni dans la scène.",
+    qb:"Quelle didascalie le confirme ?",
+    optsB:["« Géronte sort du sac, et Scapin s'enfuit. »","« Géronte met doucement la tête hors du sac »","« Il en profite pour donner des coups de bâton »"],
+    ansB:0,
+    fbB:"Cette didascalie finale indique que Scapin s'échappe juste avant que Géronte ne puisse le punir."
+  }
+];
+
+var LABELS = ['A','B','C'];
+var curQ = 0;
+var scores = 0;
+var actx = null;
+
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);}
+function beepOk(){initA();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.12,'sine',.1);},75);}
+function beepErr(){initA();beep(220,90,.22,'sawtooth',.09);}
+function beepFinal(ok){initA();if(ok){[523,659,784,1047,1318].forEach(function(f,i){setTimeout(function(){beep(f,f,.22,'triangle',.14);},i*140);});}else{beep(200,80,.4,'sawtooth',.11);}}
+document.addEventListener('pointerdown',initA,{once:true});
+
+function showFlash(ok){var f=document.getElementById('flashIcon');if(!f)return;f.textContent=ok?'✓':'✗';f.style.color=ok?'#22c55e':'#ef4444';f.style.animation='none';void f.offsetWidth;f.className='show';}
+function rnd(){try{var arr=new Uint32Array(1);crypto.getRandomValues(arr);return arr[0]/4294967296;}catch(e){return Math.random();}}
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+function buildDots(){
+  var r=document.getElementById('dotsRow');r.innerHTML='';
+  for(var i=0;i<12;i++){
+    var d=document.createElement('div');d.className='dot';d.id='dot'+i;
+    d.textContent=i+1;r.appendChild(d);
+  }
+}
+function markDot(i,ok){var d=document.getElementById('dot'+i);if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}}
+function updateBar(){
+  document.getElementById('scoreVal').textContent=scores+' / 12';
+  document.getElementById('scoreFill').style.width=Math.round(scores/12*100)+'%';
+  document.getElementById('scoreLabel').textContent='Question '+(curQ+1)+' sur 6';
+}
+
+function renderQ(idx){
+  var q=QS[idx];
+  var wrap=document.getElementById('questionsWrap');
+  var card=document.createElement('div');card.className='q-card';card.id='qcard'+idx;
+
+  var shA=shuffle(q.optsA.map(function(o,i){return{txt:o,orig:i};}));
+  var shB=shuffle(q.optsB.map(function(o,i){return{txt:o,orig:i};}));
+
+  var h='<div class="q-header">'
+    +'<span class="q-num">🔎 Question '+q.num+' / 6</span>'
+    +'<span class="q-type">QA — Compréhension</span></div>'
+    +'<div class="q-body">'
+    +'<div class="q-texte">'+q.qa+'</div>'
+    +'<div class="opts" id="optsA'+idx+'">';
+  shA.forEach(function(o,i){
+    h+='<button class="opt" onclick="selA('+idx+','+o.orig+',this)">'
+      +'<span class="opt-letter">'+LABELS[i]+'.</span>'
+      +'<span>'+o.txt+'</span></button>';
+  });
+  h+='</div>'
+    +'<div class="q-fb" id="fbA'+idx+'"></div>'
+    +'<div class="btn-row">'
+    +'<button class="btn btn-valider" id="btnA'+idx+'" onclick="valA('+idx+')" disabled>✓&nbsp;Valider</button>'
+    +'</div>'
+    /* QB masqué */
+    +'<div class="qb-section" id="qbSec'+idx+'">'
+    +'<div class="qb-label">QB — Justification par citation</div>'
+    +'<div class="q-texte">'+q.qb+'</div>'
+    +'<div class="opts" id="optsB'+idx+'">';
+  shB.forEach(function(o,i){
+    h+='<button class="opt" onclick="selB('+idx+','+o.orig+',this)">'
+      +'<span class="opt-letter">'+LABELS[i]+'.</span>'
+      +'<span class="citation">'+o.txt+'</span></button>';
+  });
+  h+='</div>'
+    +'<div class="q-fb" id="fbB'+idx+'"></div>'
+    +'<div class="btn-row">'
+    +'<button class="btn btn-valider" id="btnB'+idx+'" onclick="valB('+idx+')" disabled>✓&nbsp;Valider</button>'
+    +'</div></div>'
+    +'</div>';
+  card.innerHTML=h;
+  wrap.appendChild(card);
+}
+
+var selA_={},selB_={},doneA={},doneB={};
+
+function selA(idx,orig,el){
+  if(doneA[idx])return;
+  selA_[idx]=orig;
+  var opts=document.querySelectorAll('#optsA'+idx+' .opt');
+  opts.forEach(function(o){o.classList.remove('selected');});
+  el.classList.add('selected');
+  document.getElementById('btnA'+idx).removeAttribute('disabled');
+}
+function selB(idx,orig,el){
+  if(doneB[idx])return;
+  selB_[idx]=orig;
+  var opts=document.querySelectorAll('#optsB'+idx+' .opt');
+  opts.forEach(function(o){o.classList.remove('selected');});
+  el.classList.add('selected');
+  document.getElementById('btnB'+idx).removeAttribute('disabled');
+}
+
+function valA(idx){
+  if(doneA[idx])return;doneA[idx]=true;
+  var q=QS[idx];
+  var ok=(selA_[idx]===q.ansA);
+  var btn=document.getElementById('btnA'+idx);
+  btn.setAttribute('disabled','');
+  var opts=document.querySelectorAll('#optsA'+idx+' .opt');
+  opts.forEach(function(o){
+    o.setAttribute('disabled','');
+    var orig=parseInt(o.getAttribute('onclick').match(/selA\(\d+,(\d+)/)[1]);
+    if(orig===q.ansA) o.classList.add('correct');
+    else if(orig===selA_[idx]&&!ok) o.classList.add('wrong');
+  });
+  var fb=document.getElementById('fbA'+idx);
+  if(ok){
+    fb.textContent='✓ Bonne réponse !';
+    fb.className='q-fb ok show';
+    scores++;markDot((idx*2),true);beepOk();showFlash(true);
+  } else {
+    fb.textContent='✗ '+q.fbA;
+    fb.className='q-fb ko show';
+    markDot((idx*2),false);beepErr();showFlash(false);
+  }
+  updateBar();
+  /* Afficher QB */
+  var qbSec=document.getElementById('qbSec'+idx);
+  qbSec.className='qb-section show';
+}
+
+function valB(idx){
+  if(doneB[idx])return;doneB[idx]=true;
+  var q=QS[idx];
+  var ok=(selB_[idx]===q.ansB);
+  var btn=document.getElementById('btnB'+idx);
+  btn.setAttribute('disabled','');
+  var opts=document.querySelectorAll('#optsB'+idx+' .opt');
+  opts.forEach(function(o){
+    o.setAttribute('disabled','');
+    var orig=parseInt(o.getAttribute('onclick').match(/selB\(\d+,(\d+)/)[1]);
+    if(orig===q.ansB) o.classList.add('correct');
+    else if(orig===selB_[idx]&&!ok) o.classList.add('wrong');
+  });
+  var fb=document.getElementById('fbB'+idx);
+  if(ok){
+    fb.textContent='✓ Bonne réponse !';
+    fb.className='q-fb ok show';
+    scores++;markDot((idx*2+1),true);beepOk();showFlash(true);
+  } else {
+    fb.textContent='✗ '+q.fbB;
+    fb.className='q-fb ko show';
+    markDot((idx*2+1),false);beepErr();showFlash(false);
+  }
+  updateBar();
+  /* Passer à la question suivante ou bilan */
+  curQ=idx+1;
+  if(curQ<QS.length){
+    renderQ(curQ);
+  } else {
+    afficherBilan();
+  }
+}
+
+function afficherBilan(){
+  document.getElementById('bScore').textContent=scores;
+  var pct=scores/12;
+  var nb=pct>=.92?5:pct>=.67?4:pct>=.5?3:pct>=.33?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(scores>=11){tp.textContent='ENQUÊTE RÉSOLUE !';tp.className='bilan-tampon ok';msg.textContent='Tu as parfaitement compris la scène. Scapin n\u2019a plus de secrets pour toi\u00a0!';}
+  else if(scores>=8){tp.textContent='TRÈS BONNE COMPRÉHENSION';tp.className='bilan-tampon ok';msg.textContent='Très bonne compréhension. Quelques points restent à revoir : relis les passages signalés.';}
+  else if(scores>=6){tp.textContent='BONNE COMPRÉHENSION';tp.className='bilan-tampon moyen';msg.textContent='Bonne compréhension générale. Relis les passages dont le feedback était rouge.';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='bilan-tampon ko';msg.textContent='Relis le texte attentivement avant de retenter : les didascalies et les répliques contiennent toutes les réponses.';}
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(scores>=8);
+  if(scores>=8){
+    var box=document.getElementById('bilanParticles');box.innerHTML='';
+    ['✨','⭐','📜','🔎','✨','⭐','📜','🔎','✨','⭐','📜','🔎','✨','⭐','📜','🔎','✨','⭐','📜','🔎'].forEach(function(em,i){
+      var e=document.createElement('div');e.textContent=em;
+      e.style.cssText='position:absolute;font-size:'+(1.1+Math.random()*.8)+'rem;left:'+(3+Math.random()*94)+'%;bottom:'+(Math.random()*35)+'%;opacity:0;pointer-events:none;animation:particleUp '+(1+Math.random()*1.2)+'s ease '+(i*0.08+Math.random()*0.15)+'s forwards;';
+      box.appendChild(e);
+    });
+  }
+}
+
+function recommencer(){
+  scores=0;curQ=0;selA_={};selB_={};doneA={};doneB={};
+  document.getElementById('questionsWrap').innerHTML='';
+  document.getElementById('bilan').className='bilan';
+  buildDots();updateBar();renderQ(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleTexte(){
+  var corps=document.getElementById('texteCorps');
+  var btn=document.getElementById('toggleBtn');
+  if(!corps)return;
+  var collapsed=corps.classList.contains('collapsed');
+  if(collapsed){
+    corps.classList.remove('collapsed');
+    btn.innerHTML='&#9660;&nbsp;Replier';
+  } else {
+    corps.classList.add('collapsed');
+    btn.innerHTML='&#9654;&nbsp;Déplier';
+  }
+}
+
+/* INIT */
+buildDots();
+updateBar();
+renderQ(0);
+</script>
+</body>
+</html>
