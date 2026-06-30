@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — L'Île aux esclaves — 5e S6 J1</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.25);
+  --bg:#fffdf7;--txt:#1a1000;--gris:#7a5c10;--bord:#e8c870;
+  --vert:#22c55e;--vert-bg:#e7faec;--vert-bord:#86efac;
+  --rouge:#ef4444;--rouge-bg:#fdeaea;--rouge-bord:#fca5a5;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-90px) scale(1)}}
+@keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+@keyframes glowErr{0%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}70%{box-shadow:0 0 0 10px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(3px);opacity:.16;}
+.bubble.b1{width:140px;height:140px;background:var(--jour-pale);top:-35px;right:-28px;}
+.bubble.b2{width:90px;height:90px;background:var(--jour);bottom:25px;left:-22px;}
+.bubble.b3{width:62px;height:62px;background:#c47a10;top:42%;right:-15px;}
+#flashIcon{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:5rem;z-index:9999;pointer-events:none;opacity:0;}
+#flashIcon.show{animation:flashPop .85s ease forwards;}
+.wrap{max-width:1100px;margin:0 auto;padding:14px 13px 80px;position:relative;z-index:2;}
+
+.header{text-align:center;padding:14px 0 12px;animation:fadeUp .5s ease;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);color:#3a1800;font-family:Orbitron,sans-serif;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 18px;border-radius:22px;box-shadow:0 4px 14px var(--day-glow);margin-bottom:10px;}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#c47a10;}
+.logo-badge .pts i:nth-child(2){background:#fff;}
+.logo-badge .pts i:nth-child(3){background:var(--jour-pale);}
+.semaine{font-family:Orbitron,sans-serif;font-size:.82rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;margin-bottom:6px;}
+.titre{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(1.2rem,4vw,1.85rem);color:var(--txt);line-height:1.15;margin-bottom:8px;}
+.titre .accent{color:var(--jour-fonce);}
+.header-badge{display:inline-block;background:var(--jour);color:#3a1800;font-family:Orbitron,sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;padding:5px 16px;border-radius:20px;}
+
+.two-col{display:flex;flex-direction:column;gap:16px;}
+
+/* TEXTE */
+.texte-card{background:#fffdf5;border:2px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px rgba(196,122,16,.12);}
+.texte-header{background:linear-gradient(135deg,#2a1a00,#5a3010);padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none;}
+.texte-header:hover{filter:brightness(1.1);}
+.texte-header-title{font-family:Orbitron,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--jour-pale);text-transform:uppercase;}
+.texte-header-sub{font-size:.85rem;color:rgba(245,208,128,.8);margin-top:3px;font-style:italic;}
+.texte-toggle-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-family:Orbitron,sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.texte-corps{padding:16px 18px;font-size:.94rem;line-height:1.9;color:#2a1a00;max-height:460px;overflow-y:auto;transition:max-height .35s ease,padding .35s ease;}
+.texte-corps.collapsed{max-height:0;padding-top:0;padding-bottom:0;overflow:hidden;}
+.texte-corps::-webkit-scrollbar{width:5px;}
+.texte-corps::-webkit-scrollbar-thumb{background:var(--jour-pale);border-radius:3px;}
+.paratexte-box{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:11px 15px;font-size:.88rem;color:#3a2800;line-height:1.7;margin-bottom:16px;}
+.paratexte-box strong{color:var(--jour-fonce);}
+.didascalie{font-style:italic;color:#8a5c10;}
+.perso{font-weight:700;color:#2a1a00;}
+.ligne-num{color:#b89050;font-size:.78rem;font-family:JetBrains Mono,monospace;user-select:none;margin-right:6px;}
+.note{font-size:.78rem;color:var(--gris);margin-top:14px;padding-top:11px;border-top:1px dashed var(--bord);line-height:1.7;}
+
+/* SCORE GLOBAL */
+.score-global{background:#fff;border:1.5px solid var(--bord);border-radius:12px;padding:11px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.score-g-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.score-g-label{font-family:Orbitron,sans-serif;font-size:.63rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;}
+.score-g-val{font-family:JetBrains Mono,monospace;font-size:.9rem;font-weight:700;color:var(--jour-fonce);}
+.score-g-bg{background:var(--jour-clair);border-radius:99px;height:8px;overflow:hidden;}
+.score-g-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+.parties-chips{display:flex;gap:8px;margin-top:9px;}
+.partie-chip{flex:1;background:var(--jour-clair);border:1.5px solid var(--bord);border-radius:9px;padding:6px 10px;text-align:center;}
+.partie-chip.done{background:var(--vert-bg);border-color:var(--vert-bord);}
+.partie-chip-label{font-family:Orbitron,sans-serif;font-size:.55rem;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:1px;display:block;}
+.partie-chip.done .partie-chip-label{color:#157f3a;}
+.partie-chip-val{font-family:JetBrains Mono,monospace;font-size:.85rem;font-weight:700;color:var(--jour-fonce);display:block;margin-top:2px;}
+.partie-chip.done .partie-chip-val{color:#157f3a;}
+
+/* PARTIE CARD */
+.partie-card{background:#fff;border:1.5px solid var(--bord);border-radius:14px;overflow:hidden;box-shadow:0 3px 14px var(--day-glow);animation:fadeUp .4s ease;}
+.partie-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:12px 16px;}
+.partie-nom{font-family:Orbitron,sans-serif;font-weight:900;font-size:.75rem;letter-spacing:1.5px;color:#fff;text-transform:uppercase;}
+.partie-pts{font-family:JetBrains Mono,monospace;font-size:.72rem;color:rgba(255,255,255,.85);float:right;}
+.partie-body{padding:16px 18px 20px;}
+.consigne-box{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);border-radius:0 9px 9px 0;padding:10px 14px;font-size:.9rem;color:var(--jour-fonce);font-style:italic;margin-bottom:14px;line-height:1.6;}
+
+/* MOUVEMENTS (Partie A) */
+.mvt-bloc{margin-bottom:16px;border:1.5px solid var(--bord);border-radius:11px;padding:14px 16px;background:#fffdf5;}
+.mvt-bloc:last-child{margin-bottom:0;}
+.mvt-num{font-family:Orbitron,sans-serif;font-size:.68rem;font-weight:700;color:var(--jour-fonce);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.mvt-lignes{font-family:JetBrains Mono,monospace;font-size:.76rem;color:var(--gris);margin-bottom:8px;}
+.mvt-extrait{background:var(--jour-clair);border-left:3px solid var(--jour);border-radius:0 7px 7px 0;padding:8px 13px;font-style:italic;font-size:.88rem;margin-bottom:11px;line-height:1.6;color:#3a2800;}
+.mvt-select{width:100%;padding:11px 14px;border:2px solid var(--bord);border-radius:9px;font-size:.92rem;font-family:Arial,Helvetica,sans-serif;background:#fff;cursor:pointer;color:var(--txt);min-height:48px;}
+.mvt-select:focus{border-color:var(--jour-fonce);outline:none;}
+.mvt-fb{border-radius:8px;padding:9px 13px;font-size:.86rem;line-height:1.65;display:none;margin-top:10px;}
+.mvt-fb.show{display:block;animation:fadeUp .3s ease;}
+.mvt-fb.ok{background:var(--vert-bg);border:1px solid var(--vert-bord);color:#157f3a;}
+.mvt-fb.ko{background:var(--rouge-bg);border:1px solid var(--rouge-bord);color:#7a1f1f;}
+
+/* DOTS */
+.dots-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--bord);background:var(--jour-clair);font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--gris);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
+.dot.ok{background:var(--vert-bg);border-color:var(--vert-bord);color:#157f3a;}
+.dot.ko{background:var(--rouge-bg);border-color:var(--rouge-bord);color:#b91c1c;}
+
+/* QUESTIONS PARTIE B */
+.q-card{background:#fffdf5;border:1.5px solid var(--bord);border-radius:11px;overflow:hidden;margin-bottom:14px;}
+.q-card:last-child{margin-bottom:0;}
+.q-header{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));padding:9px 15px;}
+.q-num-title{font-family:Orbitron,sans-serif;font-size:.65rem;font-weight:900;letter-spacing:1.5px;color:#fff;text-transform:uppercase;}
+.q-sub{font-size:.72rem;color:rgba(255,255,255,.85);margin-top:2px;}
+.q-body{padding:13px 16px 16px;}
+.q-texte{font-size:clamp(.92rem,2.3vw,1rem);font-weight:700;color:var(--txt);line-height:1.55;margin-bottom:11px;}
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{display:flex;align-items:center;gap:12px;padding:11px 15px;border:2px solid var(--bord);border-radius:9px;background:#fff;cursor:pointer;font-size:clamp(.87rem,2.1vw,.93rem);min-height:46px;transition:all .15s;text-align:left;width:100%;font-family:Arial,Helvetica,sans-serif;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.opt:hover:not([disabled]){border-color:var(--jour-fonce);background:var(--jour-clair);}
+.opt.selected{border-color:var(--jour-fonce);background:var(--jour-clair);}
+.opt.correct{border-color:var(--vert);background:var(--vert-bg);animation:popIn .25s ease,glowOk .6s ease;}
+.opt.wrong{border-color:var(--rouge);background:var(--rouge-bg);animation:glowErr .6s ease;}
+.opt[disabled]{cursor:default;}
+.opt-letter{font-family:JetBrains Mono,monospace;font-size:.74rem;font-weight:800;color:#fff;background:var(--jour-fonce);flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.opt.correct .opt-letter{background:#157f3a;}
+.opt.wrong .opt-letter{background:#b91c1c;}
+.citation{font-style:italic;}
+.q-fb{border-radius:9px;padding:9px 13px;font-size:.88rem;line-height:1.7;display:none;margin-top:10px;}
+.q-fb.show{display:block;animation:fadeUp .3s ease;}
+.q-fb.ok{background:var(--vert-bg);border:1px solid var(--vert-bord);color:#157f3a;}
+.q-fb.ko{background:var(--rouge-bg);border:1px solid var(--rouge-bord);color:#7a1f1f;}
+.qb-section{border-top:2px dashed var(--bord);margin-top:13px;padding-top:13px;display:none;}
+.qb-section.show{display:block;animation:fadeUp .35s ease;}
+.qb-label{font-family:Orbitron,sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--jour-fonce);margin-bottom:9px;}
+
+/* BOUTONS / SCORE */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px;}
+.btn{border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:800;font-size:clamp(.8rem,2vw,.88rem);letter-spacing:1px;text-transform:uppercase;padding:0 18px;min-height:2.8rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-valider{background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;box-shadow:0 4px 12px var(--day-glow);}
+.btn-valider:hover:not([disabled]){transform:translateY(-2px);}
+.btn-valider[disabled]{opacity:.35;cursor:default;}
+.btn-suite{background:var(--vert);color:#fff;}
+.btn-suite:hover{transform:translateY(-2px);}
+.btn-rec{background:#e8e8e8;color:#444;font-size:.75rem;}
+.btn-rec:hover{background:#d8d8d8;}
+.sous-score{background:var(--jour-clair);border:1px solid var(--bord);border-radius:10px;padding:11px 15px;text-align:center;margin-top:13px;display:none;}
+.sous-score.show{display:block;animation:fadeUp .3s ease;}
+.sous-score-val{font-family:JetBrains Mono,monospace;font-weight:700;font-size:1.35rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.msg-blocage{font-size:.87rem;color:#7a1f1f;background:var(--rouge-bg);border:1px solid var(--rouge-bord);border-radius:9px;padding:10px 14px;line-height:1.65;margin-bottom:10px;}
+
+/* BILAN */
+.bilan{display:none;background:#fff;border:2px solid var(--jour-fonce);border-radius:16px;padding:28px 22px;text-align:center;box-shadow:0 8px 28px var(--day-glow);position:relative;overflow:hidden;}
+.bilan.show{display:block;animation:fadeUp .5s ease;}
+.bilan-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.bilan-score{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(2.8rem,9vw,4.5rem);color:var(--jour-fonce);line-height:1;}
+.bilan-score small{font-size:.3em;color:var(--gris);}
+.bilan-etoiles{font-size:1.9rem;margin:8px 0;}
+.bilan-tampon{font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(.78rem,2vw,.92rem);letter-spacing:2px;padding:7px 18px;border-radius:8px;display:inline-block;margin-bottom:10px;text-transform:uppercase;}
+.bilan-tampon.ok{color:#157f3a;border:2.5px solid #157f3a;}
+.bilan-tampon.moyen{color:var(--jour-fonce);border:2.5px solid var(--jour-fonce);}
+.bilan-tampon.ko{color:#7a1f1f;border:2.5px solid #7a1f1f;}
+.bilan-msg{font-size:clamp(.88rem,2.2vw,.97rem);color:var(--txt);line-height:1.75;margin-bottom:18px;max-width:520px;margin-left:auto;margin-right:auto;}
+.bilan-detail{display:flex;flex-direction:column;gap:5px;max-width:420px;margin:0 auto 18px;text-align:left;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-radius:8px;}
+.bilan-ligne.ok{background:var(--vert-bg);color:#157f3a;}
+.bilan-ligne.moyen{background:#fff8e0;color:#8a6000;}
+.bilan-ligne.ko{background:var(--rouge-bg);color:#7a1f1f;}
+.bilan-ligne-label{font-size:.85rem;}
+.bilan-ligne-score{font-family:JetBrains Mono,monospace;font-weight:700;}
+.btn-recommencer{font-family:Orbitron,sans-serif;font-weight:900;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;background:linear-gradient(135deg,var(--jour-fonce),var(--jour));color:#fff;border:none;border-radius:12px;padding:0 28px;min-height:2.8rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px var(--day-glow);}
+.btn-recommencer:hover{transform:translateY(-2px);}
+@media(min-width:900px){.two-col{display:grid;grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="flashIcon"></div>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
+
+<div class="wrap">
+  <div class="header">
+    <div><div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA &middot; FRANÇAIS &middot; 5E</div></div>
+    <div class="semaine">Semaine 6 &mdash; Jour 1</div>
+    <h1 class="titre">Je <span class="accent">m'entraîne</span></h1>
+    <div class="header-badge">📖 Journal du comédien &middot; /16</div>
+  </div>
+
+  <div class="two-col">
+    <div class="texte-card">
+      <div class="texte-header" onclick="toggleTexte()">
+        <div>
+          <div class="texte-header-title">Texte support</div>
+          <div class="texte-header-sub">Marivaux &mdash; L'Île aux esclaves, Scène 2, 1725</div>
+        </div>
+        <button class="texte-toggle-btn" id="toggleBtn" onclick="event.stopPropagation();toggleTexte()">&#9654;&nbsp;Déplier</button>
+      </div>
+      <div class="texte-corps collapsed" id="texteCorps">
+        <div class="paratexte-box">
+          Cette scène est extraite de la comédie <em>L'Île aux esclaves</em>, écrite par Pierre de Marivaux en 1725.<br><br>
+          Au début de la pièce, deux maîtres grecs, <strong>Iphicrate</strong> et <strong>Euphrosine</strong>, ainsi que leurs esclaves, <strong>Arlequin</strong> et <strong>Cléanthis</strong>, font naufrage sur une île inconnue. Cette île est habitée par d'anciens esclaves qui ont créé une société fondée sur des lois particulières. Lorsqu'un maître arrive sur l'île, il doit échanger sa place avec son esclave afin de comprendre les souffrances qu'il lui a fait subir. Les habitants de l'île cherchent ainsi à corriger les injustices et à rendre les maîtres plus humains.<br><br>
+          Dans l'extrait étudié, <strong>Trivelin</strong>, le gouverneur de l'île, explique aux nouveaux arrivants les règles qu'ils devront respecter pendant leur séjour.
+        </div>
+        <div style="font-family:Orbitron,sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1px;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:10px;">Scène 2, extrait</div>
+        <span class="didascalie">TRIVELIN, avec cinq ou six insulaires, arrive conduisant une dame et la suivante, IPHICRATE, ARLEQUIN.</span><br><br>
+        <span class="ligne-num">1</span><span class="perso">TRIVELIN.</span> &ndash; Ne m'interrompez point, mes enfants. Je pense donc que vous savez qui nous sommes. Quand nos pères<sup>1</sup>, irrités de la cruauté de leurs maîtres, quittèrent la Grèce et vinrent s'établir ici dans le ressentiment<sup>2</sup> des outrages<sup>3</sup> qu'ils avaient reçus de leurs patrons, la<br>
+        <span class="ligne-num">5</span>première loi qu'ils y firent fut d'ôter la vie à tous les maîtres que le hasard ou le naufrage conduirait dans leur île, et conséquemment de rendre la liberté à tous les esclaves&nbsp;: la vengeance avait dicté cette loi&nbsp;; vingt ans après la raison l'abolit, et en dicta une plus douce. Nous ne nous vengeons plus de vous, nous vous corrigeons&nbsp;; ce n'est plus votre vie que<br>
+        <span class="ligne-num">10</span>nous poursuivons, c'est la barbarie de vos cœurs que nous voulons détruire&nbsp;; nous vous jetons dans l'esclavage pour vous rendre sensible aux maux qu'on y éprouve&nbsp;; nous vous humilions, afin que, nous trouvant superbes<sup>4</sup>, vous vous reprochiez de l'avoir été. Votre esclavage, ou plutôt votre cours d'humanité dure trois ans, au bout desquels on vous renvoie si<br>
+        <span class="ligne-num">15</span>vos maîtres sont contents de vos progrès&nbsp;; et, si vous ne devenez pas meilleurs, nous vous retenons par charité pour les nouveaux malheureux que vous iriez faire encore ailleurs, et, par bonté pour vous, nous vous marions avec une de nos concitoyennes. Ce sont nos lois à cet égard&nbsp;; mettez à profit leur rigueur salutaire<sup>5</sup>,<br>
+        <span class="didascalie">[…]</span><br>
+        <span class="ligne-num">20</span>ici&nbsp;; il vous remet en nos mains durs, injustes et superbes. Vous voilà en mauvais état, nous entreprenons de vous guérir&nbsp;; vous êtes moins nos esclaves que nos malades, et nous ne prenons que trois ans pour vous rendre sains, c'est-à-dire humains, raisonnables et généreux pour toute votre vie.<br>
+        <span class="ligne-num">25</span><span class="perso">ARLEQUIN.</span> &ndash; Et le tout gratis, sans purgation ni saignée<sup>6</sup>. Peut-on<sup>7</sup> de la santé à meilleur compte&nbsp;?<br>
+        <span class="perso">TRIVELIN.</span> &ndash; Au reste, ne cherchez point à vous sauver de ces lieux, vous le tenteriez sans succès, et vous feriez votre fortune<sup>8</sup> plus mauvaise&nbsp;: commencez votre nouveau régime de vie par la patience.
+        <div class="note">
+          <b>Lexique&nbsp;:</b><br>
+          1. ancêtres &mdash; 2. rancune &mdash; 3. affronts &mdash; 4. Orgueilleux &mdash; 5. bienfaisante &mdash; 6. remèdes médicaux &mdash; 7. peut-on avoir&hellip; &mdash; 8. Destinée<br><br>
+          <em>Marivaux, L'île aux esclaves, Scène 2, 1725.</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-global">
+      <div class="score-g-head">
+        <span class="score-g-label">Score global</span>
+        <span class="score-g-val" id="scoreGlobal">0 / 16</span>
+      </div>
+      <div class="score-g-bg"><div class="score-g-fill" id="scoreFill"></div></div>
+      <div class="parties-chips">
+        <div class="partie-chip" id="chipA"><span class="partie-chip-label">Partie A</span><span class="partie-chip-val" id="chipValA">— / 4</span></div>
+        <div class="partie-chip" id="chipB"><span class="partie-chip-label">Partie B</span><span class="partie-chip-val" id="chipValB">— / 12</span></div>
+      </div>
+    </div>
+
+    <div class="partie-card" id="cardA">
+      <div class="partie-header"><span class="partie-nom">📝 Partie A — Résumer les mouvements</span><span class="partie-pts">4 pts</span></div>
+      <div class="partie-body">
+        <div class="consigne-box">Le discours de Trivelin se compose de quatre mouvements distincts. Pour chacun, choisis dans le menu déroulant le résumé qui correspond le mieux.</div>
+        <div class="dots-row" id="dotsA"></div>
+        <div id="qsA"></div>
+        <div class="sous-score" id="ssA"><div class="sous-score-val" id="ssvA">0 / 4</div><div class="sous-score-label">Score Partie A</div></div>
+        <div class="btn-row" id="suiteA" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="partie-card" id="cardB">
+      <div class="partie-header"><span class="partie-nom">🎭 Partie B — Compréhension &amp; analyse</span><span class="partie-pts">12 pts</span></div>
+      <div class="partie-body">
+        <div class="consigne-box">Réponds à chaque question, puis choisis la citation du texte qui justifie ta réponse.</div>
+        <div class="dots-row" id="dotsB"></div>
+        <div id="qsB"></div>
+        <div class="sous-score" id="ssB"><div class="sous-score-val" id="ssvB">0 / 12</div><div class="sous-score-label">Score Partie B</div></div>
+        <div class="btn-row" id="suiteB" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="bilan" id="bilan">
+      <div class="bilan-particles" id="bilanParticles"></div>
+      <div class="bilan-score"><span id="bScore">0</span><small> / 16</small></div>
+      <div class="bilan-etoiles" id="bEtoiles"></div>
+      <div class="bilan-tampon" id="bTampon"></div>
+      <div class="bilan-msg" id="bMsg"></div>
+      <div class="bilan-detail" id="bDetail"></div>
+      <button class="btn-recommencer" onclick="recommencer()">&#8635;&nbsp;Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ══ DONNÉES PARTIE A ══ */
+var MVT = [
+  {
+    num:1, lignes:"Lignes 1 à 7",
+    extrait:"\u00ab\u00a0Quand nos pères, irrités de la cruauté de leurs maîtres, quittèrent la Grèce et vinrent s\u2019établir ici dans le ressentiment des outrages qu\u2019ils avaient reçus de leurs patrons, la première loi qu\u2019ils y firent fut d\u2019ôter la vie à tous les maîtres que le hasard ou le naufrage conduirait dans leur île, et conséquemment de rendre la liberté à tous les esclaves\u00a0: la vengeance avait dicté cette loi.\u00a0\u00bb",
+    opts:[
+      "Trivelin explique que les anciens esclaves ont fondé l'île en fuyant la Grèce et ont d'abord établi une loi de mort contre les maîtres.",
+      "Trivelin raconte que les maîtres grecs ont eux-mêmes créé les lois de l'île pour protéger leurs esclaves.",
+      "Trivelin annonce que les maîtres arrivés sur l'île sont libres de repartir dès qu'ils le souhaitent."
+    ],
+    ans:0,
+    fb:"Ce premier mouvement est le rappel historique\u00a0: Trivelin explique l'origine de la communauté (des esclaves irrités de la \u00ab\u00a0cruauté de leurs maîtres\u00a0\u00bb) et la première loi, fondée sur la vengeance (\u00ab\u00a0la vengeance avait dicté cette loi\u00a0\u00bb)."
+  },
+  {
+    num:2, lignes:"Lignes 7 à 14",
+    extrait:"\u00ab\u00a0vingt ans après la raison l’abolit, et en dicta une plus douce. Nous ne nous vengeons plus de vous, nous vous corrigeons\u00a0; ce n’est plus votre vie que nous poursuivons, c’est la barbarie de vos cœurs que nous voulons détruire\u00a0; nous vous jetons dans l’esclavage pour vous rendre sensible aux maux qu’on y éprouve\u00a0; nous vous humilions, afin que, nous trouvant superbes, vous vous reprochiez de l’avoir été.\u00a0\u00bb",
+    opts:[
+      "Trivelin annonce que les maîtres seront condamnés à mort après vingt ans passés sur l'île.",
+      "Trivelin présente la nouvelle loi fondée sur la raison\u00a0: corriger les maîtres en leur faisant vivre l'esclavage pour les rendre sensibles à la souffrance.",
+      "Trivelin explique que les esclaves ont choisi de pardonner immédiatement aux maîtres sans leur imposer aucune contrainte."
+    ],
+    ans:1,
+    fb:"Ce deuxième mouvement expose la nouvelle loi\u00a0: \u00ab\u00a0la raison\u00a0\u00bb remplace \u00ab\u00a0la vengeance\u00a0\u00bb. Trivelin énonce le programme\u00a0: \u00ab\u00a0nous vous corrigeons\u00a0\u00bb, \u00ab\u00a0nous vous jetons dans l'esclavage pour vous rendre sensible aux maux qu'on y éprouve\u00a0\u00bb. L'objectif est moral, pas punitif."
+  },
+  {
+    num:3, lignes:"Lignes 14 à 24",
+    extrait:"\u00ab\u00a0Votre esclavage, ou plutôt votre cours d’humanité dure trois ans, au bout desquels on vous renvoie si vos maîtres sont contents de vos progrès\u00a0; et, si vous ne devenez pas meilleurs, nous vous retenons par charité pour les nouveaux malheureux que vous iriez faire encore ailleurs, et, par bonté pour vous, nous vous marions avec une de nos concitoyennes. Ce sont nos lois à cet égard\u00a0; mettez à profit leur rigueur salutaire. […] il vous remet en nos mains durs, injustes et superbes. Vous voilà en mauvais état, nous entreprenons de vous guérir\u00a0; vous êtes moins nos esclaves que nos malades, et nous ne prenons que trois ans pour vous rendre sains, c’est-à-dire humains, raisonnables et généreux pour toute votre vie.\u00a0\u00bb",
+    opts:[
+      "Trivelin précise les modalités du séjour\u00a0: trois ans d'esclavage qui est en réalité un \u00ab\u00a0cours d'humanité\u00a0\u00bb, avec une promesse de liberté si les maîtres progressent.",
+      "Trivelin annonce que les maîtres seront définitivement retenus sur l'île sans possibilité de retour.",
+      "Trivelin propose aux maîtres de choisir eux-mêmes la durée de leur séjour sur l'île."
+    ],
+    ans:0,
+    fb:"Ce troisième mouvement détaille les règles\u00a0: \u00ab\u00a0Votre esclavage, ou plutôt votre cours d'humanité dure trois ans\u00a0\u00bb. Le mot \u00ab\u00a0cours d'humanité\u00a0\u00bb est révélateur\u00a0: Trivelin reformule l'esclavage en apprentissage. À la fin du séjour, les maîtres doivent être \u00ab\u00a0humains, raisonnables et généreux\u00a0\u00bb."
+  },
+  {
+    num:4, lignes:"Ligne 25 à la fin",
+    extrait:"\u00ab\u00a0Et le tout gratis, sans purgation ni saignée. Peut-on de la santé à meilleur compte\u00a0? \u2014 Au reste, ne cherchez point à vous sauver de ces lieux, vous le tenteriez sans succès, et vous feriez votre fortune plus mauvaise\u00a0: commencez votre nouveau régime de vie par la patience.\u00a0\u00bb",
+    opts:[
+      "Arlequin et Trivelin débattent de la durée du séjour et finissent par se mettre d'accord sur deux ans.",
+      "Arlequin introduit une note comique en comparant le séjour à une \u00ab\u00a0santé\u00a0\u00bb bon marché, puis Trivelin conclut en déconseillant toute tentative de fuite.",
+      "Arlequin refuse d'appliquer les lois de l'île et prend la défense de son maître Iphicrate."
+    ],
+    ans:1,
+    fb:"Ce dernier mouvement combine le comique (Arlequin\u00a0: \u00ab\u00a0le tout gratis, sans purgation ni saignée\u00a0\u00bb) et la mise en garde finale de Trivelin (\u00ab\u00a0ne cherchez point à vous sauver de ces lieux\u00a0\u00bb). Arlequin détend l'atmosphère, Trivelin la referme par un avertissement."
+  }
+];
+
+/* ══ DONNÉES PARTIE B ══ */
+var QB = [
+  {
+    num:1, sujet:"La structure de la loi",
+    qa:"Comment Trivelin distingue-t-il la première loi de la nouvelle loi\u00a0?",
+    optsA:["La première loi était fondée sur la vengeance, la nouvelle est fondée sur la raison.","La première loi était fondée sur la raison, la nouvelle est fondée sur la vengeance.","Les deux lois sont identiques\u00a0: elles condamnent les maîtres à mort."],
+    ansA:0,
+    fbA:"Trivelin oppose clairement les deux lois\u00a0: la première est dictée par \u00ab\u00a0la vengeance\u00a0\u00bb, la seconde par \u00ab\u00a0la raison\u00a0\u00bb. Cette opposition est au cœur de la pièce\u00a0: Marivaux montre que la justice véritable ne passe pas par la violence mais par la correction morale.",
+    qb:"Quelle citation du texte montre explicitement cette opposition\u00a0?",
+    optsB:["\u00ab\u00a0nous vous jetons dans l'esclavage pour vous rendre sensible aux maux qu'on y éprouve\u00a0\u00bb","\u00ab\u00a0la vengeance avait dicté cette loi\u00a0; vingt ans après la raison l'abolit, et en dicta une plus douce\u00a0\u00bb","\u00ab\u00a0Vous voilà en mauvais état, nous entreprenons de vous guérir\u00a0\u00bb"],
+    ansB:1,
+    fbB:"Cette citation est la charnière du texte\u00a0: elle formule l'opposition vengeance / raison en une seule phrase, avec le verbe \u00ab\u00a0abolit\u00a0\u00bb qui marque la rupture nette entre les deux périodes."
+  },
+  {
+    num:2, sujet:"L'anaphore de \u00ab\u00a0nous\u00a0\u00bb",
+    qa:"Dans le deuxième mouvement du texte, Trivelin répète le pronom \u00ab\u00a0nous\u00a0\u00bb au début de plusieurs phrases. Quel est l'effet de cette répétition\u00a0?",
+    optsA:["Elle montre que Trivelin parle uniquement en son nom personnel.","Elle marque l'opposition entre la communauté de l'île (\u00ab\u00a0nous\u00a0\u00bb) et les maîtres (\u00ab\u00a0vous\u00a0\u00bb), et structure le programme de correction.","Elle montre que Trivelin hésite sur ce qu'il doit dire."],
+    ansA:1,
+    fbA:"La répétition de \u00ab\u00a0nous\u00a0\u00bb en début de phrase est une anaphore. Elle crée un effet de liste et renforce l'autorité de Trivelin\u00a0: c'est \u00ab\u00a0nous\u00a0\u00bb (la communauté de l'île) qui décide, \u00ab\u00a0vous\u00a0\u00bb (les maîtres) qui subissent. Cette opposition pronominale structure tout le discours.",
+    qb:"Quelle série de phrases du texte illustre le mieux cette anaphore\u00a0?",
+    optsB:["\u00ab\u00a0Votre esclavage, ou plutôt votre cours d'humanité dure trois ans\u00a0\u00bb","\u00ab\u00a0Nous ne nous vengeons plus de vous, nous vous corrigeons\u00a0; […] nous vous jetons dans l'esclavage […] nous vous humilions\u00a0\u00bb","\u00ab\u00a0remerciez le sort qui vous conduit ici\u00a0; il vous remet en nos mains durs, injustes et superbes\u00a0\u00bb"],
+    ansB:1,
+    fbB:"Cette série de phrases illustre parfaitement l'anaphore\u00a0: \u00ab\u00a0Nous ne nous vengeons plus\u00a0\u00bb, \u00ab\u00a0nous vous corrigeons\u00a0\u00bb, \u00ab\u00a0nous vous jetons\u00a0\u00bb, \u00ab\u00a0nous vous humilions\u00a0\u00bb. Chaque \u00ab\u00a0nous\u00a0\u00bb introduit une action concrète de la nouvelle loi."
+  },
+  {
+    num:3, sujet:"La métaphore",
+    qa:"À quoi Trivelin compare-t-il les maîtres dans la dernière partie de son discours\u00a0?",
+    optsA:["À des prisonniers qu'il faut enfermer pour protéger la société.","À des malades qu'il faut soigner pour les guérir de leur orgueil et de leur cruauté.","À des élèves qu'il faut punir pour qu'ils apprennent leurs leçons."],
+    ansA:1,
+    fbA:"Trivelin utilise une métaphore\u00a0: les maîtres sont des \u00ab\u00a0malades\u00a0\u00bb (malades de leur orgueil et de leur cruauté), et la communauté de l'île est un \u00ab\u00a0médecin\u00a0\u00bb qui les \u00ab\u00a0guérit\u00a0\u00bb. Le mot \u00ab\u00a0sains\u00a0\u00bb signifie ici \u00ab\u00a0humains, raisonnables et généreux\u00a0\u00bb.",
+    qb:"Quelle citation du texte contient cette comparaison\u00a0?",
+    optsB:["\u00ab\u00a0mettez à profit leur rigueur salutaire\u00a0\u00bb","\u00ab\u00a0vous êtes moins nos esclaves que nos malades, et nous ne prenons que trois ans pour vous rendre sains\u00a0\u00bb","\u00ab\u00a0commencez votre nouveau régime de vie par la patience\u00a0\u00bb"],
+    ansB:1,
+    fbB:"Cette citation contient le cœur de la métaphore\u00a0: \u00ab\u00a0malades\u00a0\u00bb (les maîtres), \u00ab\u00a0rendre sains\u00a0\u00bb (les guérir). Le champ lexical médical (malades, sains, guérir, salutaire, purgation) traverse tout le discours de Trivelin."
+  },
+  {
+    num:4, sujet:"La reformulation de l'esclavage",
+    qa:"Comment Trivelin désigne-t-il le séjour des maîtres sur l'île pour en atténuer le caractère punitif\u00a0?",
+    optsA:["Il appelle ce séjour \u00ab\u00a0une punition exemplaire pour toute la Grèce\u00a0\u00bb.","Il appelle ce séjour \u00ab\u00a0votre cours d'humanité\u00a0\u00bb pour montrer qu'il s'agit d'un apprentissage et non d'une punition.","Il appelle ce séjour \u00ab\u00a0une récompense bien méritée\u00a0\u00bb pour ceux qui ont souffert."],
+    ansA:1,
+    fbA:"Trivelin corrige lui-même le mot \u00ab\u00a0esclavage\u00a0\u00bb\u00a0: \u00ab\u00a0Votre esclavage, ou plutôt votre cours d'humanité\u00a0\u00bb. La locution \u00ab\u00a0ou plutôt\u00a0\u00bb est une reprise corrective\u00a0: Trivelin refuse le mot \u00ab\u00a0esclavage\u00a0\u00bb et lui substitue \u00ab\u00a0cours d'humanité\u00a0\u00bb, qui insiste sur la dimension éducative.",
+    qb:"Quelle citation du texte contient cette reformulation\u00a0?",
+    optsB:["\u00ab\u00a0la vengeance avait dicté cette loi\u00a0\u00bb","\u00ab\u00a0Votre esclavage, ou plutôt votre cours d'humanité dure trois ans\u00a0\u00bb","\u00ab\u00a0nous vous retenons par charité pour les nouveaux malheureux\u00a0\u00bb"],
+    ansB:1,
+    fbB:"La formule \u00ab\u00a0ou plutôt\u00a0\u00bb est clé\u00a0: elle signale que Trivelin se reprend et reformule. \u00ab\u00a0Cours d'humanité\u00a0\u00bb transforme l'esclavage en apprentissage, ce qui est au cœur du projet moral de Marivaux."
+  },
+  {
+    num:5, sujet:"Le registre comique d'Arlequin",
+    qa:"Quelle est la fonction de la réplique d'Arlequin dans le texte\u00a0?",
+    optsA:["Elle contredit le discours de Trivelin et montre qu'Arlequin refuse les lois de l'île.","Elle introduit une note comique qui allège l'atmosphère sérieuse du discours de Trivelin.","Elle annonce qu'Arlequin va tenter de s'échapper de l'île."],
+    ansA:1,
+    fbA:"La réplique d'Arlequin est typique du personnage comique de la Commedia dell'arte\u00a0: il reprend la métaphore médicale de Trivelin (purgation, saignée, santé) mais de façon plaisante, comme s'il négociait un bon prix chez un marchand. Cela détend l'atmosphère et montre qu'Arlequin accepte plutôt bien les règles de l'île.",
+    qb:"Quelle citation du texte illustre cet effet comique\u00a0?",
+    optsB:["\u00ab\u00a0commencez votre nouveau régime de vie par la patience\u00a0\u00bb","\u00ab\u00a0Et le tout gratis, sans purgation ni saignée. Peut-on de la santé à meilleur compte\u00a0?\u00a0\u00bb","\u00ab\u00a0nous vous jetons dans l'esclavage pour vous rendre sensible aux maux qu'on y éprouve\u00a0\u00bb"],
+    ansB:1,
+    fbB:"\u00ab\u00a0Le tout gratis, sans purgation ni saignée\u00a0\u00bb\u00a0: Arlequin compare le séjour sur l'île à des soins médicaux gratuits et indolores. L'humour vient du décalage entre le sérieux du discours de Trivelin et le ton bon enfant d'Arlequin."
+  },
+  {
+    num:6, sujet:"La visée de la pièce",
+    qa:"Quelle est la visée principale du discours de Trivelin dans cet extrait\u00a0?",
+    optsA:["Montrer que la vengeance est la seule réponse possible à l'injustice.","Critiquer l'esclavage et l'orgueil des maîtres en proposant une justice fondée sur la correction morale et l'empathie.","Montrer que les esclaves sont incapables de gouverner une île."],
+    ansA:1,
+    fbA:"La pièce de Marivaux est une satire sociale\u00a0: elle critique le système esclavagiste et l'orgueil des maîtres. Trivelin ne cherche pas à punir mais à \u00ab\u00a0corriger\u00a0\u00bb\u00a0: il veut que les maîtres comprennent ce qu'ils ont infligé à leurs esclaves en le vivant eux-mêmes. C'est une pensée humaniste proche des idées des Lumières.",
+    qb:"Quelle citation du texte résume le mieux cette visée\u00a0?",
+    optsB:["\u00ab\u00a0ne cherchez point à vous sauver de ces lieux\u00a0\u00bb","\u00ab\u00a0nous vous jetons dans l'esclavage pour vous rendre sensible aux maux qu'on y éprouve\u00a0\u00bb","\u00ab\u00a0commencez votre nouveau régime de vie par la patience.\u00a0\u00bb"],
+    ansB:1,
+    fbB:"Cette phrase résume parfaitement la méthode\u00a0: faire vivre l'esclavage aux maîtres pour qu'ils \u00ab\u00a0soient rendus sensibles\u00a0\u00bb à ses souffrances. C'est la notion d'empathie forcée, centrale dans la pièce de Marivaux."
+  }
+];
+
+var LABELS = ['A','B','C'];
+var scA = 0, scB = 0;
+var doneA = false, doneB = false;
+var selA = {}, valA = {};
+var selA_QB = {}, valA_QB = {};
+var actx = null;
+
+function rnd(){try{var a=new Uint32Array(1);crypto.getRandomValues(a);var t=Date.now()&0xFFFF;return((a[0]^(t*2654435761))>>>0)/4294967296;}catch(e){return Math.random();}}
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function beep(f1,f2,d,tp,vol){if(!actx)return;var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type=tp||'sine';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol||.1,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+.02);}
+function beepOk(){initA();beep(660,880,.07,'sine',.08);setTimeout(function(){beep(880,1100,.12,'sine',.1);},75);}
+function beepErr(){initA();beep(220,90,.22,'sawtooth',.09);}
+function beepFinal(ok){initA();if(ok){[523,659,784,1047,1318].forEach(function(f,i){setTimeout(function(){beep(f,f,.22,'triangle',.14);},i*140);});}else{beep(200,80,.4,'sawtooth',.11);}}
+document.addEventListener('pointerdown',initA,{once:true});
+function showFlash(ok){var f=document.getElementById('flashIcon');if(!f)return;f.textContent=ok?'✓':'✗';f.style.color=ok?'#22c55e':'#ef4444';f.style.animation='none';void f.offsetWidth;f.className='show';}
+
+function toggleTexte(){
+  var corps=document.getElementById('texteCorps');
+  var btn=document.getElementById('toggleBtn');
+  var collapsed=corps.classList.contains('collapsed');
+  if(collapsed){corps.classList.remove('collapsed');btn.innerHTML='&#9660;&nbsp;Replier';}
+  else{corps.classList.add('collapsed');btn.innerHTML='&#9654;&nbsp;Déplier';}
+}
+
+function updateGlobal(){
+  var total=scA+scB;
+  document.getElementById('scoreGlobal').textContent=total+' / 16';
+  document.getElementById('scoreFill').style.width=Math.round(total/16*100)+'%';
+  if(doneA){document.getElementById('chipValA').textContent=scA+' / 4';document.getElementById('chipA').classList.add('done');}
+  if(doneB){document.getElementById('chipValB').textContent=scB+' / 12';document.getElementById('chipB').classList.add('done');}
+}
+
+function buildDotsA(){var r=document.getElementById('dotsA');r.innerHTML='';for(var i=0;i<4;i++){var d=document.createElement('div');d.className='dot';d.id='dotA'+i;d.textContent=i+1;r.appendChild(d);}}
+function buildDotsB(){var r=document.getElementById('dotsB');r.innerHTML='';for(var i=0;i<12;i++){var d=document.createElement('div');d.className='dot';d.id='dotB'+i;d.textContent=i+1;r.appendChild(d);}}
+function markDotA(i,ok){var d=document.getElementById('dotA'+i);if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}}
+function markDotB(i,ok){var d=document.getElementById('dotB'+i);if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}}
+
+/* ── RENDU PARTIE A (menus déroulants) ── */
+function renderA(){
+  buildDotsA();
+  var wrap=document.getElementById('qsA');wrap.innerHTML='';
+  selA={};valA={};scA=0;
+  MVT.forEach(function(m,mi){
+    var sh=shuffle(m.opts.map(function(o,i){return{txt:o,orig:i};}));
+    var div=document.createElement('div');div.className='mvt-bloc';
+    var h='<div class="mvt-num">Mouvement '+m.num+'</div>';
+    h+='<div class="mvt-lignes">'+m.lignes+'</div>';
+    h+='<div class="mvt-extrait">'+m.extrait+'</div>';
+    h+='<select class="mvt-select" id="selMvt_'+mi+'" onchange="choisirMvt('+mi+')">';
+    h+='<option value="">— Choisis le bon résumé —</option>';
+    sh.forEach(function(o,i){
+      h+='<option value="'+o.orig+'">'+o.txt+'</option>';
+    });
+    h+='</select>';
+    h+='<div class="mvt-fb" id="fbMvt_'+mi+'"></div>';
+    div.innerHTML=h;wrap.appendChild(div);
+  });
+}
+
+function choisirMvt(mi){
+  if(valA[mi])return;valA[mi]=true;
+  var m=MVT[mi];
+  var sel=document.getElementById('selMvt_'+mi);
+  var chosen=parseInt(sel.value);
+  var ok=(chosen===m.ans);
+  sel.setAttribute('disabled','');
+  sel.style.borderColor=ok?'#22c55e':'#ef4444';
+  sel.style.background=ok?'#e7faec':'#fdeaea';
+  var fb=document.getElementById('fbMvt_'+mi);
+  if(ok){fb.textContent='✓ Bonne réponse\u00a0!';fb.className='mvt-fb ok show';scA++;markDotA(mi,true);beepOk();showFlash(true);}
+  else{fb.textContent='✗ '+m.fb;fb.className='mvt-fb ko show';markDotA(mi,false);beepErr();showFlash(false);}
+  updateGlobal();
+  var doneCount=Object.keys(valA).length;
+  if(doneCount===MVT.length){
+    doneA=true;
+    document.getElementById('ssvA').textContent=scA+' / 4';
+    document.getElementById('ssA').classList.add('show');
+    var s=document.getElementById('suiteA');
+    s.style.display='flex';
+    s.innerHTML='<button class="btn btn-suite" onclick="allerPartieB()">Aller à la Partie B ›</button>';
+    beepFinal(scA>=3);
+  }
+}
+
+/* ── RENDU PARTIE B (double QCM) ── */
+function renderB(){
+  buildDotsB();
+  var wrap=document.getElementById('qsB');wrap.innerHTML='';
+  selA_QB={};valA_QB={};scB=0;
+  QB.forEach(function(q,qi){
+    var shA=shuffle(q.optsA.map(function(o,i){return{txt:o,orig:i};}));
+    var card=document.createElement('div');card.className='q-card';
+    var h='<div class="q-header"><div class="q-num-title">Question '+q.num+' / 6</div><div class="q-sub">'+q.sujet+'</div></div>';
+    h+='<div class="q-body">';
+    h+='<div class="q-texte">'+q.qa+'</div>';
+    h+='<div class="opts" id="optsQA_'+qi+'">';
+    shA.forEach(function(o,i){
+      h+='<button class="opt" onclick="selQA('+qi+','+o.orig+',this)"><span class="opt-letter">'+LABELS[i]+'.</span><span>'+o.txt+'</span></button>';
+    });
+    h+='</div>';
+    h+='<div class="q-fb" id="fbQA_'+qi+'"></div>';
+    h+='<div class="qb-section" id="qbSec_'+qi+'">';
+    h+='<div class="qb-label">Justification par citation</div>';
+    h+='<div class="q-texte">'+q.qb+'</div>';
+    h+='<div class="opts" id="optsQB_'+qi+'"></div>';
+    h+='<div class="q-fb" id="fbQB_'+qi+'"></div>';
+    h+='</div></div>';
+    card.innerHTML=h;wrap.appendChild(card);
+  });
+}
+
+function selQA(qi,orig,el){
+  var q=QB[qi];
+  if(valA_QB[qi+'_a'])return;
+  document.querySelectorAll('#optsQA_'+qi+' .opt').forEach(function(o){o.classList.remove('selected');});
+  el.classList.add('selected');
+  valA_QB[qi+'_a']=true;
+  var ok=(orig===q.ansA);
+  document.querySelectorAll('#optsQA_'+qi+' .opt').forEach(function(o){
+    o.setAttribute('disabled','');
+    var m=o.getAttribute('onclick').match(/selQA\(\d+,(\d+)/);
+    var oOrig=m?parseInt(m[1]):-1;
+    if(oOrig===q.ansA)o.classList.add('correct');
+    else if(oOrig===orig&&!ok)o.classList.add('wrong');
+  });
+  var fb=document.getElementById('fbQA_'+qi);
+  if(ok){fb.textContent='✓ Bonne réponse\u00a0!';fb.className='q-fb ok show';scB++;markDotB(qi*2,true);beepOk();showFlash(true);}
+  else{fb.textContent='✗ '+q.fbA;fb.className='q-fb ko show';markDotB(qi*2,false);beepErr();showFlash(false);}
+  updateGlobal();
+  /* Afficher QB */
+  var shB=shuffle(q.optsB.map(function(o,i){return{txt:o,orig:i};}));
+  var optsB=document.getElementById('optsQB_'+qi);
+  var h='';
+  shB.forEach(function(o,i){
+    h+='<button class="opt" onclick="selQB('+qi+','+o.orig+',this)"><span class="opt-letter">'+LABELS[i]+'.</span><span class="citation">'+o.txt+'</span></button>';
+  });
+  optsB.innerHTML=h;
+  document.getElementById('qbSec_'+qi).className='qb-section show';
+}
+
+function selQB(qi,orig,el){
+  var q=QB[qi];
+  if(valA_QB[qi+'_b'])return;
+  document.querySelectorAll('#optsQB_'+qi+' .opt').forEach(function(o){o.classList.remove('selected');});
+  el.classList.add('selected');
+  valA_QB[qi+'_b']=true;
+  var ok=(orig===q.ansB);
+  document.querySelectorAll('#optsQB_'+qi+' .opt').forEach(function(o){
+    o.setAttribute('disabled','');
+    var m=o.getAttribute('onclick').match(/selQB\(\d+,(\d+)/);
+    var oOrig=m?parseInt(m[1]):-1;
+    if(oOrig===q.ansB)o.classList.add('correct');
+    else if(oOrig===orig&&!ok)o.classList.add('wrong');
+  });
+  var fb=document.getElementById('fbQB_'+qi);
+  if(ok){fb.textContent='✓ Bonne réponse\u00a0!';fb.className='q-fb ok show';scB++;markDotB(qi*2+1,true);beepOk();showFlash(true);}
+  else{fb.textContent='✗ '+q.fbB;fb.className='q-fb ko show';markDotB(qi*2+1,false);beepErr();showFlash(false);}
+  updateGlobal();
+  var doneCount=Object.keys(valA_QB).filter(function(k){return k.endsWith('_b');}).length;
+  if(doneCount===QB.length){
+    doneB=true;
+    document.getElementById('ssvB').textContent=scB+' / 12';
+    document.getElementById('ssB').classList.add('show');
+    var s=document.getElementById('suiteB');
+    s.style.display='flex';
+    s.innerHTML='<button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan ›</button>';
+    beepFinal(scB>=9);
+  }
+}
+
+function allerPartieB(){
+  var el=document.getElementById('cardB');
+  if(el){window.scrollTo({top:el.offsetTop-12,behavior:'smooth'});}
+}
+
+function afficherBilan(){
+  var total=scA+scB;
+  document.getElementById('bScore').textContent=total;
+  var pct=total/16;
+  var nb=pct>=.94?5:pct>=.69?4:pct>=.44?3:pct>=.25?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(total>=15){tp.textContent='EXCELLENT';tp.className='bilan-tampon ok';msg.textContent='Journal du comédien complété avec brio\u00a0!';}
+  else if(total>=11){tp.textContent='TRÈS BONNE ANALYSE';tp.className='bilan-tampon ok';msg.textContent='Très bonne analyse.';}
+  else if(total>=7){tp.textContent='BONNE LECTURE';tp.className='bilan-tampon moyen';msg.textContent='Bonne lecture. Relis les passages signalés.';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='bilan-tampon ko';msg.textContent='Relis le texte et le paratexte avant de retenter.';}
+  document.getElementById('bDetail').innerHTML=[
+    {label:'Partie A — Résumer les mouvements',score:scA,total:4},
+    {label:'Partie B — Compréhension et analyse',score:scB,total:12}
+  ].map(function(l){
+    var cl=l.score/l.total>=.75?'ok':l.score/l.total>=.5?'moyen':'ko';
+    return '<div class="bilan-ligne '+cl+'"><span class="bilan-ligne-label">'+l.label+'</span><span class="bilan-ligne-score">'+l.score+' / '+l.total+'</span></div>';
+  }).join('');
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(total>=11);
+  if(total>=11){
+    var box=document.getElementById('bilanParticles');box.innerHTML='';
+    ['✨','⭐','📖','🎭','✨','⭐','📖','🎭','✨','⭐','📖','🎭','✨','⭐','📖','🎭','✨','⭐','📖','🎭'].forEach(function(em,i){
+      var e=document.createElement('div');e.textContent=em;
+      e.style.cssText='position:absolute;font-size:'+(1.1+Math.random()*.8)+'rem;left:'+(3+Math.random()*94)+'%;bottom:'+(Math.random()*30)+'%;opacity:0;pointer-events:none;animation:particleUp '+(1+Math.random()*1.2)+'s ease '+(i*0.07+Math.random()*0.15)+'s forwards;';
+      box.appendChild(e);
+    });
+  }
+}
+
+function recommencer(){
+  scA=0;scB=0;doneA=false;doneB=false;selA={};valA={};selA_QB={};valA_QB={};
+  document.getElementById('chipA').classList.remove('done');
+  document.getElementById('chipB').classList.remove('done');
+  document.getElementById('chipValA').textContent='— / 4';
+  document.getElementById('chipValB').textContent='— / 12';
+  document.getElementById('scoreGlobal').textContent='0 / 16';
+  document.getElementById('scoreFill').style.width='0%';
+  document.getElementById('bilan').className='bilan';
+  document.getElementById('ssA').classList.remove('show');
+  document.getElementById('ssB').classList.remove('show');
+  document.getElementById('suiteA').style.display='none';
+  document.getElementById('suiteB').style.display='none';
+  renderA();
+  renderB();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* INIT */
+setTimeout(function(){renderA();renderB();},50);
+
+</script>
+</body>
+</html>
