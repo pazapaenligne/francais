@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S6 J3 – 5e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --pink:#f28b82;--orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+
+    .intro-bloc{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-dark);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1rem;}
+    .intro-titre{font-size:1.05rem;font-weight:900;color:var(--day-dark);margin-bottom:.4rem;}
+    .intro-texte{font-size:.95rem;color:var(--text);line-height:1.65;}
+    .consigne-bloc{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:.75rem 1.1rem;margin-bottom:1.2rem;}
+    .consigne-texte{font-size:.92rem;color:#a8c888;font-family:'JetBrains Mono',monospace;line-height:1.5;}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));
+      border-radius:99px;transition:width .5s ease;}
+
+    .chips-row{width:100%;max-width:720px;display:flex;gap:.5rem;flex-wrap:wrap;
+      margin-bottom:1rem;position:relative;z-index:1;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#15803d;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#b91c1c;}
+    .chip-rem{background:rgba(141,198,63,.15);border-color:var(--day-color);color:var(--day-dark);}
+
+    .cards-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .card{background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;
+      position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-titre{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;color:var(--day-dark);
+      margin-bottom:.5rem;line-height:1.45;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;
+      padding:.7rem 1rem;margin-bottom:.75rem;
+      font-size:clamp(1.05rem,3.2vw,1.15rem);font-weight:700;
+      color:var(--text);line-height:1.85;font-style:italic;}
+    .q-texte{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;color:var(--text);
+      margin-bottom:.65rem;line-height:1.5;}
+
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:50px;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);
+      position:relative;overflow:hidden;margin-top:.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.5rem;text-align:center;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;text-align:center;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#5a8a5a;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;text-align:center;}
+    .situe-bloc{margin:.8rem 0;border-radius:12px;overflow:hidden;}
+    .situe-ligne{padding:.85rem 1rem;}
+    .situe-txt{font-size:.92rem;color:#a8c888;line-height:1.6;font-family:'JetBrains Mono',monospace;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-dark{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Français &middot; 5ème
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 3</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">L&rsquo;accord du participe passé</span></h1>
+</header>
+
+<div class="intro-bloc">
+  <div class="intro-titre">&#128640; Prêt(e) à tester tes connaissances&nbsp;?</div>
+  <div class="intro-texte">Avant de commencer ce parcours, réponds à ces 6 questions. Elles te permettront de repérer ce que tu sais déjà et ce que tu vas apprendre ou revoir.</div>
+</div>
+
+<div class="consigne-bloc">
+  <div class="consigne-texte">Choisis la bonne réponse.</div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 6 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="chips-row">
+  <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+  <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+  <div class="chip chip-rem"><span id="chip-rem">6</span> restants</div>
+</div>
+
+<div class="cards-wrap" id="cards-wrap"></div>
+
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#128202; Je me situe</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/6</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div class="situe-bloc">
+      <div class="situe-ligne"><div class="situe-txt" id="situe-msg"></div></div>
+    </div>
+    <div style="text-align:center;margin-top:1.2rem;">
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var QS=[
+  {id:'q1',qNum:1,
+   titre:'Reconna\u00eetre un participe pass\u00e9',
+   texte:'Quel mot est un participe pass\u00e9\u00a0?',
+   opts:[{t:'\u00e9changeait',ok:false},{t:'\u00e9chang\u00e9',ok:true},{t:'\u00e9changer',ok:false}]},
+  {id:'q2',qNum:2,
+   titre:'Accord avec \u00ab\u00a0\u00eatre\u00a0\u00bb',
+   texte:'Quelle phrase est correctement \u00e9crite\u00a0?',
+   opts:[{t:'Les exploratrices sont arriv\u00E9s au refuge.',ok:false},{t:'Les exploratrices sont arriv\u00E9es au refuge.',ok:true},{t:'Les exploratrices sont arriv\u00E9s au refuge.',ok:false}]},
+  {id:'q3',qNum:3,
+   titre:'Accord avec un nom',
+   phrase:'Les feuilles ______ par le vent recouvrent le sentier.',
+   texte:'Quelle forme convient\u00a0?',
+   opts:[{t:'emport\u00e9',ok:false},{t:'emport\u00e9es',ok:true},{t:'emporter',ok:false}]},
+  {id:'q4',qNum:4,
+   titre:'Accord avec \u00ab\u00a0avoir\u00a0\u00bb',
+   texte:'Dans quelle phrase le participe pass\u00e9 s\u2019accorde-t-il\u00a0?',
+   opts:[
+     {t:'J\u2019ai observ\u00e9 les oiseaux.',ok:false},
+     {t:'Les oiseaux que j\u2019ai observ\u00e9s \u00e9taient rares.',ok:true},
+     {t:'Nous avons observ\u00e9 des oiseaux.',ok:false}
+   ]},
+  {id:'q5',qNum:5,
+   titre:'Identifier le donneur d\u2019accord',
+   phrase:'Les fleurs sont \u00e9closes au printemps.',
+   texte:'Avec quel mot le participe pass\u00e9 s\u2019accorde-t-il\u00a0?',
+   opts:[{t:'printemps',ok:false},{t:'fleurs',ok:true},{t:'sont',ok:false}]},
+  {id:'q6',qNum:6,
+   titre:'Rep\u00e9rer une erreur',
+   texte:'Quelle phrase contient une erreur d\u2019accord\u00a0?',
+   opts:[
+     {t:'Les cartes ont \u00e9t\u00e9 rang\u00e9es dans le sac.',ok:false},
+     {t:'Les aventuri\u00e8res sont revenues du voyage.',ok:false},
+     {t:'Les traces qu\u2019ils ont d\u00e9couvert \u00e9taient anciennes.',ok:true}
+   ]}
+];
+
+var scoreOk=0,res={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+
+function jouerOk(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.14,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function jouerErreur(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(220,ctx.currentTime+.12);g.gain.setValueAtTime(.14,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);o.start(ctx.currentTime);o.stop(ctx.currentTime+.35);}catch(e){}}
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/6*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 6 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('chip-ok').textContent=scoreOk;
+  document.getElementById('chip-ko').textContent=done-scoreOk;
+  document.getElementById('chip-rem').textContent=6-done;
+}
+
+function build(){
+  var wrap=document.getElementById('cards-wrap');wrap.innerHTML='';res={};scoreOk=0;
+  QS.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var tit=mkEl('div','q-titre');tit.textContent=q.titre;card.appendChild(tit);
+    if(q.phrase){var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);}
+    var txt=mkEl('div','q-texte');txt.textContent=q.texte;card.appendChild(txt);
+    var optsM=q.opts.slice().sort(function(){return Math.random()-.5;});
+    var okIdx=optsM.findIndex(function(o){return o.ok;});
+    if(okIdx===0){var tmp=optsM[0];optsM[0]=optsM[1];optsM[1]=tmp;}
+    var opts=mkEl('div','opts');
+    optsM.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selOpt(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    wrap.appendChild(card);
+  });
+}
+
+function selOpt(q,btn,optsEl){
+  if(res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(ok){scoreOk++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  var done=Object.keys(res).length;
+  majProg(done);
+  if(done===6)setTimeout(afficherVerdict,600);
+}
+
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total>=5?5:total>=3?3:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msgs=[
+    'Tu ma\u00eetrises d\u00e9j\u00e0 plusieurs r\u00e8gles d\u2019accord du participe pass\u00e9. Ce parcours te permettra de consolider tes connaissances.',
+    'Tu connais certaines r\u00e8gles, mais quelques entra\u00eenements te seront utiles.',
+    'Tu vas d\u00e9couvrir ou revoir les bases de l\u2019accord du participe pass\u00e9. Les activit\u00e9s du parcours t\u2019aideront \u00e0 progresser pas \u00e0 pas.'
+  ];
+  var msg=total>=5?msgs[0]:total>=3?msgs[1]:msgs[2];
+  document.getElementById('situe-msg').textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;res={};
+  document.getElementById('results-global').classList.remove('show');
+  majProg(0);
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+build();majProg(0);
+</script>
+</body>
+</html>
