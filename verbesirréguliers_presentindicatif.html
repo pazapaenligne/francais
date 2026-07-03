@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Défi Conjugaison - Verbes irréguliers</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background-color:#fffdf7;
+    background-image:
+        radial-gradient(circle at 8% 15%, rgba(58,181,216,0.10) 0, rgba(58,181,216,0.10) 40px, transparent 41px),
+        radial-gradient(circle at 88% 12%, rgba(58,181,216,0.08) 0, rgba(58,181,216,0.08) 55px, transparent 56px),
+        radial-gradient(circle at 15% 85%, rgba(58,181,216,0.08) 0, rgba(58,181,216,0.08) 60px, transparent 61px),
+        radial-gradient(circle at 92% 80%, rgba(58,181,216,0.10) 0, rgba(58,181,216,0.10) 45px, transparent 46px),
+        radial-gradient(circle at 50% 95%, rgba(58,181,216,0.06) 0, rgba(58,181,216,0.06) 70px, transparent 71px),
+        radial-gradient(circle at 45% 5%, rgba(58,181,216,0.06) 0, rgba(58,181,216,0.06) 35px, transparent 36px);
+    background-repeat:no-repeat;
+    margin:0;
+    padding:20px;
+    text-align:center;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 0 15px rgba(0,0,0,0.15);
+}
+
+h1{
+    color:#2d3436;
+    font-size:1.6rem;
+}
+
+p.consigne{
+    color:#555;
+}
+
+.zone-question{
+    margin-top:30px;
+    font-size:28px;
+    font-weight:bold;
+    color:#2c3e50;
+}
+
+.verbe-cible{
+    font-size:26px;
+    color:#0984e3;
+    font-weight:900;
+    margin-top:8px;
+    animation: pulseVerbe 1.2s ease-in-out infinite;
+}
+
+@keyframes pulseVerbe{
+    0%   { transform:scale(1); }
+    50%  { transform:scale(1.08); }
+    100% { transform:scale(1); }
+}
+
+input{
+    margin-top:20px;
+    padding:12px;
+    width:220px;
+    font-size:24px;
+    text-align:center;
+    border-radius:10px;
+    border:2px solid #ccc;
+}
+
+button{
+    margin-top:20px;
+    padding:12px 25px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:#00b894;
+    color:white;
+}
+
+button:hover{
+    background:#019875;
+}
+
+.resultat{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+    min-height:30px;
+}
+
+.score{
+    margin-top:20px;
+    font-size:20px;
+}
+
+.vies{
+    margin-top:15px;
+    font-size:22px;
+    letter-spacing:6px;
+}
+
+.vies span.pleine{
+    color:#00b894;
+}
+
+.vies span.vide{
+    color:#dfe6e9;
+}
+
+.timer{
+    margin-top:15px;
+    font-size:22px;
+    color:#d63031;
+    font-weight:bold;
+}
+
+.fin{
+    margin-top:30px;
+    font-size:26px;
+    color:#0984e3;
+    font-weight:bold;
+}
+
+.barre{
+    width:100%;
+    background:#dfe6e9;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:20px;
+    height:22px;
+}
+
+.progression{
+    height:100%;
+    width:0%;
+    background:#00b894;
+    transition:0.4s;
+}
+
+#btnRecommencer{
+    display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div style="width:100%; box-sizing:border-box; background:#e5c417; color:#795700; font-family:Arial, sans-serif; font-weight:bold; font-size:16px; letter-spacing:3px; text-align:center; padding:10px 0; margin:-20px -20px 20px -20px;">PAZAPA</div>
+
+<div class="container">
+
+<h1>Défi Conjugaison</h1>
+
+<p style="font-weight:bold; text-decoration:underline; color:#d63031; margin:0;">Présent de l'indicatif</p>
+
+<p class="consigne">Écris la forme correcte du verbe au présent de l'indicatif.</p>
+
+<div class="timer">
+Temps : <span id="temps">180</span>s
+</div>
+
+<div class="vies" id="vies">
+<span class="pleine">■</span><span class="pleine">■</span><span class="pleine">■</span>
+</div>
+
+<div class="barre">
+<div class="progression" id="progression"></div>
+</div>
+
+<div class="zone-question" id="question">
+Il ...
+</div>
+
+<div class="verbe-cible" id="verbeCible">(verbe)</div>
+
+<input type="text" id="reponse" autocomplete="off" placeholder="Tape ta réponse">
+
+<br>
+
+<button onclick="verifier()">Valider</button>
+
+<br>
+
+<button id="btnRecommencer" onclick="recommencer()">
+Recommencer
+</button>
+
+<div class="resultat" id="resultat"></div>
+
+<div class="score">
+Score : <span id="score">0</span>
+</div>
+
+<div class="fin" id="fin"></div>
+
+</div>
+
+<script>
+
+const verbes = {
+    "être":    { pron:["Je","Tu","Il","Nous","Vous","Ils"], formes:["suis","es","est","sommes","êtes","sont"] },
+    "avoir":   { pron:["J'","Tu","Elle","Nous","Vous","Elles"], formes:["ai","as","a","avons","avez","ont"] },
+    "aller":   { pron:["Je","Tu","Il","Nous","Vous","Ils"], formes:["vais","vas","va","allons","allez","vont"] },
+    "faire":   { pron:["Je","Tu","Elle","Nous","Vous","Elles"], formes:["fais","fais","fait","faisons","faites","font"] },
+    "pouvoir": { pron:["Je","Tu","Il","Nous","Vous","Ils"], formes:["peux","peux","peut","pouvons","pouvez","peuvent"] },
+    "vouloir": { pron:["Je","Tu","Elle","Nous","Vous","Elles"], formes:["veux","veux","veut","voulons","voulez","veulent"] },
+    "venir":   { pron:["Je","Tu","Il","Nous","Vous","Ils"], formes:["viens","viens","vient","venons","venez","viennent"] },
+    "croire":  { pron:["Je","Tu","Elle","Nous","Vous","Elles"], formes:["crois","crois","croit","croyons","croyez","croient"] },
+    "recevoir":{ pron:["Je","Tu","Il","Nous","Vous","Ils"], formes:["reçois","reçois","reçoit","recevons","recevez","reçoivent"] },
+    "devoir":  { pron:["Je","Tu","Elle","Nous","Vous","Elles"], formes:["dois","dois","doit","devons","devez","doivent"] }
+};
+
+const listeVerbes = Object.keys(verbes);
+
+let verbeActuel;
+let indicePronom;
+let bonneReponse;
+
+let score = 0;
+let vies = 3;
+let questions = 0;
+
+let temps = 180;
+let chrono;
+let dejaValide = false;
+
+function nouvelleQuestion(){
+
+    dejaValide = false;
+
+    verbeActuel = listeVerbes[Math.floor(Math.random()*listeVerbes.length)];
+    indicePronom = Math.floor(Math.random()*6);
+
+    const pronom = verbes[verbeActuel].pron[indicePronom];
+    bonneReponse = verbes[verbeActuel].formes[indicePronom];
+
+    document.getElementById("question").innerHTML =
+        pronom + " ... .";
+
+    document.getElementById("verbeCible").innerHTML =
+        "(" + verbeActuel + ")";
+
+    const champ = document.getElementById("reponse");
+    champ.value = "";
+    champ.focus();
+
+    let pourcentage = (questions/20)*100;
+
+    if(pourcentage > 100){
+        pourcentage = 100;
+    }
+
+    document.getElementById("progression").style.width =
+        pourcentage + "%";
+}
+
+function normaliser(texte){
+    return texte.trim().toLowerCase();
+}
+
+function verifier(){
+
+    if(dejaValide){
+        return;
+    }
+
+    const champ = document.getElementById("reponse");
+    const rep = champ.value;
+
+    if(rep.trim() === ""){
+        return;
+    }
+
+    dejaValide = true;
+
+    if(normaliser(rep) === normaliser(bonneReponse)){
+
+        document.getElementById("resultat").innerHTML =
+            "Correct.";
+
+        document.getElementById("resultat").style.color =
+            "#00b894";
+
+        score++;
+
+    }else{
+
+        vies--;
+
+        document.getElementById("resultat").innerHTML =
+            "Incorrect. Réponse attendue : " + bonneReponse;
+
+        document.getElementById("resultat").style.color =
+            "#d63031";
+
+        afficherVies();
+    }
+
+    questions++;
+
+    document.getElementById("score").innerHTML = score;
+
+    if(vies <= 0){
+        finJeu("Partie terminée.");
+        return;
+    }
+
+    setTimeout(nouvelleQuestion, 1200);
+}
+
+function afficherVies(){
+
+    let affichage = "";
+
+    for(let i=0;i<vies;i++){
+        affichage += '<span class="pleine">■</span>';
+    }
+
+    for(let i=vies;i<3;i++){
+        affichage += '<span class="vide">■</span>';
+    }
+
+    document.getElementById("vies").innerHTML = affichage;
+}
+
+function finJeu(message){
+
+    document.getElementById("question").innerHTML = "";
+    document.getElementById("verbeCible").innerHTML = "";
+
+    document.getElementById("fin").innerHTML =
+        message + "<br>Score final : " + score;
+
+    document.getElementById("resultat").innerHTML = "";
+
+    document.getElementById("progression").style.width = "100%";
+
+    document.getElementById("btnRecommencer").style.display =
+        "inline-block";
+
+    document.getElementById("reponse").disabled = true;
+
+    if(chrono){
+        clearInterval(chrono);
+    }
+}
+
+function compteARebours(){
+
+    chrono = setInterval(function(){
+
+        temps--;
+
+        document.getElementById("temps").innerHTML = temps;
+
+        if(temps <= 0){
+
+            clearInterval(chrono);
+
+            finJeu("Temps écoulé.");
+        }
+
+    },1000);
+}
+
+function recommencer(){
+    location.reload();
+}
+
+document.getElementById("reponse").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+        verifier();
+    }
+});
+
+afficherVies();
+nouvelleQuestion();
+compteARebours();
+
+</script>
+
+</body>
+</html>
