@@ -83,9 +83,18 @@ h1 .hl{color:var(--day-dark);}
 .item-inp:disabled{cursor:not-allowed;}
 .item-inp.ok{border-color:var(--green);background:var(--green-light);color:var(--green-dark);}
 .item-inp.ko{border-color:var(--pink-dark);background:var(--pink-light);color:var(--pink-dark);}
+.item-inp.retry{border-color:var(--yellow);background:#fffbe8;color:#78530a;}
+.item-verif-btn{font-family:Arial,Helvetica,sans-serif;font-size:.78rem;font-weight:800;
+  color:#fff;background:var(--day-dark);border:none;border-radius:8px;padding:.35rem .75rem;
+  cursor:pointer;min-height:2.2rem;transition:transform .12s,opacity .12s;
+  -webkit-tap-highlight-color:transparent;}
+.item-verif-btn:hover:not(:disabled){transform:translateY(-1px);}
+.item-verif-btn:disabled{opacity:.35;cursor:default;background:var(--muted);transform:none;}
+.item-verif-btn.done{background:var(--green);opacity:1;}
 .item-corr{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
   display:none;margin-top:.3rem;line-height:1.65;}
 .item-corr.show{display:block;}
+.item-corr.retry{color:#946200;font-weight:700;}
 .item-corr b{color:var(--green-dark);}
 .item-expl{font-size:.82rem;color:var(--day-dark2);margin-top:.25rem;
   display:none;line-height:1.65;font-family:'JetBrains Mono',monospace;}
@@ -237,6 +246,9 @@ h1 .hl{color:var(--day-dark);}
 var $ = function(id){ return document.getElementById(id); };
 var scores = [null, null], done = [false, false];
 var inputs = [[], []];
+var itemDone = [[], []];
+var itemOk = [[], []];
+var itemAttempts = [[], []];
 
 var DATA = [
   /* ACT 1 */
@@ -276,6 +288,9 @@ function norm(s){
 
 function buildAct(n){
   var list=$('list'+n); list.innerHTML=''; inputs[n-1]=[];
+  itemDone[n-1] = DATA[n-1].map(function(){ return false; });
+  itemOk[n-1]   = DATA[n-1].map(function(){ return null; });
+  itemAttempts[n-1] = DATA[n-1].map(function(){ return 0; });
   DATA[n-1].forEach(function(item,i){
     var row=document.createElement('div'); row.className='item-row'; row.id='ir'+(n-1)+'-'+i;
     var num=document.createElement('div'); num.className='item-num'; num.textContent=(i+1)+'.';
@@ -291,15 +306,27 @@ function buildAct(n){
     inp.placeholder='…';
     inp.style.width=Math.max(110, item.ans.length*13)+'px';
     inp.setAttribute('data-idx',i);
-    inp.addEventListener('keydown',function(e){
+    phrase.appendChild(inp);
+    phrase.appendChild(document.createTextNode(' '+item.after));
+
+    var vBtn=document.createElement('button');
+    vBtn.type='button'; vBtn.className='item-verif-btn'; vBtn.id='ivbtn'+(n-1)+'-'+i;
+    vBtn.textContent='Vérifier'; vBtn.disabled=true;
+    vBtn.addEventListener('click', function(){ verifyItem(n-1, i); });
+    phrase.appendChild(vBtn);
+
+    inp.addEventListener('input', function(){
+      vBtn.disabled = itemDone[n-1][i] || inp.value.trim()==='';
+    });
+    inp.addEventListener('keydown', function(e){
       if(e.key==='Enter'){ e.preventDefault();
         var ci=parseInt(inp.getAttribute('data-idx'));
+        verifyItem(n-1, ci);
         if(ci+1<inputs[n-1].length) inputs[n-1][ci+1].focus();
         else $('vbtn'+n).focus();
       }
     });
-    phrase.appendChild(inp);
-    phrase.appendChild(document.createTextNode(' '+item.after));
+
     var corr=document.createElement('div'); corr.className='item-corr'; corr.id='corr'+(n-1)+'-'+i;
     var expl=document.createElement('div'); expl.className='item-expl'; expl.id='expl'+(n-1)+'-'+i;
     row.appendChild(num); row.appendChild(phrase); row.appendChild(corr); row.appendChild(expl);
@@ -308,21 +335,82 @@ function buildAct(n){
   });
 }
 
+/* ══ VÉRIFIER UNE PHRASE (bouton individuel) — 1 réessai avant réponse ══ */
+function verifyItem(actIdx, i, forceFinal){
+  if(itemDone[actIdx][i]) return;
+  var inp=$('inp'+actIdx+'-'+i);
+  if(inp.value.trim()==='') return;
+  var item=DATA[actIdx][i];
+  var row=$('ir'+actIdx+'-'+i);
+  var corr=$('corr'+actIdx+'-'+i);
+  var expl=$('expl'+actIdx+'-'+i);
+  var vBtn=$('ivbtn'+actIdx+'-'+i);
+
+  var good = norm(inp.value)===norm(item.ans);
+  itemAttempts[actIdx][i]++;
+
+  if(good || forceFinal || itemAttempts[actIdx][i] >= 2){
+    inp.readOnly=true;
+    inp.classList.remove('retry');
+    inp.classList.add(good?'ok':'ko');
+    if(good){
+      row.classList.add('ok-item');
+      corr.className='item-corr show'; corr.textContent='✓';
+    } else {
+      row.classList.add('ko-item');
+      corr.className='item-corr show'; corr.innerHTML='→ <b>'+item.ans+'</b>';
+      expl.textContent=item.expl; expl.classList.add('show');
+    }
+    itemDone[actIdx][i]=true; itemOk[actIdx][i]=good;
+    if(vBtn){ vBtn.disabled=true; vBtn.classList.add('done'); vBtn.textContent='✓'; }
+  } else {
+    /* 1ère erreur : on laisse réessayer, sans donner la réponse */
+    inp.classList.remove('ok','ko');
+    inp.classList.add('retry');
+    corr.className='item-corr show retry';
+    corr.textContent='⚠️ Pas tout à fait… réessaie !';
+    inp.focus(); inp.select();
+    if(vBtn) vBtn.disabled = inp.value.trim()==='';
+  }
+  updateChipsLive();
+}
+
+/* ══ CHIPS EN TEMPS RÉEL (sur les 10 items, toutes activités confondues) ══ */
+function updateChipsLive(){
+  var ok=0, ko=0, rem=0;
+  for(var a=0;a<2;a++){
+    for(var i=0;i<DATA[a].length;i++){
+      if(itemDone[a][i]){ if(itemOk[a][i]) ok++; else ko++; }
+      else rem++;
+    }
+  }
+  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
+}
+
+/* ══ VALIDER L'ACTIVITÉ (finalise les phrases non encore vérifiées individuellement) ══ */
 function verif(n){
   if(done[n-1]) return; done[n-1]=true; $('vbtn'+n).disabled=true;
-  var ok=0,ko=0;
+
   DATA[n-1].forEach(function(item,i){
-    var inp=$('inp'+(n-1)+'-'+i); var row=$('ir'+(n-1)+'-'+i);
-    var corr=$('corr'+(n-1)+'-'+i); var expl=$('expl'+(n-1)+'-'+i);
-    inp.readOnly=true;
-    var good=norm(inp.value)===norm(item.ans);
-    inp.classList.add(good?'ok':'ko');
-    if(good){ ok++; row.classList.add('ok-item'); corr.textContent='✓'; corr.classList.add('show'); }
-    else { ko++; row.classList.add('ko-item');
+    if(itemDone[n-1][i]) return;
+    var inp=$('inp'+(n-1)+'-'+i);
+    if(inp.value.trim()===''){
+      var row=$('ir'+(n-1)+'-'+i), corr=$('corr'+(n-1)+'-'+i), expl=$('expl'+(n-1)+'-'+i);
+      inp.readOnly=true; inp.classList.add('ko');
+      row.classList.add('ko-item');
       corr.innerHTML='→ <b>'+item.ans+'</b>'; corr.classList.add('show');
-      expl.textContent=item.expl; expl.classList.add('show'); }
+      expl.textContent=item.expl; expl.classList.add('show');
+      itemDone[n-1][i]=true; itemOk[n-1][i]=false;
+      var vBtn=$('ivbtn'+(n-1)+'-'+i); if(vBtn) vBtn.disabled=true;
+    } else {
+      verifyItem(n-1, i, true);
+    }
   });
+
+  var ok=0;
+  itemOk[n-1].forEach(function(v){ if(v) ok++; });
   scores[n-1]=ok;
+
   var pct=ok/DATA[n-1].length*100;
   var fb=$('fb'+n);
   if(pct>=100){ fb.className='feedback show ok'; fb.textContent='Parfait ! '+ok+'/5. Tous les accords sont corrects.'; }
@@ -330,21 +418,18 @@ function verif(n){
   else { fb.className='feedback show ko'; fb.textContent=ok+'/5. Les corrections et explications sont affichées sous chaque erreur.'; }
   $('bilan'+n).classList.add('show');
   var sb=$('sol'+n); if(sb) sb.style.display='inline-flex';
-  updateGlobal(); checkDone();
+
+  updateChipsLive(); updateGlobal(); checkDone();
 }
 
 function reset(n){
   done[n-1]=false; scores[n-1]=null; $('vbtn'+n).disabled=false;
   $('fb'+n).className='feedback'; $('bilan'+n).classList.remove('show');
   var sb=$('sol'+n); if(sb) sb.style.display='none';
-  buildAct(n); updateGlobal();
+  buildAct(n); updateGlobal(); updateChipsLive();
 }
 
 function updateGlobal(){
-  var ok=(scores[0]||0)+(scores[1]||0);
-  var ko=Math.max(0,(done[0]?5-(scores[0]||0):0)+(done[1]?5-(scores[1]||0):0));
-  var rem=10-ok;
-  $('cnt-ok').textContent=ok; $('cnt-ko').textContent=ko; $('cnt-rem').textContent=rem;
   var dn=(done[0]?1:0)+(done[1]?1:0);
   $('prog-fill').style.width=Math.round(dn/2*100)+'%';
   $('prog-label').textContent=dn+' / 2 activités';
@@ -388,7 +473,7 @@ function solution(n){
     if(inp){ inp.value=item.ans; inp.classList.remove('ok','err'); inp.classList.add('ok'); }
   });
 }
-buildAct(1); buildAct(2);
+buildAct(1); buildAct(2); updateChipsLive();
 </script>
 </body>
 </html>
