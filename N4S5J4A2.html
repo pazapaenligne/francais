@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Verbes irréguliers au présent — 4e S5 J4</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#3ab5d8;--jour-fonce:#1a6e88;--jour-clair:#e8f6fb;--jour-pale:#9dd4e8;
+  --day-glow:rgba(58,181,216,.30);--bg:#fffdf7;
+  --bord:#c3e4ee;--txt:#0f1a1e;--gris:#3d6a78;
+  --vert:#22c55e;--vert-bg:#e7faec;--rouge:#ef4444;--rouge-bg:#fdeaea;
+  --accent:#b94040;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+.bulle{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;}
+.bulle-jaune{width:120px;height:120px;background:#fff5e0;top:-30px;right:-30px;}
+.bulle-jour{width:90px;height:90px;background:var(--jour-clair);bottom:60px;left:-30px;}
+.bulle-verte{width:70px;height:70px;background:#e7faec;top:40%;right:-20px;}
+.bulle-rose{width:60px;height:60px;background:#f7eded;top:20%;left:-20px;}
+
+.pazapa-header{background:#fff;border-bottom:3px solid var(--jour);padding:16px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5a623;color:#7a3d00;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 16px;border-radius:20px;box-shadow:0 3px 10px rgba(245,166,35,.35);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.header-semaine{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;letter-spacing:2px;color:var(--gris);text-transform:uppercase;}
+.header-titre{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);color:var(--txt);line-height:1.2;}
+.header-titre .accent{color:var(--jour-fonce);}
+
+.wrap{max-width:840px;margin:0 auto;padding:20px 14px 60px;position:relative;z-index:1;}
+
+/* ══ RÉFÉRENTIEL ══ */
+.referentiel{background:var(--jour-clair);border:2px solid var(--jour);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:.95rem;font-weight:800;color:var(--jour-fonce);cursor:pointer;display:flex;align-items:center;justify-content:space-between;animation:pulseRef 1.8s ease infinite;}
+.referentiel:hover{background:var(--jour-pale);}
+.referentiel.open{animation:none;background:var(--jour-fonce);color:#fff;border-color:var(--jour-fonce);border-radius:10px 10px 0 0;margin-bottom:0;transform:none;}
+.referentiel-panel{display:none;background:#fff;border:1.5px solid var(--jour);border-top:none;border-radius:0 0 10px 10px;padding:1.1rem 1.3rem;margin-bottom:16px;font-size:.9rem;line-height:1.65;color:var(--txt);max-height:75vh;overflow-y:auto;}
+.referentiel-panel.open{display:block;}
+.referentiel-panel h3{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:900;color:var(--jour-fonce);margin-bottom:12px;letter-spacing:.5px;}
+.referentiel-panel h4{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;color:#fff;background:var(--jour-fonce);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.5px;padding:.85rem 1rem;border-radius:6px;}
+.verbe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+.verbe-cell{background:var(--jour-clair);border:1.5px solid var(--bord);border-radius:8px;padding:.85rem 1rem;}
+.verbe-nom{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:900;color:var(--jour-fonce);display:block;margin-bottom:4px;}
+.verbe-formes{font-size:.9rem;line-height:1.65;color:var(--txt);}
+.verbe-formes .forme-irreg{font-weight:800;color:var(--accent);}
+.particularites-box{background:var(--jour-clair);border:2px solid var(--jour);border-radius:8px;padding:.85rem 1rem;margin-bottom:8px;}
+.particularites-box p{font-size:.9rem;line-height:1.65;margin-bottom:0;}
+.particularites-box .cle{font-weight:900;color:var(--accent);}
+.particularites-box .verbe-ex{font-size:.85rem;font-style:italic;color:var(--gris);}
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);transform:scale(1);}50%{box-shadow:0 0 0 8px var(--day-glow);transform:scale(1.015);}}
+
+
+.score-bar{background:#fff;border:2px solid var(--bord);border-radius:12px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.score-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.8rem;color:var(--jour-fonce);line-height:1;}
+.score-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;}
+.prog-bg{flex:1;height:10px;background:var(--jour-clair);border-radius:99px;overflow:hidden;border:1px solid var(--bord);}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--jour-clair);border-radius:12px;padding:5px;}
+.tab-btn{flex:1;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.5px;padding:10px 4px;border:2px solid transparent;border-radius:8px;background:transparent;color:var(--gris);cursor:pointer;text-align:center;transition:all .2s;min-height:3rem;}
+.tab-btn.active{background:var(--jour);color:#fff;border-color:var(--jour-fonce);}
+.tab-btn.done{border-color:var(--vert);color:var(--jour-fonce);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+.act-card{background:#fff;border:2px solid var(--bord);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.act-header{background:var(--jour-fonce);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.act-nom{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.78rem;color:#fff;letter-spacing:.5px;}
+.act-pts{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--jour-fonce);background:#fff;padding:3px 10px;border-radius:10px;}
+.act-body{padding:16px;}
+.consigne-box{background:var(--jour-clair);border-left:6px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:13px 16px;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;line-height:1.65;color:var(--txt);margin-bottom:16px;box-shadow:0 2px 8px rgba(26,110,136,.15);}
+.consigne-box .consigne-label{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);text-transform:uppercase;font-size:.78rem;letter-spacing:.5px;display:block;margin-bottom:4px;}
+
+.dots-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.dot{width:24px;height:24px;border-radius:50%;background:#e0e0e0;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.dot.ok{background:var(--vert);border-color:#16a34a;color:#fff;}
+.dot.ko{background:var(--rouge);border-color:#dc2626;color:#fff;}
+
+.q-card{border:1.5px solid var(--bord);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.q-header{background:var(--jour-clair);padding:9px 14px;border-bottom:1.5px solid var(--bord);display:flex;justify-content:space-between;}
+.q-titre{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--jour-fonce);}
+.q-hint{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;}
+.q-body{padding:14px;}
+.q-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;line-height:1.9;margin-bottom:12px;color:var(--txt);background:#fff;border:1.5px solid var(--bord);padding:12px 16px;border-radius:8px;}
+.q-phrase .blank{display:inline-block;font-weight:900;font-size:1.05em;color:var(--jour-fonce);background:var(--jour-clair);border:2px dashed var(--jour-fonce);border-radius:6px;padding:1px 10px;margin:0 2px;}
+.choix-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.choix-btn{padding:16px 24px;border:2.5px solid var(--jour-fonce);border-radius:9px;background:var(--jour-clair);font-size:clamp(1.05rem,3vw,1.2rem);cursor:pointer;color:var(--txt);transition:all .15s;font-family:Arial,sans-serif;font-weight:700;min-height:58px;}
+.choix-btn:hover:not([disabled]){border-color:var(--jour);background:var(--jour-pale);}
+.choix-btn.ok{border-color:var(--vert)!important;background:var(--vert-bg)!important;color:#157f3a;}
+.choix-btn.ko{border-color:var(--rouge)!important;background:var(--rouge-bg)!important;color:#991b1b;}
+.q-fb{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.7;padding:11px 14px;border-radius:8px;margin-top:8px;display:none;font-weight:600;}
+.q-fb.ok{background:var(--vert-bg);border:1.5px solid var(--vert);border-left:5px solid var(--vert);color:#157f3a;}
+.q-fb.ko{background:var(--rouge-bg);border:1.5px solid var(--rouge);border-left:5px solid var(--rouge);color:#991b1b;}
+.q-verif-btn{margin-top:8px;padding:12px 20px;font-size:clamp(.88rem,2.5vw,.97rem);min-height:3rem;}
+.q-verif-btn[disabled]{opacity:.4;cursor:default;}
+
+.texte-source{background:#fff;border:2px solid var(--jour-fonce);border-radius:10px;padding:16px 18px;margin-bottom:16px;font-family:Arial,sans-serif;font-size:1.05rem;line-height:1.9;color:var(--txt);}
+.texte-source .num-cible{font-weight:900;color:var(--accent);background:var(--jour-clair);border-radius:4px;padding:0 4px;font-size:.85rem;vertical-align:super;}
+.texte-source .mot-texte{transition:all .3s;}
+.texte-source .mot-texte.mot-corrige{background:var(--vert-bg);color:#157f3a;font-weight:800;padding:0 4px;border-radius:4px;}
+.b-card{border:1.5px solid var(--bord);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.b-header{background:var(--jour-clair);padding:8px 14px;border-bottom:1.5px solid var(--bord);}
+.b-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--jour-fonce);}
+.b-body{padding:13px 14px;}
+.b-citation{font-size:1.02rem;line-height:1.6;margin-bottom:12px;font-style:italic;font-weight:700;color:var(--txt);}
+.b-choix{display:flex;gap:10px;margin-bottom:10px;}
+.b-choix button{flex:1;padding:18px 12px;border:2.5px solid var(--jour-fonce);border-radius:9px;background:var(--jour-clair);font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(1rem,2.8vw,1.1rem);cursor:pointer;min-height:3.4rem;transition:all .15s;color:var(--txt);}
+.b-choix button:hover:not([disabled]){background:var(--jour-pale);}
+.b-choix button.sel{background:var(--jour-pale);border-color:var(--jour);}
+.b-choix button.ok{border-color:var(--vert)!important;background:var(--vert-bg)!important;color:#157f3a;}
+.b-choix button.ko{border-color:var(--rouge)!important;background:var(--rouge-bg)!important;color:#991b1b;}
+.b-saisie{display:none;margin-top:10px;}
+.b-saisie.show{display:block;}
+.b-saisie-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.b-saisie input{flex:1;min-width:160px;padding:12px 14px;border:2px solid var(--bord);border-radius:8px;font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;min-height:50px;}
+.b-saisie input:focus{outline:none;border-color:var(--jour);}
+.b-saisie-label{font-size:.85rem;color:var(--gris);margin-bottom:6px;font-weight:600;}
+.b-fb{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.7;padding:11px 14px;border-radius:8px;margin-top:8px;display:none;font-weight:600;}
+.b-fb.ok{background:var(--vert-bg);border:1.5px solid var(--vert);border-left:5px solid var(--vert);color:#157f3a;}
+.b-fb.ko{background:var(--rouge-bg);border:1.5px solid var(--rouge);border-left:5px solid var(--rouge);color:#991b1b;}
+.b-verif-btn{margin-top:6px;padding:12px 20px;font-size:clamp(.88rem,2.5vw,.97rem);min-height:3rem;}
+.b-verif-btn[disabled]{opacity:.4;cursor:default;}
+
+.sous-score{text-align:center;padding:12px;background:var(--jour-clair);border-radius:10px;margin-top:12px;display:none;}
+.sous-score-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.sous-score.show{display:block;}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn{padding:12px 20px;border:none;border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;letter-spacing:.5px;cursor:pointer;min-height:3rem;text-transform:uppercase;transition:all .15s;}
+.btn-rec{background:#fff;color:var(--gris);border:2px solid var(--bord);}
+.btn-rec:hover{background:var(--jour-clair);}
+.btn-suite{background:var(--jour-fonce);color:#fff;}
+.btn-suite:hover{background:var(--jour);}
+
+.bilan{display:none;background:#fff;border:2px solid var(--bord);border-radius:14px;padding:20px;margin-top:16px;text-align:center;}
+.bilan.show{display:block;animation:fadeUp .4s ease;}
+.bilan-etoiles{font-size:1.9rem;margin-bottom:8px;letter-spacing:4px;}
+.bilan-stamp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;letter-spacing:3px;padding:8px 20px;border-radius:10px;border:3px solid;display:inline-block;margin-bottom:12px;animation:stampPop .5s ease;}
+.bilan-stamp.ok{color:#157f3a;border-color:#22c55e;background:var(--vert-bg);}
+.bilan-stamp.moyen{color:#92400e;border-color:#f59e0b;background:#fffbeb;}
+.bilan-stamp.ko{color:#991b1b;border-color:#ef4444;background:var(--rouge-bg);}
+.bilan-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--jour-fonce);margin-bottom:4px;line-height:1;}
+.bilan-msg{font-size:.92rem;line-height:1.8;color:var(--gris);margin-bottom:14px;}
+.bilan-detail{display:flex;flex-direction:column;gap:6px;text-align:left;margin-bottom:16px;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:7px;font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.bilan-ligne.ok{background:var(--vert-bg);color:#157f3a;}
+.bilan-ligne.moyen{background:#fffbeb;color:#92400e;}
+.bilan-ligne.ko{background:var(--rouge-bg);color:#991b1b;}
+.bilan-ligne-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-6deg)}60%{opacity:1;transform:scale(1.1) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(-4deg)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes particleUp{0%{opacity:0;transform:translateY(0) scale(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1)}}
+.bilan-particles{position:relative;height:60px;overflow:visible;}
+.flash-pop{position:fixed;top:50%;left:50%;font-size:4rem;pointer-events:none;z-index:999;animation:flashPop 1s ease forwards;}
+@media(max-width:520px){.verbe-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="pazapa-header">
+  <div class="logo-badge">
+    <div class="pts"><i></i><i></i><i></i></div>
+    PAZAPA · FRANÇAIS · 4E
+  </div>
+  <div class="header-semaine">Semaine 5 — Jour 4</div>
+  <div class="header-titre">Je m'entraîne · <span class="accent">Verbes irréguliers au présent</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="referentiel" id="refBox" onclick="toggleRef()">
+    <span>📖 Référentiel</span>
+    <span id="refArrow">▼</span>
+  </div>
+  <div class="referentiel-panel" id="refPanel">
+    <h3>VERBES IRRÉGULIERS FRÉQUENTS AU PRÉSENT DE L'INDICATIF</h3>
+    <div class="verbe-grid">
+      <div class="verbe-cell"><span class="verbe-nom">ÊTRE</span><span class="verbe-formes">suis, es, est, sommes, êtes, <span class="forme-irreg">sont</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">AVOIR</span><span class="verbe-formes">ai, as, a, avons, avez, <span class="forme-irreg">ont</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">ALLER</span><span class="verbe-formes">vais, vas, va, allons, allez, <span class="forme-irreg">vont</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">FAIRE</span><span class="verbe-formes">fais, fais, fait, faisons, <span class="forme-irreg">faites</span>, font.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">DIRE</span><span class="verbe-formes">dis, dis, dit, disons, <span class="forme-irreg">dites</span>, disent.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">POUVOIR</span><span class="verbe-formes">peux, peux, peut, pouvons, pouvez, <span class="forme-irreg">peuvent</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">VOULOIR</span><span class="verbe-formes">veux, veux, veut, voulons, voulez, <span class="forme-irreg">veulent</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">PRENDRE</span><span class="verbe-formes">prends, prends, prend, prenons, prenez, <span class="forme-irreg">prennent</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">VENIR</span><span class="verbe-formes">viens, viens, vient, venons, venez, <span class="forme-irreg">viennent</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">VOIR</span><span class="verbe-formes">vois, vois, voit, voyons, voyez, <span class="forme-irreg">voient</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">SAVOIR</span><span class="verbe-formes">sais, sais, sait, savons, savez, <span class="forme-irreg">savent</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">CROIRE</span><span class="verbe-formes">crois, crois, croit, croyons, croyez, <span class="forme-irreg">croient</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">RECEVOIR</span><span class="verbe-formes"><span class="forme-irreg">reçois</span>, reçois, reçoit, recevons, recevez, <span class="forme-irreg">reçoivent</span>.</span></div>
+      <div class="verbe-cell"><span class="verbe-nom">DEVOIR</span><span class="verbe-formes">dois, dois, doit, devons, devez, <span class="forme-irreg">doivent</span>.</span></div>
+    </div>
+
+    <h4>Particularités à retenir</h4>
+    <div class="particularites-box">
+      <p><span class="cle">Le radical change souvent</span> entre le singulier et le pluriel <span class="verbe-ex">(je viens / nous venons ; je reçois / nous recevons)</span>.</p>
+    </div>
+    <div class="particularites-box">
+      <p><span class="cle">Certains verbes doublent une consonne</span> au pluriel <span class="verbe-ex">(ils viennent, ils prennent)</span> — mais <strong>doivent</strong> s'écrit sans doublement, tandis que <strong>reçoivent</strong> prend une cédille.</p>
+    </div>
+    <div class="particularites-box">
+      <p><span class="cle">Faites et dites</span> ne suivent pas la terminaison habituelle <strong>-ez</strong>.</p>
+    </div>
+    <div class="particularites-box">
+      <p>Les verbes en <span class="cle">-cevoir</span> (recevoir, apercevoir) prennent une <strong>cédille</strong> devant o et a pour conserver le son [s].</p>
+    </div>
+  </div>
+
+  <div class="score-bar">
+    <div>
+      <div class="score-num" id="scoreGlobal">0</div>
+      <div class="score-label">/ 12 pts</div>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="scoreFill"></div></div>
+  </div>
+
+  <!-- ═══ PARTIE A ═══ -->
+  <div class="tab-content active" id="tc1">
+    <div class="act-card">
+      <div class="act-header">
+        <span class="act-nom">✍️ Partie A — Choisir la bonne forme</span>
+        <span class="act-pts">6 pts</span>
+      </div>
+      <div class="act-body">
+        <div class="consigne-box"><span class="consigne-label">Consigne</span>Choisis la bonne forme du verbe indiqué entre parenthèses.</div>
+        <div class="dots-row" id="dots1"></div>
+        <div id="a-cards"></div>
+        <div class="sous-score" id="ss1">
+          <div class="sous-score-val" id="ssv1">0 / 6</div>
+          <div class="sous-score-label">Score Partie A</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-rec" onclick="resetA()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row" id="suite1" style="display:none;">
+          <button class="btn btn-suite" onclick="switchTab(2)">Partie B ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PARTIE B ═══ -->
+  <div class="tab-content" id="tc2">
+    <div class="act-card">
+      <div class="act-header">
+        <span class="act-nom">🔎 Partie B — Corriger le texte</span>
+        <span class="act-pts">6 pts</span>
+      </div>
+      <div class="act-body">
+        <div class="consigne-box"><span class="consigne-label">Consigne</span>Pour chaque repère numéroté, indique si la forme employée est correcte ou incorrecte. Si tu penses qu'elle est incorrecte, écris la bonne forme.</div>
+        <div class="texte-source" id="texteSource"></div>
+        <div class="dots-row" id="dots2"></div>
+        <div id="b-cards"></div>
+        <div class="sous-score" id="ss2">
+          <div class="sous-score-val" id="ssv2">0 / 6</div>
+          <div class="sous-score-label">Score Partie B</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-rec" onclick="resetB()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row" id="suite2" style="display:none;">
+          <button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bilan" id="bilan">
+    <div class="bilan-etoiles" id="bEtoiles"></div>
+    <div class="bilan-stamp" id="bTampon"></div>
+    <div class="bilan-score" id="bScore"></div>
+    <div class="bilan-msg" id="bMsg"></div>
+    <div class="bilan-detail" id="bDetail"></div>
+    <div class="bilan-particles" id="bilanParticles"></div>
+    <button class="btn btn-rec" onclick="recommencer()" style="margin:0 auto;display:block;">↺ Recommencer depuis le début</button>
+  </div>
+</div>
+
+<script>
+/* ══ RÉFÉRENTIEL ══ */
+function toggleRef(){
+  document.getElementById('refBox').classList.toggle('open');
+  document.getElementById('refPanel').classList.toggle('open');
+  var arrow=document.getElementById('refArrow');
+  arrow.textContent=document.getElementById('refPanel').classList.contains('open')?'▲':'▼';
+}
+
+/* ══ DONNÉES PARTIE A (contenu exact de la prof) ══ */
+var A_DATA=[
+  {
+    hint:"croire — 3e pers. plur.",
+    phrase:"Les scientifiques <span class=\"blank\" id=\"blank_a0\">___</span> que ce phénomène mérite une étude approfondie.",
+    ch:["croivent","croyaient","croient"],a:2,
+    fb:"Croire, 3e pers. plur. : radical croi- + -ent → croient."
+  },
+  {
+    hint:"vouloir — 2e pers. sing.",
+    phrase:"Tu <span class=\"blank\" id=\"blank_a1\">___</span> toujours sortir avant la fin du cours, ce qui agace le professeur.",
+    ch:["veux","veut","veulent"],a:0,
+    fb:"Vouloir, 2e pers. sing. : radical veu- + -x → veux."
+  },
+  {
+    hint:"savoir — 1re pers. plur.",
+    phrase:"Nous <span class=\"blank\" id=\"blank_a2\">___</span> bien que cette réforme suscitera des débats importants.",
+    ch:["savont","savons","savions"],a:1,
+    fb:"Savoir, 1re pers. plur. : radical sav- + -ons → savons."
+  },
+  {
+    hint:"recevoir — 3e pers. sing.",
+    phrase:"Ce musée <span class=\"blank\" id=\"blank_a3\">___</span> chaque année des milliers de visiteurs venus du monde entier.",
+    ch:["reçoit","recoit","reçois"],a:0,
+    fb:"Recevoir, 3e pers. sing. : radical reçoi- (avec cédille) + -t → reçoit."
+  },
+  {
+    hint:"devoir — 2e pers. plur.",
+    phrase:"Vous <span class=\"blank\" id=\"blank_a4\">___</span> respecter les délais imposés pour ce projet collectif.",
+    ch:["deviez","devez","devaient"],a:1,
+    fb:"Devoir, 2e pers. plur. : radical dev- + -ez → devez."
+  },
+  {
+    hint:"transmettre — 3e pers. plur.",
+    phrase:"Les habitants de ce village <span class=\"blank\" id=\"blank_a5\">___</span> souvent les anciennes traditions à leurs enfants.",
+    ch:["transmettez","transmettent","transmettaient"],a:1,
+    fb:"Transmettre, comme mettre, est irrégulier : 3e pers. plur. : radical transmett- + -ent → transmettent."
+  }
+];
+var aVerified=[];
+var aChoice=[];
+var scA=0;
+
+/* ══ DONNÉES PARTIE B (contenu exact de la prof) ══ */
+var TEXTE_B_HTML='« Les chercheurs <span class="mot-texte" id="mot_b0">croivent</span> <span class="num-cible">[1]</span> que cette découverte changera notre compréhension du climat. Ils <span class="mot-texte" id="mot_b1">veulent</span> <span class="num-cible">[2]</span> poursuivre leurs travaux malgré les obstacles financiers. Chaque laboratoire <span class="mot-texte" id="mot_b2">reçoivent</span> <span class="num-cible">[3]</span> un budget limité pour mener ses expériences. Les scientifiques <span class="mot-texte" id="mot_b3">doivent</span> <span class="num-cible">[4]</span> publier leurs résultats dans des revues spécialisées. Le public <span class="mot-texte" id="mot_b4">savent</span> <span class="num-cible">[5]</span> rarement à quel point ces recherches sont exigeantes. Cependant, les jeunes étudiants <span class="mot-texte" id="mot_b5">son</span> <span class="num-cible">[6]</span> souvent engagés dans cette voie passionnante. »';
+
+var B_DATA=[
+  {num:1,citation:"« Les chercheurs croivent »",estCorrect:false,motCible:"croient",
+   fb:"Croire n'a jamais de v dans son radical au présent : croivent n'existe pas. Le sujet « Les chercheurs » est pluriel. Croire, 3e pers. plur. : radical croi- + -ent → croient."},
+  {num:2,citation:"« Ils veulent poursuivre »",estCorrect:true,motCible:"veulent",
+   fb:"« veulent » est la bonne forme (vouloir, 3e pers. plur., sujet « Ils »)."},
+  {num:3,citation:"« Chaque laboratoire reçoivent »",estCorrect:false,motCible:"reçoit",
+   fb:"Chaque + nom singulier forme toujours un sujet singulier, même si l'idée évoque plusieurs laboratoires. Recevoir, 3e pers. sing. : radical reçoi- (avec cédille) + -t → reçoit."},
+  {num:4,citation:"« Les scientifiques doivent publier »",estCorrect:true,motCible:"doivent",
+   fb:"« doivent » est la bonne forme (devoir, 3e pers. plur., sujet « Les scientifiques »)."},
+  {num:5,citation:"« Le public savent »",estCorrect:false,motCible:"sait",
+   fb:"Le public, bien qu'il désigne un ensemble de personnes, est grammaticalement un nom singulier. Savoir, 3e pers. sing. : radical sai- + -t → sait."},
+  {num:6,citation:"« les jeunes étudiants son souvent engagés »",estCorrect:false,motCible:"sont",
+   fb:"Son est un déterminant possessif (mon, ton, son) ; il ne peut pas précéder un adjectif comme engagés. Le sujet « les jeunes étudiants » est pluriel et le verbe être est attendu ici (sont engagés). Être, 3e pers. plur. : sont."}
+];
+var bVerified=[];
+var bJudgement=[];
+var scB=0;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx&&actx.state==='suspended')actx.resume();}catch(e){}}
+document.addEventListener('pointerdown',initA,{once:true});
+function beepOk(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.setValueAtTime(660,actx.currentTime);o.frequency.setValueAtTime(880,actx.currentTime+.08);g.gain.setValueAtTime(.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.25);o.start();o.stop(actx.currentTime+.25);}catch(e){}}
+function beepErr(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sawtooth';o.frequency.setValueAtTime(220,actx.currentTime);o.frequency.exponentialRampToValueAtTime(90,actx.currentTime+.22);g.gain.setValueAtTime(.1,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.22);o.start();o.stop(actx.currentTime+.22);}catch(e){}}
+function beepFinal(ok){try{if(!actx)return;var freqs=ok?[660,880,1100,1320,1540]:[300,250,200];freqs.forEach(function(f,i){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.09,actx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+i*.1+.18);o.start(actx.currentTime+i*.1);o.stop(actx.currentTime+i*.1+.18);});}catch(e){}}
+function showFlash(ok){var d=document.createElement('div');d.className='flash-pop';d.textContent=ok?'✓':'✗';document.body.appendChild(d);setTimeout(function(){d.remove();},1000);}
+function norm(s){return s.toLowerCase().trim().replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c').replace(/[.,!?;:]/g,'');}
+
+/* ══ DOTS ══ */
+function buildDots(tabId,n){
+  var row=document.getElementById('dots'+tabId);
+  row.innerHTML='';
+  for(var i=0;i<n;i++){
+    var d=document.createElement('div');
+    d.className='dot';d.id='dot'+tabId+'_'+i;d.textContent=i+1;
+    row.appendChild(d);
+  }
+}
+function markDot(tabId,i,ok){
+  var d=document.getElementById('dot'+tabId+'_'+i);
+  if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}
+}
+
+function updateGlobal(){
+  var t=scA+scB;
+  document.getElementById('scoreGlobal').textContent=t;
+  document.getElementById('scoreFill').style.width=(t/12*100)+'%';
+}
+
+function switchTab(n){
+  for(var i=1;i<=2;i++){
+    document.getElementById('tc'+i).classList.toggle('active',i===n);
+  }
+}
+
+/* ══ PARTIE A ══ */
+function buildA(){
+  buildDots(1,6);
+  scA=0;
+  aVerified=A_DATA.map(function(){return false;});
+  aChoice=[];
+  document.getElementById('ss1').classList.remove('show');
+  document.getElementById('suite1').style.display='none';
+
+  var cont=document.getElementById('a-cards');
+  cont.innerHTML='';
+  A_DATA.forEach(function(item,ai){
+    var card=document.createElement('div');
+    card.className='q-card';
+    var chhtml=item.ch.map(function(c,ci){return '<button class="choix-btn" data-ci="'+ci+'" onclick="choisirA('+ai+','+ci+')">'+c+'</button>';}).join('');
+    card.innerHTML=
+      '<div class="q-header"><span class="q-titre">Phrase A'+(ai+1)+'</span><span class="q-hint">'+item.hint+'</span></div>'+
+      '<div class="q-body">'+
+        '<div class="q-phrase">'+item.phrase+'</div>'+
+        '<div class="choix-group" id="aCh_'+ai+'">'+chhtml+'</div>'+
+        '<button class="btn btn-rec q-verif-btn" id="aVerifBtn'+ai+'" onclick="verifierA('+ai+')" disabled>✓ Vérifier</button>'+
+        '<div class="q-fb" id="aFb_'+ai+'"></div>'+
+      '</div>';
+    cont.appendChild(card);
+  });
+}
+
+function choisirA(ai,ci){
+  if(aVerified[ai])return;
+  var group=document.getElementById('aCh_'+ai);
+  group.querySelectorAll('button').forEach(function(b){b.style.borderColor='';b.style.background='';});
+  var btn=group.querySelector('[data-ci="'+ci+'"]');
+  btn.style.borderColor='var(--jour)';
+  btn.style.background='var(--jour-pale)';
+  aChoice[ai]=ci;
+  document.getElementById('aVerifBtn'+ai).disabled=false;
+  var blankEl=document.getElementById('blank_a'+ai);
+  if(blankEl)blankEl.textContent=A_DATA[ai].ch[ci];
+}
+
+function verifierA(ai){
+  if(aVerified[ai])return;
+  aVerified[ai]=true;
+  document.getElementById('aVerifBtn'+ai).setAttribute('disabled','');
+  var item=A_DATA[ai];
+  var ok=(aChoice[ai]===item.a);
+  var g=document.getElementById('aCh_'+ai);
+  g.querySelectorAll('button').forEach(function(b,ci){
+    b.disabled=true;
+    if(ci===item.a)b.classList.add('ok');
+    else if(ci===aChoice[ai])b.classList.add('ko');
+  });
+  var fb=document.getElementById('aFb_'+ai);
+  if(ok){fb.innerHTML='✓ Bonne réponse !';fb.className='q-fb ok';beepOk();}
+  else{fb.innerHTML='✗ '+item.fb;fb.className='q-fb ko';beepErr();}
+  fb.style.display='block';
+
+  if(ok)scA++;
+  markDot(1,ai,ok);
+  showFlash(ok);
+  updateGlobal();
+
+  if(aVerified.every(function(v){return v;})){
+    document.getElementById('ssv1').textContent=scA+' / 6';
+    document.getElementById('ss1').classList.add('show');
+    document.getElementById('suite1').style.display='flex';
+  }
+}
+
+function resetA(){buildA();updateGlobal();}
+
+/* ══ PARTIE B ══ */
+var bIndex=0;
+
+function buildB(){
+  buildDots(2,6);
+  scB=0;
+  bIndex=0;
+  bVerified=B_DATA.map(function(){return false;});
+  bJudgement=[];
+  document.getElementById('ss2').classList.remove('show');
+  document.getElementById('suite2').style.display='none';
+  document.getElementById('texteSource').innerHTML=TEXTE_B_HTML;
+  renderBCard(0);
+}
+
+function renderBCard(bi){
+  var item=B_DATA[bi];
+  var cont=document.getElementById('b-cards');
+  cont.innerHTML=
+    '<div class="b-card">'+
+      '<div class="b-header"><span class="b-num">Repère ['+item.num+']</span></div>'+
+      '<div class="b-body">'+
+        '<div class="b-citation">'+item.citation+'</div>'+
+        '<div class="b-choix" id="bChoix_'+bi+'">'+
+          '<button data-j="1" onclick="jugerB('+bi+',true)">✓ Correct</button>'+
+          '<button data-j="0" onclick="jugerB('+bi+',false)">✗ Incorrect</button>'+
+        '</div>'+
+        '<div class="b-saisie" id="bSaisie_'+bi+'">'+
+          '<div class="b-saisie-label">Écris la bonne forme :</div>'+
+          '<div class="b-saisie-row">'+
+            '<input type="text" id="bInput_'+bi+'" autocomplete="off" autocorrect="off" spellcheck="false">'+
+            '<button class="btn btn-rec b-verif-btn" onclick="verifierSaisieB('+bi+')">✓ Valider</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="b-fb" id="bFb_'+bi+'"></div>'+
+        '<div class="btn-row" id="bNextRow_'+bi+'" style="display:none;">'+
+          '<button class="btn btn-suite" onclick="nextBQuestion()">Phrase suivante ›</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function jugerB(bi,estCorrectClique){
+  if(bVerified[bi])return;
+  bJudgement[bi]=estCorrectClique;
+  var g=document.getElementById('bChoix_'+bi);
+  g.querySelectorAll('button').forEach(function(b){b.classList.remove('sel');});
+  g.querySelector('[data-j="'+(estCorrectClique?'1':'0')+'"]').classList.add('sel');
+
+  if(estCorrectClique){
+    validerJugementB(bi,true,null);
+  } else {
+    document.getElementById('bSaisie_'+bi).classList.add('show');
+    document.getElementById('bInput_'+bi).focus();
+  }
+}
+
+function verifierSaisieB(bi){
+  var inp=document.getElementById('bInput_'+bi);
+  var val=inp.value.trim();
+  if(!val)return;
+  validerJugementB(bi,false,val);
+}
+
+function validerJugementB(bi,aCliqueCorrect,saisie){
+  if(bVerified[bi])return;
+  bVerified[bi]=true;
+  var item=B_DATA[bi];
+  var ok=false;
+
+  var g=document.getElementById('bChoix_'+bi);
+  g.querySelectorAll('button').forEach(function(b){b.disabled=true;});
+  var saisieBox=document.getElementById('bSaisie_'+bi);
+  var inp=document.getElementById('bInput_'+bi);
+  if(inp)inp.disabled=true;
+  var vbtn=saisieBox.querySelector('.b-verif-btn');
+  if(vbtn)vbtn.setAttribute('disabled','');
+
+  if(aCliqueCorrect){
+    ok=item.estCorrect;
+    g.querySelector('[data-j="1"]').classList.add(item.estCorrect?'ok':'ko');
+  } else {
+    ok=(norm(saisie)===norm(item.motCible));
+    g.querySelector('[data-j="0"]').classList.add(ok?'ok':'ko');
+  }
+
+  var fb=document.getElementById('bFb_'+bi);
+  if(ok){
+    fb.innerHTML='✓ '+item.fb;
+    fb.className='b-fb ok';
+    beepOk();
+  } else {
+    fb.innerHTML='✗ Corrigé : « '+item.motCible+' ». '+item.fb;
+    fb.className='b-fb ko';
+    beepErr();
+  }
+  fb.style.display='block';
+
+  var motEl=document.getElementById('mot_b'+bi);
+  if(motEl){
+    motEl.textContent=item.motCible;
+    motEl.classList.add('mot-corrige');
+  }
+
+  if(ok)scB++;
+  markDot(2,bi,ok);
+  showFlash(ok);
+  updateGlobal();
+
+  if(bi<B_DATA.length-1){
+    document.getElementById('bNextRow_'+bi).style.display='flex';
+  } else {
+    document.getElementById('ssv2').textContent=scB+' / 6';
+    document.getElementById('ss2').classList.add('show');
+    document.getElementById('suite2').style.display='flex';
+  }
+}
+
+function nextBQuestion(){
+  bIndex++;
+  if(bIndex<B_DATA.length){
+    renderBCard(bIndex);
+  }
+}
+
+function resetB(){buildB();updateGlobal();}
+
+/* ══ BILAN ══ */
+function afficherBilan(){
+  var total=scA+scB;
+  document.getElementById('bScore').textContent=total+' / 12';
+  var pct=total/12;
+  var nb=pct>=.89?5:pct>=.67?4:pct>=.44?3:pct>=.22?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(total>=11){tp.textContent='EXCELLENT';tp.className='bilan-stamp ok';msg.textContent='Maîtrise solide des verbes irréguliers au présent !';}
+  else if(total>=9){tp.textContent='TRÈS BIEN';tp.className='bilan-stamp ok';msg.textContent='Très bon travail. Quelques radicaux à revoir.';}
+  else if(total>=6){tp.textContent='BIEN';tp.className='bilan-stamp moyen';msg.textContent='Bon entraînement. Reprends le référentiel pour les verbes irréguliers.';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='bilan-stamp ko';msg.textContent='Revois le référentiel et retente l\'activité.';}
+  document.getElementById('bDetail').innerHTML=[
+    {label:'Partie A — Choisir la forme',score:scA,total:6},
+    {label:'Partie B — Corriger le texte',score:scB,total:6}
+  ].map(function(l){
+    var cl=l.score/l.total>=.67?'ok':l.score/l.total>=.5?'moyen':'ko';
+    return '<div class="bilan-ligne '+cl+'"><span>'+l.label+'</span><span class="bilan-ligne-score">'+l.score+' / '+l.total+'</span></div>';
+  }).join('');
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(total>=9);
+  if(pct>=.7){
+    var box=document.getElementById('bilanParticles');box.innerHTML='';
+    var emojis=['📚','✏️','📖','✨','⭐','🎯','💡'];
+    for(var i=0;i<24;i++){
+      var e=document.createElement('div');
+      e.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      e.style.cssText='position:absolute;font-size:'+(1+Math.random()*.8)+'rem;left:'+(3+Math.random()*94)+'%;bottom:'+(Math.random()*30)+'%;opacity:0;pointer-events:none;animation:particleUp '+(1+Math.random()*1.2)+'s ease '+(i*.06+Math.random()*.15)+'s forwards;';
+      box.appendChild(e);
+    }
+  }
+}
+
+function recommencer(){
+  scA=0;scB=0;
+  buildA();buildB();
+  document.getElementById('bilan').className='bilan';
+  updateGlobal();
+  switchTab(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── INIT ── */
+setTimeout(function(){buildA();buildB();},50);
+</script>
+</body>
+</html>
