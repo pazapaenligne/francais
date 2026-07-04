@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Compréhension : Zola et le journalisme — 4e S5 J1</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.30);--bg:#fffdf7;
+  --bord:#f0dca0;--txt:#1a1408;--gris:#7a6030;
+  --vert:#22c55e;--vert-bg:#e7faec;--rouge:#ef4444;--rouge-bg:#fdeaea;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+.bulle{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;}
+.bulle-jaune{width:120px;height:120px;background:#fff5e0;top:-30px;right:-30px;}
+.bulle-jour{width:90px;height:90px;background:var(--jour-clair);bottom:60px;left:-30px;}
+.bulle-verte{width:70px;height:70px;background:#e7faec;top:40%;right:-20px;}
+.bulle-rose{width:60px;height:60px;background:#f7eded;top:20%;left:-20px;}
+
+.pazapa-header{background:#fff;border-bottom:3px solid var(--jour);padding:16px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5a623;color:#7a3d00;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 16px;border-radius:20px;box-shadow:0 3px 10px rgba(245,166,35,.35);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.header-semaine{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;letter-spacing:2px;color:var(--gris);text-transform:uppercase;}
+.header-titre{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);color:var(--txt);line-height:1.2;}
+.header-titre .accent{color:var(--jour-fonce);}
+
+.wrap{max-width:840px;margin:0 auto;padding:20px 14px 60px;position:relative;z-index:1;}
+
+.contexte-box{background:var(--jour-clair);border:1.5px solid var(--bord);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:.92rem;line-height:1.6;color:var(--txt);}
+.contexte-box strong{color:var(--jour-fonce);}
+
+.texte-toggle{background:var(--jour-clair);border:2px solid var(--jour);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:.95rem;font-weight:800;color:var(--jour-fonce);cursor:pointer;display:flex;align-items:center;justify-content:space-between;animation:pulseRef 1.8s ease infinite;}
+.texte-toggle:hover{background:var(--jour-pale);}
+.texte-toggle.open{animation:none;background:var(--jour-fonce);color:#fff;border-color:var(--jour-fonce);border-radius:10px 10px 0 0;margin-bottom:0;}
+.texte-panel{display:none;background:#fff;border:1.5px solid var(--jour);border-top:none;border-radius:0 0 10px 10px;padding:18px 20px;margin-bottom:16px;font-size:.98rem;line-height:1.85;color:var(--txt);max-height:70vh;overflow-y:auto;}
+.texte-panel.open{display:block;}
+.texte-panel h4{font-family:Arial,sans-serif;font-weight:800;font-size:1.05rem;color:var(--jour-fonce);margin-bottom:4px;}
+.texte-panel .auteur-date{font-size:.85rem;color:var(--gris);margin-bottom:14px;font-style:italic;}
+.texte-panel p{margin-bottom:12px;}
+.texte-panel sup{color:var(--jour-fonce);font-weight:800;}
+.notes-list{margin-top:18px;padding-top:14px;border-top:1.5px solid var(--bord);font-size:.82rem;line-height:1.6;color:var(--gris);}
+.notes-list div{margin-bottom:4px;}
+.notes-list b{color:var(--jour-fonce);}
+
+.score-bar{background:#fff;border:2px solid var(--bord);border-radius:12px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.score-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.8rem;color:var(--jour-fonce);line-height:1;}
+.score-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;}
+.prog-bg{flex:1;height:10px;background:var(--jour-clair);border-radius:99px;overflow:hidden;border:1px solid var(--bord);}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+
+.act-card{background:#fff;border:2px solid var(--bord);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.act-header{background:var(--jour-fonce);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.act-nom{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.78rem;color:#fff;letter-spacing:.5px;}
+.act-pts{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--jour-fonce);background:#fff;padding:3px 10px;border-radius:10px;}
+.act-body{padding:16px;}
+.consigne-box{background:var(--jour-clair);border-left:6px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:13px 16px;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;line-height:1.65;color:var(--txt);margin-bottom:16px;box-shadow:0 2px 8px rgba(196,122,16,.15);}
+.consigne-box .consigne-label{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);text-transform:uppercase;font-size:.78rem;letter-spacing:.5px;display:block;margin-bottom:4px;}
+
+.dots-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.dot{width:24px;height:24px;border-radius:50%;background:#e0e0e0;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.dot.ok{background:var(--vert);border-color:#16a34a;color:#fff;}
+.dot.ko{background:var(--rouge);border-color:#dc2626;color:#fff;}
+
+.q-card{border:1.5px solid var(--bord);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.q-header{background:var(--jour-clair);padding:9px 14px;border-bottom:1.5px solid var(--bord);}
+.q-titre{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--jour-fonce);}
+.q-body{padding:14px;}
+.sub-q-block{margin-bottom:16px;}
+.sub-q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.sub-q-text{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;margin-bottom:10px;color:var(--txt);line-height:1.55;border:1.5px solid var(--bord);border-radius:0 8px 8px 0;padding:10px 14px;}
+.sub-q-text-a{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);}
+.sub-q-text-b{background:#eef6f2;border-left:4px solid #5a9e6f;}
+.choix-group{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+.choix-btn{padding:12px 16px;border:2px solid var(--jour-fonce);border-radius:8px;background:#f7f4ec;font-size:clamp(.92rem,2.4vw,1rem);cursor:pointer;color:#111;transition:all .15s;font-family:Arial,sans-serif;font-weight:600;min-height:50px;text-align:left;line-height:1.4;}
+.choix-btn:hover:not([disabled]){border-color:var(--jour);background:var(--jour-clair);}
+.choix-btn.ok{border-color:var(--vert)!important;background:var(--vert-bg)!important;color:#157f3a;}
+.choix-btn.ko{border-color:var(--rouge)!important;background:var(--rouge-bg)!important;color:#991b1b;}
+.q-fb{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.7;padding:11px 14px;border-radius:8px;margin-top:8px;display:none;font-weight:600;}
+.q-fb.ok{background:var(--vert-bg);border:1.5px solid var(--vert);border-left:5px solid var(--vert);color:#157f3a;}
+.q-fb.ko{background:var(--rouge-bg);border:1.5px solid var(--rouge);border-left:5px solid var(--rouge);color:#991b1b;}
+.q-verif-btn{margin-top:6px;padding:12px 20px;font-size:clamp(.88rem,2.5vw,.97rem);min-height:3rem;}
+.q-verif-btn[disabled]{opacity:.4;cursor:default;}
+
+.sous-score{text-align:center;padding:12px;background:var(--jour-clair);border-radius:10px;margin-top:12px;display:none;}
+.sous-score-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.sous-score.show{display:block;}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn{padding:12px 20px;border:none;border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;letter-spacing:.5px;cursor:pointer;min-height:3rem;text-transform:uppercase;transition:all .15s;}
+.btn-rec{background:#fff;color:var(--gris);border:2px solid var(--bord);}
+.btn-rec:hover{background:var(--jour-clair);}
+.btn-suite{background:var(--jour-fonce);color:#fff;}
+.btn-suite:hover{background:var(--jour);}
+
+.bilan{display:none;background:#fff;border:2px solid var(--bord);border-radius:14px;padding:20px;margin-top:16px;text-align:center;}
+.bilan.show{display:block;animation:fadeUp .4s ease;}
+.bilan-etoiles{font-size:1.9rem;margin-bottom:8px;letter-spacing:4px;}
+.bilan-stamp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;letter-spacing:3px;padding:8px 20px;border-radius:10px;border:3px solid;display:inline-block;margin-bottom:12px;animation:stampPop .5s ease;}
+.bilan-stamp.ok{color:#157f3a;border-color:#22c55e;background:var(--vert-bg);}
+.bilan-stamp.moyen{color:#92400e;border-color:#f59e0b;background:#fffbeb;}
+.bilan-stamp.ko{color:#991b1b;border-color:#ef4444;background:var(--rouge-bg);}
+.bilan-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--jour-fonce);margin-bottom:4px;line-height:1;}
+.bilan-msg{font-size:.92rem;line-height:1.8;color:var(--gris);margin-bottom:14px;}
+
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);transform:scale(1);}50%{box-shadow:0 0 0 8px var(--day-glow);transform:scale(1.015);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-6deg)}60%{opacity:1;transform:scale(1.1) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(-4deg)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.flash-pop{position:fixed;top:50%;left:50%;font-size:4rem;pointer-events:none;z-index:999;animation:flashPop 1s ease forwards;}
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="pazapa-header">
+  <div class="logo-badge">
+    <div class="pts"><i></i><i></i><i></i></div>
+    PAZAPA · FRANÇAIS · 4E
+  </div>
+  <div class="header-semaine">Semaine 5 — Jour 1</div>
+  <div class="header-titre">Je m'entraîne · <span class="accent">Comprendre le témoignage de Zola</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="contexte-box">
+    <strong>La Une de l'article :</strong> avant de préparer ta propre une, comprends exactement ce que dit Zola, étape par étape, en t'appuyant sur des preuves textuelles précises.
+  </div>
+
+  <div class="texte-toggle" id="texteBox" onclick="toggleTexte()">
+    <span>📖 Texte support — « À l'école du journalisme »</span>
+    <span id="texteArrow">▼</span>
+  </div>
+  <div class="texte-panel" id="textePanel">
+    <h4>À l'école du journalisme</h4>
+    <div class="auteur-date">E. Zola, <em>Le Figaro</em>, 22 septembre 1881.</div>
+    <p>Depuis plus de quinze ans, je me bats dans les journaux. D'abord, j'ai dû y gagner mon pain, très durement, je crois bien que j'ai mis les mains à toutes les besognes, depuis les faits divers jusqu'au courrier des Chambres<sup>1</sup>. Plus tard, lorsque j'aurais pu vivre de mes livres<sup>2</sup>, je suis resté dans la bagarre, retenu par la passion de la lutte. Je me sentais seul, je ne voyais aucun critique qui acceptât ma cause, et j'étais décidé à me défendre moi-même&nbsp;; tant que je demeurerais sur la brèche<sup>3</sup>, la victoire me semblait certaine. Les assauts les plus furieux me fouettaient et me donnaient du courage. […]</p>
+    <p>Il faut avoir longtemps souffert et usé du journalisme, pour le comprendre et l'aimer. A tout jeune écrivain qui me consultera, je dirai&nbsp;: «&nbsp;Jetez-vous dans la presse à corps perdu, comme on se jette à l'eau pour apprendre à nager.&nbsp;»</p>
+    <p>C'est la seule école virile, à cette heure&nbsp;; c'est là qu'on se frotte aux hommes et qu'on se bronze<sup>4</sup>&nbsp;; c'est encore là […] qu'on peut forger un style sur la terrible enclume<sup>5</sup> de l'article au jour le jour. Je sais bien qu'on accuse le journalisme de vider les gens, de les détourner des études sérieuses, des ambitions littéraires plus hautes. Certes, il vide les gens qui n'ont rien dans le ventre, il retient les paresseux et les fruits secs<sup>6</sup>, dont l'ambition se contente aisément. Mais qu'importe&nbsp;! Je ne parle pas pour les médiocres, ceux-là restent dans la vase de la presse […]. Je parle pour les forts, pour ceux qui travaillent et qui veulent. Qu'ils entrent sans peur dans les journaux&nbsp;: ils en reviendront comme nos soldats reviennent d'une campagne<sup>7</sup>, aguerris, couverts de blessure, maîtres de leur métier et des hommes. […]</p>
+    <p>[La presse] est la vie, l'action, ce qui grise<sup>8</sup> et ce qui triomphe. Quand on la quitte, on ne peut jurer que ce sera pour toujours, car elle est une force dont on garde le besoin, du moment où l'on en a mesuré l'étendue. Elle a beau vous avoir traîné sur une claie<sup>9</sup>, elle a beau être stupide et mensongère souvent, elle n'en demeure pas moins un des outils les plus laborieux, les plus efficaces du siècle. […]</p>
+    <div class="notes-list">
+      <div><b>1.</b> articles sur les débats menés dans les assemblées politiques</div>
+      <div><b>2.</b> Zola est devenu un écrivain à succès.</div>
+      <div><b>3.</b> je serai prêt à attaquer</div>
+      <div><b>4.</b> se durcit comme du bronze</div>
+      <div><b>5.</b> sorte de table de forgeron</div>
+      <div><b>6.</b> les incapables</div>
+      <div><b>7.</b> campagne militaire</div>
+      <div><b>8.</b> enthousiasme</div>
+      <div><b>9.</b> ici, sorte de brancard</div>
+    </div>
+  </div>
+
+  <div class="score-bar">
+    <div>
+      <div class="score-num" id="scoreGlobal">0</div>
+      <div class="score-label">/ 12 pts</div>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="scoreFill"></div></div>
+  </div>
+
+  <div class="act-card">
+    <div class="act-header">
+      <span class="act-nom">📰 Activité de compréhension</span>
+      <span class="act-pts">12 pts</span>
+    </div>
+    <div class="act-body">
+      <div class="consigne-box"><span class="consigne-label">Consigne</span>Pour chaque question, réponds d'abord à la question A, puis identifie la phrase du texte qui la confirme (question B).</div>
+      <div class="dots-row" id="dots1"></div>
+      <div id="q-cards"></div>
+      <div class="sous-score" id="ss1">
+        <div class="sous-score-val" id="ssv1">0 / 12</div>
+        <div class="sous-score-label">Score</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-rec" onclick="resetQ()">↺ Recommencer</button>
+      </div>
+      <div class="btn-row" id="suite1" style="display:none;">
+        <button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan ›</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bilan" id="bilan">
+    <div class="bilan-etoiles" id="bEtoiles"></div>
+    <div class="bilan-stamp" id="bTampon"></div>
+    <div class="bilan-score" id="bScore"></div>
+    <div class="bilan-msg" id="bMsg"></div>
+    <button class="btn btn-rec" onclick="recommencer()" style="margin:0 auto;display:block;">↺ Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ══ TEXTE SUPPORT ══ */
+function toggleTexte(){
+  document.getElementById('texteBox').classList.toggle('open');
+  document.getElementById('textePanel').classList.toggle('open');
+  var arrow=document.getElementById('texteArrow');
+  arrow.textContent=document.getElementById('textePanel').classList.contains('open')?'▲':'▼';
+}
+
+/* ══ DONNÉES (contenu exact de la prof) ══ */
+var Q_DATA=[
+  {
+    qA:"Pourquoi Zola a-t-il commencé à travailler dans les journaux ?",
+    chA:["Pour devenir célèbre rapidement.","Pour gagner sa vie, par nécessité.","Pour défendre ses idées politiques."],aA:1,
+    qB:"Quelle phrase du texte le confirme ?",
+    chB:["« j'ai dû y gagner mon pain, très durement »","« je me bats dans les journaux »","« je suis resté dans la bagarre »"],aB:0,
+    fbA:"Zola explique qu'au début de sa carrière, il devait \"gagner son pain\", expression qui signifie gagner de quoi vivre. C'est donc bien une nécessité financière qui l'a poussé vers le journalisme.",
+    fbB:"Cette phrase indique explicitement que Zola devait travailler durement pour subvenir à ses besoins, avant de connaître le succès littéraire."
+  },
+  {
+    qA:"Pourquoi Zola est-il resté dans le journalisme même après être devenu un écrivain à succès ?",
+    chA:["Parce qu'il avait encore besoin d'argent.","Parce qu'il aimait le combat et la lutte que représentait ce métier.","Parce que ses éditeurs l'y obligeaient."],aA:1,
+    qB:"Quelle phrase du texte le confirme ?",
+    chB:["« retenu par la passion de la lutte »","« j'ai dû y gagner mon pain »","« tant que je demeurerais sur la brèche »"],aB:0,
+    fbA:"Zola précise lui-même qu'il est resté \"retenu par la passion de la lutte\", ce qui montre que c'est le goût du combat, et non une obligation financière, qui l'a fait continuer.",
+    fbB:"Cette expression révèle que Zola éprouvait un véritable plaisir à se battre dans le journalisme, indépendamment de toute nécessité matérielle."
+  },
+  {
+    qA:"Selon Zola, comment peut-on véritablement apprendre le métier de journaliste ?",
+    chA:["En étudiant longuement la théorie avant de commencer.","En se lançant directement dans la pratique, sans préparation.","En observant d'autres journalistes sans agir soi-même."],aA:1,
+    qB:"Quelle phrase du texte le confirme ?",
+    chB:["« comme on se jette à l'eau pour apprendre à nager »","« c'est la seule école virile »","« il faut avoir longtemps souffert »"],aB:0,
+    fbA:"Zola conseille aux jeunes écrivains de se jeter directement dans la pratique du journalisme, sans attendre d'être préparés, à l'image de celui qui apprend à nager en se jetant à l'eau.",
+    fbB:"Cette comparaison illustre précisément l'idée que l'apprentissage se fait par la pratique immédiate et non par une préparation préalable."
+  },
+  {
+    qA:"Que reproche-t-on généralement au journalisme, selon ce que rapporte Zola dans le texte ?",
+    chA:["De détourner les gens des études sérieuses et des ambitions littéraires.","De ne rapporter aucun revenu aux écrivains.","D'être réservé uniquement aux personnes riches."],aA:0,
+    qB:"Quelle phrase du texte le confirme ?",
+    chB:["« on accuse le journalisme de vider les gens, de les détourner des études sérieuses »","« il retient les paresseux et les fruits secs »","« c'est encore là qu'on peut forger un style »"],aB:0,
+    fbA:"Zola rapporte une critique courante faite au journalisme : il détournerait les gens des études sérieuses et des ambitions littéraires plus élevées.",
+    fbB:"Cette phrase rapporte exactement le reproche généralement adressé au journalisme, avant que Zola ne le nuance dans la suite du texte."
+  },
+  {
+    qA:"D'après Zola, qui sont les personnes vraiment \"vidées\" par le journalisme ?",
+    chA:["Tous les journalistes, sans exception.","Uniquement les paresseux et les personnes médiocres.","Uniquement les jeunes écrivains débutants."],aA:1,
+    qB:"Quelle phrase du texte le confirme ?",
+    chB:["« il retient les paresseux et les fruits secs, dont l'ambition se contente aisément »","« je parle pour les forts »","« ils en reviendront […] aguerris »"],aB:0,
+    fbA:"Zola nuance la critique générale en précisant que seuls les paresseux et les médiocres sont réellement affaiblis par le journalisme.",
+    fbB:"Cette phrase précise exactement qui est visé par cette critique : uniquement ceux qui n'avaient pas d'ambition réelle au départ."
+  },
+  {
+    qA:"Comment Zola décrit-il ceux qui sortent renforcés de leur expérience dans le journalisme ?",
+    chA:["Comme des soldats revenus d'une campagne, aguerris et maîtres de leur métier.","Comme des élèves sortant d'une école ordinaire.","Comme des marchands ayant fait fortune."],aA:0,
+    qB:"Quelle phrase du texte le confirme ?",
+    chB:["« ils en reviendront comme nos soldats reviennent d'une campagne, aguerris »","« jetez-vous dans la presse à corps perdu »","« elle est une force dont on garde le besoin »"],aB:0,
+    fbA:"Zola emploie une image militaire pour décrire ceux qui résistent aux épreuves du journalisme : ils en reviennent comme des soldats endurcis par le combat.",
+    fbB:"Cette comparaison militaire précise montre que le journalisme, malgré ses difficultés, forge le caractère et le métier de ceux qui le pratiquent vraiment."
+  }
+];
+var qVerified=[];
+var qChoiceA=[],qChoiceB=[];
+var scQ=0;
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx&&actx.state==='suspended')actx.resume();}catch(e){}}
+document.addEventListener('pointerdown',initA,{once:true});
+function beepOk(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.setValueAtTime(660,actx.currentTime);o.frequency.setValueAtTime(880,actx.currentTime+.08);g.gain.setValueAtTime(.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.25);o.start();o.stop(actx.currentTime+.25);}catch(e){}}
+function beepErr(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sawtooth';o.frequency.setValueAtTime(220,actx.currentTime);o.frequency.exponentialRampToValueAtTime(90,actx.currentTime+.22);g.gain.setValueAtTime(.1,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.22);o.start();o.stop(actx.currentTime+.22);}catch(e){}}
+function beepFinal(ok){try{if(!actx)return;var freqs=ok?[660,880,1100,1320,1540]:[300,250,200];freqs.forEach(function(f,i){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.09,actx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+i*.1+.18);o.start(actx.currentTime+i*.1);o.stop(actx.currentTime+i*.1+.18);});}catch(e){}}
+function showFlash(ok){var d=document.createElement('div');d.className='flash-pop';d.textContent=ok?'✓':'✗';document.body.appendChild(d);setTimeout(function(){d.remove();},1000);}
+
+/* ══ DOTS ══ */
+function buildDots(n){
+  var row=document.getElementById('dots1');
+  row.innerHTML='';
+  for(var i=0;i<n;i++){
+    var d=document.createElement('div');
+    d.className='dot';d.id='dot_'+i;d.textContent=i+1;
+    row.appendChild(d);
+  }
+}
+function markDot(i,ok){
+  var d=document.getElementById('dot_'+i);
+  if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}
+}
+
+function updateGlobal(){
+  document.getElementById('scoreGlobal').textContent=scQ;
+  document.getElementById('scoreFill').style.width=(scQ/12*100)+'%';
+}
+
+var qIndex=0;
+
+function buildQ(){
+  buildDots(6);
+  scQ=0;
+  qIndex=0;
+  qVerified=Q_DATA.map(function(){return false;});
+  qChoiceA=[];qChoiceB=[];
+  document.getElementById('ss1').classList.remove('show');
+  document.getElementById('suite1').style.display='none';
+  posSeqA=shuffleIdx6Balanced();
+  posSeqB=shuffleIdx6Balanced();
+  renderQCard(0);
+}
+
+function rnd(){try{var a=new Uint32Array(1);crypto.getRandomValues(a);var t=Date.now()&0xFFFF;return((a[0]^(t*2654435761))>>>0)/4294967296;}catch(e){return Math.random();}}
+function shuffleIdx(n){var arr=[];for(var i=0;i<n;i++)arr.push(i);for(var i=arr.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+/* Répartition équilibrée : sur 6 questions, la bonne réponse tombe exactement 2 fois en position 0 (A), 2 fois en 1 (B), 2 fois en 2 (C) — l'ordre d'attribution est tiré au sort */
+function shuffleIdx6Balanced(){var base=[0,0,1,1,2,2];var arr=base.slice();for(var i=arr.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+/* Construit l'ordre d'affichage : place l'indice correct à targetPos, mélange les 2 autres */
+function buildOrderWithTarget(correctIdx,totalLen,targetPos){
+  var others=[];for(var i=0;i<totalLen;i++)if(i!==correctIdx)others.push(i);
+  var shuffledOthers=shuffleIdx(others.length).map(function(k){return others[k];});
+  var order=[];var oi=0;
+  for(var pos=0;pos<totalLen;pos++){
+    if(pos===targetPos)order.push(correctIdx);
+    else{order.push(shuffledOthers[oi]);oi++;}
+  }
+  return order;
+}
+
+var orderA=[],orderB=[]; /* orderA[qi][position] = indice d'origine dans chA */
+var posSeqA=[],posSeqB=[]; /* posSeqA[qi] = position (0/1/2) où placer la bonne réponse de A pour la question qi */
+
+function renderQCard(qi){
+  var item=Q_DATA[qi];
+  orderA[qi]=buildOrderWithTarget(item.aA,item.chA.length,posSeqA[qi]);
+  orderB[qi]=buildOrderWithTarget(item.aB,item.chB.length,posSeqB[qi]);
+  var chAhtml=orderA[qi].map(function(origIdx){return '<button class="choix-btn" data-oi="'+origIdx+'" onclick="choisirQ('+qi+',\'A\','+origIdx+')">'+item.chA[origIdx]+'</button>';}).join('');
+  var chBhtml=orderB[qi].map(function(origIdx){return '<button class="choix-btn" data-oi="'+origIdx+'" onclick="choisirQ('+qi+',\'B\','+origIdx+')">'+item.chB[origIdx]+'</button>';}).join('');
+  var cont=document.getElementById('q-cards');
+  cont.innerHTML=
+    '<div class="q-card">'+
+      '<div class="q-header"><span class="q-titre">Question Q'+(qi+1)+'</span></div>'+
+      '<div class="q-body">'+
+        '<div class="sub-q-block">'+
+          '<div class="sub-q-label">Question A</div>'+
+          '<div class="sub-q-text sub-q-text-a">'+item.qA+'</div>'+
+          '<div class="choix-group" id="qChA_'+qi+'">'+chAhtml+'</div>'+
+          '<div class="q-fb" id="qFbA_'+qi+'"></div>'+
+        '</div>'+
+        '<div class="sub-q-block">'+
+          '<div class="sub-q-label">Question B</div>'+
+          '<div class="sub-q-text sub-q-text-b">'+item.qB+'</div>'+
+          '<div class="choix-group" id="qChB_'+qi+'">'+chBhtml+'</div>'+
+          '<div class="q-fb" id="qFbB_'+qi+'"></div>'+
+        '</div>'+
+        '<button class="btn btn-rec q-verif-btn" id="qVerifBtn'+qi+'" onclick="verifierQ('+qi+')" disabled>✓ Vérifier</button>'+
+        '<div class="btn-row" id="qNextRow_'+qi+'" style="display:none;">'+
+          '<button class="btn btn-suite" onclick="nextQQuestion()">Question suivante ›</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function choisirQ(qi,sub,origIdx){
+  if(qVerified[qi])return;
+  var groupId=(sub==='A')?'qChA_':'qChB_';
+  var group=document.getElementById(groupId+qi);
+  group.querySelectorAll('button').forEach(function(b){b.style.borderColor='var(--jour-fonce)';b.style.background='#f7f4ec';});
+  group.querySelector('[data-oi="'+origIdx+'"]').style.background='var(--jour-clair)';
+  if(sub==='A')qChoiceA[qi]=origIdx; else qChoiceB[qi]=origIdx;
+  var ready=(qChoiceA[qi]!==undefined && qChoiceB[qi]!==undefined);
+  document.getElementById('qVerifBtn'+qi).disabled=!ready;
+}
+
+function verifierQ(qi){
+  if(qVerified[qi])return;
+  qVerified[qi]=true;
+  document.getElementById('qVerifBtn'+qi).setAttribute('disabled','');
+  var item=Q_DATA[qi];
+  var okA=(qChoiceA[qi]===item.aA);
+  var okB=(qChoiceB[qi]===item.aB);
+
+  var gA=document.getElementById('qChA_'+qi);
+  gA.querySelectorAll('button').forEach(function(b){
+    var oi=parseInt(b.dataset.oi);
+    b.disabled=true;
+    if(oi===item.aA)b.classList.add('ok');
+    else if(oi===qChoiceA[qi])b.classList.add('ko');
+  });
+  var fbA=document.getElementById('qFbA_'+qi);
+  fbA.innerHTML=(okA?'✓ ':'✗ ')+item.fbA;
+  fbA.className='q-fb '+(okA?'ok':'ko');
+  fbA.style.display='block';
+
+  var gB=document.getElementById('qChB_'+qi);
+  gB.querySelectorAll('button').forEach(function(b){
+    var oi=parseInt(b.dataset.oi);
+    b.disabled=true;
+    if(oi===item.aB)b.classList.add('ok');
+    else if(oi===qChoiceB[qi])b.classList.add('ko');
+  });
+  var fbB=document.getElementById('qFbB_'+qi);
+  fbB.innerHTML=(okB?'✓ ':'✗ ')+item.fbB;
+  fbB.className='q-fb '+(okB?'ok':'ko');
+  fbB.style.display='block';
+
+  if(okA)scQ++;
+  if(okB)scQ++;
+  markDot(qi,okA&&okB);
+  showFlash(okA&&okB);
+  updateGlobal();
+
+  if(okA&&okB)beepOk(); else beepErr();
+
+  if(qi<Q_DATA.length-1){
+    document.getElementById('qNextRow_'+qi).style.display='flex';
+  } else {
+    document.getElementById('ssv1').textContent=scQ+' / 12';
+    document.getElementById('ss1').classList.add('show');
+    document.getElementById('suite1').style.display='flex';
+    beepFinal(scQ>=8);
+  }
+}
+
+function nextQQuestion(){
+  qIndex++;
+  if(qIndex<Q_DATA.length){
+    renderQCard(qIndex);
+  }
+}
+
+function resetQ(){
+  buildQ();updateGlobal();
+}
+
+/* ══ BILAN ══ */
+function afficherBilan(){
+  document.getElementById('bScore').textContent=scQ+' / 12';
+  var pct=scQ/12;
+  var nb=pct>=.89?5:pct>=.67?4:pct>=.44?3:pct>=.22?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(scQ>=11){tp.textContent='PARFAIT';tp.className='bilan-stamp ok';msg.textContent='Compréhension parfaite ! Tu as bien saisi le témoignage de Zola.';}
+  else if(scQ>=8){tp.textContent='TRÈS BIEN';tp.className='bilan-stamp ok';msg.textContent='Très bonne compréhension. Quelques points à revoir.';}
+  else if(scQ>=6){tp.textContent='BIEN';tp.className='bilan-stamp moyen';msg.textContent='Bonne compréhension générale. Relis les passages signalés.';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='bilan-stamp ko';msg.textContent='Relis le texte attentivement avant de retenter.';}
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(scQ>=8);
+}
+
+function recommencer(){
+  buildQ();
+  document.getElementById('bilan').className='bilan';
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── INIT ── */
+setTimeout(function(){buildQ();},50);
+</script>
+</body>
+</html>
