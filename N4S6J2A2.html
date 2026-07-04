@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Les modalisateurs — 4e S6 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#b94040;--jour-fonce:#7a1f1f;--jour-clair:#f7eded;--jour-pale:#e2a3a3;
+  --day-glow:rgba(185,64,64,.30);--bg:#fffdf7;
+  --bord:#e8cccc;--txt:#1a0e0e;--gris:#7a5555;
+  --vert:#22c55e;--vert-bg:#e7faec;--rouge:#ef4444;--rouge-bg:#fdeaea;
+  --c-certitude:#1a6e88;--c-doute:#8a6000;--c-jugement:#7a1f1f;--c-opinion:#3d7a10;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+.bulle{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;}
+.bulle-jaune{width:120px;height:120px;background:#fff5e0;top:-30px;right:-30px;}
+.bulle-jour{width:90px;height:90px;background:var(--jour-clair);bottom:60px;left:-30px;}
+.bulle-verte{width:70px;height:70px;background:#e7faec;top:40%;right:-20px;}
+.bulle-rose{width:60px;height:60px;background:#f7eded;top:20%;left:-20px;}
+
+.pazapa-header{background:#fff;border-bottom:3px solid var(--jour);padding:16px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5a623;color:#7a3d00;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 16px;border-radius:20px;box-shadow:0 3px 10px rgba(245,166,35,.35);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.header-semaine{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;letter-spacing:2px;color:var(--gris);text-transform:uppercase;}
+.header-titre{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);color:var(--txt);line-height:1.2;}
+.header-titre .accent{color:var(--jour-fonce);}
+
+.wrap{max-width:840px;margin:0 auto;padding:20px 14px 60px;position:relative;z-index:1;}
+
+.contexte-box{background:var(--jour-clair);border:1.5px solid var(--bord);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:.92rem;line-height:1.6;color:var(--txt);}
+.contexte-box strong{color:var(--jour-fonce);}
+
+.score-bar{background:#fff;border:2px solid var(--bord);border-radius:12px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.score-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.8rem;color:var(--jour-fonce);line-height:1;}
+.score-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;}
+.prog-bg{flex:1;height:10px;background:var(--jour-clair);border-radius:99px;overflow:hidden;border:1px solid var(--bord);}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--jour-clair);border-radius:12px;padding:5px;}
+.tab-btn{flex:1;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.5px;padding:10px 4px;border:2px solid transparent;border-radius:8px;background:transparent;color:var(--gris);text-align:center;min-height:3rem;pointer-events:none;}
+.tab-btn.active{background:var(--jour);color:#fff;border-color:var(--jour-fonce);}
+.tab-btn.done{border-color:var(--vert);color:var(--jour-fonce);}
+
+.act-card{background:#fff;border:2px solid var(--bord);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.act-header{background:var(--jour-fonce);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.act-nom{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.78rem;color:#fff;letter-spacing:.5px;}
+.act-pts{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--jour-fonce);background:#fff;padding:3px 10px;border-radius:10px;}
+.act-body{padding:16px;}
+.consigne-box{background:var(--jour-clair);border-left:6px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:13px 16px;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;line-height:1.65;color:var(--txt);margin-bottom:16px;box-shadow:0 2px 8px rgba(122,31,31,.15);}
+.consigne-box .consigne-label{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);text-transform:uppercase;font-size:.78rem;letter-spacing:.5px;display:block;margin-bottom:4px;}
+
+.dots-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.dot{width:24px;height:24px;border-radius:50%;background:#e0e0e0;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.dot.ok{background:var(--vert);border-color:#16a34a;color:#fff;}
+.dot.ko{background:var(--rouge);border-color:#dc2626;color:#fff;}
+
+/* ── ATELIER 1 : phrases contexte ── */
+.phrase-ctx{font-size:clamp(1rem,3vw,1.1rem);line-height:1.9;background:#fff;border:1.5px solid var(--bord);border-radius:8px;padding:12px 16px;margin-bottom:10px;color:var(--txt);}
+.phrase-ctx .mod-hl{font-weight:800;color:var(--jour-fonce);background:var(--jour-clair);border-radius:4px;padding:1px 6px;}
+.phrase-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+
+.tri-zone{margin-top:20px;}
+.tri-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gris);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;}
+.pool-mods{display:flex;flex-wrap:wrap;gap:8px;min-height:50px;padding:12px;border:2px dashed var(--bord);border-radius:10px;background:#fdfaf7;margin-bottom:16px;}
+.mod-chip{padding:9px 16px;border:2px solid var(--jour-fonce);border-radius:8px;background:#fff;cursor:grab;font-size:.95rem;font-weight:700;color:var(--txt);user-select:none;transition:all .15s;}
+.mod-chip.used{opacity:.25;cursor:default;pointer-events:none;}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+@media(max-width:520px){.cat-grid{grid-template-columns:1fr;}}
+.cat-col{border-radius:10px;overflow:hidden;border:2px solid var(--bord);}
+.cat-head{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;letter-spacing:.5px;text-align:center;padding:9px 6px;color:#fff;}
+.cat-head.certitude{background:var(--c-certitude);}
+.cat-head.doute{background:var(--c-doute);}
+.cat-head.jugement{background:var(--c-jugement);}
+.cat-head.opinion{background:var(--c-opinion);}
+.cat-drop{min-height:90px;padding:10px;background:#fafafa;display:flex;flex-direction:column;gap:6px;transition:background .15s;}
+
+.q-verif-btn{margin-top:10px;padding:12px 20px;font-size:clamp(.88rem,2.5vw,.97rem);min-height:3rem;}
+.q-verif-btn[disabled]{opacity:.4;cursor:default;}
+.tri-fb{margin-top:14px;}
+.tri-fb-item{font-size:.88rem;line-height:1.6;padding:9px 12px;border-radius:8px;margin-bottom:7px;}
+.tri-fb-item.ok{background:var(--vert-bg);border:1.5px solid var(--vert);border-left:5px solid var(--vert);color:#157f3a;}
+.tri-fb-item.ko{background:var(--rouge-bg);border:1.5px solid var(--rouge);border-left:5px solid var(--rouge);color:#991b1b;}
+
+/* ── ATELIER 2 ── */
+.r-phrase{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;line-height:1.85;background:#fff;border:1.5px solid var(--bord);border-radius:8px;padding:14px 16px;margin-bottom:12px;color:var(--txt);}
+.r-cat-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;letter-spacing:.5px;padding:6px 14px;border-radius:20px;color:#fff;margin-bottom:14px;}
+.r-select-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.r-select{width:100%;padding:14px 16px;border:2px solid var(--jour-fonce);border-radius:8px;background:#f7f0ee;font-size:clamp(.92rem,2.4vw,1rem);font-family:Arial,sans-serif;color:#111;cursor:pointer;min-height:50px;margin-bottom:10px;}
+.r-select:focus{outline:none;border-color:var(--jour);}
+.r-transformee{display:none;margin-top:12px;background:var(--jour-clair);border:1.5px solid var(--jour);border-radius:8px;padding:12px 16px;font-size:.98rem;font-style:italic;color:var(--txt);}
+.r-fb{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.7;padding:11px 14px;border-radius:8px;margin-top:10px;display:none;font-weight:600;}
+.r-fb.ok{background:var(--vert-bg);border:1.5px solid var(--vert);border-left:5px solid var(--vert);color:#157f3a;}
+.r-fb.ko{background:var(--rouge-bg);border:1.5px solid var(--rouge);border-left:5px solid var(--rouge);color:#991b1b;}
+
+.sous-score{text-align:center;padding:12px;background:var(--jour-clair);border-radius:10px;margin-top:12px;display:none;}
+.sous-score-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.sous-score.show{display:block;}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn{padding:12px 20px;border:none;border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;letter-spacing:.5px;cursor:pointer;min-height:3rem;text-transform:uppercase;transition:all .15s;}
+.btn-rec{background:#fff;color:var(--gris);border:2px solid var(--bord);}
+.btn-rec:hover{background:var(--jour-clair);}
+.btn-suite{background:var(--jour-fonce);color:#fff;}
+.btn-suite:hover{background:var(--jour);}
+
+.bilan{display:none;background:#fff;border:2px solid var(--bord);border-radius:14px;padding:20px;margin-top:16px;text-align:center;}
+.bilan.show{display:block;animation:fadeUp .4s ease;}
+.bilan-etoiles{font-size:1.9rem;margin-bottom:8px;letter-spacing:4px;}
+.bilan-stamp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;letter-spacing:3px;padding:8px 20px;border-radius:10px;border:3px solid;display:inline-block;margin-bottom:12px;animation:stampPop .5s ease;}
+.bilan-stamp.ok{color:#157f3a;border-color:#22c55e;background:var(--vert-bg);}
+.bilan-stamp.moyen{color:#92400e;border-color:#f59e0b;background:#fffbeb;}
+.bilan-stamp.ko{color:#991b1b;border-color:#ef4444;background:var(--rouge-bg);}
+.bilan-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--jour-fonce);margin-bottom:4px;line-height:1;}
+.bilan-msg{font-size:.92rem;line-height:1.8;color:var(--gris);margin-bottom:14px;}
+.bilan-detail{display:flex;flex-direction:column;gap:6px;text-align:left;margin-bottom:16px;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:7px;font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.bilan-ligne.ok{background:var(--vert-bg);color:#157f3a;}
+.bilan-ligne.moyen{background:#fffbeb;color:#92400e;}
+.bilan-ligne.ko{background:var(--rouge-bg);color:#991b1b;}
+.bilan-ligne-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-6deg)}60%{opacity:1;transform:scale(1.1) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(-4deg)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.flash-pop{position:fixed;top:50%;left:50%;font-size:4rem;pointer-events:none;z-index:999;animation:flashPop 1s ease forwards;}
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="pazapa-header">
+  <div class="logo-badge">
+    <div class="pts"><i></i><i></i><i></i></div>
+    PAZAPA · FRANÇAIS · 4E
+  </div>
+  <div class="header-semaine">Semaine 6 — Jour 2</div>
+  <div class="header-titre">Je m'entraîne · <span class="accent">Les modalisateurs</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="score-bar">
+    <div>
+      <div class="score-num" id="scoreGlobal">0</div>
+      <div class="score-label">/ 12 pts</div>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="scoreFill"></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab1">🗂️ Atelier 1<br><span style="font-size:.55rem;opacity:.8">/8 pts</span></button>
+    <button class="tab-btn" id="tab2">✏️ Atelier 2<br><span style="font-size:.55rem;opacity:.8">/4 pts</span></button>
+  </div>
+
+  <div id="tc1">
+    <div class="act-card">
+      <div class="act-header">
+        <span class="act-nom">🗂️ Atelier 1 — Trieur de modalisateurs</span>
+        <span class="act-pts">8 pts</span>
+      </div>
+      <div class="act-body">
+        <div class="consigne-box"><span class="consigne-label">Consigne</span>Chaque phrase contient deux modalisateurs surlignés. Pour chacun, fais-le glisser dans la bonne catégorie : CERTITUDE / DOUTE / JUGEMENT DE VALEUR / OPINION.</div>
+        <div class="dots-row" id="dots1"></div>
+        <div id="phrases-ctx"></div>
+        <div class="tri-zone">
+          <div class="tri-label">Fais glisser chaque modalisateur dans la bonne catégorie :</div>
+          <div class="pool-mods" id="poolMods"></div>
+          <div class="cat-grid">
+            <div class="cat-col"><div class="cat-head certitude">CERTITUDE</div><div class="cat-drop" id="drop_certitude" data-cat="certitude"></div></div>
+            <div class="cat-col"><div class="cat-head doute">DOUTE</div><div class="cat-drop" id="drop_doute" data-cat="doute"></div></div>
+            <div class="cat-col"><div class="cat-head jugement">JUGEMENT DE VALEUR</div><div class="cat-drop" id="drop_jugement" data-cat="jugement"></div></div>
+            <div class="cat-col"><div class="cat-head opinion">OPINION</div><div class="cat-drop" id="drop_opinion" data-cat="opinion"></div></div>
+          </div>
+          <button class="btn btn-rec q-verif-btn" id="btnVerifTri" onclick="verifierTri()">✓ Vérifier le tri</button>
+          <div class="tri-fb" id="triFb"></div>
+        </div>
+        <div class="sous-score" id="ss1">
+          <div class="sous-score-val" id="ssv1">0 / 8</div>
+          <div class="sous-score-label">Score Atelier 1</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-rec" onclick="resetAtelier1()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row" id="suite1" style="display:none;">
+          <button class="btn btn-suite" onclick="goToAtelier2()">Atelier 2 ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tc2" style="display:none;">
+    <div class="act-card">
+      <div class="act-header">
+        <span class="act-nom">✏️ Atelier 2 — Transformateur de texte</span>
+        <span class="act-pts">4 pts</span>
+      </div>
+      <div class="act-body">
+        <div class="consigne-box"><span class="consigne-label">Consigne</span>Chaque phrase est écrite de façon neutre, sans modalisateur. Transforme-la en ajoutant un modalisateur de la catégorie indiquée. Choisis le meilleur modalisateur parmi les trois proposés.</div>
+        <div class="dots-row" id="dots2"></div>
+        <div id="r-cards"></div>
+        <div class="sous-score" id="ss2">
+          <div class="sous-score-val" id="ssv2">0 / 4</div>
+          <div class="sous-score-label">Score Atelier 2</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-rec" onclick="resetAtelier2()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row" id="suite2" style="display:none;">
+          <button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bilan" id="bilan">
+    <div class="bilan-etoiles" id="bEtoiles"></div>
+    <div class="bilan-stamp" id="bTampon"></div>
+    <div class="bilan-score" id="bScore"></div>
+    <div class="bilan-msg" id="bMsg"></div>
+    <div class="bilan-detail" id="bDetail"></div>
+    <button class="btn btn-rec" onclick="recommencer()" style="margin:0 auto;display:block;">↺ Recommencer depuis le début</button>
+  </div>
+</div>
+
+<script>
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx&&actx.state==='suspended')actx.resume();}catch(e){}}
+document.addEventListener('pointerdown',initA,{once:true});
+function beepOk(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.setValueAtTime(660,actx.currentTime);o.frequency.setValueAtTime(880,actx.currentTime+.08);g.gain.setValueAtTime(.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.25);o.start();o.stop(actx.currentTime+.25);}catch(e){}}
+function beepErr(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sawtooth';o.frequency.setValueAtTime(220,actx.currentTime);o.frequency.exponentialRampToValueAtTime(90,actx.currentTime+.22);g.gain.setValueAtTime(.1,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.22);o.start();o.stop(actx.currentTime+.22);}catch(e){}}
+function beepFinal(ok){try{if(!actx)return;var freqs=ok?[660,880,1100,1320,1540]:[300,250,200];freqs.forEach(function(f,i){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.09,actx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+i*.1+.18);o.start(actx.currentTime+i*.1);o.stop(actx.currentTime+i*.1+.18);});}catch(e){}}
+function showFlash(ok){var d=document.createElement('div');d.className='flash-pop';d.textContent=ok?'✓':'✗';document.body.appendChild(d);setTimeout(function(){d.remove();},1000);}
+function rnd(){try{var a=new Uint32Array(1);crypto.getRandomValues(a);var t=Date.now()&0xFFFF;return((a[0]^(t*2654435761))>>>0)/4294967296;}catch(e){return Math.random();}}
+function shuffleArr(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function balancedPositions(n,k){
+  var base=[];for(var i=0;i<n;i++)base.push(i%k);
+  var arr=base.slice();
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+function buildOrderWithTarget(correctIdx,totalLen,targetPos){
+  var others=[];for(var i=0;i<totalLen;i++)if(i!==correctIdx)others.push(i);
+  var shuffledOthers=shuffleArr(others.map(function(_,k){return k;})).map(function(k){return others[k];});
+  var order=[];var oi=0;
+  for(var pos=0;pos<totalLen;pos++){
+    if(pos===targetPos)order.push(correctIdx);
+    else{order.push(shuffledOthers[oi]);oi++;}
+  }
+  return order;
+}
+
+function buildDots(elId,n){
+  var row=document.getElementById(elId);
+  row.innerHTML='';
+  for(var i=0;i<n;i++){
+    var d=document.createElement('div');
+    d.className='dot';d.id=elId+'_'+i;d.textContent=i+1;
+    row.appendChild(d);
+  }
+}
+function markDot(elId,i,ok){
+  var d=document.getElementById(elId+'_'+i);
+  if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}
+}
+
+var scA=0,scB=0;
+function updateGlobal(){
+  var t=scA+scB;
+  document.getElementById('scoreGlobal').textContent=t;
+  document.getElementById('scoreFill').style.width=(t/12*100)+'%';
+}
+
+/* ══ DONNÉES ATELIER 1 (contenu exact) ══ */
+var PHRASES_CTX=[
+  {html:"Je <span class=\"mod-hl\">pense</span> que cette décision est <span class=\"mod-hl\">probablement</span> la meilleure.",num:1},
+  {html:"Cette pollution est <span class=\"mod-hl\">évidemment</span> <span class=\"mod-hl\">catastrophique</span> pour la faune marine.",num:2},
+  {html:"Ce scientifique <span class=\"mod-hl\">semble</span> avoir fait une découverte <span class=\"mod-hl\">extraordinaire</span>.",num:3},
+  {html:"<span class=\"mod-hl\">À mon avis</span>, il est <span class=\"mod-hl\">indiscutable</span> que les médias influencent notre opinion.",num:4}
+];
+
+/* Chaque modalisateur : texte exact, catégorie correcte, feedback exact */
+var MOD_ITEMS=[
+  {id:'m0',txt:'pense',cat:'opinion',fb:"Penser (je pense que) introduit une opinion personnelle. C'est un verbe modalisateur d'opinion, comme croire, estimer, considérer."},
+  {id:'m1',txt:'probablement',cat:'doute',fb:"Probablement exprime une incertitude : l'auteur n'est pas tout à fait certain. C'est un adverbe modalisateur de doute."},
+  {id:'m2',txt:'évidemment',cat:'certitude',fb:"Évidemment renforce l'affirmation : l'auteur en est certain. C'est un adverbe modalisateur de certitude."},
+  {id:'m3',txt:'catastrophique',cat:'jugement',fb:"Catastrophique est un adjectif qui exprime un jugement négatif fort. C'est un modalisateur de jugement de valeur."},
+  {id:'m4',txt:'semble',cat:'doute',fb:"Sembler est un verbe qui exprime une incertitude de l'énonciateur. C'est un modalisateur de doute, comme paraître, avoir l'air."},
+  {id:'m5',txt:'extraordinaire',cat:'jugement',fb:"Extraordinaire est un adjectif qui exprime un jugement très positif. C'est un modalisateur de jugement de valeur."},
+  {id:'m6',txt:'À mon avis',cat:'opinion',fb:"\"À mon avis\" est une expression qui marque que ce qui suit est une opinion personnelle. C'est un modalisateur d'opinion."},
+  {id:'m7',txt:'indiscutable',cat:'certitude',fb:"Indiscutable est un adjectif qui renforce la certitude de l'énonciateur : il n'y a pas de doute possible. C'est un modalisateur de certitude."}
+];
+
+var triVerified=false;
+var triPlacements={}; /* modId -> catégorie où il a été déposé */
+var dragMod=null;
+
+function buildAtelier1(){
+  buildDots('dots1',8);
+  scA=0;
+  triVerified=false;
+  triPlacements={};
+  document.getElementById('ss1').classList.remove('show');
+  document.getElementById('suite1').style.display='none';
+  document.getElementById('btnVerifTri').removeAttribute('disabled');
+  document.getElementById('triFb').innerHTML='';
+
+  var ctxCont=document.getElementById('phrases-ctx');
+  ctxCont.innerHTML='';
+  PHRASES_CTX.forEach(function(p){
+    var div=document.createElement('div');
+    div.innerHTML='<div class="phrase-num">Phrase T'+p.num+'</div><div class="phrase-ctx">'+p.html+'</div>';
+    ctxCont.appendChild(div);
+  });
+
+  var pool=document.getElementById('poolMods');
+  pool.innerHTML='';
+  shuffleArr(MOD_ITEMS).forEach(function(item){
+    pool.appendChild(makeModChip(item));
+  });
+
+  ['certitude','doute','jugement','opinion'].forEach(function(cat){
+    var zone=document.getElementById('drop_'+cat);
+    zone.innerHTML='';
+    zone.addEventListener('dragover',function(ev){ev.preventDefault();zone.style.background='#f0e8e8';});
+    zone.addEventListener('dragleave',function(){zone.style.background='#fafafa';});
+    zone.addEventListener('drop',function(ev){
+      ev.preventDefault();zone.style.background='#fafafa';
+      if(!dragMod||triVerified)return;
+      zone.appendChild(dragMod);
+      triPlacements[dragMod.dataset.modid]=cat;
+    });
+  });
+}
+
+function makeModChip(item){
+  var d=document.createElement('div');
+  d.className='mod-chip';d.textContent=item.txt;
+  d.dataset.modid=item.id;d.draggable=true;
+  d.addEventListener('dragstart',function(){if(triVerified)return;dragMod=d;d.style.opacity='.4';});
+  d.addEventListener('dragend',function(){d.style.opacity='1';dragMod=null;});
+  return d;
+}
+
+function verifierTri(){
+  if(triVerified)return;triVerified=true;
+  document.getElementById('btnVerifTri').setAttribute('disabled','');
+  scA=0;
+  var fbHtml='';
+  MOD_ITEMS.forEach(function(item,i){
+    var placedCat=triPlacements[item.id];
+    var ok=(placedCat===item.cat);
+    if(ok)scA++;
+    markDot('dots1',i,ok);
+    var chip=document.querySelector('[data-modid="'+item.id+'"]');
+    if(chip){
+      chip.style.borderColor=ok?'#22c55e':'#ef4444';
+      chip.style.background=ok?'#e7faec':'#fdeaea';
+      chip.draggable=false;chip.style.cursor='default';
+    }
+    if(ok){
+      fbHtml+='<div class="tri-fb-item ok">✓ « '+item.txt+' » → '+item.fb+'</div>';
+    } else {
+      fbHtml+='<div class="tri-fb-item ko">✗ « '+item.txt+' » (catégorie correcte : '+catLabel(item.cat)+') → '+item.fb+'</div>';
+    }
+  });
+  document.getElementById('triFb').innerHTML=fbHtml;
+
+  showFlash(scA>=6);
+  updateGlobal();
+  document.getElementById('ssv1').textContent=scA+' / 8';
+  document.getElementById('ss1').classList.add('show');
+  document.getElementById('tab1').classList.add('done');
+  document.getElementById('suite1').style.display='flex';
+  beepFinal(scA>=6);
+}
+
+function catLabel(cat){
+  return {certitude:'CERTITUDE',doute:'DOUTE',jugement:'JUGEMENT DE VALEUR',opinion:'OPINION'}[cat];
+}
+
+function resetAtelier1(){buildAtelier1();updateGlobal();}
+
+function goToAtelier2(){
+  document.getElementById('tc1').style.display='none';
+  document.getElementById('tc2').style.display='block';
+  document.getElementById('tab1').classList.remove('active');
+  document.getElementById('tab2').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+/* ══ DONNÉES ATELIER 2 (contenu exact) ══ */
+var R_DATA=[
+  {
+    neutre:"Ce documentaire traite du réchauffement climatique.",
+    cat:"jugement",catLabel:"JUGEMENT DE VALEUR",
+    ch:["peut-être","remarquablement","certainement"],a:1,
+    transformee:"Ce documentaire traite remarquablement le réchauffement climatique.",
+    fb:"Remarquablement est un adverbe de jugement de valeur positif. Peut-être est un modalisateur de doute ; certainement est un modalisateur de certitude."
+  },
+  {
+    neutre:"Les résultats de cette expérience sont connus.",
+    cat:"doute",catLabel:"DOUTE",
+    ch:["évidemment","il est regrettable que","il semble que"],a:2,
+    transformee:"Il semble que les résultats de cette expérience soient connus.",
+    fb:"\"Il semble que\" est une expression de doute : l'auteur n'est pas certain. Évidemment est de certitude ; \"il est regrettable que\" est un jugement de valeur."
+  },
+  {
+    neutre:"Les réseaux sociaux changent nos habitudes.",
+    cat:"opinion",catLabel:"OPINION",
+    ch:["malheureusement","j'estime que","indiscutablement"],a:1,
+    transformee:"J'estime que les réseaux sociaux changent nos habitudes.",
+    fb:"\"J'estime que\" introduit une opinion personnelle. Malheureusement est un jugement de valeur ; indiscutablement est de certitude."
+  },
+  {
+    neutre:"Cette information a été vérifiée.",
+    cat:"certitude",catLabel:"CERTITUDE",
+    ch:["apparemment","j'imagine que","assurément"],a:2,
+    transformee:"Cette information a été assurément vérifiée.",
+    fb:"Assurément est un adverbe de certitude. Apparemment est de doute ; \"j'imagine que\" est d'opinion."
+  }
+];
+var rVerified=[],rChoice=[],rOrder=[],rPosSeq=[],rIndex=0;
+var catColors={certitude:'var(--c-certitude)',doute:'var(--c-doute)',jugement:'var(--c-jugement)',opinion:'var(--c-opinion)'};
+
+function buildAtelier2(){
+  buildDots('dots2',4);
+  scB=0;
+  rIndex=0;
+  rVerified=R_DATA.map(function(){return false;});
+  rChoice=[];
+  document.getElementById('ss2').classList.remove('show');
+  document.getElementById('suite2').style.display='none';
+  rPosSeq=balancedPositions(4,3);
+  renderRCard(0);
+}
+
+function renderRCard(ri){
+  var item=R_DATA[ri];
+  rOrder[ri]=buildOrderWithTarget(item.a,item.ch.length,rPosSeq[ri]);
+  var optHtml='<option value="" disabled selected>— Choisis un modalisateur —</option>';
+  rOrder[ri].forEach(function(origIdx){
+    optHtml+='<option value="'+origIdx+'">'+item.ch[origIdx]+'</option>';
+  });
+  var cont=document.getElementById('r-cards');
+  cont.innerHTML=
+    '<div class="q-card" style="border:1.5px solid var(--bord);border-radius:10px;overflow:hidden;">'+
+      '<div class="q-header" style="background:var(--jour-clair);padding:9px 14px;border-bottom:1.5px solid var(--bord);"><span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;font-weight:700;color:var(--jour-fonce);">Phrase R'+(ri+1)+'</span></div>'+
+      '<div style="padding:14px;">'+
+        '<div class="r-phrase">'+item.neutre+'</div>'+
+        '<div class="r-cat-badge" style="background:'+catColors[item.cat]+';">Catégorie demandée : '+item.catLabel+'</div>'+
+        '<div class="r-select-label">Choisis le meilleur modalisateur :</div>'+
+        '<select class="r-select" id="rSel_'+ri+'" onchange="choisirR('+ri+')">'+optHtml+'</select>'+
+        '<button class="btn btn-rec q-verif-btn" id="rVerifBtn'+ri+'" onclick="verifierR('+ri+')" disabled>✓ Vérifier</button>'+
+        '<div class="r-transformee" id="rTrans_'+ri+'"></div>'+
+        '<div class="r-fb" id="rFb_'+ri+'"></div>'+
+        '<div class="btn-row" id="rNextRow_'+ri+'" style="display:none;margin-top:12px;">'+
+          '<button class="btn btn-suite" onclick="nextRQuestion()">Phrase suivante ›</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function choisirR(ri){
+  if(rVerified[ri])return;
+  var sel=document.getElementById('rSel_'+ri);
+  rChoice[ri]=parseInt(sel.value);
+  document.getElementById('rVerifBtn'+ri).disabled=false;
+}
+
+function verifierR(ri){
+  if(rVerified[ri])return;
+  rVerified[ri]=true;
+  document.getElementById('rVerifBtn'+ri).setAttribute('disabled','');
+  document.getElementById('rSel_'+ri).disabled=true;
+  var item=R_DATA[ri];
+  var ok=(rChoice[ri]===item.a);
+
+  var transDiv=document.getElementById('rTrans_'+ri);
+  transDiv.textContent='« '+item.transformee+' »';
+  transDiv.style.display='block';
+
+  var fb=document.getElementById('rFb_'+ri);
+  if(ok){fb.innerHTML='✓ '+item.fb;fb.className='r-fb ok';beepOk();}
+  else{fb.innerHTML='✗ '+item.fb;fb.className='r-fb ko';beepErr();}
+  fb.style.display='block';
+
+  if(ok)scB++;
+  markDot('dots2',ri,ok);
+  showFlash(ok);
+  updateGlobal();
+
+  if(ri<R_DATA.length-1){
+    document.getElementById('rNextRow_'+ri).style.display='flex';
+  } else {
+    document.getElementById('ssv2').textContent=scB+' / 4';
+    document.getElementById('ss2').classList.add('show');
+    document.getElementById('tab2').classList.add('done');
+    document.getElementById('suite2').style.display='flex';
+    beepFinal(scB>=3);
+  }
+}
+
+function nextRQuestion(){
+  rIndex++;
+  if(rIndex<R_DATA.length){renderRCard(rIndex);}
+}
+
+function resetAtelier2(){buildAtelier2();updateGlobal();}
+
+/* ══ BILAN ══ */
+function afficherBilan(){
+  var total=scA+scB;
+  document.getElementById('bScore').textContent=total+' / 12';
+  var pct=total/12;
+  var nb=pct>=.89?5:pct>=.67?4:pct>=.44?3:pct>=.22?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(total>=11){tp.textContent='EXCELLENT';tp.className='bilan-stamp ok';msg.textContent='Maîtrise parfaite des modalisateurs !';}
+  else if(total>=9){tp.textContent='TRÈS BIEN';tp.className='bilan-stamp ok';msg.textContent='Très bon travail. Quelques nuances à revoir.';}
+  else if(total>=6){tp.textContent='BIEN';tp.className='bilan-stamp moyen';msg.textContent='Bon entraînement. Revois les catégories de modalisateurs.';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='bilan-stamp ko';msg.textContent='Reprends les catégories avant de retenter.';}
+  document.getElementById('bDetail').innerHTML=[
+    {label:'Atelier 1 — Trieur de modalisateurs',score:scA,total:8},
+    {label:'Atelier 2 — Transformateur de texte',score:scB,total:4}
+  ].map(function(l){
+    var cl=l.score/l.total>=.67?'ok':l.score/l.total>=.5?'moyen':'ko';
+    return '<div class="bilan-ligne '+cl+'"><span>'+l.label+'</span><span class="bilan-ligne-score">'+l.score+' / '+l.total+'</span></div>';
+  }).join('');
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(total>=9);
+}
+
+function recommencer(){
+  scA=0;scB=0;
+  buildAtelier1();buildAtelier2();
+  document.getElementById('tc1').style.display='block';
+  document.getElementById('tc2').style.display='none';
+  document.getElementById('tab1').classList.add('active');
+  document.getElementById('tab1').classList.remove('done');
+  document.getElementById('tab2').classList.remove('active');
+  document.getElementById('tab2').classList.remove('done');
+  document.getElementById('bilan').className='bilan';
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── INIT ── */
+setTimeout(function(){buildAtelier1();buildAtelier2();},50);
+</script>
+</body>
+</html>
