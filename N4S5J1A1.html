@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – À l'école du journalisme – 4ème</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623;
+      --day-dark:#c47a10;
+      --day-light:#fff5e0;
+      --day-border:#f5d080;
+      --day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;
+    }
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;max-width:800px;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:#f5c518;box-shadow:0 2px 8px rgba(245,197,24,.45);
+      color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;
+    }
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    .main-layout{display:flex;gap:1.2rem;width:100%;max-width:900px;
+      align-items:flex-start;position:relative;z-index:1;}
+    .col-left{flex:1 1 0;min-width:0;}
+    .col-right{width:240px;flex-shrink:0;}
+
+    .card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;margin-bottom:1.2rem;}
+    .card:last-child{margin-bottom:0;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--pink));}
+    .card-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.9rem;}
+
+    /* ── Texte ── */
+    .texte-body{font-size:.97rem;line-height:1.85;color:var(--text);}
+    .texte-body p{margin-bottom:.95rem;}
+    .texte-body p:last-child{margin-bottom:0;}
+    .texte-titre{font-size:1.05rem;font-weight:900;color:var(--text);margin-bottom:.8rem;}
+    .notes{font-size:.82rem;color:var(--muted);margin-top:1rem;line-height:1.75;
+      border-top:1px solid var(--border);padding-top:.7rem;}
+    .source{font-size:.85rem;color:var(--muted);margin-top:.8rem;font-style:italic;}
+    sup{font-size:.65rem;line-height:0;position:relative;top:-.5em;}
+
+    /* ── Tokens ── */
+    .tok{display:inline;cursor:pointer;border-radius:3px;padding:1px 2px;
+      transition:background .12s,color .12s;
+      -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
+    .tok:hover{background:rgba(245,166,35,.18);}
+    .tok.correct{background:rgba(141,198,63,.35);color:#1a4a00;font-weight:700;}
+    .tok.wrong{background:rgba(232,0,45,.18);color:#8b0000;}
+
+    /* ── Carnet journaliste SVG ── */
+    .carnet-card{text-align:center;}
+    .carnet-wrap{display:flex;justify-content:center;margin:.4rem 0 .6rem;}
+    .carnet-svg{width:90px;height:110px;}
+    .page-line{transition:opacity .4s;opacity:.15;}
+    .page-line.filled{opacity:1;}
+    .carnet-bar-wrap{width:100%;background:#eee;border-radius:99px;height:8px;margin-top:.2rem;overflow:hidden;}
+    .carnet-bar{height:8px;border-radius:99px;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+    .carnet-score{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-top:.4rem;}
+
+    /* ── Référentiel ── */
+    .ref-item{margin-bottom:.65rem;font-size:.88rem;line-height:1.6;color:var(--text);}
+    .ref-item:last-child{margin-bottom:0;}
+    .ref-term{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);
+      display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.1rem;}
+
+    /* ── Question ── */
+    .q-progress{display:flex;gap:.35rem;margin-bottom:.9rem;flex-wrap:wrap;}
+    .q-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);
+      background:#fff;display:flex;align-items:center;justify-content:center;
+      font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--muted);
+      transition:all .3s;}
+    .q-dot.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+    .q-dot.done-ok{border-color:var(--green);background:rgba(141,198,63,.15);color:#1a4a00;}
+    .q-dot.done-ko{border-color:var(--pink);background:rgba(242,139,130,.15);color:#8b0000;}
+
+    .q-label{font-size:.75rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+      letter-spacing:.1em;color:var(--day-dark);font-weight:700;margin-bottom:.35rem;}
+    .q-text{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.7rem;}
+
+    .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;
+      display:inline-flex;align-items:center;gap:.4rem;
+      transition:transform .15s,box-shadow .15s;}
+    .btn:active{transform:scale(.96);}
+    .btn-next{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-next:hover{box-shadow:0 5px 18px var(--day-glow);}
+    .btn-retry{background:var(--bg);color:var(--text);border:2px solid var(--border);}
+    .btn-retry:hover{border-color:var(--day-color);}
+
+    .q-feedback{display:none;margin-top:.75rem;padding:.65rem .85rem;border-radius:8px;
+      font-size:.9rem;line-height:1.6;border-left:4px solid;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ko{background:rgba(242,139,130,.1);border-color:var(--pink);color:#7a0000;}
+
+    /* ── Score ── */
+    .score-card{display:none;text-align:center;}
+    .score-card.show{display:block;}
+    .score-big{font-size:3rem;font-weight:900;color:var(--day-color);line-height:1;}
+    .score-sub{font-size:1rem;color:var(--muted);margin-top:.3rem;}
+    .score-msg{font-size:.95rem;color:var(--text);margin-top:.8rem;line-height:1.55;}
+    .score-bravo{display:none;margin-top:.8rem;padding:.65rem 1rem;border-radius:10px;
+      background:rgba(141,198,63,.15);border:2px solid var(--green);
+      color:#1a4a00;font-size:.95rem;font-weight:700;line-height:1.5;}
+    .score-bravo.show{display:block;}
+
+    /* ── Flash ── */
+    .flash-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+      z-index:500;font-size:3.5rem;pointer-events:none;opacity:0;}
+    .flash-pop.run-ok{animation:flashOk .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+    .flash-pop.run-err{animation:flashErr .5s cubic-bezier(.34,1.56,.64,1) forwards;}
+    @keyframes flashOk{
+      0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.8);}
+    }
+    @keyframes flashErr{
+      0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      40%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.6);}
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .card{animation:fadeUp .4s ease both;}
+
+    @media(max-width:680px){
+      .main-layout{flex-direction:column;}
+      .col-right{width:100%;}
+    }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+<div class="flash-pop" id="flashpop"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 1</div>
+  <h1>J&rsquo;explore &middot; <span class="hl">Zola, &Agrave; l&rsquo;&eacute;cole du journalisme</span></h1>
+</header>
+
+<div class="main-layout">
+
+  <!-- ═══ COLONNE GAUCHE ═══ -->
+  <div class="col-left">
+
+    <!-- Question active -->
+    <div class="card" id="qcard">
+      <div class="card-stripe"></div>
+      <div class="card-title">Question en cours</div>
+      <div style="font-size:.9rem;line-height:1.6;color:var(--muted);margin-bottom:.9rem;padding:.55rem .8rem;background:var(--day-light);border-radius:8px;border-left:3px solid var(--day-border);">
+        &#128269; Maintenant, observe attentivement le texte et repère les informations essentielles pour mieux comprendre l'histoire.
+      </div>
+      <div class="q-progress" id="qdots"></div>
+      <div class="q-label" id="qlabel">Q1 / 6</div>
+      <div class="q-text" id="qtext"></div>
+      <div class="q-feedback" id="qfb"></div>
+      <div id="qactions" style="margin-top:.75rem;display:flex;gap:.6rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Score final -->
+    <div class="card score-card" id="scorecard">
+      <div class="card-stripe"></div>
+      <div class="score-big" id="scoreval"></div>
+      <div class="score-sub">sur 6 questions</div>
+      <div class="score-msg" id="scoremsg"></div>
+      <div class="score-bravo" id="scorebravo">Bravo&nbsp;! Tu es pr&ecirc;t.e &agrave; passer &agrave; l&rsquo;&eacute;tape suivante&nbsp;!</div>
+    </div>
+
+    <!-- Texte support -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Texte support</div>
+      <div class="texte-titre">&Agrave; l&rsquo;&eacute;cole du journalisme</div>
+      <div class="texte-body" id="texte"></div>
+      <div class="source">E. Zola, <em>Le Figaro</em>, 22 septembre 1881.</div>
+      <div class="notes" id="lexique"></div>
+    </div>
+
+  </div>
+
+  <!-- ═══ COLONNE DROITE ═══ -->
+  <div class="col-right">
+
+    <!-- Carnet de journaliste -->
+    <div class="card carnet-card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Carnet du journaliste</div>
+      <div class="carnet-wrap">
+        <svg class="carnet-svg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+          <!-- Couverture -->
+          <rect x="8" y="4" width="68" height="96" rx="5" ry="5" fill="#1a1d23"/>
+          <!-- Reliure -->
+          <rect x="8" y="4" width="10" height="96" rx="3" ry="3" fill="#000"/>
+          <!-- Page intérieure -->
+          <rect x="20" y="10" width="52" height="84" rx="3" ry="3" fill="#fffdf7"/>
+          <!-- Titre -->
+          <text x="46" y="24" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">CARNET DU</text>
+          <text x="46" y="32" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">JOURNALISTE</text>
+          <!-- Séparateur -->
+          <line x1="26" y1="38" x2="66" y2="38" stroke="#f5d080" stroke-width="1"/>
+          <!-- 6 lignes de notes qui s'allument -->
+          <line id="pl0" class="page-line" x1="26" y1="46" x2="66" y2="46" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl1" class="page-line" x1="26" y1="53" x2="66" y2="53" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl2" class="page-line" x1="26" y1="60" x2="66" y2="60" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl3" class="page-line" x1="26" y1="67" x2="66" y2="67" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl4" class="page-line" x1="26" y1="74" x2="66" y2="74" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl5" class="page-line" x1="26" y1="81" x2="52" y2="81" stroke="#8dc63f" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Étoile déco -->
+          <text x="66" y="92" text-anchor="middle" font-family="Arial" font-size="8" fill="#f5d080">&#9733;</text>
+        </svg>
+      </div>
+      <div class="carnet-bar-wrap"><div class="carnet-bar" id="carnetbar"></div></div>
+      <div class="carnet-score" id="carnetscore">0 / 6 rep&egrave;res</div>
+    </div>
+
+    <!-- Référentiel -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">R&eacute;f&eacute;rentiel</div>
+      <div class="ref-item">
+        <span class="ref-term">Comparaison</span>
+        Rapprochement de deux &eacute;l&eacute;ments &agrave; l&rsquo;aide d&rsquo;un outil (comme, tel, semblable &agrave;&hellip;).
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">M&eacute;taphore</span>
+        Comparaison sans outil de comparaison.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Argumentation</span>
+        Ensemble de raisonnements visant &agrave; convaincre.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Concession</span>
+        Fait d&rsquo;admettre un point de vue adverse avant de le r&eacute;futer.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Champ lexical</span>
+        Ensemble de mots li&eacute;s &agrave; un m&ecirc;me th&egrave;me.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   TEXTE TOKENISÉ PAR PARAGRAPHES
+══════════════════════════════════════════ */
+var PARAGRAPHES = [
+  /* §1 */
+  [
+    {id:'p1t0',w:'Depuis'},{id:'p1t1',w:'plus'},{id:'p1t2',w:'de'},{id:'p1t3',w:'quinze'},
+    {id:'p1t4',w:'ans,'},{id:'p1t5',w:'je'},{id:'p1t6',w:'me'},{id:'p1t7',w:'bats'},
+    {id:'p1t8',w:'dans'},{id:'p1t9',w:'les'},{id:'p1t10',w:'journaux.'},{id:'p1t11',w:"D'abord,"},
+    {id:'p1t12',w:"j'ai"},{id:'p1t13',w:'dû'},{id:'p1t14',w:'y'},{id:'p1t15',w:'gagner'},
+    {id:'p1t16',w:'mon'},{id:'p1t17',w:'pain,'},{id:'p1t18',w:'très'},{id:'p1t19',w:'durement,'},
+    {id:'p1t20',w:'je'},{id:'p1t21',w:'crois'},{id:'p1t22',w:'bien'},{id:'p1t23',w:'que'},
+    {id:'p1t24',w:"j'ai"},{id:'p1t25',w:'mis'},{id:'p1t26',w:'les'},{id:'p1t27',w:'mains'},
+    {id:'p1t28',w:'à'},{id:'p1t29',w:'toutes'},{id:'p1t30',w:'les'},{id:'p1t31',w:'besognes,'},
+    {id:'p1t32',w:'depuis'},{id:'p1t33',w:'les'},{id:'p1t34',w:'faits'},{id:'p1t35',w:'divers'},
+    {id:'p1t36',w:"jusqu'au"},{id:'p1t37',w:'courrier'},{id:'p1t38',w:'des'},
+    {id:'p1t39',w:'Chambres',nc:true},{id:'p1t40',w:'.'},{id:'p1t41',w:'Plus'},{id:'p1t42',w:'tard,'},
+    {id:'p1t43',w:'lorsque'},{id:'p1t44',w:"j'aurais"},{id:'p1t45',w:'pu'},{id:'p1t46',w:'vivre'},
+    {id:'p1t47',w:'de'},{id:'p1t48',w:'mes'},{id:'p1t49',w:'livres',nc:true},
+    {id:'p1t50',w:','},{id:'p1t51',w:'je'},{id:'p1t52',w:'suis'},{id:'p1t53',w:'resté'},
+    {id:'p1t54',w:'dans'},{id:'p1t55',w:'la'},{id:'p1t56',w:'bagarre,'},{id:'p1t57',w:'retenu'},
+    {id:'p1t58',w:'par'},{id:'p1t59',w:'la'},{id:'p1t60',w:'passion'},{id:'p1t61',w:'de'},
+    {id:'p1t62',w:'la'},{id:'p1t63',w:'lutte.'},{id:'p1t64',w:'Je'},{id:'p1t65',w:'me'},
+    {id:'p1t66',w:'sentais'},{id:'p1t67',w:'seul,'},{id:'p1t68',w:'je'},{id:'p1t69',w:'ne'},
+    {id:'p1t70',w:'voyais'},{id:'p1t71',w:'aucun'},{id:'p1t72',w:'critique'},{id:'p1t73',w:'qui'},
+    {id:'p1t74',w:'acceptât'},{id:'p1t75',w:'ma'},{id:'p1t76',w:'cause,'},{id:'p1t77',w:'et'},
+    {id:'p1t78',w:"j'étais"},{id:'p1t79',w:'décidé'},{id:'p1t80',w:'à'},{id:'p1t81',w:'me'},
+    {id:'p1t82',w:'défendre'},{id:'p1t83',w:'moi-même'},{id:'p1t84',w:';'},{id:'p1t85',w:'tant'},
+    {id:'p1t86',w:'que'},{id:'p1t87',w:'je'},{id:'p1t88',w:'demeurerais'},{id:'p1t89',w:'sur'},
+    {id:'p1t90',w:'la'},{id:'p1t91',w:'brèche',nc:true},{id:'p1t92',w:','},{id:'p1t93',w:'la'},
+    {id:'p1t94',w:'victoire'},{id:'p1t95',w:'me'},{id:'p1t96',w:'semblait'},{id:'p1t97',w:'certaine.'},
+    {id:'p1t98',w:'Les'},{id:'p1t99',w:'assauts'},{id:'p1t100',w:'les'},{id:'p1t101',w:'plus'},
+    {id:'p1t102',w:'furieux'},{id:'p1t103',w:'me'},{id:'p1t104',w:'fouettaient'},{id:'p1t105',w:'et'},
+    {id:'p1t106',w:'me'},{id:'p1t107',w:'donnaient'},{id:'p1t108',w:'du'},{id:'p1t109',w:'courage.'},
+    {id:'p1t110',w:'[…]'}
+  ],
+  /* §2 */
+  [
+    {id:'p2t0',w:'Il'},{id:'p2t1',w:'faut'},{id:'p2t2',w:'avoir'},{id:'p2t3',w:'longtemps'},
+    {id:'p2t4',w:'souffert'},{id:'p2t5',w:'et'},{id:'p2t6',w:'usé'},{id:'p2t7',w:'du'},
+    {id:'p2t8',w:'journalisme,'},{id:'p2t9',w:'pour'},{id:'p2t10',w:'le'},{id:'p2t11',w:'comprendre'},
+    {id:'p2t12',w:'et'},{id:'p2t13',w:"l'aimer."},{id:'p2t14',w:'A'},{id:'p2t15',w:'tout'},
+    {id:'p2t16',w:'jeune'},{id:'p2t17',w:'écrivain'},{id:'p2t18',w:'qui'},{id:'p2t19',w:'me'},
+    {id:'p2t20',w:'consultera,'},{id:'p2t21',w:'je'},{id:'p2t22',w:'dirai'},{id:'p2t23',w:':'},
+    {id:'p2t24',w:'«'},{id:'p2t25',w:'Jetez-vous'},{id:'p2t26',w:'dans'},{id:'p2t27',w:'la'},
+    {id:'p2t28',w:'presse'},{id:'p2t29',w:'à'},{id:'p2t30',w:'corps'},{id:'p2t31',w:'perdu,'},
+    {id:'p2t32',w:'comme'},{id:'p2t33',w:'on'},{id:'p2t34',w:'se'},{id:'p2t35',w:'jette'},
+    {id:'p2t36',w:'à'},{id:'p2t37',w:"l'eau"},{id:'p2t38',w:'pour'},{id:'p2t39',w:'apprendre'},
+    {id:'p2t40',w:'à'},{id:'p2t41',w:'nager.'},{id:'p2t42',w:'»'}
+  ],
+  /* §3 */
+  [
+    {id:'p3t0',w:"C'est"},{id:'p3t1',w:'la'},{id:'p3t2',w:'seule'},{id:'p3t3',w:'école'},
+    {id:'p3t4',w:'virile,'},{id:'p3t5',w:'à'},{id:'p3t6',w:'cette'},{id:'p3t7',w:'heure'},
+    {id:'p3t8',w:';'},{id:'p3t9',w:"c'est"},{id:'p3t10',w:'là'},{id:'p3t11',w:"qu'on"},
+    {id:'p3t12',w:'se'},{id:'p3t13',w:'frotte'},{id:'p3t14',w:'aux'},{id:'p3t15',w:'hommes'},
+    {id:'p3t16',w:'et'},{id:'p3t17',w:"qu'on"},{id:'p3t18',w:'se'},{id:'p3t19',w:'bronze',nc:true},
+    {id:'p3t20',w:';'},{id:'p3t21',w:"c'est"},{id:'p3t22',w:'encore'},{id:'p3t23',w:'là'},
+    {id:'p3t24',w:'[…]'},{id:'p3t25',w:"qu'on"},{id:'p3t26',w:'peut'},{id:'p3t27',w:'forger'},
+    {id:'p3t28',w:'un'},{id:'p3t29',w:'style'},{id:'p3t30',w:'sur'},{id:'p3t31',w:'la'},
+    {id:'p3t32',w:'terrible'},{id:'p3t33',w:'enclume',nc:true},{id:'p3t34',w:'de'},
+    {id:'p3t35',w:"l'article"},{id:'p3t36',w:'au'},{id:'p3t37',w:'jour'},{id:'p3t38',w:'le'},
+    {id:'p3t39',w:'jour.'},{id:'p3t40',w:'Je'},{id:'p3t41',w:'sais'},{id:'p3t42',w:'bien'},
+    {id:'p3t43',w:"qu'on"},{id:'p3t44',w:'accuse'},{id:'p3t45',w:'le'},{id:'p3t46',w:'journalisme'},
+    {id:'p3t47',w:'de'},{id:'p3t48',w:'vider'},{id:'p3t49',w:'les'},{id:'p3t50',w:'gens,'},
+    {id:'p3t51',w:'de'},{id:'p3t52',w:'les'},{id:'p3t53',w:'détourner'},{id:'p3t54',w:'des'},
+    {id:'p3t55',w:'études'},{id:'p3t56',w:'sérieuses,'},{id:'p3t57',w:'des'},{id:'p3t58',w:'ambitions'},
+    {id:'p3t59',w:'littéraires'},{id:'p3t60',w:'plus'},{id:'p3t61',w:'hautes.'},{id:'p3t62',w:'Certes,'},
+    {id:'p3t63',w:'il'},{id:'p3t64',w:'vide'},{id:'p3t65',w:'les'},{id:'p3t66',w:'gens'},
+    {id:'p3t67',w:'qui'},{id:'p3t68',w:"n'ont"},{id:'p3t69',w:'rien'},{id:'p3t70',w:'dans'},
+    {id:'p3t71',w:'le'},{id:'p3t72',w:'ventre,'},{id:'p3t73',w:'il'},{id:'p3t74',w:'retient'},
+    {id:'p3t75',w:'les'},{id:'p3t76',w:'paresseux'},{id:'p3t77',w:'et'},{id:'p3t78',w:'les'},
+    {id:'p3t79',w:'fruits'},{id:'p3t80',w:'secs',nc:true},{id:'p3t81',w:','},{id:'p3t82',w:'dont'},
+    {id:'p3t83',w:"l'ambition"},{id:'p3t84',w:'se'},{id:'p3t85',w:'contente'},{id:'p3t86',w:'aisément.'},
+    {id:'p3t87',w:'Mais'},{id:'p3t88',w:"qu'importe"},{id:'p3t89',w:'!'},{id:'p3t90',w:'Je'},
+    {id:'p3t91',w:'ne'},{id:'p3t92',w:'parle'},{id:'p3t93',w:'pas'},{id:'p3t94',w:'pour'},
+    {id:'p3t95',w:'les'},{id:'p3t96',w:'médiocres,'},{id:'p3t97',w:'ceux-là'},{id:'p3t98',w:'restent'},
+    {id:'p3t99',w:'dans'},{id:'p3t100',w:'la'},{id:'p3t101',w:'vase'},{id:'p3t102',w:'de'},
+    {id:'p3t103',w:'la'},{id:'p3t104',w:'presse'},{id:'p3t105',w:'[…].'},{id:'p3t106',w:'Je'},
+    {id:'p3t107',w:'parle'},{id:'p3t108',w:'pour'},{id:'p3t109',w:'les'},{id:'p3t110',w:'forts,'},
+    {id:'p3t111',w:'pour'},{id:'p3t112',w:'ceux'},{id:'p3t113',w:'qui'},{id:'p3t114',w:'travaillent'},
+    {id:'p3t115',w:'et'},{id:'p3t116',w:'qui'},{id:'p3t117',w:'veulent.'},{id:'p3t118',w:"Qu'ils"},
+    {id:'p3t119',w:'entrent'},{id:'p3t120',w:'sans'},{id:'p3t121',w:'peur'},{id:'p3t122',w:'dans'},
+    {id:'p3t123',w:'les'},{id:'p3t124',w:'journaux'},{id:'p3t125',w:':'},{id:'p3t126',w:'ils'},
+    {id:'p3t127',w:'en'},{id:'p3t128',w:'reviendront'},{id:'p3t129',w:'comme'},{id:'p3t130',w:'nos'},
+    {id:'p3t131',w:'soldats'},{id:'p3t132',w:'reviennent'},{id:'p3t133',w:"d'une"},
+    {id:'p3t134',w:'campagne',nc:true},{id:'p3t135',w:','},{id:'p3t136',w:'aguerris,'},
+    {id:'p3t137',w:'couverts'},{id:'p3t138',w:'de'},{id:'p3t139',w:'blessure,'},{id:'p3t140',w:'maîtres'},
+    {id:'p3t141',w:'de'},{id:'p3t142',w:'leur'},{id:'p3t143',w:'métier'},{id:'p3t144',w:'et'},
+    {id:'p3t145',w:'des'},{id:'p3t146',w:'hommes.'},{id:'p3t147',w:'[…]'}
+  ],
+  /* §4 */
+  [
+    {id:'p4t0',w:'['},{id:'p4t1',w:'La'},{id:'p4t2',w:'presse]'},{id:'p4t3',w:'est'},
+    {id:'p4t4',w:'la'},{id:'p4t5',w:'vie,'},{id:'p4t6',w:"l'action,"},{id:'p4t7',w:'ce'},
+    {id:'p4t8',w:'qui'},{id:'p4t9',w:'grise',nc:true},{id:'p4t10',w:'et'},{id:'p4t11',w:'ce'},
+    {id:'p4t12',w:'qui'},{id:'p4t13',w:'triomphe.'},{id:'p4t14',w:'Quand'},{id:'p4t15',w:'on'},
+    {id:'p4t16',w:'la'},{id:'p4t17',w:'quitte,'},{id:'p4t18',w:'on'},{id:'p4t19',w:'ne'},
+    {id:'p4t20',w:'peut'},{id:'p4t21',w:'jurer'},{id:'p4t22',w:'que'},{id:'p4t23',w:'ce'},
+    {id:'p4t24',w:'sera'},{id:'p4t25',w:'pour'},{id:'p4t26',w:'toujours,'},{id:'p4t27',w:'car'},
+    {id:'p4t28',w:'elle'},{id:'p4t29',w:'est'},{id:'p4t30',w:'une'},{id:'p4t31',w:'force'},
+    {id:'p4t32',w:'dont'},{id:'p4t33',w:'on'},{id:'p4t34',w:'garde'},{id:'p4t35',w:'le'},
+    {id:'p4t36',w:'besoin,'},{id:'p4t37',w:'du'},{id:'p4t38',w:'moment'},{id:'p4t39',w:'où'},
+    {id:'p4t40',w:"l'on"},{id:'p4t41',w:'en'},{id:'p4t42',w:'a'},{id:'p4t43',w:'mesuré'},
+    {id:'p4t44',w:"l'étendue."},{id:'p4t45',w:'Elle'},{id:'p4t46',w:'a'},{id:'p4t47',w:'beau'},
+    {id:'p4t48',w:'vous'},{id:'p4t49',w:'avoir'},{id:'p4t50',w:'traîné'},{id:'p4t51',w:'sur'},
+    {id:'p4t52',w:'une'},{id:'p4t53',w:'claie',nc:true},{id:'p4t54',w:','},{id:'p4t55',w:'elle'},
+    {id:'p4t56',w:'a'},{id:'p4t57',w:'beau'},{id:'p4t58',w:'être'},{id:'p4t59',w:'stupide'},
+    {id:'p4t60',w:'et'},{id:'p4t61',w:'mensongère'},{id:'p4t62',w:'souvent,'},{id:'p4t63',w:'elle'},
+    {id:'p4t64',w:"n'en"},{id:'p4t65',w:'demeure'},{id:'p4t66',w:'pas'},{id:'p4t67',w:'moins'},
+    {id:'p4t68',w:'un'},{id:'p4t69',w:'des'},{id:'p4t70',w:'outils'},{id:'p4t71',w:'les'},
+    {id:'p4t72',w:'plus'},{id:'p4t73',w:'laborieux,'},{id:'p4t74',w:'les'},{id:'p4t75',w:'plus'},
+    {id:'p4t76',w:'efficaces'},{id:'p4t77',w:'du'},{id:'p4t78',w:'siècle.'},{id:'p4t79',w:'[…]'}
+  ]
+];
+
+/* ══ QUESTIONS ══ */
+var QUESTIONS = [
+  {
+    num:1,
+    text:"Clique sur la phrase qui indique depuis combien de temps Zola exerce le journalisme.",
+    groups:[['p1t0','p1t1','p1t2','p1t3','p1t4','p1t5','p1t6','p1t7','p1t8','p1t9','p1t10']],
+    answers:['p1t0','p1t1','p1t2','p1t3','p1t4','p1t5','p1t6','p1t7','p1t8','p1t9','p1t10'],
+    fb_ok:null,
+    fb_ko:"Dès la première phrase, Zola situe son expérience dans la durée : plus de quinze ans de carrière journalistique."
+  },
+  {
+    num:2,
+    text:"Clique sur la phrase qui montre que Zola a continué le journalisme même après être devenu un écrivain reconnu.",
+    groups:[['p1t43','p1t44','p1t45','p1t46','p1t47','p1t48','p1t49','p1t50','p1t51','p1t52','p1t53','p1t54','p1t55','p1t56']],
+    answers:['p1t43','p1t44','p1t45','p1t46','p1t47','p1t48','p1t49','p1t50','p1t51','p1t52','p1t53','p1t54','p1t55','p1t56'],
+    fb_ok:null,
+    fb_ko:"Cette phrase montre que Zola n'a pas quitté le journalisme par nécessité financière, mais par choix, alors même qu'il aurait pu vivre de ses œuvres littéraires."
+  },
+  {
+    num:3,
+    text:"Clique sur la comparaison employée par Zola pour conseiller aux jeunes écrivains de se lancer dans la presse.",
+    groups:[['p2t25','p2t26','p2t27','p2t28','p2t29','p2t30','p2t31','p2t32','p2t33','p2t34','p2t35','p2t36','p2t37','p2t38','p2t39','p2t40','p2t41']],
+    answers:['p2t25','p2t26','p2t27','p2t28','p2t29','p2t30','p2t31','p2t32','p2t33','p2t34','p2t35','p2t36','p2t37','p2t38','p2t39','p2t40','p2t41'],
+    fb_ok:null,
+    fb_ko:"Zola compare l'entrée dans le journalisme à l'apprentissage de la natation : on apprend en se jetant directement dans l'action, sans préparation préalable."
+  },
+  {
+    num:4,
+    text:"Clique sur le passage qui décrit les personnes que le journalisme, selon Zola, «\u00a0vide\u00a0» ou affaiblit.",
+    groups:[['p3t73','p3t74','p3t75','p3t76','p3t77','p3t78','p3t79','p3t80','p3t81','p3t82','p3t83','p3t84','p3t85','p3t86']],
+    answers:['p3t73','p3t74','p3t75','p3t76','p3t77','p3t78','p3t79','p3t80','p3t81','p3t82','p3t83','p3t84','p3t85','p3t86'],
+    fb_ok:null,
+    fb_ko:"Zola admet que le journalisme peut nuire à certaines personnes, mais il précise qu'il s'agit uniquement des paresseux et des médiocres, pas de tous les journalistes."
+  },
+  {
+    num:5,
+    text:"Clique sur la comparaison militaire employée par Zola pour décrire ceux qui sortent renforcés du journalisme.",
+    groups:[['p3t126','p3t127','p3t128','p3t129','p3t130','p3t131','p3t132','p3t133','p3t134','p3t135','p3t136','p3t137','p3t138','p3t139']],
+    answers:['p3t126','p3t127','p3t128','p3t129','p3t130','p3t131','p3t132','p3t133','p3t134','p3t135','p3t136','p3t137','p3t138','p3t139'],
+    fb_ok:null,
+    fb_ko:"Zola compare les journalistes qui résistent aux épreuves du métier à des soldats revenant d'une campagne militaire, endurcis par les combats qu'ils ont menés."
+  },
+  {
+    num:6,
+    text:"Clique sur la phrase finale qui résume le jugement nuancé de Zola sur la presse, malgré ses défauts.",
+    groups:[['p4t63','p4t64','p4t65','p4t66','p4t67','p4t68','p4t69','p4t70','p4t71','p4t72','p4t73','p4t74','p4t75','p4t76','p4t77','p4t78']],
+    answers:['p4t63','p4t64','p4t65','p4t66','p4t67','p4t68','p4t69','p4t70','p4t71','p4t72','p4t73','p4t74','p4t75','p4t76','p4t77','p4t78'],
+    fb_ok:null,
+    fb_ko:"Cette phrase conclut le texte sur un jugement positif : malgré ses défauts reconnus (stupidité, mensonge parfois), la presse reste un outil précieux et efficace."
+  }
+];
+
+/* ══ État ══ */
+var curQ=0, groupsValidated=[], results=[], done=false, audioCtx=null;
+
+document.addEventListener('pointerdown', function ia(){
+  if(!audioCtx) try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  document.removeEventListener('pointerdown',ia);
+},{once:true});
+
+window.addEventListener('DOMContentLoaded', function(){
+  buildTexte(); buildDots(); showQuestion(0);
+});
+
+/* ══ Construire le texte ══ */
+function buildTexte(){
+  var container=document.getElementById('texte');
+  PARAGRAPHES.forEach(function(para){
+    var p=document.createElement('p');
+    para.forEach(function(tok,i){
+      var w=tok.w;
+      var noPre=(i===0||w===','||w===';'||w===':'||w==='.'||w==='!'||w==='?'||w==='»'||w===']');
+      if(!noPre&&i>0) p.appendChild(document.createTextNode(' '));
+      appendTok(p, tok);
+    });
+    container.appendChild(p);
+  });
+
+  /* Lexique */
+  var lex=document.getElementById('lexique');
+  var items=[
+    '1. articles sur les débats menés dans les assemblées politiques',
+    '2. Zola est devenu un écrivain à succès.',
+    '3. je serai prêt à attaquer',
+    '4. se durcit comme du bronze',
+    "5. sorte de table de forgeron",
+    '6. les incapables',
+    '7. campagne militaire',
+    '8. enthousiasme',
+    '9. ici, sorte de brancard'
+  ];
+  items.forEach(function(it){
+    var d=document.createElement('div'); d.textContent=it; lex.appendChild(d);
+  });
+}
+
+function appendTok(container, tok){
+  var s=document.createElement('span');
+  if(tok.nc){
+    s.textContent=tok.w;
+  } else {
+    s.className='tok';
+    s.id=tok.id;
+    s.textContent=tok.w;
+    s.addEventListener('click',function(){onTok(tok.id);});
+  }
+  container.appendChild(s);
+}
+
+/* ══ Dots ══ */
+function buildDots(){
+  var wrap=document.getElementById('qdots');
+  QUESTIONS.forEach(function(q,i){
+    var d=document.createElement('div');
+    d.className='q-dot'; d.id='dot'+i; d.textContent=q.num;
+    wrap.appendChild(d);
+  });
+}
+function updateDots(){
+  QUESTIONS.forEach(function(q,i){
+    var d=document.getElementById('dot'+i);
+    d.className='q-dot';
+    if(i<curQ) d.classList.add(results[i]?'done-ok':'done-ko');
+    else if(i===curQ) d.classList.add('active');
+  });
+}
+
+/* ══ Afficher question ══ */
+function showQuestion(idx){
+  var q=QUESTIONS[idx];
+  groupsValidated=[];
+  document.getElementById('qlabel').textContent='Q'+q.num+' / 6';
+  document.getElementById('qtext').textContent=q.text;
+  var fb=document.getElementById('qfb');
+  fb.className='q-feedback'; fb.textContent='';
+  clearMarks(); updateDots(); renderActions(false,false);
+}
+
+/* ══ Boutons ══ */
+function renderActions(answered,isOk){
+  var wrap=document.getElementById('qactions');
+  wrap.innerHTML='';
+  if(!answered) return;
+  if(!isOk){
+    var br=document.createElement('button');
+    br.className='btn btn-retry'; br.textContent='Réessayer'; br.onclick=reessayer;
+    wrap.appendChild(br);
+  }
+  var bn=document.createElement('button');
+  bn.className='btn btn-next';
+  bn.textContent=curQ<QUESTIONS.length-1?'Question suivante \u2192':'Voir le résultat';
+  bn.onclick=curQ<QUESTIONS.length-1?suivant:showScore;
+  wrap.appendChild(bn);
+}
+
+/* ══ Clic token ══ */
+function onTok(id){
+  if(done) return;
+  var fb=document.getElementById('qfb');
+  if(fb.classList.contains('show')&&results[curQ]!==undefined) return;
+  var q=QUESTIONS[curQ];
+  var groupIdx=-1;
+  q.groups.forEach(function(grp,gi){if(grp.indexOf(id)!==-1) groupIdx=gi;});
+  if(groupIdx===-1){validerErreur();return;}
+  if(groupsValidated.indexOf(groupIdx)===-1){
+    groupsValidated.push(groupIdx);
+    q.groups[groupIdx].forEach(function(tid){
+      var el=document.getElementById(tid);
+      if(el) el.classList.add('correct');
+    });
+  }
+  if(groupsValidated.length===q.groups.length) validerSucces();
+}
+
+/* ══ Succès ══ */
+function validerSucces(){
+  var q=QUESTIONS[curQ];
+  results[curQ]=true;
+  q.answers.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.classList.remove('wrong');el.classList.add('correct');}
+  });
+  flashPop(true); beepOk();
+  updateCarnet(results.filter(Boolean).length);
+  renderActions(true,true);
+}
+
+/* ══ Erreur ══ */
+function validerErreur(){
+  var q=QUESTIONS[curQ];
+  results[curQ]=false;
+  q.answers.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.classList.add('correct');
+  });
+  var fb=document.getElementById('qfb');
+  if(q.fb_ko){fb.textContent=q.fb_ko;fb.className='q-feedback show ko';}
+  flashPop(false); beepErr();
+  updateCarnet(results.filter(Boolean).length);
+  renderActions(true,false);
+}
+
+/* ══ Réessayer ══ */
+function reessayer(){
+  groupsValidated=[]; results[curQ]=undefined;
+  clearMarks();
+  var fb=document.getElementById('qfb');
+  fb.className='q-feedback'; fb.textContent='';
+  renderActions(false,false);
+}
+
+/* ══ Suivant ══ */
+function suivant(){
+  curQ++; showQuestion(curQ);
+  document.getElementById('qcard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ══ Score final ══ */
+function showScore(){
+  done=true;
+  document.getElementById('qcard').style.display='none';
+  var sc=document.getElementById('scorecard');
+  sc.classList.add('show');
+  var score=results.filter(Boolean).length;
+  document.getElementById('scoreval').textContent=score+' / 6';
+  var msg='';
+  if(score===6) msg='Repérage parfait\u00a0! Tu es prêt à entrer dans l\'analyse du texte.';
+  else if(score>=4) msg='Bon repérage. Relis les passages signalés.';
+  else msg='Relis attentivement le texte et retente.';
+  document.getElementById('scoremsg').textContent=msg;
+  if(score>=4) document.getElementById('scorebravo').classList.add('show');
+  updateCarnet(score); updateDots(); beepFinal(score);
+  if(score>=5) launchEmojis();
+}
+
+/* ══ Carnet ══ */
+function updateCarnet(score){
+  var pct=Math.round((score/6)*100);
+  document.getElementById('carnetbar').style.width=pct+'%';
+  document.getElementById('carnetscore').textContent=score+' / 6 rep\u00e8res';
+  for(var i=0;i<6;i++){
+    var line=document.getElementById('pl'+i);
+    if(line){ if(i<score) line.classList.add('filled'); else line.classList.remove('filled'); }
+  }
+}
+
+/* ══ Nettoyer ══ */
+function clearMarks(){
+  document.querySelectorAll('.tok').forEach(function(el){el.classList.remove('correct','wrong');});
+}
+
+/* ══ Flash ══ */
+function flashPop(isOk){
+  var el=document.getElementById('flashpop');
+  el.textContent=isOk?'\u2713':'\u2715';
+  el.style.color=isOk?'#8dc63f':'#e8002d';
+  el.className='flash-pop';
+  void el.offsetWidth;
+  el.classList.add(isOk?'run-ok':'run-err');
+}
+
+/* ══ Sons ══ */
+function getCtx(){
+  if(!audioCtx) try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}
+  return audioCtx;
+}
+function beepOk(){
+  var ctx=getCtx();if(!ctx)return;
+  [[600,.08],[900,.12]].forEach(function(p,i){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.value=p[0];
+    var t=ctx.currentTime+i*.13;
+    g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.01,t+.18);
+    o.start(t);o.stop(t+.2);
+  });
+}
+function beepErr(){
+  var ctx=getCtx();if(!ctx)return;
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.type='sawtooth';o.frequency.value=280;
+  g.gain.setValueAtTime(.18,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.3);
+  o.start(ctx.currentTime);o.stop(ctx.currentTime+.32);
+}
+function beepFinal(score){
+  var ctx=getCtx();if(!ctx)return;
+  if(score>=5){
+    [523,659,784,880,1047].forEach(function(freq,i){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='sine';o.frequency.value=freq;
+      var t=ctx.currentTime+i*.17;
+      g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.01,t+.28);
+      o.start(t);o.stop(t+.3);
+    });
+  } else {
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.value=220;
+    g.gain.setValueAtTime(.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.5);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.55);
+  }
+}
+function launchEmojis(){
+  var pool=['\uD83C\uDF0A','\uD83D\uDCA7','\u26F5','\uD83D\uDD2D','\uD83D\uDDFA\uFE0F','\uD83C\uDF27\uFE0F','\uD83D\uDCAB','\u2693'];
+  for(var i=0;i<25;i++){
+    (function(idx){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.textContent=pool[Math.floor(Math.random()*pool.length)];
+        el.style.cssText=[
+          'position:fixed','pointer-events:none','z-index:999',
+          'font-size:'+(1.3+Math.random()*1.3)+'rem',
+          'left:'+(Math.random()*96)+'vw',
+          'top:-2rem','opacity:1',
+          'transition:transform '+(1.5+Math.random()*1.3)+'s linear, opacity .4s linear '+(1.3+Math.random()*.9)+'s'
+        ].join(';');
+        document.body.appendChild(el);
+        requestAnimationFrame(function(){requestAnimationFrame(function(){
+          el.style.transform='translateY('+(window.innerHeight+60)+'px) rotate('+(Math.random()*360)+'deg)';
+          el.style.opacity='0';
+        });});
+        setTimeout(function(){el.remove();},3200);
+      },idx*100+Math.random()*80);
+    })(i);
+  }
+}
+</script>
+</body>
+</html>
