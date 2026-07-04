@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Compréhension : Kapuscinski et les médias — 4e S6 J1</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5a623;--jour-fonce:#c47a10;--jour-clair:#fff5e0;--jour-pale:#f5d080;
+  --day-glow:rgba(245,166,35,.30);--bg:#fffdf7;
+  --bord:#f0dca0;--txt:#1a1408;--gris:#7a6030;
+  --vert:#22c55e;--vert-bg:#e7faec;--rouge:#ef4444;--rouge-bg:#fdeaea;
+  --day-color:var(--jour);--day-dark:var(--jour-fonce);--day-light:var(--jour-clair);--day-border:var(--bord);
+  --surface:#ffffff;--border:var(--bord);--yellow:#fff5e0;--green:var(--vert);--pink:#f7eded;--orange:var(--jour);
+  --text:var(--txt);--muted:var(--gris);--radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+.bulle{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;}
+.bulle-jaune{width:120px;height:120px;background:#fff5e0;top:-30px;right:-30px;}
+.bulle-jour{width:90px;height:90px;background:var(--jour-clair);bottom:60px;left:-30px;}
+.bulle-verte{width:70px;height:70px;background:#e7faec;top:40%;right:-20px;}
+.bulle-rose{width:60px;height:60px;background:#f7eded;top:20%;left:-20px;}
+
+.pazapa-header{background:#fff;border-bottom:3px solid var(--jour);padding:16px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5a623;color:#7a3d00;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 16px;border-radius:20px;box-shadow:0 3px 10px rgba(245,166,35,.35);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.header-semaine{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;letter-spacing:2px;color:var(--gris);text-transform:uppercase;}
+.header-titre{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);color:var(--txt);line-height:1.2;}
+.header-titre .accent{color:var(--jour-fonce);}
+
+.wrap{max-width:840px;margin:0 auto;padding:20px 14px 60px;position:relative;z-index:1;}
+
+.texte-toggle{background:var(--jour-clair);border:2px solid var(--jour);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:.95rem;font-weight:800;color:var(--jour-fonce);cursor:pointer;display:flex;align-items:center;justify-content:space-between;animation:pulseRef 1.8s ease infinite;}
+.texte-toggle:hover{background:var(--jour-pale);}
+.texte-toggle.open{animation:none;background:var(--jour-fonce);color:#fff;border-color:var(--jour-fonce);border-radius:10px 10px 0 0;margin-bottom:0;}
+.texte-panel{display:none;background:#fff;border:1.5px solid var(--jour);border-top:none;border-radius:0 0 10px 10px;padding:18px 20px;margin-bottom:16px;font-size:.98rem;line-height:1.85;color:var(--txt);max-height:70vh;overflow-y:auto;}
+.texte-panel.open{display:block;}
+.texte-panel h4{font-family:Arial,sans-serif;font-weight:800;font-size:1.05rem;color:var(--jour-fonce);margin-bottom:4px;}
+.texte-panel .auteur-date{font-size:.85rem;color:var(--gris);margin-bottom:14px;font-style:italic;}
+.texte-panel p{margin-bottom:12px;}
+.texte-panel sup{color:var(--jour-fonce);font-weight:800;}
+.notes-list{margin-top:18px;padding-top:14px;border-top:1.5px solid var(--bord);font-size:.82rem;line-height:1.6;color:var(--gris);}
+.notes-list div{margin-bottom:4px;}
+.notes-list b{color:var(--jour-fonce);}
+
+.score-bar{background:#fff;border:2px solid var(--bord);border-radius:12px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.score-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.8rem;color:var(--jour-fonce);line-height:1;}
+.score-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;}
+.prog-bg{flex:1;height:10px;background:var(--jour-clair);border-radius:99px;overflow:hidden;border:1px solid var(--bord);}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:99px;transition:width .5s ease;}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--jour-clair);border-radius:12px;padding:5px;}
+.tab-btn{flex:1;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.5px;padding:10px 4px;border:2px solid transparent;border-radius:8px;background:transparent;color:var(--gris);cursor:default;text-align:center;transition:all .2s;min-height:3rem;pointer-events:none;}
+.tab-btn.active{background:var(--jour);color:#fff;border-color:var(--jour-fonce);}
+.tab-btn.done{border-color:var(--vert);color:var(--jour-fonce);}
+
+.act-card{background:#fff;border:2px solid var(--bord);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.act-header{background:var(--jour-fonce);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.act-nom{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.78rem;color:#fff;letter-spacing:.5px;}
+.act-pts{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--jour-fonce);background:#fff;padding:3px 10px;border-radius:10px;}
+.act-body{padding:16px;}
+.consigne-box{background:var(--jour-clair);border-left:6px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:13px 16px;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;line-height:1.65;color:var(--txt);margin-bottom:16px;box-shadow:0 2px 8px rgba(196,122,16,.15);}
+.consigne-box .consigne-label{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);text-transform:uppercase;font-size:.78rem;letter-spacing:.5px;display:block;margin-bottom:4px;}
+
+.dots-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.dot{width:24px;height:24px;border-radius:50%;background:#e0e0e0;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.dot.ok{background:var(--vert);border-color:#16a34a;color:#fff;}
+.dot.ko{background:var(--rouge);border-color:#dc2626;color:#fff;}
+
+.para-box{font-size:clamp(.95rem,2.6vw,1.05rem);line-height:1.85;background:#fff;border:1.5px solid var(--bord);border-left:4px solid var(--jour);border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:14px;color:var(--txt);}
+.select-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.dropdown-wrap{position:relative;width:100%;max-width:100%;margin-bottom:10px;}
+.dropdown-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;max-width:100%;box-sizing:border-box;padding:14px 16px;border:2px solid var(--jour-fonce);border-radius:8px;background:#f7f4ec;font-size:clamp(.92rem,2.4vw,1rem);font-family:Arial,sans-serif;color:#111;cursor:pointer;min-height:50px;text-align:left;line-height:1.4;}
+.dropdown-toggle.placeholder{color:var(--gris);}
+.dropdown-toggle .arrow{flex:0 0 auto;font-size:.8em;color:var(--jour-fonce);}
+.dropdown-toggle span.txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.dropdown-toggle.open{border-color:var(--jour);border-radius:8px 8px 0 0;}
+.dropdown-menu{display:none;width:100%;max-width:100%;box-sizing:border-box;border:2px solid var(--jour);border-top:none;border-radius:0 0 8px 8px;background:#fff;overflow:hidden;}
+.dropdown-menu.open{display:block;}
+.dropdown-option{display:block;width:100%;max-width:100%;box-sizing:border-box;padding:12px 16px;border:none;border-top:1px solid var(--bord);background:#fff;font-size:clamp(.9rem,2.3vw,.98rem);font-family:Arial,sans-serif;color:#111;cursor:pointer;text-align:left;line-height:1.5;white-space:normal;word-break:break-word;}
+.dropdown-option:first-child{border-top:none;}
+.dropdown-option:hover{background:var(--jour-clair);}
+
+.q-card{border:1.5px solid var(--bord);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.q-header{background:var(--jour-clair);padding:9px 14px;border-bottom:1.5px solid var(--bord);}
+.q-titre{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--jour-fonce);}
+.q-body{padding:14px;}
+.sub-q-block{margin-bottom:16px;}
+.sub-q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.sub-q-text{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;margin-bottom:10px;color:var(--txt);line-height:1.55;border:1.5px solid var(--bord);border-radius:0 8px 8px 0;padding:10px 14px;}
+.sub-q-text-a{background:var(--jour-clair);border-left:4px solid var(--jour-fonce);}
+.sub-q-text-b{background:#eef6f2;border-left:4px solid #5a9e6f;}
+.choix-group{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+.choix-btn{padding:12px 16px;border:2px solid var(--jour-fonce);border-radius:8px;background:#f7f4ec;font-size:clamp(.92rem,2.4vw,1rem);cursor:pointer;color:#111;transition:all .15s;font-family:Arial,sans-serif;font-weight:600;min-height:50px;text-align:left;line-height:1.4;}
+.choix-btn:hover:not([disabled]){border-color:var(--jour);background:var(--jour-clair);}
+.choix-btn.ok{border-color:var(--vert)!important;background:var(--vert-bg)!important;color:#157f3a;}
+.choix-btn.ko{border-color:var(--rouge)!important;background:var(--rouge-bg)!important;color:#991b1b;}
+.q-fb{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.7;padding:11px 14px;border-radius:8px;margin-top:8px;display:none;font-weight:600;}
+.q-fb.ok{background:var(--vert-bg);border:1.5px solid var(--vert);border-left:5px solid var(--vert);color:#157f3a;}
+.q-fb.ko{background:var(--rouge-bg);border:1.5px solid var(--rouge);border-left:5px solid var(--rouge);color:#991b1b;}
+.q-verif-btn{margin-top:8px;padding:12px 20px;font-size:clamp(.88rem,2.5vw,.97rem);min-height:3rem;}
+.q-verif-btn[disabled]{opacity:.4;cursor:default;}
+
+.sous-score{text-align:center;padding:12px;background:var(--jour-clair);border-radius:10px;margin-top:12px;display:none;}
+.sous-score-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;color:var(--jour-fonce);}
+.sous-score-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.sous-score.show{display:block;}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn{padding:12px 20px;border:none;border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;letter-spacing:.5px;cursor:pointer;min-height:3rem;text-transform:uppercase;transition:all .15s;}
+.btn-rec{background:#fff;color:var(--gris);border:2px solid var(--bord);}
+.btn-rec:hover{background:var(--jour-clair);}
+.btn-suite{background:var(--jour-fonce);color:#fff;}
+.btn-suite:hover{background:var(--jour);}
+
+.bilan{display:none;background:#fff;border:2px solid var(--bord);border-radius:14px;padding:20px;margin-top:16px;text-align:center;}
+.bilan.show{display:block;animation:fadeUp .4s ease;}
+.bilan-etoiles{font-size:1.9rem;margin-bottom:8px;letter-spacing:4px;}
+.bilan-stamp{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;letter-spacing:3px;padding:8px 20px;border-radius:10px;border:3px solid;display:inline-block;margin-bottom:12px;animation:stampPop .5s ease;}
+.bilan-stamp.ok{color:#157f3a;border-color:#22c55e;background:var(--vert-bg);}
+.bilan-stamp.moyen{color:#92400e;border-color:#f59e0b;background:#fffbeb;}
+.bilan-stamp.ko{color:#991b1b;border-color:#ef4444;background:var(--rouge-bg);}
+.bilan-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--jour-fonce);margin-bottom:4px;line-height:1;}
+.bilan-msg{font-size:.92rem;line-height:1.8;color:var(--gris);margin-bottom:14px;}
+.bilan-detail{display:flex;flex-direction:column;gap:6px;text-align:left;margin-bottom:16px;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:7px;font-size:.82rem;font-family:'JetBrains Mono',monospace;}
+.bilan-ligne.ok{background:var(--vert-bg);color:#157f3a;}
+.bilan-ligne.moyen{background:#fffbeb;color:#92400e;}
+.bilan-ligne.ko{background:var(--rouge-bg);color:#991b1b;}
+.bilan-ligne-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;}
+
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);transform:scale(1);}50%{box-shadow:0 0 0 8px var(--day-glow);transform:scale(1.015);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.2) rotate(-6deg)}60%{opacity:1;transform:scale(1.1) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(-4deg)}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.flash-pop{position:fixed;top:50%;left:50%;font-size:4rem;pointer-events:none;z-index:999;animation:flashPop 1s ease forwards;}
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="pazapa-header">
+  <div class="logo-badge">
+    <div class="pts"><i></i><i></i><i></i></div>
+    PAZAPA · FRANÇAIS · 4E
+  </div>
+  <div class="header-semaine">Semaine 6 — Jour 1</div>
+  <div class="header-titre">Je m'entraîne · <span class="accent">Comprendre Kapuscinski</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="texte-toggle" id="texteBox" onclick="toggleTexte()">
+    <span>📖 Texte support</span>
+    <span id="texteArrow">▼</span>
+  </div>
+  <div class="texte-panel" id="textePanel">
+    <div class="auteur-date">R. Kapuscinski, <em>Autoportrait d'un reporter</em>, Flammarion, 2010</div>
+    <p>A l’heure actuelle, on ne peut plus imaginer la vie de l’homme sans les médias. Avant, l’homme ne pouvait pas vivre sans armes, puis sans voitures ou sans électricité. Aujourd’hui, il ne peut vivre sans les médias. Le danger vient de ce que les médias, qui sont devenus une puissance, ne s’occupent plus exclusivement de l’information. Ils se sont fixés un objectif plus ambitieux : ils façonnent la réalité. De plus en plus souvent, nous percevons le monde tel qu’il nous est montré à la télévision et non pas tel qu’il est en réalité. La télévision nous fait vivre dans un univers de contes.</p>
+    <p>L’histoire que nous connaissons d’après la télévision n’est pas le fruit de notre existence, mais de notre imagination. Nous ne faisons que l’imaginer, sur la base d’éléments réels, certes, mais dont la construction dépend de nous nous recevons une image proche de la réalité ou une image qui en est totalement éloignée en fonction de la manière dont nous structurons ces éléments. Il s’agit d’une sorte de fabulation du monde.</p>
+    <p>Le rôle de l’image télévisée est énorme. Nous devons toutefois rester conscients que l’image ne suscite pas de réflexion ; elle agit seulement sur nos émotions.</p>
+    <p>Il est impossible de freiner des phénomènes négatifs, l’exploitation des émotions par exemple. Un journaliste entre dans l’appartement d’une mère dont le fils vient de mourir et il lui demande comment elle se sent. Tel l’œil d’une hyène<sup>1</sup>, l’objectif de la caméra guette les larmes, les gestes de désespoir. Il n’a pas de scrupule, pas de freins éthiques<sup>2</sup>. Et il n’y a aucun moyen d’échapper à cela, car le mécanisme de la concurrence est un mécanisme de marché ; or le mécanisme de marché est la base de la démocratie. Nous n’avons pas de système meilleur que le marché, la démocratie, la concurrence, un système qui veut que si quelqu’un (un journaliste en l’occurrence) refoule un comportement, il libère une place qui sera aussitôt occupée par un autre. On peut condamner ce système, le limiter, le critiquer. Mais on ne peut pas le supprimer.</p>
+    <p>Combien de fois voyons-nous des gens confondre le concept<sup>3</sup> de « voir » avec celui de « comprendre » ! Par exemple, deux personnes se querellent. L’une dit à l’autre : « Ma chère, tu as tort. Ce que tu dis est faux ! » Et l’autre de répondre : « Comment ça, j’ai tort ? Puisque je l’ai vu à la télévision ! » </p>
+    <p>En percevant le monde par le biais des médias, nous ne connaissons que les conséquences, la surface des événements. Or, si nous ne connaissons pas leurs causes, nous ne sommes pas en état de réfléchir sur eux de manière appropriée. En même temps, les médias ne sont pas en mesure de tout expliquer de manière exhaustive<sup>4</sup> ; ils opèrent donc une sélection, un choix. Le principe guidant la transmission de l’information est le résumé.</p>
+    <div class="notes-list">
+      <div><b>1.</b> animal prédateur</div>
+      <div><b>2.</b> moraux</div>
+      <div><b>3.</b> la notion</div>
+      <div><b>4.</b> complète</div>
+    </div>
+  </div>
+
+  <div class="score-bar">
+    <div>
+      <div class="score-num" id="scoreGlobal">0</div>
+      <div class="score-label">/ 17 pts</div>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="scoreFill"></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab1">📝 Partie A<br><span style="font-size:.55rem;opacity:.8">/5 pts</span></button>
+    <button class="tab-btn" id="tab2">📰 Partie B<br><span style="font-size:.55rem;opacity:.8">/12 pts</span></button>
+  </div>
+
+  <div id="tc1">
+    <div class="act-card">
+      <div class="act-header">
+        <span class="act-nom">📝 Partie A — Résumer les paragraphes</span>
+        <span class="act-pts">5 pts</span>
+      </div>
+      <div class="act-body">
+        <div class="consigne-box"><span class="consigne-label">Consigne</span>Ce texte se compose de cinq paragraphes. Pour chacun, choisis dans le menu déroulant le résumé qui correspond le mieux.</div>
+        <div class="dots-row" id="dotsA"></div>
+        <div id="a-cards"></div>
+        <div class="sous-score" id="ssA">
+          <div class="sous-score-val" id="ssvA">0 / 5</div>
+          <div class="sous-score-label">Score Partie A</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-rec" onclick="resetA()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row" id="suiteA" style="display:none;">
+          <button class="btn btn-suite" onclick="goToPartieB()">Partie B ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tc2" style="display:none;">
+    <div class="act-card">
+      <div class="act-header">
+        <span class="act-nom">📰 Partie B — Questions de compréhension et d'analyse</span>
+        <span class="act-pts">12 pts</span>
+      </div>
+      <div class="act-body">
+        <div class="consigne-box"><span class="consigne-label">Consigne</span>Réponds à chaque question, puis choisis la citation du texte qui justifie ta réponse.</div>
+        <div class="dots-row" id="dotsB"></div>
+        <div id="q-cards"></div>
+        <div class="sous-score" id="ssB">
+          <div class="sous-score-val" id="ssvB">0 / 12</div>
+          <div class="sous-score-label">Score Partie B</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-rec" onclick="resetB()">↺ Recommencer</button>
+        </div>
+        <div class="btn-row" id="suiteB" style="display:none;">
+          <button class="btn btn-suite" onclick="afficherBilan()">Voir le bilan ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bilan" id="bilan">
+    <div class="bilan-etoiles" id="bEtoiles"></div>
+    <div class="bilan-stamp" id="bTampon"></div>
+    <div class="bilan-score" id="bScore"></div>
+    <div class="bilan-msg" id="bMsg"></div>
+    <div class="bilan-detail" id="bDetail"></div>
+    <button class="btn btn-rec" onclick="recommencer()" style="margin:0 auto;display:block;">↺ Recommencer depuis le début</button>
+  </div>
+</div>
+<script>
+/* ══ TEXTE SUPPORT ══ */
+function toggleTexte(){
+  document.getElementById('texteBox').classList.toggle('open');
+  document.getElementById('textePanel').classList.toggle('open');
+  var arrow=document.getElementById('texteArrow');
+  arrow.textContent=document.getElementById('textePanel').classList.contains('open')?'▲':'▼';
+}
+
+/* ══ AUDIO ══ */
+var actx=null;
+function initA(){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx&&actx.state==='suspended')actx.resume();}catch(e){}}
+document.addEventListener('pointerdown',initA,{once:true});
+function beepOk(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.setValueAtTime(660,actx.currentTime);o.frequency.setValueAtTime(880,actx.currentTime+.08);g.gain.setValueAtTime(.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.25);o.start();o.stop(actx.currentTime+.25);}catch(e){}}
+function beepErr(){try{if(!actx)return;var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sawtooth';o.frequency.setValueAtTime(220,actx.currentTime);o.frequency.exponentialRampToValueAtTime(90,actx.currentTime+.22);g.gain.setValueAtTime(.1,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.22);o.start();o.stop(actx.currentTime+.22);}catch(e){}}
+function beepFinal(ok){try{if(!actx)return;var freqs=ok?[660,880,1100,1320,1540]:[300,250,200];freqs.forEach(function(f,i){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.09,actx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+i*.1+.18);o.start(actx.currentTime+i*.1);o.stop(actx.currentTime+i*.1+.18);});}catch(e){}}
+function showFlash(ok){var d=document.createElement('div');d.className='flash-pop';d.textContent=ok?'✓':'✗';document.body.appendChild(d);setTimeout(function(){d.remove();},1000);}
+function rnd(){try{var a=new Uint32Array(1);crypto.getRandomValues(a);var t=Date.now()&0xFFFF;return((a[0]^(t*2654435761))>>>0)/4294967296;}catch(e){return Math.random();}}
+function shuffleIdx(n){var arr=[];for(var i=0;i<n;i++)arr.push(i);for(var i=arr.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function balancedPositions(n,k){
+  var base=[];for(var i=0;i<n;i++)base.push(i%k);
+  var arr=base.slice();
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+function buildOrderWithTarget(correctIdx,totalLen,targetPos){
+  var others=[];for(var i=0;i<totalLen;i++)if(i!==correctIdx)others.push(i);
+  var shuffledOthers=shuffleIdx(others.length).map(function(k){return others[k];});
+  var order=[];var oi=0;
+  for(var pos=0;pos<totalLen;pos++){
+    if(pos===targetPos)order.push(correctIdx);
+    else{order.push(shuffledOthers[oi]);oi++;}
+  }
+  return order;
+}
+
+/* ══ DOTS ══ */
+function buildDots(elId,n){
+  var row=document.getElementById(elId);
+  row.innerHTML='';
+  for(var i=0;i<n;i++){
+    var d=document.createElement('div');
+    d.className='dot';d.id=elId+'_'+i;d.textContent=i+1;
+    row.appendChild(d);
+  }
+}
+function markDot(elId,i,ok){
+  var d=document.getElementById(elId+'_'+i);
+  if(d){d.className='dot '+(ok?'ok':'ko');d.textContent=ok?'✓':'✗';}
+}
+
+var scA=0,scB=0;
+function updateGlobal(){
+  var t=scA+scB;
+  document.getElementById('scoreGlobal').textContent=t;
+  document.getElementById('scoreFill').style.width=(t/17*100)+'%';
+}
+
+
+/* ══ DONNÉES PARTIE A (contenu exact — paragraphes complets) ══ */
+var A_DATA=[
+  {
+    para:"À l'heure actuelle, on ne peut plus imaginer la vie de l'homme sans les médias. Avant, l'homme ne pouvait pas vivre sans armes, puis sans voitures ou sans électricité. Aujourd'hui, il ne peut vivre sans les médias. Le danger vient de ce que les médias, qui sont devenus une puissance, ne s'occupent plus exclusivement de l'information. Ils se sont fixés un objectif plus ambitieux : ils façonnent la réalité. De plus en plus souvent, nous percevons le monde tel qu'il nous est montré à la télévision et non pas tel qu'il est en réalité. La télévision nous fait vivre dans un univers de contes.",
+    ch:["Kapuscinski dénonce les médias en soulignant qu'ils ne se contentent plus d'informer : ils façonnent notre perception de la réalité.",
+        "Kapuscinski défend les médias en montrant qu'ils sont nécessaires comme les armes ou l'électricité.",
+        "Kapuscinski explique que la télévision est un outil pédagogique qui aide les gens à mieux comprendre le monde."],
+    a:0,
+    fb:"Ce premier paragraphe pose le constat de départ : les médias sont devenus une \"puissance\" qui ne se contente plus d'informer mais \"façonne la réalité\". Kapuscinski compare notre dépendance aux médias à celle de l'homme vis-à-vis des armes ou de l'électricité, avant de formuler sa critique : \"La télévision nous fait vivre dans un univers de contes.\""
+  },
+  {
+    para:"L'histoire que nous connaissons d'après la télévision n'est pas le fruit de notre existence, mais de notre imagination. Nous ne faisons que l'imaginer, sur la base d'éléments réels, certes, mais dont la construction dépend de nous nous recevons une image proche de la réalité ou une image qui en est totalement éloignée en fonction de la manière dont nous structurons ces éléments. Il s'agit d'une sorte de fabulation du monde.",
+    ch:["Kapuscinski explique que notre connaissance du monde via la télévision n'est pas réelle mais construite par notre imagination, fondée sur des éléments réels mais déformés.",
+        "Kapuscinski pense que la télévision est le meilleur moyen de connaître l'histoire et les événements du monde.",
+        "Kapuscinski affirme que les gens n'ont pas d'imagination et que la télévision supplée à ce manque."],
+    a:0,
+    fb:"Ce deuxième paragraphe approfondit la thèse : la connaissance que nous tirons de la télévision \"n'est pas le fruit de notre existence, mais de notre imagination\". Kapuscinski introduit le concept de \"fabulation du monde\" : nous construisons une version imaginée de la réalité à partir d'éléments réels mais déformés."
+  },
+  {
+    para:"Le rôle de l'image télévisée est énorme. Nous devons toutefois rester conscients que l'image ne suscite pas de réflexion ; elle agit seulement sur nos émotions.",
+    ch:["Kapuscinski souligne la force de l'image télévisée mais met en garde : l'image ne provoque pas la réflexion, elle agit sur les émotions.",
+        "Kapuscinski pense que l'image télévisée est le meilleur moyen de susciter une réflexion critique chez les téléspectateurs.",
+        "Kapuscinski affirme que les émotions sont plus importantes que la réflexion pour comprendre le monde."],
+    a:0,
+    fb:"Ce court paragraphe formule une mise en garde essentielle : \"l'image ne suscite pas de réflexion ; elle agit seulement sur nos émotions.\" Cette idée est au cœur de la critique de Kapuscinski : une information purement émotionnelle ne permet pas une compréhension rationnelle du monde."
+  },
+  {
+    para:"Il est impossible de freiner des phénomènes négatifs, l'exploitation des émotions par exemple. Un journaliste entre dans l'appartement d'une mère dont le fils vient de mourir et il lui demande comment elle se sent. Tel l'œil d'une hyène, l'objectif de la caméra guette les larmes, les gestes de désespoir. Il n'a pas de scrupule, pas de freins éthiques. Et il n'y a aucun moyen d'échapper à cela, car le mécanisme de la concurrence est un mécanisme de marché ; or le mécanisme de marché est la base de la démocratie. Nous n'avons pas de système meilleur que le marché, la démocratie, la concurrence, un système qui veut que si quelqu'un (un journaliste en l'occurrence) refoule un comportement, il libère une place qui sera aussitôt occupée par un autre. On peut condamner ce système, le limiter, le critiquer. Mais on ne peut pas le supprimer.",
+    ch:["Kapuscinski explique que la démocratie et le marché rendent impossible toute suppression des dérives journalistiques, car la concurrence remplace toujours un comportement chassé par un autre.",
+        "Kapuscinski défend la démocratie et le marché comme les meilleurs systèmes pour réguler les abus journalistiques.",
+        "Kapuscinski pense que les journalistes doivent être condamnés pour leurs comportements abusifs."],
+    a:0,
+    fb:"Ce paragraphe est le plus argumentatif : Kapuscinski explique pourquoi il est \"impossible\" d'éliminer les dérives journalistiques. Son raisonnement : concurrence → marché → démocratie → on ne peut supprimer le système. Si un journaliste renonce à un comportement abusif, \"il libère une place qui sera aussitôt occupée par un autre\"."
+  },
+  {
+    para:"Combien de fois voyons-nous des gens confondre le concept de « voir » avec celui de « comprendre » ! Par exemple, deux personnes se querellent. L'une dit à l'autre : « Ma chère, tu as tort. Ce que tu dis est faux ! » Et l'autre de répondre : « Comment ça, j'ai tort ? Puisque je l'ai vu à la télévision ! » En percevant le monde par le biais des médias, nous ne connaissons que les conséquences, la surface des événements. Or, si nous ne connaissons pas leurs causes, nous ne sommes pas en état de réfléchir sur eux de manière appropriée. En même temps, les médias ne sont pas en mesure de tout expliquer de manière exhaustive ; ils opèrent donc une sélection, un choix. Le principe guidant la transmission de l'information est le résumé.",
+    ch:["Kapuscinski dénonce la confusion entre \"voir\" et \"comprendre\" et conclut que les médias, en résumant l'information, ne permettent pas une compréhension véritable des causes des événements.",
+        "Kapuscinski pense que voir un événement à la télévision est une preuve suffisante de sa vérité.",
+        "Kapuscinski conclut que les médias font un travail exhaustif d'explication et permettent une bonne compréhension globale du monde."],
+    a:0,
+    fb:"Ce dernier paragraphe formule la conclusion de Kapuscinski : les médias ne montrent que \"les conséquences, la surface des événements\". Sans en connaître les causes, on ne peut \"pas réfléchir sur eux de manière appropriée\". La phrase finale est un constat implacable : \"Le principe guidant la transmission de l'information est le résumé.\""
+  }
+];
+
+/* ══ DONNÉES PARTIE B (contenu exact) ══ */
+var B_DATA=[
+  {
+    titre:"Le constat de Kapuscinski (lignes 1 à 16)",
+    qA:"Quel est le constat principal de Kapuscinski dans les premières lignes du texte ?",
+    chA:["Les médias informent objectivement les citoyens et sont indispensables à la démocratie.",
+         "Les médias sont devenus si puissants qu'ils ne se contentent plus d'informer : ils construisent une version déformée de la réalité.",
+         "Les médias sont inutiles et doivent être supprimés pour protéger les citoyens."],
+    aA:1,
+    qB:"Quelle citation du texte résume le mieux ce constat ?",
+    chB:["« La télévision nous fait vivre dans un univers de contes. »",
+         "« ils façonnent la réalité »",
+         "« nous percevons le monde tel qu'il nous est montré à la télévision »"],
+    aB:1,
+    fbA:"Le constat de Kapuscinski est alarmiste : les médias ont dépassé leur rôle informatif pour devenir des \"puissances\" qui \"façonnent la réalité\". Il ne s'agit plus seulement de décrire le monde, mais de le construire à travers le prisme médiatique.",
+    fbB:"\"Ils façonnent la réalité\" : c'est la formule la plus courte et la plus forte du texte. Le verbe \"façonner\" (= modeler) dit que les médias ne reflètent pas la réalité, ils la créent. C'est l'argument central de tout le texte."
+  },
+  {
+    titre:"Le jugement sur la télévision",
+    qA:"Quel jugement Kapuscinski porte-t-il sur la télévision ? Est-il positif ou négatif ?",
+    chA:["Positif : Kapuscinski pense que la télévision est un progrès nécessaire comme les armes ou l'électricité.",
+         "Négatif et critique : Kapuscinski pense que la télévision déforme la réalité, exploite les émotions et empêche une véritable réflexion.",
+         "Neutre : Kapuscinski décrit la télévision sans prendre position pour ou contre elle."],
+    aA:1,
+    qB:"Quelle citation du texte montre ce jugement négatif de manière particulièrement forte ?",
+    chB:["« l'image ne suscite pas de réflexion ; elle agit seulement sur nos émotions »",
+         "« Tel l'œil d'une hyène, l'objectif de la caméra guette les larmes, les gestes de désespoir »",
+         "« Le principe guidant la transmission de l'information est le résumé »"],
+    aB:1,
+    fbA:"Le jugement de Kapuscinski est clairement négatif. Il accumule les arguments : la télévision \"façonne la réalité\", nous fait vivre \"dans un univers de contes\", exploite les émotions, et ne permet pas de comprendre les causes des événements. C'est une critique systématique des dérives médiatiques.",
+    fbB:"La comparaison de la caméra à \"l'œil d'une hyène\" est la formulation la plus violente du texte. Une hyène est un prédateur qui se nourrit de la détresse d'autrui : en utilisant cette image, Kapuscinski condamne moralement le comportement de certains journalistes."
+  },
+  {
+    titre:"Le \"système\" (lignes 28-31)",
+    qA:"De quel \"système\" Kapuscinski parle-t-il dans ce passage ?",
+    chA:["Du système judiciaire qui condamne les journalistes qui abusent de leur pouvoir.",
+         "Du système économique et démocratique fondé sur la concurrence et le marché, qui rend impossible toute suppression des dérives journalistiques.",
+         "Du système éducatif qui devrait apprendre aux citoyens à mieux lire les médias."],
+    aA:1,
+    qB:"Quelle citation du texte explique pourquoi ce système ne peut pas être supprimé ?",
+    chB:["« On peut condamner ce système, le limiter, le critiquer. Mais on ne peut pas le supprimer. »",
+         "« Il n'a pas de scrupule, pas de freins éthiques. »",
+         "« le mécanisme de marché est la base de la démocratie »"],
+    aB:0,
+    fbA:"Le \"système\" désigne l'ensemble marché + démocratie + concurrence. Le raisonnement de Kapuscinski est le suivant : si un journaliste renonce à un comportement abusif, \"il libère une place qui sera aussitôt occupée par un autre\". La concurrence impose la surenchère émotionnelle : personne ne peut y échapper.",
+    fbB:"Cette phrase finale du paragraphe est une concession : Kapuscinski reconnaît qu'on peut critiquer le système, mais il affirme qu'on ne peut pas le supprimer. C'est une position réaliste et désabusée, pas une défense du système."
+  },
+  {
+    titre:"La confusion entre \"voir\" et \"comprendre\"",
+    qA:"Pourquoi Kapuscinski considère-t-il comme une erreur de confondre \"voir\" et \"comprendre\" ?",
+    chA:["Parce que voir un événement à la télévision donne toujours une image complète et fidèle de la réalité.",
+         "Parce que les médias ne montrent que \"les conséquences, la surface des événements\" sans en expliquer les causes, ce qui empêche une vraie compréhension.",
+         "Parce que les gens ne regardent pas suffisamment la télévision pour bien comprendre le monde."],
+    aA:1,
+    qB:"Quelle citation du texte justifie cette distinction ?",
+    chB:["« Le principe guidant la transmission de l'information est le résumé »",
+         "« nous ne connaissons que les conséquences, la surface des événements. Or, si nous ne connaissons pas leurs causes, nous ne sommes pas en état de réfléchir sur eux de manière appropriée »",
+         "« Comment ça, j'ai tort ? Puisque je l'ai vu à la télévision ! »"],
+    aB:1,
+    fbA:"Kapuscinski distingue deux niveaux : voir (perception immédiate, surface) et comprendre (analyse, causes). Les médias ne montrent que la surface. Sans les causes, il est impossible de vraiment comprendre un événement. C'est pourquoi \"voir à la télévision\" ne peut pas être une preuve de compréhension.",
+    fbB:"\"Nous ne connaissons que les conséquences, la surface des événements\" : c'est la formulation la plus précise de l'argument. Les médias montrent ce qui se passe (les conséquences), mais pas pourquoi cela se passe (les causes)."
+  },
+  {
+    titre:"La dernière phrase du texte",
+    qA:"\"Le principe guidant la transmission de l'information est le résumé.\" Comprends-tu cette phrase ? Qu'est-ce que Kapuscinski veut dire ?",
+    chA:["Kapuscinski veut dire que les médias font un excellent travail en résumant l'information pour que tout le monde puisse y accéder facilement.",
+         "Kapuscinski veut dire que les médias, forcés de sélectionner et de résumer, ne peuvent jamais donner une information complète : le résumé est une limite structurelle.",
+         "Kapuscinski veut dire que le résumé est suffisant pour comprendre les événements du monde."],
+    aA:1,
+    qB:"Cette phrase constitue-t-elle un éloge de la télévision ou un reproche ?",
+    chB:["Un éloge : Kapuscinski admire la capacité des médias à résumer l'information complexe pour les citoyens.",
+         "Un reproche : en affirmant que le principe des médias est le \"résumé\", Kapuscinski souligne qu'ils privent les citoyens d'une information exhaustive et donc d'une vraie compréhension du monde.",
+         "Ni l'un ni l'autre : c'est une simple observation neutre sans jugement de valeur."],
+    aB:1,
+    fbA:"Le mot \"résumé\" est le dernier mot du texte : ce choix est délibéré. Kapuscinski a montré tout au long du texte que les médias appauvrissent l'information. La conclusion est logique : leur principe fondamental est le résumé, c'est-à-dire la réduction. Ce n'est pas un éloge : c'est un constat critique.",
+    fbB:"C'est un reproche voilé. Kapuscinski vient de dire que les médias \"ne sont pas en mesure de tout expliquer de manière exhaustive\" : en terminant sur \"le résumé\", il dit que cette limite n'est pas un accident, c'est le principe même des médias. Le résumé = la simplification = l'obstacle à la vraie compréhension."
+  },
+  {
+    titre:"La figure de style centrale du texte",
+    qA:"Kapuscinski compare l'objectif de la caméra à \"l'œil d'une hyène\". De quel procédé stylistique s'agit-il, et quel effet cela produit-il ?",
+    chA:["C'est une métaphore qui présente la caméra comme un outil neutre de documentation.",
+         "C'est une comparaison qui assimile la caméra à un prédateur : elle produit un effet de répulsion et condamne moralement le comportement des journalistes.",
+         "C'est une hyperbole qui exagère volontairement le comportement des journalistes pour faire rire le lecteur."],
+    aA:1,
+    qB:"Quelle autre formule du texte renforce ce jugement moral négatif sur les journalistes ?",
+    chB:["« les médias ne sont pas en mesure de tout expliquer de manière exhaustive »",
+         "« Il n'a pas de scrupule, pas de freins éthiques »",
+         "« le mécanisme de la concurrence est un mécanisme de marché »"],
+    aB:1,
+    fbA:"\"Tel l'œil d'une hyène\" est une comparaison (avec \"tel\" = comme). La hyène est un prédateur qui se nourrit de la souffrance d'autres animaux : en comparant la caméra à cet animal, Kapuscinski condamne les journalistes qui \"guettent les larmes, les gestes de désespoir\" pour en faire un spectacle.",
+    fbB:"\"Il n'a pas de scrupule, pas de freins éthiques\" : cette phrase courte et sans ambiguïté porte un jugement moral très dur. Les \"freins éthiques\" (= moraux) désignent les limites que la conscience impose normalement. Kapuscinski dit que le journaliste décrit n'en a aucun."
+  }
+];
+var qVerified=[],qChoiceA=[],qChoiceB=[],orderA=[],orderB=[],posSeqA=[],posSeqB=[],qIndex=0;
+
+/* ══ PARTIE A — menus déroulants, répartition équilibrée A/B/C ══ */
+var aVerified=[],aChoice=[],aOrder=[],aPosSeq=[];
+
+function buildA(){
+  buildDots('dotsA',5);
+  scA=0;
+  aVerified=A_DATA.map(function(){return false;});
+  aChoice=[];
+  document.getElementById('ssA').classList.remove('show');
+  document.getElementById('suiteA').style.display='none';
+  aPosSeq=balancedPositions(5,3);
+
+  var cont=document.getElementById('a-cards');
+  cont.innerHTML='';
+  A_DATA.forEach(function(item,ai){
+    aOrder[ai]=buildOrderWithTarget(item.a,item.ch.length,aPosSeq[ai]);
+    var optHtml='';
+    aOrder[ai].forEach(function(origIdx){
+      optHtml+='<button type="button" class="dropdown-option" data-oi="'+origIdx+'" onclick="choisirA('+ai+','+origIdx+')">'+item.ch[origIdx]+'</button>';
+    });
+    var card=document.createElement('div');
+    card.className='q-card';
+    card.innerHTML=
+      '<div class="q-header"><span class="q-titre">Paragraphe '+(ai+1)+'</span></div>'+
+      '<div class="q-body">'+
+        '<div class="para-box">'+item.para+'</div>'+
+        '<div class="select-label">Choisis le bon résumé :</div>'+
+        '<div class="dropdown-wrap">'+
+          '<button type="button" class="dropdown-toggle placeholder" id="aTog_'+ai+'" onclick="toggleDropdownA('+ai+')"><span class="txt">— Choisis un résumé —</span><span class="arrow">▼</span></button>'+
+          '<div class="dropdown-menu" id="aMenu_'+ai+'">'+optHtml+'</div>'+
+        '</div>'+
+        '<button class="btn btn-rec q-verif-btn" id="aVerifBtn'+ai+'" onclick="verifierA('+ai+')" disabled>✓ Vérifier</button>'+
+        '<div class="q-fb" id="aFb_'+ai+'"></div>'+
+      '</div>';
+    cont.appendChild(card);
+  });
+}
+
+function toggleDropdownA(ai){
+  if(aVerified[ai])return;
+  var menu=document.getElementById('aMenu_'+ai);
+  var isOpen=menu.classList.contains('open');
+  document.querySelectorAll('.dropdown-menu.open').forEach(function(m){m.classList.remove('open');});
+  document.querySelectorAll('.dropdown-toggle.open').forEach(function(t){t.classList.remove('open');});
+  if(!isOpen){
+    menu.classList.add('open');
+    document.getElementById('aTog_'+ai).classList.add('open');
+  }
+}
+
+function choisirA(ai,origIdx){
+  if(aVerified[ai])return;
+  aChoice[ai]=origIdx;
+  var item=A_DATA[ai];
+  var tog=document.getElementById('aTog_'+ai);
+  tog.querySelector('.txt').textContent=item.ch[origIdx];
+  tog.classList.remove('placeholder');
+  tog.classList.remove('open');
+  document.getElementById('aMenu_'+ai).classList.remove('open');
+  document.getElementById('aVerifBtn'+ai).disabled=false;
+}
+
+function verifierA(ai){
+  if(aVerified[ai])return;
+  aVerified[ai]=true;
+  document.getElementById('aVerifBtn'+ai).setAttribute('disabled','');
+  document.getElementById('aTog_'+ai).style.pointerEvents='none';
+  document.getElementById('aTog_'+ai).style.opacity='.7';
+  var item=A_DATA[ai];
+  var ok=(aChoice[ai]===item.a);
+  var fb=document.getElementById('aFb_'+ai);
+  if(ok){fb.innerHTML='✓ '+item.fb;fb.className='q-fb ok';beepOk();}
+  else{fb.innerHTML='✗ '+item.fb;fb.className='q-fb ko';beepErr();}
+  fb.style.display='block';
+
+  if(ok)scA++;
+  markDot('dotsA',ai,ok);
+  showFlash(ok);
+  updateGlobal();
+
+  if(aVerified.every(function(v){return v;})){
+    document.getElementById('ssvA').textContent=scA+' / 5';
+    document.getElementById('ssA').classList.add('show');
+    document.getElementById('tab1').classList.add('done');
+    document.getElementById('suiteA').style.display='flex';
+    beepFinal(scA>=4);
+  }
+}
+
+function resetA(){buildA();updateGlobal();}
+
+function goToPartieB(){
+  document.getElementById('tc1').style.display='none';
+  document.getElementById('tc2').style.display='block';
+  document.getElementById('tab1').classList.remove('active');
+  document.getElementById('tab2').classList.add('active');
+}
+
+/* ══ PARTIE B — séquentiel, répartition équilibrée A/B/C ══ */
+function buildB(){
+  buildDots('dotsB',6);
+  scB=0;
+  qIndex=0;
+  qVerified=B_DATA.map(function(){return false;});
+  qChoiceA=[];qChoiceB=[];
+  document.getElementById('ssB').classList.remove('show');
+  document.getElementById('suiteB').style.display='none';
+  posSeqA=balancedPositions(6,3);
+  posSeqB=balancedPositions(6,3);
+  renderQCard(0);
+}
+
+function renderQCard(qi){
+  var item=B_DATA[qi];
+  orderA[qi]=buildOrderWithTarget(item.aA,item.chA.length,posSeqA[qi]);
+  orderB[qi]=buildOrderWithTarget(item.aB,item.chB.length,posSeqB[qi]);
+  var chAhtml=orderA[qi].map(function(origIdx){return '<button class="choix-btn" data-oi="'+origIdx+'" onclick="choisirQ('+qi+',\'A\','+origIdx+')">'+item.chA[origIdx]+'</button>';}).join('');
+  var chBhtml=orderB[qi].map(function(origIdx){return '<button class="choix-btn" data-oi="'+origIdx+'" onclick="choisirQ('+qi+',\'B\','+origIdx+')">'+item.chB[origIdx]+'</button>';}).join('');
+  var cont=document.getElementById('q-cards');
+  cont.innerHTML=
+    '<div class="q-card">'+
+      '<div class="q-header"><span class="q-titre">Question Q'+(qi+1)+' — '+item.titre+'</span></div>'+
+      '<div class="q-body">'+
+        '<div class="sub-q-block">'+
+          '<div class="sub-q-label">Question A</div>'+
+          '<div class="sub-q-text sub-q-text-a">'+item.qA+'</div>'+
+          '<div class="choix-group" id="qChA_'+qi+'">'+chAhtml+'</div>'+
+          '<div class="q-fb" id="qFbA_'+qi+'"></div>'+
+        '</div>'+
+        '<div class="sub-q-block">'+
+          '<div class="sub-q-label">Question B</div>'+
+          '<div class="sub-q-text sub-q-text-b">'+item.qB+'</div>'+
+          '<div class="choix-group" id="qChB_'+qi+'">'+chBhtml+'</div>'+
+          '<div class="q-fb" id="qFbB_'+qi+'"></div>'+
+        '</div>'+
+        '<button class="btn btn-rec q-verif-btn" id="qVerifBtn'+qi+'" onclick="verifierQ('+qi+')" disabled>✓ Vérifier</button>'+
+        '<div class="btn-row" id="qNextRow_'+qi+'" style="display:none;">'+
+          '<button class="btn btn-suite" onclick="nextQQuestion()">Question suivante ›</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function choisirQ(qi,sub,origIdx){
+  if(qVerified[qi])return;
+  var groupId=(sub==='A')?'qChA_':'qChB_';
+  var group=document.getElementById(groupId+qi);
+  group.querySelectorAll('button').forEach(function(b){b.style.borderColor='var(--jour-fonce)';b.style.background='#f7f4ec';});
+  group.querySelector('[data-oi="'+origIdx+'"]').style.background='var(--jour-clair)';
+  if(sub==='A')qChoiceA[qi]=origIdx; else qChoiceB[qi]=origIdx;
+  var ready=(qChoiceA[qi]!==undefined && qChoiceB[qi]!==undefined);
+  document.getElementById('qVerifBtn'+qi).disabled=!ready;
+}
+
+function verifierQ(qi){
+  if(qVerified[qi])return;
+  qVerified[qi]=true;
+  document.getElementById('qVerifBtn'+qi).setAttribute('disabled','');
+  var item=B_DATA[qi];
+  var okA=(qChoiceA[qi]===item.aA);
+  var okB=(qChoiceB[qi]===item.aB);
+
+  var gA=document.getElementById('qChA_'+qi);
+  gA.querySelectorAll('button').forEach(function(b){
+    var oi=parseInt(b.dataset.oi);
+    b.disabled=true;
+    if(oi===item.aA)b.classList.add('ok');
+    else if(oi===qChoiceA[qi])b.classList.add('ko');
+  });
+  var fbA=document.getElementById('qFbA_'+qi);
+  fbA.innerHTML=(okA?'✓ ':'✗ ')+item.fbA;
+  fbA.className='q-fb '+(okA?'ok':'ko');
+  fbA.style.display='block';
+
+  var gB=document.getElementById('qChB_'+qi);
+  gB.querySelectorAll('button').forEach(function(b){
+    var oi=parseInt(b.dataset.oi);
+    b.disabled=true;
+    if(oi===item.aB)b.classList.add('ok');
+    else if(oi===qChoiceB[qi])b.classList.add('ko');
+  });
+  var fbB=document.getElementById('qFbB_'+qi);
+  fbB.innerHTML=(okB?'✓ ':'✗ ')+item.fbB;
+  fbB.className='q-fb '+(okB?'ok':'ko');
+  fbB.style.display='block';
+
+  if(okA)scB++;
+  if(okB)scB++;
+  markDot('dotsB',qi,okA&&okB);
+  showFlash(okA&&okB);
+  updateGlobal();
+
+  if(okA&&okB)beepOk(); else beepErr();
+
+  if(qi<B_DATA.length-1){
+    document.getElementById('qNextRow_'+qi).style.display='flex';
+  } else {
+    document.getElementById('ssvB').textContent=scB+' / 12';
+    document.getElementById('ssB').classList.add('show');
+    document.getElementById('tab2').classList.add('done');
+    document.getElementById('suiteB').style.display='flex';
+    beepFinal(scB>=8);
+  }
+}
+
+function nextQQuestion(){
+  qIndex++;
+  if(qIndex<B_DATA.length){
+    renderQCard(qIndex);
+  }
+}
+
+function resetB(){buildB();updateGlobal();}
+
+/* ══ BILAN ══ */
+function afficherBilan(){
+  var total=scA+scB;
+  document.getElementById('bScore').textContent=total+' / 17';
+  var pct=total/17;
+  var nb=pct>=.89?5:pct>=.67?4:pct>=.44?3:pct>=.22?2:1;
+  document.getElementById('bEtoiles').textContent='⭐'.repeat(nb)+'☆'.repeat(5-nb);
+  var tp=document.getElementById('bTampon'),msg=document.getElementById('bMsg');
+  if(total>=16){tp.textContent='EXCELLENT';tp.className='bilan-stamp ok';msg.textContent="Analyse complète et précise ! Tu maîtrises la lecture de ce texte argumentatif.";}
+  else if(total>=12){tp.textContent='TRÈS BIEN';tp.className='bilan-stamp ok';msg.textContent='Très bonne analyse.';}
+  else if(total>=7){tp.textContent='BIEN';tp.className='bilan-stamp moyen';msg.textContent='Bonne lecture. Relis les passages signalés.';}
+  else{tp.textContent='À RETRAVAILLER';tp.className='bilan-stamp ko';msg.textContent='Relis le texte attentivement avant de retenter.';}
+  document.getElementById('bDetail').innerHTML=[
+    {label:'Partie A — Résumer les paragraphes',score:scA,total:5},
+    {label:'Partie B — Compréhension et analyse',score:scB,total:12}
+  ].map(function(l){
+    var cl=l.score/l.total>=.67?'ok':l.score/l.total>=.5?'moyen':'ko';
+    return '<div class="bilan-ligne '+cl+'"><span>'+l.label+'</span><span class="bilan-ligne-score">'+l.score+' / '+l.total+'</span></div>';
+  }).join('');
+  document.getElementById('bilan').className='bilan show';
+  beepFinal(total>=12);
+}
+
+function recommencer(){
+  scA=0;scB=0;
+  buildA();buildB();
+  document.getElementById('tc1').style.display='block';
+  document.getElementById('tc2').style.display='none';
+  document.getElementById('tab1').classList.add('active');
+  document.getElementById('tab1').classList.remove('done');
+  document.getElementById('tab2').classList.remove('active');
+  document.getElementById('tab2').classList.remove('done');
+  document.getElementById('bilan').className='bilan';
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── INIT ── */
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.dropdown-wrap')){
+    document.querySelectorAll('.dropdown-menu.open').forEach(function(m){m.classList.remove('open');});
+    document.querySelectorAll('.dropdown-toggle.open').forEach(function(t){t.classList.remove('open');});
+  }
+});
+setTimeout(function(){buildA();buildB();},50);
+</script>
+</body>
+</html>
