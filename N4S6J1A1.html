@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Kapuscinski – 4ème</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;
+      --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;max-width:800px;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;
+      box-shadow:0 2px 8px rgba(245,197,24,.45);color:#000;font-size:.78rem;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;
+      margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+    .main-layout{display:flex;gap:1.2rem;width:100%;max-width:900px;
+      align-items:flex-start;position:relative;z-index:1;}
+    .col-left{flex:1 1 0;min-width:0;}
+    .col-right{width:240px;flex-shrink:0;}
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;margin-bottom:1.2rem;}
+    .card:last-child{margin-bottom:0;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--pink));}
+    .card-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.9rem;}
+    .texte-body{font-size:.97rem;line-height:1.85;color:var(--text);}
+    .texte-body p{margin-bottom:.95rem;}
+    .texte-body p:last-child{margin-bottom:0;}
+    .notes{font-size:.82rem;color:var(--muted);margin-top:1rem;line-height:1.75;
+      border-top:1px solid var(--border);padding-top:.7rem;}
+    .source{font-size:.85rem;color:var(--muted);margin-top:.8rem;font-style:italic;}
+    sup{font-size:.65rem;line-height:0;position:relative;top:-.5em;}
+    .tok{display:inline;cursor:pointer;border-radius:3px;padding:1px 2px;
+      transition:background .12s,color .12s;-webkit-user-select:none;user-select:none;
+      -webkit-tap-highlight-color:transparent;}
+    .tok:hover{background:rgba(245,166,35,.18);}
+    .tok.correct{background:rgba(141,198,63,.35);color:#1a4a00;font-weight:700;}
+    .tok.wrong{background:rgba(232,0,45,.18);color:#8b0000;}
+    .carnet-card{text-align:center;}
+    .carnet-wrap{display:flex;justify-content:center;margin:.4rem 0 .6rem;}
+    .carnet-svg{width:90px;height:110px;}
+    .page-line{transition:opacity .4s;opacity:.15;}
+    .page-line.filled{opacity:1;}
+    .carnet-bar-wrap{width:100%;background:#eee;border-radius:99px;height:8px;margin-top:.2rem;overflow:hidden;}
+    .carnet-bar{height:8px;border-radius:99px;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+    .carnet-score{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-top:.4rem;}
+    .ref-item{margin-bottom:.65rem;font-size:.88rem;line-height:1.6;color:var(--text);}
+    .ref-item:last-child{margin-bottom:0;}
+    .ref-term{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);
+      display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.1rem;}
+    .q-progress{display:flex;gap:.35rem;margin-bottom:.9rem;flex-wrap:wrap;}
+    .q-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:#fff;
+      display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;
+      font-size:.72rem;font-weight:700;color:var(--muted);transition:all .3s;}
+    .q-dot.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+    .q-dot.done-ok{border-color:var(--green);background:rgba(141,198,63,.15);color:#1a4a00;}
+    .q-dot.done-ko{border-color:var(--pink);background:rgba(242,139,130,.15);color:#8b0000;}
+    .q-label{font-size:.75rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+      letter-spacing:.1em;color:var(--day-dark);font-weight:700;margin-bottom:.35rem;}
+    .q-text{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.7rem;}
+    .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;
+      display:inline-flex;align-items:center;gap:.4rem;transition:transform .15s,box-shadow .15s;}
+    .btn:active{transform:scale(.96);}
+    .btn-next{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-next:hover{box-shadow:0 5px 18px var(--day-glow);}
+    .btn-retry{background:var(--bg);color:var(--text);border:2px solid var(--border);}
+    .btn-retry:hover{border-color:var(--day-color);}
+    .q-feedback{display:none;margin-top:.75rem;padding:.65rem .85rem;border-radius:8px;
+      font-size:.9rem;line-height:1.6;border-left:4px solid;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ko{background:rgba(242,139,130,.1);border-color:var(--pink);color:#7a0000;}
+    .score-card{display:none;text-align:center;}
+    .score-card.show{display:block;}
+    .score-big{font-size:3rem;font-weight:900;color:var(--day-color);line-height:1;}
+    .score-sub{font-size:1rem;color:var(--muted);margin-top:.3rem;}
+    .score-msg{font-size:.95rem;color:var(--text);margin-top:.8rem;line-height:1.55;}
+    .score-bravo{display:none;margin-top:.8rem;padding:.65rem 1rem;border-radius:10px;
+      background:rgba(141,198,63,.15);border:2px solid var(--green);
+      color:#1a4a00;font-size:.95rem;font-weight:700;line-height:1.5;}
+    .score-bravo.show{display:block;}
+    .flash-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+      z-index:500;font-size:3.5rem;pointer-events:none;opacity:0;}
+    .flash-pop.run-ok{animation:flashOk .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+    .flash-pop.run-err{animation:flashErr .5s cubic-bezier(.34,1.56,.64,1) forwards;}
+    @keyframes flashOk{0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.8);}}
+    @keyframes flashErr{0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      40%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.6);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .card{animation:fadeUp .4s ease both;}
+    @media(max-width:680px){.main-layout{flex-direction:column;}.col-right{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash-pop" id="flashpop"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 1</div>
+  <h1>J&rsquo;explore &middot; <span class="hl">Kapuscinski, Autoportrait d&rsquo;un reporter</span></h1>
+</header>
+
+<div class="main-layout">
+  <div class="col-left">
+
+    <div class="card" id="qcard">
+      <div class="card-stripe"></div>
+      <div class="card-title">Question en cours</div>
+      <div style="font-size:.9rem;line-height:1.6;color:var(--muted);margin-bottom:.9rem;padding:.55rem .8rem;background:var(--day-light);border-radius:8px;border-left:3px solid var(--day-border);">
+        &#128269; Maintenant, observe attentivement le texte et rep&egrave;re les informations essentielles pour mieux comprendre l&rsquo;histoire.
+      </div>
+      <div class="q-progress" id="qdots"></div>
+      <div class="q-label" id="qlabel">Q1 / 6</div>
+      <div class="q-text" id="qtext"></div>
+      <div class="q-feedback" id="qfb"></div>
+      <div id="qactions" style="margin-top:.75rem;display:flex;gap:.6rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <div class="card score-card" id="scorecard">
+      <div class="card-stripe"></div>
+      <div class="score-big" id="scoreval"></div>
+      <div class="score-sub">sur 6 questions</div>
+      <div class="score-msg" id="scoremsg"></div>
+      <div class="score-bravo" id="scorebravo">Bravo&nbsp;! Tu es pr&ecirc;t.e &agrave; passer &agrave; l&rsquo;&eacute;tape suivante&nbsp;!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Texte support</div>
+      <div class="texte-body" id="texte"></div>
+      <div class="source">R. Kapuscinski, <em>Autoportrait d&rsquo;un reporter</em>, Flammarion, 2010.</div>
+      <div class="notes" id="lexique"></div>
+    </div>
+
+  </div>
+  <div class="col-right">
+
+    <div class="card carnet-card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Carnet du reporter</div>
+      <div class="carnet-wrap">
+        <svg class="carnet-svg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="4" width="68" height="96" rx="5" ry="5" fill="#1a1d23"/>
+          <rect x="8" y="4" width="10" height="96" rx="3" ry="3" fill="#000"/>
+          <rect x="20" y="10" width="52" height="84" rx="3" ry="3" fill="#fffdf7"/>
+          <text x="46" y="24" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">CARNET DU</text>
+          <text x="46" y="32" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">REPORTER</text>
+          <line x1="26" y1="38" x2="66" y2="38" stroke="#f5d080" stroke-width="1"/>
+          <line id="pl0" class="page-line" x1="26" y1="46" x2="66" y2="46" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl1" class="page-line" x1="26" y1="53" x2="66" y2="53" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl2" class="page-line" x1="26" y1="60" x2="66" y2="60" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl3" class="page-line" x1="26" y1="67" x2="66" y2="67" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl4" class="page-line" x1="26" y1="74" x2="66" y2="74" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl5" class="page-line" x1="26" y1="81" x2="52" y2="81" stroke="#8dc63f" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="66" y="92" text-anchor="middle" font-family="Arial" font-size="8" fill="#f5d080">&#9733;</text>
+        </svg>
+      </div>
+      <div class="carnet-bar-wrap"><div class="carnet-bar" id="carnetbar"></div></div>
+      <div class="carnet-score" id="carnetscore">0 / 6 rep&egrave;res</div>
+    </div>
+
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">R&eacute;f&eacute;rentiel</div>
+      <div class="ref-item"><span class="ref-term">Th&egrave;se</span>Point de vue d&eacute;fendu par l&rsquo;auteur dans un texte argumentatif.</div>
+      <div class="ref-item"><span class="ref-term">Argument</span>Id&eacute;e qui soutient ou illustre la th&egrave;se.</div>
+      <div class="ref-item"><span class="ref-term">Exemple</span>Fait concret qui illustre un argument.</div>
+      <div class="ref-item"><span class="ref-term">Comparaison</span>Rapprochement de deux &eacute;l&eacute;ments &agrave; l&rsquo;aide d&rsquo;un outil (comme, tel&hellip;).</div>
+      <div class="ref-item"><span class="ref-term">Concession</span>Fait d&rsquo;admettre un point adverse avant de le r&eacute;futer.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var PARAGRAPHES = [
+  [
+    {id:'p1t0',w:'«'},{id:'p1t1',w:'À'},{id:'p1t2',w:"l'heure"},{id:'p1t3',w:'actuelle,'},
+    {id:'p1t4',w:'on'},{id:'p1t5',w:'ne'},{id:'p1t6',w:'peut'},{id:'p1t7',w:'plus'},
+    {id:'p1t8',w:'imaginer'},{id:'p1t9',w:'la'},{id:'p1t10',w:'vie'},{id:'p1t11',w:'de'},
+    {id:'p1t12',w:"l'homme"},{id:'p1t13',w:'sans'},{id:'p1t14',w:'les'},{id:'p1t15',w:'médias.'},
+    {id:'p1t16',w:'Avant,'},{id:'p1t17',w:"l'homme"},{id:'p1t18',w:'ne'},{id:'p1t19',w:'pouvait'},
+    {id:'p1t20',w:'pas'},{id:'p1t21',w:'vivre'},{id:'p1t22',w:'sans'},{id:'p1t23',w:'armes,'},
+    {id:'p1t24',w:'puis'},{id:'p1t25',w:'sans'},{id:'p1t26',w:'voitures'},{id:'p1t27',w:'ou'},
+    {id:'p1t28',w:'sans'},{id:'p1t29',w:"électricité."},{id:'p1t30',w:"Aujourd'hui,"},
+    {id:'p1t31',w:'il'},{id:'p1t32',w:'ne'},{id:'p1t33',w:'peut'},{id:'p1t34',w:'vivre'},
+    {id:'p1t35',w:'sans'},{id:'p1t36',w:'les'},{id:'p1t37',w:'médias.'},{id:'p1t38',w:'Le'},
+    {id:'p1t39',w:'danger'},{id:'p1t40',w:'vient'},{id:'p1t41',w:'de'},{id:'p1t42',w:'ce'},
+    {id:'p1t43',w:'que'},{id:'p1t44',w:'les'},{id:'p1t45',w:'médias,'},{id:'p1t46',w:'qui'},
+    {id:'p1t47',w:'sont'},{id:'p1t48',w:'devenus'},{id:'p1t49',w:'une'},{id:'p1t50',w:'puissance,'},
+    {id:'p1t51',w:'ne'},{id:'p1t52',w:"s'occupent"},{id:'p1t53',w:'plus'},{id:'p1t54',w:'exclusivement'},
+    {id:'p1t55',w:'de'},{id:'p1t56',w:"l'information."},{id:'p1t57',w:'Ils'},{id:'p1t58',w:'se'},
+    {id:'p1t59',w:'sont'},{id:'p1t60',w:'fixés'},{id:'p1t61',w:'un'},{id:'p1t62',w:'objectif'},
+    {id:'p1t63',w:'plus'},{id:'p1t64',w:'ambitieux'},{id:'p1t65',w:':'},{id:'p1t66',w:'ils'},
+    {id:'p1t67',w:'façonnent'},{id:'p1t68',w:'la'},{id:'p1t69',w:'réalité.'},{id:'p1t70',w:'De'},
+    {id:'p1t71',w:'plus'},{id:'p1t72',w:'en'},{id:'p1t73',w:'plus'},{id:'p1t74',w:'souvent,'},
+    {id:'p1t75',w:'nous'},{id:'p1t76',w:'percevons'},{id:'p1t77',w:'le'},{id:'p1t78',w:'monde'},
+    {id:'p1t79',w:'tel'},{id:'p1t80',w:"qu'il"},{id:'p1t81',w:'nous'},{id:'p1t82',w:'est'},
+    {id:'p1t83',w:'montré'},{id:'p1t84',w:'à'},{id:'p1t85',w:'la'},{id:'p1t86',w:'télévision'},
+    {id:'p1t87',w:'et'},{id:'p1t88',w:'non'},{id:'p1t89',w:'pas'},{id:'p1t90',w:'tel'},
+    {id:'p1t91',w:"qu'il"},{id:'p1t92',w:'est'},{id:'p1t93',w:'en'},{id:'p1t94',w:'réalité.'},
+    {id:'p1t95',w:'La'},{id:'p1t96',w:'télévision'},{id:'p1t97',w:'nous'},{id:'p1t98',w:'fait'},
+    {id:'p1t99',w:'vivre'},{id:'p1t100',w:'dans'},{id:'p1t101',w:'un'},{id:'p1t102',w:'univers'},
+    {id:'p1t103',w:'de'},{id:'p1t104',w:'contes.'}
+  ],
+  [
+    {id:'p2t0',w:"L'histoire"},{id:'p2t1',w:'que'},{id:'p2t2',w:'nous'},{id:'p2t3',w:'connaissons'},
+    {id:'p2t4',w:"d'après"},{id:'p2t5',w:'la'},{id:'p2t6',w:'télévision'},{id:'p2t7',w:"n'est"},
+    {id:'p2t8',w:'pas'},{id:'p2t9',w:'le'},{id:'p2t10',w:'fruit'},{id:'p2t11',w:'de'},
+    {id:'p2t12',w:'notre'},{id:'p2t13',w:'existence,'},{id:'p2t14',w:'mais'},{id:'p2t15',w:'de'},
+    {id:'p2t16',w:'notre'},{id:'p2t17',w:'imagination.'},{id:'p2t18',w:'Nous'},{id:'p2t19',w:'ne'},
+    {id:'p2t20',w:'faisons'},{id:'p2t21',w:'que'},{id:'p2t22',w:"l'imaginer,"},{id:'p2t23',w:'sur'},
+    {id:'p2t24',w:'la'},{id:'p2t25',w:'base'},{id:'p2t26',w:"d'éléments"},{id:'p2t27',w:'réels,'},
+    {id:'p2t28',w:'certes,'},{id:'p2t29',w:'mais'},{id:'p2t30',w:'dont'},{id:'p2t31',w:'la'},
+    {id:'p2t32',w:'construction'},{id:'p2t33',w:'dépend'},{id:'p2t34',w:'de'},{id:'p2t35',w:'nous'},
+    {id:'p2t36',w:':'},{id:'p2t37',w:'nous'},{id:'p2t38',w:'recevons'},{id:'p2t39',w:'une'},
+    {id:'p2t40',w:'image'},{id:'p2t41',w:'proche'},{id:'p2t42',w:'de'},{id:'p2t43',w:'la'},
+    {id:'p2t44',w:'réalité'},{id:'p2t45',w:'ou'},{id:'p2t46',w:'une'},{id:'p2t47',w:'image'},
+    {id:'p2t48',w:'qui'},{id:'p2t49',w:'en'},{id:'p2t50',w:'est'},{id:'p2t51',w:'totalement'},
+    {id:'p2t52',w:'éloignée'},{id:'p2t53',w:'en'},{id:'p2t54',w:'fonction'},{id:'p2t55',w:'de'},
+    {id:'p2t56',w:'la'},{id:'p2t57',w:'manière'},{id:'p2t58',w:'dont'},{id:'p2t59',w:'nous'},
+    {id:'p2t60',w:'structurons'},{id:'p2t61',w:'ces'},{id:'p2t62',w:'éléments.'},{id:'p2t63',w:'Il'},
+    {id:'p2t64',w:"s'agit"},{id:'p2t65',w:"d'une"},{id:'p2t66',w:'sorte'},{id:'p2t67',w:'de'},
+    {id:'p2t68',w:'fabulation'},{id:'p2t69',w:'du'},{id:'p2t70',w:'monde.'}
+  ],
+  [
+    {id:'p3t0',w:'Le'},{id:'p3t1',w:'rôle'},{id:'p3t2',w:'de'},{id:'p3t3',w:"l'image"},
+    {id:'p3t4',w:'télévisée'},{id:'p3t5',w:'est'},{id:'p3t6',w:'énorme.'},{id:'p3t7',w:'Nous'},
+    {id:'p3t8',w:'devons'},{id:'p3t9',w:'toutefois'},{id:'p3t10',w:'rester'},{id:'p3t11',w:'conscients'},
+    {id:'p3t12',w:'que'},{id:'p3t13',w:"l'image"},{id:'p3t14',w:'ne'},{id:'p3t15',w:'suscite'},
+    {id:'p3t16',w:'pas'},{id:'p3t17',w:'de'},{id:'p3t18',w:'réflexion'},{id:'p3t19',w:';'},
+    {id:'p3t20',w:'elle'},{id:'p3t21',w:'agit'},{id:'p3t22',w:'seulement'},{id:'p3t23',w:'sur'},
+    {id:'p3t24',w:'nos'},{id:'p3t25',w:'émotions.'},{id:'p3t26',w:'Il'},{id:'p3t27',w:'est'},
+    {id:'p3t28',w:'impossible'},{id:'p3t29',w:'de'},{id:'p3t30',w:'freiner'},{id:'p3t31',w:'des'},
+    {id:'p3t32',w:'phénomènes'},{id:'p3t33',w:'négatifs,'},{id:'p3t34',w:"l'exploitation"},
+    {id:'p3t35',w:'des'},{id:'p3t36',w:'émotions'},{id:'p3t37',w:'par'},{id:'p3t38',w:'exemple.'},
+    {id:'p3t39',w:'Un'},{id:'p3t40',w:'journaliste'},{id:'p3t41',w:'entre'},{id:'p3t42',w:'dans'},
+    {id:'p3t43',w:"l'appartement"},{id:'p3t44',w:"d'une"},{id:'p3t45',w:'mère'},{id:'p3t46',w:'dont'},
+    {id:'p3t47',w:'le'},{id:'p3t48',w:'fils'},{id:'p3t49',w:'vient'},{id:'p3t50',w:'de'},
+    {id:'p3t51',w:'mourir'},{id:'p3t52',w:'et'},{id:'p3t53',w:'il'},{id:'p3t54',w:'lui'},
+    {id:'p3t55',w:'demande'},{id:'p3t56',w:'comment'},{id:'p3t57',w:'elle'},{id:'p3t58',w:'se'},
+    {id:'p3t59',w:'sent.'},{id:'p3t60',w:'Tel'},{id:'p3t61',w:"l'œil"},{id:'p3t62',w:"d'une"},
+    {id:'p3t63',w:'hyène',nc:true},{id:'p3t64',w:','},{id:'p3t65',w:"l'objectif"},
+    {id:'p3t66',w:'de'},{id:'p3t67',w:'la'},{id:'p3t68',w:'caméra'},{id:'p3t69',w:'guette'},
+    {id:'p3t70',w:'les'},{id:'p3t71',w:'larmes,'},{id:'p3t72',w:'les'},{id:'p3t73',w:'gestes'},
+    {id:'p3t74',w:'de'},{id:'p3t75',w:'désespoir.'},{id:'p3t76',w:'Il'},{id:'p3t77',w:"n'a"},
+    {id:'p3t78',w:'pas'},{id:'p3t79',w:'de'},{id:'p3t80',w:'scrupule,'},{id:'p3t81',w:'pas'},
+    {id:'p3t82',w:'de'},{id:'p3t83',w:'freins'},{id:'p3t84',w:'éthiques',nc:true},
+    {id:'p3t85',w:'.'},{id:'p3t86',w:'Et'},{id:'p3t87',w:'il'},{id:'p3t88',w:"n'y"},
+    {id:'p3t89',w:'a'},{id:'p3t90',w:'aucun'},{id:'p3t91',w:'moyen'},{id:'p3t92',w:"d'échapper"},
+    {id:'p3t93',w:'à'},{id:'p3t94',w:'cela,'},{id:'p3t95',w:'car'},{id:'p3t96',w:'le'},
+    {id:'p3t97',w:'mécanisme'},{id:'p3t98',w:'de'},{id:'p3t99',w:'la'},{id:'p3t100',w:'concurrence'},
+    {id:'p3t101',w:'est'},{id:'p3t102',w:'un'},{id:'p3t103',w:'mécanisme'},{id:'p3t104',w:'de'},
+    {id:'p3t105',w:'marché'},{id:'p3t106',w:';'},{id:'p3t107',w:'or'},{id:'p3t108',w:'le'},
+    {id:'p3t109',w:'mécanisme'},{id:'p3t110',w:'de'},{id:'p3t111',w:'marché'},{id:'p3t112',w:'est'},
+    {id:'p3t113',w:'la'},{id:'p3t114',w:'base'},{id:'p3t115',w:'de'},{id:'p3t116',w:'la'},
+    {id:'p3t117',w:'démocratie.'},{id:'p3t118',w:'Nous'},{id:'p3t119',w:"n'avons"},
+    {id:'p3t120',w:'pas'},{id:'p3t121',w:'de'},{id:'p3t122',w:'système'},{id:'p3t123',w:'meilleur'},
+    {id:'p3t124',w:'que'},{id:'p3t125',w:'le'},{id:'p3t126',w:'marché,'},{id:'p3t127',w:'la'},
+    {id:'p3t128',w:'démocratie,'},{id:'p3t129',w:'la'},{id:'p3t130',w:'concurrence,'},
+    {id:'p3t131',w:'un'},{id:'p3t132',w:'système'},{id:'p3t133',w:'qui'},{id:'p3t134',w:'veut'},
+    {id:'p3t135',w:'que'},{id:'p3t136',w:'si'},{id:'p3t137',w:'quelqu\'un'},
+    {id:'p3t138',w:'(un'},{id:'p3t139',w:'journaliste'},{id:'p3t140',w:'en'},
+    {id:'p3t141',w:"l'occurrence)"},{id:'p3t142',w:'refoule'},{id:'p3t143',w:'un'},
+    {id:'p3t144',w:'comportement,'},{id:'p3t145',w:'il'},{id:'p3t146',w:'libère'},
+    {id:'p3t147',w:'une'},{id:'p3t148',w:'place'},{id:'p3t149',w:'qui'},{id:'p3t150',w:'sera'},
+    {id:'p3t151',w:'aussitôt'},{id:'p3t152',w:'occupée'},{id:'p3t153',w:'par'},{id:'p3t154',w:'un'},
+    {id:'p3t155',w:'autre.'},{id:'p3t156',w:'On'},{id:'p3t157',w:'peut'},{id:'p3t158',w:'condamner'},
+    {id:'p3t159',w:'ce'},{id:'p3t160',w:'système,'},{id:'p3t161',w:'le'},{id:'p3t162',w:'limiter,'},
+    {id:'p3t163',w:'le'},{id:'p3t164',w:'critiquer.'},{id:'p3t165',w:'Mais'},{id:'p3t166',w:'on'},
+    {id:'p3t167',w:'ne'},{id:'p3t168',w:'peut'},{id:'p3t169',w:'pas'},{id:'p3t170',w:'le'},
+    {id:'p3t171',w:'supprimer.'}
+  ],
+  [
+    {id:'p4t0',w:'Combien'},{id:'p4t1',w:'de'},{id:'p4t2',w:'fois'},{id:'p4t3',w:'voyons-nous'},
+    {id:'p4t4',w:'des'},{id:'p4t5',w:'gens'},{id:'p4t6',w:'confondre'},{id:'p4t7',w:'le'},
+    {id:'p4t8',w:'concept',nc:true},{id:'p4t9',w:'de'},{id:'p4t10',w:'«\u00a0voir\u00a0»'},
+    {id:'p4t11',w:'avec'},{id:'p4t12',w:'celui'},{id:'p4t13',w:'de'},{id:'p4t14',w:'«\u00a0comprendre\u00a0»'},
+    {id:'p4t15',w:'!'},{id:'p4t16',w:'Par'},{id:'p4t17',w:'exemple,'},{id:'p4t18',w:'deux'},
+    {id:'p4t19',w:'personnes'},{id:'p4t20',w:'se'},{id:'p4t21',w:'querellent.'},{id:'p4t22',w:"L'une"},
+    {id:'p4t23',w:'dit'},{id:'p4t24',w:'à'},{id:'p4t25',w:"l'autre"},{id:'p4t26',w:':'},
+    {id:'p4t27',w:'«\u00a0Ma'},{id:'p4t28',w:'chère,'},{id:'p4t29',w:'tu'},{id:'p4t30',w:'as'},
+    {id:'p4t31',w:'tort.'},{id:'p4t32',w:'Ce'},{id:'p4t33',w:'que'},{id:'p4t34',w:'tu'},
+    {id:'p4t35',w:'dis'},{id:'p4t36',w:'est'},{id:'p4t37',w:'faux\u00a0!'},{id:'p4t38',w:'»'},
+    {id:'p4t39',w:'Et'},{id:'p4t40',w:"l'autre"},{id:'p4t41',w:'de'},{id:'p4t42',w:'répondre'},
+    {id:'p4t43',w:':'},{id:'p4t44',w:'«\u00a0Comment'},{id:'p4t45',w:'ça,'},{id:'p4t46',w:"j'ai"},
+    {id:'p4t47',w:'tort'},{id:'p4t48',w:'?'},{id:'p4t49',w:'Puisque'},{id:'p4t50',w:'je'},
+    {id:'p4t51',w:"l'ai"},{id:'p4t52',w:'vu'},{id:'p4t53',w:'à'},{id:'p4t54',w:'la'},
+    {id:'p4t55',w:'télévision\u00a0!'},{id:'p4t56',w:'»'}
+  ],
+  [
+    {id:'p5t0',w:'En'},{id:'p5t1',w:'percevant'},{id:'p5t2',w:'le'},{id:'p5t3',w:'monde'},
+    {id:'p5t4',w:'par'},{id:'p5t5',w:'le'},{id:'p5t6',w:'biais'},{id:'p5t7',w:'des'},
+    {id:'p5t8',w:'médias,'},{id:'p5t9',w:'nous'},{id:'p5t10',w:'ne'},{id:'p5t11',w:'connaissons'},
+    {id:'p5t12',w:'que'},{id:'p5t13',w:'les'},{id:'p5t14',w:'conséquences,'},{id:'p5t15',w:'la'},
+    {id:'p5t16',w:'surface'},{id:'p5t17',w:'des'},{id:'p5t18',w:'événements.'},{id:'p5t19',w:'Or,'},
+    {id:'p5t20',w:'si'},{id:'p5t21',w:'nous'},{id:'p5t22',w:'ne'},{id:'p5t23',w:'connaissons'},
+    {id:'p5t24',w:'pas'},{id:'p5t25',w:'leurs'},{id:'p5t26',w:'causes,'},{id:'p5t27',w:'nous'},
+    {id:'p5t28',w:'ne'},{id:'p5t29',w:'sommes'},{id:'p5t30',w:'pas'},{id:'p5t31',w:'en'},
+    {id:'p5t32',w:'état'},{id:'p5t33',w:'de'},{id:'p5t34',w:'réfléchir'},{id:'p5t35',w:'sur'},
+    {id:'p5t36',w:'eux'},{id:'p5t37',w:'de'},{id:'p5t38',w:'manière'},{id:'p5t39',w:'appropriée.'},
+    {id:'p5t40',w:'En'},{id:'p5t41',w:'même'},{id:'p5t42',w:'temps,'},{id:'p5t43',w:'les'},
+    {id:'p5t44',w:'médias'},{id:'p5t45',w:'ne'},{id:'p5t46',w:'sont'},{id:'p5t47',w:'pas'},
+    {id:'p5t48',w:'en'},{id:'p5t49',w:'mesure'},{id:'p5t50',w:'de'},{id:'p5t51',w:'tout'},
+    {id:'p5t52',w:'expliquer'},{id:'p5t53',w:'de'},{id:'p5t54',w:'manière'},{id:'p5t55',w:'exhaustive',nc:true},
+    {id:'p5t56',w:';'},{id:'p5t57',w:'ils'},{id:'p5t58',w:'opèrent'},{id:'p5t59',w:'donc'},
+    {id:'p5t60',w:'une'},{id:'p5t61',w:'sélection,'},{id:'p5t62',w:'un'},{id:'p5t63',w:'choix.'},
+    {id:'p5t64',w:'Le'},{id:'p5t65',w:'principe'},{id:'p5t66',w:'guidant'},{id:'p5t67',w:'la'},
+    {id:'p5t68',w:'transmission'},{id:'p5t69',w:'de'},{id:'p5t70',w:"l'information"},
+    {id:'p5t71',w:'est'},{id:'p5t72',w:'le'},{id:'p5t73',w:'résumé.'},{id:'p5t74',w:'»'}
+  ]
+];
+
+var QUESTIONS = [
+  {
+    num:1,
+    text:"Clique sur la phrase qui résume la thèse principale de Kapuscinski sur le rôle des médias dans notre perception du monde.",
+    groups:[['p1t66','p1t67','p1t68','p1t69']],
+    answers:['p1t66','p1t67','p1t68','p1t69'],
+    fb_ok:null,
+    fb_ko:"Cette formule courte et percutante est la thèse centrale du texte : les médias ne se contentent plus d’informer, ils créent une version de la réalité. Le verbe «façonner» (= modeler, construire) est fort : il montre que les médias ont un pouvoir actif sur notre vision du monde."
+  },
+  {
+    num:2,
+    text:"Clique sur la phrase qui explique la différence entre la réalité telle qu'elle est et la réalité telle que les médias nous la montrent.",
+    groups:[['p1t75','p1t76','p1t77','p1t78','p1t79','p1t80','p1t81','p1t82','p1t83','p1t84','p1t85','p1t86','p1t87','p1t88','p1t89','p1t90','p1t91','p1t92','p1t93','p1t94']],
+    answers:['p1t75','p1t76','p1t77','p1t78','p1t79','p1t80','p1t81','p1t82','p1t83','p1t84','p1t85','p1t86','p1t87','p1t88','p1t89','p1t90','p1t91','p1t92','p1t93','p1t94'],
+    fb_ok:null,
+    fb_ko:"Cette phrase oppose deux façons de percevoir le monde : la réalité médiatisée («tel qu’il nous est montré à la télévision») et la réalité brute («tel qu’il est en réalité»). C’est l’argument central du premier paragraphe : les médias créent un écran entre nous et le monde réel."
+  },
+  {
+    num:3,
+    text:"Clique sur la phrase qui décrit concrètement comment les journalistes exploitent les émotions des gens.",
+    groups:[['p3t39','p3t40','p3t41','p3t42','p3t43','p3t44','p3t45','p3t46','p3t47','p3t48','p3t49','p3t50','p3t51','p3t52','p3t53','p3t54','p3t55','p3t56','p3t57','p3t58','p3t59']],
+    answers:['p3t39','p3t40','p3t41','p3t42','p3t43','p3t44','p3t45','p3t46','p3t47','p3t48','p3t49','p3t50','p3t51','p3t52','p3t53','p3t54','p3t55','p3t56','p3t57','p3t58','p3t59'],
+    fb_ok:null,
+    fb_ko:"Cet exemple concret illustre ce que Kapuscinski appelle «l’exploitation des émotions» : le journaliste s’introduit dans l’intimité d’une personne en deuil pour en tirer un contenu émotionnel fort. C’est l’un des arguments les plus percutants du texte, car il rend la critique très tangible et choquante."
+  },
+  {
+    num:4,
+    text:"Clique sur la comparaison que Kapuscinski utilise pour décrire le comportement de la caméra.",
+    groups:[['p3t60','p3t61','p3t62','p3t63','p3t64','p3t65','p3t66','p3t67','p3t68','p3t69','p3t70','p3t71','p3t72','p3t73','p3t74','p3t75']],
+    answers:['p3t60','p3t61','p3t62','p3t63','p3t64','p3t65','p3t66','p3t67','p3t68','p3t69','p3t70','p3t71','p3t72','p3t73','p3t74','p3t75'],
+    fb_ok:null,
+    fb_ko:"Kapuscinski compare l’objectif de la caméra à «l’œil d’une hyène», un animal prédateur (voir note 1). C’est une comparaison : la caméra est présentée comme un prédateur qui «guette» (= observe avec une intention malveillante) les moments de souffrance. Le jugement moral de l’auteur est très négatif."
+  },
+  {
+    num:5,
+    text:'Clique sur la phrase qui illustre la confusion entre "voir" et "comprendre" à travers un exemple de dialogue.',
+    groups:[['p4t44','p4t45','p4t46','p4t47','p4t48','p4t49','p4t50','p4t51','p4t52','p4t53','p4t54','p4t55','p4t56']],
+    answers:['p4t44','p4t45','p4t46','p4t47','p4t48','p4t49','p4t50','p4t51','p4t52','p4t53','p4t54','p4t55','p4t56'],
+    fb_ok:null,
+    fb_ko:"Cette réplique illustre la confusion dénoncée par Kapuscinski : voir quelque chose à la télévision ne signifie pas le comprendre. La locution «Puisque je l’ai vu à la télévision» est devenue un argument d’autorité dans le langage courant — ce que Kapuscinski critique vivement."
+  },
+  {
+    num:6,
+    text:"Clique sur la phrase finale du texte qui résume la limite fondamentale des médias.",
+    groups:[['p5t64','p5t65','p5t66','p5t67','p5t68','p5t69','p5t70','p5t71','p5t72','p5t73']],
+    answers:['p5t64','p5t65','p5t66','p5t67','p5t68','p5t69','p5t70','p5t71','p5t72','p5t73'],
+    fb_ok:null,
+    fb_ko:"Cette phrase finale est un constat critique : les médias ne peuvent pas tout expliquer, ils résument. Le mot «résumé» est présenté comme une limite structurelle des médias : en résumant, ils appauvrissent l’information et privent le téléspectateur d’une compréhension complète des causes des événements."
+  }
+];
+
+var curQ=0,groupsValidated=[],results=[],done=false,audioCtx=null;
+document.addEventListener('pointerdown',function ia(){
+  if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  document.removeEventListener('pointerdown',ia);
+},{once:true});
+window.addEventListener('DOMContentLoaded',function(){buildTexte();buildDots();showQuestion(0);});
+
+function buildTexte(){
+  var container=document.getElementById('texte');
+  PARAGRAPHES.forEach(function(para){
+    var p=document.createElement('p');
+    para.forEach(function(tok,i){
+      var w=tok.w;
+      var noPre=(i===0||w===','||w===';'||w===':'||w==='.'||w==='!'||w==='?'||w==='»'||w===')');
+      if(!noPre&&i>0) p.appendChild(document.createTextNode(' '));
+      appendTok(p,tok);
+    });
+    container.appendChild(p);
+  });
+  var lex=document.getElementById('lexique');
+  ['1.\u00a0hyène\u00a0: animal prédateur.',
+   '2.\u00a0éthiques\u00a0: moraux.',
+   '3.\u00a0concept\u00a0: la notion.',
+   '4.\u00a0exhaustive\u00a0: complète.'].forEach(function(it){
+    var d=document.createElement('div');d.textContent=it;lex.appendChild(d);
+  });
+}
+function appendTok(container,tok){
+  var s=document.createElement('span');
+  if(tok.nc){s.textContent=tok.w;}
+  else{s.className='tok';s.id=tok.id;s.textContent=tok.w;
+    s.addEventListener('click',function(){onTok(tok.id);});}
+  container.appendChild(s);
+}
+function buildDots(){
+  var wrap=document.getElementById('qdots');
+  QUESTIONS.forEach(function(q,i){
+    var d=document.createElement('div');
+    d.className='q-dot';d.id='dot'+i;d.textContent=q.num;wrap.appendChild(d);
+  });
+}
+function updateDots(){
+  QUESTIONS.forEach(function(q,i){
+    var d=document.getElementById('dot'+i);d.className='q-dot';
+    if(i<curQ)d.classList.add(results[i]?'done-ok':'done-ko');
+    else if(i===curQ)d.classList.add('active');
+  });
+}
+function showQuestion(idx){
+  var q=QUESTIONS[idx];groupsValidated=[];
+  document.getElementById('qlabel').textContent='Q'+q.num+' / 6';
+  document.getElementById('qtext').textContent=q.text;
+  var fb=document.getElementById('qfb');fb.className='q-feedback';fb.textContent='';
+  clearMarks();updateDots();renderActions(false,false);
+}
+function renderActions(answered,isOk){
+  var wrap=document.getElementById('qactions');wrap.innerHTML='';
+  if(!answered)return;
+  if(!isOk){var br=document.createElement('button');br.className='btn btn-retry';
+    br.textContent='Réessayer';br.onclick=reessayer;wrap.appendChild(br);}
+  var bn=document.createElement('button');bn.className='btn btn-next';
+  bn.textContent=curQ<QUESTIONS.length-1?'Question suivante \u2192':'Voir le résultat';
+  bn.onclick=curQ<QUESTIONS.length-1?suivant:showScore;wrap.appendChild(bn);
+}
+function onTok(id){
+  if(done)return;
+  var fb=document.getElementById('qfb');
+  if(fb.classList.contains('show')&&results[curQ]!==undefined)return;
+  var q=QUESTIONS[curQ],groupIdx=-1;
+  q.groups.forEach(function(grp,gi){if(grp.indexOf(id)!==-1)groupIdx=gi;});
+  if(groupIdx===-1){validerErreur();return;}
+  if(groupsValidated.indexOf(groupIdx)===-1){
+    groupsValidated.push(groupIdx);
+    q.groups[groupIdx].forEach(function(tid){var el=document.getElementById(tid);if(el)el.classList.add('correct');});
+  }
+  if(groupsValidated.length===q.groups.length)validerSucces();
+}
+function validerSucces(){
+  var q=QUESTIONS[curQ];results[curQ]=true;
+  q.answers.forEach(function(id){var el=document.getElementById(id);if(el){el.classList.remove('wrong');el.classList.add('correct');}});
+  flashPop(true);beepOk();updateCarnet(results.filter(Boolean).length);renderActions(true,true);
+}
+function validerErreur(){
+  var q=QUESTIONS[curQ];results[curQ]=false;
+  q.answers.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('correct');});
+  var fb=document.getElementById('qfb');
+  if(q.fb_ko){fb.textContent=q.fb_ko;fb.className='q-feedback show ko';}
+  flashPop(false);beepErr();updateCarnet(results.filter(Boolean).length);renderActions(true,false);
+}
+function reessayer(){
+  groupsValidated=[];results[curQ]=undefined;clearMarks();
+  var fb=document.getElementById('qfb');fb.className='q-feedback';fb.textContent='';
+  renderActions(false,false);
+}
+function suivant(){curQ++;showQuestion(curQ);document.getElementById('qcard').scrollIntoView({behavior:'smooth',block:'nearest'});}
+function showScore(){
+  done=true;document.getElementById('qcard').style.display='none';
+  var sc=document.getElementById('scorecard');sc.classList.add('show');
+  var score=results.filter(Boolean).length;
+  document.getElementById('scoreval').textContent=score+' / 6';
+  var msg='';
+  if(score===6)msg='Carnet complété\u00a0! Tu as repéré tous les passages clés du texte de Kapuscinski.';
+  else if(score>=4)msg='Bon repérage\u00a0! Relis les passages signalés.';
+  else msg='Relis attentivement le texte et retente.';
+  document.getElementById('scoremsg').textContent=msg;
+  if(score>=4)document.getElementById('scorebravo').classList.add('show');
+  updateCarnet(score);updateDots();beepFinal(score);
+  if(score>=5)launchEmojis();
+}
+function updateCarnet(score){
+  var pct=Math.round((score/6)*100);
+  document.getElementById('carnetbar').style.width=pct+'%';
+  document.getElementById('carnetscore').textContent=score+' / 6 rep\u00e8res';
+  for(var i=0;i<6;i++){var l=document.getElementById('pl'+i);if(l){if(i<score)l.classList.add('filled');else l.classList.remove('filled');}}
+}
+function clearMarks(){document.querySelectorAll('.tok').forEach(function(el){el.classList.remove('correct','wrong');});}
+function flashPop(isOk){
+  var el=document.getElementById('flashpop');
+  el.textContent=isOk?'\u2713':'\u2715';el.style.color=isOk?'#8dc63f':'#e8002d';
+  el.className='flash-pop';void el.offsetWidth;el.classList.add(isOk?'run-ok':'run-err');
+}
+function getCtx(){if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}return audioCtx;}
+function beepOk(){var ctx=getCtx();if(!ctx)return;[[600,.08],[900,.12]].forEach(function(p,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=p[0];var t=ctx.currentTime+i*.13;g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.01,t+.18);o.start(t);o.stop(t+.2);});}
+function beepErr(){var ctx=getCtx();if(!ctx)return;var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sawtooth';o.frequency.value=280;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.3);o.start(ctx.currentTime);o.stop(ctx.currentTime+.32);}
+function beepFinal(score){var ctx=getCtx();if(!ctx)return;if(score>=5){[523,659,784,880,1047].forEach(function(freq,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=freq;var t=ctx.currentTime+i*.17;g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.01,t+.28);o.start(t);o.stop(t+.3);});}else{var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=220;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.5);o.start(ctx.currentTime);o.stop(ctx.currentTime+.55);}}
+function launchEmojis(){
+  var pool=['\uD83C\uDF0A','\uD83D\uDCA7','\u26F5','\uD83D\uDD2D','\uD83D\uDDFA\uFE0F','\uD83C\uDF27\uFE0F','\uD83D\uDCAB','\u2693'];
+  for(var i=0;i<25;i++){(function(idx){setTimeout(function(){var el=document.createElement('div');el.textContent=pool[Math.floor(Math.random()*pool.length)];el.style.cssText=['position:fixed','pointer-events:none','z-index:999','font-size:'+(1.3+Math.random()*1.3)+'rem','left:'+(Math.random()*96)+'vw','top:-2rem','opacity:1','transition:transform '+(1.5+Math.random()*1.3)+'s linear, opacity .4s linear '+(1.3+Math.random()*.9)+'s'].join(';');document.body.appendChild(el);requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.transform='translateY('+(window.innerHeight+60)+'px) rotate('+(Math.random()*360)+'deg)';el.style.opacity='0';});});setTimeout(function(){el.remove();},3200);},idx*100+Math.random()*80);})(i);}
+}
+</script>
+</body>
+</html>
