@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Les temps composés — Reporter — 4e S6 J4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+:root{
+ --day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.3);
+ --gold:#f5c518;--bg:#fffdf7;--rouge:#c0392b;--vert:#1f7a4d;--rouge-bg:#fbdcd6;--vert-bg:#d7f3e3;
+ --surface:#fff;--border:#d8dee5;--yellow:#f5c518;--green:#1f7a4d;--pink:#f9c0bb;--orange:#f5a623;
+ --text:#1f2937;--muted:#6b7280;--radius:10px;--dark:#1a2430;--dark3:#3a4655;
+}
+body{margin:0;background:var(--bg);color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;min-height:100vh;padding:18px;position:relative;overflow-x:hidden;}
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.3;}
+.bubble.b1{width:130px;height:130px;background:var(--gold);top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:var(--day-color);bottom:26px;left:-24px;}
+.bubble.b3{width:74px;height:74px;background:#8dc63f;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:#f9c0bb;top:26%;left:-32px;}
+.wrap{max-width:760px;margin:0 auto;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--gold);border-radius:999px;padding:5px 16px;}
+.logo-badge .dots{display:flex;gap:4px;}
+.logo-badge .dots i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#c0392b;}
+.logo-badge .dots i:nth-child(2){background:#8a6000;}
+.logo-badge .dots i:nth-child(3){background:var(--day-dark);}
+.logo-badge .lab{font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:#3a2a00;letter-spacing:.5px;}
+.week{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#7a6f54;margin:8px 0 4px;letter-spacing:1px;}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.15rem,4vw,1.7rem);margin:2px 0 4px;color:var(--day-dark);font-weight:700;}
+.theme-badge{display:inline-block;background:var(--day-light);border:1px solid var(--day-border);color:var(--day-dark);
+ font-family:Arial,sans-serif;font-size:.82rem;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+.section-title{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--day-dark);letter-spacing:1px;
+ text-transform:uppercase;font-weight:800;margin:24px 0 10px;}
+
+.consigne-txt{font-family:Arial,sans-serif;font-size:.95rem;line-height:1.7;color:#374151;font-weight:600;
+ background:var(--day-light);border-left:3px solid var(--day-color);padding:10px 14px;border-radius:6px;margin-bottom:14px;}
+
+.hud{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center;}
+.hud-box{font-family:'Orbitron',monospace;font-size:.85rem;background:#fff;border:1px solid var(--day-border);
+ padding:8px 14px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.hud-box b{color:var(--day-dark);}
+.progress-track{flex:1;min-width:140px;height:10px;background:#eef2f4;border:1px solid var(--day-border);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--day-color),var(--vert));transition:width .5s ease;}
+
+.tableau-card{background:#fff;border:1px solid var(--day-border);border-radius:14px;padding:16px;margin-bottom:18px;
+ box-shadow:0 4px 16px rgba(0,0,0,.06);overflow-x:auto;}
+table.grille{border-collapse:collapse;width:100%;min-width:640px;}
+table.grille th, table.grille td{border:1px solid var(--day-border);padding:6px;text-align:center;}
+table.grille thead th{background:var(--day-light);color:var(--day-dark);font-family:'Orbitron',sans-serif;
+ font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:10px 6px;}
+table.grille .verbe-cell{background:#f4f6f8;font-weight:700;font-size:.85rem;color:#1f2937;white-space:nowrap;padding:10px 12px;text-align:left;}
+.cell-wrap{display:flex;flex-direction:column;gap:4px;align-items:stretch;}
+.cell-input{width:100%;padding:8px 6px;border:1.5px solid #b0b8c2;border-radius:6px;font-size:.85rem;
+ font-family:Arial,sans-serif;text-align:center;min-height:38px;}
+.cell-input:disabled{background:#f2f2f2;}
+.cell-input.ok{background:var(--vert-bg);border-color:var(--vert);color:#0f5c34;font-weight:700;}
+.cell-input.no{background:var(--rouge-bg);border-color:var(--rouge);color:#7a1e14;font-weight:700;}
+.cell-btn{font-family:Arial,sans-serif;font-size:.72rem;font-weight:700;background:var(--day-color);color:#fff;
+ border:none;border-radius:5px;padding:5px 4px;cursor:pointer;min-height:28px;}
+.cell-btn:disabled{background:#d8dee5;color:#9aa0a6;cursor:not-allowed;}
+.cell-fb{font-size:.72rem;line-height:1.4;color:#7a1e14;text-align:left;display:none;padding:4px 2px;}
+.cell-fb .rep-forte{font-weight:800;font-size:1.15em;}
+.cell-fb.show{display:block;}
+
+.texte-card{background:#fff;border:1px solid var(--day-border);border-top:4px solid var(--day-color);border-radius:14px;
+ padding:20px 22px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.texte-body{font-size:1.05rem;line-height:2.4;color:#1f2937;}
+.blank-wrap{display:inline-flex;flex-direction:column;vertical-align:middle;margin:0 3px;}
+.blank-verbe{font-size:.68rem;font-style:italic;color:var(--day-dark);margin-bottom:2px;}
+.blank-input{width:150px;padding:6px 8px;border:1.5px solid #b0b8c2;border-radius:6px;font-size:.92rem;
+ font-family:Arial,sans-serif;text-align:center;display:inline-block;}
+.blank-input.ok{background:var(--vert-bg);border-color:var(--vert);color:#0f5c34;font-weight:700;}
+.blank-input.no{background:var(--rouge-bg);border-color:var(--rouge);color:#7a1e14;font-weight:700;}
+.blank-input:disabled{background:#f2f2f2;}
+.blank-btn{font-family:Arial,sans-serif;font-size:.68rem;font-weight:700;background:var(--day-color);color:#fff;
+ border:none;border-radius:4px;padding:2px 6px;cursor:pointer;margin-left:3px;vertical-align:middle;}
+.blank-btn:disabled{background:#d8dee5;cursor:not-allowed;}
+.blank-fb{display:block;font-size:.75rem;color:#7a1e14;line-height:1.5;max-width:280px;margin-top:2px;display:none;}
+.blank-fb.show{display:block;}
+
+.locked-msg{background:#f2f2f2;border:1.5px dashed #b0b8c2;border-radius:10px;padding:20px;text-align:center;
+ color:#6b7280;font-family:Arial,sans-serif;font-weight:700;font-size:.95rem;}
+.btn-recommencer-t1{display:block;margin:16px auto 0;background:#fff;border:1.5px solid var(--day-border);color:var(--day-dark);
+ font-family:Arial,sans-serif;font-weight:800;font-size:.88rem;padding:11px 22px;border-radius:10px;cursor:pointer;
+ min-height:44px;box-shadow:0 3px 10px rgba(0,0,0,.08);}
+.btn-recommencer-t1:hover{background:var(--day-light);}
+
+.referentiel{
+  width:100%;max-width:720px;background:var(--surface);
+  border:2px solid var(--border);border-radius:var(--radius);
+  padding:1.1rem 1.3rem;margin-bottom:1.4rem;
+  position:relative;z-index:1;
+}
+.ref-stripe{
+  height:3px;border-radius:3px;margin-bottom:.75rem;
+  background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));
+}
+.ref-titre{
+  font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;
+}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+@media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{
+  background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:9px;padding:.85rem 1rem;
+}
+.ref-cell.full{grid-column:1/-1;}
+.ref-cell-titre{
+  font-size:1rem;font-weight:900;color:var(--day-dark);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.35rem;
+}
+.ref-cell-body{font-size:.9rem;color:var(--text);line-height:1.65;}
+.ref-cell-body strong{color:var(--day-dark);}
+.ref-cell-body em{font-style:italic;}
+.ref-astuce{
+  background:var(--dark);border:1.5px solid var(--dark3);
+  border-radius:9px;padding:.85rem 1rem;grid-column:1/-1;
+}
+.ref-astuce-titre{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--day-border);margin-bottom:.3rem;
+}
+.ref-astuce-body{font-size:.9rem;color:#c8c8c8;line-height:1.65;}
+.ref-astuce-body strong{color:var(--gold);}
+
+.overlay{position:fixed;inset:0;background:rgba(20,15,10,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:600;}
+.overlay.show{display:flex;animation:fade .4s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{background:#fff;border:2px solid var(--day-color);border-radius:18px;padding:30px 26px;max-width:440px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25);}
+.modal .trophy{font-size:3.2rem;}
+.modal h2{margin:6px 0 8px;color:var(--day-dark);font-family:'Orbitron',sans-serif;font-size:1.05rem;line-height:1.4;}
+.modal .final{font-family:'Orbitron',monospace;font-size:1.3rem;color:var(--day-dark);margin-bottom:10px;font-weight:700;}
+.modal .detail{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#374151;line-height:1.8;margin-bottom:18px;}
+.replay{background:var(--day-color);color:#fff;border:none;border-radius:10px;padding:13px 24px;font-size:1.05rem;font-weight:700;cursor:pointer;}
+.replay:hover{filter:brightness(1.08);}
+
+.flash-v{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.3);
+ font-size:3.4rem;font-weight:900;z-index:9999;pointer-events:none;opacity:0;font-family:'JetBrains Mono',monospace;}
+.flash-v.pop{animation:flashPop 1s ease-out forwards;}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+@keyframes rainFall{0%{opacity:1;transform:translateY(-40px) rotate(0);}100%{opacity:0;transform:translateY(110vh) rotate(var(--rot));}}
+@keyframes confFall{0%{opacity:1;transform:translateY(-30px) rotate(0);}100%{opacity:0;transform:translateY(100vh) rotate(720deg);}}
+
+@media (max-width:600px){.blank-input{width:110px;}}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div>
+<div class="bubble b3"></div><div class="bubble b4"></div>
+<div class="flash-v" id="flashV"></div>
+
+<div class="wrap">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 4E</span></div>
+  <div class="week">SEMAINE 6 — JOUR 4 · LES TEMPS COMPOSÉS</div>
+  <h1>📰 Le Reporter — Temps composés</h1>
+  <div class="theme-badge">Passé composé, plus-que-parfait, futur antérieur, passé antérieur</div>
+
+  <div class="referentiel">
+    <div class="ref-stripe"></div>
+    <div class="ref-titre">Référentiel</div>
+    <div class="ref-grid">
+      <div class="ref-cell">
+        <div class="ref-cell-titre">Correspondances</div>
+        <div class="ref-cell-body">
+          <strong>Passé composé</strong> = auxiliaire au <strong>PRÉSENT</strong> + participe passé.<br>
+          <strong>Plus-que-parfait</strong> = auxiliaire à l'<strong>IMPARFAIT</strong> + participe passé.<br>
+          <strong>Passé antérieur</strong> = auxiliaire au <strong>PASSÉ SIMPLE</strong> + participe passé.<br>
+          <strong>Futur antérieur</strong> = auxiliaire au <strong>FUTUR SIMPLE</strong> + participe passé.
+        </div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-titre">Choix de l'auxiliaire</div>
+        <div class="ref-cell-body">
+          — <strong>ÊTRE</strong> : verbes de mouvement et de changement d'état (aller, venir, partir, arriver, naître, mourir, entrer, sortir, monter, descendre, rester, tomber, passer…) + verbes pronominaux.<br>
+          — <strong>AVOIR</strong> : tous les autres verbes.
+        </div>
+      </div>
+      <div class="ref-astuce">
+        <div class="ref-astuce-titre">Participes passés irréguliers courants</div>
+        <div class="ref-astuce-body"><strong>avoir</strong> → eu ; <strong>être</strong> → été ; <strong>faire</strong> → fait ; <strong>prendre</strong> → pris ; <strong>venir</strong> → venu ; <strong>voir</strong> → vu ; <strong>dire</strong> → dit ; <strong>mettre</strong> → mis ; <strong>écrire</strong> → écrit ; <strong>lire</strong> → lu.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Étape 1 — Le Tableau de bord</div>
+  <div class="consigne-txt">Complète le tableau en écrivant toi-même la forme complète (auxiliaire + participe passé) dans chaque case.</div>
+  <div class="hud">
+    <div class="hud-box">Tableau : <b id="scoreT1">0</b> / 16</div>
+    <div class="progress-track"><div class="progress-fill" id="progFillT1"></div></div>
+  </div>
+  <div class="tableau-card">
+    <table class="grille">
+      <thead>
+        <tr><th></th><th>Passé composé</th><th>Plus-que-parfait</th><th>Futur antérieur</th><th>Passé antérieur</th></tr>
+      </thead>
+      <tbody id="tableauBody"></tbody>
+    </table>
+  </div>
+  <button class="btn-recommencer-t1" id="btnRecommencerT1">🔄 Recommencer</button>
+
+  <div class="section-title">Étape 2 — Le Texte du reporter</div>
+  <div id="etape2Locked" class="locked-msg">🔒 Remplis les 16 cases du tableau avec au moins 11 bonnes réponses pour débloquer le texte du reporter.</div>
+  <div id="etape2Contenu" style="display:none;">
+    <div class="consigne-txt">Complète ce texte journalistique en écrivant toi-même la forme verbale attendue dans chaque emplacement. Aucune proposition ne t'est donnée : le contexte de la phrase t'indique quel temps composé utiliser.</div>
+    <div class="hud">
+      <div class="hud-box">Texte : <b id="scoreT2">0</b> / 8</div>
+      <div class="progress-track"><div class="progress-fill" id="progFillT2"></div></div>
+    </div>
+    <div class="texte-card">
+      <div class="texte-body" id="texteReporter"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy" id="modalTrophy"></div>
+    <h2 id="modalTitle"></h2>
+    <div class="final" id="modalScore"></div>
+    <div class="detail" id="modalDetail"></div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   N4S6J4 — Les temps composés — Reporter — 4e
+   Étape 1 : tableau 4x4, saisie libre = /16 (déblocage étape 2 à 11/16)
+   Étape 2 : texte à 8 trous, saisie libre = /8
+   Étape 3 : bilan /24
+   Référentiel non fourni dans le document source → non inclus.
+   ═══════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+
+/* ---------- ÉTAPE 1 : tableau ---------- */
+const VERBES = [
+  { label:"RECEVOIR — elle", cells:[
+    { rep:"a reçu", alt:["a recu"], fb:"Recevoir + avoir. Passé composé = auxiliaire avoir au PRÉSENT + participe. Avoir, 3e pers. sing. présent : a. Participe de recevoir : reçu (irrégulier). → elle a reçu." },
+    { rep:"avait reçu", alt:["avait recu"], fb:"Plus-que-parfait = auxiliaire avoir à l'IMPARFAIT + participe. Avoir, 3e pers. sing. imparfait : avait. Même participe : reçu. → elle avait reçu." },
+    { rep:"aura reçu", alt:[], fb:"Futur antérieur = auxiliaire avoir au FUTUR SIMPLE + participe. Avoir, 3e pers. sing. futur simple : aura. Même participe : reçu. → elle aura reçu." },
+    { rep:"eut reçu", alt:[], fb:"Passé antérieur = auxiliaire avoir au PASSÉ SIMPLE + participe. Avoir, 3e pers. sing. passé simple : eut. Même participe : reçu. → elle eut reçu." }
+  ]},
+  { label:"TOMBER — ils", cells:[
+    { rep:"sont tombés", alt:[], fb:"Tomber + être. Passé composé = être au PRÉSENT + participe accordé. Être, 3e pers. plur. présent : sont. Participe de tomber + accord masc. plur. : tombés. → ils sont tombés." },
+    { rep:"étaient tombés", alt:[], fb:"Plus-que-parfait + être = être à l'IMPARFAIT + participe. Être, 3e pers. plur. imparfait : étaient. Accord masc. plur. : tombés. → ils étaient tombés." },
+    { rep:"seront tombés", alt:[], fb:"Futur antérieur + être = être au FUTUR SIMPLE + participe. Être, 3e pers. plur. futur simple : seront. Accord masc. plur. : tombés. → ils seront tombés." },
+    { rep:"furent tombés", alt:[], fb:"Passé antérieur + être = être au PASSÉ SIMPLE + participe. Être, 3e pers. plur. passé simple : furent. Accord masc. plur. : tombés. → ils furent tombés." }
+  ]},
+  { label:"LIRE — nous", cells:[
+    { rep:"avons lu", alt:[], fb:"Lire + avoir. Passé composé = avoir au PRÉSENT + participe. Avoir, 1re pers. plur. présent : avons. Participe de lire : lu (irrégulier). → nous avons lu." },
+    { rep:"avions lu", alt:[], fb:"Plus-que-parfait = avoir à l'IMPARFAIT + participe. Avoir, 1re pers. plur. imparfait : avions. Même participe : lu. → nous avions lu." },
+    { rep:"aurons lu", alt:[], fb:"Futur antérieur = avoir au FUTUR SIMPLE + participe. Avoir, 1re pers. plur. futur simple : aurons. Même participe : lu. → nous aurons lu." },
+    { rep:"eûmes lu", alt:[], fb:"Passé antérieur = avoir au PASSÉ SIMPLE + participe. Avoir, 1re pers. plur. passé simple : eûmes. Même participe : lu. → nous eûmes lu." }
+  ]},
+  { label:"PARTIR — vous", cells:[
+    { rep:"êtes partis", alt:[], fb:"Partir + être. Passé composé = être au PRÉSENT + participe accordé. Être, 2e pers. plur. présent : êtes. Participe de partir + accord masc. plur. : partis. → vous êtes partis." },
+    { rep:"étiez partis", alt:[], fb:"Plus-que-parfait + être = être à l'IMPARFAIT + participe. Être, 2e pers. plur. imparfait : étiez. Accord masc. plur. : partis. → vous étiez partis." },
+    { rep:"serez partis", alt:[], fb:"Futur antérieur + être = être au FUTUR SIMPLE + participe. Être, 2e pers. plur. futur simple : serez. Accord masc. plur. : partis. → vous serez partis." },
+    { rep:"fûtes partis", alt:[], fb:"Passé antérieur + être = être au PASSÉ SIMPLE + participe. Être, 2e pers. plur. passé simple : fûtes. Accord masc. plur. : partis. → vous fûtes partis." }
+  ]}
+];
+
+let scoreT1 = 0, doneT1 = 0;
+const totalCellsT1 = 16;
+
+function buildTableau(){
+  const tbody = $('tableauBody');
+  tbody.innerHTML = '';
+  VERBES.forEach((v, vi)=>{
+    const tr = document.createElement('tr');
+    let html = '<td class="verbe-cell">'+v.label+'</td>';
+    v.cells.forEach((c, ci)=>{
+      const id = vi+'-'+ci;
+      html += '<td><div class="cell-wrap">'
+        +'<input type="text" class="cell-input" id="input-'+id+'" placeholder="…">'
+        +'<button class="cell-btn" id="btn-'+id+'">Valider</button>'
+        +'<div class="cell-fb" id="fb-'+id+'"></div>'
+        +'</div></td>';
+    });
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  });
+  VERBES.forEach((v, vi)=>{
+    v.cells.forEach((c, ci)=>{
+      const id = vi+'-'+ci;
+      const inp = $('input-'+id), btn = $('btn-'+id);
+      const submit = ()=>validateCell(vi, ci);
+      btn.addEventListener('click', submit);
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } });
+    });
+  });
+}
+
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+
+function validateCell(vi, ci){
+  const id = vi+'-'+ci;
+  const inp = $('input-'+id), btn = $('btn-'+id), fb = $('fb-'+id);
+  if(inp.disabled) return;
+  const c = VERBES[vi].cells[ci];
+  const val = norm(inp.value);
+  if(!val) return;
+  const accepted = [c.rep, ...c.alt].map(norm);
+  const ok = accepted.includes(val);
+  inp.disabled = true; btn.disabled = true;
+  if(ok){
+    inp.classList.add('ok');
+    fb.classList.remove('show');
+    scoreT1++;
+    flashV(true); okSound();
+  } else {
+    inp.classList.add('no');
+    fb.innerHTML = c.fb.replace(/(→[^→]+)$/, '<span class="rep-forte">$1</span>');
+    fb.classList.add('show');
+    flashV(false); errSound();
+  }
+  doneT1++;
+  updateT1();
+  checkUnlockEtape2();
+}
+
+function updateT1(){
+  $('scoreT1').textContent = scoreT1;
+  $('progFillT1').style.width = (scoreT1/totalCellsT1*100)+'%';
+}
+
+function checkUnlockEtape2(){
+  if(doneT1>=totalCellsT1){
+    if(scoreT1>=11 && $('etape2Locked').style.display!=='none'){
+      $('etape2Locked').style.display='none';
+      $('etape2Contenu').style.display='block';
+    } else if(scoreT1<11){
+      $('etape2Locked').textContent = '🔒 '+scoreT1+' / 16 bonnes réponses : il en faut au moins 11 pour débloquer le texte du reporter. Clique sur "Recommencer".';
+    }
+    checkFinished();
+  }
+}
+
+/* ---------- ÉTAPE 2 : texte du reporter ---------- */
+const BLANKS = [
+  { verbe:"recueillir", rep:"a recueilli", alt:[], fb:"« L'an dernier » + récit moderne → passé composé. Recueillir + avoir, 3e pers. sing. : a recueilli." },
+  { verbe:"paraître", rep:"avait paru", alt:[], fb:"« À peine… que » + antériorité dans le passé → plus-que-parfait. Paraître + avoir, 3e pers. sing. : avait paru (participe irrégulier)." },
+  { verbe:"établir", rep:"avaient établi", alt:["avaient etabli"], fb:"Action accomplie avant le moment principal du récit → plus-que-parfait. Établir + avoir, 3e pers. plur. : avaient établi." },
+  { verbe:"connaître", rep:"eut connu", alt:[], fb:"« Dès que » + passé simple → passé antérieur pour l'action immédiatement antérieure. Connaître + avoir, 3e pers. sing. : eut connu (participe irrégulier)." },
+  { verbe:"négliger", rep:"avons négligé", alt:[], fb:"Bilan d'une action passée liée au présent → passé composé. Négliger + avoir, 1re pers. plur. : avons négligé." },
+  { verbe:"rassembler", rep:"auront rassemblé", alt:[], fb:"« D'ici cinq ans » + futur → futur antérieur. Rassembler + avoir, 3e pers. plur. : auront rassemblé." },
+  { verbe:"assimiler", rep:"auront assimilé", alt:[], fb:"« Quand » + futur simple (devront) → futur antérieur. Assimiler + avoir, 3e pers. plur. : auront assimilé." },
+  { verbe:"tenir", rep:"a tenu", alt:[], fb:"Bilan d'une situation passée liée au présent → passé composé. Tenir + avoir, 3e pers. sing. : a tenu (participe irrégulier)." }
+];
+let scoreT2 = 0, doneT2 = 0;
+
+function buildTexteReporter(){
+  const zone = $('texteReporter');
+  function blankHtml(i){
+    return '<span class="blank-wrap">'
+      +'<span class="blank-verbe">('+BLANKS[i].verbe+')</span>'
+      +'<input type="text" class="blank-input" id="binput-'+i+'" placeholder="…">'
+      +'<button class="blank-btn" id="bbtn-'+i+'">✓</button>'
+      +'<span class="blank-fb" id="bfb-'+i+'"></span>'
+      +'</span>';
+  }
+  zone.innerHTML =
+    "L'an dernier, un groupe de chercheurs "+blankHtml(0)+" d'importantes données sur le changement climatique. "
+    +"Leur rapport "+blankHtml(1)+" à peine que d'autres équipes "+blankHtml(2)+" des conclusions similaires. "
+    +"Dès que le public "+blankHtml(3)+" les conclusions, le débat fut vif. "
+    +"Nous estimons que nous "+blankHtml(4)+" ce phénomène depuis trop longtemps. "
+    +"D'ici cinq ans, les scientifiques "+blankHtml(5)+" de nouvelles preuves. "
+    +"Quand les gouvernements "+blankHtml(6)+" ces données, ils devront agir. "
+    +"La communauté internationale "+blankHtml(7)+" de nombreuses conférences sans parvenir à un accord.";
+
+  BLANKS.forEach((b,i)=>{
+    const inp = $('binput-'+i), btn = $('bbtn-'+i);
+    const submit = ()=>validateBlank(i);
+    btn.addEventListener('click', submit);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } });
+  });
+}
+
+function validateBlank(i){
+  const inp = $('binput-'+i), btn = $('bbtn-'+i), fb = $('bfb-'+i);
+  if(inp.disabled) return;
+  const b = BLANKS[i];
+  const val = norm(inp.value);
+  if(!val) return;
+  const accepted = [b.rep, ...b.alt].map(norm);
+  const ok = accepted.includes(val);
+  inp.disabled = true; btn.disabled = true;
+  if(ok){
+    inp.classList.add('ok');
+    fb.classList.remove('show');
+    scoreT2++;
+    flashV(true); okSound();
+  } else {
+    inp.classList.add('no');
+    fb.textContent = b.fb;
+    fb.classList.add('show');
+    flashV(false); errSound();
+  }
+  doneT2++;
+  updateT2();
+  if(doneT2>=8){ checkFinished(); }
+}
+
+function updateT2(){
+  $('scoreT2').textContent = scoreT2;
+  $('progFillT2').style.width = (scoreT2/8*100)+'%';
+}
+
+/* ---------- ÉTAPE 3 : verdict ---------- */
+function checkFinished(){
+  const t1Complete = doneT1>=totalCellsT1 || scoreT1>=11;
+  const t2Complete = doneT2>=8;
+  if(t1Complete && t2Complete){ setTimeout(showBilan, 600); }
+}
+
+function medalInfo(sc){
+  if(sc>=23) return {icon:"🥇", txt:"Rédacteur en chef certifié ! Maîtrise parfaite des temps composés."};
+  if(sc>=18) return {icon:"🥈", txt:"Grand reporter. Quelques formes à consolider."};
+  if(sc>=12) return {icon:"🥉", txt:"Reporter junior. Revois les auxiliaires et leurs temps."};
+  return {icon:"📰", txt:"Reprends le parcours depuis le début."};
+}
+
+function showBilan(){
+  const total = scoreT1 + scoreT2;
+  const m = medalInfo(total);
+  $('modalTrophy').textContent = m.icon;
+  $('modalTitle').textContent = m.txt;
+  $('modalScore').textContent = total+' / 24';
+  $('modalDetail').textContent = 'Tableau de bord : '+scoreT1+' / 16\nTexte du reporter : '+scoreT2+' / 8';
+  $('modalDetail').style.whiteSpace='pre-line';
+  $('overlay').classList.add('show');
+  beepFinal(total>=18);
+  if(total/24>=0.85) rainEmojis();
+}
+
+function rejouer(){
+  scoreT1=0; doneT1=0; scoreT2=0; doneT2=0;
+  updateT1(); updateT2();
+  buildTableau(); buildTexteReporter();
+  $('etape2Locked').textContent = '🔒 Remplis les 16 cases du tableau avec au moins 11 bonnes réponses pour débloquer le texte du reporter.';
+  $('etape2Locked').style.display='block';
+  $('etape2Contenu').style.display='none';
+  $('overlay').classList.remove('show');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ── FLASH ── */
+function flashV(ok){
+  const el=$('flashV');
+  el.textContent=ok?'✓':'✗'; el.style.color=ok?'#1f7a4d':'#c0392b';
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+
+/* ── PLUIE EMOJIS + CONFETTIS ── */
+function confetti(){
+  const cols=['#3ab5d8','#1f7a4d','#c0392b','#f5c518'];
+  for(let i=0;i<30;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.style.cssText='position:fixed;top:-20px;left:'+(Math.random()*100)+'vw;width:8px;height:8px;'
+        +'background:'+cols[i%4]+';z-index:9997;pointer-events:none;'
+        +'animation:confFall '+(1.6+Math.random()*1.2).toFixed(2)+'s ease-in forwards;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),3000);
+    }, i*40);
+  }
+}
+const RAIN=['🌊','💧','⛵','🔭','🗺️','🌧️','💫','⚓'];
+function rainEmojis(){
+  confetti();
+  for(let i=0;i<25;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+      el.style.cssText='position:fixed;top:-40px;left:'+(Math.random()*100)+'vw;'
+        +'font-size:'+(1+Math.random()*1.3).toFixed(2)+'rem;z-index:9998;pointer-events:none;'
+        +'--rot:'+(Math.random()*60-30)+'deg;animation:rainFall '+(1.8+Math.random()*1.4).toFixed(2)+'s ease-in forwards;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),3500);
+    }, i*85);
+  }
+}
+
+/* ── AUDIO ── */
+let actx=null, son=true;
+function initA(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){ if(!actx||!son) return; const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+ o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.16,t+0.01); g.gain.exponentialRampToValueAtTime(0.0008,t+d);
+ o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02); }
+function okSound(){ initA(); beep(523,784,0.13,'sine',0.13); setTimeout(()=>beep(784,1046,0.11,'sine',0.11),80); }
+function errSound(){ initA(); beep(320,140,0.24,'sawtooth',0.12); }
+function beepFinal(good){
+  initA();
+  if(good){ [523,659,784,1046,1318].forEach((f,k)=>setTimeout(()=>beep(f,f,0.2,'sine',0.14),k*90)); }
+  else { beep(300,150,0.4,'sine',0.14); }
+}
+document.addEventListener('pointerdown', initA, {once:true});
+
+buildTableau();
+buildTexteReporter();
+updateT1();
+updateT2();
+$('btnRecommencerT1').addEventListener('click', rejouer);
+</script>
+</body>
+</html>
