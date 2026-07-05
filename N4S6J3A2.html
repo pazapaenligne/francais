@@ -426,22 +426,24 @@ function updateWagon(){
     wagon.onGround = false;
   }
 
-  /* Wagon tombé dans le trou → GAME OVER */
+  /* Wagon tombé dans le trou → respawn APRÈS le trou, sans perte de progression */
   if(wagon.y > H + 30){
-    stopTrainSound();
-    gameRunning=false;
+    loseGold(10);
     beep(200,400,'sawtooth',0.15);
-    flashTimer=40; flashColor='rgba(200,0,0,0.6)';
-    setTimeout(()=>{
-      const goHtml='<div class="ph">CATASTROPHE !</div>'+
-        '<div class="ps">LE WAGON EST TOMBÉ</div>'+
-        '<p>Le wagonnet a chuté dans un trou !<br>'+
-        '<b style="color:#e5c417">Saute ↑ par-dessus les trous !</b><br><br>'+
-        '🟡 Pièces sauvées : <b style="color:#f0c040">'+gold+'</b></p>'+
-        '<button class="btn" onclick="startGame()">⛏ Recommencer</button>';
-      document.getElementById('ov').innerHTML=goHtml;
-      document.getElementById('ov').style.display='flex';
-    }, 600);
+    flashTimer=30; flashColor='rgba(200,0,0,0.5)';
+    spawnFloatLabel(wagon.x-10,H/2-30,'Aïe ! On continue ↑','#ff6b6b');
+    /* Trouve le trou responsable de la chute pour réapparaître juste APRÈS son bord droit */
+    const SAFE_MARGIN = 60;
+    let holeEnd = wagonWorldX;
+    obstacles.filter(o=>o.type==='hole').forEach(o=>{
+      if(wagonWorldX+wagon.w > o.x-180 && wagonWorldX < o.x+o.w+40){
+        holeEnd = Math.max(holeEnd===wagonWorldX ? o.x+o.w : holeEnd, o.x+o.w);
+      }
+    });
+    /* Nouvelle position du monde : le wagon réapparaît SAFE_MARGIN après la fin du trou */
+    worldX = Math.max(0, holeEnd + SAFE_MARGIN - wagon.x);
+    wagon.y=RAIL_Y-wagon.h; wagon.vy=0; wagon.onGround=true; wagon.jumpHeld=false;
+    /* Vitesse conservée, pas de ralentissement pénalisant */
   }
 
   /* Saut — jumpHeld reset dès que touche relâchée OU au sol */
@@ -817,12 +819,12 @@ function showWinOverlay(){
       ✅ Réussite : <b style="color:#89c843">${pct}%</b><br><br>
       <span style="color:#f0c040;font-size:20px">★★★★★</span>
     </p>
-    <div style="text-align:left;background:rgba(255,255,255,.06);border:1px solid #8b6914;border-radius:8px;padding:12px 14px;margin:14px 0;font-size:12px;line-height:1.7;color:#fff;">
-      <b style="color:#e5c417;">✍️ Ce que j'ai découvert</b><br>
+    <div style="text-align:left;background:#fffdf7;border:1.5px solid #8dc63f;border-radius:8px;padding:12px 14px;margin:14px 0;font-size:12px;line-height:1.7;color:#1a2a08;">
+      <b style="color:#3d7a10;">✍️ Ce que j'ai découvert</b><br>
       ✔ Je peux remplacer <b>on</b> par <b>il</b>.<br>
       ✔ Je peux remplacer <b>ont</b> par <b>avaient</b>.<br>
       ✔ Lorsque je vois une négation, j'écris <b>on n'</b>.<br><br>
-      <b style="color:#e5c417;">🧠 Bilan — Lorsque j'hésite…</b><br>
+      <b style="color:#3d7a10;">🧠 Bilan — Lorsque j'hésite…</b><br>
       ☑ Je remplace par il.<br>
       ☑ Je remplace par avaient.<br>
       ☑ Je cherche une négation.
