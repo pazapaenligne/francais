@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je m'entraîne — Avant la dictée : déjoue les pièges ! — S6 J5</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5c518;--jour-fonce:#8a6000;--jour-clair:#fffbeb;--jour-pale:#f5e08a;
+  --day-glow:rgba(245,197,24,.30);--bg:#fffdf7;
+  --bord:#f0deA0;--txt:#1a1408;--gris:#7a6a30;
+  --vert:#22c55e;--vert-bg:#e7faec;--rouge:#ef4444;--rouge-bg:#fdeaea;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+.bulle{position:fixed;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;}
+.bulle-jaune{width:120px;height:120px;background:#fff5e0;top:-30px;right:-30px;}
+.bulle-jour{width:90px;height:90px;background:var(--jour-clair);bottom:60px;left:-30px;}
+.bulle-verte{width:70px;height:70px;background:#e7faec;top:40%;right:-20px;}
+.bulle-rose{width:60px;height:60px;background:#f7eded;top:20%;left:-20px;}
+
+.pazapa-header{background:#fff;border-bottom:3px solid var(--jour);padding:16px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5a623;color:#7a3d00;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:1.2px;padding:7px 16px;border-radius:20px;box-shadow:0 3px 10px rgba(245,166,35,.35);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+.header-semaine{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;letter-spacing:2px;color:var(--gris);text-transform:uppercase;}
+.header-titre{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);color:var(--txt);line-height:1.2;}
+.header-titre .accent{color:var(--jour-fonce);}
+
+.wrap{max-width:840px;margin:0 auto;padding:20px 14px 60px;position:relative;z-index:1;}
+
+.contexte-box{background:var(--jour-clair);border:1.5px solid var(--bord);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:.92rem;line-height:1.6;color:var(--txt);}
+.contexte-box strong{color:var(--jour-fonce);}
+.contexte-box ul{margin:8px 0 0 20px;}
+
+.consigne-box{background:var(--jour-clair);border-left:6px solid var(--jour-fonce);border-radius:0 8px 8px 0;padding:13px 16px;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;line-height:1.65;color:var(--txt);margin-bottom:16px;}
+.consigne-box .consigne-label{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);text-transform:uppercase;font-size:.78rem;letter-spacing:.5px;display:block;margin-bottom:4px;}
+.consigne-box ol{margin:8px 0 0 20px;font-weight:600;}
+.consigne-box li{margin-bottom:2px;}
+
+.exemple-box{background:#fff;border:1.5px dashed var(--jour-fonce);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+.exemple-label{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.78rem;color:var(--jour-fonce);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.exemple-phrase{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--txt);}
+.exemple-ligne{font-size:.88rem;line-height:1.6;color:var(--txt);margin-bottom:4px;}
+
+.act-card{background:#fff;border:2px solid var(--bord);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.act-header{background:var(--jour-fonce);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.act-nom{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.78rem;color:#fff;letter-spacing:.5px;}
+.act-body{padding:16px;}
+
+.texte-source{font-size:clamp(1rem,2.8vw,1.1rem);line-height:2;background:#fff;border:1.5px solid var(--bord);border-radius:8px;padding:16px 18px;color:var(--txt);}
+.mot-cible{font-weight:800;color:var(--jour-fonce);background:var(--jour-clair);border-radius:5px;padding:1px 6px;cursor:pointer;border:2px solid var(--jour);transition:all .15s;}
+.mot-cible:hover{background:var(--jour-pale);}
+.mot-cible.done{background:var(--vert-bg);border-color:var(--vert);color:#157f3a;}
+
+.recherche-item{border:1.5px solid var(--bord);border-radius:10px;margin-top:12px;overflow:hidden;}
+.recherche-head{background:var(--jour-clair);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.recherche-head-txt{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--jour-fonce);}
+.recherche-arrow{font-size:.8rem;color:var(--gris);transition:transform .2s;}
+.recherche-body{padding:14px;display:none;}
+.recherche-body.open{display:block;}
+.champ-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gris);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px;}
+.champ-label:first-child{margin-top:0;}
+.check-aucune-erreur{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;color:var(--jour-fonce);background:var(--jour-clair);padding:10px 14px;border-radius:8px;margin-bottom:12px;cursor:pointer;}
+.check-aucune-erreur input{width:20px;height:20px;cursor:pointer;flex-shrink:0;}
+.champ-input{width:100%;padding:12px 14px;border:2px solid var(--bord);border-radius:8px;font-size:.95rem;font-family:Arial,sans-serif;color:var(--txt);min-height:3rem;}
+.champ-input:focus{outline:none;border-color:var(--jour);}
+textarea.champ-input{min-height:4.5rem;resize:vertical;font-family:Arial,sans-serif;line-height:1.5;}
+.recherche-valide-btn{margin-top:12px;padding:10px 18px;font-size:.78rem;min-height:2.8rem;}
+
+.manip-item{border:1.5px solid var(--bord);border-radius:10px;padding:14px;margin-bottom:12px;}
+.manip-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--jour-fonce);color:#fff;border-radius:50%;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.85rem;margin-right:8px;}
+.manip-phrase{font-size:clamp(1rem,2.8vw,1.1rem);font-weight:700;color:var(--txt);margin-bottom:6px;}
+.manip-consigne{font-size:.88rem;color:var(--gris);font-style:italic;margin-bottom:10px;padding-left:34px;}
+.manip-input{width:100%;padding:12px 14px;border:2px solid var(--bord);border-radius:8px;font-size:.95rem;font-family:Arial,sans-serif;color:var(--txt);min-height:3rem;}
+.manip-input:focus{outline:none;border-color:var(--jour);}
+
+.reflexe-box{background:var(--jour-clair);border:2px solid var(--jour);border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.reflexe-titre{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;color:var(--jour-fonce);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.reflexe-item{font-size:.95rem;line-height:1.7;color:var(--txt);margin-bottom:4px;}
+
+.progress-note{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gris);margin-top:14px;}
+
+.btn-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{padding:12px 20px;border:none;border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;letter-spacing:.5px;cursor:pointer;min-height:3rem;text-transform:uppercase;transition:all .15s;}
+.btn-rec{background:#fff;color:var(--gris);border:2px solid var(--bord);}
+.btn-rec:hover{background:var(--jour-clair);}
+.btn-ok{background:var(--jour-fonce);color:#fff;}
+.btn-ok:hover{background:var(--jour);}
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+<div class="bulle bulle-rose"></div>
+
+<div class="pazapa-header">
+  <div class="logo-badge">
+    <div class="pts"><i></i><i></i><i></i></div>
+    PAZAPA · FRANÇAIS
+  </div>
+  <div class="header-semaine">Semaine 6 — Jour 5</div>
+  <div class="header-titre">Je m'entraîne · <span class="accent">Avant la dictée : déjoue les pièges !</span></div>
+</div>
+
+<div class="wrap">
+
+  <div class="contexte-box">
+    <strong>Objectif :</strong> retrouver les erreurs cachées dans un texte en mobilisant les notions étudiées cette semaine.
+    <ul>
+      <li>les homonymes on / on n' / ont</li>
+      <li>les temps composés de l'indicatif</li>
+    </ul>
+  </div>
+
+  <div class="consigne-box">
+    <span class="consigne-label">Consigne</span>
+    Un élève a rédigé ce texte, mais son correcteur automatique s'est trompé. À toi de retrouver les erreurs. Pour chacune :
+    <ol>
+      <li>① Corrige-la.</li>
+      <li>② Explique ton choix.</li>
+      <li>③ Justifie avec une manipulation (remplacement, changement de temps, etc.).</li>
+    </ol>
+  </div>
+
+  <div class="exemple-box">
+    <div class="exemple-label">💡 Exemple résolu</div>
+    <div class="exemple-phrase">« Ce matin, <b>ont a préparé</b> le petit-déjeuner. »</div>
+    <div class="exemple-ligne"><b>① Corrige :</b> on a préparé</div>
+    <div class="exemple-ligne"><b>② Pourquoi ?</b> « Ont » est le verbe avoir, alors qu'ici il faut le pronom « on ».</div>
+    <div class="exemple-ligne"><b>③ Comment le prouver ?</b> Remplace « on » par « il » : « il a préparé » fonctionne → c'est bien le pronom « on », pas le verbe « ont ».</div>
+  </div>
+
+  <div class="act-card">
+    <div class="act-header">
+      <span class="act-nom">📝 Le texte</span>
+    </div>
+    <div class="act-body">
+      <div class="texte-source">
+        Hier, <span class="mot-cible" data-id="0">on a terminé</span> le projet de journal du collège. Les élèves <span class="mot-cible" data-id="1">on travaillé</span> avec sérieux et <span class="mot-cible" data-id="2">on n'a oublié</span> aucun détail. Lorsque chacun <span class="mot-cible" data-id="3">avait relit</span> son article, les professeurs <span class="mot-cible" data-id="4">ont félicité</span> la classe. Demain, on présentera le journal et chacun <span class="mot-cible" data-id="5">aura préparé</span> son intervention.
+      </div>
+    </div>
+  </div>
+
+  <div class="act-card">
+    <div class="act-header">
+      <span class="act-nom">🔍 Tableau de recherche</span>
+    </div>
+    <div class="act-body">
+      <div id="recherche-list"></div>
+      <div class="progress-note" id="rechercheProgress">0 / 6 expressions traitées</div>
+    </div>
+  </div>
+
+  <div class="act-card">
+    <div class="act-header">
+      <span class="act-nom">🎯 Défi Manipulation</span>
+    </div>
+    <div class="act-body">
+      <div id="manip-list"></div>
+    </div>
+  </div>
+
+  <div class="reflexe-box">
+    <div class="reflexe-titre">🎯 Le réflexe du champion</div>
+    <div class="reflexe-item">Avant la dictée, pose-toi systématiquement ces trois questions :</div>
+    <div class="reflexe-item">✔ Puis-je remplacer <b>ont</b> par <b>avaient</b> ?</div>
+    <div class="reflexe-item">✔ Ai-je bien un auxiliaire + un participe passé ?</div>
+    <div class="reflexe-item">✔ Mon temps composé exprime-t-il une action déjà achevée ?</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-rec" id="btnReset">↺ Recommencer</button>
+  </div>
+
+</div>
+
+<script>
+/* ══ DONNÉES (contenu exact de la prof) ══ */
+var RECHERCHE_DATA = [
+  {expr:"on a terminé", correct:"on a terminé", piege:true,
+   pourquoi:"Cette forme est déjà correcte : « on » est un pronom indéfini singulier, suivi de l'auxiliaire avoir au présent « a » + participe passé « terminé ».",
+   manip:"Remplace « on » par « il » : « il a terminé » fonctionne → « on a terminé » est bien correct, pas de correction nécessaire."},
+  {expr:"on travaillé", correct:"ont travaillé", piege:false,
+   pourquoi:"Le sujet est « Les élèves » (pluriel). Le verbe avoir à la 3e personne du pluriel est « ont », pas « on » (pronom indéfini singulier).",
+   manip:"Remplace par « avaient » : « les élèves avaient travaillé » fonctionne → c'est bien le verbe avoir (« ont »), pas le pronom « on »."},
+  {expr:"on n'a oublié", correct:"on n'a oublié", piege:true,
+   pourquoi:"Cette forme est déjà correcte : « on » reste un pronom indéfini singulier ici, et la négation « ne...aucun » s'écrit « n' » devant une voyelle.",
+   manip:"Remplace « on » par « il » : « il n'a oublié » fonctionne → « on » est bien le bon choix, pas de correction nécessaire."},
+  {expr:"avait relit", correct:"avait relu", piege:false,
+   pourquoi:"Le participe passé de « relire » est « relu » (comme « lire » → « lu »). « Relit » est une forme conjuguée au présent, pas un participe passé.",
+   manip:"Vérifie la formation du participe passé du verbe « relire » : il est irrégulier, comme son verbe de base « lire » → « lu »."},
+  {expr:"ont félicité", correct:"ont félicité", piege:true,
+   pourquoi:"Cette forme est déjà correcte : sujet « les professeurs » (pluriel), verbe avoir « ont » + participe passé « félicité » (verbe régulier en -er).",
+   manip:"Remplace par « avaient » : « les professeurs avaient félicité » fonctionne → « ont » est bien correct ici."},
+  {expr:"aura préparé", correct:"aura préparé", piege:true,
+   pourquoi:"Cette forme est déjà correcte : « chacun » (singulier) + « aura » (avoir au futur simple) + participe passé → futur antérieur, cohérent avec « Demain ».",
+   manip:"Le marqueur temporel « Demain » annonce une action future antérieure à une autre → le futur antérieur est bien la forme attendue."}
+];
+
+var doneItems={};
+function norm(s){return s.toLowerCase().trim().replace(/[’]/g,"'").replace(/\s+/g,' ');}
+
+/* ══ TABLEAU DE RECHERCHE ══ */
+function buildRecherche(){
+  var cont=document.getElementById('recherche-list');
+  cont.innerHTML='';
+  RECHERCHE_DATA.forEach(function(item,i){
+    var div=document.createElement('div');
+    div.className='recherche-item';
+    div.innerHTML=
+      '<div class="recherche-head" data-id="'+i+'">'+
+        '<span class="recherche-head-txt">« '+item.expr+' »</span>'+
+        '<span class="recherche-arrow" id="arrow'+i+'">▼</span>'+
+      '</div>'+
+      '<div class="recherche-body" id="body'+i+'">'+
+        '<label class="check-aucune-erreur"><input type="checkbox" id="checkOk'+i+'"> Cette phrase ne contient aucune erreur</label>'+
+        '<div class="champ-label">① Corrige (laisse vide si tu as coché "aucune erreur")</div>'+
+        '<input type="text" class="champ-input" id="corrige'+i+'" placeholder="Écris la forme correcte...">'+
+        '<div class="champ-label">② Pourquoi ?</div>'+
+        '<textarea class="champ-input" id="pourquoi'+i+'" placeholder="Explique ton choix..."></textarea>'+
+        '<div class="champ-label">③ Comment le prouver ?</div>'+
+        '<textarea class="champ-input" id="preuve'+i+'" placeholder="Indique la manipulation utilisée (remplacement, changement de temps...)..."></textarea>'+
+        '<div class="btn-row" style="margin-top:12px;">'+
+          '<button class="btn btn-ok recherche-valide-btn" data-id="'+i+'">✓ Vérifier</button>'+
+          '<button class="btn btn-rec recherche-reset-btn" data-id="'+i+'">↺ Recommencer</button>'+
+        '</div>'+
+        '<div class="recherche-fb" id="fb'+i+'" style="display:none;margin-top:12px;"></div>'+
+      '</div>';
+    cont.appendChild(div);
+  });
+
+  cont.querySelectorAll('.recherche-head').forEach(function(head){
+    head.addEventListener('click',function(){
+      var id=head.dataset.id;
+      var body=document.getElementById('body'+id);
+      var arrow=document.getElementById('arrow'+id);
+      var isOpen=body.classList.toggle('open');
+      arrow.style.transform=isOpen?'rotate(180deg)':'rotate(0deg)';
+    });
+  });
+
+  cont.querySelectorAll('.recherche-valide-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=btn.dataset.id;
+      var data=RECHERCHE_DATA[id];
+      var checkOk=document.getElementById('checkOk'+id).checked;
+      var corrigeVal=document.getElementById('corrige'+id).value;
+      var isOk=checkOk?data.piege:(norm(corrigeVal)===norm(data.correct));
+
+      var fb=document.getElementById('fb'+id);
+      var corrigeFbHtml='<div style="padding:10px 12px;border-radius:8px;margin-bottom:8px;font-size:.88rem;font-weight:600;'+
+        (isOk?'background:#e7faec;border:1.5px solid #22c55e;border-left:5px solid #22c55e;color:#157f3a;':
+              'background:#fdeaea;border:1.5px solid #ef4444;border-left:5px solid #ef4444;color:#991b1b;')+
+        '">'+(isOk?'✓ Correction juste !':'✗ Corrigé attendu : « '+data.correct+' »')+
+        (data.piege?' <em>(c\'était un piège : la forme était déjà correcte.)</em>':'')+
+        '</div>';
+
+      var refFbHtml='<div style="padding:10px 12px;border-radius:8px;background:var(--jour-clair);border:1.5px solid var(--bord);font-size:.86rem;line-height:1.6;color:var(--txt);">'+
+        '<b style="color:var(--jour-fonce);">Pour comparer avec ta réponse — pourquoi :</b> '+data.pourquoi+
+        '<br><br><b style="color:var(--jour-fonce);">Manipulation possible :</b> '+data.manip+
+        '</div>';
+
+      fb.innerHTML=corrigeFbHtml+refFbHtml;
+      fb.style.display='block';
+
+      doneItems[id]=true;
+      var mot=document.querySelector('.mot-cible[data-id="'+id+'"]');
+      if(mot)mot.classList.add('done');
+      updateProgress();
+    });
+  });
+
+  cont.querySelectorAll('.recherche-reset-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=btn.dataset.id;
+      document.getElementById('corrige'+id).value='';
+      document.getElementById('pourquoi'+id).value='';
+      document.getElementById('preuve'+id).value='';
+      document.getElementById('checkOk'+id).checked=false;
+      var fb=document.getElementById('fb'+id);
+      fb.innerHTML='';
+      fb.style.display='none';
+      delete doneItems[id];
+      var mot=document.querySelector('.mot-cible[data-id="'+id+'"]');
+      if(mot)mot.classList.remove('done');
+      updateProgress();
+    });
+  });
+
+  document.querySelectorAll('.mot-cible').forEach(function(mot){
+    mot.addEventListener('click',function(){
+      var id=mot.dataset.id;
+      var body=document.getElementById('body'+id);
+      var arrow=document.getElementById('arrow'+id);
+      body.classList.add('open');
+      arrow.style.transform='rotate(180deg)';
+      body.scrollIntoView({behavior:'smooth',block:'center'});
+      document.getElementById('corrige'+id).focus();
+    });
+  });
+}
+
+function updateProgress(){
+  var n=Object.keys(doneItems).length;
+  document.getElementById('rechercheProgress').textContent=n+' / 6 expressions traitées';
+}
+
+/* ══ DÉFI MANIPULATION ══ */
+var MANIP = [
+  {phrase:"Les élèves ont préparé leur exposé.",consigne:"→ Mets la phrase au singulier.",
+   correct:"L'élève a préparé son exposé."},
+  {phrase:"On n'a jamais perdu courage.",consigne:"→ Écris la phrase au pluriel.",
+   correct:"Nous n'avons jamais perdu courage."},
+  {phrase:"Nous avons terminé notre travail.",consigne:"→ Remplace le passé composé par le plus-que-parfait.",
+   correct:"Nous avions terminé notre travail."},
+  {phrase:"Tu auras compris la consigne.",consigne:"→ Imagine qu'il s'agit d'un récit au passé. Quel temps composé utiliserais-tu ?",
+   correct:"Tu eus compris la consigne. (passé antérieur)"}
+];
+
+function buildManip(){
+  var cont=document.getElementById('manip-list');
+  cont.innerHTML='';
+  MANIP.forEach(function(item,i){
+    var div=document.createElement('div');
+    div.className='manip-item';
+    div.innerHTML=
+      '<div class="manip-phrase"><span class="manip-num">'+(i+1)+'</span>'+item.phrase+'</div>'+
+      '<div class="manip-consigne">'+item.consigne+'</div>'+
+      '<input type="text" class="manip-input" id="manip'+i+'" placeholder="Écris ta réponse ici...">'+
+      '<div class="btn-row" style="margin-top:10px;">'+
+        '<button class="btn btn-ok manip-verif-btn" data-id="'+i+'">✓ Vérifier</button>'+
+        '<button class="btn btn-rec manip-reset-btn" data-id="'+i+'">↺ Recommencer</button>'+
+      '</div>'+
+      '<div class="manip-fb" id="manipFb'+i+'" style="display:none;margin-top:10px;"></div>';
+    cont.appendChild(div);
+  });
+
+  cont.querySelectorAll('.manip-verif-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=btn.dataset.id;
+      var item=MANIP[id];
+      var val=document.getElementById('manip'+id).value;
+      var isOk=norm(val)===norm(item.correct);
+      var fb=document.getElementById('manipFb'+id);
+      fb.innerHTML='<div style="padding:10px 12px;border-radius:8px;font-size:.88rem;font-weight:600;'+
+        (isOk?'background:#e7faec;border:1.5px solid #22c55e;border-left:5px solid #22c55e;color:#157f3a;':
+              'background:#fdeaea;border:1.5px solid #ef4444;border-left:5px solid #ef4444;color:#991b1b;')+
+        '">'+(isOk?'✓ Bonne réponse !':'✗ Réponse attendue : « '+item.correct+' »')+'</div>';
+      fb.style.display='block';
+    });
+  });
+
+  cont.querySelectorAll('.manip-reset-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=btn.dataset.id;
+      document.getElementById('manip'+id).value='';
+      var fb=document.getElementById('manipFb'+id);
+      fb.innerHTML='';fb.style.display='none';
+    });
+  });
+}
+
+/* ══ RESET ══ */
+function resetAll(){
+  doneItems={};
+  buildRecherche();
+  buildManip();
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('btnReset').addEventListener('click',resetAll);
+
+/* ── INIT ── */
+buildRecherche();
+buildManip();
+</script>
+</body>
+</html>
