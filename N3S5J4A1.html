@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S5 J4 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;
+      --day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+
+    /* CONSIGNE LECTURE */
+    .consigne-lecture{width:100%;max-width:720px;position:relative;z-index:1;
+      background:#1a6e88;color:#fff;border-radius:var(--radius);
+      padding:.85rem 1.1rem;margin-bottom:.85rem;
+      display:flex;align-items:flex-start;gap:.75rem;}
+    .consigne-lecture-icone{font-size:1.4rem;flex-shrink:0;margin-top:.05rem;}
+    .consigne-lecture-texte{font-size:clamp(.92rem,2.5vw,1rem);line-height:1.7;font-weight:600;}
+    .consigne-lecture-texte strong{font-size:1rem;display:block;margin-bottom:.2rem;font-weight:900;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    @media(max-width:540px){.ref-grid{grid-template-columns:1fr;}}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.85rem 1rem;}
+    .ref-cell.full{grid-column:1/-1;}
+    .ref-cell-titre{font-size:1rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;
+      display:flex;align-items:center;gap:.45rem;cursor:pointer;user-select:none;}
+    .ref-cell-titre[onclick]:hover{opacity:.8;}
+    .ref-cell-titre[onclick]::after{content:'\2190 clique pour cocher';
+      font-size:.65rem;color:var(--muted);font-weight:500;font-family:Arial,sans-serif;
+      font-style:italic;margin-left:.3rem;white-space:nowrap;}
+    .ref-cell-titre[onclick].done::after{content:'\2714 lu';color:var(--day-dark);font-style:normal;font-weight:700;}
+    .ref-check-box{width:19px;height:19px;border:2.5px solid var(--day-dark);border-radius:5px;
+      flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+      transition:all .2s;background:#fff;font-size:.82rem;font-weight:900;color:transparent;}
+    .ref-check-box.checked{background:var(--day-dark);color:#fff;}
+    .ref-check-box.checked::after{content:'\2713';}
+    .ref-cell-body{font-size:.9rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body strong{color:var(--day-dark);}
+    /* Terminaisons en couleur */
+    .term{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--day-dark);
+      background:var(--day-border);border-radius:4px;padding:.05rem .35rem;}
+    .verb-ex{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;
+      color:var(--day-dark);}
+
+    /* DÉBLOCAGE */
+    .ref-deblocage{width:100%;max-width:720px;position:relative;z-index:1;
+      text-align:center;margin-bottom:1.2rem;}
+    .ref-progress-txt{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      color:var(--muted);margin-bottom:.5rem;}
+    .ref-progress-txt span{color:var(--day-dark);font-weight:900;}
+
+    /* DASH */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5a8a9a;text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#5a8a9a;text-transform:uppercase;letter-spacing:.08em;}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#4ade80;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#fca5a5;}
+    .chip-rem{background:rgba(58,181,216,.15);border-color:var(--day-color);color:var(--day-border);}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+
+    /* CARTES */
+    .cards-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.1rem;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;padding:.75rem 1rem;margin-bottom:.7rem;
+      font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);line-height:1.85;font-style:italic;}
+    .q-phrase strong{font-style:normal;}
+
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:'JetBrains Mono',monospace;
+      color:var(--text);cursor:pointer;transition:all .15s;text-align:left;min-height:50px;
+      -webkit-tap-highlight-color:transparent;font-weight:700;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.6rem;display:none;
+      line-height:1.75;border-left:5px solid var(--red);}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);color:#7f1d1d;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.45rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .fb ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+    .fb ul li{margin-bottom:.3rem;line-height:1.75;}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* RÉSULTATS */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#5a8a9a;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#88c8d8;margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;}
+
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    Pazapa &middot; Français &middot; 3ème
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 4</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Le passé simple</span></h1>
+  <div class="theme-badge">Conjugaison &mdash; passé simple de l&rsquo;indicatif</div>
+</header>
+
+<!-- CONSIGNE LECTURE -->
+<div class="consigne-lecture">
+  <div class="consigne-lecture-icone">&#128196;</div>
+  <div class="consigne-lecture-texte">
+    <strong>Lis le référentiel avant de commencer&nbsp;!</strong>
+    Coche chaque section après l&rsquo;avoir lue. Quand les 4 sections sont cochées, le bouton &laquo;&nbsp;J&rsquo;ai lu &mdash; je commence&nbsp;&raquo; se débloque.
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; Référentiel &mdash; Terminaisons du passé simple</div>
+  <div class="ref-grid">
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-g1" onclick="cocherSection('g1')">
+        <span id="rc-g1" class="ref-check-box"></span>1er groupe (-er)
+      </div>
+      <div class="ref-cell-body">
+        <span class="term">-ai</span> <span class="term">-as</span> <span class="term">-a</span><br>
+        <span class="term">-âmes</span> <span class="term">-âtes</span> <span class="term">-èrent</span><br><br>
+        <em><span class="verb-ex">il joua</span> &bull; <span class="verb-ex">ils jouèrent</span></em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-g2" onclick="cocherSection('g2')">
+        <span id="rc-g2" class="ref-check-box"></span>2e groupe &amp; certains verbes du 3e
+      </div>
+      <div class="ref-cell-body">
+        <span class="term">-is</span> <span class="term">-is</span> <span class="term">-it</span><br>
+        <span class="term">-îmes</span> <span class="term">-îtes</span> <span class="term">-irent</span><br><br>
+        <em><span class="verb-ex">il finit</span> &bull; <span class="verb-ex">ils prirent</span></em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-us" onclick="cocherSection('us')">
+        <span id="rc-us" class="ref-check-box"></span>Irréguliers en -us &amp; -ins
+      </div>
+      <div class="ref-cell-body">
+        <strong>En -us&nbsp;:</strong> <span class="term">-us</span> <span class="term">-us</span> <span class="term">-ut</span> <span class="term">-ûmes</span> <span class="term">-ûtes</span> <span class="term">-urent</span><br>
+        <em><span class="verb-ex">pouvoir &rarr; put</span> &bull; <span class="verb-ex">vouloir &rarr; voulut</span> &bull; <span class="verb-ex">savoir &rarr; sut</span> &bull; <span class="verb-ex">croire &rarr; crut</span></em><br><br>
+        <strong>En -ins&nbsp;:</strong> <span class="term">-ins</span> <span class="term">-ins</span> <span class="term">-int</span> <span class="term">-înmes</span> <span class="term">-întes</span> <span class="term">-inrent</span><br>
+        <em><span class="verb-ex">venir &rarr; vint</span> &bull; <span class="verb-ex">tenir &rarr; tint</span></em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-irr" onclick="cocherSection('irr')">
+        <span id="rc-irr" class="ref-check-box"></span>Verbes très irréguliers
+      </div>
+      <div class="ref-cell-body">
+        <em>
+          <span class="verb-ex">être &rarr; fus</span><br>
+          <span class="verb-ex">avoir &rarr; eus</span><br>
+          <span class="verb-ex">faire &rarr; fis</span><br>
+          <span class="verb-ex">voir &rarr; vis</span><br>
+          <span class="verb-ex">dire &rarr; dis</span><br>
+          <span class="verb-ex">prendre &rarr; pris</span>
+        </em>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DÉBLOCAGE -->
+<div class="ref-deblocage" id="ref-deblocage">
+  <div class="ref-progress-txt">Sections lues&nbsp;: <span id="cpt-sections">0</span>&nbsp;/ 4</div>
+  <button class="btn btn-primary" id="btn-jai-lu" onclick="debloquerQuiz()" disabled style="opacity:.4;min-width:240px;">
+    &#128214;&nbsp;J&rsquo;ai lu &mdash; je commence
+  </button>
+</div>
+
+<!-- DASH -->
+<div class="dash" id="dash-bloc" style="display:none;">
+  <div class="dash-titre">&#9201; Atelier passé simple &mdash; 6 questions</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Question 1 / 6&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/6</div>
+      <div class="dash-score-label">Valid&eacute;es</div>
+    </div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">6</span> restants</div>
+  </div>
+</div>
+
+<div class="progress-wrap" id="prog-bloc" style="display:none;">
+  <div class="progress-info">
+    <span id="prog-label">0 / 6 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- CARTES -->
+<div class="cards-wrap" id="cards-wrap" style="display:none;"></div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#9201; Bilan de séance</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/6</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+/* \u2500\u2500 CASES R\u00C9F\u00C9RENTIEL \u2500\u2500 */
+var sectionsLues={g1:false,g2:false,us:false,irr:false};
+function cocherSection(id){
+  if(sectionsLues[id])return;
+  sectionsLues[id]=true;
+  var box=document.getElementById('rc-'+id);if(box)box.classList.add('checked');
+  var titre=document.getElementById('rct-'+id);if(titre)titre.classList.add('done');
+  var lues=Object.values(sectionsLues).filter(Boolean).length;
+  var cpt=document.getElementById('cpt-sections');if(cpt)cpt.textContent=lues;
+  if(lues===4){var btn=document.getElementById('btn-jai-lu');if(btn){btn.disabled=false;btn.style.opacity='1';}}
+}
+function debloquerQuiz(){
+  document.getElementById('ref-deblocage').style.display='none';
+  document.getElementById('dash-bloc').style.display='';
+  document.getElementById('prog-bloc').style.display='';
+  document.getElementById('cards-wrap').style.display='';
+  buildQuiz();majProg(0);
+}
+
+/* \u2500\u2500 DONN\u00C9ES \u2500\u2500 */
+var QS=[
+  {id:'q1',qNum:1,
+   phrase:'\u00ab\u00a0Le pass\u00e9 simple du 1er groupe se termine, \u00e0 la 3e pers. sing., par\u00a0:\u00a0\u00bb',
+   opts:[{t:'-it',ok:false},{t:'-a',ok:true},{t:'-ut',ok:false}],
+   fb:'<span class="fb-titre">1er groupe (-er)\u00a0: terminaison en <span class="hl-ok">-a</span></span>Les verbes du 1er groupe se terminent par <span class="hl-ok">-a</span> \u00e0 la 3e pers. sing.<br><ul><li><em>il <span class="hl-ok">marcha</span></em></li><li><em>il <span class="hl-ok">joua</span></em></li></ul>'},
+  {id:'q2',qNum:2,
+   phrase:'\u00ab\u00a0Quelle est la forme correcte de venir, 3e pers. sing., au pass\u00e9 simple\u00a0?\u00a0\u00bb',
+   opts:[{t:'venit',ok:false},{t:'vint',ok:true},{t:'vena',ok:false}],
+   fb:'<span class="fb-titre">Venir est irr\u00e9gulier\u00a0!</span>Venir suit la s\u00e9rie en <span class="hl-ok">-ins</span>\u00a0: il <span class="hl-ok">vint</span>, radical enti\u00e8rement diff\u00e9rent de l\u2019infinitif.<br><br><em>tenir \u2192 il <span class="hl-ok">tint</span></em>'},
+  {id:'q3',qNum:3,
+   phrase:'\u00ab\u00a0Quelle est la forme correcte de avoir, 3e pers. sing., au pass\u00e9 simple\u00a0?\u00a0\u00bb',
+   opts:[{t:'avut',ok:false},{t:'avait',ok:false},{t:'eut',ok:true}],
+   fb:'<span class="fb-titre">Avoir au pass\u00e9 simple\u00a0: <span class="hl-ok">il eut</span></span><ul><li><span class="hl-ko">avait</span> = imparfait \u2260 pass\u00e9 simple</li><li><span class="hl-ok">eut</span> = pass\u00e9 simple \u2713</li></ul>'},
+  {id:'q4',qNum:4,
+   phrase:'\u00ab\u00a0Les verbes du 2e groupe se terminent, \u00e0 la 3e pers. plur., par\u00a0:\u00a0\u00bb',
+   opts:[{t:'-\u00e8rent',ok:false},{t:'-irent',ok:true},{t:'-urent',ok:false}],
+   fb:'<span class="fb-titre">2e groupe (-ir, -issons)\u00a0: terminaison en <span class="hl-ok">-irent</span></span><em>ils <span class="hl-ok">finirent</span></em> \u2022 <em>ils <span class="hl-ok">b\u00e2tirent</span></em><br><br><ul><li><span class="hl-ko">-\u00e8rent</span> = 1er groupe</li><li><span class="hl-ko">-urent</span> = irr\u00e9guliers en -us</li></ul>'},
+  {id:'q5',qNum:5,
+   phrase:'\u00ab\u00a0Quelle est la forme correcte de pouvoir, 3e pers. sing., au pass\u00e9 simple\u00a0?\u00a0\u00bb',
+   opts:[{t:'pouva',ok:false},{t:'put',ok:true},{t:'pouvit',ok:false}],
+   fb:'<span class="fb-titre">Irr\u00e9guliers en <span class="hl-ok">-us</span></span><ul><li>pouvoir \u2192 il <span class="hl-ok">put</span></li><li>savoir \u2192 il <span class="hl-ok">sut</span></li><li>vouloir \u2192 il <span class="hl-ok">voulut</span></li><li>croire \u2192 il <span class="hl-ok">crut</span></li></ul>'},
+  {id:'q6',qNum:6,
+   phrase:'\u00ab\u00a0Quelle est la forme correcte de faire, 3e pers. sing., au pass\u00e9 simple\u00a0?\u00a0\u00bb',
+   opts:[{t:'fait',ok:false},{t:'fit',ok:true},{t:'faisit',ok:false}],
+   fb:'<span class="fb-titre">Faire au pass\u00e9 simple\u00a0: <span class="hl-ok">il fit</span></span><ul><li><span class="hl-ko">fait</span> = participe pass\u00e9 ou pr\u00e9sent \u2260 pass\u00e9 simple</li><li><span class="hl-ok">fit</span> = pass\u00e9 simple \u2713</li></ul>'}
+];
+
+var scoreOk=0,res={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/6*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 6 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+  document.getElementById('chip-ok').textContent=scoreOk;
+  document.getElementById('chip-ko').textContent=done-scoreOk;
+  document.getElementById('chip-rem').textContent=6-done;
+}
+
+function buildQuiz(){
+  var wrap=document.getElementById('cards-wrap');wrap.innerHTML='';res={};scoreOk=0;
+  QS.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum+' / 6';card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var optsM=q.opts.slice();
+    var okIdx=optsM.findIndex(function(o){return o.ok;});
+    if(okIdx===0){var tmp=optsM[0];optsM[0]=optsM[1];optsM[1]=tmp;}
+    var opts=mkEl('div','opts');
+    optsM.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selQ(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selQ(q,btn,optsEl){
+  if(res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb;}
+  if(ok){scoreOk++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  var done=Object.keys(res).length;
+  majProg(done);
+  document.getElementById('dash-statut').textContent=done<6?'Question '+(done+1)+' / 6\u2026':'S\u00e9ance termin\u00e9e.';
+  if(done===6)setTimeout(afficherVerdict,500);
+}
+
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===6?5:total>=4?4:total===3?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===6){badge='<div class="badge-ok">\u2713 Machine bien r\u00e9gl\u00e9e\u00a0!</div>';msg='';pluie();}
+  else if(total>=4){badge='<div class="badge-ok">\u2713 Tr\u00e8s bon travail\u00a0!</div>';msg='';pluie();}
+  else if(total===3){badge='<div class="badge-ko">Bon d\u00e9but\u00a0!</div>';msg='';}
+  else{badge='<div class="badge-ko">Relis le r\u00e9f\u00e9rentiel et retente.</div>';msg='';}
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;res={};
+  sectionsLues={g1:false,g2:false,us:false,irr:false};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('dash-bloc').style.display='none';
+  document.getElementById('prog-bloc').style.display='none';
+  document.getElementById('cards-wrap').style.display='none';
+  document.getElementById('ref-deblocage').style.display='';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Question 1 / 6\u2026';
+  var btnlu=document.getElementById('btn-jai-lu');if(btnlu){btnlu.disabled=true;btnlu.style.opacity='.4';}
+  var cpts=document.getElementById('cpt-sections');if(cpts)cpts.textContent='0';
+  ['g1','g2','us','irr'].forEach(function(id){
+    var box=document.getElementById('rc-'+id);if(box)box.classList.remove('checked');
+    var titre=document.getElementById('rct-'+id);if(titre)titre.classList.remove('done');
+  });
+  majProg(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
