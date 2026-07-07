@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S5 J3 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#8dc63f;--day-color:#8dc63f;--day-dark:#3d7a10;--day-dark2:#254d09;
+  --day-light:#f0faeb;--day-border:#b5e08a;--day-glow:rgba(141,198,63,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#f5faf0;--border:#e8e4d9;
+  --yellow:#f5c518;--blue:#3ab5d8;--pink:#f28b82;--green:#8dc63f;--orange:#f5a623;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:760px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--blue);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+/* PROGRESSION */
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.dots{display:flex;gap:.35rem;justify-content:center;margin:.55rem 0 .6rem;flex-wrap:wrap;}
+.dot{width:11px;height:11px;border-radius:50%;background:#d8d4c8;transition:background .25s,transform .25s;}
+.dot.active{background:var(--yellow);transform:scale(1.25);}
+.dot.done{background:var(--day-dark);}
+.chips{display:flex;gap:.45rem;justify-content:center;margin-bottom:.9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+/* RÉFÉRENTIEL */
+.ref-toggle{width:100%;background:var(--day-light);border:2px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:'JetBrains Mono',monospace;
+  font-weight:800;font-size:.8rem;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;
+  animation:pulseRef 2.2s ease-in-out infinite;}
+.ref-toggle:hover,.ref-toggle.open{background:var(--day-border);}
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 7px rgba(141,198,63,0);}}
+.ref{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;max-height:0;
+  transition:max-height .35s ease;box-shadow:0 3px 14px rgba(0,0,0,.06);}
+.ref.open{max-height:1400px;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.ref-inner{padding:.9rem 1.2rem;max-height:520px;overflow-y:auto;}
+.ref-title{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem;}
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+@media(max-width:560px){.ref-grid{grid-template-columns:1fr;}}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.7rem .9rem;}
+.ref-cell.full{grid-column:1/-1;}
+.ref-cell-title{font-size:.85rem;font-weight:900;color:var(--day-dark2);margin-bottom:.3rem;}
+.ref-cell-body{font-size:.82rem;color:#4a4f58;line-height:1.7;}
+.ref-cell-body em{color:var(--day-dark2);font-style:normal;font-weight:700;}
+.ref-cell-body .ex{display:block;margin-top:.3rem;font-style:italic;color:var(--muted);}
+
+/* CARD PARTIE */
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+/* TEXTE DE RÉFÉRENCE PARTIE B */
+.texte-ref{margin:0 1.2rem .9rem;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.9rem 1.05rem;font-size:.92rem;line-height:1.9;
+  color:#333;font-style:italic;}
+.texte-ref .z{font-style:normal;font-weight:800;color:var(--day-dark2);
+  background:rgba(141,198,63,.22);border-radius:5px;padding:.05rem .3rem;}
+
+/* QUESTION */
+.q-item{padding:.2rem 1.2rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.4rem;letter-spacing:.05em;}
+.q-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+  line-height:1.85;margin-bottom:.7rem;padding:.75rem 1rem;
+  background:linear-gradient(var(--day-light),var(--day-light)) padding-box;
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);font-style:italic;}
+.q-phrase .blank{display:inline-block;min-width:74px;border-bottom:3px solid var(--day-dark);
+  text-align:center;color:var(--day-dark2);font-family:'JetBrains Mono',monospace;
+  font-weight:900;font-style:normal;margin:0 .2rem;vertical-align:bottom;}
+.q-phrase .blank.ok{border-color:#2f7a1f;color:#2f7a1f;}
+.q-phrase .blank.ko{border-color:var(--err);color:var(--err);}
+
+.opts-col{display:flex;flex-direction:column;gap:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.5rem;word-break:break-word;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.opt-sel{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;
+  color:#2f5c15!important;animation:glowOk .5s ease;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;
+  color:var(--err-dark)!important;animation:wrongShake .35s ease;}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(95,168,47,.55);}100%{box-shadow:0 0 0 10px rgba(95,168,47,0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 0 0;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-ko{color:#7f1d1d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+
+.nav-row{padding:.9rem 1.2rem 0;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.4vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:var(--day-dark2);}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+/* FLASH ✓/✗ */
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:50;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
+/* RÉSULTATS */
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--yellow),var(--day),var(--blue),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:1rem;color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1.1rem;}
+.recap-list div{padding:.15rem 0;}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:1rem;padding:.4rem 1.1rem;border:3px solid;border-radius:10px;
+  transform:rotate(-6deg) scale(0);margin-bottom:.9rem;letter-spacing:.05em;}
+.stamp.play{animation:stampPop .5s cubic-bezier(.2,1.4,.5,1) forwards;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}
+  70%{transform:rotate(-6deg) scale(1.15);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.stamp.ok{color:#2f7a1f;border-color:#2f7a1f;}
+.stamp.mid{color:#8a6000;border-color:#8a6000;}
+.stamp.ko{color:var(--err-dark);border-color:var(--err-dark);}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:var(--day-dark2);}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 5 · Jour 3</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Quel(s) / Quelle(s) / Qu'elle(s)</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 11 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="dots" id="dots"></div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">11</span></span>
+</div>
+
+<button class="ref-toggle" id="refToggle">
+  <span>📘 Référentiel — Quel / Quelle / Qu'elle</span><span id="refArrow">▾</span>
+</button>
+<div class="ref" id="refBox">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-title">À consulter à tout moment</div>
+    <div class="ref-grid">
+      <div class="ref-cell">
+        <div class="ref-cell-title">QUEL / QUELS</div>
+        <div class="ref-cell-body">Déterminant ou pronom exclamatif/interrogatif, <em>masculin</em>. S'accorde avec le nom qu'il accompagne ou qu'il représente.<br>
+        Test&nbsp;: remplacer par <em>quel grand</em> (masc. sing.) ou <em>quels grands</em> (masc. plur.).
+        <span class="ex">Ex.&nbsp;: « Quel talent&nbsp;! » (masc. sing.) — « Quels résultats&nbsp;! » (masc. plur.)</span></div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-cell-title">QUELLE / QUELLES</div>
+        <div class="ref-cell-body">Déterminant ou pronom exclamatif/interrogatif, <em>féminin</em>. S'accorde avec le nom qu'il accompagne ou qu'il représente.<br>
+        Test&nbsp;: remplacer par <em>quelle grande</em> (fém. sing.) ou <em>quelles grandes</em> (fém. plur.).
+        <span class="ex">Ex.&nbsp;: « Quelle chance&nbsp;! » (fém. sing.) — « Quelles nouvelles&nbsp;! » (fém. plur.)</span></div>
+      </div>
+      <div class="ref-cell full">
+        <div class="ref-cell-title">QU'ELLE / QU'ELLES</div>
+        <div class="ref-cell-body">Conjonction <em>que</em> (ou pronom relatif <em>que</em>) + pronom personnel sujet <em>elle/elles</em>. Toujours suivi d'un verbe conjugué dont elle/elles est le sujet.<br>
+        Test&nbsp;: remplacer <em>elle/elles</em> par <em>il/ils</em>. Si la phrase reste correcte avec <em>il/ils</em> → qu'elle(s).
+        <span class="ex">Ex.&nbsp;: « Je crois qu'elle viendra. » → « Je crois qu'il viendra. » ✓ → qu'elle.</span></div>
+      </div>
+      <div class="ref-cell full">
+        <div class="ref-cell-title">ASTUCE GLOBALE</div>
+        <div class="ref-cell-body">Si un <em>nom</em> suit directement → quel(s) ou quelle(s) (déterminant), accordé en genre et en nombre avec ce nom.<br>
+        Si un <em>verbe conjugué</em> suit directement, avec un sujet féminin sous-entendu → qu'elle(s) (que + elle/elles).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTIE A -->
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Partie A</span>
+    <span class="part-label">Choisir le bon homophone</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="part-consigne">Choisis l'homophone qui convient pour compléter chaque phrase.</div>
+  <div id="listA"></div>
+</div>
+
+<!-- PARTIE B -->
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Partie B</span>
+    <span class="part-label">Corriger le texte</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+  <div class="part-consigne">Ce texte contient cinq erreurs sur quel(s) / quelle(s) / qu'elle(s). Pour chaque erreur, choisis la correction exacte.</div>
+  <div class="texte-ref">« <span class="z">Quelle mérite</span> a eu cette jeune écrivaine de voir son premier roman publié si tôt&nbsp;! On se demande <span class="z">qu'elles épreuves</span> elle a dû traverser pour en arriver là. <span class="z">Quel que soit</span> la difficulté, elle continue d'écrire avec passion. Les critiques affirment <span class="z">quelle mérite</span> une attention particulière. Quels que soient les obstacles, on raconte <span class="z">quelle ne renonce jamais</span>. »</div>
+  <div id="listB"></div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="stamp" id="stamp"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 11 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="recap-list">
+      <div>Partie A (homophones) : <span id="r-sA"></span></div>
+      <div>Partie B (texte à corriger) : <span id="r-sB"></span></div>
+    </div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+
+/* ══ SHUFFLE / BALANCED POSITIONS ══ */
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function balancedPositions(n){
+  var per=Math.floor(n/3),rem=n%3,base=[];
+  for(var k=0;k<3;k++){var c=per+(k<rem?1:0);for(var i=0;i<c;i++)base.push(k);}
+  return shuffleArr(base);
+}
+function buildOpts(correct,distractors,slot){
+  var arr=[null,null,null];arr[slot]=correct;
+  var rest=shuffleArr(distractors.slice());var ri=0;
+  for(var s=0;s<3;s++){if(arr[s]===null)arr[s]=rest[ri++];}
+  return arr;
+}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+
+/* ══ DONNÉES PARTIE A (6 questions, QCM) ══ */
+var DA=[
+  {id:1,before:'«\u00a0',blankTxt:'',after:'\u00a0ambition anime cette jeune autrice depuis ses débuts\u00a0!\u00a0»',
+   correct:'Quelle',distractors:['Quel',"Qu'elle"],
+   fb:"Test\u00a0: « Quelle grande ambition\u00a0! » ✓ Ambition est <span class=\"hl-neu\">féminin singulier</span> → <span class=\"hl-ok\">Quelle</span>."},
+  {id:2,before:'«\u00a0On raconte\u00a0',blankTxt:'',after:'\u00a0a écrit ce roman en moins d\u2019un an.\u00a0»',
+   correct:"qu'elle",distractors:['quelle','quel'],
+   fb:"Test\u00a0: « On raconte qu'il a écrit ce roman » ✓ → <span class=\"hl-ok\">qu'elle</span> (que + elle, sujet du verbe a écrit)."},
+  {id:3,before:'«\u00a0',blankTxt:'',after:'\u00a0procédés stylistiques l\u2019auteur emploie-t-il dans cet extrait\u00a0?\u00a0»',
+   correct:'Quels',distractors:['Quelles',"Qu'elles"],
+   fb:"Test\u00a0: « Quels grands procédés\u00a0? » ✓ Procédés est <span class=\"hl-neu\">masculin pluriel</span> → <span class=\"hl-ok\">Quels</span>."},
+  {id:4,before:'«\u00a0Bien\u00a0',blankTxt:'',after:'\u00a0paraissent complexes, ces figures de style restent accessibles avec de la pratique.\u00a0»',
+   correct:"qu'elles",distractors:['quelles','quels'],
+   fb:"Test\u00a0: « bien qu'ils paraissent complexes » ✓ → <span class=\"hl-ok\">qu'elles</span> (que + elles, sujet de paraissent)."},
+  {id:5,before:'«\u00a0',blankTxt:'',after:'\u00a0a été la réaction du jury face à cette œuvre audacieuse\u00a0?\u00a0»',
+   correct:'Quelle',distractors:["Qu'elle",'Quel'],
+   fb:"Test\u00a0: « Quelle grande réaction… » ✓ Réaction est <span class=\"hl-neu\">féminin singulier</span> → <span class=\"hl-ok\">Quelle</span>."},
+  {id:6,before:'«\u00a0Le critique affirme\u00a0',blankTxt:'',after:'\u00a0mérite amplement le prix qu\u2019on lui a décerné.\u00a0»',
+   correct:"qu'elle",distractors:['quelle','quels'],
+   fb:"Test\u00a0: « Le critique affirme qu'il mérite amplement le prix » ✓ → <span class=\"hl-ok\">qu'elle</span> (que + elle, sujet de mérite)."}
+];
+
+/* ══ DONNÉES PARTIE B (5 corrections, QCM) ══ */
+var DB=[
+  {id:1,excerpt:'«\u00a0<span class="z">Quelle mérite</span> a eu cette jeune écrivaine…\u00a0»',
+   correct:'Quel mérite',distractors:['Quelle mérite',"Qu'elle mérite"],
+   fb:"→ <span class=\"hl-ok\">Quel mérite</span> (mérite, <span class=\"hl-neu\">masculin singulier</span> ; test\u00a0: « Quel grand mérite\u00a0! » ✓)"},
+  {id:2,excerpt:'«\u00a0On se demande <span class="z">qu\u2019elles épreuves</span> elle a dû traverser…\u00a0»',
+   correct:'quelles épreuves',distractors:['quels épreuves',"qu'elles épreuves"],
+   fb:"→ <span class=\"hl-ok\">quelles épreuves</span> (épreuves est un nom pluriel qui suit directement : test\u00a0: « quelles grandes épreuves » ✓ → déterminant, pas <span class=\"hl-ko\">que + elles</span>)"},
+  {id:3,excerpt:'«\u00a0<span class="z">Quel que soit</span> la difficulté, elle continue d\u2019écrire…\u00a0»',
+   correct:'Quelle que soit',distractors:['Quel que soit',"Qu'elle que soit"],
+   fb:"La locution correcte est « <span class=\"hl-ok\">quelle que soit</span> la difficulté » (quelle s'accorde avec difficulté, <span class=\"hl-neu\">féminin singulier</span>), et non « <span class=\"hl-ko\">Quel que soit</span> la difficulté »."},
+  {id:4,excerpt:'«\u00a0Les critiques affirment <span class="z">quelle mérite</span> une attention particulière.\u00a0»',
+   correct:"qu'elle mérite",distractors:['quelle mérite',"qu'elles mérite"],
+   fb:"Test\u00a0: « affirment qu'il mérite » ✓ → <span class=\"hl-ok\">qu'elle</span>, sujet de mérite."},
+  {id:5,excerpt:'«\u00a0…on raconte <span class="z">quelle ne renonce jamais</span>.\u00a0»',
+   correct:"qu'elle ne renonce jamais",distractors:['quelle ne renonce jamais',"qu'elles ne renonce jamais"],
+   fb:"Test\u00a0: « qu'il ne renonce jamais » ✓ → <span class=\"hl-ok\">qu'elle</span>, sujet de renonce."}
+];
+
+var TOTAL=11,scA=0,scB=0,errA=0,errB=0,curA=0,curB=0,lockA=[],lockB=[],posA=[],posB=[];
+
+/* ══ RÉFÉRENTIEL TOGGLE ══ */
+$('refToggle').addEventListener('click',function(){
+  $('refBox').classList.toggle('open');
+  $('refToggle').classList.toggle('open');
+  $('refArrow').textContent=$('refBox').classList.contains('open')?'▴':'▾';
+});
+
+/* ══ DOTS ══ */
+function buildDots(){
+  var d=$('dots');d.innerHTML='';
+  for(var i=0;i<11;i++){var s=document.createElement('div');s.className='dot';s.id='dot-'+i;d.appendChild(s);}
+}
+function updateDots(){
+  var ok=scA+scB;
+  for(var i=0;i<11;i++){
+    var el=$('dot-'+i);el.className='dot'+(i<ok?' done':(i===ok?' active':''));
+  }
+}
+
+/* ══ PARTIE A : construction séquentielle ══ */
+function buildA(){
+  scA=0;errA=0;curA=0;lockA=new Array(6).fill(false);
+  posA=balancedPositions(6);
+  $('spA').textContent='';
+  var list=$('listA');list.innerHTML='';
+  renderQA();
+}
+function renderQA(){
+  var list=$('listA');list.innerHTML='';
+  if(curA>=DA.length){ endA(); return; }
+  var d=DA[curA];
+  var opts=buildOpts(d.correct,d.distractors,posA[curA]);
+  var correctIdx=posA[curA];
+  var div=document.createElement('div');div.className='q-item';
+  var num=document.createElement('div');num.className='q-num';num.textContent='Q'+(curA+1)+' — Choisis l\u2019homophone';
+  div.appendChild(num);
+  var ph=document.createElement('div');ph.className='q-phrase';
+  ph.innerHTML=d.before+'<span class="blank" id="blankA">____</span>'+d.after;
+  div.appendChild(ph);
+  var col=document.createElement('div');col.className='opts-col';
+  var letters=['A','B','C'];var answered=false;
+  opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=letters[i];
+    var sp=document.createElement('span');sp.textContent=txt;
+    btn.appendChild(lt);btn.appendChild(sp);
+    btn.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      var ok=(i===correctIdx);
+      Array.prototype.forEach.call(col.children,function(b,bi){
+        b.disabled=true;
+        if(bi===correctIdx)b.classList.add('correct');
+        else if(bi===i)b.classList.add('wrong');
+      });
+      $('blankA').textContent=d.correct;
+      $('blankA').classList.add(ok?'ok':'ko');
+      flashIcon(ok);
+      if(ok){scA++;beepOk();}else{errA++;beepErr();}
+      var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne réponse.')+'</span>'+d.fb;
+      div.appendChild(fb);
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curA<DA.length-1)?'Suivant →':'Voir le score →';
+      next.addEventListener('click',function(){curA++;renderQA();});
+      nav.appendChild(next);div.appendChild(nav);
+      $('spA').textContent='Score\u00a0: '+scA+' / 6';
+      updateGlobal();
+    });
+    col.appendChild(btn);
+  });
+  div.appendChild(col);
+  list.appendChild(div);
+}
+function endA(){
+  $('spA').textContent='Score Partie A\u00a0: '+scA+' / 6';
+  $('cardB').classList.remove('locked');
+  buildB();
+}
+
+/* ══ PARTIE B : construction séquentielle ══ */
+function buildB(){
+  scB=0;errB=0;curB=0;
+  posB=balancedPositions(5);
+  $('spB').textContent='';
+  renderQB();
+}
+function renderQB(){
+  var list=$('listB');list.innerHTML='';
+  if(curB>=DB.length){ endB(); return; }
+  var d=DB[curB];
+  var opts=buildOpts(d.correct,d.distractors,posB[curB]);
+  var correctIdx=posB[curB];
+  var div=document.createElement('div');div.className='q-item';
+  var num=document.createElement('div');num.className='q-num';num.textContent='Q'+(curB+1)+' — Corrige l\u2019erreur';
+  div.appendChild(num);
+  var ph=document.createElement('div');ph.className='q-phrase';
+  ph.innerHTML=d.excerpt;
+  div.appendChild(ph);
+  var col=document.createElement('div');col.className='opts-col';
+  var letters=['A','B','C'];var answered=false;
+  opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=letters[i];
+    var sp=document.createElement('span');sp.textContent=txt;
+    btn.appendChild(lt);btn.appendChild(sp);
+    btn.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      var ok=(i===correctIdx);
+      Array.prototype.forEach.call(col.children,function(b,bi){
+        b.disabled=true;
+        if(bi===correctIdx)b.classList.add('correct');
+        else if(bi===i)b.classList.add('wrong');
+      });
+      flashIcon(ok);
+      if(ok){scB++;beepOk();}else{errB++;beepErr();}
+      var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne correction.')+'</span>'+d.fb;
+      div.appendChild(fb);
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curB<DB.length-1)?'Suivant →':'Voir le résultat →';
+      next.addEventListener('click',function(){curB++;renderQB();});
+      nav.appendChild(next);div.appendChild(nav);
+      $('spB').textContent='Score\u00a0: '+scB+' / 5';
+      updateGlobal();
+    });
+    col.appendChild(btn);
+  });
+  div.appendChild(col);
+  list.appendChild(div);
+}
+function endB(){
+  $('spB').textContent='Score Partie B\u00a0: '+scB+' / 5';
+  setTimeout(showResults,500);
+}
+
+/* ══ GLOBAL / PROGRESSION ══ */
+function updateGlobal(){
+  var ok=scA+scB;var ko=errA+errB;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;$('cnt-rem').textContent=TOTAL-ok-ko;
+  updateDots();
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  var pool=theme;
+  var n=24;
+  for(var i=0;i<n;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=pool[Math.floor(csRand()*pool.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var tot=scA+scB;
+  $('r-score').textContent=tot;
+  $('r-sA').textContent=scA+'/6';$('r-sB').textContent=scB+'/5';
+  var pct=tot/TOTAL;
+  var s=pct>=1?5:pct>=.82?4:pct>=.64?3:pct>=.45?2:1;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msgs=[
+    'Tu confonds encore souvent quel(s), quelle(s) et qu\u2019elle(s). Relis le référentiel et recommence.',
+    'Quelques hésitations persistent. Reprends surtout la distinction déterminant / que + elle(s).',
+    'Bon niveau global. Encore quelques confusions à corriger sur les accords.',
+    'Très bonne maîtrise ! Un ou deux points restent à consolider.',
+    'Maîtrise parfaite de quel(s), quelle(s) et qu\u2019elle(s) !'
+  ];
+  $('r-msg').textContent=msgs[s-1];
+  var stamp=$('stamp');
+  if(pct>=.7){stamp.className='stamp ok';stamp.textContent='RÉUSSI';}
+  else if(pct>=.45){stamp.className='stamp mid';stamp.textContent='À REVOIR';}
+  else{stamp.className='stamp ko';stamp.textContent='À REFAIRE';}
+  void stamp.offsetWidth;stamp.classList.add('play');
+  $('results').classList.add('show');
+  beepFinal(pct>=.7);
+  if(pct>=.7){emojiRain(['📚','✒️','📖','✍️','📜','🖋️','📝']);}
+  window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardB').classList.add('locked');
+  scB=0;errB=0;
+  buildDots();
+  buildA();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildDots();
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
