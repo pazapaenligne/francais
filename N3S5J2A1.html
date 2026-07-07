@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S5 J2 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#b94040;--day-dark:#7a1f1f;
+      --day-light:#f7eded;--day-border:#e2a3a3;
+      --day-glow:rgba(185,64,64,.22);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+
+    /* UNIVERS */
+    .univers-bloc{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-dark);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1rem;}
+    .univers-titre{font-size:1rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .univers-texte{font-size:.95rem;color:var(--text);line-height:1.65;}
+    .univers-texte strong{font-size:1.05rem;line-height:1.7;display:block;margin-top:.5rem;}
+
+    /* DASH */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a0a0;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#9a7a7a;text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#9a7a7a;text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);border:1.5px solid var(--dark3);
+      border-radius:8px;padding:.28rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#4ade80;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#fca5a5;}
+    .chip-rem{background:rgba(185,64,64,.15);border-color:var(--day-color);color:var(--day-border);}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+
+    /* RÉFÉRENTIEL */
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    @media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.85rem 1rem;}
+    .ref-cell.full{grid-column:1/-1;}
+    .ref-cell-titre{font-size:1rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;
+      display:flex;align-items:center;gap:.4rem;user-select:none;}
+    .ref-cell-titre[onclick]:hover{opacity:.8;}
+    .ref-cell-titre[onclick]::after{content:'\2190 clique pour cocher';
+      font-size:.65rem;color:var(--muted);font-weight:500;font-family:Arial,sans-serif;
+      font-style:italic;margin-left:.3rem;white-space:nowrap;}
+    .ref-cell-titre[onclick].done::after{content:'\2714 lu';color:var(--day-dark);font-style:normal;}
+    .ref-cell-body{font-size:.9rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body strong{color:var(--day-dark);}
+    .ref-cell-body em{font-style:italic;}
+    /* Tableau transposition */
+    .ref-table{width:100%;border-collapse:collapse;margin-top:.4rem;}
+    .ref-table th{background:var(--day-dark);color:#fff;font-family:'JetBrains Mono',monospace;
+      font-size:.78rem;padding:.4rem .6rem;text-align:left;font-weight:700;}
+    .ref-table td{font-size:.85rem;padding:.35rem .6rem;border-bottom:1px solid var(--day-border);
+      color:var(--text);line-height:1.5;}
+    .ref-table tr:last-child td{border-bottom:none;}
+    .ref-table tr:nth-child(even) td{background:rgba(185,64,64,.05);}
+    .ref-table .arrow{color:var(--day-dark);font-weight:900;text-align:center;}
+    /* Changements */
+    /* Consigne de lecture */
+    .consigne-lecture{width:100%;max-width:720px;position:relative;z-index:1;
+      background:#1a6e88;color:#fff;border-radius:var(--radius);
+      padding:.85rem 1.1rem;margin-bottom:.85rem;
+      display:flex;align-items:flex-start;gap:.75rem;}
+    .consigne-lecture-icone{font-size:1.4rem;flex-shrink:0;margin-top:.05rem;}
+    .consigne-lecture-texte{font-size:clamp(.92rem,2.5vw,1rem);line-height:1.7;font-weight:600;}
+    .consigne-lecture-texte strong{font-size:1rem;display:block;margin-bottom:.2rem;font-weight:900;}
+
+    /* Cases à cocher référentiel */
+    .ref-check-wrap{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.35rem;cursor:pointer;}
+    .ref-check-box{width:20px;height:20px;border:2.5px solid var(--day-dark);border-radius:5px;
+      flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+      transition:all .2s;background:#fff;color:transparent;font-size:.85rem;font-weight:900;}
+    .ref-check-box.checked{background:var(--day-dark);border-color:var(--day-dark);color:#fff;}
+    .ref-check-box.checked::after{content:'\2713';}
+    .ref-check-label{font-size:.9rem;color:var(--text);line-height:1.65;flex:1;cursor:pointer;}
+    .ref-check-label.checked{color:var(--muted);}
+    .ref-deblocage{width:100%;max-width:720px;position:relative;z-index:1;
+      text-align:center;margin-bottom:1rem;}
+    .ref-progress-txt{font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      color:var(--muted);margin-bottom:.5rem;}
+    .ref-progress-txt span{color:var(--day-dark);font-weight:900;}
+
+    .ref-change{background:var(--surface);border-left:3px solid var(--day-color);
+      border-radius:0 7px 7px 0;padding:.45rem .75rem;margin-bottom:.35rem;font-size:.88rem;color:var(--text);line-height:1.55;}
+    .ref-change strong{color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+
+    /* PARTIES */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.1rem;text-align:center;margin-top:.7rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.9rem;color:#c8a0a0;margin:.3rem 0 .9rem;font-family:'JetBrains Mono',monospace;}
+
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.1rem;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;padding:.75rem 1rem;margin-bottom:.7rem;
+      font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);line-height:1.85;font-style:italic;}
+    .q-texte{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);margin-bottom:.65rem;line-height:1.55;}
+    .tc-passe{color:#b94040;font-weight:900;font-style:normal;}
+    .tc-present{color:#3d7a10;font-weight:900;font-style:normal;}
+    .tc-futur{color:#1a6e88;font-weight:900;font-style:normal;}
+    .q-phrase strong{font-style:normal;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.45rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .fb ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+    .fb ul li{margin-bottom:.3rem;line-height:1.75;}
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.6rem;display:none;
+      line-height:1.75;border-left:5px solid var(--red);}
+
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);background:var(--surface);
+      font-size:1.05rem;font-weight:700;font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:50px;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;color:var(--text);
+      cursor:pointer;transition:all .15s;text-align:left;min-height:50px;
+      -webkit-tap-highlight-color:transparent;font-weight:500;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);color:#7f1d1d;}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:#fff;}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a0a0;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#9a7a7a;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#c8a0a0;margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}.vf-row{gap:.4rem;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#b94040"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Français &middot; 3ème
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 2</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Les paroles rapportées</span></h1>
+  <div class="theme-badge">Grammaire &mdash; discours direct &amp; indirect</div>
+</header>
+
+<!-- UNIVERS -->
+<div class="univers-bloc">
+  <div class="univers-titre">&#128640; Avant de commencer</div>
+  <div class="univers-texte">
+    Avant de commencer, réactive tes connaissances&nbsp;: ce défi te permettra de retrouver les indices essentiels et d'aborder la suite du parcours avec confiance&nbsp;!
+    <strong>Tu es transcripteur chargé de vérifier la bonne distinction entre discours direct et indirect avant de commencer les transpositions. 8 vérifications à valider.</strong>
+  </div>
+</div>
+
+<!-- DASH -->
+<div class="dash">
+  <div class="dash-titre">&#9999;&#65039; Atelier transcription &mdash; 8 vérifications</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Partie 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Valid&eacute;es</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Partie&nbsp;1</span><span id="nb-s-p1" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Partie&nbsp;2</span><span id="nb-s-p2" style="font-weight:900;">0/4</span></div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">8</span> restants</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 vérifications</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- CONSIGNE LECTURE -->
+<div class="consigne-lecture">
+  <div class="consigne-lecture-icone">&#128196;</div>
+  <div class="consigne-lecture-texte">
+    <strong>Lis le référentiel avant de commencer&nbsp;!</strong>
+    Coche chaque section après l&rsquo;avoir lue. Quand les 3 sections sont cochées, le bouton &laquo;&nbsp;J&rsquo;ai lu &mdash; je commence&nbsp;&raquo; se débloque.
+  </div>
+</div>
+
+<!-- RÉFÉRENTIEL -->
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; Référentiel &mdash; Les paroles rapportées</div>
+  <div class="ref-grid">
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-dd" onclick="cocherSection('dd')" style="cursor:pointer;"><span id="rc-dd" class="ref-check-box" style="display:inline-flex;margin-right:.5rem;vertical-align:middle;width:18px;height:18px;"></span>Discours direct</div>
+      <div class="ref-cell-body">
+        Insertion des paroles <strong>telles quelles</strong> dans le récit (dialogue ou monologue).<br><br>
+        <strong>Ponctuation spécifique&nbsp;:</strong> guillemets, deux-points, tirets, points d&rsquo;exclamation&hellip;<br><br>
+        <em>Ex.&nbsp;: &laquo;&nbsp;Il déclara&nbsp;: &laquo;&nbsp;Je reviendrai demain.&nbsp;&raquo;&nbsp;&raquo;</em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-di" onclick="cocherSection('di')" style="cursor:pointer;"><span id="rc-di" class="ref-check-box" style="display:inline-flex;margin-right:.5rem;vertical-align:middle;width:18px;height:18px;"></span>Discours indirect</div>
+      <div class="ref-cell-body">
+        Intégration des paroles dans le récit, sous forme de <strong>proposition subordonnée</strong> introduite par une conjonction (que, si&hellip;).<br><br>
+        <em>Ex.&nbsp;: &laquo;&nbsp;Il déclara qu&rsquo;il reviendrait le lendemain.&nbsp;&raquo;</em>
+      </div>
+    </div>
+
+    <div class="ref-cell full">
+      <div class="ref-cell-titre" id="rct-tr" onclick="cocherSection('tr')" style="cursor:pointer;"><span id="rc-tr" class="ref-check-box" style="display:inline-flex;margin-right:.5rem;vertical-align:middle;width:18px;height:18px;"></span>Transposition &mdash; 4 changements</div>
+      <div class="ref-change"><strong>1. Ponctuation&nbsp;:</strong> perte de la ponctuation spécifique (guillemets, points d&rsquo;exclamation&hellip;).</div>
+      <div class="ref-change"><strong>2. Personnes&nbsp;:</strong> pronoms personnels et déterminants possessifs passent souvent de la 1re/2e personne à la 3e personne.</div>
+      <div class="ref-change"><strong>3. Temps verbaux (concordance)&nbsp;:</strong>
+        <table class="ref-table" style="margin-top:.5rem;">
+          <tr><th>Verbe de parole</th><th style="text-align:center;">&rarr;</th><th>Subordonnée</th></tr>
+          <tr><td>Présent ou futur</td><td class="arrow">&rarr;</td><td>Pas de changement</td></tr>
+          <tr><td>Passé (passé composé, passé simple&hellip;)</td><td class="arrow">&rarr;</td><td>Présent/imparfait &rarr; imparfait&nbsp;; PC/PS &rarr; plus-que-parfait&nbsp;; futur simple &rarr; conditionnel présent&nbsp;; futur antérieur &rarr; conditionnel passé&nbsp;; impératif &rarr; infinitif (précédé de <em>de</em>).</td></tr>
+        </table>
+      </div>
+      <div class="ref-change" style="margin-top:.35rem;"><strong>4. Indicateurs de temps et de lieu&nbsp;:</strong>
+        <table class="ref-table" style="margin-top:.5rem;">
+          <tr><th>Discours direct</th><th style="text-align:center;">&rarr;</th><th>Discours indirect</th></tr>
+          <tr><td>aujourd&rsquo;hui</td><td class="arrow">&rarr;</td><td>ce jour-là</td></tr>
+          <tr><td>maintenant</td><td class="arrow">&rarr;</td><td>à ce moment-là</td></tr>
+          <tr><td>ce soir</td><td class="arrow">&rarr;</td><td>ce soir-là</td></tr>
+          <tr><td>hier</td><td class="arrow">&rarr;</td><td>la veille</td></tr>
+          <tr><td>demain</td><td class="arrow">&rarr;</td><td>le lendemain</td></tr>
+          <tr><td>la semaine prochaine</td><td class="arrow">&rarr;</td><td>la semaine suivante</td></tr>
+          <tr><td>la semaine dernière</td><td class="arrow">&rarr;</td><td>la semaine précédente</td></tr>
+          <tr><td>ici</td><td class="arrow">&rarr;</td><td>là</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="ref-deblocage" id="ref-deblocage">
+  <div class="ref-progress-txt">Sections lues&nbsp;: <span id="cpt-sections">0</span>&nbsp;/ 3</div>
+  <button class="btn btn-primary" id="btn-jai-lu" onclick="debloquerP1()" disabled style="opacity:.4;min-width:240px;">
+    &#128214;&nbsp;J&rsquo;ai lu &mdash; je commence
+  </button>
+</div>
+
+<!-- PARTIE 1 -->
+<div class="bloc-partie" id="bloc-p1" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128214;</div>
+    <div>
+      <div class="part-titre">Partie 1 &mdash; Vrai ou faux</div>
+      <div class="part-sous">4 vérifications &mdash; Q1 à Q4</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/4</div>
+  </div>
+  <div id="cards-p1"></div>
+  <div style="width:100%;text-align:center;margin:.7rem 0 .3rem;">
+    <button class="btn btn-primary" id="btn-vers-p2" onclick="debP2()" disabled style="opacity:.45;min-width:220px;">
+      Partie 2 &rarr; <span id="cpt-p1">0 / 4 valid&eacute;es</span>
+    </button>
+  </div>
+  <div class="part-result" id="res-p1">
+    <div class="part-score" id="score-p1"></div>
+    <div class="part-msg" id="msg-p1"></div>
+  </div>
+</div>
+
+<!-- PARTIE 2 -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128221;</div>
+    <div>
+      <div class="part-titre">Partie 2 &mdash; Identifier et transposer</div>
+      <div class="part-sous">4 questions QCM &mdash; Q5 à Q8</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/4</div>
+  </div>
+  <div id="cards-p2"></div>
+  <div class="part-result" id="res-p2">
+    <div class="part-score" id="score-p2"></div>
+    <div class="part-msg" id="msg-p2"></div>
+    <div id="btn-p2"></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#9999;&#65039; Bilan de séance</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var P1=[
+  {id:'q1',qNum:1,
+   phrase:'\u00ab\u00a0Le discours direct ins\u00e8re les paroles telles quelles dans le r\u00e9cit, avec une ponctuation sp\u00e9cifique comme les guillemets.\u00a0\u00bb',
+   rep:true,
+   fb:"<span class=\"fb-titre\">Le discours direct</span>Les paroles sont reproduites <strong>telles quelles</strong>, avec une ponctuation spécifique :<ul><li><strong>guillemets</strong> « … »</li><li><strong>deux-points</strong> avant les paroles</li><li><strong>tirets</strong> pour chaque prise de parole</li><li><strong>points d’exclamation</strong>, de suspension…</li></ul><em>Ex. : « Il s’écria : « Attendez-moi ! » »</em>"},
+  {id:'q2',qNum:2,
+   phrase:'\u00ab\u00a0Le discours indirect conserve la ponctuation sp\u00e9cifique du discours direct, comme les guillemets.\u00a0\u00bb',
+   rep:false,
+   fb:"<span class=\"fb-titre\">Le discours indirect ne garde pas la ponctuation !</span>Il <span class=\"hl-ko\">perd</span> les guillemets, les points d’exclamation…<br><br>Les paroles deviennent une <strong>proposition subordonnée</strong> introduite par <span class=\"hl-neu\">que</span> ou <span class=\"hl-neu\">si</span>.<br><em>Ex. : « Il dit <span class=\"hl-neu\">qu’il</span> partait. »</em>"},
+  {id:'q3',qNum:3,
+   phrase:'\u00ab\u00a0Si le verbe de parole de la principale est au pr\u00e9sent, le verbe de la subordonn\u00e9e ne change pas de temps lors de la transposition au discours indirect.\u00a0\u00bb',
+   rep:true,
+   fb:"<span class=\"fb-titre\">Concordance des temps : verbe de parole au présent</span>Verbe introducteur au <strong>présent ou au futur</strong> → <span class=\"hl-ok\">aucun changement</span> dans la subordonnée.<br><br><ul><li>« Il <span class=\"hl-neu\">dit</span> : \"Je <span class=\"hl-ko\">pars</span>.\" » → « Il dit qu’il <span class=\"hl-ok\">part</span>. »</li><li>Présent → présent : <strong>pas de changement</strong></li></ul>"},
+  {id:'q4',qNum:4,
+   phrase:'\u00ab\u00a0Lors du passage au discours indirect, l\u2019adverbe demain devient toujours la veille.\u00a0\u00bb',
+   rep:false,
+   fb:"<span class=\"fb-titre\">Ne pas confondre !</span><ul><li><span class=\"hl-ko\">demain</span> → <span class=\"hl-ok\">le lendemain</span></li><li><span class=\"hl-ko\">hier</span> → <span class=\"hl-ok\">la veille</span></li></ul>Ces deux transpositions sont <strong>opposées</strong> : ne pas les inverser !"}
+];
+
+var P2=[
+  {id:'q5',qNum:5,
+   phrase:'\u00ab\u00a0Le professeur annon\u00e7a\u00a0: \u00ab\u00a0Vous aurez un contr\u00f4le la semaine prochaine.\u00a0\u00bb\u00a0\u00bb',
+   texte:'Quel type de discours reconna\u00eet-on ici\u00a0?',
+   opts:[{t:'Discours indirect.',ok:false},{t:'Discours direct.',ok:true},{t:'Je ne sais pas.',ok:false}],
+   fb:"<span class=\"fb-titre\">Deux indices de discours direct :</span><ul><li>Les <strong>guillemets</strong> « … »</li><li>Les <strong>deux-points</strong> avant les paroles</li></ul>Les paroles sont reproduites <strong>mot pour mot</strong>, sans transformation."},
+  {id:'q6',qNum:6,
+   phrase:'\u00ab\u00a0Le candidat affirma qu\u2019il r\u00e9ussirait son entretien le lendemain.\u00a0\u00bb',
+   texte:'Quel type de discours reconna\u00eet-on ici\u00a0?',
+   opts:[{t:'Discours direct.',ok:false},{t:'Discours indirect.',ok:true},{t:'Je ne sais pas.',ok:false}],
+   fb:"<span class=\"fb-titre\">Deux indices de discours indirect :</span><ul><li>La conjonction <span class=\"hl-neu\">qu’</span> (que) introduit la subordonnée</li><li><strong>Pas de guillemets</strong>, pas de ponctuation spécifique</li></ul><em>« …affirma <span class=\"hl-neu\">qu’il</span> réussirait… »</em>"},
+  {id:'q7',qNum:7,
+   phrase:'<strong>Situation :</strong><br>• Verbe de parole : <span class=\"tc-passe\">passé composé</span> « Il a dit que… »<br>• Verbe de la subordonnée dans les paroles d’origine : <span class=\"tc-present\">présent</span><br><br>&rarr; <strong>À quel temps doit-il être transposé au discours indirect ?</strong>',
+   texte:'',
+   opts:[{t:'Au futur simple.',ok:false},{t:'\u00c0 l\u2019imparfait.',ok:true},{t:'Au conditionnel pr\u00e9sent.',ok:false}],
+   fb:"<span class=\"fb-titre\">Règle de concordance des temps :</span>Le verbe de parole est au <strong>passé composé</strong> → temps du passé.<br><br><ul><li>Présent → <span class=\"hl-ok\">imparfait</span></li></ul><em>« Il a dit : \"Je <span class=\"hl-ko\">pars</span>.\" » → « Il a dit qu’il <span class=\"hl-ok\">partait</span>. »</em>"},
+  {id:'q8',qNum:8,
+   phrase:'<strong>Situation :</strong><br>• Indicateur de temps dans les paroles d’origine : <span class=\"tc-passe\">hier</span><br>• Verbe de parole : au <span class=\"tc-passe\">passé</span><br><br>&rarr; <strong>Quelle est la forme transposée au discours indirect ?</strong>',
+   texte:'',
+   opts:[{t:'Le lendemain.',ok:false},{t:'La veille.',ok:true},{t:'Ce jour-l\u00e0.',ok:false}],
+   fb:"<span class=\"fb-titre\">Indicateurs de temps — ne pas confondre !</span><ul><li><span class=\"hl-ko\">hier</span> → <span class=\"hl-ok\">la veille</span></li><li><span class=\"hl-ko\">demain</span> → <span class=\"hl-ok\">le lendemain</span></li></ul><em>« \"Je suis arrivé <span class=\"hl-ko\">hier</span>.\" » → « il était arrivé <span class=\"hl-ok\">la veille</span> »</em>"}
+];
+
+var scoreOk=0,p1Ok=0,p1Res={},p2Ok=0,p2Res={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 8 v\u00e9rifications';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+  document.getElementById('chip-ok').textContent=scoreOk;
+  document.getElementById('chip-ko').textContent=done-scoreOk;
+  document.getElementById('chip-rem').textContent=8-done;
+}
+function majBadge(id,ok,total){
+  var sc=document.getElementById('nb-s-'+id),b=document.getElementById('nb-'+id);
+  if(!sc||!b)return;sc.textContent=ok+'/'+total;
+  if(ok===total){b.style.background='rgba(34,197,94,.2)';b.style.borderColor='var(--green)';sc.style.color='#4ade80';}
+  else if(ok>0){b.style.background='rgba(185,64,64,.15)';b.style.borderColor='var(--day-color)';sc.style.color='var(--day-border)';}
+}
+
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Res={};p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='V\u00e9rification '+q.qNum+' \u2014 Vrai ou faux\u00a0?';card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    var row=mkEl('div','vf-row');
+    ['Vrai','Faux'].forEach(function(txt){
+      var btn=document.createElement('button');btn.className='vf-btn';
+      btn.innerHTML=(txt==='Vrai'?'&#10003;':'&#10007;')+' '+txt;
+      btn.dataset.val=txt==='Vrai'?'true':'false';
+      btn.addEventListener('click',function(){selVF(q,btn,row);});
+      row.appendChild(btn);
+    });
+    card.appendChild(row);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Res[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Res[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb;}
+  if(ok){scoreOk++;p1Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p1').textContent=p1Ok+'/4';
+  majBadge('p1',p1Ok,4);
+  var done=Object.keys(p1Res).length;
+  majProg(done);
+  var cpt=document.getElementById('cpt-p1');var btn2=document.getElementById('btn-vers-p2');
+  if(cpt)cpt.textContent=done+' / 4 valid\u00e9es';
+  if(btn2&&done===4){btn2.disabled=false;btn2.style.opacity='1';}
+  document.getElementById('dash-statut').textContent=done<4?'Partie 1 \u2014 v\u00e9rification '+(done+1)+'/4\u2026':'Partie 1 termin\u00e9e';
+  if(done===4)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 4';
+  document.getElementById('msg-p1').textContent=p1Ok===4?'\u2713 Partie 1 r\u00e9ussie\u00a0!':'';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  document.getElementById('dash-statut').textContent='Partie 2 en cours\u2026';
+  buildP2();
+}
+
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Res={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='V\u00e9rification '+q.qNum;card.appendChild(lbl);
+    if(q.phrase){var ph=mkEl('div','q-phrase');ph.innerHTML=q.phrase;card.appendChild(ph);}
+    if(q.texte){var tx=mkEl('div','q-texte');tx.innerHTML=q.texte;card.appendChild(tx);}
+    var optsM=q.opts.slice();
+    var okIdx=optsM.findIndex(function(o){return o.ok;});
+    if(okIdx===0){var tmp=optsM[0];optsM[0]=optsM[1];optsM[1]=tmp;}
+    var opts=mkEl('div','opts');
+    optsM.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selP2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p2Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb;}
+  if(ok){scoreOk++;p2Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/4';
+  majBadge('p2',p2Ok,4);
+  var done=Object.keys(p2Res).length;
+  majProg(4+done);
+  document.getElementById('dash-statut').textContent=done<4?'Partie 2 \u2014 v\u00e9rification '+(done+1)+'/4\u2026':'S\u00e9ance termin\u00e9e.';
+  if(done===4)showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 4';
+  document.getElementById('msg-p2').textContent=p2Ok===4?'\u2713 Partie 2 parfaite\u00a0!':
+    p2Ok>=3?'Tr\u00e8s bien\u00a0!':p2Ok>=2?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML='<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+}
+
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===8){badge='<div class="badge-ok">\u2713 Transcription valid\u00e9e\u00a0!</div>';msg='Tu ma\u00eetrises la distinction\ndiscours direct / indirect.';pluie();}
+  else if(total>=6){badge='<div class="badge-ok">\u2713 Tr\u00e8s bon travail\u00a0!</div>';msg='Un point \u00e0 consolider.';pluie();}
+  else if(total>=4){badge='<div class="badge-ko">Bon d\u00e9but\u00a0!</div>';msg='Relis le r\u00e9f\u00e9rentiel.';}
+  else{badge='<div class="badge-ko">Relis le r\u00e9f\u00e9rentiel et retente.</div>';msg='';}
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Res={};p2Ok=0;p2Res={};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('badge-p1').textContent='0/4';
+  document.getElementById('badge-p2').textContent='0/4';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Partie 1 en cours\u2026';
+  var btn2=document.getElementById('btn-vers-p2');if(btn2){btn2.disabled=true;btn2.style.opacity='.45';}
+  var cpt=document.getElementById('cpt-p1');if(cpt)cpt.textContent='0 / 4 valid\u00e9es';
+  ['p1','p2'].forEach(function(id){
+    var b=document.getElementById('nb-'+id),s=document.getElementById('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    if(s){s.textContent='0/4';s.style.color='';}
+  });
+  document.getElementById('cards-p2').innerHTML='';
+  majProg(0);
+  buildP1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── LECTURE RÉFÉRENTIEL ── */
+var sectionsLues={dd:false,di:false,tr:false};
+function cocherSection(id){
+  if(sectionsLues[id])return;
+  sectionsLues[id]=true;
+  var box=document.getElementById('rc-'+id);
+  if(box){box.classList.add('checked');}
+  var titre=document.getElementById('rct-'+id);
+  if(titre)titre.classList.add('done');
+  var lues=Object.values(sectionsLues).filter(Boolean).length;
+  var cpt=document.getElementById('cpt-sections');
+  if(cpt)cpt.textContent=lues;
+  if(lues===3){
+    var btn=document.getElementById('btn-jai-lu');
+    if(btn){btn.disabled=false;btn.style.opacity='1';}
+  }
+}
+function debloquerP1(){
+  document.getElementById('ref-deblocage').style.display='none';
+  document.getElementById('bloc-p1').style.display='';
+  buildP1();majProg(0);
+}
+</script>
+</body>
+</html>
