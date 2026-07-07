@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quel / Quelle / Qu'elle — Défi correction — 3e S5 J3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+:root{
+ --day-color:#8dc63f;--day-dark:#3d7a10;--day-light:#f0faeb;--day-border:#b5e08a;--day-glow:rgba(141,198,63,.3);
+ --gold:#f5c518;--bg:#fffdf7;--rouge:#c0392b;--vert:#1f7a4d;--rouge-bg:#fbdcd6;--vert-bg:#d7f3e3;
+ --surface:#fff;--border:#d8dee5;--text:#1f2937;--muted:#6b7280;--radius:10px;
+}
+body{margin:0;background:var(--bg);color:#1f2937;font-family:'Segoe UI',system-ui,Arial,sans-serif;min-height:100vh;padding:18px;position:relative;overflow-x:hidden;}
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.3;}
+.bubble.b1{width:130px;height:130px;background:var(--gold);top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:var(--day-color);bottom:26px;left:-24px;}
+.bubble.b3{width:74px;height:74px;background:#3ab5d8;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:#f9c0bb;top:26%;left:-32px;}
+.wrap{max-width:720px;margin:0 auto;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--gold);border-radius:999px;padding:5px 16px;}
+.logo-badge .dots{display:flex;gap:4px;}
+.logo-badge .dots i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#c0392b;}
+.logo-badge .dots i:nth-child(2){background:#8a6000;}
+.logo-badge .dots i:nth-child(3){background:var(--day-dark);}
+.logo-badge .lab{font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:#3a2a00;letter-spacing:.5px;}
+.week{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#7a6f54;margin:8px 0 4px;letter-spacing:1px;}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.15rem,4vw,1.7rem);margin:2px 0 4px;color:var(--day-dark);font-weight:700;}
+.theme-badge{display:inline-block;background:var(--day-light);border:1px solid var(--day-border);color:var(--day-dark);
+ font-family:Arial,sans-serif;font-size:.82rem;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+.section-title{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--day-dark);letter-spacing:1px;
+ text-transform:uppercase;font-weight:800;margin:24px 0 10px;}
+.consigne-txt{font-family:Arial,sans-serif;font-size:.95rem;line-height:1.7;color:#374151;font-weight:600;
+ background:var(--day-light);border-left:3px solid var(--day-color);padding:10px 14px;border-radius:6px;margin-bottom:14px;}
+
+.hud{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center;}
+.hud-box{font-family:'Orbitron',monospace;font-size:.85rem;background:#fff;border:1px solid var(--day-border);
+ padding:8px 14px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.hud-box b{color:var(--day-dark);}
+.progress-track{flex:1;min-width:140px;height:10px;background:#eef2f4;border:1px solid var(--day-border);border-radius:6px;overflow:hidden;}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--day-color),var(--vert));transition:width .5s ease;}
+
+.texte-card{background:#fff;border:1px solid var(--day-border);border-top:4px solid var(--day-color);border-radius:14px;
+ padding:20px 22px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.texte-body{font-size:1.05rem;line-height:2.3;color:#1f2937;}
+.mot-clic{cursor:pointer;padding:1px 4px;border-radius:4px;transition:background .15s;}
+.mot-clic:hover{background:var(--day-light);}
+.mot-clic.trouve{background:#fff3c4;color:#8a6d00;font-weight:700;border-bottom:2px solid var(--gold);}
+.mot-clic.corrige{background:var(--vert-bg);color:#0f5c34;font-weight:700;border-bottom:2px solid var(--vert);}
+.mot-clic.trouve.disabled{cursor:default;}
+.mot-clic.wrong-flash{animation:motShake .4s;}
+@keyframes motShake{25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
+
+.locked-msg{background:#f2f2f2;border:1.5px dashed #b0b8c2;border-radius:10px;padding:20px;text-align:center;
+ color:#6b7280;font-family:Arial,sans-serif;font-weight:700;font-size:.95rem;}
+
+.qcard{background:#fff;border:1px solid var(--day-border);border-radius:14px;padding:20px 22px;margin-bottom:16px;
+ box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.qtext{font-size:1.02rem;font-weight:700;color:#1a2430;margin-bottom:14px;line-height:1.5;}
+.choix-col{display:flex;flex-direction:column;gap:10px;margin-bottom:6px;}
+.choix-btn{font-family:Arial,sans-serif;text-align:left;padding:12px 14px;min-height:50px;border:2px solid #b0b8c2;
+ border-radius:8px;background:#fff;color:#1a2430;font-weight:600;cursor:pointer;font-size:.95rem;transition:all .15s;}
+.choix-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+.choix-btn.sel{border-color:var(--day-dark);background:var(--day-light);}
+.choix-btn.correct{background:var(--vert-bg);border-color:var(--vert);color:#0f5c34;font-weight:800;}
+.choix-btn.wrong{background:var(--rouge-bg);border-color:var(--rouge);color:#7a1e14;font-weight:800;}
+.choix-btn:disabled{cursor:default;}
+.btn-valider{font-family:Arial,sans-serif;background:var(--day-color);color:#3a2000;border:none;border-radius:8px;
+ padding:10px 22px;font-weight:800;cursor:pointer;font-size:.9rem;min-height:44px;}
+.btn-valider:disabled{background:#e0e0e0;color:#9aa0a6;cursor:not-allowed;}
+.item-feedback{margin-top:10px;font-size:.9rem;line-height:1.65;padding:10px 12px;border-radius:6px;display:none;}
+.item-feedback.show{display:block;}
+.item-feedback.ok{background:var(--vert-bg);border-left:3px solid var(--vert);color:#0f5c34;}
+.item-feedback.no{background:var(--rouge-bg);border-left:3px solid var(--rouge);color:#7a1e14;}
+
+.correction-item{background:#fff;border:1px solid var(--day-border);border-radius:12px;padding:16px 18px;margin-bottom:14px;
+ box-shadow:0 3px 12px rgba(0,0,0,.05);}
+.correction-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--day-dark);font-weight:700;margin-bottom:6px;}
+.correction-extrait{font-size:1rem;font-weight:700;color:#1a2430;margin-bottom:12px;font-style:italic;}
+.correction-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.correction-input{flex:1;min-width:140px;padding:10px 12px;border:2px solid #b0b8c2;border-radius:8px;
+ font-size:.95rem;font-family:Arial,sans-serif;}
+.correction-input.ok{background:var(--vert-bg);border-color:var(--vert);color:#0f5c34;font-weight:700;}
+.correction-input.no{background:var(--rouge-bg);border-color:var(--rouge);color:#7a1e14;font-weight:700;}
+.correction-input:disabled{background:#f2f2f2;}
+
+.overlay{position:fixed;inset:0;background:rgba(20,15,10,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:600;}
+.overlay.show{display:flex;animation:fade .4s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{background:#fff;border:2px solid var(--day-color);border-radius:18px;padding:30px 26px;max-width:440px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25);}
+.modal .trophy{font-size:3.2rem;}
+.modal h2{margin:6px 0 8px;color:var(--day-dark);font-family:'Orbitron',sans-serif;font-size:1.05rem;line-height:1.4;}
+.modal .final{font-family:'Orbitron',monospace;font-size:1.3rem;color:var(--day-dark);margin-bottom:18px;font-weight:700;}
+.replay{background:var(--day-color);color:#3a2000;border:none;border-radius:10px;padding:13px 24px;font-size:1.05rem;font-weight:700;cursor:pointer;}
+.replay:hover{filter:brightness(1.08);}
+
+.btn-continuer{font-family:Arial,sans-serif;background:var(--day-color);color:#3a2000;border:none;border-radius:8px;
+ padding:12px 26px;font-weight:800;font-size:1rem;cursor:pointer;min-height:44px;display:block;margin:14px auto 0;}
+.btn-continuer:hover:not(:disabled){filter:brightness(1.06);}
+.btn-continuer:disabled{background:#e0e0e0;color:#9aa0a6;cursor:not-allowed;}
+
+.flash-v{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.3);
+ font-size:3.4rem;font-weight:900;z-index:9999;pointer-events:none;opacity:0;font-family:'JetBrains Mono',monospace;}
+.flash-v.pop{animation:flashPop 1s ease-out forwards;}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+@keyframes rainFall{0%{opacity:1;transform:translateY(-40px) rotate(0);}100%{opacity:0;transform:translateY(110vh) rotate(var(--rot));}}
+@keyframes confFall{0%{opacity:1;transform:translateY(-30px) rotate(0);}100%{opacity:0;transform:translateY(100vh) rotate(720deg);}}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div>
+<div class="bubble b3"></div><div class="bubble b4"></div>
+<div class="flash-v" id="flashV"></div>
+
+<div class="wrap">
+  <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 3E</span></div>
+  <div class="week">SEMAINE 5 — JOUR 3 · QUEL / QUELLE / QU'ELLE</div>
+  <h1>🔍 Défi correction — Quel / Quelle / Qu'elle</h1>
+  <div class="theme-badge">Repérage puis correction</div>
+
+  <div id="phase1Meta">
+    <div class="section-title">Phase 1 — Repérage</div>
+    <div class="consigne-txt">Ce texte contient des erreurs sur quel / quelle / qu'elle. Clique sur chaque mot que tu penses fautif.</div>
+    <div class="hud">
+      <div class="hud-box">Erreurs trouvées : <b id="scoreP1">0</b> / 8</div>
+      <div class="progress-track"><div class="progress-fill" id="progFillP1"></div></div>
+    </div>
+  </div>
+  <div class="texte-card">
+    <div class="texte-body" id="texteBody"></div>
+  </div>
+  <button class="btn-continuer" id="btnContinuerP1" disabled>Continuer ▸</button>
+
+  <div id="etape1Locked" class="locked-msg" style="display:none;">🔒 Termine la phase 1 pour continuer.</div>
+  <div id="etape1Contenu" style="display:none;">
+    <div class="section-title">Étape 1 — Combien d'erreurs ?</div>
+    <div class="qcard">
+      <div class="qtext">Combien d'erreurs dans ce texte ?</div>
+      <div class="choix-col" id="optsEtape1">
+        <button class="choix-btn" data-v="0">6</button>
+        <button class="choix-btn" data-v="1">8</button>
+        <button class="choix-btn" data-v="2">10</button>
+      </div>
+      <button class="btn-valider" id="validEtape1" disabled>Valider</button>
+      <div class="item-feedback" id="fbEtape1"></div>
+    </div>
+    <button class="btn-continuer" id="btnContinuerEtape1" style="display:none;">Passer à la correction ▸</button>
+  </div>
+
+  <div id="etape2Zone" style="display:none;">
+    <div class="section-title">Étape 2 — Correction mot par mot</div>
+    <div class="consigne-txt">Pour chaque mot repéré, écris la bonne forme dans le champ (saisie libre, sans proposition).</div>
+    <div id="correctionsZone"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">🏆</div>
+    <h2 id="modalTitle"></h2>
+    <div class="final" id="modalScore"></div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   N3S5J3 — Quel/Quelle/Qu'elle — Défi correction — 3e
+   Phase 1 : repérage par clic (8 erreurs), sans QCM
+   Étape 1 : "Combien d'erreurs ?" QCM (6/8/10)
+   Étape 2 : 8 corrections en saisie libre (pas de QCM)
+   Aucun bilan à paliers fourni dans le document → score chiffré uniquement.
+   ═══════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+
+const TOKENS = [
+  {w:"«",skip:true},
+  {w:"Quelle",target:0},
+  {w:"talent"},{w:"extraordinaire"},{w:"possède"},{w:"cette"},{w:"romancière"},{w:"!",skip:true},
+  {w:"On"},{w:"raconte"},
+  {w:"quelle",target:1},
+  {w:"a"},{w:"commencé"},{w:"à"},{w:"écrire"},{w:"dès"},{w:"l'âge"},{w:"de"},{w:"douze"},{w:"ans."},
+  {w:"Qu'elle",target:2},
+  {w:"que"},{w:"soit"},{w:"le"},{w:"sujet"},
+  {w:"qu'elle"},
+  {w:"aborde,"},{w:"son"},{w:"style"},{w:"reste"},{w:"toujours"},{w:"élégant."},
+  {w:"Les"},{w:"critiques"},{w:"se"},{w:"demandent"},
+  {w:"qu'elles",target:3},
+  {w:"influences"},{w:"ont"},{w:"façonné"},{w:"son"},{w:"écriture."},
+  {w:"Quel",target:4},
+  {w:"admiration"},{w:"ses"},{w:"lecteurs"},{w:"lui"},{w:"témoignent"},{w:"!",skip:true},
+  {w:"Bien"},
+  {w:"quelles",target:5},
+  {w:"paraissent"},{w:"discrètes,"},{w:"ces"},{w:"deux"},{w:"autrices"},{w:"suscitent"},{w:"un"},{w:"vif"},{w:"intérêt."},
+  {w:"Quel",target:6},
+  {w:"est,"},{w:"selon"},{w:"vous,"},{w:"la"},{w:"figure"},{w:"de"},{w:"style"},
+  {w:"qu'elle"},
+  {w:"utilise"},{w:"le"},{w:"plus"},{w:"souvent"},{w:"?",skip:true},
+  {w:"Qu'elles",target:7},
+  {w:"que"},{w:"soient"},{w:"les"},{w:"difficultés"},{w:"rencontrées,"},{w:"elle"},{w:"persévère"},{w:"toujours"},{w:"dans"},{w:"son"},{w:"travail"},{w:"d'écriture."},
+  {w:"»",skip:true}
+];
+
+const CORRECTIONS = [
+  { extrait:"« Quelle talent »", rep:"Quel", fb:"Talent est masculin singulier. Test : « Quel grand talent ! » ✓ → Quel." },
+  { extrait:"« On raconte quelle a commencé »", rep:"qu'elle", fb:"Test : « qu'il a commencé » ✓ → qu'elle, sujet de a commencé." },
+  { extrait:"« Qu'elle que soit le sujet »", rep:"Quel", fb:"Locution figée « quel que soit », jamais qu'elle. Sujet le sujet, masculin singulier." },
+  { extrait:"« se demandent qu'elles influences »", rep:"quelles", fb:"Influences, nom féminin pluriel, suit directement : déterminant. Test : « quelles grandes influences » ✓." },
+  { extrait:"« Quel admiration »", rep:"Quelle", fb:"Admiration est féminin singulier. Test : « Quelle grande admiration ! » ✓." },
+  { extrait:"« Bien quelles paraissent discrètes »", rep:"qu'elles", fb:"Paraissent est un verbe conjugué : quelles, sans apostrophe, ne peut pas le précéder directement. Test : « bien qu'ils paraissent discrets » ✓ → qu'elles, sujet de paraissent." },
+  { extrait:"« Quel est, selon vous, la figure de style »", rep:"Quelle", fb:"La figure de style est féminin singulier. Test : « Quelle est la figure de style » ✓." },
+  { extrait:"« Qu'elles que soient les difficultés »", rep:"Quelles", fb:"Locution figée « quelles que soient », jamais qu'elles. Sujet les difficultés, féminin pluriel." }
+];
+
+let foundP1 = 0;
+const foundState = new Array(8).fill(false);
+const targetSpans = {};
+
+function buildTexte(){
+  const zone = $('texteBody');
+  zone.innerHTML = '';
+  TOKENS.forEach((t,i)=>{
+    if(t.skip){
+      zone.appendChild(document.createTextNode(t.w+' '));
+      return;
+    }
+    const span = document.createElement('span');
+    span.className = 'mot-clic';
+    span.textContent = t.w;
+    span.dataset.i = i;
+    span.addEventListener('click', ()=>onWordClick(i, span));
+    zone.appendChild(span);
+    zone.appendChild(document.createTextNode(' '));
+    if(t.target!==undefined){
+      targetSpans[t.target] = span;
+    }
+  });
+}
+
+function onWordClick(i, span){
+  const t = TOKENS[i];
+  if(span.classList.contains('trouve')) return;
+  if(t.target===undefined){
+    flashV(false); errSound();
+    span.classList.remove('wrong-flash'); void span.offsetWidth; span.classList.add('wrong-flash');
+    showToast('Ce mot est correct.');
+    return;
+  }
+  if(foundState[t.target]) return;
+  foundState[t.target] = true;
+  foundP1++;
+  span.classList.add('trouve','disabled');
+  flashV(true); okSound();
+  updateP1();
+}
+
+let toastTimer=null;
+function showToast(msg){
+  let t = $('toastMsg');
+  if(!t){
+    t = document.createElement('div');
+    t.id='toastMsg';
+    t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:700;background:#374151;color:#fff;'
+      +'font-family:Arial,sans-serif;font-weight:700;font-size:.85rem;padding:9px 18px;border-radius:20px;'
+      +'box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  clearTimeout(toastTimer);
+  t.style.opacity='1';
+  toastTimer = setTimeout(()=>{ t.style.opacity='0'; }, 2000);
+}
+
+function updateP1(){
+  $('scoreP1').textContent = foundP1;
+  $('progFillP1').style.width = (foundP1/8*100)+'%';
+  $('btnContinuerP1').disabled = foundP1 < 8;
+}
+
+$('btnContinuerP1').addEventListener('click', ()=>{
+  if($('btnContinuerP1').disabled) return;
+  document.querySelectorAll('.mot-clic:not(.trouve)').forEach(s=>{
+    s.style.pointerEvents='none';
+  });
+  $('etape1Contenu').style.display='block';
+  $('btnContinuerP1').style.display='none';
+});
+
+let selEtape1 = null;
+document.querySelectorAll('#optsEtape1 .choix-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.disabled) return;
+    selEtape1 = Number(btn.dataset.v);
+    document.querySelectorAll('#optsEtape1 .choix-btn').forEach(b=>b.classList.toggle('sel', b===btn));
+    $('validEtape1').disabled = false;
+  });
+});
+$('validEtape1').addEventListener('click', ()=>{
+  if(selEtape1===null) return;
+  const ok = selEtape1===1;
+  document.querySelectorAll('#optsEtape1 .choix-btn').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===1) b.classList.add('correct');
+    else if(i===selEtape1 && !ok) b.classList.add('wrong');
+  });
+  $('validEtape1').disabled=true;
+  flashV(ok); if(ok) okSound(); else errSound();
+  const fb = $('fbEtape1');
+  fb.className = 'item-feedback show '+(ok?'ok':'no');
+  fb.textContent = ok ? 'Correct.' : "Les 8 formes numérotées dans ce texte sont toutes des erreurs.";
+  $('btnContinuerEtape1').style.display='inline-block';
+});
+$('btnContinuerEtape1').addEventListener('click', ()=>{
+  $('phase1Meta').style.display='none';
+  $('etape1Contenu').style.display='none';
+  $('etape2Zone').style.display='block';
+  buildCorrections();
+});
+
+let scoreP2 = 0;
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+let curCorrection = 0;
+
+function buildCorrections(){
+  curCorrection = 0;
+  renderCorrection(0);
+}
+
+function renderCorrection(i){
+  const c = CORRECTIONS[i];
+  const zone = $('correctionsZone');
+  zone.innerHTML =
+    '<div class="correction-item">'
+    +'<div class="correction-num">Correction '+(i+1)+' / 8</div>'
+    +'<div class="correction-extrait">'+c.extrait+'</div>'
+    +'<div class="correction-row">'
+    +'<input type="text" class="correction-input" id="cinput-'+i+'" placeholder="Écris la bonne forme…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">'
+    +'<button class="btn-valider" id="cbtn-'+i+'">Valider</button>'
+    +'</div>'
+    +'<div class="item-feedback" id="cfb-'+i+'"></div>'
+    +'</div>'
+    +'<button class="btn-continuer" id="btnSuivantCorrection" style="display:none;">Suivant ▸</button>';
+
+  const submit = ()=>validateCorrection(i);
+  $('cbtn-'+i).addEventListener('click', submit);
+  $('cinput-'+i).addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } });
+  $('cinput-'+i).focus();
+}
+
+function validateCorrection(i){
+  const inp = $('cinput-'+i), btn = $('cbtn-'+i), fb = $('cfb-'+i);
+  if(inp.disabled) return;
+  const val = norm(inp.value);
+  if(!val) return;
+  const ok = val === norm(CORRECTIONS[i].rep);
+  inp.disabled = true; btn.disabled = true;
+  if(ok){
+    inp.classList.add('ok');
+    scoreP2++;
+    flashV(true); okSound();
+    fb.className='item-feedback show ok';
+    fb.textContent='Correct.';
+    const span = targetSpans[i];
+    if(span){
+      span.textContent = CORRECTIONS[i].rep;
+      span.classList.remove('trouve');
+      span.classList.add('corrige');
+    }
+  } else {
+    inp.classList.add('no');
+    flashV(false); errSound();
+    fb.className='item-feedback show no';
+    fb.textContent = CORRECTIONS[i].fb;
+  }
+
+  if(i<CORRECTIONS.length-1){
+    const btnS = $('btnSuivantCorrection');
+    btnS.textContent = 'Suivant ▸';
+    btnS.style.display = 'block';
+    btnS.onclick = ()=>{ curCorrection++; renderCorrection(curCorrection); };
+  } else {
+    const btnS = $('btnSuivantCorrection');
+    btnS.textContent = 'Voir le bilan ▸';
+    btnS.style.display = 'block';
+    btnS.onclick = ()=>{ showBilan(); };
+  }
+}
+
+function showBilan(){
+  $('modalTitle').textContent = "Correction terminée.";
+  $('modalScore').textContent = scoreP2+' / 8';
+  $('overlay').classList.add('show');
+  beepFinal(scoreP2>=6);
+  if(scoreP2/8>=0.85) rainEmojis();
+}
+
+function rejouer(){
+  foundP1=0; foundState.fill(false); selEtape1=null; scoreP2=0; curCorrection=0;
+  updateP1();
+  buildTexte();
+  $('phase1Meta').style.display='block';
+  $('etape1Contenu').style.display='none';
+  $('btnContinuerP1').style.display='block';
+  $('btnContinuerP1').disabled=true;
+  document.querySelectorAll('.mot-clic').forEach(s=>{ s.style.pointerEvents=''; });
+  document.querySelectorAll('#optsEtape1 .choix-btn').forEach(b=>{ b.disabled=false; b.classList.remove('sel','correct','wrong'); });
+  $('validEtape1').disabled=true;
+  $('fbEtape1').className='item-feedback';
+  $('btnContinuerEtape1').style.display='none';
+  $('etape2Zone').style.display='none';
+  $('overlay').classList.remove('show');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function flashV(ok){
+  const el=$('flashV');
+  el.textContent=ok?'✓':'✗'; el.style.color=ok?'#1f7a4d':'#c0392b';
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+
+function confetti(){
+  const cols=['#8dc63f','#1f7a4d','#c0392b','#f5c518'];
+  for(let i=0;i<30;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.style.cssText='position:fixed;top:-20px;left:'+(Math.random()*100)+'vw;width:8px;height:8px;'
+        +'background:'+cols[i%4]+';z-index:9997;pointer-events:none;'
+        +'animation:confFall '+(1.6+Math.random()*1.2).toFixed(2)+'s ease-in forwards;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),3000);
+    }, i*40);
+  }
+}
+const RAIN=['🌊','💧','⛵','🔭','🗺️','🌧️','💫','⚓'];
+function rainEmojis(){
+  confetti();
+  for(let i=0;i<25;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+      el.style.cssText='position:fixed;top:-40px;left:'+(Math.random()*100)+'vw;'
+        +'font-size:'+(1+Math.random()*1.3).toFixed(2)+'rem;z-index:9998;pointer-events:none;'
+        +'--rot:'+(Math.random()*60-30)+'deg;animation:rainFall '+(1.8+Math.random()*1.4).toFixed(2)+'s ease-in forwards;';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),3500);
+    }, i*85);
+  }
+}
+
+let actx=null, son=true;
+function initA(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){ if(!actx||!son) return; const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+ o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.16,t+0.01); g.gain.exponentialRampToValueAtTime(0.0008,t+d);
+ o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02); }
+function okSound(){ initA(); beep(523,784,0.13,'sine',0.13); setTimeout(()=>beep(784,1046,0.11,'sine',0.11),80); }
+function errSound(){ initA(); beep(320,140,0.24,'sawtooth',0.12); }
+function beepFinal(good){
+  initA();
+  if(good){ [523,659,784,1046,1318].forEach((f,k)=>setTimeout(()=>beep(f,f,0.2,'sine',0.14),k*90)); }
+  else { beep(300,150,0.4,'sine',0.14); }
+}
+document.addEventListener('pointerdown', initA, {once:true});
+
+buildTexte();
+updateP1();
+</script>
+</body>
+</html>
