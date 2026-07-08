@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – J'observe et je teste – S5 J5 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5c518;--day-dark:#8a6000;
+      --day-light:#fffbeb;--day-border:#f5e08a;
+      --day-glow:rgba(245,197,24,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+
+    .consigne-lecture{width:100%;max-width:720px;position:relative;z-index:1;
+      background:#1a6e88;color:#fff;border-radius:var(--radius);
+      padding:.85rem 1.1rem;margin-bottom:.85rem;display:flex;align-items:flex-start;gap:.75rem;}
+    .consigne-lecture-icone{font-size:1.4rem;flex-shrink:0;margin-top:.05rem;}
+    .consigne-lecture-texte{font-size:clamp(.92rem,2.5vw,1rem);line-height:1.7;font-weight:600;}
+    .consigne-lecture-texte strong{font-size:1rem;display:block;margin-bottom:.2rem;font-weight:900;}
+
+    .referentiel{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:1rem;position:relative;z-index:1;}
+    .ref-stripe{height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .ref-titre{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.75rem;}
+    .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    @media(max-width:520px){.ref-grid{grid-template-columns:1fr;}}
+    .ref-cell{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:9px;padding:.85rem 1rem;}
+    .ref-cell.full{grid-column:1/-1;}
+    .ref-cell-titre{font-size:1rem;font-weight:900;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;
+      display:flex;align-items:center;gap:.45rem;cursor:pointer;user-select:none;}
+    .ref-cell-titre[onclick]:hover{opacity:.8;}
+    .ref-cell-titre[onclick]::after{content:'\2190 clique pour cocher';
+      font-size:.65rem;color:var(--muted);font-weight:500;font-family:Arial,sans-serif;
+      font-style:italic;margin-left:.3rem;white-space:nowrap;}
+    .ref-cell-titre[onclick].done::after{content:'\2714 lu';color:var(--day-dark);font-style:normal;font-weight:700;}
+    .ref-check-box{width:19px;height:19px;border:2.5px solid var(--day-dark);border-radius:5px;
+      flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+      transition:all .2s;background:#fff;font-size:.82rem;font-weight:900;color:transparent;}
+    .ref-check-box.checked{background:var(--day-dark);color:#fff;}
+    .ref-check-box.checked::after{content:'\2713';}
+    .ref-cell-body{font-size:.9rem;color:var(--text);line-height:1.65;}
+    .ref-cell-body strong{color:var(--day-dark);}
+    .ref-cell-body em{font-style:italic;}
+    .hq{color:#8a6000;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .hqe{color:#1a6e88;font-weight:900;font-family:'JetBrains Mono',monospace;}
+    .ref-test{background:var(--yellow);color:#3a2c00;display:inline-block;
+      padding:.12rem .45rem;border-radius:4px;font-size:.85rem;font-weight:800;margin:.2rem 0;}
+    .term{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--day-dark);
+      background:var(--day-border);border-radius:4px;padding:.05rem .35rem;}
+    .verb-ex{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--day-dark);}
+
+    .ref-deblocage{width:100%;max-width:720px;position:relative;z-index:1;text-align:center;margin-bottom:1.2rem;}
+    .ref-progress-txt{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    .ref-progress-txt span{color:var(--day-dark);font-weight:900;}
+
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a840;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#8a7030;text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#8a7030;text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);border:1.5px solid var(--dark3);
+      border-radius:8px;padding:.28rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#4ade80;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#fca5a5;}
+    .chip-rem{background:rgba(245,197,24,.15);border-color:var(--day-color);color:var(--day-border);}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-dark);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.1rem;text-align:center;margin-top:.7rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.9rem;color:#c8a840;margin:.3rem 0 .9rem;font-family:'JetBrains Mono',monospace;}
+
+    .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.1rem;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--orange));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-dark);border-radius:10px;padding:.75rem 1rem;margin-bottom:.7rem;
+      font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);line-height:1.85;font-style:italic;}
+    .q-phrase strong{font-style:normal;}
+    .q-info{font-size:.9rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;}
+
+    .vf-row{display:flex;gap:.6rem;margin-bottom:.5rem;}
+    .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);background:var(--surface);
+      font-size:1.05rem;font-weight:700;font-family:Arial,sans-serif;color:var(--text);cursor:pointer;
+      transition:all .15s;min-height:50px;-webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .vf-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:'JetBrains Mono',monospace;
+      color:var(--text);cursor:pointer;transition:all .15s;text-align:left;min-height:50px;
+      -webkit-tap-highlight-color:transparent;font-weight:700;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.6rem;display:none;
+      line-height:1.75;border-left:5px solid var(--red);}
+    .fb.show{display:block;}
+    .fb.ko-fb{background:var(--red-pale);color:#7f1d1d;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.45rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .fb ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+    .fb ul li{margin-bottom:.3rem;line-height:1.75;}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--orange));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#c8a840;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#8a7030;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#c8a840;margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;}
+
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}.vf-row{gap:.4rem;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Français &middot; 3ème
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 5</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Bilan de semaine</span></h1>
+  <div class="theme-badge">Homophones &bull; Passé simple</div>
+</header>
+
+<div class="consigne-lecture">
+  <div class="consigne-lecture-icone">&#128196;</div>
+  <div class="consigne-lecture-texte">
+    <strong>Lis le référentiel avant de commencer&nbsp;!</strong>
+    Coche chaque section après l&rsquo;avoir lue. Quand les 5 sections sont cochées, le bouton &laquo;&nbsp;J&rsquo;ai lu &mdash; je commence&nbsp;&raquo; se débloque.
+  </div>
+</div>
+
+<div class="referentiel">
+  <div class="ref-stripe"></div>
+  <div class="ref-titre">&#128214; Référentiel &mdash; Bilan semaine 5</div>
+  <div class="ref-grid">
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-qs" onclick="cocherSection('qs')">
+        <span id="rc-qs" class="ref-check-box"></span>QUEL / QUELS
+      </div>
+      <div class="ref-cell-body">
+        Déterminant ou pronom exclamatif/interrogatif, <strong>masculin</strong>. S&rsquo;accorde avec le nom qu&rsquo;il accompagne ou qu&rsquo;il représente.<br><br>
+        <span class="ref-test">Test : quel grand (masc. sing.) ou quels grands (masc. plur.)</span><br><br>
+        <em>Ex.&nbsp;: &laquo;&nbsp;<span class="hq">Quel</span> talent&nbsp;!&nbsp;&raquo;</em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-qf" onclick="cocherSection('qf')">
+        <span id="rc-qf" class="ref-check-box"></span>QUELLE / QUELLES
+      </div>
+      <div class="ref-cell-body">
+        Déterminant ou pronom exclamatif/interrogatif, <strong>féminin</strong>. S&rsquo;accorde avec le nom qu&rsquo;il accompagne ou qu&rsquo;il représente.<br><br>
+        <span class="ref-test">Test : quelle grande (fém. sing.) ou quelles grandes (fém. plur.)</span><br><br>
+        <em>Ex.&nbsp;: &laquo;&nbsp;<span class="hq">Quelle</span> chance&nbsp;!&nbsp;&raquo;</em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-qe" onclick="cocherSection('qe')">
+        <span id="rc-qe" class="ref-check-box"></span>QU&rsquo;ELLE / QU&rsquo;ELLES
+      </div>
+      <div class="ref-cell-body">
+        Conjonction <strong>que</strong> (ou pronom relatif <em>que</em>) + pronom personnel sujet <strong>elle/elles</strong>. Toujours suivi d&rsquo;un verbe conjugué.<br><br>
+        <span class="ref-test">Test : remplacer elle/elles par il/ils</span><br><br>
+        <em>Ex.&nbsp;: &laquo;&nbsp;Je crois <span class="hqe">qu&rsquo;elle</span> viendra.&nbsp;&raquo; &rarr; &laquo;&nbsp;Je crois <span class="hqe">qu&rsquo;il</span> viendra.&nbsp;&raquo; ✓</em>
+      </div>
+    </div>
+
+    <div class="ref-cell">
+      <div class="ref-cell-titre" id="rct-ast" onclick="cocherSection('ast')">
+        <span id="rc-ast" class="ref-check-box"></span>ASTUCE
+      </div>
+      <div class="ref-cell-body">
+        <strong>Un nom suit directement&nbsp;?</strong><br>
+        &rarr; <span class="hq">quel(s)</span> ou <span class="hq">quelle(s)</span><br><br>
+        <strong>Un verbe conjugué suit directement&nbsp;?</strong><br>
+        &rarr; <span class="hqe">qu&rsquo;elle(s)</span>
+      </div>
+    </div>
+
+    <div class="ref-cell full">
+      <div class="ref-cell-titre" id="rct-ps" onclick="cocherSection('ps')">
+        <span id="rc-ps" class="ref-check-box"></span>LE PASSÉ SIMPLE
+      </div>
+      <div class="ref-cell-body">
+        <strong>1er groupe&nbsp;:</strong> <span class="term">-ai</span> <span class="term">-as</span> <span class="term">-a</span> <span class="term">-âmes</span> <span class="term">-âtes</span> <span class="term">-èrent</span><br>
+        <strong>2e groupe &amp; certains verbes du 3e&nbsp;:</strong> <span class="term">-is</span> <span class="term">-is</span> <span class="term">-it</span> <span class="term">-îmes</span> <span class="term">-îtes</span> <span class="term">-irent</span><br><br>
+        <strong>En -us&nbsp;:</strong> <span class="verb-ex">pouvoir &rarr; put</span> &bull; <span class="verb-ex">savoir &rarr; sut</span><br>
+        <strong>En -ins&nbsp;:</strong> <span class="verb-ex">venir &rarr; vint</span> &bull; <span class="verb-ex">tenir &rarr; tint</span><br><br>
+        <span class="verb-ex">être &rarr; fut</span> &bull; <span class="verb-ex">avoir &rarr; eut</span> &bull; <span class="verb-ex">faire &rarr; fit</span> &bull; <span class="verb-ex">voir &rarr; vit</span> &bull; <span class="verb-ex">prendre &rarr; prit</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="ref-deblocage" id="ref-deblocage">
+  <div class="ref-progress-txt">Sections lues&nbsp;: <span id="cpt-sections">0</span>&nbsp;/ 5</div>
+  <button class="btn btn-primary" id="btn-jai-lu" onclick="debloquerP1()" disabled style="opacity:.4;min-width:240px;">
+    &#128214;&nbsp;J&rsquo;ai lu &mdash; je commence
+  </button>
+</div>
+
+<div class="dash" id="dash-bloc" style="display:none;">
+  <div class="dash-titre">&#9881; Vérification de semaine &mdash; 8 questions</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Partie 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Validées</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Partie&nbsp;1</span><span id="nb-s-p1" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Partie&nbsp;2</span><span id="nb-s-p2" style="font-weight:900;">0/4</span></div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">8</span> restants</div>
+  </div>
+</div>
+
+<div class="progress-wrap" id="prog-bloc" style="display:none;">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="bloc-partie" id="bloc-p1" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128214;</div>
+    <div>
+      <div class="part-titre">Partie 1 &mdash; Homophones</div>
+      <div class="part-sous">4 questions &mdash; Q1 à Q4</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/4</div>
+  </div>
+  <div id="cards-p1"></div>
+  <div style="width:100%;text-align:center;margin:.7rem 0 .3rem;">
+    <button class="btn btn-primary" id="btn-vers-p2" onclick="debP2()" disabled style="opacity:.45;min-width:220px;">
+      Partie 2 &rarr; <span id="cpt-p1">0 / 4 validées</span>
+    </button>
+  </div>
+  <div class="part-result" id="res-p1">
+    <div class="part-score" id="score-p1"></div>
+    <div class="part-msg" id="msg-p1"></div>
+  </div>
+</div>
+
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#9201;</div>
+    <div>
+      <div class="part-titre">Partie 2 &mdash; Passé simple</div>
+      <div class="part-sous">4 questions QCM &mdash; Q5 à Q8</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/4</div>
+  </div>
+  <div id="cards-p2"></div>
+  <div class="part-result" id="res-p2">
+    <div class="part-score" id="score-p2"></div>
+    <div class="part-msg" id="msg-p2"></div>
+    <div id="btn-p2"></div>
+  </div>
+</div>
+
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#9881; Bilan de séance</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/8</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var sectionsLues={qs:false,qf:false,qe:false,ast:false,ps:false};
+function cocherSection(id){
+  if(sectionsLues[id])return;
+  sectionsLues[id]=true;
+  var box=document.getElementById('rc-'+id);if(box)box.classList.add('checked');
+  var titre=document.getElementById('rct-'+id);if(titre)titre.classList.add('done');
+  var lues=Object.values(sectionsLues).filter(Boolean).length;
+  var cpt=document.getElementById('cpt-sections');if(cpt)cpt.textContent=lues;
+  if(lues===5){var btn=document.getElementById('btn-jai-lu');if(btn){btn.disabled=false;btn.style.opacity='1';}}
+}
+function debloquerP1(){
+  document.getElementById('ref-deblocage').style.display='none';
+  document.getElementById('dash-bloc').style.display='';
+  document.getElementById('prog-bloc').style.display='';
+  document.getElementById('bloc-p1').style.display='';
+  buildP1();majProg(0);
+}
+
+var P1=[
+  {id:'q1',qNum:1,type:'vf',
+   phrase:"« <span class=\"hl-neu\">Qu’elle</span> est composé de la conjonction <span class=\"hl-ok\">que</span> et du pronom personnel <span class=\"hl-ok\">elle</span>. »",
+   rep:true,
+   fb:'<span class="fb-titre">Composition de qu\u2019elle\u00a0!</span><span class="hl-neu">Qu\u2019elle</span> = <strong>que</strong> + <strong>elle</strong>. Le <em>e</em> final de <em>que</em> s\u2019\u00e9lide devant la voyelle <em>e</em> de <em>elle</em>.<br><br><em>Ex.\u00a0: \u00ab\u00a0Je pense <span class="hl-neu">qu\u2019elle</span> a raison.\u00a0\u00bb</em>'},
+  {id:'q2',qNum:2,type:'vf',
+   phrase:"« <span style=\"text-decoration:underline;font-style:normal;\">Si un nom suit directement</span>, c’est toujours <span class=\"hl-neu\">qu’elle</span> qu’il faut écrire. »",
+   rep:false,
+   fb:'<span class="fb-titre">Si un nom suit directement \u2192 <span class="hl-ok">quel(s)</span> ou <span class="hl-ok">quelle(s)</span>\u00a0!</span><span class="hl-neu">Qu\u2019elle</span> est toujours suivi d\u2019un <strong>verbe conjugu\u00e9</strong>, jamais directement d\u2019un nom.<br><ul><li>Nom suit \u2192 <span class="hl-ok">quel(s) / quelle(s)</span></li><li>Verbe conjugu\u00e9 suit \u2192 <span class="hl-neu">qu\u2019elle(s)</span></li></ul>'},
+  {id:'q3',qNum:3,type:'qcm',
+   phrase:'\u00ab\u00a0__ temp\u00eate se levait ce soir-l\u00e0\u00a0!\u00a0\u00bb',
+   opts:[{t:'Quel',ok:false},{t:'Quelle',ok:true},{t:'Qu\u2019elle',ok:false}],
+   fb:'<span class="fb-titre">Test\u00a0: \u00ab\u00a0<span class="hl-ok">Quelle grande</span> temp\u00eate\u00a0!\u00a0\u00bb \u2713</span><em>Temp\u00eate</em> est <strong>f\u00e9minin singulier</strong> \u2192 d\u00e9terminant exclamatif accord\u00e9 \u2192 <span class="hl-ok">Quelle</span>.'},
+  {id:'q4',qNum:4,type:'qcm',
+   phrase:'\u00ab\u00a0Le capitaine pensait __ naviguait avec prudence malgr\u00e9 le danger.\u00a0\u00bb',
+   opts:[{t:'quelle',ok:false},{t:'qu\u2019elle',ok:true},{t:'quel',ok:false}],
+   fb:'<span class="fb-titre">Test\u00a0: \u00ab\u00a0Le capitaine pensait <span class="hl-ok">qu\u2019il</span> naviguait\u2026\u00a0\u00bb \u2713</span>\u2192 <span class="hl-neu">qu\u2019elle</span> (que + elle, sujet de <em>naviguait</em>).'}
+];
+
+var P2=[
+  {id:'q5',qNum:5,
+   phrase:'\u00ab\u00a0Le navire __ soudainement sur les rochers.\u00a0\u00bb',
+   info:'(s\u2019\u00e9chouer \u2014 3e pers. sing.)',
+   opts:[{t:'s\u2019\u00e9chouait',ok:false},{t:'s\u2019\u00e9chouera',ok:false},{t:'s\u2019\u00e9choua',ok:true}],
+   fb:'<span class="fb-titre">S\u2019\u00e9chouer \u2014 1er groupe, 3e pers. sing.</span>Radical <em>\u00e9chou-</em> + <span class="hl-ok">-a</span> \u2192 <span class="hl-ok">s\u2019\u00e9choua</span>.<br><ul><li><span class="hl-ko">s\u2019\u00e9chouait</span> = imparfait</li><li><span class="hl-ko">s\u2019\u00e9chouera</span> = futur</li></ul>'},
+  {id:'q6',qNum:6,
+   phrase:'\u00ab\u00a0Les marins __ leurs filets avant le lever du jour.\u00a0\u00bb',
+   info:'(rassembler \u2014 3e pers. plur.)',
+   opts:[{t:'rassembl\u00e8rent',ok:true},{t:'rassemblaient',ok:false},{t:'rassembl\u00e2mes',ok:false}],
+   fb:'<span class="fb-titre">Rassembler \u2014 1er groupe, 3e pers. plur.</span>Radical <em>rassembl-</em> + <span class="hl-ok">-\u00e8rent</span> \u2192 <span class="hl-ok">rassembl\u00e8rent</span>.<br><ul><li><span class="hl-ko">rassemblaient</span> = imparfait</li><li><span class="hl-ko">rassembl\u00e2mes</span> = 1re pers. plur.</li></ul>'},
+  {id:'q7',qNum:7,
+   phrase:'\u00ab\u00a0Le capitaine __ calme malgr\u00e9 la temp\u00eate.\u00a0\u00bb',
+   info:'(rester \u2014 3e pers. sing.)',
+   opts:[{t:'resta',ok:true},{t:'restai',ok:false},{t:'restit',ok:false}],
+   fb:'<span class="fb-titre">Rester \u2014 1er groupe, 3e pers. sing.</span>Radical <em>rest-</em> + <span class="hl-ok">-a</span> \u2192 <span class="hl-ok">resta</span>.<br><ul><li><span class="hl-ko">restai</span> = 1re pers. sing.</li><li><span class="hl-ko">restit</span> = forme inexistante</li></ul>'},
+  {id:'q8',qNum:8,
+   phrase:'\u00ab\u00a0Quelle est la forme correcte de venir, 3e pers. sing., au pass\u00e9 simple\u00a0?\u00a0\u00bb',
+   info:'',
+   opts:[{t:'venit',ok:false},{t:'vena',ok:false},{t:'vint',ok:true}],
+   fb:'<span class="fb-titre">Venir est irr\u00e9gulier\u00a0: <span class="hl-ok">il vint</span></span>Radical totalement diff\u00e9rent de l\u2019infinitif \u2192 s\u00e9rie en <span class="hl-ok">-ins</span>.<br><ul><li><span class="hl-ko">venit</span> = forme inexistante</li><li><span class="hl-ko">vena</span> = forme inexistante</li></ul>'}
+];
+
+var scoreOk=0,p1Ok=0,p1Res={},p2Ok=0,p2Res={};
+var L=['A','B','C'];
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/8*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 8 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+  document.getElementById('chip-ok').textContent=scoreOk;
+  document.getElementById('chip-ko').textContent=done-scoreOk;
+  document.getElementById('chip-rem').textContent=8-done;
+}
+function majBadge(id,ok,total){
+  var sc=document.getElementById('nb-s-'+id),b=document.getElementById('nb-'+id);
+  if(!sc||!b)return;sc.textContent=ok+'/'+total;
+  if(ok===total){b.style.background='rgba(34,197,94,.2)';b.style.borderColor='var(--green)';sc.style.color='#4ade80';}
+  else if(ok>0){b.style.background='rgba(245,197,24,.15)';b.style.borderColor='var(--day-color)';sc.style.color='var(--day-border)';}
+}
+
+function buildP1(){
+  var wrap=document.getElementById('cards-p1');wrap.innerHTML='';p1Res={};p1Ok=0;
+  P1.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');
+    lbl.textContent='Question '+q.qNum+(q.type==='vf'?' \u2014 Vrai ou faux\u00a0?':'');
+    card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.innerHTML=q.phrase;card.appendChild(ph);
+    if(q.type==='vf'){
+      var row=mkEl('div','vf-row');
+      ['Vrai','Faux'].forEach(function(txt){
+        var btn=document.createElement('button');btn.className='vf-btn';
+        btn.innerHTML=(txt==='Vrai'?'&#10003;':'&#10007;')+' '+txt;
+        btn.dataset.val=txt==='Vrai'?'true':'false';
+        btn.addEventListener('click',function(){selVF(q,btn,row);});
+        row.appendChild(btn);
+      });
+      card.appendChild(row);
+    } else {
+      var opts=mkEl('div','opts');
+      q.opts.forEach(function(opt,oi){
+        var btn=document.createElement('button');btn.className='opt-btn';
+        btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+        btn.dataset.ok=opt.ok?'1':'0';
+        btn.addEventListener('click',function(){selP1QCM(q,btn,opts);});
+        opts.appendChild(btn);
+      });
+      card.appendChild(opts);
+    }
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selVF(q,btn,row){
+  if(p1Res[q.id]!==undefined)return;
+  var choix=btn.dataset.val==='true',ok=choix===q.rep;
+  p1Res[q.id]=ok;
+  Array.from(row.querySelectorAll('.vf-btn')).forEach(function(b){
+    b.disabled=true;
+    if((b.dataset.val==='true')===q.rep)b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb;}
+  if(ok){scoreOk++;p1Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  majApresP1();
+}
+
+function selP1QCM(q,btn,optsEl){
+  if(p1Res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p1Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb;}
+  if(ok){scoreOk++;p1Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  majApresP1();
+}
+
+function majApresP1(){
+  document.getElementById('badge-p1').textContent=p1Ok+'/4';
+  majBadge('p1',p1Ok,4);
+  var done=Object.keys(p1Res).length;
+  majProg(done);
+  var cpt=document.getElementById('cpt-p1');var btn2=document.getElementById('btn-vers-p2');
+  if(cpt)cpt.textContent=done+' / 4 valid\u00e9es';
+  if(btn2&&done===4){btn2.disabled=false;btn2.style.opacity='1';}
+  document.getElementById('dash-statut').textContent=done<4?'Partie 1 \u2014 question '+(done+1)+'/4\u2026':'Partie 1 termin\u00e9e';
+  if(done===4)showResP1();
+}
+
+function showResP1(){
+  var r=document.getElementById('res-p1');r.classList.add('show');
+  document.getElementById('score-p1').textContent=p1Ok+' / 4';
+  document.getElementById('msg-p1').textContent=p1Ok===4?'\u2713 Partie 1 r\u00e9ussie\u00a0!':'';
+}
+
+function debP2(){
+  document.getElementById('bloc-p2').style.display='';
+  document.getElementById('dash-statut').textContent='Partie 2 en cours\u2026';
+  buildP2();
+}
+
+function buildP2(){
+  var wrap=document.getElementById('cards-p2');wrap.innerHTML='';p2Res={};p2Ok=0;
+  P2.forEach(function(q){
+    var card=mkEl('div','card');card.id='c-'+q.id;
+    card.appendChild(mkEl('div','card-stripe'));
+    var lbl=mkEl('div','q-label');lbl.textContent='Question '+q.qNum;card.appendChild(lbl);
+    var ph=mkEl('div','q-phrase');ph.textContent=q.phrase;card.appendChild(ph);
+    if(q.info){var inf=mkEl('div','q-info');inf.textContent=q.info;card.appendChild(inf);}
+    var opts=mkEl('div','opts');
+    q.opts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+L[oi]+'.</span><span>'+opt.t+'</span>';
+      btn.dataset.ok=opt.ok?'1':'0';
+      btn.addEventListener('click',function(){selP2(q,btn,opts);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=mkEl('div','fb');fb.id='fb-'+q.id;card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+function selP2(q,btn,optsEl){
+  if(p2Res[q.id]!==undefined)return;
+  var ok=btn.dataset.ok==='1';
+  p2Res[q.id]=ok;
+  Array.from(optsEl.querySelectorAll('.opt-btn')).forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.ok==='1')b.classList.add('ok-opt');
+    else if(b===btn&&!ok)b.classList.add('ko-opt');
+  });
+  if(!ok){var fb=document.getElementById('fb-'+q.id);fb.className='fb show ko-fb';fb.innerHTML=q.fb;}
+  if(ok){scoreOk++;p2Ok++;jouerOk();}else jouerErreur();
+  animerCard(q.id,ok);
+  document.getElementById('badge-p2').textContent=p2Ok+'/4';
+  majBadge('p2',p2Ok,4);
+  var done=Object.keys(p2Res).length;
+  majProg(4+done);
+  document.getElementById('dash-statut').textContent=done<4?'Partie 2 \u2014 question '+(done+1)+'/4\u2026':'S\u00e9ance termin\u00e9e.';
+  if(done===4)showResP2();
+}
+
+function showResP2(){
+  var r=document.getElementById('res-p2');r.classList.add('show');
+  document.getElementById('score-p2').textContent=p2Ok+' / 4';
+  document.getElementById('msg-p2').textContent=p2Ok===4?'\u2713 Partie 2 parfaite\u00a0!':
+    p2Ok>=3?'Tr\u00e8s bien\u00a0!':p2Ok>=2?'Bien\u00a0!':'Relis le r\u00e9f\u00e9rentiel.';
+  document.getElementById('btn-p2').innerHTML='<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+}
+
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===8?5:total>=6?4:total>=4?3:total>=2?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(total===8){badge='<div class="badge-ok">\u2713 V\u00e9rification parfaite.</div>';msg='Tu entres en salle de dict\u00e9e\navec une ma\u00eetrise totale.';pluie();}
+  else if(total>=6){badge='<div class="badge-ok">\u2713 Tr\u00e8s bonne v\u00e9rification.</div>';msg='';pluie();}
+  else if(total>=4){badge='<div class="badge-ko">V\u00e9rification partielle.</div>';msg='Revois les r\u00e8gles avant la dict\u00e9e.';}
+  else{badge='<div class="badge-ko">Reprends les parcours de la semaine avant la dict\u00e9e.</div>';msg='';}
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;p1Ok=0;p1Res={};p2Ok=0;p2Res={};
+  sectionsLues={qs:false,qf:false,qe:false,ast:false,ps:false};
+  document.getElementById('results-global').classList.remove('show');
+  document.getElementById('res-p1').classList.remove('show');
+  document.getElementById('res-p2').classList.remove('show');
+  document.getElementById('bloc-p1').style.display='none';
+  document.getElementById('bloc-p2').style.display='none';
+  document.getElementById('dash-bloc').style.display='none';
+  document.getElementById('prog-bloc').style.display='none';
+  document.getElementById('ref-deblocage').style.display='';
+  document.getElementById('badge-p1').textContent='0/4';
+  document.getElementById('badge-p2').textContent='0/4';
+  document.getElementById('dash-total').textContent='0';
+  document.getElementById('dash-statut').textContent='Partie 1 en cours\u2026';
+  var btn2=document.getElementById('btn-vers-p2');if(btn2){btn2.disabled=true;btn2.style.opacity='.45';}
+  var cpt=document.getElementById('cpt-p1');if(cpt)cpt.textContent='0 / 4 valid\u00e9es';
+  var btnlu=document.getElementById('btn-jai-lu');if(btnlu){btnlu.disabled=true;btnlu.style.opacity='.4';}
+  var cpts=document.getElementById('cpt-sections');if(cpts)cpts.textContent='0';
+  ['qs','qf','qe','ast','ps'].forEach(function(id){
+    var box=document.getElementById('rc-'+id);if(box)box.classList.remove('checked');
+    var titre=document.getElementById('rct-'+id);if(titre)titre.classList.remove('done');
+  });
+  ['p1','p2'].forEach(function(id){
+    var b=document.getElementById('nb-'+id),s=document.getElementById('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    if(s){s.textContent='0/4';s.style.color='';}
+  });
+  document.getElementById('cards-p2').innerHTML='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
