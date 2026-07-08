@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S6 J1 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-color:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5600;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.28);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffaf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:800px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--blue);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.dots{display:flex;gap:.28rem;justify-content:center;margin:.55rem 0 .6rem;flex-wrap:wrap;}
+.dot{width:9px;height:9px;border-radius:50%;background:#d8d4c8;transition:background .25s,transform .25s;}
+.dot.active{background:var(--day-dark);transform:scale(1.25);}
+.dot.done{background:#a86200;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin-bottom:.9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+/* TEXTE SUPPORT */
+.text-toggle{width:100%;background:var(--day-light);border:2px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:'JetBrains Mono',monospace;
+  font-weight:800;font-size:.8rem;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;
+  animation:pulseRef 2.2s ease-in-out infinite;}
+.text-toggle:hover,.text-toggle.open{background:var(--day-border);}
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 7px rgba(245,166,35,0);}}
+.textbox{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;max-height:0;
+  transition:max-height .4s ease;box-shadow:0 3px 14px rgba(0,0,0,.06);}
+.textbox.open{max-height:3000px;}
+.text-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.text-inner{padding:1rem 1.3rem;max-height:460px;overflow-y:auto;font-size:.92rem;
+  line-height:1.85;color:#333;}
+.text-inner p{margin-bottom:.85rem;}
+.text-inner .titre-oeuvre{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+/* PARTIE A — MENUS DÉROULANTS */
+.mvt-item{margin:0 1.2rem 1rem;padding:.9rem 1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.mvt-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.4rem;letter-spacing:.05em;}
+.mvt-excerpt{font-size:.95rem;font-style:italic;color:var(--day-dark2);line-height:1.7;
+  margin-bottom:.65rem;padding-left:.7rem;border-left:3px solid var(--day-border);}
+.dd{position:relative;width:100%;}
+.dd-trigger{width:100%;min-height:3rem;border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  background:var(--surface);font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);
+  color:var(--text);padding:.6rem .9rem;cursor:pointer;text-align:left;white-space:normal;
+  line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:.6rem;}
+.dd-trigger .dd-placeholder{color:var(--muted);}
+.dd-trigger .dd-arrow{flex-shrink:0;font-size:.8rem;color:var(--day-dark2);transition:transform .15s;}
+.dd-trigger.open .dd-arrow{transform:rotate(180deg);}
+.dd-trigger.correct{border-color:#5fa82f;background:#eaf7e2;color:#2f5c15;}
+.dd-trigger.wrong{border-color:var(--err);background:var(--err-light);color:var(--err-dark);}
+.dd-trigger:disabled{cursor:default;opacity:1;}
+.dd-list{display:none;margin-top:.4rem;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  overflow:hidden;background:var(--surface);}
+.dd-list.open{display:block;}
+.dd-option{display:block;width:100%;text-align:left;white-space:normal;line-height:1.5;
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);color:var(--text);
+  background:var(--surface);border:none;border-top:1px solid var(--border);
+  padding:.6rem .9rem;min-height:44px;cursor:pointer;}
+.dd-option:first-child{border-top:none;}
+.dd-option:hover{background:var(--day-light);}
+.mvt-fb{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin-top:.6rem;line-height:1.75;
+  padding:.7rem .9rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.mvt-fb.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.mvt-fb.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+
+.btn-verify-mvt{display:block;margin-top:.7rem;background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.7rem 1.4rem;min-height:2.8rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-verify-mvt:hover:not(:disabled){background:#6e4c00;}
+.btn-verify-mvt:disabled{opacity:.35;cursor:default;}
+
+/* PARTIE B */
+.q-item{padding:.2rem 1.2rem;margin-bottom:.6rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.4rem;letter-spacing:.05em;}
+.q-phrase{font-size:clamp(1rem,3vw,1.12rem);font-weight:700;color:var(--text);
+  line-height:1.8;margin-bottom:.7rem;padding:.7rem .95rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);font-style:italic;}
+.opts-col{display:flex;flex-direction:column;gap:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.5rem;word-break:break-word;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;
+  color:#2f5c15!important;animation:glowOk .5s ease;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;
+  color:var(--err-dark)!important;animation:wrongShake .35s ease;}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(95,168,47,.55);}100%{box-shadow:0 0 0 10px rgba(95,168,47,0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 0 0;line-height:1.75;
+  padding:.75rem .95rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+.pair-title{margin:0 1.2rem .3rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  font-weight:800;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;}
+
+.nav-row{padding:.9rem 1.2rem 0;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#6e4c00;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1.1rem;}
+.recap-list div{padding:.15rem 0;}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:1rem;padding:.4rem 1.1rem;border:3px solid;border-radius:10px;
+  transform:rotate(-6deg) scale(0);margin-bottom:.9rem;letter-spacing:.05em;}
+.stamp.play{animation:stampPop .5s cubic-bezier(.2,1.4,.5,1) forwards;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}
+  70%{transform:rotate(-6deg) scale(1.15);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.stamp.ok{color:#2f7a1f;border-color:#2f7a1f;}
+.stamp.mid{color:#8a6000;border-color:#8a6000;}
+.stamp.ko{color:var(--err-dark);border-color:var(--err-dark);}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#6e4c00;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 6 · Jour 1</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">« Aux champs », Maupassant — compréhension</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 12 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="dots" id="dots"></div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">12</span></span>
+</div>
+
+<button class="text-toggle" id="textToggle">
+  <span>📖 Texte support — Aux champs (incipit)</span><span id="textArrow">▾</span>
+</button>
+<div class="textbox open" id="textBox">
+  <div class="text-stripe"></div>
+  <div class="text-inner">
+    <div class="titre-oeuvre">Guy de Maupassant — Aux champs (1882)</div>
+    <p>Les deux chaumières étaient côte à côte, au pied d'une colline, proches d'une petite ville de bains. Les deux paysans besognaient dur sur la terre inféconde pour élever tous leurs petits. Chaque ménage en avait quatre. Devant les deux portes voisines, toute la marmaille grouillait du matin au soir. Les deux aînés avaient six ans et les deux cadets quinze mois environ&nbsp;; les mariages, et, ensuite, les naissances, s'étaient produites à peu près simultanément dans l'une et l'autre maison.</p>
+    <p>Les deux mères distinguaient à peine leurs produits dans le tas&nbsp;; et les deux pères confondaient tout à fait. Les huit noms dansaient dans leur tête, se mêlaient sans cesse&nbsp;; et, quand il fallait en appeler un, les hommes souvent en criaient trois avant d'arriver au véritable.</p>
+    <p>La première des deux demeures, en venant de la station d'eaux de Rolleport, était occupée par les Tuvache, qui avaient trois filles et un garçon&nbsp;; l'autre masure abritait les Vallin, qui avaient une fille et trois garçons.</p>
+    <p>Tout cela vivait péniblement de soupe, de pommes de terre et de grand air. À sept heures, le matin, puis à midi, puis à six heures, le soir, les ménagères réunissaient leurs mioches pour donner la pâtée, comme des gardeurs d'oies assemblent leurs bêtes. Les enfants étaient assis, par rang d'âge, devant la table en bois, vernie par cinquante ans d'usage. Le dernier moutard avait à peine la bouche au niveau de la planche. On posait devant eux l'assiette creuse pleine de pain molli dans l'eau où avaient cuit les pommes de terre, un demi-chou et trois oignons&nbsp;; et toute la ligne mangeait jusqu'à plus faim. La mère empâtait elle-même le petit. Un peu de viande au pot-au-feu, le dimanche, était une fête pour tous&nbsp;; et le père, ce jour-là, s'attardait au repas en répétant&nbsp;: « Je m'y ferais bien tous les jours. »</p>
+    <p>Par un après-midi du mois d'août, une légère voiture s'arrêta brusquement devant les deux chaumières, et une jeune femme, qui conduisait elle-même, dit au monsieur assis à côté d'elle&nbsp;:</p>
+    <p>— Oh&nbsp;! regarde, Henri, ce tas d'enfants&nbsp;! Sont-ils jolis, comme ça, à grouiller dans la poussière&nbsp;!</p>
+    <p>L'homme ne répondit rien, accoutumé à ces admirations qui étaient une douleur et presque un reproche pour lui.</p>
+    <p>La jeune femme reprit&nbsp;:</p>
+    <p>— Il faut que je les embrasse&nbsp;! Oh&nbsp;! comme je voudrais en avoir un, celui-là, le tout petit.</p>
+    <p>Et, sautant de la voiture, elle courut aux enfants, prit un des deux derniers, celui des Tuvache, et, l'enlevant dans ses bras, elle le baisa passionnément sur ses joues sales, sur ses cheveux blonds frisés et pommadés de terre, sur ses menottes qu'il agitait pour se débarrasser des caresses ennuyeuses.</p>
+    <p>Puis elle remonta dans sa voiture et partit au grand trot.</p>
+  </div>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Partie A</span>
+    <span class="part-label">Résumer les mouvements</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="part-consigne">Cet incipit se compose de quatre mouvements. Pour chacun, choisis dans le menu déroulant le résumé qui correspond le mieux.</div>
+  <div id="listA"></div>
+</div>
+
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Partie B</span>
+    <span class="part-label">Compréhension et analyse</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+  <div class="part-consigne">Réponds à chaque question, puis choisis la citation du texte qui justifie ta réponse.</div>
+  <div id="listB"></div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="stamp" id="stamp"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 12 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="recap-list">
+      <div>Partie A (mouvements) : <span id="r-sA"></span></div>
+      <div>Partie B (compréhension) : <span id="r-sB"></span></div>
+    </div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function balancedPositions(n){
+  var per=Math.floor(n/3),rem=n%3,base=[];
+  for(var k=0;k<3;k++){var c=per+(k<rem?1:0);for(var i=0;i<c;i++)base.push(k);}
+  return shuffleArr(base);
+}
+function buildOpts(correct,distractors,slot){
+  var arr=[null,null,null];arr[slot]=correct;
+  var rest=shuffleArr(distractors.slice());var ri=0;
+  for(var s=0;s<3;s++){if(arr[s]===null)arr[s]=rest[ri++];}
+  return arr;
+}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+
+/* ══ TOGGLE TEXTE ══ */
+$('textToggle').addEventListener('click',function(){
+  $('textBox').classList.toggle('open');
+  $('textToggle').classList.toggle('open');
+  $('textArrow').textContent=$('textBox').classList.contains('open')?'▴':'▾';
+});
+
+/* ══ DONNÉES PARTIE A ══ */
+var MVT=[
+ {excerpt:"« Les deux chaumières étaient côte à côte, au pied d'une colline, proches d'une petite ville de bains. Les deux paysans besognaient dur sur la terre inféconde pour élever tous leurs petits. Chaque ménage en avait quatre. Devant les deux portes voisines, toute la marmaille grouillait du matin au soir. Les deux aînés avaient six ans et les deux cadets quinze mois environ\u00a0; les mariages, et, ensuite, les naissances, s'étaient produites à peu près simultanément dans l'une et l'autre maison. »",
+  options:[
+   "Maupassant présente deux familles paysannes voisines, pauvres, avec quatre enfants chacune, vivant dans un isolement total.",
+   "Maupassant décrit deux familles bourgeoises qui s'installent dans une région rurale pour l'été.",
+   "Maupassant raconte comment deux familles se disputent leurs enfants confondus par les voisins."
+  ],correctIndex:0,
+  fb:"Ce premier mouvement est la présentation du cadre et des personnages\u00a0: deux familles paysannes voisines, chacune avec quatre enfants, dans une misère similaire. La répétition de «\u00a0les deux\u00a0» (chaumières, paysans, mères, pères) insiste sur leur similitude totale."},
+ {excerpt:"« Les deux mères distinguaient à peine leurs produits dans le tas\u00a0; et les deux pères confondaient tout à fait. Les huit noms dansaient dans leur tête, se mêlaient sans cesse\u00a0; et, quand il fallait en appeler un, les hommes souvent en criaient trois avant d'arriver au véritable. La première des deux demeures, en venant de la station d'eaux de Rolleport, était occupée par les Tuvache, qui avaient trois filles et un garçon\u00a0; l'autre masure abritait les Vallin, qui avaient une fille et trois garçons. »",
+  options:[
+   "Le narrateur précise la confusion des parents entre leurs enfants et donne les noms des deux familles\u00a0: les Tuvache et les Vallin.",
+   "Le narrateur décrit les disputes fréquentes entre les deux familles à propos de leurs enfants.",
+   "Le narrateur explique comment les enfants s'organisent seuls dans les deux chaumières."
+  ],correctIndex:0,
+  fb:"Ce deuxième mouvement approfondit le portrait des familles qui se ressemblent\u00a0: la confusion des parents entre leurs enfants et l'identification des deux familles par leurs noms (les Tuvache, les Vallin). Le détail des noms ancre le récit dans le réalisme."},
+ {excerpt:"« Tout cela vivait péniblement de soupe, de pommes de terre et de grand air. À sept heures, le matin, puis à midi, puis à six heures, le soir, les ménagères réunissaient leurs mioches pour donner la pâtée, comme des gardeurs d'oies assemblent leurs bêtes. Les enfants étaient assis, par rang d'âge, devant la table en bois, vernie par cinquante ans d'usage. Le dernier moutard avait à peine la bouche au niveau de la planche. On posait devant eux l'assiette creuse pleine de pain molli dans l'eau où avaient cuit les pommes de terre, un demi-chou et trois oignons\u00a0; et toute la ligne mangeait jusqu'à plus faim. La mère empâtait elle-même le petit. Un peu de viande au pot-au-feu, le dimanche, était une fête pour tous\u00a0; et le père, ce jour-là, s'attardait au repas en répétant\u00a0: « Je m'y ferais bien tous les jours. » »",
+  options:[
+   "Le narrateur décrit en détail la misère alimentaire des deux familles, avec une seule fête\u00a0: la viande du dimanche.",
+   "Le narrateur décrit comment les familles s'enrichissent peu à peu grâce à leurs récoltes et à l'entraide entre voisins.",
+   "Le narrateur montre que les enfants mangent abondamment grâce à la générosité des habitants de la ville voisine."
+  ],correctIndex:0,
+  fb:"Ce troisième mouvement est le plus réaliste\u00a0: Maupassant décrit avec précision la misère alimentaire (soupe, pommes de terre, demi-chou, trois oignons). La viande du dimanche est présentée comme «\u00a0une fête\u00a0», ce qui révèle à quel point le quotidien est déshérité. La parole du père clôt ce mouvement avec une ironie pathétique."},
+ {excerpt:"« Par un après-midi du mois d'août, une légère voiture s'arrêta brusquement devant les deux chaumières, et une jeune femme, qui conduisait elle-même, dit au monsieur assis à côté d'elle\u00a0: — Oh\u00a0! regarde, Henri, ce tas d'enfants\u00a0! Sont-ils jolis, comme ça, à grouiller dans la poussière\u00a0! L'homme ne répondit rien, accoutumé à ces admirations qui étaient une douleur et presque un reproche pour lui. La jeune femme reprit\u00a0: — Il faut que je les embrasse\u00a0! Oh\u00a0! comme je voudrais en avoir un, celui-là, le tout petit. Et, sautant de la voiture, elle courut aux enfants, prit un des deux derniers, celui des Tuvache, et, l'enlevant dans ses bras, elle le baisa passionnément sur ses joues sales, sur ses cheveux blonds frisés et pommadés de terre, sur ses menottes qu'il agitait pour se débarrasser des caresses ennuyeuses. Puis elle remonta dans sa voiture et partit au grand trot. »",
+  options:[
+   "Une voiture bourgeoise s'arrête devant les chaumières\u00a0; une jeune femme manifeste un enthousiasme naïf pour les enfants pauvres et embrasse l'un d'eux avant de repartir, tandis que son mari reste silencieux et douloureux.",
+   "Un riche propriétaire terrien arrive en voiture pour inspecter les deux chaumières qu'il envisage d'acheter.",
+   "Une jeune femme bourgeoise décide d'adopter un enfant paysan sur-le-champ et repart avec lui dans sa voiture."
+  ],correctIndex:0,
+  fb:"Ce quatrième mouvement introduit le contraste social\u00a0: l'irruption du monde bourgeois (voiture légère, jeune femme élégante) dans le monde paysan. Le silence douloureux du mari et l'enthousiasme naïf de la femme amorcent le drame à venir. Maupassant clôt l'incipit sur cette tension."}
+];
+
+/* ══ DONNÉES PARTIE B ══ */
+var DBQ=[
+ {titre:'Q1 — Le réalisme de Maupassant',
+  qA:{q:"Quels procédés Maupassant utilise-t-il pour donner l'impression que l'histoire est vraie et crédible\u00a0?",
+      opts:["Il invente des noms de lieux imaginaires et des personnages historiques célèbres.",
+            "Il ancre l'histoire dans un lieu géographique précis, utilise un vocabulaire concret et socialement situé, et décrit des détails du quotidien avec exactitude.",
+            "Il utilise un narrateur qui raconte à la première personne sa propre histoire vraie."],
+      correct:1,
+      fb:"Le réalisme de Maupassant passe par plusieurs procédés\u00a0: un nom de lieu précis (Rolleport), un vocabulaire populaire et argotique (marmaille, mioches, moutard, pâtée), et une description minutieuse du quotidien (les heures des repas, la table «\u00a0vernie par cinquante ans d'usage\u00a0»). Le lecteur doit avoir l'impression de voir la scène."},
+  qB:{q:"Quelle phrase du texte illustre le mieux cette précision réaliste dans la description du quotidien\u00a0?",
+      opts:["« Les deux chaumières étaient côte à côte, au pied d'une colline »",
+            "« On posait devant eux l'assiette creuse pleine de pain molli dans l'eau où avaient cuit les pommes de terre, un demi-chou et trois oignons »",
+            "« Les huit noms dansaient dans leur tête, se mêlaient sans cesse »"],
+      correct:1,
+      fb:"Cette phrase est un exemple parfait de précision réaliste\u00a0: Maupassant énumère exactement ce que mangent les enfants (pain molli, pommes de terre, demi-chou, trois oignons). L'adjectif «\u00a0demi\u00a0» et le chiffre «\u00a0trois\u00a0» donnent une impression de comptage, de pénurie mesurée au plus juste."}},
+ {titre:'Q2 — Le regard du narrateur sur les paysans',
+  qA:{q:"Quel regard le narrateur porte-t-il sur les familles paysannes\u00a0? Est-il purement objectif ou laisse-t-il transparaître un point de vue\u00a0?",
+      opts:["Le narrateur est totalement objectif\u00a0: il décrit les faits sans aucun jugement ni émotion.",
+            "Le narrateur n'est pas neutre\u00a0: à travers l'ironie, le choix des mots et la comparaison animale, il exprime une critique sociale implicite de la condition paysanne.",
+            "Le narrateur admire les paysans et les présente comme des êtres nobles et courageux."],
+      correct:1,
+      fb:"Le narrateur de Maupassant n'est pas neutre. Il assimile les enfants à des animaux («\u00a0comme des gardeurs d'oies assemblent leurs bêtes\u00a0»), utilise un vocabulaire péjoratif («\u00a0marmaille\u00a0», «\u00a0mioches\u00a0», «\u00a0moutard\u00a0», «\u00a0pâtée\u00a0») et décrit la misère avec une précision qui force le lecteur à ressentir l'indignation. C'est une critique sociale voilée, caractéristique du réalisme de Maupassant."},
+  qB:{q:"Quelle comparaison du texte révèle le plus clairement le regard du narrateur sur la condition des enfants pauvres\u00a0?",
+      opts:["« Les deux aînés avaient six ans et les deux cadets quinze mois environ »",
+            "« comme des gardeurs d'oies assemblent leurs bêtes »",
+            "« toute la ligne mangeait jusqu'à plus faim »"],
+      correct:1,
+      fb:"Cette comparaison est la plus révélatrice du regard du narrateur\u00a0: les enfants sont comparés à des oies, leurs mères à des gardeurs de bêtes. Ce n'est pas une description neutre\u00a0: c'est une dénonciation voilée de la déshumanisation que la misère impose aux familles paysannes."}},
+ {titre:'Q3 — Le contraste social',
+  qA:{q:"Comment Maupassant construit-il le contraste entre le monde paysan et le monde bourgeois\u00a0?",
+      opts:["Il met en scène une longue conversation entre les paysans et les bourgeois qui révèle leurs différences culturelles.",
+            "Il oppose d'abord longuement la misère paysanne, puis fait irruption le monde bourgeois avec sa voiture, son enthousiasme naïf et son indifférence à la réalité sociale.",
+            "Il montre que bourgeois et paysans ont des modes de vie très similaires malgré les apparences."],
+      correct:1,
+      fb:"Maupassant construit le contraste en deux temps\u00a0: d'abord trois paragraphes consacrés à la misère paysanne (nourriture, logement, quotidien), puis l'irruption brutale d'une «\u00a0légère voiture\u00a0» avec une jeune femme bourgeoise enthousiaste. Ce contraste est structurel\u00a0: la longueur de la description de la misère rend l'enthousiasme bourgeois encore plus choquant."},
+  qB:{q:"Quelle paire de citations illustre le mieux ce contraste entre les deux mondes\u00a0?",
+      opts:["« Les deux chaumières étaient côte à côte » et « Les deux mères distinguaient à peine leurs produits »",
+            "« Tout cela vivait péniblement de soupe, de pommes de terre et de grand air » et « Sont-ils jolis, comme ça, à grouiller dans la poussière\u00a0! »",
+            "« les hommes souvent en criaient trois avant d'arriver au véritable » et « Par un après-midi du mois d'août »"],
+      correct:1,
+      fb:"Ces deux citations résument parfaitement le contraste\u00a0: d'un côté, la misère vécue de l'intérieur («\u00a0péniblement\u00a0», «\u00a0soupe\u00a0», «\u00a0pommes de terre\u00a0», «\u00a0grand air\u00a0»)\u00a0; de l'autre, la misère vue de l'extérieur et transformée en tableau pittoresque («\u00a0jolis\u00a0», «\u00a0grouiller dans la poussière\u00a0»). Le même verbe «\u00a0grouiller\u00a0» apparaît dans les deux mondes, mais avec des connotations opposées."}},
+ {titre:"Q4 — La parole du père et l'ironie pathétique",
+  qA:{q:"Que révèle la parole du père paysan («\u00a0Je m'y ferais bien tous les jours.\u00a0») sur sa condition sociale\u00a0?",
+      opts:["Elle montre que le père est un gourmet raffiné qui apprécie les plaisirs de la table.",
+            "Elle révèle la profondeur de la misère.",
+            "Elle montre que le père est paresseux et ne veut pas travailler pour améliorer sa condition."],
+      correct:1,
+      fb:"Cette parole apparemment anodine est en réalité bouleversante\u00a0: le père considère comme un idéal inaccessible («\u00a0je m'y ferais bien\u00a0») ce qui est pour les bourgeois le minimum quotidien. Maupassant donne la parole au père sans commentaire\u00a0: le lecteur comprend seul l'étendue de la misère. C'est la technique réaliste\u00a0: montrer sans commenter."},
+  qB:{q:"Quel effet littéraire cette phrase produit-elle sur le lecteur\u00a0?",
+      opts:["Un effet comique\u00a0: le lecteur rit de la simplicité du père paysan.",
+            "Un effet pathétique et ironique\u00a0: le lecteur constate la difficulté de vie des paysans.",
+            "Un effet de suspense\u00a0: le lecteur se demande si le père va trouver un moyen de manger de la viande tous les jours."],
+      correct:1,
+      fb:"C'est un effet pathétique et ironique simultanément. Pathétique car le lecteur ressent de la pitié pour cet homme dont le seul rêve est la viande le dimanche. Ironique car la phrase est formulée comme un souhait ordinaire («\u00a0je m'y ferais bien\u00a0»), alors qu'elle révèle une misère extraordinaire."}}
+];
+
+var TOTAL=12,scA=0,scB=0,errA=0,errB=0,curB=0,posB=[];
+
+/* ══ DOTS ══ */
+function buildDots(){
+  var d=$('dots');d.innerHTML='';
+  for(var i=0;i<TOTAL;i++){var s=document.createElement('div');s.className='dot';s.id='dot-'+i;d.appendChild(s);}
+}
+function updateGlobal(){
+  var ok=scA+scB,ko=errA+errB;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;$('cnt-rem').textContent=TOTAL-ok-ko;
+  for(var i=0;i<TOTAL;i++){
+    var el=$('dot-'+i);el.className='dot'+(i<ok?' done':(i===ok?' active':''));
+  }
+}
+
+/* ══ PARTIE A — 4 MENUS DÉROULANTS (maison, sans débordement) ══ */
+function closeAllDD(){
+  document.querySelectorAll('.dd-trigger.open').forEach(function(t){t.classList.remove('open');});
+  document.querySelectorAll('.dd-list.open').forEach(function(l){l.classList.remove('open');});
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest || !e.target.closest('.dd')) closeAllDD();
+});
+
+function buildA(){
+  scA=0;errA=0;
+  var list=$('listA');list.innerHTML='';
+  var posA=balancedPositions(4);
+  var doneCount=0;
+
+  MVT.forEach(function(m,idx){
+    var opts=buildOpts(m.options[m.correctIndex],
+      [m.options[(m.correctIndex+1)%3],m.options[(m.correctIndex+2)%3]],posA[idx]);
+    var correctIdx=posA[idx];
+    var item=document.createElement('div');item.className='mvt-item';
+    var num=document.createElement('div');num.className='mvt-num';num.textContent='Mouvement '+(idx+1);
+    var exc=document.createElement('div');exc.className='mvt-excerpt';exc.textContent=m.excerpt;
+
+    var dd=document.createElement('div');dd.className='dd';
+    var trigger=document.createElement('button');trigger.type='button';trigger.className='dd-trigger';
+    var trigTxt=document.createElement('span');trigTxt.className='dd-placeholder';trigTxt.textContent='— Choisis un résumé —';
+    var trigArrow=document.createElement('span');trigArrow.className='dd-arrow';trigArrow.textContent='▾';
+    trigger.appendChild(trigTxt);trigger.appendChild(trigArrow);
+    var ddList=document.createElement('div');ddList.className='dd-list';
+    var selectedValue=null;
+    opts.forEach(function(txt,i){
+      var optBtn=document.createElement('button');optBtn.type='button';optBtn.className='dd-option';
+      optBtn.textContent=txt;
+      optBtn.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        selectedValue=i;
+        trigTxt.textContent=txt;trigTxt.classList.remove('dd-placeholder');
+        closeAllDD();
+        verifBtn.disabled=false;
+      });
+      ddList.appendChild(optBtn);
+    });
+    trigger.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(trigger.disabled)return;
+      var willOpen=!ddList.classList.contains('open');
+      closeAllDD();
+      if(willOpen){ddList.classList.add('open');trigger.classList.add('open');}
+    });
+    dd.appendChild(trigger);dd.appendChild(ddList);
+
+    var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-verify-mvt';
+    verifBtn.textContent='Vérifier';verifBtn.disabled=true;
+
+    var fb=document.createElement('div');fb.className='mvt-fb';
+
+    item.appendChild(num);item.appendChild(exc);item.appendChild(dd);item.appendChild(verifBtn);item.appendChild(fb);
+    list.appendChild(item);
+
+    var locked=false;
+    verifBtn.addEventListener('click',function(){
+      if(locked||selectedValue===null)return;
+      locked=true;
+      closeAllDD();
+      trigger.disabled=true;
+      var ok=(selectedValue===correctIdx);
+      trigger.classList.add(ok?'correct':'wrong');
+      if(ok){scA++;}else{errA++;}
+      fb.classList.add('show',ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas le bon résumé.')+'</span>'+m.fb;
+      flashIcon(ok);
+      if(ok)beepOk();else beepErr();
+      verifBtn.style.display='none';
+      $('spA').textContent='Score\u00a0: '+scA+' / 4';
+      updateGlobal();
+      doneCount++;
+      if(doneCount>=MVT.length){
+        var nav=document.createElement('div');nav.className='nav-row';
+        var next=document.createElement('button');next.className='btn-next';next.textContent='Partie B →';
+        next.addEventListener('click',function(){
+          $('cardB').classList.remove('locked');
+          buildB();
+        });
+        nav.appendChild(next);list.appendChild(nav);
+      }
+    });
+  });
+}
+
+/* ══ PARTIE B — 4 DOUBLES QUESTIONS ══ */
+function buildB(){
+  scB=0;errB=0;curB=0;posB=balancedPositions(4).concat(balancedPositions(4));
+  $('spB').textContent='';
+  renderDQ();
+}
+function renderDQ(){
+  var list=$('listB');list.innerHTML='';
+  if(curB>=DBQ.length){ endB(); return; }
+  var d=DBQ[curB];
+  var pTitle=document.createElement('div');pTitle.className='pair-title';pTitle.textContent=d.titre;
+  list.appendChild(pTitle);
+
+  var doneA=false,doneB=false;
+  function makeSub(sub,label,posIdx){
+    var opts=buildOpts(sub.opts[sub.correct],
+      [sub.opts[(sub.correct+1)%3],sub.opts[(sub.correct+2)%3]],posB[posIdx]);
+    var correctIdx=posB[posIdx];
+    var div=document.createElement('div');div.className='q-item';
+    var num=document.createElement('div');num.className='q-num';num.textContent=label;
+    div.appendChild(num);
+    var ph=document.createElement('div');ph.className='q-phrase';ph.textContent=sub.q;
+    div.appendChild(ph);
+    var col=document.createElement('div');col.className='opts-col';
+    var letters=['A','B','C'];var answered=false;
+    opts.forEach(function(txt,i){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=letters[i];
+      var sp=document.createElement('span');sp.textContent=txt;
+      btn.appendChild(lt);btn.appendChild(sp);
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        var ok=(i===correctIdx);
+        Array.prototype.forEach.call(col.children,function(b,bi){
+          b.disabled=true;
+          if(bi===correctIdx)b.classList.add('correct');
+          else if(bi===i)b.classList.add('wrong');
+        });
+        flashIcon(ok);
+        if(ok){scB++;beepOk();}else{errB++;beepErr();}
+        var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+        fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne réponse.')+'</span>'+sub.fb;
+        div.appendChild(fb);
+        $('spB').textContent='Score\u00a0: '+scB+' / 8';
+        updateGlobal();
+        if(label.indexOf('Question A')===0)doneA=true;else doneB=true;
+        checkBothDone();
+      });
+      col.appendChild(btn);
+    });
+    div.appendChild(col);
+    return div;
+  }
+  list.appendChild(makeSub(d.qA,'Question A',curB));
+  list.appendChild(makeSub(d.qB,'Question B — citation',curB+4));
+
+  function checkBothDone(){
+    if(doneA&&doneB){
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curB<DBQ.length-1)?'Question suivante →':'Voir le résultat →';
+      next.addEventListener('click',function(){curB++;renderDQ();});
+      nav.appendChild(next);list.appendChild(nav);
+    }
+  }
+}
+function endB(){
+  $('spB').textContent='Score Partie B\u00a0: '+scB+' / 8';
+  setTimeout(showResults,500);
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var tot=scA+scB;
+  $('r-score').textContent=tot;
+  $('r-sA').textContent=scA+'/4';$('r-sB').textContent=scB+'/8';
+  var s= tot<=3?1: tot<=6?2: tot<=8?3: tot<=10?4:5;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg;
+  if(tot>=11)msg='Excellente lecture\u00a0! Tu maîtrises parfaitement ce texte.';
+  else if(tot>=8)msg='Très bonne compréhension du texte, encore quelques nuances à approfondir.';
+  else if(tot>=5)msg='Bonne lecture générale. Relis les passages liés aux questions manquées.';
+  else msg='Reprends le texte et le référentiel avant de continuer.';
+  $('r-msg').textContent=msg;
+  var stamp=$('stamp');
+  if(tot>=8){stamp.className='stamp ok';stamp.textContent='RÉUSSI';}
+  else if(tot>=5){stamp.className='stamp mid';stamp.textContent='À REVOIR';}
+  else{stamp.className='stamp ko';stamp.textContent='À REFAIRE';}
+  void stamp.offsetWidth;stamp.classList.add('play');
+  $('results').classList.add('show');
+  beepFinal(tot>=8);
+  if(tot>=8){emojiRain(['📖','✒️','📜','✍️','🖋️']);}
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardB').classList.add('locked');
+  buildDots();
+  buildA();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildDots();
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
