@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S6 J2 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#b94040;--day-color:#b94040;--day-dark:#7a1f1f;--day-dark2:#551414;
+  --day-light:#f7eded;--day-border:#e2a3a3;--day-glow:rgba(185,64,64,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fdf5f5;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+  --catA:#1a6e88;--catA-l:#e8f6fb;--catB:#3d7a10;--catB-l:#f0faeb;
+  --catC:#c47a10;--catC-l:#fff5e0;--catD:#7a3d8a;--catD-l:#f6edf9;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:800px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--blue);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--green);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.dots{display:flex;gap:.3rem;justify-content:center;margin:.55rem 0 .6rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:#d8d4c8;transition:background .25s,transform .25s;}
+.dot.active{background:var(--day-dark);transform:scale(1.25);}
+.dot.done{background:#943030;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin-bottom:.9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.ref-toggle{width:100%;background:var(--day-light);border:2px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:'JetBrains Mono',monospace;
+  font-weight:800;font-size:.8rem;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;
+  animation:pulseRef 2.2s ease-in-out infinite;}
+.ref-toggle:hover,.ref-toggle.open{background:var(--day-border);}
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 7px rgba(185,64,64,0);}}
+.ref{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;max-height:0;
+  transition:max-height .4s ease;box-shadow:0 3px 14px rgba(0,0,0,.06);}
+.ref.open{max-height:2000px;}
+.ref-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.ref-inner{padding:1.1rem 1.3rem;max-height:520px;overflow-y:auto;}
+.ref-cell{background:var(--surface2);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:.6rem;}
+.ref-cell:last-child{margin-bottom:0;}
+.ref-cell-title{font-size:1rem;font-weight:900;color:var(--day-dark2);margin-bottom:.35rem;}
+.ref-cell-body{font-size:.9rem;color:#4a4f58;line-height:1.65;}
+.ref-cell-body em{color:var(--day-dark2);font-style:normal;font-weight:700;}
+.ref-cell-body .ex{display:block;margin-top:.3rem;font-style:italic;color:var(--muted);font-size:.85rem;}
+.ref-cell-body .warn{display:block;margin-top:.3rem;color:var(--err-dark);font-weight:700;}
+.ref-regle{background:var(--day-light);border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);
+  padding:.7rem .9rem;font-size:.88rem;color:var(--day-dark2);font-weight:700;line-height:1.6;}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+.extrait-box{margin:0 1.2rem 1rem;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:1rem 1.1rem;font-size:.95rem;line-height:2;color:#333;font-style:italic;}
+.extrait-box .exp{font-style:normal;font-weight:800;background:rgba(185,64,64,.14);
+  border-radius:5px;padding:.05rem .3rem;color:var(--day-dark2);}
+.extrait-box .num{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:.72rem;
+  color:#fff;background:var(--day-dark);border-radius:5px;padding:.02rem .32rem;margin-left:.15rem;}
+
+.board-wrap{background:#171009;border-bottom:2px solid #4a3528;padding:10px;margin:0 1.2rem 1rem;border-radius:10px;}
+#board1{width:100%;height:auto;display:block;border-radius:8px;}
+.fiche{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(.6) rotate(var(--rot));
+  transition:opacity .4s ease,transform .55s cubic-bezier(.3,1.5,.5,1);}
+.fiche.on{opacity:1;transform:scale(1) rotate(var(--rot));}
+.stamp1{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(1.6) rotate(-8deg);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.3,1.6,.5,1);}
+.stamp1.on{opacity:.92;transform:scale(1) rotate(-8deg);}
+.stamp1-fail{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(1.6) rotate(6deg);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.3,1.6,.5,1);}
+.stamp1-fail.on{opacity:.88;transform:scale(1) rotate(6deg);}
+
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin:0 1.2rem .4rem;letter-spacing:.05em;}
+.q-phrase{margin:0 1.2rem .9rem;font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+  line-height:1.85;padding:.75rem 1rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);font-style:italic;}
+
+.stamps-row{margin:0 1.2rem .8rem;display:flex;gap:.55rem;flex-wrap:wrap;}
+.stamp-btn{display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  padding:.6rem .9rem;border-radius:var(--radius-sm);cursor:pointer;
+  border:2px solid transparent;background:var(--surface2);min-height:56px;min-width:120px;flex:1;
+  transition:transform .12s,border-color .15s,background .15s;-webkit-tap-highlight-color:transparent;}
+.stamp-btn:hover:not(:disabled){transform:translateY(-2px);}
+.stamp-btn:disabled{cursor:default;opacity:.65;}
+.stamp-btn .stamp-label{font-size:.86rem;font-weight:800;text-align:center;line-height:1.3;}
+.stamp-btn.cA{border-color:var(--catA);background:var(--catA-l);color:var(--catA);}
+.stamp-btn.cB{border-color:var(--catB);background:var(--catB-l);color:var(--catB);}
+.stamp-btn.cC{border-color:var(--catC);background:var(--catC-l);color:var(--catC);}
+.stamp-btn.cD{border-color:var(--catD);background:var(--catD-l);color:var(--catD);}
+.stamp-btn.correct{animation:stampDown .35s ease;border-width:3px;}
+.stamp-btn.wrong{animation:wrongShake .4s ease;}
+@keyframes stampDown{0%{transform:scale(1.15) rotate(-3deg);}50%{transform:scale(.92);}100%{transform:scale(1) rotate(0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:0 1.2rem .9rem;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+
+.nav-row{padding:0 1.2rem;display:flex;justify-content:flex-end;margin-bottom:.9rem;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#5c1717;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+/* ATELIER 2 */
+.ins-item{margin:0 1.2rem 1.1rem;padding:1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.ins-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.ins-type{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  font-weight:800;color:#fff;background:var(--day-dark);border-radius:6px;padding:.2rem .55rem;
+  margin-bottom:.6rem;letter-spacing:.03em;}
+.ins-preview{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;color:var(--text);line-height:1.8;
+  padding:.7rem .9rem;background:var(--day-light);border-left:4px solid var(--day-dark);
+  border-radius:var(--radius-sm);font-style:italic;margin-bottom:.7rem;}
+.ins-preview .gap{color:var(--muted);font-style:normal;font-weight:900;}
+.ins-preview .filled{color:var(--day-dark2);font-style:normal;text-decoration:underline;text-decoration-style:dotted;}
+
+.dd{position:relative;width:100%;margin-bottom:.6rem;}
+.dd-trigger{width:100%;min-height:3rem;border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  background:var(--surface);font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);
+  color:var(--text);padding:.6rem .9rem;cursor:pointer;text-align:left;white-space:normal;
+  line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:.6rem;}
+.dd-trigger .dd-placeholder{color:var(--muted);}
+.dd-trigger .dd-arrow{flex-shrink:0;font-size:.8rem;color:var(--day-dark2);transition:transform .15s;}
+.dd-trigger.open .dd-arrow{transform:rotate(180deg);}
+.dd-trigger.correct{border-color:#5fa82f;background:#eaf7e2;color:#2f5c15;}
+.dd-trigger.wrong{border-color:var(--err);background:var(--err-light);color:var(--err-dark);}
+.dd-trigger:disabled{cursor:default;opacity:1;}
+.dd-list{display:none;margin-top:.4rem;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  overflow:hidden;background:var(--surface);}
+.dd-list.open{display:block;}
+.dd-option{display:block;width:100%;text-align:left;white-space:normal;line-height:1.5;
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);color:var(--text);
+  background:var(--surface);border:none;border-top:1px solid var(--border);
+  padding:.6rem .9rem;min-height:44px;cursor:pointer;}
+.dd-option:first-child{border-top:none;}
+.dd-option:hover{background:var(--day-light);}
+
+.btn-verify-ins{display:block;margin-top:.2rem;background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.7rem 1.4rem;min-height:2.8rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-verify-ins:hover:not(:disabled){background:#5c1717;}
+.btn-verify-ins:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1.1rem;}
+.recap-list div{padding:.15rem 0;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#5c1717;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 6 · Jour 2</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Les expansions du nom</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 10 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="dots" id="dots"></div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">10</span></span>
+</div>
+
+<button class="ref-toggle" id="refToggle">
+  <span>📘 Référentiel — Les 4 types d'expansions du nom</span><span id="refArrow">▾</span>
+</button>
+<div class="ref" id="refBox">
+  <div class="ref-stripe"></div>
+  <div class="ref-inner">
+    <div class="ref-cell">
+      <div class="ref-cell-title">1. L'adjectif épithète ou apposé</div>
+      <div class="ref-cell-body">Adjectif qualificatif placé directement à côté du nom (épithète) ou séparé par des virgules (apposé).<br>
+      Test&nbsp;: supprimable sans détruire la phrase.
+      <span class="warn">⚠ Les adjectifs ATTRIBUTS ne sont PAS des expansions (on ne peut pas les supprimer).</span>
+      <span class="ex">Ex. épithète&nbsp;: « une terre inféconde ». Ex. apposé&nbsp;: « la femme, épuisée, s'assit. »</span></div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-title">2. Le complément du nom</div>
+      <div class="ref-cell-body">Groupe introduit par une <em>préposition</em> (de, à, en, sur, dans, par, vers, avec, sans, entre, derrière, chez, contre…).<br>
+      Peut être un nom ou GN («&nbsp;un distributeur de boissons&nbsp;»), un verbe à l'infinitif («&nbsp;une histoire pour rêver&nbsp;») ou un pronom («&nbsp;un souvenir de sa grand-mère&nbsp;»).
+      <span class="warn">⚠ NE PAS CONFONDRE avec le COI qui complète un verbe. Ex.&nbsp;: « On parle DE Paris. » → de Paris = COI (complète le verbe parler), pas complément du nom.</span></div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-title">3. La proposition subordonnée relative</div>
+      <div class="ref-cell-body">Proposition introduite par un <em>pronom relatif</em> (qui, que, qu', dont, où, lequel…). Elle complète un nom (son antécédent).
+      <span class="ex">Ex.&nbsp;: « les enfants qui grouillaient dans la poussière » → qui = sujet de grouillaient ; antécédent = les enfants.</span></div>
+    </div>
+    <div class="ref-cell">
+      <div class="ref-cell-title">4. L'apposition</div>
+      <div class="ref-cell-body">Groupe nominal (GN) placé entre virgules qui apporte une précision sur le nom.
+      <span class="ex">Ex.&nbsp;: « Maupassant, grand auteur réaliste, dénonce les inégalités. »</span></div>
+    </div>
+    <div class="ref-regle">Règle commune&nbsp;: toute expansion du nom est SUPPRIMABLE — la phrase reste grammaticalement correcte sans elle.</div>
+  </div>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Atelier 1</span>
+    <span class="part-label">Trieur de descriptions</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="part-consigne">Lis cet extrait. Six expansions du nom sont surlignées et numérotées. Pour chacune, indique d'abord son type, puis justifie par le test de suppression.</div>
+  <div class="extrait-box">
+    « La boutique <span class="exp">sombre et étroite<span class="num">1</span></span> donnait sur une ruelle <span class="exp">de province<span class="num">2</span></span>. Derrière le comptoir, une femme, <span class="exp">les cheveux tirés<span class="num">3</span></span>, comptait les pièces <span class="exp">qu'elle avait gagnées<span class="num">4</span></span> avec une lenteur <span class="exp">épuisante<span class="num">5</span></span>. Son fils, <span class="exp">un grand gaillard maigre<span class="num">6</span></span>, dormait sur une chaise. »
+  </div>
+  <div class="board-wrap"><svg id="board1" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div id="qA"></div>
+</div>
+
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Atelier 2</span>
+    <span class="part-label">Enrichisseur de texte</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+  <div class="part-consigne">Ce texte réaliste est trop pauvre&nbsp;: ses groupes nominaux manquent de précision. Pour chaque emplacement vide, choisis dans le menu déroulant l'expansion du nom indiquée qui convient le mieux.</div>
+  <div id="listB"></div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 10 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="recap-list">
+      <div>Atelier 1 (trieur) : <span id="r-sA"></span></div>
+      <div>Atelier 2 (enrichisseur) : <span id="r-sB"></span></div>
+    </div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+
+/* ══ RÉFÉRENTIEL TOGGLE ══ */
+$('refToggle').addEventListener('click',function(){
+  $('refBox').classList.toggle('open');
+  $('refToggle').classList.toggle('open');
+  $('refArrow').textContent=$('refBox').classList.contains('open')?'▴':'▾';
+});
+
+/* ══ DONNÉES ATELIER 1 ══ */
+var CATS=[
+  {val:'A',label:'Adjectif épithète',cls:'cA'},
+  {val:'B',label:'Complément du nom',cls:'cB'},
+  {val:'C',label:'Proposition subordonnée relative',cls:'cC'},
+  {val:'D',label:'Apposition',cls:'cD'}
+];
+var ATEL1=[
+ {num:1,texte:"sombre et étroite",ans:'A',
+  fb:"« Sombre et étroite » sont deux adjectifs qualificatifs placés directement à côté du nom « boutique » (épithètes). Test\u00a0: « La boutique donnait sur une ruelle. » reste correct. → <span class=\"hl-ok\">adjectifs épithètes</span>."},
+ {num:2,texte:"de province",ans:'B',
+  fb:"« De province » est introduit par la préposition « de » et complète le nom « ruelle »\u00a0: c'est un <span class=\"hl-ok\">complément du nom</span>. Il est formé d'un nom simple. Test\u00a0: « une ruelle donnait sur… » reste correct."},
+ {num:3,texte:"les cheveux tirés",ans:'D',
+  fb:"« Les cheveux tirés » est un groupe nominal placé entre virgules qui apporte une précision sur « femme »\u00a0: c'est une <span class=\"hl-ok\">apposition</span>. Test\u00a0: « une femme comptait les pièces » reste correct."},
+ {num:4,texte:"qu'elle avait gagnées",ans:'C',
+  fb:"« Qu'elle avait gagnées » est une proposition introduite par le pronom relatif « que » (antécédent\u00a0: les pièces)\u00a0: c'est une <span class=\"hl-ok\">proposition subordonnée relative</span>. Test\u00a0: « elle comptait les pièces avec lenteur » reste correct."},
+ {num:5,texte:"épuisante",ans:'A',
+  fb:"« Épuisante » est un adjectif qualificatif placé directement à côté du nom « lenteur »\u00a0: c'est un <span class=\"hl-ok\">adjectif épithète</span>. Test\u00a0: « avec une lenteur » reste correct."},
+ {num:6,texte:"un grand gaillard maigre",ans:'D',
+  fb:"« Un grand gaillard maigre » est un groupe nominal placé entre virgules qui apporte une précision sur « son fils »\u00a0: c'est une <span class=\"hl-ok\">apposition</span>. Test\u00a0: « Son fils dormait sur une chaise. » reste correct."}
+];
+var ZONES1=[
+  {x:160,y:95,color:'#1a6e88',light:'#e8f6fb',label:'Épithète'},
+  {x:440,y:95,color:'#3d7a10',light:'#f0faeb',label:'Compl. du nom'},
+  {x:160,y:225,color:'#c47a10',light:'#fff5e0',label:'PSR'},
+  {x:440,y:225,color:'#7a3d8a',light:'#f6edf9',label:'Apposition'}
+];
+
+function buildBoard1(){
+  var s='';
+  s+='<rect width="600" height="360" fill="#5b3a1e"/>';
+  s+='<rect x="10" y="10" width="580" height="340" rx="6" fill="#c9a06a"/>';
+  var seed=77;
+  for(var k=0;k<220;k++){
+    seed=(seed*1103515245+12345)&0x7fffffff;var gx=15+(seed%570);
+    seed=(seed*1103515245+12345)&0x7fffffff;var gy=15+(seed%330);
+    s+='<circle cx="'+gx+'" cy="'+gy+'" r="1.2" fill="#00000011"/>';
+  }
+  ZONES1.forEach(function(z){
+    s+='<rect x="'+(z.x-125)+'" y="'+(z.y-55)+'" width="250" height="120" rx="8" fill="'+z.light+'55" stroke="'+z.color+'77" stroke-width="1.5" stroke-dasharray="6,4"/>';
+    s+='<rect x="'+(z.x-55)+'" y="'+(z.y-50)+'" width="110" height="28" rx="5" fill="none" stroke="'+z.color+'" stroke-width="2.5"/>';
+    s+='<text x="'+z.x+'" y="'+(z.y-31)+'" text-anchor="middle" font-family="Arial" font-size="10" font-weight="900" fill="'+z.color+'">'+z.label+'</text>';
+  });
+  var fichePos={A:[[125,z1y(0,15)],[195,z1y(0,42)]],B:[[440,z1y(1,25)]],C:[[160,z1y(2,25)]],D:[[405,z1y(3,15)],[475,z1y(3,42)]]};
+  function z1y(zoneIdx,dy){return ZONES1[zoneIdx].y+dy;}
+  var used={A:0,B:0,C:0,D:0};
+  var rotations=[-5,4,-3,6,-4,3];
+  ATEL1.forEach(function(item,i){
+    var arr=fichePos[item.ans];var pos=arr[used[item.ans]%arr.length];used[item.ans]++;
+    s+='<g transform="translate('+pos[0]+','+pos[1]+')"><g class="fiche" id="fiche1_'+i+'" style="--rot:'+rotations[i]+'deg">'
+      +'<rect x="-26" y="-17" width="56" height="46" rx="3" fill="#00000022" transform="translate(2,3)"/>'
+      +'<rect x="-28" y="-19" width="56" height="46" rx="3" fill="#f7f3ea" stroke="#d8cdb6" stroke-width="1"/>'
+      +'<text x="0" y="8" text-anchor="middle" font-size="16">📄</text>'
+      +'<circle cx="0" cy="-24" r="4" fill="'+ZONES1.find(function(z){return z.label===(item.ans==='A'?'Épithète':item.ans==='B'?'Compl. du nom':item.ans==='C'?'PSR':'Apposition');}).color+'"/>'
+      +'</g></g>';
+  });
+  s+='<g transform="translate(300,317)"><g class="stamp1" id="stamp1">'
+    +'<rect x="-95" y="-20" width="190" height="40" rx="6" fill="none" stroke="#1a6e88" stroke-width="3.5"/>'
+    +'<text x="0" y="7" text-anchor="middle" font-family="Arial" font-size="15" font-weight="900" fill="#1a6e88" letter-spacing="1">DOSSIER CLASSÉ</text>'
+    +'</g></g>';
+  s+='<g transform="translate(300,317)"><g class="stamp1-fail" id="stamp1-fail">'
+    +'<rect x="-100" y="-20" width="200" height="40" rx="6" fill="none" stroke="#c0392b" stroke-width="3.5"/>'
+    +'<text x="0" y="7" text-anchor="middle" font-family="Arial" font-size="14" font-weight="900" fill="#c0392b" letter-spacing="1">À REVOIR</text>'
+    +'</g></g>';
+  $('board1').innerHTML=s;
+}
+function renderBoard1(curA){
+  ATEL1.forEach(function(item,i){
+    var f=$('fiche1_'+i);if(f)f.classList.toggle('on',i<curA);
+  });
+}
+
+var scA=0,errA=0,curA=0;
+function buildA(){
+  scA=0;errA=0;curA=0;
+  buildBoard1();renderBoard1(0);
+  renderQA();
+}
+function renderQA(){
+  var zone=$('qA');zone.innerHTML='';
+  if(curA>=ATEL1.length){ endA(); return; }
+  var it=ATEL1[curA];
+  var num=document.createElement('div');num.className='q-num';num.textContent='Question sur ['+it.num+']';
+  zone.appendChild(num);
+  var ph=document.createElement('div');ph.className='q-phrase';ph.textContent='« '+it.texte+' »';
+  zone.appendChild(ph);
+  var row=document.createElement('div');row.className='stamps-row';
+  var locked=false;
+  var catsShuffled=shuffleArr(CATS.slice());
+  catsShuffled.forEach(function(cat){
+    var btn=document.createElement('button');btn.className='stamp-btn '+cat.cls;btn.type='button';
+    var lab=document.createElement('span');lab.className='stamp-label';lab.textContent=cat.label;
+    btn.appendChild(lab);
+    btn.addEventListener('click',function(){
+      if(locked)return;locked=true;
+      row.querySelectorAll('.stamp-btn').forEach(function(b){b.disabled=true;});
+      var ok=(cat.val===it.ans);
+      btn.classList.add(ok?'correct':'wrong');
+      flashIcon(ok);
+      if(ok){scA++;beepOk();}else{errA++;beepErr();}
+      var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas le bon type.')+'</span>'+it.fb;
+      zone.appendChild(fb);
+      curA++;
+      renderBoard1(curA);
+      $('spA').textContent='Score\u00a0: '+scA+' / 6';
+      updateGlobal();
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curA<ATEL1.length)?'Suivant →':'Atelier 2 →';
+      next.addEventListener('click',function(){
+        if(curA>=ATEL1.length){
+          setTimeout(function(){
+            $('cardB').classList.remove('locked');
+            buildB();
+            var cb=$('cardB');
+            if(cb)cb.scrollIntoView({behavior:'smooth',block:'start'});
+          },600);
+        }
+        renderQA();
+      });
+      nav.appendChild(next);
+      zone.appendChild(nav);
+    });
+    row.appendChild(btn);
+  });
+  zone.appendChild(row);
+}
+function endA(){
+  $('spA').textContent='Score Atelier 1\u00a0: '+scA+' / 6';
+  var allOk=(scA===ATEL1.length);
+  setTimeout(function(){
+    var st=$('stamp1');if(st)st.classList.toggle('on',allOk);
+    var stf=$('stamp1-fail');if(stf)stf.classList.toggle('on',!allOk);
+  },500);
+}
+
+/* ══ DONNÉES ATELIER 2 ══ */
+var ATEL2=[
+ {before:"La maison ",after:" se dressait au bout d'une rue.",typeLabel:"ADJECTIF ÉPITHÈTE",
+  correct:"délabrée et grise",distractors:["qui avait été abandonnée depuis des années","de pierre"],
+  phraseOk:"« La maison délabrée et grise se dressait au bout d'une rue. »",
+  fb:"Un adjectif épithète est un adjectif qualificatif placé directement à côté du nom. « Délabrée et grise » qualifie directement « maison » → <span class=\"hl-ok\">adjectifs épithètes</span>. Les deux autres propositions sont une proposition relative et un complément du nom."},
+ {before:"au bout d'une rue ",after:".",typeLabel:"COMPLÉMENT DU NOM",
+  correct:"aux pavés disjoints",distractors:["obscure et pavée","qui sentait la misère"],
+  phraseOk:"« au bout d'une rue aux pavés disjoints. »",
+  fb:"Un complément du nom est introduit par une préposition. « Aux pavés disjoints » (à + les = aux) complète le nom « rue »\u00a0: c'est un <span class=\"hl-ok\">complément du nom</span>. Les autres propositions sont un adjectif épithète et une proposition relative."},
+ {before:"Un homme, ",after:", regardait par la fenêtre les passants.",typeLabel:"APPOSITION",
+  correct:", un vieillard aux épaules tombantes,",distractors:["de campagne","qui ne dormait plus depuis des semaines"],
+  phraseOk:"« Un homme, un vieillard aux épaules tombantes, regardait par la fenêtre. »",
+  fb:"Une apposition est un GN placé entre virgules. « Un vieillard aux épaules tombantes » est un GN qui précise « un homme »\u00a0: c'est une <span class=\"hl-ok\">apposition</span>. Les deux autres propositions sont un complément du nom et une proposition relative."},
+ {before:"regardait par la fenêtre les passants ",after:".",typeLabel:"PROPOSITION SUBORDONNÉE RELATIVE",
+  correct:"qui rentraient chez eux après le travail",distractors:["misérables et pressés","du quartier"],
+  phraseOk:"« les passants qui rentraient chez eux après le travail. »",
+  fb:"Une proposition subordonnée relative est introduite par un pronom relatif. « Qui rentraient chez eux après le travail » est introduite par « qui » (antécédent\u00a0: les passants) → <span class=\"hl-ok\">proposition relative</span>. Les deux autres sont un adjectif épithète et un complément du nom."}
+];
+
+var scB=0,errB=0;
+function buildB(){
+  scB=0;errB=0;
+  var list=$('listB');list.innerHTML='';
+  var doneCount=0;
+
+  ATEL2.forEach(function(item,idx){
+    var opts=shuffleArr([item.correct,item.distractors[0],item.distractors[1]]);
+    var div=document.createElement('div');div.className='ins-item';
+    var num=document.createElement('div');num.className='ins-num';num.textContent='Insertion ['+(idx+1)+']';
+    var typ=document.createElement('div');typ.className='ins-type';typ.textContent='Type demandé\u00a0: '+item.typeLabel;
+    var prev=document.createElement('div');prev.className='ins-preview';
+    function updatePreview(txt){
+      prev.innerHTML=item.before+'<span class="gap filled">'+(txt||'[____]')+'</span>'+item.after;
+    }
+    updatePreview(null);
+
+    var dd=document.createElement('div');dd.className='dd';
+    var trigger=document.createElement('button');trigger.type='button';trigger.className='dd-trigger';
+    var trigTxt=document.createElement('span');trigTxt.className='dd-placeholder';trigTxt.textContent='— Choisis une expansion —';
+    var trigArrow=document.createElement('span');trigArrow.className='dd-arrow';trigArrow.textContent='▾';
+    trigger.appendChild(trigTxt);trigger.appendChild(trigArrow);
+    var ddList=document.createElement('div');ddList.className='dd-list';
+    var selectedTxt=null;
+    function closeAllDD(){
+      document.querySelectorAll('.dd-trigger.open').forEach(function(t){t.classList.remove('open');});
+      document.querySelectorAll('.dd-list.open').forEach(function(l){l.classList.remove('open');});
+    }
+    opts.forEach(function(txt){
+      var optBtn=document.createElement('button');optBtn.type='button';optBtn.className='dd-option';
+      optBtn.textContent=txt;
+      optBtn.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        selectedTxt=txt;
+        trigTxt.textContent=txt;trigTxt.classList.remove('dd-placeholder');
+        closeAllDD();
+        updatePreview(txt);
+        verifBtn.disabled=false;
+      });
+      ddList.appendChild(optBtn);
+    });
+    trigger.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      if(trigger.disabled)return;
+      var willOpen=!ddList.classList.contains('open');
+      closeAllDD();
+      if(willOpen){ddList.classList.add('open');trigger.classList.add('open');}
+    });
+    dd.appendChild(trigger);dd.appendChild(ddList);
+
+    var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-verify-ins';
+    verifBtn.textContent='Vérifier';verifBtn.disabled=true;
+
+    var fb=document.createElement('div');fb.className='fb-box';
+
+    div.appendChild(num);div.appendChild(typ);div.appendChild(prev);
+    div.appendChild(dd);div.appendChild(verifBtn);div.appendChild(fb);
+    list.appendChild(div);
+
+    var locked=false;
+    verifBtn.addEventListener('click',function(){
+      if(locked||selectedTxt===null)return;
+      locked=true;
+      closeAllDD();
+      trigger.disabled=true;
+      var ok=(selectedTxt===item.correct);
+      trigger.classList.add(ok?'correct':'wrong');
+      if(ok){scB++;updatePreview(item.correct);}else{errB++;}
+      flashIcon(ok);
+      if(ok)beepOk();else beepErr();
+      fb.classList.add('show',ok?'ok':'ko');
+      var extra=ok?'<br><strong>Phrase obtenue\u00a0:</strong> '+item.phraseOk:'';
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne expansion.')+'</span>'+item.fb+extra;
+      verifBtn.style.display='none';
+      $('spB').textContent='Score\u00a0: '+scB+' / 4';
+      updateGlobal();
+      doneCount++;
+      if(doneCount>=ATEL2.length){
+        setTimeout(showResults,500);
+      }
+    });
+  });
+}
+
+/* ══ GLOBAL ══ */
+var TOTAL=10;
+function buildDots(){
+  var d=$('dots');d.innerHTML='';
+  for(var i=0;i<TOTAL;i++){var s=document.createElement('div');s.className='dot';s.id='dot-'+i;d.appendChild(s);}
+}
+function updateGlobal(){
+  var ok=scA+scB,ko=errA+errB;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;$('cnt-rem').textContent=TOTAL-ok-ko;
+  for(var i=0;i<TOTAL;i++){
+    var el=$('dot-'+i);el.className='dot'+(i<ok?' done':(i===ok?' active':''));
+  }
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var tot=scA+scB;
+  $('r-score').textContent=tot;
+  $('r-sA').textContent=scA+'/6';$('r-sB').textContent=scB+'/4';
+  var s= tot<=2?1: tot<=4?2: tot<=6?3: tot<=8?4:5;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg;
+  if(tot>=9)msg='Excellent\u00a0! Tu identifies et emploies parfaitement les expansions du nom.';
+  else if(tot>=7)msg='Très bon travail, encore quelques confusions à revoir.';
+  else if(tot>=5)msg='Bon travail global. Reprends l\u2019atelier le moins réussi.';
+  else msg='Reprends le référentiel des expansions du nom avant de continuer.';
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  beepFinal(tot>=7);
+  if(tot>=7){emojiRain(['📝','📜','✒️','📖','🖋️']);}
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardB').classList.add('locked');
+  buildDots();
+  buildA();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildDots();
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
