@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Test de réactivation – S6 J4 – 3e</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;
+      --day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;
+      --orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+
+    /* INTRO */
+    .intro-bloc{width:100%;max-width:720px;position:relative;z-index:1;
+      background:#1a6e88;color:#fff;border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:flex-start;gap:.75rem;}
+    .intro-icone{font-size:1.5rem;flex-shrink:0;margin-top:.05rem;}
+    .intro-texte{font-size:clamp(.92rem,2.5vw,1rem);line-height:1.75;font-weight:500;}
+    .intro-texte strong{display:block;font-size:1rem;font-weight:900;margin-bottom:.25rem;}
+
+    /* DASH */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.5rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5a8a9a;text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#5a8a9a;text-transform:uppercase;letter-spacing:.08em;}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#4ade80;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#fca5a5;}
+    .chip-rem{background:rgba(58,181,216,.15);border-color:var(--day-color);color:var(--day-border);}
+
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+
+    /* CARTES */
+    .cards-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.1rem;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-titre{font-size:1rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);border-radius:10px;padding:.75rem 1rem;margin-bottom:.7rem;
+      font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);line-height:1.85;font-style:italic;}
+    .q-phrase strong{font-style:normal;}
+    .q-consigne{font-size:.92rem;color:var(--muted);margin-bottom:.65rem;line-height:1.6;}
+
+    /* SURLIGNAGE Q1 */
+    .surlig-wrap{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.6rem;}
+    .mot{display:inline-block;padding:.3rem .55rem;border-radius:6px;cursor:pointer;
+      font-size:clamp(1rem,2.8vw,1.1rem);font-weight:700;font-style:italic;
+      border:2px solid transparent;transition:all .15s;user-select:none;-webkit-tap-highlight-color:transparent;}
+    .mot:hover{border-color:var(--day-color);background:var(--day-light);}
+    .mot.selectionne{background:var(--day-dark);color:#fff;border-color:var(--day-dark);}
+    .mot.correct{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .mot.incorrect{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+
+    /* SAISIE Q2 */
+    .saisie-wrap{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;
+      font-size:clamp(1rem,3vw,1.1rem);font-weight:700;font-style:italic;color:var(--text);line-height:2;}
+    .saisie-input{font-size:clamp(1rem,2.8vw,1.05rem);font-weight:700;font-family:Arial,sans-serif;
+      padding:.35rem .6rem;border:2.5px solid var(--day-border);border-radius:8px;
+      background:var(--day-light);color:var(--text);outline:none;width:160px;
+      transition:border-color .15s;}
+    .saisie-input:focus{border-color:var(--day-dark);}
+    .saisie-input.ok-input{border-color:var(--green);background:var(--green-pale);color:#14532d;}
+    .saisie-input.ko-input{border-color:var(--red);background:var(--red-pale);color:#7f1d1d;}
+
+    /* QCM */
+    .opts{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:'JetBrains Mono',monospace;
+      color:var(--text);cursor:pointer;transition:all .15s;text-align:left;min-height:50px;
+      -webkit-tap-highlight-color:transparent;font-weight:700;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;color:var(--muted);flex-shrink:0;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+
+    /* FEEDBACKS */
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.6rem;display:none;line-height:1.75;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border-left:5px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border-left:5px solid var(--red);color:#7f1d1d;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.45rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .fb ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+    .fb ul li{margin-bottom:.3rem;line-height:1.75;}
+
+    /* BOUTON VALIDER */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+
+    /* RÉSULTATS */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#5a8a9a;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#88c8d8;margin-bottom:.9rem;
+      line-height:1.9;font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    .res-jauge{display:inline-block;padding:.55rem 1.1rem;border-radius:10px;
+      font-size:.92rem;font-weight:700;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;border:2px solid;}
+    .jauge-vert{background:rgba(34,197,94,.15);color:#86efac;border-color:var(--green);}
+    .jauge-jaune{background:rgba(245,197,24,.15);color:#fde68a;border-color:var(--yellow);}
+    .jauge-rouge{background:rgba(239,68,68,.15);color:#fca5a5;border-color:var(--red);}
+
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}.saisie-input{width:130px;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    Pazapa &middot; Français &middot; 3ème
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 4</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Conditionnel présent</span></h1>
+  <div class="theme-badge">Conjugaison &mdash; test de réactivation</div>
+</header>
+
+<div class="intro-bloc">
+  <div class="intro-icone">&#128678;</div>
+  <div class="intro-texte">
+    <strong>Test de réactivation &mdash; Conditionnel présent</strong>
+    Avant de commencer le parcours, fais le point sur tes connaissances&nbsp;! Ce test te permettra simplement de repérer tes points forts et les notions à retravailler.
+  </div>
+</div>
+
+<div class="dash">
+  <div class="dash-titre">&#128678; Diagnostic &mdash; 4 questions</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Question 1 / 4&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/4</div>
+      <div class="dash-score-label">Valid&eacute;es</div>
+    </div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">4</span> restants</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 4 questions</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="cards-wrap" id="cards-wrap"></div>
+
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">&#127919; Interpr&egrave;te ton r&eacute;sultat</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/4</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-jauge-bloc"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var scoreOk=0,res={};
+var L=['A','B','C'];
+
+function mkEl(t,c){var e=document.createElement(t);if(c)e.className=c;return e;}
+function animerCard(id,ok){var c=document.getElementById('c-'+id);if(!c)return;c.classList.remove('anim-ok','anim-ko');void c.offsetWidth;c.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(done){
+  var pct=Math.round(done/4*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done+' / 4 questions';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+  document.getElementById('chip-ok').textContent=scoreOk;
+  document.getElementById('chip-ko').textContent=done-scoreOk;
+  document.getElementById('chip-rem').textContent=4-done;
+  document.getElementById('dash-statut').textContent=done<4?'Question '+(done+1)+' / 4\u2026':'Test termin\u00e9\u00a0!';
+}
+
+/* \u2500\u2500 Q1 SURLIGNAGE \u2500\u2500 */
+function buildQ1(){
+  var card=mkEl('div','card');card.id='c-q1';
+  card.appendChild(mkEl('div','card-stripe'));
+  var lbl=mkEl('div','q-label');lbl.textContent='1 \u2014 Reconna\u00eetre le conditionnel pr\u00e9sent';card.appendChild(lbl);
+  var titre=mkEl('div','q-titre');titre.textContent='Dans cette phrase, clique sur le verbe au conditionnel pr\u00e9sent.';card.appendChild(titre);
+  var ph=mkEl('div','q-phrase');ph.textContent='\u00ab\u00a0Si j\u2019avais plus de temps, je lirais ce livre.\u00a0\u00bb';card.appendChild(ph);
+  var wrap=mkEl('div','surlig-wrap');
+  var mots=['Si','j\u2019avais','plus','de','temps','je','lirais','ce','livre'];
+  var correct='lirais';
+  var valide=false;
+  mots.forEach(function(m){
+    var span=mkEl('span','mot');span.textContent=m;
+    span.addEventListener('click',function(){
+      if(valide)return;
+      valide=true;
+      var ok=(m===correct);
+      mots.forEach(function(m2,i){
+        var s=wrap.children[i];
+        if(m2===correct){s.classList.add('correct');}
+        else if(s===span&&!ok){s.classList.add('incorrect');}
+      });
+      var fb=document.getElementById('fb-q1');
+      if(ok){
+        fb.className='fb show ok-fb';
+        fb.innerHTML='<span class="fb-titre">\u2713 Bonne r\u00e9ponse\u00a0!</span><span class="hl-ok">lirais</span> est au conditionnel pr\u00e9sent.<br>Formation\u00a0: radical du futur (<em>lir-</em>) + terminaison de l\u2019imparfait (<em>-ais</em>).';
+        scoreOk++;jouerOk();
+      } else {
+        fb.className='fb show ko-fb';
+        fb.innerHTML='<span class="fb-titre">La r\u00e9ponse attendue\u00a0: <span class="hl-ok">lirais</span></span>Formation\u00a0: radical du futur (<em>lir-</em>) + terminaison de l\u2019imparfait (<em>-ais</em>).<br><br><span class="hl-ko">j\u2019avais</span> = imparfait, pas conditionnel.';
+        jouerErreur();
+      }
+      res['q1']=ok;
+      animerCard('q1',ok);
+      majProg(Object.keys(res).length);
+      if(Object.keys(res).length===4)setTimeout(afficherVerdict,600);
+    });
+    wrap.appendChild(span);
+  });
+  card.appendChild(wrap);
+  var fb=mkEl('div','fb');fb.id='fb-q1';card.appendChild(fb);
+  return card;
+}
+
+/* \u2500\u2500 Q2 SAISIE \u2500\u2500 */
+function buildQ2(){
+  var card=mkEl('div','card');card.id='c-q2';
+  card.appendChild(mkEl('div','card-stripe'));
+  var lbl=mkEl('div','q-label');lbl.textContent='2 \u2014 Conjuguer';card.appendChild(lbl);
+  var titre=mkEl('div','q-titre');titre.textContent='Conjugue le verbe entre parenth\u00e8ses au conditionnel pr\u00e9sent.';card.appendChild(titre);
+  var wrap=mkEl('div','saisie-wrap');
+  wrap.innerHTML='Nous&nbsp;';
+  var inp=document.createElement('input');
+  inp.type='text';inp.className='saisie-input';inp.placeholder='venir\u2026';
+  inp.setAttribute('autocomplete','off');inp.setAttribute('autocorrect','off');inp.setAttribute('spellcheck','false');
+  wrap.appendChild(inp);
+  var suite=document.createTextNode('\u00a0avec plaisir.');
+  wrap.appendChild(suite);
+  card.appendChild(wrap);
+  var correct='viendrions';
+  var btnV=document.createElement('button');btnV.className='btn btn-primary';btnV.style.marginBottom='.5rem';
+  btnV.innerHTML='V\u00e9rifier';
+  btnV.addEventListener('click',function(){
+    if(res['q2']!==undefined)return;
+    var val=inp.value.trim().toLowerCase().replace(/\s+/g,'');
+    var ok=(val===correct);
+    res['q2']=ok;
+    inp.disabled=true;
+    btnV.disabled=true;
+    inp.classList.add(ok?'ok-input':'ko-input');
+    var fb=document.getElementById('fb-q2');
+    if(ok){
+      fb.className='fb show ok-fb';
+      fb.innerHTML='<span class="fb-titre">\u2713 Bonne r\u00e9ponse\u00a0!</span>Nous <span class="hl-ok">viendrions</span> avec plaisir.<br>Radical irr\u00e9gulier au conditionnel\u00a0: <em>viendr-</em> + <em>-ions</em>.';
+      scoreOk++;jouerOk();
+    } else {
+      inp.value=inp.value;
+      fb.className='fb show ko-fb';
+      fb.innerHTML='<span class="fb-titre">R\u00e9ponse attendue\u00a0: <span class="hl-ok">viendrions</span></span>Radical irr\u00e9gulier\u00a0: <em>viendr-</em> + terminaison <em>-ions</em>.<br><br>Votre r\u00e9ponse\u00a0: <span class="hl-ko">'+inp.value+'</span>';
+      jouerErreur();
+    }
+    animerCard('q2',ok);
+    majProg(Object.keys(res).length);
+    if(Object.keys(res).length===4)setTimeout(afficherVerdict,600);
+  });
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')btnV.click();});
+  card.appendChild(btnV);
+  var fb=mkEl('div','fb');fb.id='fb-q2';card.appendChild(fb);
+  return card;
+}
+
+/* \u2500\u2500 Q3 QCM \u2500\u2500 */
+function buildQ3(){
+  var card=mkEl('div','card');card.id='c-q3';
+  card.appendChild(mkEl('div','card-stripe'));
+  var lbl=mkEl('div','q-label');lbl.textContent='3 \u2014 Choisir la bonne forme';card.appendChild(lbl);
+  var titre=mkEl('div','q-titre');titre.textContent='Quelle forme est correcte\u00a0?';card.appendChild(titre);
+  var opts_data=[
+    {t:'Ils feraient leurs devoirs.',ok:true},
+    {t:'Ils ferais leurs devoirs.',ok:false},
+    {t:'Ils ferait leurs devoirs.',ok:false}
+  ];
+  var opts=mkEl('div','opts');
+  opts_data.forEach(function(opt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-letter">'+L[i]+'.</span><span>'+opt.t+'</span>';
+    btn.dataset.ok=opt.ok?'1':'0';
+    btn.addEventListener('click',function(){
+      if(res['q3']!==undefined)return;
+      var ok=btn.dataset.ok==='1';
+      res['q3']=ok;
+      Array.from(opts.querySelectorAll('.opt-btn')).forEach(function(b){
+        b.disabled=true;
+        if(b.dataset.ok==='1')b.classList.add('ok-opt');
+        else if(b===btn&&!ok)b.classList.add('ko-opt');
+      });
+      var fb=document.getElementById('fb-q3');
+      if(ok){
+        fb.className='fb show ok-fb';
+        fb.innerHTML='<span class="fb-titre">\u2713 Bonne r\u00e9ponse\u00a0!</span>Avec <em>ils</em>, la terminaison du conditionnel pr\u00e9sent est <span class="hl-ok">-aient</span>\u00a0: ils <span class="hl-ok">feraient</span>.';
+        scoreOk++;jouerOk();
+      } else {
+        fb.className='fb show ko-fb';
+        fb.innerHTML='<span class="fb-titre">La bonne forme\u00a0: <span class="hl-ok">ils feraient</span></span>Avec <em>ils</em>, la terminaison est <span class="hl-ok">-aient</span>.<br><ul><li><span class="hl-ko">ferais</span> = 1re ou 2e pers. sing.</li><li><span class="hl-ko">ferait</span> = 3e pers. sing.</li></ul>';
+        jouerErreur();
+      }
+      animerCard('q3',ok);
+      majProg(Object.keys(res).length);
+      if(Object.keys(res).length===4)setTimeout(afficherVerdict,600);
+    });
+    opts.appendChild(btn);
+  });
+  card.appendChild(opts);
+  var fb=mkEl('div','fb');fb.id='fb-q3';card.appendChild(fb);
+  return card;
+}
+
+/* \u2500\u2500 Q4 QCM \u2500\u2500 */
+function buildQ4(){
+  var card=mkEl('div','card');card.id='c-q4';
+  card.appendChild(mkEl('div','card-stripe'));
+  var lbl=mkEl('div','q-label');lbl.textContent='4 \u2014 Identifier l\u2019emploi';card.appendChild(lbl);
+  var titre=mkEl('div','q-titre');titre.textContent='Quel est l\u2019emploi du conditionnel dans cette phrase\u00a0?';card.appendChild(titre);
+  var ph=mkEl('div','q-phrase');ph.innerHTML='Tu <span class="hl-neu">devrais</span> relire ta le\u00e7on avant le contr\u00f4le.';card.appendChild(ph);
+  var opts_data=[
+    {t:'Une hypoth\u00e8se.',ok:false},
+    {t:'Un conseil.',ok:true},
+    {t:'Un fait pass\u00e9.',ok:false}
+  ];
+  var opts=mkEl('div','opts');
+  opts_data.forEach(function(opt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-letter">'+L[i]+'.</span><span>'+opt.t+'</span>';
+    btn.dataset.ok=opt.ok?'1':'0';
+    btn.addEventListener('click',function(){
+      if(res['q4']!==undefined)return;
+      var ok=btn.dataset.ok==='1';
+      res['q4']=ok;
+      Array.from(opts.querySelectorAll('.opt-btn')).forEach(function(b){
+        b.disabled=true;
+        if(b.dataset.ok==='1')b.classList.add('ok-opt');
+        else if(b===btn&&!ok)b.classList.add('ko-opt');
+      });
+      var fb=document.getElementById('fb-q4');
+      if(ok){
+        fb.className='fb show ok-fb';
+        fb.innerHTML='<span class="fb-titre">\u2713 Bonne r\u00e9ponse\u00a0!</span>Le conditionnel pr\u00e9sent est souvent utilis\u00e9 pour donner un <span class="hl-ok">conseil</span> ou formuler une recommandation avec plus de politesse.';
+        scoreOk++;jouerOk();
+      } else {
+        fb.className='fb show ko-fb';
+        fb.innerHTML='<span class="fb-titre">La bonne r\u00e9ponse\u00a0: <span class="hl-ok">un conseil</span></span>Le conditionnel pr\u00e9sent est ici utilis\u00e9 pour formuler une recommandation de fa\u00e7on polie.<br><ul><li><span class="hl-ko">Une hypoth\u00e8se</span> appara\u00eet plut\u00f4t dans des constructions en <em>si</em>.</li><li><span class="hl-ko">Un fait pass\u00e9</span> se marque \u00e0 l\u2019imparfait ou au pass\u00e9 compos\u00e9.</li></ul>';
+        jouerErreur();
+      }
+      animerCard('q4',ok);
+      majProg(Object.keys(res).length);
+      if(Object.keys(res).length===4)setTimeout(afficherVerdict,600);
+    });
+    opts.appendChild(btn);
+  });
+  card.appendChild(opts);
+  var fb=mkEl('div','fb');fb.id='fb-q4';card.appendChild(fb);
+  return card;
+}
+
+function afficherVerdict(){
+  var total=scoreOk;
+  document.getElementById('results-global').classList.add('show');
+  document.getElementById('res-num').textContent=total;
+  var stars=total===4?5:total===3?4:total===2?3:total===1?2:1;
+  document.getElementById('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var jauge,msg;
+  if(total===4){
+    jauge='<div class="res-jauge jauge-vert">\ud83d\udfe2 4/4 \u2014 Excellent d\u00e9part\u00a0!</div>';
+    msg='Tu peux aborder les r\u00e9visions avec confiance\net viser la ma\u00eetrise compl\u00e8te.';
+    pluie();
+  } else if(total>=2){
+    jauge='<div class="res-jauge jauge-jaune">\ud83d\udfe1 '+total+'/4 \u2014 Plusieurs acquis\u00a0!</div>';
+    msg='Les prochaines activit\u00e9s t\u2019aideront\n\u00e0 renforcer les points encore fragiles.';
+    if(total===3)pluie();
+  } else {
+    jauge='<div class="res-jauge jauge-rouge">\ud83d\udd34 '+total+'/4 \u2014 Bases \u00e0 reprendre</div>';
+    msg='Suis le parcours \u00e9tape par \u00e9tape\u00a0:\ntu progresseras rapidement\u00a0!';
+  }
+  document.getElementById('res-jauge-bloc').innerHTML=jauge;
+  document.getElementById('res-msg').textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;res={};
+  document.getElementById('results-global').classList.remove('show');
+  var wrap=document.getElementById('cards-wrap');wrap.innerHTML='';
+  majProg(0);
+  buildAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildAll(){
+  var wrap=document.getElementById('cards-wrap');
+  wrap.appendChild(buildQ1());
+  wrap.appendChild(buildQ2());
+  wrap.appendChild(buildQ3());
+  wrap.appendChild(buildQ4());
+}
+
+buildAll();majProg(0);
+</script>
+</body>
+</html>
