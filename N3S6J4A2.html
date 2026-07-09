@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S6 J4 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#3ab5d8;--day-color:#3ab5d8;--day-dark:#1a6e88;--day-dark2:#124f63;
+  --day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#f0fafd;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:780px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.dots{display:flex;gap:.3rem;justify-content:center;margin:.55rem 0 .6rem;flex-wrap:wrap;}
+.dot{width:10px;height:10px;border-radius:50%;background:#d8d4c8;transition:background .25s,transform .25s;}
+.dot.active{background:var(--yellow);transform:scale(1.25);}
+.dot.done{background:var(--day-dark);}
+.chips{display:flex;gap:.45rem;justify-content:center;margin-bottom:.9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+.step-title{margin:0 1.2rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  font-weight:800;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.05em;}
+
+.obs-table{margin:0 1.2rem 1.1rem;width:calc(100% - 2.4rem);border-collapse:collapse;
+  font-size:.88rem;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);overflow:hidden;}
+.obs-table th{background:var(--day-dark);color:#fff;padding:.55rem .7rem;font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.04em;font-family:'JetBrains Mono',monospace;}
+.obs-table td{padding:.55rem .7rem;border-top:1px solid var(--day-border);background:var(--surface2);}
+.obs-table td.fut{color:#8a5600;font-weight:700;}
+.obs-table td.cond{color:var(--day-dark2);font-weight:700;}
+
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin:0 1.2rem .4rem;letter-spacing:.05em;}
+.q-phrase{margin:0 1.2rem .7rem;font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+  line-height:1.85;padding:.75rem 1rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);font-style:italic;}
+.opts-col{margin:0 1.2rem;display:flex;flex-direction:column;gap:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.5rem;word-break:break-word;line-height:1.5;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;
+  color:#2f5c15!important;animation:glowOk .5s ease;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;
+  color:var(--err-dark)!important;animation:wrongShake .35s ease;}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(95,168,47,.55);}100%{box-shadow:0 0 0 10px rgba(95,168,47,0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+
+/* toggle multi-select */
+.toggle-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;margin-bottom:.4rem;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.6rem;word-break:break-word;line-height:1.5;width:100%;}
+.toggle-btn .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--day-border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;}
+.toggle-btn.sel{background:var(--day-light);border-color:var(--day-dark);}
+.toggle-btn.sel .chk{background:var(--day-dark);border-color:var(--day-dark);}
+.toggle-btn.sel .chk::after{content:'✓';}
+.toggle-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;}
+.toggle-btn.correct .chk{background:#5fa82f!important;border-color:#5fa82f!important;}
+.toggle-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;}
+.toggle-btn.wrong .chk{background:var(--err)!important;border-color:var(--err)!important;}
+.toggle-btn:disabled{cursor:default;}
+
+/* dropdown maison */
+.dd{position:relative;width:100%;margin-bottom:.6rem;}
+.dd-trigger{width:100%;min-height:3rem;border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  background:var(--surface);font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);
+  color:var(--text);padding:.6rem .9rem;cursor:pointer;text-align:left;white-space:normal;
+  line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:.6rem;}
+.dd-trigger .dd-placeholder{color:var(--muted);}
+.dd-trigger .dd-arrow{flex-shrink:0;font-size:.8rem;color:var(--day-dark2);transition:transform .15s;}
+.dd-trigger.open .dd-arrow{transform:rotate(180deg);}
+.dd-trigger.correct{border-color:#5fa82f;background:#eaf7e2;color:#2f5c15;}
+.dd-trigger.wrong{border-color:var(--err);background:var(--err-light);color:var(--err-dark);}
+.dd-trigger:disabled{cursor:default;opacity:1;}
+.dd-list{display:none;margin-top:.4rem;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  overflow:hidden;background:var(--surface);}
+.dd-list.open{display:block;}
+.dd-option{display:block;width:100%;text-align:left;white-space:normal;line-height:1.5;
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);color:var(--text);
+  background:var(--surface);border:none;border-top:1px solid var(--border);
+  padding:.6rem .9rem;min-height:44px;cursor:pointer;}
+.dd-option:first-child{border-top:none;}
+.dd-option:hover{background:var(--day-light);}
+
+.blank-item{margin:0 1.2rem 1.1rem;padding:1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.blank-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.mvt-item{margin:0 1.2rem 1rem;padding:.9rem 1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.mvt-excerpt{font-size:.95rem;font-style:italic;color:var(--day-dark2);line-height:1.6;margin-bottom:.6rem;}
+
+.btn-verify-mvt{display:block;margin-top:.7rem;background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.7rem 1.4rem;min-height:2.8rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-verify-mvt:hover:not(:disabled){background:#0d3a4a;}
+.btn-verify-mvt:disabled{opacity:.35;cursor:default;}
+.btn-verify{display:block;margin:0 1.2rem;background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.8rem 1.6rem;min-height:3rem;cursor:pointer;width:calc(100% - 2.4rem);}
+.btn-verify:hover:not(:disabled){background:#0d3a4a;}
+.btn-verify:disabled{opacity:.4;cursor:default;}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 1.2rem 0;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.inline{margin:.6rem 0 0;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+
+.retiens-box{display:none;margin:0 1.2rem 1rem;background:var(--day-light);
+  border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.85rem 1rem;
+  font-size:.9rem;color:var(--day-dark2);font-weight:700;line-height:1.6;}
+.retiens-box.show{display:block;animation:fadeIn .4s ease;}
+.retiens-box .lbl{display:block;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem;color:var(--day-dark2);}
+.retiens-box ul{margin:.3rem 0 0 1.2rem;}
+.retiens-box li{margin-bottom:.2rem;font-weight:600;}
+
+.nav-row{padding:.9rem 1.2rem 0;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#0d3a4a;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--yellow),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1.1rem;}
+.recap-list div{padding:.15rem 0;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#0d3a4a;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 6 · Jour 4</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Le conditionnel présent</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 10 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="dots" id="dots"></div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">10</span></span>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Activité 1</span>
+    <span class="part-label">Observe, compare et déduis</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="part-consigne">Retrouve la règle de formation du conditionnel présent.</div>
+
+  <div class="step-title">Étape 1 — Observe</div>
+  <table class="obs-table">
+    <tr><th>Futur simple</th><th>Conditionnel présent</th></tr>
+    <tr><td class="fut">Je prendrai la parole.</td><td class="cond">Je prendrais la parole.</td></tr>
+    <tr><td class="fut">Tu viendras demain.</td><td class="cond">Tu viendrais demain.</td></tr>
+    <tr><td class="fut">Nous serons présents.</td><td class="cond">Nous serions présents.</td></tr>
+    <tr><td class="fut">Vous aurez le temps.</td><td class="cond">Vous auriez le temps.</td></tr>
+    <tr><td class="fut">Ils feront un effort.</td><td class="cond">Ils feraient un effort.</td></tr>
+  </table>
+
+  <div class="step-title">Étape 2 — Choisis la bonne réponse</div>
+  <div id="listA"></div>
+  <div class="retiens-box" id="retiensA">
+    <span class="lbl">💡 Je retiens</span>
+    Conditionnel présent = radical du futur + terminaisons de l'imparfait.
+  </div>
+</div>
+
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Activité 2</span>
+    <span class="part-label">Analyse du verbe</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+  <div class="part-consigne">Lis les phrases suivantes, puis réponds aux questions.</div>
+  <div class="mvt-item">
+    <div class="mvt-excerpt">
+      <strong>A.</strong> Si j'avais beaucoup de vacances, je voyagerais plus souvent.<br>
+      <strong>B.</strong> Tu pourrais fermer la fenêtre, s'il te plaît&nbsp;?<br>
+      <strong>C.</strong> Selon plusieurs témoins, l'incendie serait parti du garage.<br>
+      <strong>D.</strong> Nous partirons dès que tout sera prêt.
+    </div>
+  </div>
+  <div id="listB"></div>
+  <div class="retiens-box" id="retiensB">
+    <span class="lbl">💡 À retenir</span>
+    Le conditionnel présent peut servir à&nbsp;:
+    <ul>
+      <li>exprimer une hypothèse&nbsp;;</li>
+      <li>donner un conseil ou formuler une demande polie&nbsp;;</li>
+      <li>rapporter une information non confirmée, notamment dans les médias.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 10 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="recap-list">
+      <div>Activité 1 (règle) : <span id="r-sA"></span></div>
+      <div>Activité 2 (analyse) : <span id="r-sB"></span></div>
+    </div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+function closeAllDD(){
+  document.querySelectorAll('.dd-trigger.open').forEach(function(t){t.classList.remove('open');});
+  document.querySelectorAll('.dd-list.open').forEach(function(l){l.classList.remove('open');});
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest || !e.target.closest('.dd')) closeAllDD();
+});
+
+var scA=0,errA=0,scB=0,errB=0;
+var TOTAL=10;
+
+/* ══ ACTIVITÉ 1 : Q1 / Q2 (QCM à feedback individualisé) + Q3 (2 blancs) ══ */
+var Q1OPTS=[
+ {text:"différent de celui du futur simple.",correct:false,
+  title:"❌ Différent de celui du futur simple",
+  body:"Compare prendrai / prendrais ou serons / serions\u00a0: le radical est exactement le même."},
+ {text:"identique à celui du futur simple.",correct:true,
+  title:"✅ Identique à celui du futur simple",
+  body:"Exact\u00a0! Tu viens d'identifier la première partie de la règle."},
+ {text:"identique à celui de l'imparfait.",correct:false,
+  title:"❌ Identique à celui de l'imparfait",
+  body:"Observe les verbes être ou avoir\u00a0: le radical n'est pas celui de l'imparfait (étais, avais), mais celui du futur (ser-, aur-)."}
+];
+var Q2OPTS=[
+ {text:"du présent.",correct:false,
+  title:"❌ Du présent",
+  body:"Les terminaisons du présent sont différentes (-e, -es, -ons…)."},
+ {text:"de l'imparfait.",correct:true,
+  title:"✅ De l'imparfait",
+  body:"Bravo\u00a0! Les terminaisons sont -ais, -ais, -ait, -ions, -iez, -aient."},
+ {text:"du futur simple.",correct:false,
+  title:"❌ Du futur simple",
+  body:"Compare je prendrai et je prendrais\u00a0: seule la terminaison change."}
+];
+
+var doneA={q1:false,q2:false,b1:false,b2:false};
+
+function buildA(){
+  scA=0;errA=0;doneA={q1:false,q2:false,b1:false,b2:false};
+  $('retiensA').classList.remove('show');
+  var list=$('listA');list.innerHTML='';
+
+  function buildQCM(num,label,opts,onDone){
+    var order=shuffleArr(opts.map(function(o,i){return {o:o,i:i};}));
+    var qn=document.createElement('div');qn.className='q-num';qn.textContent=num;
+    list.appendChild(qn);
+    var ph=document.createElement('div');ph.className='q-phrase';ph.textContent=label;
+    list.appendChild(ph);
+    var col=document.createElement('div');col.className='opts-col';
+    var letters=['A','B','C'];var answered=false;
+    order.forEach(function(o,i){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=letters[i];
+      var sp=document.createElement('span');sp.textContent=o.o.text;
+      btn.appendChild(lt);btn.appendChild(sp);
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        Array.prototype.forEach.call(col.children,function(b){b.disabled=true;});
+        btn.classList.add(o.o.correct?'correct':'wrong');
+        flashIcon(o.o.correct);
+        if(o.o.correct){scA++;beepOk();}else{errA++;beepErr();}
+        var fb=document.createElement('div');fb.className='fb-box inline show '+(o.o.correct?'ok':'ko');
+        fb.innerHTML='<span class="fb-titre">'+o.o.title+'</span>'+o.o.body;
+        col.parentNode.insertBefore(fb,col.nextSibling);
+        $('spA').textContent='Score\u00a0: '+scA+' / 4';
+        updateGlobal();
+        onDone();
+      });
+      col.appendChild(btn);
+    });
+    list.appendChild(col);
+  }
+
+  buildQCM('Question 1','Le radical des verbes au conditionnel présent est…',Q1OPTS,function(){doneA.q1=true;checkStep2();});
+  buildQCM('Question 2','Les terminaisons du conditionnel présent sont celles…',Q2OPTS,function(){doneA.q2=true;checkStep2();});
+
+  var q3div=document.createElement('div');q3div.className='blank-item';
+  var q3lbl=document.createElement('div');q3lbl.className='blank-lbl';q3lbl.textContent='Question 3 — Complète la règle';
+  var q3ph=document.createElement('div');q3ph.className='q-phrase';q3ph.style.margin='0 0 .8rem';
+  q3ph.textContent="Le conditionnel présent se forme avec le radical du __________ auquel on ajoute les terminaisons de l'__________.";
+  q3div.appendChild(q3lbl);q3div.appendChild(q3ph);
+
+  function buildBlankDD(placeholderLbl,correctVal,options){
+    var dd=document.createElement('div');dd.className='dd';
+    var trigger=document.createElement('button');trigger.type='button';trigger.className='dd-trigger';
+    var trigTxt=document.createElement('span');trigTxt.className='dd-placeholder';trigTxt.textContent=placeholderLbl;
+    var trigArrow=document.createElement('span');trigArrow.className='dd-arrow';trigArrow.textContent='▾';
+    trigger.appendChild(trigTxt);trigger.appendChild(trigArrow);
+    var ddList=document.createElement('div');ddList.className='dd-list';
+    var selectedVal=null;
+    shuffleArr(options.slice()).forEach(function(txt){
+      var optBtn=document.createElement('button');optBtn.type='button';optBtn.className='dd-option';
+      optBtn.textContent=txt;
+      optBtn.addEventListener('click',function(ev){
+        ev.stopPropagation();selectedVal=txt;
+        trigTxt.textContent=txt;trigTxt.classList.remove('dd-placeholder');
+        closeAllDD();verifBtn.disabled=false;
+      });
+      ddList.appendChild(optBtn);
+    });
+    trigger.addEventListener('click',function(ev){
+      ev.stopPropagation();if(trigger.disabled)return;
+      var willOpen=!ddList.classList.contains('open');
+      closeAllDD();
+      if(willOpen){ddList.classList.add('open');trigger.classList.add('open');}
+    });
+    dd.appendChild(trigger);dd.appendChild(ddList);
+    var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-verify-mvt';
+    verifBtn.textContent='Vérifier';verifBtn.disabled=true;
+    var fb=document.createElement('div');fb.className='fb-box';
+    var wrap=document.createElement('div');
+    wrap.appendChild(dd);wrap.appendChild(verifBtn);wrap.appendChild(fb);
+    return {wrap:wrap,trigger:trigger,verifBtn:verifBtn,fb:fb,getVal:function(){return selectedVal;},correctVal:correctVal};
+  }
+
+  var blank1=buildBlankDD('— 1er blanc —','futur simple',['futur simple','imparfait','présent']);
+  var blank2=buildBlankDD('— 2e blanc —','imparfait',['imparfait','futur simple','présent']);
+  q3div.appendChild(blank1.wrap);q3div.appendChild(blank2.wrap);
+  list.appendChild(q3div);
+
+  [{b:blank1,key:'b1',fbOk:"Exact\u00a0: le radical vient du <span class=\"hl-ok\">futur simple</span>."},
+   {b:blank2,key:'b2',fbOk:"Exact\u00a0: les terminaisons viennent de l'<span class=\"hl-ok\">imparfait</span>."}].forEach(function(pair){
+    var locked=false;
+    pair.b.verifBtn.addEventListener('click',function(){
+      if(locked||pair.b.getVal()===null)return;
+      locked=true;closeAllDD();pair.b.trigger.disabled=true;
+      var ok=(pair.b.getVal()===pair.b.correctVal);
+      pair.b.trigger.classList.add(ok?'correct':'wrong');
+      if(ok){scA++;}else{errA++;}
+      flashIcon(ok);if(ok)beepOk();else beepErr();
+      pair.b.fb.classList.add('show',ok?'ok':'ko');
+      pair.b.fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne réponse.')+'</span>'+pair.fbOk;
+      pair.b.verifBtn.style.display='none';
+      $('spA').textContent='Score\u00a0: '+scA+' / 4';
+      updateGlobal();
+      doneA[pair.key]=true;checkStep2();
+    });
+  });
+}
+
+function checkStep2(){
+  if(doneA.q1&&doneA.q2&&doneA.b1&&doneA.b2){
+    $('retiensA').classList.add('show');
+    var nav=document.createElement('div');nav.className='nav-row';
+    var next=document.createElement('button');next.className='btn-next';next.textContent='Activité 2 →';
+    next.addEventListener('click',function(){
+      $('cardB').classList.remove('locked');
+      buildB();
+      var cb=$('cardB');if(cb)cb.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    nav.appendChild(next);$('listA').appendChild(nav);
+  }
+}
+
+/* ══ ACTIVITÉ 2 ══ */
+var PHRASES={
+ A:"Si j'avais beaucoup de vacances, je voyagerais plus souvent.",
+ B:"Tu pourrais fermer la fenêtre, s'il te plaît\u00a0?",
+ C:"Selon plusieurs témoins, l'incendie serait parti du garage.",
+ D:"Nous partirons dès que tout sera prêt."
+};
+var doneB={q1:false,q2:false,q3:false};
+
+function buildB(){
+  scB=0;errB=0;doneB={q1:false,q2:false,q3:false};
+  $('retiensB').classList.remove('show');
+  var list=$('listB');list.innerHTML='';
+
+  /* Q1 — multi-select */
+  var q1div=document.createElement('div');q1div.className='q-item';
+  var q1num=document.createElement('div');q1num.className='q-num';q1num.textContent='Question 1';
+  var q1ph=document.createElement('div');q1ph.className='q-phrase';
+  q1ph.textContent='Dans quelles phrases le verbe est-il conjugué au conditionnel présent\u00a0? (sélectionne toutes les bonnes réponses)';
+  q1div.appendChild(q1num);q1div.appendChild(q1ph);
+  var q1col=document.createElement('div');q1col.className='opts-col';
+  var selected={};
+  ['A','B','C','D'].forEach(function(k){
+    var btn=document.createElement('button');btn.type='button';btn.className='toggle-btn';
+    var chk=document.createElement('span');chk.className='chk';
+    var sp=document.createElement('span');sp.textContent=k+'. '+PHRASES[k];
+    btn.appendChild(chk);btn.appendChild(sp);
+    btn.addEventListener('click',function(){
+      if(btn.disabled)return;
+      selected[k]=!selected[k];
+      btn.classList.toggle('sel',selected[k]);
+    });
+    q1col.appendChild(btn);
+  });
+  q1div.appendChild(q1col);
+  var q1verif=document.createElement('button');q1verif.type='button';q1verif.className='btn-verify-mvt';
+  q1verif.textContent='Vérifier';
+  q1verif.style.margin='.8rem 0 0 1.2rem';
+  q1div.appendChild(q1verif);
+  var q1fb=document.createElement('div');q1fb.className='fb-box';
+  q1div.appendChild(q1fb);
+  list.appendChild(q1div);
+
+  var lockedQ1=false;
+  q1verif.addEventListener('click',function(){
+    if(lockedQ1)return;lockedQ1=true;
+    Array.prototype.forEach.call(q1col.children,function(b){b.disabled=true;});
+    var correctSet={A:true,B:true,C:true,D:false};
+    var ok=['A','B','C','D'].every(function(k){return !!selected[k]===correctSet[k];});
+    Array.prototype.forEach.call(q1col.children,function(b,i){
+      var k=['A','B','C','D'][i];
+      var cls=correctSet[k]?'correct':(selected[k]?'wrong':'');
+      if(cls)b.classList.add(cls);
+    });
+    if(ok){scB++;beepOk();}else{errB++;beepErr();}
+    flashIcon(ok);
+    q1fb.classList.add('show',ok?'ok':'ko');
+    q1fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas exactement ça.')+'</span>Les verbes au conditionnel présent sont\u00a0: <span class="hl-ok">voyagerais</span>\u00a0; <span class="hl-ok">pourrais</span>\u00a0; <span class="hl-ok">serait</span> (phrases A, B, C). La phrase D est au futur simple.';
+    q1verif.style.display='none';
+    $('spB').textContent='Score\u00a0: '+scB+' / 6';
+    updateGlobal();
+    doneB.q1=true;checkStep2B();
+  });
+
+  /* Q2 — association (4 menus déroulants + 1 bouton Vérifier) */
+  var q2div=document.createElement('div');q2div.className='q-item';
+  var q2num=document.createElement('div');q2num.className='q-num';q2num.textContent='Question 2';
+  var q2ph=document.createElement('div');q2ph.className='q-phrase';
+  q2ph.textContent='Associe chaque emploi à la bonne phrase.';
+  q2div.appendChild(q2num);q2div.appendChild(q2ph);
+
+  var EMPLOIS=[
+    {label:'Exprimer une hypothèse.',correct:'A'},
+    {label:'Formuler une demande polie.',correct:'B'},
+    {label:'Rapporter une information incertaine.',correct:'C'},
+    {label:'Annoncer un fait futur.',correct:'D'}
+  ];
+  var ddItems=[];
+  EMPLOIS.forEach(function(em){
+    var mvt=document.createElement('div');mvt.className='mvt-item';
+    var lbl=document.createElement('div');lbl.className='blank-lbl';lbl.textContent=em.label;
+    mvt.appendChild(lbl);
+    var dd=document.createElement('div');dd.className='dd';
+    var trigger=document.createElement('button');trigger.type='button';trigger.className='dd-trigger';
+    var trigTxt=document.createElement('span');trigTxt.className='dd-placeholder';trigTxt.textContent='— Choisis une phrase —';
+    var trigArrow=document.createElement('span');trigArrow.className='dd-arrow';trigArrow.textContent='▾';
+    trigger.appendChild(trigTxt);trigger.appendChild(trigArrow);
+    var ddList=document.createElement('div');ddList.className='dd-list';
+    var selectedVal=null;
+    shuffleArr(['A','B','C','D']).forEach(function(k){
+      var optBtn=document.createElement('button');optBtn.type='button';optBtn.className='dd-option';
+      optBtn.textContent=k+'. '+PHRASES[k];
+      optBtn.addEventListener('click',function(ev){
+        ev.stopPropagation();selectedVal=k;
+        trigTxt.textContent=k+'. '+PHRASES[k];trigTxt.classList.remove('dd-placeholder');
+        closeAllDD();
+      });
+      ddList.appendChild(optBtn);
+    });
+    trigger.addEventListener('click',function(ev){
+      ev.stopPropagation();if(trigger.disabled)return;
+      var willOpen=!ddList.classList.contains('open');
+      closeAllDD();
+      if(willOpen){ddList.classList.add('open');trigger.classList.add('open');}
+    });
+    dd.appendChild(trigger);dd.appendChild(ddList);
+    var fb=document.createElement('div');fb.className='fb-box';
+    mvt.appendChild(dd);mvt.appendChild(fb);
+    q2div.appendChild(mvt);
+    ddItems.push({trigger:trigger,getVal:function(){return selectedVal;},correct:em.correct,fb:fb,label:em.label});
+  });
+  var q2verif=document.createElement('button');q2verif.type='button';q2verif.className='btn-verify-mvt';
+  q2verif.textContent='Vérifier mes associations';
+  q2div.appendChild(q2verif);
+  list.appendChild(q2div);
+
+  var lockedQ2=false;
+  q2verif.addEventListener('click',function(){
+    if(lockedQ2)return;
+    var allFilled=ddItems.every(function(it){return it.getVal()!==null;});
+    if(!allFilled)return;
+    lockedQ2=true;closeAllDD();
+    ddItems.forEach(function(it){it.trigger.disabled=true;});
+    var allOk=true;
+    ddItems.forEach(function(it){
+      var ok=(it.getVal()===it.correct);
+      if(!ok)allOk=false;
+      it.trigger.classList.add(ok?'correct':'wrong');
+      if(ok){scB++;}else{errB++;}
+      it.fb.classList.add('show',ok?'ok':'ko');
+      it.fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne association.')+'</span>« '+it.label+' » correspond à la phrase <span class="hl-ok">'+it.correct+'</span>.';
+    });
+    flashIcon(allOk);if(allOk)beepOk();else beepErr();
+    q2verif.style.display='none';
+    $('spB').textContent='Score\u00a0: '+scB+' / 6';
+    updateGlobal();
+    doneB.q2=true;checkStep2B();
+  });
+
+  /* Q3 — QCM identifier phrase D */
+  var q3div=document.createElement('div');q3div.className='q-item';
+  var q3num=document.createElement('div');q3num.className='q-num';q3num.textContent='Question 3';
+  var q3ph=document.createElement('div');q3ph.className='q-phrase';
+  q3ph.textContent='Quelle phrase n\u2019est pas au conditionnel\u00a0?';
+  q3div.appendChild(q3num);q3div.appendChild(q3ph);
+  var q3col=document.createElement('div');q3col.className='opts-col';
+  var answeredQ3=false;
+  shuffleArr(['A','B','C','D']).forEach(function(k,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=['A','B','C','D'][i];
+    var sp=document.createElement('span');sp.textContent=k+'. '+PHRASES[k];
+    btn.appendChild(lt);btn.appendChild(sp);
+    btn.addEventListener('click',function(){
+      if(answeredQ3)return;answeredQ3=true;
+      Array.prototype.forEach.call(q3col.children,function(b){b.disabled=true;});
+      var ok=(k==='D');
+      btn.classList.add(ok?'correct':'wrong');
+      flashIcon(ok);
+      if(ok){scB++;beepOk();}else{errB++;beepErr();}
+      var fb=document.createElement('div');fb.className='fb-box inline show '+(ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne réponse.')+'</span>La phrase <span class="hl-ok">D</span> n\u2019est pas au conditionnel. Le verbe <em>partirons</em> est au futur simple\u00a0: il annonce une action qui se réalisera dans l\u2019avenir.';
+      q3div.appendChild(fb);
+      $('spB').textContent='Score\u00a0: '+scB+' / 6';
+      updateGlobal();
+      doneB.q3=true;checkStep2B();
+    });
+    q3col.appendChild(btn);
+  });
+  q3div.appendChild(q3col);
+  list.appendChild(q3div);
+}
+
+function checkStep2B(){
+  if(doneB.q1&&doneB.q2&&doneB.q3){
+    $('retiensB').classList.add('show');
+    setTimeout(showResults,500);
+  }
+}
+
+/* ══ GLOBAL ══ */
+function buildDots(){
+  var d=$('dots');d.innerHTML='';
+  for(var i=0;i<TOTAL;i++){var s=document.createElement('div');s.className='dot';s.id='dot-'+i;d.appendChild(s);}
+}
+function updateGlobal(){
+  var ok=scA+scB,ko=errA+errB;
+  var pct=Math.round(ok/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=ok+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;$('cnt-rem').textContent=TOTAL-ok-ko;
+  for(var i=0;i<TOTAL;i++){
+    var el=$('dot-'+i);el.className='dot'+(i<ok?' done':(i===ok?' active':''));
+  }
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var tot=scA+scB;
+  $('r-score').textContent=tot;
+  $('r-sA').textContent=scA+'/4';$('r-sB').textContent=scB+'/6';
+  var s= tot<=2?1: tot<=4?2: tot<=6?3: tot<=8?4:5;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg;
+  if(tot>=9)msg='Excellent\u00a0! Tu maîtrises la formation et les emplois du conditionnel présent.';
+  else if(tot>=7)msg='Très bon travail, encore quelques nuances à revoir.';
+  else if(tot>=4)msg='Bon travail global. Reprends l\u2019activité la moins réussie.';
+  else msg='Reprends la règle du conditionnel présent avant de continuer.';
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  beepFinal(tot>=7);
+  if(tot>=7){emojiRain(['📝','📖','✒️','🖋️','📜']);}
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardB').classList.add('locked');
+  buildDots();
+  buildA();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildDots();
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
