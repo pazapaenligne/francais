@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – L'écriture naturaliste – 3ème</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;
+      --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;max-width:800px;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;
+      box-shadow:0 2px 8px rgba(245,197,24,.45);color:#000;font-size:.78rem;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;
+      margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+
+    .main-layout{display:flex;gap:1.2rem;width:100%;max-width:900px;
+      align-items:flex-start;position:relative;z-index:1;}
+    .col-left{flex:1 1 0;min-width:0;}
+    .col-right{width:220px;flex-shrink:0;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;margin-bottom:1.2rem;}
+    .card:last-child{margin-bottom:0;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--pink));}
+    .card-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.9rem;}
+
+    /* ── Extrait ── */
+    .extrait{font-size:.97rem;line-height:1.85;color:var(--text);
+      border-left:3px solid var(--day-border);padding:.6rem .9rem;
+      background:var(--day-light);border-radius:0 8px 8px 0;font-style:italic;}
+    .extrait-source{font-size:.82rem;color:var(--muted);margin-top:.5rem;font-style:normal;text-align:right;}
+
+    /* ── Questions ── */
+    .q-block{margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid var(--border);}
+    .q-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.3rem;}
+    .q-consigne{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.7rem;}
+    .q-indice{font-size:.85rem;color:var(--muted);line-height:1.6;
+      padding:.4rem .7rem;background:#f5f5f0;border-radius:6px;margin-bottom:.7rem;display:none;}
+    .q-indice.show{display:block;}
+    .q-indice-btn{font-size:.82rem;color:var(--day-dark);background:none;border:1px solid var(--day-border);
+      border-radius:6px;padding:.3rem .7rem;cursor:pointer;margin-bottom:.6rem;font-weight:700;}
+    .q-indice-btn:hover{background:var(--day-light);}
+
+    textarea{width:100%;min-height:80px;border:2px solid var(--border);border-radius:8px;
+      padding:.6rem .8rem;font-family:Arial,sans-serif;font-size:.95rem;line-height:1.6;
+      color:var(--text);background:#fff;resize:vertical;transition:border .2s;}
+    textarea:focus{outline:none;border-color:var(--day-color);}
+    textarea:disabled{background:#f5f5f0;color:var(--muted);}
+
+    .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;
+      display:inline-flex;align-items:center;gap:.4rem;transition:transform .15s,box-shadow .15s;margin-top:.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn-val{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);margin-right:.5rem;}
+    .btn-val:hover{box-shadow:0 5px 18px var(--day-glow);}
+    .btn-corr{background:var(--bg);color:var(--text);border:2px solid var(--border);}
+    .btn-corr:hover{border-color:var(--day-color);}
+    .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+
+    .q-feedback{display:none;margin-top:.8rem;padding:.65rem .85rem;border-radius:8px;
+      font-size:.9rem;line-height:1.6;border-left:4px solid;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ok{background:rgba(141,198,63,.12);border-color:var(--green);color:#1a4a00;}
+    .q-feedback.ko{background:rgba(242,139,130,.1);border-color:var(--pink);color:#7a0000;}
+
+    .correction-box{display:none;margin-top:.8rem;padding:.65rem .85rem;border-radius:8px;
+      font-size:.9rem;line-height:1.6;background:var(--day-light);border-left:4px solid var(--day-border);}
+    .correction-box.show{display:block;}
+    .correction-box strong{color:var(--day-dark);}
+
+    /* ── Score final ── */
+    .score-card{display:none;text-align:center;}
+    .score-card.show{display:block;}
+    .score-pct{font-size:3rem;font-weight:900;color:var(--day-color);line-height:1;}
+    .score-sub{font-size:1rem;color:var(--muted);margin-top:.3rem;}
+    .score-msg{font-size:1rem;color:var(--text);margin-top:.8rem;font-weight:700;}
+    .score-recap{margin-top:1rem;width:100%;}
+    .recap-line{display:flex;justify-content:space-between;align-items:center;
+      padding:.4rem .6rem;border-radius:6px;font-size:.88rem;margin-bottom:.35rem;}
+    .recap-line.ok{background:rgba(141,198,63,.12);color:#1a4a00;}
+    .recap-line.ko{background:rgba(242,139,130,.1);color:#7a0000;}
+    .recap-badge{font-weight:700;font-size:.78rem;font-family:'JetBrains Mono',monospace;}
+
+    /* ── Référentiel ── */
+    .ref-item{margin-bottom:.65rem;font-size:.88rem;line-height:1.6;color:var(--text);}
+    .ref-item:last-child{margin-bottom:0;}
+    .ref-term{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);
+      display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.1rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .card{animation:fadeUp .4s ease both;}
+    @media(max-width:680px){.main-layout{flex-direction:column;}.col-right{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 1</div>
+  <h1>Je m&rsquo;entra&icirc;ne &middot; <span class="hl">L&rsquo;&eacute;criture naturaliste</span></h1>
+</header>
+
+<div class="main-layout">
+  <div class="col-left">
+
+    <!-- Extrait -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Extrait de r&eacute;f&eacute;rence</div>
+      <div class="extrait">
+        Gervaise &eacute;tait entr&eacute;e dans la blanchisserie depuis l&rsquo;aube. La vapeur grise montait des bassines, &eacute;paisse, collante, et les ouvri&egrave;res avan&ccedil;aient dans cette bu&eacute;e ti&egrave;de qui sentait le savon rance. Les murs noircis suintaient d&rsquo;humidit&eacute;. Devant la premi&egrave;re bassine, une femme aux doigts rougis par l&rsquo;eau chaude frottait sans rel&acirc;che, les &eacute;paules pli&eacute;es, les reins br&ucirc;lants. Par moments, les yeux lui piquaient&nbsp;; elle relevait la t&ecirc;te, aspirait l&rsquo;air charg&eacute; de vapeur, puis replongeait les bras dans l&rsquo;eau savonneuse. Les flaques savonneuses s&rsquo;&eacute;tendaient sur les dalles us&eacute;es, et on entendait le claquement sourd des sabots dans cette humidit&eacute; tenace.
+        <div class="extrait-source">&Eacute;mile Zola, <em>L&rsquo;Assommoir</em></div>
+      </div>
+    </div>
+
+    <!-- Questions -->
+    <div class="card" id="questionscard">
+      <div class="card-stripe"></div>
+      <div class="card-title">Questions</div>
+
+      <!-- Q1 -->
+      <div class="q-block" id="qblock0">
+        <div class="q-num">Question 1 &mdash; Observation des d&eacute;tails du lieu</div>
+        <div class="q-consigne">Rel&egrave;ve trois d&eacute;tails pr&eacute;cis dans l&rsquo;extrait qui d&eacute;crivent le lieu de la blanchisserie. Copie-les entre guillemets.</div>
+        <button class="q-indice-btn" onclick="toggleIndice(0)">&#128269; Voir l&rsquo;indice</button>
+        <div class="q-indice" id="indice0">Cherche des &eacute;l&eacute;ments visuels ou sensoriels qui &eacute;voquent l&rsquo;atmosph&egrave;re du lieu&nbsp;: l&rsquo;air, les murs, le sol&hellip;</div>
+        <textarea id="rep0" placeholder="Écris ta réponse ici…"></textarea>
+        <div><button class="btn btn-val" onclick="valider(0)">V&eacute;rifier</button><button class="btn btn-corr" onclick="voirCorrection(0)">Voir la correction</button></div>
+        <div class="q-feedback" id="fb0"></div>
+        <div class="correction-box" id="corr0">
+          <strong>Correction &mdash; exemples de d&eacute;tails attendus&nbsp;:</strong><br>
+          &laquo;&nbsp;vapeur grise&nbsp;&raquo; &mdash; &laquo;&nbsp;murs noircis&nbsp;&raquo; &mdash; &laquo;&nbsp;flaques savonneuses&nbsp;&raquo; &mdash; &laquo;&nbsp;sabots&nbsp;&raquo; &mdash; &laquo;&nbsp;humidit&eacute;&nbsp;&raquo; &mdash; &laquo;&nbsp;dalles us&eacute;es&nbsp;&raquo;<br><br>
+          3 de ces &eacute;l&eacute;ments suffisent. L&rsquo;important est qu&rsquo;ils soient cit&eacute;s entre guillemets et extraits du texte.
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-block" id="qblock1">
+        <div class="q-num">Question 2 &mdash; Souffrance et fatigue physique</div>
+        <div class="q-consigne">Identifie les expressions qui d&eacute;crivent la fatigue et la souffrance physique des ouvri&egrave;res. Rel&egrave;ve au moins trois exemples.</div>
+        <button class="q-indice-btn" onclick="toggleIndice(1)">&#128269; Voir l&rsquo;indice</button>
+        <div class="q-indice" id="indice1">Concentre-toi sur les parties du corps mentionn&eacute;es et les verbes qui expriment une douleur ou un effort.</div>
+        <textarea id="rep1" placeholder="Écris ta réponse ici…"></textarea>
+        <div><button class="btn btn-val" onclick="valider(1)">V&eacute;rifier</button><button class="btn btn-corr" onclick="voirCorrection(1)">Voir la correction</button></div>
+        <div class="q-feedback" id="fb1"></div>
+        <div class="correction-box" id="corr1">
+          <strong>Correction &mdash; expressions attendues&nbsp;:</strong><br>
+          &laquo;&nbsp;les &eacute;paules pli&eacute;es&nbsp;&raquo; &mdash; &laquo;&nbsp;les reins br&ucirc;lants&nbsp;&raquo; &mdash; &laquo;&nbsp;les yeux lui piquaient&nbsp;&raquo; &mdash; &laquo;&nbsp;doigts rougis&nbsp;&raquo; &mdash; &laquo;&nbsp;frottait sans rel&acirc;che&nbsp;&raquo;<br><br>
+          3 de ces expressions suffisent. Elles montrent toutes une forme de souffrance ou d&rsquo;effort physique intense.
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-block" id="qblock2">
+        <div class="q-num">Question 3 &mdash; Milieu social repr&eacute;sent&eacute;</div>
+        <div class="q-consigne">Quel milieu social ce texte repr&eacute;sente-t-il&nbsp;? Justifie ta r&eacute;ponse en citant deux indices pr&eacute;cis du texte.</div>
+        <button class="q-indice-btn" onclick="toggleIndice(2)">&#128269; Voir l&rsquo;indice</button>
+        <div class="q-indice" id="indice2">Quels mots te renseignent sur le m&eacute;tier et la classe sociale des personnages&nbsp;? Pense au lieu, aux v&ecirc;tements, au travail d&eacute;crit.</div>
+        <textarea id="rep2" placeholder="Écris ta réponse ici…" style="min-height:110px;"></textarea>
+        <div><button class="btn btn-val" onclick="valider(2)">V&eacute;rifier</button><button class="btn btn-corr" onclick="voirCorrection(2)">Voir la correction</button></div>
+        <div class="q-feedback" id="fb2"></div>
+        <div class="correction-box" id="corr2">
+          <strong>R&eacute;ponse mod&egrave;le&nbsp;:</strong><br>
+          Ce texte repr&eacute;sente un milieu ouvrier et populaire, avec une jeune travailleuse dans une blanchisserie.<br><br>
+          <strong>Indices attendus (2 parmi&nbsp;:)</strong><br>
+          &laquo;&nbsp;ouvri&egrave;res&nbsp;&raquo; &mdash; &laquo;&nbsp;sabots&nbsp;&raquo; &mdash; &laquo;&nbsp;blanchisserie&nbsp;&raquo; &mdash; le travail manuel d&eacute;crit (frotter, eau chaude&hellip;)
+        </div>
+      </div>
+    </div>
+
+    <!-- Score final -->
+    <div class="card score-card" id="scorecard">
+      <div class="card-stripe"></div>
+      <div class="card-title">Bilan</div>
+      <div class="score-pct" id="scorepct"></div>
+      <div class="score-sub">de r&eacute;ussite</div>
+      <div class="score-msg" id="scoremsg"></div>
+      <div class="score-recap" id="scorerecap"></div>
+    </div>
+
+  </div>
+  <div class="col-right">
+
+    <!-- Progression -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Progression</div>
+      <div id="prog" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.8rem;">
+        <div class="prog-line" id="prog0" style="display:flex;align-items:center;gap:.6rem;font-size:.88rem;color:var(--muted);">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-color);">Q1</span>
+          <span id="progbadge0" style="font-size:.75rem;font-family:'JetBrains Mono',monospace;">En attente</span>
+        </div>
+        <div class="prog-line" id="prog1" style="display:flex;align-items:center;gap:.6rem;font-size:.88rem;color:var(--muted);">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-color);">Q2</span>
+          <span id="progbadge1" style="font-size:.75rem;font-family:'JetBrains Mono',monospace;">En attente</span>
+        </div>
+        <div class="prog-line" id="prog2" style="display:flex;align-items:center;gap:.6rem;font-size:.88rem;color:var(--muted);">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-color);">Q3</span>
+          <span id="progbadge2" style="font-size:.75rem;font-family:'JetBrains Mono',monospace;">En attente</span>
+        </div>
+      </div>
+      <button class="btn btn-val" style="width:100%;justify-content:center;" onclick="showBilan()">Voir le bilan</button>
+    </div>
+
+    <!-- Référentiel -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">R&eacute;f&eacute;rentiel</div>
+      <div class="ref-item">
+        <span class="ref-term">Naturalisme</span>
+        Courant litt&eacute;raire du XIX<sup>e</sup>&nbsp;s. qui d&eacute;crit la r&eacute;alit&eacute; sociale avec pr&eacute;cision scientifique.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Champ lexical</span>
+        Ensemble de mots li&eacute;s &agrave; un m&ecirc;me th&egrave;me.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">D&eacute;tail r&eacute;aliste</span>
+        &Eacute;l&eacute;ment concret et pr&eacute;cis qui ancre le r&eacute;cit dans la r&eacute;alit&eacute;.
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Milieu social</span>
+        Groupe social auquel appartient un personnage (ouvrier, bourgeois&hellip;).
+      </div>
+      <div class="ref-item">
+        <span class="ref-term">Registre patho&shy;tique</span>
+        Ton qui cherche &agrave; &eacute;mouvoir face &agrave; la souffrance.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══ Mots-clés par question pour validation automatique ══ */
+var KEYS = [
+  /* Q1 — détails du lieu */
+  ['vapeur','murs noircis','flaques','sabots','humidité','dalles','bassine','buée'],
+  /* Q2 — souffrance physique */
+  ['épaules','reins','yeux','piquaient','rougis','relâche','brûlants','frottait'],
+  /* Q3 — milieu social */
+  ['ouvrier','ouvrières','blanchisserie','sabots','travail','populaire','manuel']
+];
+var SEUILS = [3, 3, 2]; /* nombre de mots-clés minimum */
+var results = [null, null, null]; /* null=non traité, true=ok, false=ko */
+
+function countMatches(rep, keys){
+  var r=rep.toLowerCase();
+  var found=0;
+  keys.forEach(function(k){if(r.indexOf(k.toLowerCase())!==-1)found++;});
+  return found;
+}
+
+function valider(idx){
+  var rep=document.getElementById('rep'+idx).value.trim();
+  if(!rep){alert('Écris ta réponse avant de vérifier.');return;}
+  var fb=document.getElementById('fb'+idx);
+  var found=countMatches(rep,KEYS[idx]);
+  var ok=found>=SEUILS[idx];
+  results[idx]=ok;
+  fb.className='q-feedback show '+(ok?'ok':'ko');
+  if(ok){
+    fb.textContent='Bon travail\u00a0! Tu as identifié les éléments essentiels. Tu peux consulter la correction pour compléter.';
+  } else {
+    var manque=SEUILS[idx]-found;
+    fb.textContent='Tu es sur la bonne voie, mais il manque encore '+(manque===1?'un élément':'quelques éléments')+'. Relis l\'extrait attentivement et complète ta réponse.';
+  }
+  document.getElementById('rep'+idx).disabled=true;
+  updateProg(idx,ok);
+}
+
+function voirCorrection(idx){
+  var corr=document.getElementById('corr'+idx);
+  corr.classList.toggle('show');
+}
+
+function toggleIndice(idx){
+  var ind=document.getElementById('indice'+idx);
+  ind.classList.toggle('show');
+}
+
+function updateProg(idx,ok){
+  var badge=document.getElementById('progbadge'+idx);
+  badge.textContent=ok?'Réussi':'À revoir';
+  badge.style.color=ok?'#1a4a00':'#8b0000';
+  badge.style.background=ok?'rgba(141,198,63,.15)':'rgba(242,139,130,.15)';
+  badge.style.padding='2px 6px';
+  badge.style.borderRadius='4px';
+}
+
+function showBilan(){
+  var done=results.filter(function(r){return r!==null;}).length;
+  if(done===0){alert('Traite au moins une question avant de voir le bilan.');return;}
+  var ok=results.filter(function(r){return r===true;}).length;
+  var total=results.filter(function(r){return r!==null;}).length;
+  var pct=Math.round((ok/3)*100);
+
+  document.getElementById('scorecard').classList.add('show');
+  document.getElementById('scorecard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('scorepct').textContent=pct+'%';
+
+  var msg='';
+  if(pct>=90)msg='Excellent\u00a0!';
+  else if(pct>=70)msg='Très bien\u00a0!';
+  else if(pct>=50)msg='Bien\u00a0!';
+  else msg='Continue\u00a0!';
+  document.getElementById('scoremsg').textContent=msg;
+
+  var recap=document.getElementById('scorerecap');
+  recap.innerHTML='';
+  ['Observation des détails du lieu','Souffrance et fatigue physique','Milieu social représenté'].forEach(function(label,i){
+    var r=results[i];
+    var div=document.createElement('div');
+    div.className='recap-line '+(r===true?'ok':r===false?'ko':'');
+    div.innerHTML='<span>Q'+(i+1)+' \u2013 '+label+'</span>'
+      +'<span class="recap-badge">'+(r===true?'Réussi':r===false?'À revoir':'Non traité')+'</span>';
+    recap.appendChild(div);
+  });
+}
+</script>
+</body>
+</html>
