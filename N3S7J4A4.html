@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S7 J4 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#3ab5d8;--day-color:#3ab5d8;--day-dark:#1a6e88;--day-dark2:#124f63;
+  --day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#f0fafd;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+.sub-title{margin:1rem 1.2rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  font-weight:800;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.05em;}
+.sub-title:first-of-type{margin-top:0;}
+
+.corpus-box{margin:0 1.2rem 1rem;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.9rem 1rem;font-size:.92rem;line-height:1.9;color:#333;}
+.corpus-box .lettre{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--day-dark2);margin-right:.3rem;}
+.corpus-box p{margin-bottom:.3rem;}
+
+.classif-card{margin:0 1.2rem 1rem;padding:.9rem 1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.classif-phrase{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;font-style:italic;color:var(--text);
+  line-height:1.7;margin-bottom:.6rem;}
+.classif-phrase .lettre{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--day-dark2);
+  font-style:normal;margin-right:.3rem;}
+.cat-btns{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;}
+.cat-btn{flex:1;min-width:130px;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;font-size:clamp(.88rem,2.4vw,.98rem);
+  font-weight:700;padding:.55rem .8rem;cursor:pointer;min-height:50px;text-align:center;
+  transition:background .12s,border-color .12s;}
+.cat-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.cat-btn.sel{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.cat-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;color:#2f5c15!important;}
+.cat-btn.correct-dim{background:#f2faee!important;border-color:#a8d98a!important;color:#5a8a3a!important;}
+.cat-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;color:var(--err-dark)!important;}
+.cat-btn:disabled{cursor:default;}
+.classif-explic{font-size:.85rem;display:none;line-height:1.6;padding:.6rem .8rem;
+  border-radius:var(--radius-sm);border-left:4px solid;margin-top:.4rem;}
+.classif-explic.show{display:block;background:var(--day-light);border-color:var(--day-dark);color:var(--day-dark2);}
+
+.opts-col{display:flex;flex-direction:column;gap:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.5rem;word-break:break-word;line-height:1.5;width:100%;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;
+  color:#2f5c15!important;animation:glowOk .5s ease;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;
+  color:var(--err-dark)!important;animation:wrongShake .35s ease;}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(95,168,47,.55);}100%{box-shadow:0 0 0 10px rgba(95,168,47,0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+
+.trans-item{margin:0 1.2rem 1.1rem;padding:1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.trans-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.trans-orig{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);line-height:1.85;
+  padding:.65rem .85rem;background:var(--day-light);border-left:4px solid var(--day-dark);
+  border-radius:var(--radius-sm);font-style:italic;margin-bottom:.5rem;}
+.trans-instr{font-size:.86rem;color:var(--day-dark2);font-weight:700;margin-bottom:.6rem;}
+.trans-input{width:100%;min-height:3rem;border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  background:var(--surface);font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);
+  color:var(--text);padding:.6rem .9rem;margin-bottom:.6rem;}
+textarea.trans-input{min-height:5rem;resize:vertical;line-height:1.5;font-family:Arial,sans-serif;}
+.trans-input:focus{outline:none;border-color:var(--day-dark);}
+.trans-input.correct{border-color:#5fa82f;background:#eaf7e2;}
+.trans-input.wrong{border-color:var(--err);background:var(--err-light);}
+.trans-input.mid{border-color:var(--orange);background:#fff5e0;}
+.trans-input:disabled{cursor:default;opacity:1;}
+
+.btn-verify-t{display:block;background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.7rem 1.4rem;min-height:2.8rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-verify-t:hover:not(:disabled){background:#0d3a4a;}
+.btn-verify-t:disabled{opacity:.35;cursor:default;}
+.btn-reset-q{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:none;border:1.5px solid var(--day-border);color:var(--day-dark2);border-radius:99px;
+  padding:.3rem .75rem;margin-top:.5rem;cursor:pointer;min-height:2rem;}
+.btn-reset-q:hover{background:var(--day-light);}
+.btn-mini{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:none;border:1.5px solid var(--day-border);color:var(--day-dark2);border-radius:99px;
+  padding:.3rem .75rem;cursor:pointer;min-height:2rem;margin-right:.5rem;}
+.btn-mini:hover{background:var(--day-light);}
+
+/* Q3 reorder */
+.seq-pool,.seq-target{margin:0 1.2rem .6rem;display:flex;gap:.5rem;flex-wrap:wrap;
+  min-height:56px;padding:.6rem;border-radius:var(--radius-sm);}
+.seq-pool{background:var(--surface2);border:1.5px dashed var(--border);}
+.seq-target{background:var(--day-light);border:1.5px solid var(--day-border);}
+.seq-chip{background:var(--surface);border:2px solid var(--day-border);border-radius:10px;
+  font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.1rem;color:var(--day-dark2);
+  min-width:42px;min-height:42px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:opacity .15s,transform .12s;}
+.seq-chip:hover{transform:translateY(-2px);}
+.seq-chip.correct{background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.seq-chip.wrong{background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.seq-chip.disabled{pointer-events:none;opacity:.9;}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 1.2rem 0;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.inline{margin:.6rem 0 0;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-box.show.mid{display:block;background:#fff5e0;border-color:var(--orange);color:#8a5600;}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+
+.corrige-box{margin:0 1.2rem 1rem;background:var(--day-light);border:1.5px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;font-size:.87rem;color:var(--day-dark2);line-height:1.7;}
+.corrige-box .lbl{display:block;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  text-transform:uppercase;font-weight:800;margin-bottom:.4rem;}
+
+.nav-row{padding:.9rem 1.2rem 0;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#0d3a4a;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--yellow),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1rem;max-height:220px;overflow-y:auto;}
+.recap-list div{padding:.15rem 0;}
+.synth-final{text-align:left;background:var(--day-light);border:1.5px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.87rem;color:var(--day-dark2);
+  line-height:1.65;margin-bottom:1.1rem;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#0d3a4a;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 7 · Jour 4</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Les temps du récit</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 22 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">22</span></span>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Activité 1 ⭐⭐</span>
+    <span class="part-label">Classer, ordonner, formuler une règle</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div style="margin:0 1.2rem .5rem;font-weight:800;font-size:1rem;color:var(--day-dark2);">Voici un texte dont les phrases ont été mélangées&nbsp;:</div>
+  <div class="corpus-box" id="corpusBox"></div>
+
+  <div id="q1Wrap">
+  <div class="sub-title">Question 1 — 🖱️ Classe chaque phrase par catégorie</div>
+  <div class="part-consigne" style="border-bottom:none;margin-bottom:0;">📋 Clique sur la catégorie qui correspond à chaque phrase. Toutes les phrases doivent être classées avant de valider.</div>
+  <div id="listQ1"></div>
+  <button class="btn-verify-t" id="btnVerifyQ1" style="margin:0 1.2rem 1rem;" disabled>Vérifier mon classement</button>
+  <div class="fb-box inline" id="fbQ1" style="margin:0 1.2rem 1rem;"></div>
+  <div id="q1Actions" style="display:none;margin:0 1.2rem 1rem;gap:.6rem;flex-wrap:wrap;">
+    <button class="btn-reset-q" id="btnResetQ1" style="margin-top:0;">↺ Recommencer cette question</button>
+    <button class="btn-next" id="btnNextQ1">Question suivante →</button>
+  </div>
+  </div>
+
+  <div id="q2Wrap" style="display:none;">
+  <div class="sub-title">Question 2 — ✍️ Bilan sur les temps employés</div>
+  <div id="listQ2"></div>
+  </div>
+
+  <div id="q3Wrap" style="display:none;">
+  <div class="sub-title">Question 3 — 🔢 Remets les phrases dans l'ordre logique</div>
+  <div class="part-consigne" style="border-bottom:none;margin-bottom:0;">🧩 Clique sur les lettres dans l'ordre logique pour reconstituer un récit cohérent.</div>
+  <div class="seq-pool" id="seqPool"></div>
+  <div class="seq-target" id="seqTarget"></div>
+  <div style="margin:0 1.2rem .8rem;">
+    <button class="btn-mini" id="btnSeqReset">↺ Réinitialiser</button>
+    <button class="btn-verify-t" id="btnVerifyQ3" style="display:inline-block;" disabled>Vérifier l'ordre</button>
+  </div>
+  <div class="fb-box inline" id="fbQ3" style="margin:0 1.2rem 1rem;"></div>
+  <div class="corrige-box" id="corrigeQ3" style="display:none;"></div>
+  <div id="q3Actions" style="display:none;margin:0 1.2rem 1rem;gap:.6rem;flex-wrap:wrap;">
+    <button class="btn-reset-q" id="btnResetQ3" style="margin-top:0;">↺ Recommencer cette question</button>
+    <button class="btn-next" id="btnNextQ3">Question suivante →</button>
+  </div>
+  </div>
+
+  <div id="q4Wrap" style="display:none;">
+  <div class="sub-title">Question 4 — 📐 Formule la règle</div>
+  <div id="listQ4"></div>
+  </div>
+</div>
+
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Activité 2 ⭐⭐⭐</span>
+    <span class="part-label">Transformer les temps, observer les effets</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+  <div class="corpus-box" id="refTextBox"></div>
+  <div id="listB"></div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 22 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <div class="synth-final">L'imparfait installe le décor et la durée. Le passé simple fait avancer l'action. Le plus-que-parfait marque l'antériorité. Le présent de narration donne de la vivacité. Le choix du temps, c'est le choix du rythme et du point de vue.</div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+function norm(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[’]/g,"'").replace(/\s+/g,' ').trim();
+}
+function containsAny(text,keywords){
+  var t=norm(text);
+  return keywords.some(function(k){return t.indexOf(norm(k))>=0;});
+}
+function countKeywords(text,keywords){
+  var t=norm(text);
+  return keywords.filter(function(k){return t.indexOf(norm(k))>=0;}).length;
+}
+
+var TOTAL=22,scGlobal=0,errGlobal=0,recapItems=[];
+function updateGlobal(){
+  var pct=Math.round(scGlobal/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scGlobal+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=scGlobal;$('cnt-ko').textContent=errGlobal;
+  $('cnt-rem').textContent=Math.max(0,TOTAL-scGlobal-errGlobal);
+}
+
+/* ══ CORPUS ══ */
+var CORPUS=[
+ {l:'A',t:"Depuis trois jours, la concierge avait remarqué des allées et venues inhabituelles.",cat:'anter',
+  explic:"Plus-que-parfait (avait remarqué)\u00a0: action passée avant les autres."},
+ {l:'E',t:"Elle ouvrit la porte cochère et aperçut le facteur.",cat:'action',
+  explic:"Passé simple (ouvrit, aperçut)\u00a0: enchaînement d'actions."},
+ {l:'B',t:"La cour sentait le charbon humide.",cat:'decor',
+  explic:"Imparfait (sentait)\u00a0: description de l'ambiance."},
+ {l:'C',t:"À huit heures, Julie descendit l'escalier en courant.",cat:'action',
+  explic:"Passé simple (descendit)\u00a0: action ponctuelle au premier plan."},
+ {l:'D',t:"Les voisins parlaient à voix basse.",cat:'decor',
+  explic:"Imparfait (parlaient)\u00a0: ambiance, action de fond."},
+ {l:'F',t:"Il lui tendit une lettre épaisse, déjà tachée de pluie.",cat:'action',
+  explic:"Passé simple (tendit)\u00a0: action qui fait avancer le récit."}
+];
+var CATS=[{v:'decor',l:'Décor / arrière-plan'},{v:'action',l:'Action principale'},{v:'anter',l:'Fait antérieur'}];
+
+function buildCorpus(){
+  var box=$('corpusBox');box.innerHTML='';
+  CORPUS.forEach(function(c){
+    var p=document.createElement('p');
+    p.innerHTML='<span class="lettre">'+c.l+'.</span>'+c.t;
+    box.appendChild(p);
+  });
+}
+
+/* ══ Q1 — CLASSEMENT ══ */
+var q1Choices={};
+function buildQ1(){
+  var list=$('listQ1');list.innerHTML='';list.style.display='';q1Choices={};
+  $('btnVerifyQ1').disabled=true;$('btnVerifyQ1').style.display='';
+  $('fbQ1').className='fb-box inline';$('fbQ1').innerHTML='';
+  $('q1Actions').style.display='none';
+  CORPUS.forEach(function(c){
+    var card=document.createElement('div');card.className='classif-card';
+    var ph=document.createElement('div');ph.className='classif-phrase';
+    ph.innerHTML='<span class="lettre">'+c.l+'.</span>'+c.t;
+    card.appendChild(ph);
+    var row=document.createElement('div');row.className='cat-btns';
+    CATS.forEach(function(cat){
+      var btn=document.createElement('button');btn.type='button';btn.className='cat-btn';btn.textContent=cat.l;
+      btn.addEventListener('click',function(){
+        if(btn.disabled)return;
+        Array.prototype.forEach.call(row.children,function(b){b.classList.remove('sel');});
+        btn.classList.add('sel');
+        q1Choices[c.l]=cat.v;
+        $('btnVerifyQ1').disabled=(Object.keys(q1Choices).length<CORPUS.length);
+      });
+      row.appendChild(btn);
+    });
+    card.appendChild(row);
+    var explic=document.createElement('div');explic.className='classif-explic';explic.textContent=c.explic;
+    card.appendChild(explic);
+    list.appendChild(card);
+  });
+}
+var q1Locked=false;
+$('btnVerifyQ1').addEventListener('click',function(){
+  if(q1Locked||Object.keys(q1Choices).length<CORPUS.length)return;
+  q1Locked=true;
+  var okCount=0;
+  var cards=$('listQ1').children;
+  Array.prototype.forEach.call(cards,function(card,idx){
+    var c=CORPUS[idx];
+    var btns=card.querySelectorAll('.cat-btn');
+    Array.prototype.forEach.call(btns,function(b,bi){
+      b.disabled=true;
+      var isCorrectCat=(CATS[bi].v===c.cat);
+      var wasChosen=b.classList.contains('sel');
+      if(isCorrectCat&&wasChosen)b.classList.add('correct');
+      else if(isCorrectCat&&!wasChosen)b.classList.add('correct-dim');
+      else if(!isCorrectCat&&wasChosen)b.classList.add('wrong');
+    });
+    card.querySelector('.classif-explic').classList.add('show');
+    if(q1Choices[c.l]===c.cat)okCount++;
+  });
+  flashIcon(okCount>=5);
+  if(okCount>=5)beepOk();else beepErr();
+  scGlobal+=okCount;errGlobal+=(CORPUS.length-okCount);
+  var msg = okCount>=5 ? "Excellent\u00a0! "+okCount+"/6 — tu distingues bien décor, action et antériorité."
+    : okCount>=3 ? okCount+"/6. Quelques catégories à revoir — consulte le corrigé."
+    : okCount+"/6. Relis les explications\u00a0: chaque temps joue un rôle précis.";
+  $('fbQ1').classList.add('show', okCount>=5?'ok':(okCount>=3?'mid':'ko'));
+  $('fbQ1').innerHTML='<span class="fb-titre">Score\u00a0: '+okCount+' / 6</span>'+msg;
+  $('spA').textContent='Q1\u00a0: '+okCount+' / 6';
+  updateGlobal();
+  recapItems.push({l:'A1 · Q1 — Classement',s:okCount>=5?'Réussi':(okCount>=3?'Partiel':'À revoir')});
+  $('btnVerifyQ1').style.display='none';
+  $('q1Actions').style.display='flex';
+});
+$('btnResetQ1').addEventListener('click',function(){
+  if(!q1Locked)return;
+  var cards=$('listQ1').children;
+  var okCount=0;
+  Array.prototype.forEach.call(cards,function(card,idx){
+    if(q1Choices[CORPUS[idx].l]===CORPUS[idx].cat)okCount++;
+  });
+  scGlobal-=okCount;errGlobal-=(CORPUS.length-okCount);
+  recapItems=recapItems.filter(function(r){return r.l!=='A1 · Q1 — Classement';});
+  q1Locked=false;
+  buildQ1();
+  updateGlobal();
+  $('spA').textContent='';
+});
+$('btnNextQ1').addEventListener('click',function(){
+  $('q1Wrap').style.display='none';
+  $('q2Wrap').style.display='';
+});
+
+/* ══ Q2 — BILAN ══ */
+var KEYWORDS_Q2=['imparfait','passé simple','plus-que-parfait','décor','action','antérieur','ambiance','fond','premier plan'];
+function scoreQ2(text){
+  var n=countKeywords(text,KEYWORDS_Q2);
+  return (n>=3&&text.trim().length>30)?2:(n>=1?1:0);
+}
+function buildFreeQ(container,opts){
+  // opts: {label, promptHTML, instr, placeholder, scoreFn (text->pts), maxPts, feedbackFor(pts), corrigeHTML, recapLabel, textarea, onNext, nextLabel}
+  var div=document.createElement('div');div.className='trans-item';
+  var num=document.createElement('div');num.className='trans-num';num.textContent=opts.label;
+  div.appendChild(num);
+  if(opts.promptHTML){
+    var orig=document.createElement('div');orig.className='trans-orig';orig.innerHTML=opts.promptHTML;
+    div.appendChild(orig);
+  }
+  if(opts.instr){
+    var instrEl=document.createElement('div');instrEl.className='trans-instr';instrEl.textContent=opts.instr;
+    div.appendChild(instrEl);
+  }
+  var input=document.createElement(opts.textarea?'textarea':'input');
+  if(!opts.textarea)input.type='text';
+  input.className='trans-input';input.placeholder=opts.placeholder;
+  div.appendChild(input);
+  var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-verify-t';
+  verifBtn.textContent='Vérifier';verifBtn.disabled=true;
+  div.appendChild(verifBtn);
+  var fb=document.createElement('div');fb.className='fb-box inline';
+  div.appendChild(fb);
+  var actions=document.createElement('div');actions.style.display='none';
+  actions.style.gap='.6rem';actions.style.flexWrap='wrap';actions.style.marginTop='.6rem';
+  var resetBtn=document.createElement('button');resetBtn.type='button';resetBtn.className='btn-reset-q';
+  resetBtn.textContent='↺ Recommencer cette question';resetBtn.style.marginTop='0';
+  actions.appendChild(resetBtn);
+  var nextBtn=document.createElement('button');nextBtn.type='button';nextBtn.className='btn-next';
+  nextBtn.textContent=opts.nextLabel||'Question suivante →';
+  actions.appendChild(nextBtn);
+  div.appendChild(actions);
+  container.appendChild(div);
+
+  input.addEventListener('input',function(){verifBtn.disabled=(input.value.trim()==='');});
+  var locked=false,ptsGiven=0;
+  verifBtn.addEventListener('click',function(){
+    if(locked||input.value.trim()==='')return;
+    locked=true;input.disabled=true;
+    var pts=opts.scoreFn(input.value);
+    ptsGiven=pts;
+    var cls= pts>=opts.maxPts?'correct':(pts>0?'mid':'wrong');
+    input.classList.add(cls);
+    scGlobal+=pts;errGlobal+=(opts.maxPts-pts);
+    flashIcon(pts>=opts.maxPts);if(pts>=opts.maxPts)beepOk();else beepErr();
+    var fbClass= pts>=opts.maxPts?'ok':(pts>0?'mid':'ko');
+    fb.classList.add('show',fbClass);
+    fb.innerHTML='<span class="fb-titre">Score\u00a0: '+pts+' / '+opts.maxPts+'</span>'+opts.feedbackFor(pts)
+      +(opts.corrigeHTML?('<br><br><strong>Corrigé possible</strong><br>'+opts.corrigeHTML):'');
+    verifBtn.style.display='none';
+    actions.style.display='flex';
+    updateGlobal();
+    recapItems.push({l:opts.recapLabel,s:pts>=opts.maxPts?'Réussi':(pts>0?'Partiel':'À revoir')});
+    if(opts.onDone)opts.onDone(pts);
+  });
+  resetBtn.addEventListener('click',function(){
+    if(!locked)return;
+    locked=false;
+    scGlobal-=ptsGiven;errGlobal-=(opts.maxPts-ptsGiven);
+    recapItems=recapItems.filter(function(r){return r.l!==opts.recapLabel;});
+    input.disabled=false;input.value='';input.classList.remove('correct','wrong','mid');
+    fb.classList.remove('show','ok','ko','mid');fb.innerHTML='';
+    verifBtn.style.display='';verifBtn.disabled=true;
+    actions.style.display='none';
+    updateGlobal();
+    if(opts.onReset)opts.onReset();
+  });
+  nextBtn.addEventListener('click',function(){
+    if(opts.onNext){opts.onNext();return;}
+    div.style.display='none';
+    var sib=div.nextElementSibling;
+    while(sib){
+      sib.style.display='';
+      if(sib.classList.contains('trans-item'))break;
+      sib=sib.nextElementSibling;
+    }
+  });
+  return {input:input,verifBtn:verifBtn,div:div};
+}
+
+function buildQ2(){
+  var list=$('listQ2');list.innerHTML='';
+  buildFreeQ(list,{
+    label:'Bilan',placeholder:"Rédige une phrase de bilan sur les temps employés…",
+    scoreFn:scoreQ2,maxPts:2,recapLabel:'A1 · Q2 — Bilan',
+    feedbackFor:function(pts){
+      return pts===2?"Bilan bien formulé\u00a0! Tu identifies les trois temps et leurs rôles."
+        :pts===1?"Essaie de citer les trois temps (imparfait, passé simple, plus-que-parfait) et leur rôle."
+        :"Essaie de citer les temps et d'expliquer ce qu'ils expriment.";
+    },
+    corrigeHTML:"L'imparfait sert à décrire le lieu ou l'ambiance, le passé simple sert à raconter les actions successives, le plus-que-parfait sert à évoquer ce qui s'est passé avant.",
+    onNext:function(){
+      $('q2Wrap').style.display='none';
+      $('q3Wrap').style.display='';
+    }
+  });
+}
+
+/* ══ Q3 — REMISE EN ORDRE ══ */
+var SEQ_MAIN=['A','B','D','C','E','F'];
+var SEQ_ALT=['A','D','B','C','E','F'];
+var seqOrder=[];
+function buildQ3(){
+  seqOrder=[];
+  $('fbQ3').className='fb-box inline';$('fbQ3').innerHTML='';
+  $('corrigeQ3').style.display='none';
+  $('q3Actions').style.display='none';
+  $('btnVerifyQ3').disabled=true;$('btnVerifyQ3').style.display='inline-block';
+  renderSeq();
+}
+function renderSeq(locked){
+  var pool=$('seqPool');pool.innerHTML='';
+  var target=$('seqTarget');target.innerHTML='';
+  var letters=shuffleArr(CORPUS.map(function(c){return c.l;}).slice()).filter(function(l){return seqOrder.indexOf(l)<0;});
+  if(!locked){
+    letters.forEach(function(l){
+      var chip=document.createElement('div');chip.className='seq-chip';chip.textContent=l;
+      chip.addEventListener('click',function(){
+        seqOrder.push(l);
+        renderSeq();
+        $('btnVerifyQ3').disabled=(seqOrder.length<6);
+      });
+      pool.appendChild(chip);
+    });
+  }
+  seqOrder.forEach(function(l,i){
+    var chip=document.createElement('div');chip.className='seq-chip';chip.textContent=l;
+    if(!locked){
+      chip.addEventListener('click',function(){
+        seqOrder.splice(i,1);
+        renderSeq();
+        $('btnVerifyQ3').disabled=(seqOrder.length<6);
+      });
+    }else{
+      chip.classList.add('disabled');
+    }
+    target.appendChild(chip);
+  });
+}
+$('btnSeqReset').addEventListener('click',function(){
+  if($('btnVerifyQ3').style.display==='none')return;
+  seqOrder=[];renderSeq();$('btnVerifyQ3').disabled=true;
+});
+var q3Locked=false,q3Pts=0;
+$('btnVerifyQ3').addEventListener('click',function(){
+  if(q3Locked||seqOrder.length<6)return;
+  q3Locked=true;
+  renderSeq(true);
+  var target=$('seqTarget');
+  Array.prototype.forEach.call(target.children,function(chip,i){
+    chip.classList.add(seqOrder[i]===SEQ_MAIN[i]?'correct':'wrong');
+  });
+  var exact=(seqOrder.join('')===SEQ_MAIN.join(''))||(seqOrder.join('')===SEQ_ALT.join(''));
+  var bookends=(seqOrder[0]==='A'&&seqOrder[5]==='F');
+  var pts= exact?2:(bookends?1:0);
+  q3Pts=pts;
+  scGlobal+=pts;errGlobal+=(2-pts);
+  flashIcon(pts===2);if(pts===2)beepOk();else beepErr();
+  var msg= exact?"Parfait\u00a0! Contexte → décor → ambiance → actions → détail final."
+    :bookends?"Ton ordre commence et finit bien. Quelques phrases intermédiaires sont à repositionner."
+    :"L'ordre logique place le contexte en premier, puis le décor, puis les actions.";
+  $('fbQ3').classList.add('show',exact?'ok':(bookends?'mid':'ko'));
+  $('fbQ3').innerHTML='<span class="fb-titre">Score\u00a0: '+pts+' / 2</span>'+msg;
+  $('corrigeQ3').style.display='block';
+  $('corrigeQ3').innerHTML='<span class="lbl">Corrigé — A → B → D → C → E → F</span>'
+    +SEQ_MAIN.map(function(l){
+      var c=CORPUS.filter(function(x){return x.l===l;})[0];
+      return '<div style="margin-bottom:.3rem;"><strong>'+l+'.</strong> <em>'+c.t+'</em></div>';
+    }).join('');
+  $('spA').textContent=($('spA').textContent||'')+' · Q3\u00a0: '+pts+' / 2';
+  updateGlobal();
+  recapItems.push({l:'A1 · Q3 — Ordre logique',s:exact?'Réussi':(bookends?'Partiel':'À revoir')});
+  $('btnVerifyQ3').style.display='none';
+  $('q3Actions').style.display='flex';
+});
+$('btnResetQ3').addEventListener('click',function(){
+  if(!q3Locked)return;
+  q3Locked=false;
+  scGlobal-=q3Pts;errGlobal-=(2-q3Pts);
+  recapItems=recapItems.filter(function(r){return r.l!=='A1 · Q3 — Ordre logique';});
+  updateGlobal();
+  buildQ3();
+});
+$('btnNextQ3').addEventListener('click',function(){
+  $('q3Wrap').style.display='none';
+  $('q4Wrap').style.display='';
+});
+
+/* ══ Q4 — RÈGLE ══ */
+var KEYWORDS_Q4=['imparfait','passé simple','plus-que-parfait','décor','action','antériorité','durée','fond'];
+function scoreQ4(text){
+  var n=countKeywords(text,KEYWORDS_Q4);
+  return (n>=4&&text.trim().length>40)?2:(n>=2?1:0);
+}
+function buildQ4(){
+  var list=$('listQ4');list.innerHTML='';
+  buildFreeQ(list,{
+    label:'Règle',placeholder:"Écris la règle que tu retiens…",textarea:true,
+    scoreFn:scoreQ4,maxPts:2,recapLabel:'A1 · Q4 — Règle',
+    feedbackFor:function(pts){
+      return pts===2?"Excellente formulation\u00a0! Tu as bien saisi les trois rôles."
+        :pts===1?"Essaie d'évoquer les trois temps et leur rôle (décor, action, antériorité)."
+        :"Ta règle est incomplète. Cite les trois temps et explique à quoi chacun sert.";
+    },
+    corrigeHTML:"Dans un récit réaliste au passé, on combine souvent plusieurs temps\u00a0: l'imparfait pour le cadre et la durée, le passé simple pour les actions de premier plan, le plus-que-parfait pour un événement antérieur.",
+    nextLabel:'Activité 2 →',
+    onNext:function(){
+      $('q4Wrap').style.display='none';
+      $('cardA').style.display='none';
+      $('cardB').classList.remove('locked');
+      buildActB();
+      var cb=$('cardB');if(cb)cb.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  });
+}
+
+/* ══ ACTIVITÉ 2 ══ */
+var REF_TEXT="Le train entra lentement en gare. Sur le quai, les voyageurs attendaient en silence. Une femme tenait un bouquet de dahlias\u00a0; un enfant grelottait contre sa valise. Soudain, un contrôleur siffla et la foule se mit en mouvement.";
+function buildRefText(){
+  $('refTextBox').innerHTML='<p style="font-style:italic;">'+REF_TEXT+'</p>';
+}
+function mapScore3(n){return n>=2?2:(n===1?1:0);}
+
+function buildActB(){
+  var list=$('listB');list.innerHTML='';
+
+  buildFreeQ(list,{
+    label:'Question 1 — Passé simple → imparfait',textarea:true,
+    promptHTML:"Transforme seulement les verbes au passé simple en les mettant à l'imparfait. Recopie le texte entier.",
+    placeholder:"Recopie tout le texte avec les transformations…",
+    scoreFn:function(text){var n=(containsAny(text,['entrait'])?1:0)+(containsAny(text,['sifflait'])?1:0)+(containsAny(text,['se mettait','mettait'])?1:0);return mapScore3(n);},
+    maxPts:2,recapLabel:'A2 · Q1 — PS→imparfait',
+    feedbackFor:function(pts){return pts>=2?"Très bien\u00a0! Tu as bien remplacé les verbes au passé simple par des imparfaits."
+      :pts===1?"Quelques transformations sont correctes — consulte le corrigé."
+      :"Souviens-toi\u00a0: il faut seulement changer les verbes au passé simple (entra, siffla, se mit), pas ceux déjà à l'imparfait.";},
+    corrigeHTML:"Le train <span class=\"hl-ok\">entrait</span> lentement en gare […] un contrôleur <span class=\"hl-ok\">sifflait</span> et la foule <span class=\"hl-ok\">se mettait</span> en mouvement. Effet\u00a0: le récit devient moins net, moins dynamique\u00a0; les actions semblent durer ou rester en arrière-plan."
+  });
+
+  buildFreeQ(list,{
+    label:'Question 2 — Imparfait → passé simple',textarea:true,
+    promptHTML:"Transforme seulement les verbes à l'imparfait en les mettant au passé simple. Recopie le texte entier.",
+    placeholder:"Recopie tout le texte avec les transformations…",
+    scoreFn:function(text){var n=(containsAny(text,['attendirent'])?1:0)+(containsAny(text,['tint'])?1:0)+(containsAny(text,['grelotta'])?1:0);return mapScore3(n);},
+    maxPts:2,recapLabel:'A2 · Q2 — Imparfait→PS',
+    feedbackFor:function(pts){return pts>=2?"Très bien\u00a0! Tu as bien mis les imparfaits au passé simple."
+      :pts===1?"Quelques transformations sont correctes — consulte le corrigé."
+      :"Souviens-toi\u00a0: il faut seulement changer les verbes à l'imparfait (attendaient, tenait, grelottait).";},
+    corrigeHTML:"[…] les voyageurs <span class=\"hl-ok\">attendirent</span> en silence. Une femme <span class=\"hl-ok\">tint</span> un bouquet de dahlias\u00a0; un enfant <span class=\"hl-ok\">grelotta</span> contre sa valise. Effet\u00a0: tout passe au premier plan\u00a0; le texte devient plus haché, plus rapide, moins descriptif."
+  });
+
+  buildFreeQ(list,{
+    label:'Question 3 — Présent de narration',
+    instr:"Réécris seulement la dernière phrase au présent de narration.",
+    promptHTML:"Soudain, un contrôleur siffla et la foule se mit en mouvement.",
+    placeholder:"Réécris cette phrase au présent de narration…",
+    scoreFn:function(text){var n=(containsAny(text,['siffle'])?1:0)+(containsAny(text,['se met'])?1:0);return n;},
+    maxPts:2,recapLabel:'A2 · Q3 — Présent de narration',
+    feedbackFor:function(pts){return pts===2?"Parfait\u00a0! Les deux verbes sont bien au présent de narration."
+      :pts===1?"Un verbe est bien transformé. Vérifie l'autre\u00a0: siffla → siffle et se mit → se met."
+      :"Les deux verbes au passé simple doivent passer au présent\u00a0: siffle et se met.";},
+    corrigeHTML:"Soudain, un contrôleur <span class=\"hl-ok\">siffle</span> et la foule <span class=\"hl-ok\">se met</span> en mouvement. Effet\u00a0: le présent de narration rend la scène plus vive, plus immédiate, comme si elle se déroulait sous les yeux du lecteur."
+  });
+
+  var effTitle=document.createElement('div');effTitle.className='sub-title';effTitle.textContent="Questions 4 & 5 — 🎯 Effets et conclusion";
+  list.appendChild(effTitle);
+
+  function buildQCMQ(container,opts){
+  // opts: {label, promptHTML, instr, options:[{text,correct}], feedbackFor(ok), corrigeHTML, recapLabel, onNext, nextLabel}
+  var div=document.createElement('div');div.className='trans-item';
+  var num=document.createElement('div');num.className='trans-num';num.textContent=opts.label;
+  div.appendChild(num);
+  if(opts.promptHTML){
+    var orig=document.createElement('div');orig.className='trans-orig';orig.innerHTML=opts.promptHTML;
+    div.appendChild(orig);
+  }
+  if(opts.instr){
+    var instrEl=document.createElement('div');instrEl.className='trans-instr';instrEl.textContent=opts.instr;
+    div.appendChild(instrEl);
+  }
+  var col=document.createElement('div');col.className='opts-col';
+  var order=shuffleArr(opts.options.map(function(o,i){return {o:o,i:i};}));
+  var fb=document.createElement('div');fb.className='fb-box inline';
+  var actions=document.createElement('div');actions.style.display='none';
+  actions.style.gap='.6rem';actions.style.flexWrap='wrap';actions.style.marginTop='.6rem';
+  var resetBtn=document.createElement('button');resetBtn.type='button';resetBtn.className='btn-reset-q';
+  resetBtn.textContent='↺ Recommencer cette question';resetBtn.style.marginTop='0';
+  actions.appendChild(resetBtn);
+  var nextBtn=document.createElement('button');nextBtn.type='button';nextBtn.className='btn-next';
+  nextBtn.textContent=opts.nextLabel||'Question suivante →';
+  actions.appendChild(nextBtn);
+
+  var answered=false,ptsGiven=0;
+  var letters=['A','B','C'];
+  function render(){
+    col.innerHTML='';answered=false;
+    order.forEach(function(o,i){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=letters[i];
+      var sp=document.createElement('span');sp.textContent=o.o.text;
+      btn.appendChild(lt);btn.appendChild(sp);
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        var ok=o.o.correct;
+        Array.prototype.forEach.call(col.children,function(b,bi){
+          b.disabled=true;
+          if(order[bi].o.correct)b.classList.add('correct');
+          else if(bi===i)b.classList.add('wrong');
+        });
+        ptsGiven=ok?1:0;
+        scGlobal+=ptsGiven;errGlobal+=(1-ptsGiven);
+        flashIcon(ok);if(ok)beepOk();else beepErr();
+        fb.classList.add('show',ok?'ok':'ko');
+        fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne réponse.')+'</span>'+opts.feedbackFor(ok)
+          +(opts.corrigeHTML?('<br><br><strong>Corrigé</strong><br>'+opts.corrigeHTML):'');
+        updateGlobal();
+        recapItems.push({l:opts.recapLabel,s:ok?'Réussi':'À revoir'});
+        actions.style.display='flex';
+      });
+      col.appendChild(btn);
+    });
+  }
+  render();
+  div.appendChild(col);div.appendChild(fb);div.appendChild(actions);
+  container.appendChild(div);
+
+  resetBtn.addEventListener('click',function(){
+    scGlobal-=ptsGiven;errGlobal-=(1-ptsGiven);
+    recapItems=recapItems.filter(function(r){return r.l!==opts.recapLabel;});
+    fb.classList.remove('show','ok','ko');fb.innerHTML='';
+    actions.style.display='none';
+    order=shuffleArr(opts.options.map(function(o,i){return {o:o,i:i};}));
+    render();
+    updateGlobal();
+  });
+  nextBtn.addEventListener('click',function(){
+    if(opts.onNext){opts.onNext();return;}
+    div.style.display='none';
+    var sib=div.nextElementSibling;
+    while(sib){
+      sib.style.display='';
+      if(sib.classList.contains('trans-item'))break;
+      sib=sib.nextElementSibling;
+    }
+  });
+  return {div:div};
+}
+
+var EFFECTS=[
+ {label:'Effet — passé simple → imparfait',recapLabel:'A2 · Effet 1',
+  options:[
+   {text:"Cela ralentit le récit et efface le caractère ponctuel des actions.",correct:true},
+   {text:"Cela accélère le récit et rend les actions plus vives.",correct:false},
+   {text:"Cela n'a aucun effet sur le rythme du récit.",correct:false}
+  ],
+  corrige:"ralentit le récit, efface le caractère ponctuel des actions"},
+ {label:'Effet — imparfait → passé simple',recapLabel:'A2 · Effet 2',
+  options:[
+   {text:"Cela ralentit le récit et installe une ambiance durable.",correct:false},
+   {text:"Cela accélère le récit et met toutes les actions au premier plan.",correct:true},
+   {text:"Cela transforme le récit en dialogue direct.",correct:false}
+  ],
+  corrige:"accélère le récit, met toutes les actions au premier plan"},
+ {label:'Effet — présent de narration',recapLabel:'A2 · Effet 3',
+  options:[
+   {text:"Cela éloigne le lecteur de la scène, comme un souvenir lointain.",correct:false},
+   {text:"Cela rend le récit plus formel et plus soutenu.",correct:false},
+   {text:"Cela donne une impression de direct, de vivacité, comme si la scène se déroulait sous les yeux du lecteur.",correct:true}
+  ],
+  corrige:"donne une impression de direct, de vivacité"}
+];
+var CONCLUSION_OPTIONS=[
+ {text:"L'imparfait sert au décor et à la durée, le passé simple aux actions brèves et successives, le présent de narration à la vivacité d'un moment.",correct:true},
+ {text:"Les trois temps s'utilisent indifféremment, sans règle précise.",correct:false},
+ {text:"Seul le passé simple permet de raconter une histoire au passé.",correct:false}
+];
+
+  EFFECTS.forEach(function(eff){
+    buildQCMQ(list,{
+      label:eff.label,options:eff.options,recapLabel:eff.recapLabel,
+      feedbackFor:function(ok){return ok?"Effet bien identifié\u00a0!":"Pense au rythme, à la dynamique et à la perception du lecteur.";},
+      corrigeHTML:eff.corrige
+    });
+  });
+
+  buildQCMQ(list,{
+    label:'Conclusion',options:CONCLUSION_OPTIONS,recapLabel:'A2 · Conclusion',
+    feedbackFor:function(ok){return ok?"Bonne conclusion\u00a0!":"Reprends les trois temps et leur rôle dans ta conclusion.";},
+    corrigeHTML:"L'imparfait pour le décor et la durée · le passé simple pour les actions brèves et successives · le présent de narration pour rendre un moment plus vivant.",
+    nextLabel:'Voir le résultat →',
+    onNext:function(){setTimeout(showResults,400);}
+  });
+
+  var children=Array.prototype.slice.call(list.children);
+  var seenFirst=false;
+  children.forEach(function(el){
+    if(el.classList.contains('trans-item')){
+      if(!seenFirst){seenFirst=true;el.style.display='';}
+      else el.style.display='none';
+    }else{
+      el.style.display='none';
+    }
+  });
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var pct=scGlobal/TOTAL;
+  $('r-score').textContent=scGlobal;
+  var s= pct>=.9?5: pct>=.7?4: pct>=.5?3: pct>=.25?2:1;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg = pct>=.88 ? "Excellent\u00a0! Maîtrise solide des temps du récit."
+    : pct>=.70 ? "Très bien\u00a0! Quelques effets à affiner."
+    : pct>=.50 ? "Bien. Relis les corrigés et recommence."
+    : "Continue\u00a0! Reprends les transformations pas à pas.";
+  $('r-msg').textContent=msg;
+  var rl=$('recap-list');rl.innerHTML='';
+  recapItems.forEach(function(r){
+    var d=document.createElement('div');d.textContent=r.l+' — '+r.s;rl.appendChild(d);
+  });
+  $('results').classList.add('show');
+  beepFinal(pct>=.70);
+  if(pct>=.70){emojiRain(['📝','📖','✒️','🖋️','📜']);}
+}
+
+/* ══ RESTART ══ */
+function resetAll(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardA').style.display='';
+  $('cardB').classList.add('locked');
+  $('listB').innerHTML='';
+  scGlobal=0;errGlobal=0;recapItems=[];
+  q1Locked=false;q3Locked=false;
+  $('q1Wrap').style.display='';
+  $('q2Wrap').style.display='none';
+  $('q3Wrap').style.display='none';
+  $('q4Wrap').style.display='none';
+  buildQ1();buildQ2();buildQ3();buildQ4();
+  updateGlobal();
+  $('spA').textContent='';$('spB').textContent='';
+}
+$('btn-restart').addEventListener('click',function(){
+  resetAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildCorpus();
+buildRefText();
+buildQ1();
+buildQ2();
+buildQ3();
+buildQ4();
+updateGlobal();
+</script>
+</body>
+</html>
