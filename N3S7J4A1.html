@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa &ndash; S7 J4 &ndash; 3e &ndash; Temps du r&eacute;cit</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;
+      --day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;--orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+    /* EXTRAIT */
+    .extrait{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-bottom:1rem;}
+    .extrait::before{content:'';display:block;height:3px;border-radius:3px;margin-bottom:.75rem;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .extrait-titre{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:#88c8d8;margin-bottom:.55rem;}
+    .extrait-texte{font-size:clamp(.95rem,2.6vw,1.05rem);color:#e8f6fb;line-height:1.9;font-style:italic;}
+    .v-imp{color:#f5c518;font-weight:900;font-style:normal;}
+    .v-ps{color:#4ade80;font-weight:900;font-style:normal;}
+    .v-ppq{color:#f87171;font-weight:900;font-style:normal;}
+    /* DASH */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5a8a9a;text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#5a8a9a;text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);border:1.5px solid var(--dark3);
+      border-radius:8px;padding:.28rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#4ade80;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#fca5a5;}
+    .chip-rem{background:rgba(58,181,216,.15);border-color:var(--day-color);color:var(--day-border);}
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+    /* PARTIES */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-color);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+    .part-result{display:none;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1.1rem;text-align:center;margin-top:.7rem;}
+    .part-result.show{display:block;animation:fadeUp .3s ease both;}
+    .part-score{font-size:2rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .part-msg{font-size:.9rem;color:#88c8d8;margin:.3rem 0 .9rem;font-family:'JetBrains Mono',monospace;}
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.1rem;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem;}
+    /* Q1 */
+    .q1-item{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+      padding:.6rem .4rem;border-bottom:1px solid var(--border);}
+    .q1-item:last-child{border-bottom:none;}
+    .q1-verbe{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:900;
+      color:var(--day-dark);min-width:155px;font-style:italic;}
+    .q1-btns{display:flex;gap:.35rem;flex-wrap:wrap;}
+    .t-btn{padding:.38rem .75rem;border-radius:7px;border:2px solid var(--border);
+      background:var(--surface);font-size:.88rem;font-family:'JetBrains Mono',monospace;
+      font-weight:700;color:var(--text);cursor:pointer;transition:all .15s;min-height:40px;
+      -webkit-tap-highlight-color:transparent;}
+    .t-btn:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .t-btn.sel{background:var(--day-dark);color:#fff;border-color:var(--day-dark);}
+    .t-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .t-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .t-btn.locked{cursor:default;}
+    .q1-expl{font-size:.82rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      display:none;width:100%;padding:.3rem .4rem .1rem;line-height:1.55;}
+    .q1-expl.show{display:block;}
+    .q1-expl .imp{color:#c47a10;font-weight:900;}
+    .q1-expl .ps{color:#14532d;font-weight:900;}
+    .q1-expl .ppq{color:#7f1d1d;font-weight:900;}
+    /* Q2 */
+    .q2-table{width:100%;border-collapse:collapse;margin-bottom:.6rem;}
+    .q2-table th{background:var(--day-dark);color:#fff;font-family:'JetBrains Mono',monospace;
+      font-size:.78rem;font-weight:700;padding:.5rem .7rem;text-align:left;letter-spacing:.05em;}
+    .q2-table td{padding:.6rem .7rem;border-bottom:1px solid var(--day-border);vertical-align:top;font-size:.92rem;}
+    .q2-table tr:last-child td{border-bottom:none;}
+    .role-cell{font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:1.55;}
+    .saisie-q2{font-size:.9rem;font-family:Arial,sans-serif;font-weight:600;
+      padding:.35rem .6rem;border:2px solid var(--day-border);border-radius:7px;
+      background:var(--day-light);color:var(--text);width:100%;
+      outline:none;transition:border-color .15s;}
+    .saisie-q2:focus{border-color:var(--day-dark);}
+    .saisie-q2.ok-input{border-color:var(--green);background:var(--green-pale);color:#14532d;}
+    .saisie-q2.ko-input{border-color:var(--red);background:var(--red-pale);color:#7f1d1d;}
+    .saisie-q2.partial-input{border-color:var(--orange);background:#fff8ee;color:#7a4000;}
+    .q2-fb{font-size:.82rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem;
+      display:none;line-height:1.55;padding:.3rem .5rem;border-radius:5px;}
+    .q2-fb.show{display:block;}
+    .q2-fb.ok-fb{background:var(--green-pale);color:#14532d;}
+    .q2-fb.ko-fb{background:var(--red-pale);color:#7f1d1d;}
+    /* Q3 */
+    .q3-phrase{font-size:clamp(1rem,2.8vw,1.1rem);font-weight:700;color:var(--text);
+      line-height:2.1;margin-bottom:.6rem;background:var(--day-light);
+      border-left:4px solid var(--day-color);border-radius:8px;padding:.65rem .9rem;}
+    .saisie-q3{font-size:.95rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+      padding:.28rem .55rem;border:2px solid var(--day-border);border-radius:6px;
+      background:#fff;color:var(--text);width:160px;outline:none;
+      transition:border-color .15s;vertical-align:middle;}
+    .saisie-q3:focus{border-color:var(--day-dark);}
+    .saisie-q3.ok-input{border-color:var(--green);background:var(--green-pale);color:#14532d;}
+    .saisie-q3.ko-input{border-color:var(--red);background:var(--red-pale);color:#7f1d1d;}
+    .temps-rappel{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);
+      margin-bottom:.65rem;background:var(--dark);padding:.5rem .8rem;border-radius:8px;display:inline-block;}
+    .temps-rappel span{font-weight:700;color:var(--day-border);}
+    /* CORRIGÉ */
+    .corrige-bloc{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:.9rem 1.1rem;margin-top:.8rem;display:none;}
+    .corrige-bloc.show{display:block;animation:fadeUp .3s ease both;}
+    .corrige-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:#88c8d8;margin-bottom:.55rem;}
+    .corrige-item{font-size:.88rem;color:#c8e0e8;line-height:1.7;margin-bottom:.25rem;}
+    .corrige-item strong{color:#fff;}
+    /* SYNTHÈSE */
+    .synthese-bloc{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-dark);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-top:1rem;display:none;}
+    .synthese-bloc.show{display:block;animation:fadeUp .3s ease both;}
+    .synthese-titre{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.45rem;}
+    .synthese-texte{font-size:.95rem;color:var(--text);line-height:1.8;}
+    /* FEEDBACKS */
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.6rem;display:none;line-height:1.75;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border-left:5px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border-left:5px solid var(--red);color:#7f1d1d;}
+    .fb.mid-fb{background:#fff8ee;border-left:5px solid var(--orange);color:#7a4000;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.45rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    /* BOUTONS */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:3rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+    /* RÉSULTATS */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#88c8d8;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#5a8a9a;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#88c8d8;margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}.q1-verbe{min-width:100%;}.saisie-q3{width:130px;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 4</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">Les temps du r&eacute;cit</span></h1>
+  <div class="theme-badge">Conjugaison &mdash; imparfait &middot; pass&eacute; simple &middot; plus-que-parfait</div>
+</header>
+
+<!-- DASH -->
+<div class="dash">
+  <div class="dash-titre">Test &mdash; 3 questions &mdash; 17 points</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Question 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/17</div>
+      <div class="dash-score-label">Points</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Q1</span><span id="nb-s-p1" style="font-weight:900;">0/7</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Q2</span><span id="nb-s-p2" style="font-weight:900;">0/7</span></div>
+    <div class="part-b" id="nb-p3"><span style="font-weight:700;">Q3</span><span id="nb-s-p3" style="font-weight:900;">0/3</span></div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> pts corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> pts perdus</div>
+    <div class="chip chip-rem"><span id="chip-rem">17</span> restants</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 17 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- EXTRAIT -->
+<div class="extrait">
+  <div class="extrait-titre">&#128214; Extrait de r&eacute;f&eacute;rence &mdash; disponible &agrave; tout moment</div>
+  <div class="extrait-texte">
+    Le lundi matin, la rue <span class="v-imp">était</span> presque vide. M. Renaud <span class="v-ps">ouvrit</span> sa boutique avant sept heures. Il <span class="v-ppq">avait mal dormi</span> et <span class="v-imp">regardait</span> sans cesse l&rsquo;horloge. Tout &agrave; coup, un camion <span class="v-ps">s&rsquo;arr&ecirc;ta</span> devant la vitrine&nbsp;; deux hommes <span class="v-ps">descendirent</span> et <span class="v-ps">d&eacute;pos&egrave;rent</span> une caisse sur le trottoir.
+  </div>
+</div>
+
+<!-- Q1 -->
+<div class="bloc-partie" id="bloc-p1">
+  <div class="partie-header">
+    <div class="part-icon">&#128221;</div>
+    <div>
+      <div class="part-titre">Question 1 &mdash; Identifier les temps</div>
+      <div class="part-sous">7 points &mdash; clique sur le temps de chaque verbe, puis valide</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/7</div>
+  </div>
+  <div class="card" id="card-q1">
+    <div class="card-stripe"></div>
+    <div class="q-label">Pour chaque verbe du texte, clique sur son temps.</div>
+    <div id="q1-items"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;">
+      <button class="btn btn-primary" id="btn-val-q1" onclick="validerQ1()" disabled style="opacity:.4;">
+        V&eacute;rifier &mdash; <span id="cpt-q1">0/7 r&eacute;ponses</span>
+      </button>
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="fb" id="fb-q1"></div>
+    <div class="corrige-bloc" id="cor-q1">
+      <div class="corrige-titre">Corrig&eacute;</div>
+      <div class="corrige-item"><strong>&eacute;tait</strong> &rarr; imparfait &mdash; d&eacute;crit l&rsquo;&eacute;tat du d&eacute;cor (dur&eacute;e, fond).</div>
+      <div class="corrige-item"><strong>ouvrit</strong> &rarr; pass&eacute; simple &mdash; action ponctuelle qui fait avancer le r&eacute;cit.</div>
+      <div class="corrige-item"><strong>avait mal dormi</strong> &rarr; plus-que-parfait &mdash; fait ant&eacute;rieur : il avait mal dormi AVANT d&rsquo;ouvrir la boutique.</div>
+      <div class="corrige-item"><strong>regardait</strong> &rarr; imparfait &mdash; action qui dure, &eacute;tat d&rsquo;esprit du personnage.</div>
+      <div class="corrige-item"><strong>s&rsquo;arr&ecirc;ta</strong> &rarr; pass&eacute; simple &mdash; action ponctuelle qui relance le r&eacute;cit.</div>
+      <div class="corrige-item"><strong>descendirent</strong> &rarr; pass&eacute; simple &mdash; cha&icirc;nement d&rsquo;actions au premier plan.</div>
+      <div class="corrige-item"><strong>d&eacute;pos&egrave;rent</strong> &rarr; pass&eacute; simple &mdash; cha&icirc;nement d&rsquo;actions au premier plan.</div>
+    </div>
+  </div>
+  <div style="width:100%;text-align:center;margin:.7rem 0 .3rem;">
+    <button class="btn btn-primary" id="btn-vers-p2" onclick="debQ2()" disabled style="opacity:.45;min-width:220px;">
+      Question 2 &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128200;</div>
+    <div>
+      <div class="part-titre">Question 2 &mdash; Classer par r&ocirc;le narratif</div>
+      <div class="part-sous">7 points &mdash; classe les verbes selon leur r&ocirc;le</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/7</div>
+  </div>
+  <div class="card" id="card-q2">
+    <div class="card-stripe"></div>
+    <div class="q-label">Classe les verbes du texte selon leur r&ocirc;le dans le r&eacute;cit.</div>
+    <table class="q2-table">
+      <thead><tr><th>R&ocirc;le dans le r&eacute;cit</th><th>Verbes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="role-cell">D&eacute;cor / description / habitude</td>
+          <td><input type="text" class="saisie-q2" id="q2-0" placeholder="verbes…"
+            autocomplete="off" autocorrect="off" spellcheck="false"/>
+            <div class="q2-fb" id="q2fb-0"></div></td>
+        </tr>
+        <tr>
+          <td class="role-cell">Actions qui font avancer le r&eacute;cit</td>
+          <td><input type="text" class="saisie-q2" id="q2-1" placeholder="verbes…"
+            autocomplete="off" autocorrect="off" spellcheck="false"/>
+            <div class="q2-fb" id="q2fb-1"></div></td>
+        </tr>
+        <tr>
+          <td class="role-cell">Fait ant&eacute;rieur &agrave; un autre fait pass&eacute;</td>
+          <td><input type="text" class="saisie-q2" id="q2-2" placeholder="verbes…"
+            autocomplete="off" autocorrect="off" spellcheck="false"/>
+            <div class="q2-fb" id="q2fb-2"></div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
+      <button class="btn btn-primary" id="btn-val-q2" onclick="validerQ2()">V&eacute;rifier</button>
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="fb" id="fb-q2"></div>
+    <div class="corrige-bloc" id="cor-q2">
+      <div class="corrige-titre">Corrig&eacute;</div>
+      <div class="corrige-item"><strong>D&eacute;cor / description :</strong> &eacute;tait, regardait</div>
+      <div class="corrige-item"><strong>Actions :</strong> ouvrit, s&rsquo;arr&ecirc;ta, descendirent, d&eacute;pos&egrave;rent</div>
+      <div class="corrige-item"><strong>Fait ant&eacute;rieur :</strong> avait mal dormi</div>
+    </div>
+  </div>
+  <div style="width:100%;text-align:center;margin:.7rem 0 .3rem;">
+    <button class="btn btn-primary" id="btn-vers-p3" onclick="debQ3()" disabled style="opacity:.45;min-width:220px;">
+      Question 3 &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="bloc-partie" id="bloc-p3" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128221;</div>
+    <div>
+      <div class="part-titre">Question 3 &mdash; Compl&eacute;ter la r&egrave;gle</div>
+      <div class="part-sous">3 points &mdash; compl&egrave;te les blancs avec les temps verbaux</div>
+    </div>
+    <div class="part-badge" id="badge-p3">0/3</div>
+  </div>
+  <div class="card" id="card-q3">
+    <div class="card-stripe"></div>
+    <div class="q-label">Compl&egrave;te les blancs avec les temps verbaux corrects.</div>
+    <div class="temps-rappel">Temps disponibles&nbsp;: <span>imparfait</span> &middot; <span>pass&eacute; simple</span> &middot; <span>plus-que-parfait</span></div>
+    <div class="q3-phrase">
+      Dans un r&eacute;cit r&eacute;aliste au pass&eacute;, l&rsquo;<input type="text" class="saisie-q3" id="q3-0"
+        placeholder="temps…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      sert souvent &agrave; d&eacute;crire, &agrave; installer le d&eacute;cor ou &agrave; montrer une action qui dure&nbsp;;
+    </div>
+    <div class="q3-phrase">
+      le <input type="text" class="saisie-q3" id="q3-1"
+        placeholder="temps…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      sert souvent &agrave; raconter les actions principales&nbsp;;
+    </div>
+    <div class="q3-phrase">
+      le <input type="text" class="saisie-q3" id="q3-2"
+        placeholder="temps…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      sert &agrave; exprimer un fait pass&eacute; plus ancien qu&rsquo;un autre fait pass&eacute;.
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;">
+      <button class="btn btn-primary" id="btn-val-q3" onclick="validerQ3()">V&eacute;rifier</button>
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="fb" id="fb-q3"></div>
+    <div class="corrige-bloc" id="cor-q3">
+      <div class="corrige-titre">Corrig&eacute;</div>
+      <div class="corrige-item"><strong>L&rsquo;imparfait</strong> sert souvent &agrave; d&eacute;crire, &agrave; installer le d&eacute;cor ou &agrave; montrer une action qui dure.</div>
+      <div class="corrige-item"><strong>Le pass&eacute; simple</strong> sert souvent &agrave; raconter les actions principales.</div>
+      <div class="corrige-item"><strong>Le plus-que-parfait</strong> sert &agrave; exprimer un fait pass&eacute; plus ancien qu&rsquo;un autre fait pass&eacute;.</div>
+    </div>
+  </div>
+  <div class="part-result" id="res-p3">
+    <div class="part-score" id="score-p3"></div>
+    <div class="part-msg" id="msg-p3"></div>
+    <div id="btn-p3"></div>
+  </div>
+</div>
+
+<!-- SYNTHÈSE -->
+<div class="synthese-bloc" id="synthese">
+  <div class="synthese-titre">&#128218; &Agrave; retenir</div>
+  <div class="synthese-texte">
+    Dans un r&eacute;cit au pass&eacute;&nbsp;: l&rsquo;<strong>imparfait</strong> installe le d&eacute;cor et d&eacute;crit ce qui dure &mdash; le <strong>pass&eacute; simple</strong> fait avancer l&rsquo;action &mdash; le <strong>plus-que-parfait</strong> exprime un fait ant&eacute;rieur &agrave; un autre fait pass&eacute;.
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">Bilan &mdash; Les temps du r&eacute;cit</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/17</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var scoreOk=0,q1Sc=0,q2Sc=0,q3Sc=0,TOTAL=17;
+var q1Sel={},q1Done=false,q2Done=false,q3Done=false;
+
+function majProg(){
+  var pct=Math.round(scoreOk/TOTAL*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=scoreOk+' / '+TOTAL+' points';
+  document.getElementById('prog-pct').textContent=pct+'\u00a0%';
+  document.getElementById('dash-total').textContent=scoreOk;
+  var done=(q1Done?7:0)+(q2Done?7:0)+(q3Done?3:0);
+  document.getElementById('chip-ok').textContent=scoreOk;
+  document.getElementById('chip-ko').textContent=done-scoreOk;
+  document.getElementById('chip-rem').textContent=TOTAL-done;
+}
+function g(id){return document.getElementById(id);}
+function animerEl(el,ok){if(!el)return;el.classList.remove('anim-ok','anim-ko');void el.offsetWidth;el.classList.add(ok?'anim-ok':'anim-ko');}
+
+/* \u2500\u2500 Q1 \u2500\u2500 */
+var Q1=[
+  {v:'\u00e9tait',c:'imp',e:'<span class="imp">Imparfait</span> \u2192 d\u00e9crit l\u2019\u00e9tat du d\u00e9cor (dur\u00e9e, fond).'},
+  {v:'ouvrit',c:'ps',e:'<span class="ps">Pass\u00e9 simple</span> \u2192 action ponctuelle qui fait avancer le r\u00e9cit.'},
+  {v:'avait mal dormi',c:'ppq',e:'<span class="ppq">Plus-que-parfait</span> \u2192 fait ant\u00e9rieur : il avait mal dormi AVANT d\u2019ouvrir la boutique.'},
+  {v:'regardait',c:'imp',e:'<span class="imp">Imparfait</span> \u2192 action qui dure, \u00e9tat d\u2019esprit du personnage.'},
+  {v:'s\u2019arr\u00eata',c:'ps',e:'<span class="ps">Pass\u00e9 simple</span> \u2192 action ponctuelle qui relance le r\u00e9cit.'},
+  {v:'descendirent',c:'ps',e:'<span class="ps">Pass\u00e9 simple</span> \u2192 cha\u00eenement d\u2019actions au premier plan.'},
+  {v:'d\u00e9pos\u00e8rent',c:'ps',e:'<span class="ps">Pass\u00e9 simple</span> \u2192 cha\u00eenement d\u2019actions au premier plan.'}
+];
+var T_LABELS={'imp':'imparfait','ps':'pass\u00e9 simple','ppq':'plus-que-parfait'};
+
+function buildQ1(){
+  var wrap=g('q1-items');if(!wrap)return;wrap.innerHTML='';
+  for(var i=0;i<Q1.length;i++){
+    (function(q,idx){
+      var div=document.createElement('div');div.className='q1-item';
+      var vb=document.createElement('span');vb.className='q1-verbe';vb.textContent=q.v;div.appendChild(vb);
+      var btns=document.createElement('div');btns.className='q1-btns';
+      ['imp','ps','ppq'].forEach(function(t){
+        var btn=document.createElement('button');btn.className='t-btn';btn.textContent=T_LABELS[t];
+        btn.setAttribute('data-t',t);btn.setAttribute('data-idx',idx);
+        btn.addEventListener('click',function(){
+          if(q1Done)return;
+          var sib=btns.querySelectorAll('.t-btn');for(var k=0;k<sib.length;k++)sib[k].classList.remove('sel');
+          btn.classList.add('sel');q1Sel[idx]=t;majCptQ1();
+        });
+        btns.appendChild(btn);
+      });
+      div.appendChild(btns);
+      var expl=document.createElement('div');expl.className='q1-expl';expl.id='expl-'+idx;expl.innerHTML=q.e;
+      div.appendChild(expl);
+      wrap.appendChild(div);
+    })(Q1[i],i);
+  }
+}
+function majCptQ1(){
+  var n=Object.keys(q1Sel).length;
+  var btn=g('btn-val-q1'),cpt=g('cpt-q1');
+  if(btn){btn.disabled=n<7;btn.style.opacity=n<7?'.4':'1';}
+  if(cpt)cpt.textContent=n+'/7 r\u00e9ponses';
+}
+function validerQ1(){
+  if(q1Done)return;q1Done=true;
+  var bv=g('btn-val-q1');if(bv)bv.style.display='none';
+  var sc=0;
+  for(var i=0;i<Q1.length;i++){
+    var ok=(q1Sel[i]===Q1[i].c);if(ok)sc++;
+    var allB=document.querySelectorAll('[data-idx="'+i+'"]');
+    for(var k=0;k<allB.length;k++){
+      allB[k].classList.remove('sel');allB[k].classList.add('locked');allB[k].disabled=true;
+      if(allB[k].getAttribute('data-t')===Q1[i].c)allB[k].classList.add('ok-opt');
+      else if(allB[k].getAttribute('data-t')===q1Sel[i]&&!ok)allB[k].classList.add('ko-opt');
+    }
+    var ex=g('expl-'+i);if(ex)ex.classList.add('show');
+  }
+  q1Sc=sc;scoreOk+=sc;
+  var bdg=g('badge-p1');if(bdg)bdg.textContent=sc+'/7';
+  var nbs=g('nb-s-p1');if(nbs)nbs.textContent=sc+'/7';
+  if(sc>=6){var nb=g('nb-p1');if(nb){nb.style.background='rgba(34,197,94,.2)';nb.style.borderColor='var(--green)';if(nbs)nbs.style.color='#4ade80';}}
+  var fb=g('fb-q1');
+  if(fb){
+    if(sc>=6){fb.className='fb show ok-fb';fb.innerHTML='<span class="fb-titre">\u2713 Excellent\u00a0! '+sc+'/7</span>Tu identifies bien les temps du r\u00e9cit.';jouerOk();}
+    else if(sc>=4){fb.className='fb mid-fb show';fb.innerHTML='<span class="fb-titre">Bien\u00a0! '+sc+'/7.</span>Renfor\u00e7ons certains points ensemble.';if(sc===4||sc===5)jouerOk();}
+    else{fb.className='fb show ko-fb';fb.innerHTML='<span class="fb-titre">'+sc+'/7.</span>C\u2019est parti\u00a0! Revoyons ensemble les valeurs des temps du r\u00e9cit.';jouerErreur();}
+  }
+  var cor=g('cor-q1');if(cor)cor.classList.add('show');
+  animerEl(g('card-q1'),sc>=4);majProg();
+  var ds=g('dash-statut');if(ds)ds.textContent='Question 2 en cours\u2026';
+  var btn2=g('btn-vers-p2');if(btn2){btn2.disabled=false;btn2.style.opacity='1';}
+}
+
+/* \u2500\u2500 Q2 \u2500\u2500 */
+var Q2_DATA=[
+  {mots:['\u00e9tait','regardait'],pts:2},
+  {mots:['ouvrit','arr\u00eata','descendirent','d\u00e9pos\u00e8rent','d\u00e9posa'],pts:4},
+  {mots:['avait mal dormi','avait dormi'],pts:1}
+];
+var Q2_CORRIGE=['\u00E9tait, regardait','ouvrit, s\'arr\u00EAta, descendirent, d\u00E9pos\u00E8rent','avait mal dormi'];
+
+function debQ2(){
+  var b1=g('bloc-p1');if(b1)b1.style.display='none';
+  var b2=g('bloc-p2');if(b2)b2.style.display='';
+  var ds=g('dash-statut');if(ds)ds.textContent='Question 2 en cours\u2026';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function norm(s){return s.trim().toLowerCase().replace(/[\s\u00a0]+/g,' ').replace(/['\u2019]/g,"'");}
+
+function validerQ2(){
+  if(q2Done)return;q2Done=true;
+  var bv=g('btn-val-q2');if(bv)bv.disabled=true;
+  var sc=0;
+  for(var i=0;i<Q2_DATA.length;i++){
+    var inp=g('q2-'+i),fb=g('q2fb-'+i);
+    if(!inp)continue;inp.disabled=true;
+    var val=norm(inp.value);
+    if(val.length===0){
+      inp.classList.add('ko-input');
+      if(fb){fb.className='q2-fb show ko-fb';fb.innerHTML='Attendu\u00a0: <strong>'+Q2_CORRIGE[i]+'</strong>';}
+      continue;
+    }
+    var found=0;
+    Q2_DATA[i].mots.forEach(function(m){if(val.indexOf(norm(m))>=0)found++;});
+    var ligPts=Math.min(found,Q2_DATA[i].pts);
+    sc+=ligPts;
+    var ok=ligPts===Q2_DATA[i].pts;var partial=ligPts>0&&!ok;
+    if(ok){inp.classList.add('ok-input');if(fb){fb.className='q2-fb show ok-fb';fb.textContent='\u2713 Correct\u00a0!';}}
+    else if(partial){inp.classList.add('partial-input');if(fb){fb.className='q2-fb show ko-fb';fb.innerHTML='Partiel ('+ligPts+'/'+Q2_DATA[i].pts+'). Attendu\u00a0: <strong>'+Q2_CORRIGE[i]+'</strong>';}}
+    else{inp.classList.add('ko-input');if(fb){fb.className='q2-fb show ko-fb';fb.innerHTML='Attendu\u00a0: <strong>'+Q2_CORRIGE[i]+'</strong>';}}
+  }
+  q2Sc=sc;scoreOk+=sc;
+  var bdg=g('badge-p2');if(bdg)bdg.textContent=sc+'/7';
+  var nbs=g('nb-s-p2');if(nbs)nbs.textContent=sc+'/7';
+  if(sc>=6){var nb=g('nb-p2');if(nb){nb.style.background='rgba(34,197,94,.2)';nb.style.borderColor='var(--green)';if(nbs)nbs.style.color='#4ade80';}}
+  var fb2=g('fb-q2');
+  if(fb2){
+    if(sc>=6){fb2.className='fb show ok-fb';fb2.innerHTML='<span class="fb-titre">\u2713 Tr\u00e8s bien\u00a0!</span>Tu as correctement class\u00e9 les verbes selon leur r\u00f4le narratif.';jouerOk();}
+    else if(sc>=4){fb2.className='fb mid-fb show';fb2.innerHTML='<span class="fb-titre">Bien\u00a0! '+sc+'/7.</span>Certains verbes sont bien plac\u00e9s. On va revoir tout cela ensemble.';}
+    else{fb2.className='fb show ko-fb';fb2.innerHTML='<span class="fb-titre">'+sc+'/7.</span>Rassure-toi, tu es l\u00e0 pour revoir cette notion.';jouerErreur();}
+  }
+  var cor=g('cor-q2');if(cor)cor.classList.add('show');
+  animerEl(g('card-q2'),sc>=4);majProg();
+  var ds=g('dash-statut');if(ds)ds.textContent='Question 3 en cours\u2026';
+  var btn3=g('btn-vers-p3');if(btn3){btn3.disabled=false;btn3.style.opacity='1';}
+}
+
+/* \u2500\u2500 Q3 \u2500\u2500 */
+var Q3_CORR=['imparfait','pass\u00e9 simple','plus-que-parfait'];
+
+function debQ3(){
+  var b2=g('bloc-p2');if(b2)b2.style.display='none';
+  var b3=g('bloc-p3');if(b3)b3.style.display='';
+  var ds=g('dash-statut');if(ds)ds.textContent='Question 3 en cours\u2026';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function validerQ3(){
+  if(q3Done)return;q3Done=true;
+  var bv=g('btn-val-q3');if(bv)bv.disabled=true;
+  var sc=0;
+  for(var i=0;i<3;i++){
+    var inp=g('q3-'+i);if(!inp)continue;
+    inp.disabled=true;
+    var val=norm(inp.value);
+    if(val.length===0){inp.classList.add('ko-input');continue;}
+    var ok=val.indexOf(norm(Q3_CORR[i]))>=0;
+    if(ok){sc++;inp.classList.add('ok-input');}else{inp.classList.add('ko-input');}
+  }
+  q3Sc=sc;scoreOk+=sc;
+  var bdg=g('badge-p3');if(bdg)bdg.textContent=sc+'/3';
+  var nbs=g('nb-s-p3');if(nbs)nbs.textContent=sc+'/3';
+  if(sc===3){var nb=g('nb-p3');if(nb){nb.style.background='rgba(34,197,94,.2)';nb.style.borderColor='var(--green)';if(nbs)nbs.style.color='#4ade80';}}
+  var fb3=g('fb-q3');
+  if(fb3){
+    if(sc===3){fb3.className='fb show ok-fb';fb3.innerHTML='<span class="fb-titre">\u2713 Parfait\u00a0!</span>Tu connais le r\u00f4le de chacun des trois temps du r\u00e9cit.';jouerOk();}
+    else if(sc===2){fb3.className='fb mid-fb show';fb3.innerHTML='<span class="fb-titre">Presque\u00a0! 2/3.</span>';}
+    else{fb3.className='fb show ko-fb';fb3.innerHTML='<span class="fb-titre">'+sc+'/3.</span>C\u2019est parti pour une courte r\u00e9vision\u00a0!';jouerErreur();}
+  }
+  var cor=g('cor-q3');if(cor)cor.classList.add('show');
+  animerEl(g('card-q3'),sc>=2);majProg();
+  var rp=g('res-p3');if(rp)rp.classList.add('show');
+  var sp=g('score-p3');if(sp)sp.textContent=sc+' / 3';
+  var mp=g('msg-p3');if(mp)mp.textContent=sc===3?'\u2713 Question 3 r\u00e9ussie\u00a0!':'';
+  var bp=g('btn-p3');if(bp)bp.innerHTML='<button class="btn btn-primary" onclick="afficherVerdict()">Voir le bilan \u2192</button>';
+}
+
+function afficherVerdict(){
+  var syn=g('synthese');if(syn)syn.classList.add('show');
+  var rg=g('results-global');if(rg)rg.classList.add('show');
+  var rn=g('res-num');if(rn)rn.textContent=scoreOk;
+  var stars=scoreOk>=15?5:scoreOk>=12?4:scoreOk>=9?3:scoreOk>=5?2:1;
+  var rs=g('res-stars');if(rs)rs.textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(scoreOk>=15){badge='<div class="badge-ok">\u2713 Excellent\u00a0! Ma\u00eetrise solide des temps du r\u00e9cit.</div>';msg='';pluie();}
+  else if(scoreOk>=12){badge='<div class="badge-ok">\u2713 Tr\u00e8s bien\u00a0!</div>';msg='Quelques points \u00e0 consolider.';pluie();}
+  else if(scoreOk>=8){badge='<div class="badge-ko">Bien.</div>';msg='On approfondit ensemble\u00a0!';}
+  else{badge='<div class="badge-ko">C\u2019est parti\u00a0!</div>';msg='Revoyons les temps du r\u00e9cit.';}
+  var rb=g('res-badge');if(rb)rb.innerHTML=badge;
+  var rm=g('res-msg');if(rm)rm.textContent=msg;
+}
+
+function resetTout(){
+  scoreOk=0;q1Sc=0;q2Sc=0;q3Sc=0;q1Sel={};q1Done=false;q2Done=false;q3Done=false;
+  ['results-global','synthese'].forEach(function(id){var e=g(id);if(e)e.classList.remove('show');});
+  ['bloc-p2','bloc-p3'].forEach(function(id){var e=g(id);if(e)e.style.display='none';});
+  var rp=g('res-p3');if(rp)rp.classList.remove('show');
+  ['fb-q1','fb-q2','fb-q3'].forEach(function(id){var e=g(id);if(e)e.className='fb';});
+  ['cor-q1','cor-q2','cor-q3'].forEach(function(id){var e=g(id);if(e)e.className='corrige-bloc';});
+  ['p1','p2','p3'].forEach(function(id){
+    var b=g('nb-'+id),s=g('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    var m={'p1':'0/7','p2':'0/7','p3':'0/3'};
+    if(s){s.textContent=m[id];s.style.color='';}
+    var bd=g('badge-'+id);if(bd)bd.textContent=m[id];
+  });
+  var btn2=g('btn-vers-p2');if(btn2){btn2.disabled=true;btn2.style.opacity='.45';}
+  var btn3=g('btn-vers-p3');if(btn3){btn3.disabled=true;btn3.style.opacity='.45';}
+  var bv1=g('btn-val-q1');if(bv1){bv1.disabled=true;bv1.style.opacity='.4';bv1.style.display='';}
+  var cpt=g('cpt-q1');if(cpt)cpt.textContent='0/7 r\u00e9ponses';
+  var bv2=g('btn-val-q2');if(bv2){bv2.disabled=false;}
+  var bv3=g('btn-val-q3');if(bv3){bv3.disabled=false;}
+  /* Reset Q2 inputs */
+  for(var i=0;i<3;i++){
+    var inp=g('q2-'+i);if(inp){inp.disabled=false;inp.value='';inp.className='saisie-q2';}
+    var fb=g('q2fb-'+i);if(fb)fb.className='q2-fb';
+    var i3=g('q3-'+i);if(i3){i3.disabled=false;i3.value='';i3.className='saisie-q3';}
+  }
+  var ds=g('dash-statut');if(ds)ds.textContent='Question 1 en cours\u2026';
+  majProg();buildQ1();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildQ1();majProg();
+</script>
+</body>
+</html>
