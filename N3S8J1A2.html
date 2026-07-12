@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J1 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-color:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5600;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.28);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffaf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:800px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--blue);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.text-toggle{width:100%;background:var(--day-light);border:2px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:'JetBrains Mono',monospace;
+  font-weight:800;font-size:.8rem;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;
+  animation:pulseRef 2.2s ease-in-out infinite;}
+.text-toggle:hover,.text-toggle.open{background:var(--day-border);}
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 7px rgba(245,166,35,0);}}
+.textbox{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;max-height:0;
+  transition:max-height .4s ease;box-shadow:0 3px 14px rgba(0,0,0,.06);}
+.textbox.open{max-height:3000px;}
+.text-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.text-inner{padding:1rem 1.3rem;max-height:480px;overflow-y:auto;font-size:.92rem;line-height:1.85;color:#333;}
+.text-inner .titre-oeuvre{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;}
+.text-inner .sub-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;margin:.9rem 0 .4rem;}
+.text-inner .sub-lbl:first-child{margin-top:0;}
+.text-inner .contexte-box{background:var(--surface2);border-left:4px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.7rem .9rem;font-style:italic;margin-bottom:.3rem;}
+.text-inner .vocab-item{font-size:.85rem;margin-bottom:.2rem;}
+.text-inner .vocab-item strong{color:var(--day-dark2);}
+.text-inner p{margin-bottom:.85rem;}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+.pair-title{margin:0 1.2rem .3rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  font-weight:800;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;}
+.q-item{padding:.2rem 1.2rem;margin-bottom:.6rem;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.4rem;letter-spacing:.05em;}
+.q-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+  line-height:1.85;margin-bottom:.7rem;padding:.75rem 1rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);font-style:italic;}
+.opts-col{display:flex;flex-direction:column;gap:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.5rem;word-break:break-word;line-height:1.5;width:100%;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;
+  color:#2f5c15!important;animation:glowOk .5s ease;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;
+  color:var(--err-dark)!important;animation:wrongShake .35s ease;}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(95,168,47,.55);}100%{box-shadow:0 0 0 10px rgba(95,168,47,0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 0 0;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+
+.nav-row{padding:.9rem 1.2rem 0;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#6e4c00;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#6e4c00;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 1</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">« Germinal », Zola — compréhension</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 12 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">12</span></span>
+</div>
+
+<button class="text-toggle" id="textToggle">
+  <span>📖 Texte support — Germinal, Zola (1885)</span><span id="textArrow">▾</span>
+</button>
+<div class="textbox open" id="textBox">
+  <div class="text-stripe"></div>
+  <div class="text-inner">
+    <div class="sub-lbl">Contexte historique</div>
+    <div class="contexte-box">« En amont de la rédaction de Germinal, Émile Zola lit beaucoup, visite un coron, s'entretient avec les travailleurs, descend dans une mine. La documentation qu'il rassemble est constituée de près de mille feuillets. Plusieurs descriptions du roman sont des transpositions exactes de ses observations. »</div>
+
+    <div class="sub-lbl">Texte</div>
+    <p>« Dès quatre heures, la descente des ouvriers commençait. Ils arrivaient de la baraque, pieds nus, la lampe à la main, attendant par petits groupes d'être en nombre suffisant. Sans un bruit, d'un jaillissement doux de bête nocturne, la cage de fer montait du noir, se calait sur les verrous, avec ses quatre étages contenant chacun deux berlines pleines de charbon. Des moulineurs, aux différents paliers, sortaient les berlines, les remplaçaient par d'autres, vides ou chargées à l'avance des bois de taille. Et c'était dans les berlines vides que s'empilaient les ouvriers, cinq par cinq, jusqu'à quarante d'un coup, lorsqu'ils tenaient toutes les cases. Un ordre partait du porte-voix, un beuglement sourd et indistinct, pendant qu'on tirait quatre fois la corde du signal d'en bas, "sonnant à la viande", pour prévenir de ce chargement de chair humaine. Puis, après un léger sursaut, la cage plongeait silencieuse, tombait comme une pierre, ne laissait derrière elle que la fuite vibrante du câble. Le héros, Étienne Lantier, regarde un mineur descendre. Son tour était arrivé, la cage avait reparu, de son mouvement aisé et sans fatigue. Il s'y accroupit avec des camarades, elle replongea, puis jaillit de nouveau au bout de quatre minutes à peine, pour engloutir une nouvelle fournée. Elle les dévora de la sorte, d'une gueule plus ou moins gloutonne, selon la profondeur de l'accrochage où ils descendaient, mais sans un arrêt, toujours affamée, de boyaux géants capables de digérer un peuple. Cela s'emplissait, s'emplissait encore, et les ténèbres restaient mortes, la cage montait du vide dans le même silence vorace. »</p>
+    <p style="font-size:.82rem;color:var(--muted);">E. Zola, <em>Germinal</em>, 1885, 1<sup>re</sup> partie.</p>
+
+    <div class="sub-lbl">Aide de vocabulaire</div>
+    <div class="vocab-item"><strong>coron&nbsp;:</strong> cité ouvrière proche de la mine.</div>
+    <div class="vocab-item"><strong>berline&nbsp;:</strong> wagonnet utilisé dans la mine.</div>
+    <div class="vocab-item"><strong>moulineurs&nbsp;:</strong> ouvriers qui manœuvrent les wagonnets.</div>
+    <div class="vocab-item"><strong>accrochage&nbsp;:</strong> niveau de la mine où les ouvriers descendent.</div>
+  </div>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Partie A</span>
+    <span class="part-label">Compréhension</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="part-consigne">📋 Pour chaque question, coche d'abord la bonne réponse, puis coche la citation qui la justifie. Une seule réponse est attendue à chaque fois.</div>
+  <div id="listA"></div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 12 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+
+/* ══ TOGGLE TEXTE ══ */
+$('textToggle').addEventListener('click',function(){
+  $('textBox').classList.toggle('open');
+  $('textToggle').classList.toggle('open');
+  $('textArrow').textContent=$('textBox').classList.contains('open')?'▴':'▾';
+});
+
+/* ══ DONNÉES ══ */
+var DBQ=[
+ {titre:'Question 1',
+  qA:{q:"La scène se déroule à quel moment de la journée\u00a0?",
+      opts:["Très tôt le matin.","Au milieu de la journée.","Le soir."],correct:0,
+      fb:"La scène commence avant le lever du jour\u00a0: « Dès quatre heures » indique très tôt le matin. Cela montre la dureté du travail des mineurs, contraints de descendre dans l'obscurité totale."},
+  qB:{q:"Quelle citation justifie cette réponse\u00a0?",
+      opts:["« Dès quatre heures, la descente des ouvriers commençait. »","« au bout de quatre minutes à peine »","« toujours affamé »"],correct:0,
+      fb:"« Dès quatre heures, la descente des ouvriers commençait. » est la seule citation qui donne une indication de temps précise. Les deux autres (« quatre minutes » et « toujours affamé ») ne répondent pas à la question du moment de la journée."}},
+ {titre:'Question 2',
+  qA:{q:"Comment les ouvriers attendent-ils avant de descendre\u00a0?",
+      opts:["Calmement et en silence.","Dans le bruit et les cris.","En refusant de descendre."],correct:0,
+      fb:"Les ouvriers attendent en silence. « Sans un bruit » crée une atmosphère lourde et presque inquiétante\u00a0: ce silence n'est pas serein, il révèle une résignation face à la descente inévitable."},
+  qB:{q:"Quelle citation justifie cette réponse\u00a0?",
+      opts:["« attendant par petits groupes d'être en nombre suffisant »","« Sans un bruit »","« un beuglement sourd et indistinct »"],correct:1,
+      fb:"« Sans un bruit » est la citation qui justifie directement le silence. « Attendant par petits groupes » dit comment ils se regroupent mais pas leur attitude. « Un beuglement sourd » désigne le signal, pas les ouvriers."}},
+ {titre:'Question 3',
+  qA:{q:"Où les ouvriers prennent-ils place pour descendre\u00a0?",
+      opts:["Dans des berlines vides.","Sur les verrous.","Dans la baraque."],correct:0,
+      fb:"Les ouvriers descendent dans les berlines vides — les mêmes wagonnets qui servent à transporter le charbon. Le texte insiste ainsi sur des conditions de travail très dures\u00a0: les hommes sont traités comme une marchandise."},
+  qB:{q:"Quelle citation justifie cette réponse\u00a0?",
+      opts:["« se calait sur les verrous »","« Ils arrivaient de la baraque »","« Et c'était dans les berlines vides que s'empilaient les ouvriers »"],correct:2,
+      fb:"« Et c'était dans les berlines vides que s'empilaient les ouvriers »\u00a0: le verbe « s'empilaient » montre que les hommes sont entassés comme des objets. Les deux autres citations parlent de la cage et de la baraque, pas de l'emplacement des ouvriers."}},
+ {titre:'Question 4',
+  qA:{q:"Comment le signal de départ est-il présenté\u00a0?",
+      opts:["Comme un bruit brutal et confus.","Comme un chant joyeux.","Comme un appel poli et clair."],correct:0,
+      fb:"Le signal n'est pas humain ni rassurant. « Un beuglement sourd et indistinct » ressemble à un cri animal, ce qui rend la scène plus violente et déshumanisée."},
+  qB:{q:"Quelle citation justifie cette réponse\u00a0?",
+      opts:["« un jaillissement doux de bête nocturne »","« un beuglement sourd et indistinct »","« la fuite vibrante du câble »"],correct:1,
+      fb:"« Un beuglement sourd et indistinct »\u00a0: le mot « beuglement » (cri d'un animal) et les adjectifs « sourd » (étouffé) et « indistinct » (incompréhensible) décrivent un bruit brutal et confus. Les deux autres citations ne parlent pas du signal de départ."}},
+ {titre:'Question 5',
+  qA:{q:"Quelle impression donne la descente de la cage\u00a0?",
+      opts:["Elle est rapide et inquiétante.","Elle est lente et rassurante.","Elle est comique et légère."],correct:0,
+      fb:"La comparaison avec la pierre insiste sur la vitesse et sur le danger de la descente. Le mot « silencieuse » renforce l'inquiétude\u00a0: une chute aussi rapide dans le silence absolu est particulièrement angoissante."},
+  qB:{q:"Quelle citation justifie cette réponse\u00a0?",
+      opts:["« de son mouvement aisé et sans fatigue »","« la cage plongeait silencieuse, tombait comme une pierre »","« montait du vide »"],correct:1,
+      fb:"« La cage plongeait silencieuse, tombait comme une pierre »\u00a0: le verbe « plonger », la comparaison « comme une pierre » et l'adjectif « silencieuse » traduisent une descente rapide et inquiétante. « De son mouvement aisé » décrit le mécanisme, pas la descente des hommes. « Montait du vide » parle de la montée de la cage."}},
+ {titre:'Question 6',
+  qA:{q:"À la fin de l'extrait, la mine est surtout présentée comme…",
+      opts:["Un monstre qui avale les hommes.","Un simple outil de travail.","Un lieu lumineux et protecteur."],correct:0,
+      fb:"La mine est personnifiée\u00a0: elle devient une créature immense et menaçante qui semble dévorer les ouvriers. Des mots comme « gueule », « affamée », « boyaux » et « digérer » forment une métaphore filée de la mine comme monstre."},
+  qB:{q:"Quelle citation justifie cette réponse\u00a0?",
+      opts:["« la lampe à la main »","« de boyaux géants capables de digérer un peuple »","« les ténèbres restaient mortes »"],correct:1,
+      fb:"« De boyaux géants capables de digérer un peuple »\u00a0: les « boyaux » (intestins) et « digérer » montrent que la mine est comparée à un être vivant qui avale et digère les hommes. « La lampe à la main » parle de l'équipement des mineurs. « Les ténèbres restaient mortes » décrit l'obscurité mais ne présente pas la mine comme un monstre."}}
+];
+
+var TOTAL=12,scA=0,errA=0,curA=0,posA=[];
+
+function balancedPositions(n){
+  var per=Math.floor(n/3),rem=n%3,base=[];
+  for(var k=0;k<3;k++){var c=per+(k<rem?1:0);for(var i=0;i<c;i++)base.push(k);}
+  return shuffleArr(base);
+}
+function buildOpts(correct,distractors,slot){
+  var arr=[null,null,null];arr[slot]=correct;
+  var rest=shuffleArr(distractors.slice());var ri=0;
+  for(var s=0;s<3;s++){if(arr[s]===null)arr[s]=rest[ri++];}
+  return arr;
+}
+function updateGlobal(){
+  var pct=Math.round(scA/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scA+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=scA;$('cnt-ko').textContent=errA;$('cnt-rem').textContent=TOTAL-scA-errA;
+}
+
+function buildA(){
+  scA=0;errA=0;curA=0;
+  renderDQ();
+}
+function renderDQ(){
+  var list=$('listA');list.innerHTML='';
+  if(curA>=DBQ.length){ endA(); return; }
+  var d=DBQ[curA];
+  var pTitle=document.createElement('div');pTitle.className='pair-title';pTitle.textContent=d.titre;
+  list.appendChild(pTitle);
+
+  var doneA=false,doneB=false;
+  function makeSub(sub,label){
+    var correctText=sub.opts[sub.correct];
+    var distractors=sub.opts.filter(function(t,i){return i!==sub.correct;});
+    var slot=Math.floor(csRand()*3);
+    var opts=buildOpts(correctText,distractors,slot);
+    var correctIdx=slot;
+    var div=document.createElement('div');div.className='q-item';
+    var num=document.createElement('div');num.className='q-num';num.textContent=label;
+    div.appendChild(num);
+    var ph=document.createElement('div');ph.className='q-phrase';ph.textContent=sub.q;
+    div.appendChild(ph);
+    var col=document.createElement('div');col.className='opts-col';
+    var letters=['A','B','C'];var answered=false;
+    opts.forEach(function(txt,i){
+      var btn=document.createElement('button');btn.className='opt-btn';
+      var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=letters[i];
+      var sp=document.createElement('span');sp.textContent=txt;
+      btn.appendChild(lt);btn.appendChild(sp);
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        var ok=(i===correctIdx);
+        Array.prototype.forEach.call(col.children,function(b,bi){
+          b.disabled=true;
+          if(bi===correctIdx)b.classList.add('correct');
+          else if(bi===i)b.classList.add('wrong');
+        });
+        flashIcon(ok);
+        if(ok){scA++;beepOk();}else{errA++;beepErr();}
+        var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+        fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne réponse.')+'</span>'+sub.fb;
+        div.appendChild(fb);
+        updateGlobal();
+        if(label.indexOf('QCM 1')===0)doneA=true;else doneB=true;
+        checkBothDone();
+      });
+      col.appendChild(btn);
+    });
+    div.appendChild(col);
+    return div;
+  }
+  list.appendChild(makeSub(d.qA,'QCM 1 — Réponse'));
+  list.appendChild(makeSub(d.qB,'QCM 2 — Citation justificative'));
+
+  function checkBothDone(){
+    if(doneA&&doneB){
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curA<DBQ.length-1)?'Question suivante →':'Voir le résultat →';
+      next.addEventListener('click',function(){curA++;renderDQ();});
+      nav.appendChild(next);list.appendChild(nav);
+    }
+  }
+}
+function endA(){
+  setTimeout(showResults,400);
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  $('r-score').textContent=scA;
+  var s= scA<=4?1: scA<=6?2: scA<=8?3: scA<=10?4:5;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg;
+  if(scA>=11)msg='Bravo\u00a0! Tu maîtrises la compréhension de cet extrait de Zola.';
+  else if(scA>=8)msg='Très bonne lecture. Quelques nuances à affiner.';
+  else if(scA>=5)msg='Bonne lecture. Relis les passages signalés.';
+  else msg='Relis le texte attentivement avant de retenter.';
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  beepFinal(scA>=8);
+  if(scA>=8){emojiRain(['📖','✒️','📜','⛏️','🖋️']);}
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  buildA();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
