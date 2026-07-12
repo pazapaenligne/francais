@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J2 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#b94040;--day-color:#b94040;--day-dark:#7a1f1f;--day-dark2:#551414;
+  --day-light:#f7eded;--day-border:#e2a3a3;--day-glow:rgba(185,64,64,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fdf5f5;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+  --catA:#1a6e88;--catA-l:#e8f6fb;--catB:#3d7a10;--catB-l:#f0faeb;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--blue);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--green);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.aide-toggle{width:100%;background:var(--day-light);border:2px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:'JetBrains Mono',monospace;
+  font-weight:800;font-size:.8rem;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;
+  animation:pulseRef 2.2s ease-in-out infinite;}
+.aide-toggle:hover,.aide-toggle.open{background:var(--day-border);}
+@keyframes pulseRef{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 7px rgba(185,64,64,0);}}
+.aide-box{background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;max-height:0;
+  transition:max-height .4s ease;box-shadow:0 3px 14px rgba(0,0,0,.06);}
+.aide-box.open{max-height:600px;}
+.aide-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.aide-inner{padding:.9rem 1.2rem;font-size:.9rem;line-height:1.75;color:#4a4f58;}
+.aide-inner ul{margin-left:1.2rem;}
+.aide-inner li{margin-bottom:.4rem;}
+.aide-inner strong{color:var(--day-dark2);}
+
+.corpus-box{margin:0 1.2rem 1rem;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.9rem 1rem;font-size:.9rem;line-height:1.9;}
+.corpus-box .n{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--day-dark2);margin-right:.3rem;}
+.corpus-box strong{font-style:normal;text-decoration:underline;color:var(--day-dark2);}
+.corpus-box p{margin-bottom:.25rem;}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+.sub-title{margin:1rem 1.2rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  font-weight:800;color:var(--day-dark2);text-transform:uppercase;letter-spacing:.05em;}
+.sub-title:first-of-type{margin-top:0;}
+
+/* tri / classement */
+.tray{margin:0 1.2rem 1rem;display:flex;gap:.5rem;flex-wrap:wrap;padding:.7rem;
+  background:var(--surface2);border:1.5px dashed var(--border);border-radius:var(--radius-sm);}
+.tile{touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;
+  background:var(--surface);border:2px solid var(--day-border);border-radius:10px;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.85rem,2.4vw,.95rem);
+  color:var(--day-dark2);padding:.5rem .85rem;min-height:42px;display:flex;align-items:center;
+  transition:opacity .15s,border-color .15s,transform .12s;}
+.tile.sel{border-color:var(--day-dark);background:var(--day-light);transform:scale(1.05);}
+.tile.placed{opacity:.3;pointer-events:none;}
+.zones{margin:0 1.2rem 1rem;display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;}
+@media(max-width:560px){.zones{grid-template-columns:1fr;}}
+.zone{border-radius:var(--radius-sm);padding:.75rem .7rem;min-height:110px;
+  cursor:pointer;transition:transform .12s;display:flex;flex-direction:column;gap:.3rem;}
+.zone:hover{transform:translateY(-2px);}
+.zone.zA{background:var(--catA-l);border:2px dashed var(--catA);}
+.zone.zB{background:var(--catB-l);border:2px dashed var(--catB);}
+.zone-title{font-size:.82rem;font-weight:900;text-align:center;margin-bottom:.3rem;}
+.zone.zA .zone-title{color:var(--catA);}
+.zone.zB .zone-title{color:var(--catB);}
+.zone-chip{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  border-radius:6px;padding:.2rem .45rem;display:inline-block;margin:.1rem;}
+.zone-chip.correct{background:#eaf7e2;color:#2f5c15;border:1px solid #5fa82f;}
+.zone-chip.wrong{background:var(--err-light);color:var(--err-dark);border:1px solid var(--err);text-decoration:line-through;}
+
+/* appariement */
+.match-cols{margin:0 1.2rem 1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:560px){.match-cols{grid-template-columns:1fr;}}
+.match-col-title{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:800;text-transform:uppercase;margin-bottom:.4rem;letter-spacing:.05em;}
+.match-item{background:var(--surface);border:2px solid var(--day-border);border-radius:10px;
+  font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.85rem,2.4vw,.95rem);
+  color:var(--day-dark2);padding:.55rem .8rem;min-height:44px;display:flex;align-items:center;
+  cursor:pointer;margin-bottom:.4rem;transition:opacity .15s,border-color .15s,transform .12s;}
+.match-item.sel{border-color:var(--day-dark);background:var(--day-light);transform:scale(1.02);}
+.match-item.used{opacity:.3;pointer-events:none;}
+.match-item.correct{background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.match-item.wrong{background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+
+.gcard{margin:0 1.2rem 1rem;padding:.9rem 1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.gcard-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.gcard-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;font-style:italic;color:var(--text);
+  line-height:1.85;margin-bottom:.6rem;padding:.7rem .9rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);}
+.gcard-phrase strong{font-style:normal;text-decoration:underline;}
+.choice-btns{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;}
+.choice-btn{flex:1;min-width:90px;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-family:Arial,sans-serif;font-size:clamp(.85rem,2.3vw,.95rem);
+  font-weight:700;padding:.5rem .7rem;cursor:pointer;min-height:46px;text-align:center;
+  transition:background .12s,border-color .12s;}
+.choice-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.choice-btn.sel{background:var(--day-light);border-color:var(--day-dark);border-width:2px;}
+.choice-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;color:#2f5c15!important;}
+.choice-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;color:var(--err-dark)!important;}
+.choice-btn:disabled{cursor:default;}
+.gcard-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.3rem;letter-spacing:.05em;}
+.gcard-explic{font-size:.85rem;display:none;line-height:1.6;padding:.6rem .8rem;
+  border-radius:var(--radius-sm);border-left:4px solid;margin-top:.5rem;}
+.gcard-explic.show{display:block;background:var(--day-light);border-color:var(--day-dark);color:var(--day-dark2);}
+
+.trans-item{margin:0 1.2rem 1.1rem;padding:1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.trans-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.trans-orig{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);line-height:1.85;
+  padding:.65rem .85rem;background:var(--day-light);border-left:4px solid var(--day-dark);
+  border-radius:var(--radius-sm);font-style:italic;margin-bottom:.5rem;}
+.trans-orig strong{font-style:normal;text-decoration:underline;}
+.trans-instr{font-size:.86rem;color:var(--day-dark2);font-weight:700;margin-bottom:.6rem;}
+.trans-input{width:100%;min-height:3rem;border:2px solid var(--day-border);border-radius:var(--radius-sm);
+  background:var(--surface);font-family:Arial,sans-serif;font-size:clamp(.95rem,2.6vw,1.05rem);
+  color:var(--text);padding:.6rem .9rem;margin-bottom:.6rem;}
+.trans-input:focus{outline:none;border-color:var(--day-dark);}
+.trans-input.correct{border-color:#5fa82f;background:#eaf7e2;}
+.trans-input.wrong{border-color:var(--err);background:var(--err-light);}
+.trans-input:disabled{cursor:default;opacity:1;}
+
+.btn-verify-t{display:inline-block;background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.7rem 1.4rem;min-height:2.8rem;cursor:pointer;transition:background .15s,opacity .15s;margin-top:.4rem;}
+.btn-verify-t:hover:not(:disabled){background:#4a0f0f;}
+.btn-verify-t:disabled{opacity:.35;cursor:default;}
+.btn-reset-q{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:none;border:1.5px solid var(--day-border);color:var(--day-dark2);border-radius:99px;
+  padding:.3rem .75rem;margin-top:.5rem;margin-left:.5rem;cursor:pointer;min-height:2rem;}
+.btn-reset-q:hover{background:var(--day-light);}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 1.2rem 1rem;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.inline{margin:.6rem 0 0;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-box.show.mid{display:block;background:#fff5e0;border-color:var(--orange);color:#8a5600;}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+.hl-ok{color:#14532d;font-weight:800;text-decoration:underline;}
+.hl-neu{color:var(--day-dark2);font-weight:800;}
+
+.corrige-box{margin:0 1.2rem 1rem;background:var(--day-light);border:1.5px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.85rem 1rem;font-size:.87rem;color:var(--day-dark2);line-height:1.7;}
+.corrige-box .lbl{display:block;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  text-transform:uppercase;font-weight:800;margin-bottom:.4rem;}
+
+.actions-row{margin:0 1.2rem 1rem;display:none;gap:.6rem;flex-wrap:wrap;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#4a0f0f;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1rem;max-height:220px;overflow-y:auto;}
+.recap-list div{padding:.15rem 0;}
+.synth-final{text-align:left;background:var(--day-light);border:1.5px solid var(--day-dark);
+  border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.87rem;color:var(--day-dark2);
+  line-height:1.65;margin-bottom:1.1rem;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#4a0f0f;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 2</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Fonctions des groupes dans la phrase</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 23 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">23</span></span>
+</div>
+
+<button class="aide-toggle" id="aideToggle">
+  <span>💡 Aide express</span><span id="aideArrow">▾</span>
+</button>
+<div class="aide-box" id="aideBox">
+  <div class="aide-stripe"></div>
+  <div class="aide-inner">
+    <ul>
+      <li><strong>COD&nbsp;:</strong> pas de préposition&nbsp;; remplaçable par <em>le, la, les</em>.</li>
+      <li><strong>COI&nbsp;:</strong> souvent introduit par <em>à</em> ou <em>de</em>&nbsp;; remplaçable par <em>lui, leur, y, en</em>.</li>
+      <li><strong>Attribut du sujet&nbsp;:</strong> après un verbe d'état&nbsp;: <em>être, sembler, devenir, rester…</em></li>
+      <li><strong>CC&nbsp;:</strong> souvent déplaçable ou supprimable.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Exercice 1</span>
+    <span class="part-label">Essentiels ou circonstanciels&nbsp;?</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="corpus-box" id="corpusBox"></div>
+
+  <div id="e2q1Wrap">
+  <div class="sub-title">Question 1 — 🖱️ Classe chaque groupe</div>
+  <div class="part-consigne" style="border-bottom:none;margin-bottom:0;">📋 Clique sur un groupe, puis clique sur la colonne qui convient&nbsp;: essentiel ou circonstanciel.</div>
+  <div class="tray" id="trayQ1"></div>
+  <div class="zones" id="zonesQ1"></div>
+  <div class="fb-box inline" id="fbQ1" style="margin:0 1.2rem 1rem;"></div>
+  <div class="corrige-box" id="corrigeQ1" style="display:none;"></div>
+  <div class="actions-row" id="actionsQ1">
+    <button class="btn-next" id="btnNextQ1">Question suivante →</button>
+  </div>
+  </div>
+
+  <div id="e2q2Wrap" style="display:none;">
+  <div class="sub-title">Question 2 — 🔗 Associe chaque groupe à sa fonction</div>
+  <div class="part-consigne" style="border-bottom:none;margin-bottom:0;">📋 Clique d'abord sur un groupe (à gauche), puis clique sur sa fonction précise (à droite).</div>
+  <div class="match-cols">
+    <div>
+      <div class="match-col-title">Groupes</div>
+      <div id="matchLeft"></div>
+    </div>
+    <div>
+      <div class="match-col-title">Fonctions</div>
+      <div id="matchRight"></div>
+    </div>
+  </div>
+  <div class="fb-box inline" id="fbQ2" style="margin:0 1.2rem 1rem;"></div>
+  <div class="corrige-box" id="corrigeQ2" style="display:none;"></div>
+  <div class="actions-row" id="actionsQ2">
+    <button class="btn-next" id="btnNextQ2">Exercice 2 →</button>
+  </div>
+  </div>
+</div>
+
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Exercice 2</span>
+    <span class="part-label">Remplacement pronominal</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+
+  <div id="e3q1Wrap">
+  <div class="sub-title">Question 1 — 🖱️ Pronom + fonction</div>
+  <div class="part-consigne" style="border-bottom:none;margin-bottom:0;">📋 Clique sur le pronom qui peut remplacer le groupe en gras, puis indique sa fonction.</div>
+  <div id="e3q1Cards"></div>
+  </div>
+
+  <div id="e3q2Wrap" style="display:none;">
+  <div class="sub-title">Question 2 — ✍️ Justification libre</div>
+  <div class="part-consigne" style="border-bottom:none;margin-bottom:0;">✍️ Pour les phrases 1, 2 et 3, écris en une ligne comment le remplacement t'aide à identifier la fonction. Formule guide&nbsp;: « J'obtiens … ; le groupe est donc … »</div>
+  <div id="listE3Q2"></div>
+  </div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 23 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <div class="synth-final">Les CC sont souvent déplaçables. Les compléments essentiels font partie de la construction du verbe. Le remplacement pronominal est la manipulation la plus efficace pour distinguer COD (le/la/l'), COI (lui/leur/y/en) et attribut du sujet (non remplaçable par un pronom complément).</div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function shuffleArr(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(csRand()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+function norm(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[’]/g,"'").replace(/\s+/g,' ').trim();
+}
+function containsAny(text,keywords){
+  var t=norm(text);
+  return keywords.some(function(k){return t.indexOf(norm(k))>=0;});
+}
+
+var TOTAL=23,scGlobal=0,errGlobal=0,recapItems=[];
+function updateGlobal(){
+  var pct=Math.round(scGlobal/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scGlobal+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=scGlobal;$('cnt-ko').textContent=errGlobal;
+  $('cnt-rem').textContent=Math.max(0,TOTAL-scGlobal-errGlobal);
+}
+
+/* ══ AIDE EXPRESS ══ */
+$('aideToggle').addEventListener('click',function(){
+  $('aideBox').classList.toggle('open');
+  $('aideToggle').classList.toggle('open');
+  $('aideArrow').textContent=$('aideBox').classList.contains('open')?'▴':'▾';
+});
+
+/* ══ CORPUS ══ */
+var CORPUS=[
+ {n:1,before:'',bold:'Le soir',after:', Nora relit ses notes.',cat:'C'},
+ {n:2,before:'Nora relit ',bold:'ses notes',after:'.',cat:'E'},
+ {n:3,before:'Il ressemble ',bold:'à sa sœur',after:'.',cat:'E'},
+ {n:4,before:'',bold:'Dans le couloir',after:', les élèves chuchotent.',cat:'C'},
+ {n:5,before:'Le ciel devient ',bold:'sombre',after:'.',cat:'E'},
+ {n:6,before:'Les sportifs s\u2019entraînent ',bold:'avec sérieux',after:'.',cat:'C'}
+];
+function buildCorpus(){
+  var box=$('corpusBox');box.innerHTML='';
+  CORPUS.forEach(function(c){
+    var p=document.createElement('p');
+    p.innerHTML='<span class="n">'+c.n+'.</span>'+c.before+'<strong>'+c.bold+'</strong>'+c.after;
+    box.appendChild(p);
+  });
+}
+
+/* ══ Q1 — CLASSEMENT (essentiel / circonstanciel) ══ */
+var ZONES1=[{key:'E',cls:'zA',label:'Compléments essentiels'},{key:'C',cls:'zB',label:'Compléments circonstanciels'}];
+var scQ1=0,errQ1=0,doneQ1=0;
+function buildQ1(){
+  scQ1=0;errQ1=0;doneQ1=0;
+  $('fbQ1').className='fb-box inline';$('fbQ1').innerHTML='';
+  $('corrigeQ1').style.display='none';
+  $('actionsQ1').style.display='none';
+  var tray=$('trayQ1');tray.innerHTML='';
+  var zonesEl=$('zonesQ1');zonesEl.innerHTML='';
+  var selectedTile=null;
+  var order=shuffleArr(CORPUS.map(function(c,i){return {c:c,i:i};}));
+  var tiles=[];
+  order.forEach(function(o){
+    var tile=document.createElement('div');tile.className='tile';tile.textContent=o.c.bold;
+    tile.addEventListener('click',function(){
+      if(tile.classList.contains('placed'))return;
+      tiles.forEach(function(t){t.el.classList.remove('sel');});
+      selectedTile=o;tile.classList.add('sel');
+    });
+    tray.appendChild(tile);
+    tiles.push({el:tile,data:o});
+  });
+  ZONES1.forEach(function(z){
+    var zoneDiv=document.createElement('div');zoneDiv.className='zone '+z.cls;
+    var title=document.createElement('div');title.className='zone-title';title.textContent=z.label;
+    zoneDiv.appendChild(title);
+    var chipsHolder=document.createElement('div');
+    zoneDiv.appendChild(chipsHolder);
+    zoneDiv.addEventListener('click',function(){
+      if(!selectedTile)return;
+      var tileObj=tiles.filter(function(t){return t.data===selectedTile;})[0];
+      tileObj.el.classList.add('placed');tileObj.el.classList.remove('sel');
+      var ok=(selectedTile.c.cat===z.key);
+      var chip=document.createElement('span');chip.className='zone-chip '+(ok?'correct':'wrong');
+      chip.textContent=selectedTile.c.bold;
+      chipsHolder.appendChild(chip);
+      flashIcon(ok);
+      if(ok){scQ1++;scGlobal++;beepOk();}else{errQ1++;errGlobal++;beepErr();}
+      selectedTile=null;
+      doneQ1++;
+      $('spA').textContent='Q1\u00a0: '+scQ1+' / 6';
+      updateGlobal();
+      if(doneQ1>=CORPUS.length)endQ1();
+    });
+    zonesEl.appendChild(zoneDiv);
+  });
+}
+function endQ1(){
+  var msg = scQ1>=5 ? "Excellent\u00a0! "+scQ1+"/6 — tu distingues bien essentiels et circonstanciels."
+    : scQ1>=3 ? scQ1+"/6. Relis les manipulations dans le corrigé."
+    : scQ1+"/6. Conseil\u00a0: teste le déplacement — si le groupe peut bouger, c'est souvent circonstanciel.";
+  $('fbQ1').classList.add('show', scQ1>=5?'ok':(scQ1>=3?'mid':'ko'));
+  $('fbQ1').innerHTML='<span class="fb-titre">Score\u00a0: '+scQ1+' / 6</span>'+msg;
+  $('corrigeQ1').style.display='block';
+  $('corrigeQ1').innerHTML='<span class="lbl">Corrigé</span>'
+    +'Essentiels\u00a0: ses notes (COD) · à sa sœur (COI) · sombre (attribut du sujet)<br>'
+    +'Circonstanciels\u00a0: Le soir (CC temps) · Dans le couloir (CC lieu) · avec sérieux (CC manière)<br>'
+    +'<em>À retenir\u00a0: les CC sont déplaçables ; les essentiels font partie de la construction du verbe.</em>';
+  recapItems.push({l:'E1 · Q1 — Essentiel/circonstanciel',s:scQ1>=5?'Réussi':(scQ1>=3?'Partiel':'À revoir')});
+  $('actionsQ1').style.display='flex';
+}
+$('btnNextQ1').addEventListener('click',function(){
+  $('e2q1Wrap').style.display='none';
+  $('e2q2Wrap').style.display='';
+});
+
+/* ══ Q2 — APPARIEMENT ══ */
+var FUNCS=[
+ {key:'ccT',label:'CC de temps'},{key:'cod',label:'COD'},{key:'coi',label:'COI'},
+ {key:'ccL',label:'CC de lieu'},{key:'attr',label:'attribut du sujet'},{key:'ccM',label:'CC de manière'}
+];
+var MATCH_DATA={
+ 'Le soir':'ccT','ses notes':'cod','à sa sœur':'coi','Dans le couloir':'ccL','sombre':'attr','avec sérieux':'ccM'
+};
+var scQ2=0,errQ2=0,doneQ2=0;
+function buildQ2(){
+  scQ2=0;errQ2=0;doneQ2=0;
+  $('fbQ2').className='fb-box inline';$('fbQ2').innerHTML='';
+  $('corrigeQ2').style.display='none';
+  $('actionsQ2').style.display='none';
+  var left=$('matchLeft');left.innerHTML='';
+  var right=$('matchRight');right.innerHTML='';
+  var selectedGroup=null;
+  var groups=shuffleArr(CORPUS.map(function(c){return c.bold;}).slice());
+  var groupEls=[];
+  groups.forEach(function(g){
+    var el=document.createElement('div');el.className='match-item';el.textContent=g;
+    el.addEventListener('click',function(){
+      if(el.classList.contains('used'))return;
+      groupEls.forEach(function(o){o.el.classList.remove('sel');});
+      selectedGroup=g;el.classList.add('sel');
+    });
+    left.appendChild(el);
+    groupEls.push({el:el,g:g});
+  });
+  var funcOrder=FUNCS.slice();
+  var funcEls=[];
+  funcOrder.forEach(function(f){
+    var el=document.createElement('div');el.className='match-item';el.textContent=f.label;
+    el.addEventListener('click',function(){
+      if(el.classList.contains('used')||!selectedGroup)return;
+      var groupObj=groupEls.filter(function(o){return o.g===selectedGroup;})[0];
+      var ok=(MATCH_DATA[selectedGroup]===f.key);
+      groupObj.el.classList.add('used',ok?'correct':'wrong');
+      el.classList.add('used',ok?'correct':'wrong');
+      flashIcon(ok);
+      if(ok){scQ2++;scGlobal++;beepOk();}else{errQ2++;errGlobal++;beepErr();}
+      selectedGroup=null;
+      doneQ2++;
+      $('spA').textContent=($('spA').textContent.split(' · ')[0]||'Q1\u00a0: '+scQ1+' / 6')+' · Q2\u00a0: '+scQ2+' / 6';
+      updateGlobal();
+      if(doneQ2>=CORPUS.length)endQ2();
+    });
+    right.appendChild(el);
+    funcEls.push({el:el,f:f});
+  });
+}
+function endQ2(){
+  var msg = scQ2>=5 ? "Excellent\u00a0! "+scQ2+"/6 — tu identifies bien les fonctions précises."
+    : scQ2>=3 ? scQ2+"/6. Relis le corrigé pour les erreurs."
+    : scQ2+"/6. Attention\u00a0: CC de temps/lieu/manière se distinguent par leur sens.";
+  $('fbQ2').classList.add('show', scQ2>=5?'ok':(scQ2>=3?'mid':'ko'));
+  $('fbQ2').innerHTML='<span class="fb-titre">Score\u00a0: '+scQ2+' / 6</span>'+msg;
+  $('corrigeQ2').style.display='block';
+  $('corrigeQ2').innerHTML='<span class="lbl">Corrigé</span>'
+    +'Le soir → CC de temps<br>ses notes → COD (Nora les relit)<br>à sa sœur → COI (Il lui ressemble)<br>'
+    +'Dans le couloir → CC de lieu<br>sombre → attribut du sujet (verbe d\u2019état devient)<br>avec sérieux → CC de manière';
+  recapItems.push({l:'E1 · Q2 — Appariement',s:scQ2>=5?'Réussi':(scQ2>=3?'Partiel':'À revoir')});
+  $('actionsQ2').style.display='flex';
+}
+$('btnNextQ2').addEventListener('click',function(){
+  $('e2q2Wrap').style.display='none';
+  $('cardA').style.display='none';
+  $('cardB').classList.remove('locked');
+  var cb=$('cardB');if(cb)cb.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ══ EXERCICE 3 — Q1 ══ */
+var E3Q1_ITEMS=[
+ {phraseBefore:"J'admire ",bold:'ce tableau',phraseAfter:'.',
+  pronomOpts:["le / l'",'lui','aucun'],pronomCorrect:0,
+  funcOpts:['COD','COI','attribut du sujet'],funcCorrect:0,
+  explic:"Je l'admire → pronom l' = COD direct sans préposition."},
+ {phraseBefore:'Nous téléphonons ',bold:'à nos grands-parents',phraseAfter:'.',
+  pronomOpts:["le / l'",'leur','aucun'],pronomCorrect:1,
+  funcOpts:['COD','COI','attribut du sujet'],funcCorrect:1,
+  explic:"Nous leur téléphonons → pronom leur = COI."},
+ {phraseBefore:'Le ciel devient ',bold:'orageux',phraseAfter:'.',
+  pronomOpts:["le / l'",'lui','aucun'],pronomCorrect:2,
+  funcOpts:['COD','COI','attribut du sujet'],funcCorrect:2,
+  explic:"Aucun pronom complément ne convient\u00a0: orageux caractérise le ciel après le verbe d'état devient."}
+];
+var E3Q1_P4={
+ phrase:"Le guide raconte l'histoire du château aux visiteurs.",
+ groupA:"l'histoire du château",funcCorrectA:0,explicA:"Il la raconte → COD.",
+ groupB:'aux visiteurs',funcCorrectB:1,explicB:'Il leur raconte → COI.',
+ funcOpts:['COD','COI','attribut du sujet']
+};
+var e3q1RunningPts=0;
+function buildE3Q1(){
+  e3q1RunningPts=0;
+  var container=$('e3q1Cards');container.innerHTML='';
+  var doneCount=0;
+  E3Q1_ITEMS.forEach(function(item,idx){
+    var card=document.createElement('div');card.className='gcard';
+    var num=document.createElement('div');num.className='gcard-num';num.textContent='Phrase '+(idx+1)+' / 4';
+    var ph=document.createElement('div');ph.className='gcard-phrase';
+    ph.innerHTML=item.phraseBefore+'<strong>'+item.bold+'</strong>'+item.phraseAfter;
+    card.appendChild(num);card.appendChild(ph);
+    var lblP=document.createElement('div');lblP.className='gcard-lbl';lblP.textContent='Pronom de remplacement';
+    card.appendChild(lblP);
+    var rowP=document.createElement('div');rowP.className='choice-btns';
+    var selP=null;
+    var orderP=shuffleArr(item.pronomOpts.map(function(t,i){return{t:t,i:i};}));
+    orderP.forEach(function(o){
+      var b=document.createElement('button');b.type='button';b.className='choice-btn';b.textContent=o.t;
+      b.addEventListener('click',function(){
+        if(b.disabled)return;
+        Array.prototype.forEach.call(rowP.children,function(x){x.classList.remove('sel');});
+        b.classList.add('sel');selP=o.i;refresh();
+      });
+      rowP.appendChild(b);
+    });
+    card.appendChild(rowP);
+    var lblF=document.createElement('div');lblF.className='gcard-lbl';lblF.textContent='Fonction';
+    card.appendChild(lblF);
+    var rowF=document.createElement('div');rowF.className='choice-btns';
+    var selF=null;
+    var orderF=shuffleArr(item.funcOpts.map(function(t,i){return{t:t,i:i};}));
+    orderF.forEach(function(o){
+      var b=document.createElement('button');b.type='button';b.className='choice-btn';b.textContent=o.t;
+      b.addEventListener('click',function(){
+        if(b.disabled)return;
+        Array.prototype.forEach.call(rowF.children,function(x){x.classList.remove('sel');});
+        b.classList.add('sel');selF=o.i;refresh();
+      });
+      rowF.appendChild(b);
+    });
+    card.appendChild(rowF);
+    var explic=document.createElement('div');explic.className='gcard-explic';explic.textContent=item.explic;
+    card.appendChild(explic);
+    var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-verify-t';
+    verifBtn.textContent='Vérifier';verifBtn.disabled=true;
+    card.appendChild(verifBtn);
+    var resetBtn=document.createElement('button');resetBtn.type='button';resetBtn.className='btn-reset-q';
+    resetBtn.textContent='↺ Recommencer cette question';resetBtn.style.display='none';
+    card.appendChild(resetBtn);
+    container.appendChild(card);
+
+    function refresh(){verifBtn.disabled=!(selP!==null&&selF!==null);}
+    var locked=false,ptsGiven=0;
+    verifBtn.addEventListener('click',function(){
+      if(locked||verifBtn.disabled)return;
+      locked=true;
+      Array.prototype.forEach.call(rowP.children,function(b,bi){
+        b.disabled=true;
+        if(orderP[bi].i===item.pronomCorrect)b.classList.add('correct');
+        else if(b.classList.contains('sel'))b.classList.add('wrong');
+      });
+      Array.prototype.forEach.call(rowF.children,function(b,bi){
+        b.disabled=true;
+        if(orderF[bi].i===item.funcCorrect)b.classList.add('correct');
+        else if(b.classList.contains('sel'))b.classList.add('wrong');
+      });
+      explic.classList.add('show');
+      var okP=(selP===item.pronomCorrect),okF=(selF===item.funcCorrect);
+      var pts=(okP?1:0)+(okF?1:0);
+      ptsGiven=pts;e3q1RunningPts+=pts;
+      scGlobal+=pts;errGlobal+=(2-pts);
+      flashIcon(pts===2);if(pts===2)beepOk();else beepErr();
+      $('spB').textContent='Q1\u00a0: '+e3q1RunningPts+' / 8';
+      updateGlobal();
+      verifBtn.style.display='none';resetBtn.style.display='inline-block';
+      doneCount++;
+      if(doneCount>=4)endE3Q1Aggregate();
+    });
+    resetBtn.addEventListener('click',function(){
+      if(!locked)return;
+      locked=false;e3q1RunningPts-=ptsGiven;scGlobal-=ptsGiven;errGlobal-=(2-ptsGiven);
+      updateGlobal();$('spB').textContent='Q1\u00a0: '+e3q1RunningPts+' / 8';
+      Array.prototype.forEach.call(rowP.children,function(b){b.disabled=false;b.classList.remove('correct','wrong','sel');});
+      Array.prototype.forEach.call(rowF.children,function(b){b.disabled=false;b.classList.remove('correct','wrong','sel');});
+      selP=null;selF=null;explic.classList.remove('show');
+      verifBtn.style.display='inline-block';verifBtn.disabled=true;resetBtn.style.display='none';
+    });
+  });
+
+  /* phrase 4 : deux fonctions, pas de pronom */
+  var card4=document.createElement('div');card4.className='gcard';
+  var num4=document.createElement('div');num4.className='gcard-num';num4.textContent='Phrase 4 / 4';
+  var ph4=document.createElement('div');ph4.className='gcard-phrase';
+  ph4.innerHTML="Le guide raconte <strong>l'histoire du château</strong> <strong>aux visiteurs</strong>.";
+  card4.appendChild(num4);card4.appendChild(ph4);
+
+  var lblA=document.createElement('div');lblA.className='gcard-lbl';lblA.textContent="Fonction de « l'histoire du château »";
+  card4.appendChild(lblA);
+  var rowA=document.createElement('div');rowA.className='choice-btns';
+  var selA=null;
+  var orderA=shuffleArr(E3Q1_P4.funcOpts.map(function(t,i){return{t:t,i:i};}));
+  orderA.forEach(function(o){
+    var b=document.createElement('button');b.type='button';b.className='choice-btn';b.textContent=o.t;
+    b.addEventListener('click',function(){
+      if(b.disabled)return;
+      Array.prototype.forEach.call(rowA.children,function(x){x.classList.remove('sel');});
+      b.classList.add('sel');selA=o.i;refresh4();
+    });
+    rowA.appendChild(b);
+  });
+  card4.appendChild(rowA);
+
+  var lblB=document.createElement('div');lblB.className='gcard-lbl';lblB.textContent="Fonction de « aux visiteurs »";
+  card4.appendChild(lblB);
+  var rowB=document.createElement('div');rowB.className='choice-btns';
+  var selB=null;
+  var orderB=shuffleArr(E3Q1_P4.funcOpts.map(function(t,i){return{t:t,i:i};}));
+  orderB.forEach(function(o){
+    var b=document.createElement('button');b.type='button';b.className='choice-btn';b.textContent=o.t;
+    b.addEventListener('click',function(){
+      if(b.disabled)return;
+      Array.prototype.forEach.call(rowB.children,function(x){x.classList.remove('sel');});
+      b.classList.add('sel');selB=o.i;refresh4();
+    });
+    rowB.appendChild(b);
+  });
+  card4.appendChild(rowB);
+
+  var explic4=document.createElement('div');explic4.className='gcard-explic';
+  explic4.textContent=E3Q1_P4.explicA+' '+E3Q1_P4.explicB;
+  card4.appendChild(explic4);
+  var verifBtn4=document.createElement('button');verifBtn4.type='button';verifBtn4.className='btn-verify-t';
+  verifBtn4.textContent='Vérifier';verifBtn4.disabled=true;
+  card4.appendChild(verifBtn4);
+  var resetBtn4=document.createElement('button');resetBtn4.type='button';resetBtn4.className='btn-reset-q';
+  resetBtn4.textContent='↺ Recommencer cette question';resetBtn4.style.display='none';
+  card4.appendChild(resetBtn4);
+  container.appendChild(card4);
+
+  function refresh4(){verifBtn4.disabled=!(selA!==null&&selB!==null);}
+  var locked4=false,pts4Given=0;
+  verifBtn4.addEventListener('click',function(){
+    if(locked4||verifBtn4.disabled)return;
+    locked4=true;
+    Array.prototype.forEach.call(rowA.children,function(b,bi){
+      b.disabled=true;
+      if(orderA[bi].i===E3Q1_P4.funcCorrectA)b.classList.add('correct');
+      else if(b.classList.contains('sel'))b.classList.add('wrong');
+    });
+    Array.prototype.forEach.call(rowB.children,function(b,bi){
+      b.disabled=true;
+      if(orderB[bi].i===E3Q1_P4.funcCorrectB)b.classList.add('correct');
+      else if(b.classList.contains('sel'))b.classList.add('wrong');
+    });
+    explic4.classList.add('show');
+    var okA=(selA===E3Q1_P4.funcCorrectA),okB=(selB===E3Q1_P4.funcCorrectB);
+    var pts=(okA?1:0)+(okB?1:0);
+    pts4Given=pts;e3q1RunningPts+=pts;
+    scGlobal+=pts;errGlobal+=(2-pts);
+    flashIcon(pts===2);if(pts===2)beepOk();else beepErr();
+    $('spB').textContent='Q1\u00a0: '+e3q1RunningPts+' / 8';
+    updateGlobal();
+    verifBtn4.style.display='none';resetBtn4.style.display='inline-block';
+    doneCount++;
+    if(doneCount>=4)endE3Q1Aggregate();
+  });
+  resetBtn4.addEventListener('click',function(){
+    if(!locked4)return;
+    locked4=false;e3q1RunningPts-=pts4Given;scGlobal-=pts4Given;errGlobal-=(2-pts4Given);
+    updateGlobal();$('spB').textContent='Q1\u00a0: '+e3q1RunningPts+' / 8';
+    Array.prototype.forEach.call(rowA.children,function(b){b.disabled=false;b.classList.remove('correct','wrong','sel');});
+    Array.prototype.forEach.call(rowB.children,function(b){b.disabled=false;b.classList.remove('correct','wrong','sel');});
+    selA=null;selB=null;explic4.classList.remove('show');
+    verifBtn4.style.display='inline-block';verifBtn4.disabled=true;resetBtn4.style.display='none';
+  });
+}
+function endE3Q1Aggregate(){
+  var pts=e3q1RunningPts;
+  var msg = pts>=7 ? "Très bien\u00a0! "+pts+"/8 — tu maîtrises le remplacement pronominal."
+    : pts>=5 ? pts+"/8. Relis les explications des erreurs."
+    : pts+"/8. Rappel\u00a0: le/la/l' = COD · lui/leur = COI · aucun pronom = attribut.";
+  var fb=document.createElement('div');fb.className='fb-box inline show '+(pts>=7?'ok':(pts>=5?'mid':'ko'));
+  fb.innerHTML='<span class="fb-titre">Score\u00a0: '+pts+' / 8</span>'+msg;
+  $('e3q1Cards').appendChild(fb);
+  var corrige=document.createElement('div');corrige.className='corrige-box';
+  corrige.innerHTML='<span class="lbl">Corrigé</span>'
+    +"Je l'admire → COD.<br>Nous leur téléphonons → COI.<br>Pas de pronom complément → attribut du sujet.<br>"
+    +'Il la raconte = COD · Il leur raconte = COI.';
+  $('e3q1Cards').appendChild(corrige);
+  recapItems.push({l:'E2 · Q1 — Pronom et fonction',s:pts>=7?'Réussi':(pts>=5?'Partiel':'À revoir')});
+  var nav=document.createElement('div');nav.className='actions-row';nav.style.display='flex';
+  var next=document.createElement('button');next.className='btn-next';next.textContent='Question suivante →';
+  next.addEventListener('click',function(){
+    $('e3q1Wrap').style.display='none';
+    $('e3q2Wrap').style.display='';
+  });
+  nav.appendChild(next);$('e3q1Cards').appendChild(nav);
+}
+
+/* ══ EXERCICE 3 — Q2 : justification libre ══ */
+var KEYWORDS_E3Q2=["l'",'le','la','cod','coi','leur','pronom','attribut',"verbe d'état",'devient','caractérise','fonction','donc','remplacer'];
+function scoreE3Q2Field(text){
+  return (containsAny(text,KEYWORDS_E3Q2)&&text.trim().length>10)?1:0;
+}
+var E3Q2_ITEMS=[
+ {ref:"J'admire ce tableau."},
+ {ref:'Nous téléphonons à nos grands-parents.'},
+ {ref:'Le ciel devient orageux.'}
+];
+function buildE3Q2(){
+  var list=$('listE3Q2');list.innerHTML='';
+  var validCount=0,doneCount=0;
+  E3Q2_ITEMS.forEach(function(item,idx){
+    var div=document.createElement('div');div.className='trans-item';
+    var num=document.createElement('div');num.className='trans-num';num.textContent='Phrase '+(idx+1)+' / 3';
+    var orig=document.createElement('div');orig.className='trans-orig';orig.textContent=item.ref;
+    div.appendChild(num);div.appendChild(orig);
+    var input=document.createElement('input');input.type='text';input.className='trans-input';
+    input.placeholder="J'obtiens … ; le groupe est donc …";
+    div.appendChild(input);
+    var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-verify-t';
+    verifBtn.textContent='Vérifier';verifBtn.disabled=true;
+    div.appendChild(verifBtn);
+    var resetBtn=document.createElement('button');resetBtn.type='button';resetBtn.className='btn-reset-q';
+    resetBtn.textContent='↺ Recommencer cette question';resetBtn.style.display='none';
+    div.appendChild(resetBtn);
+    var fb=document.createElement('div');fb.className='fb-box inline';
+    div.appendChild(fb);
+    list.appendChild(div);
+
+    input.addEventListener('input',function(){verifBtn.disabled=(input.value.trim()==='');});
+    var locked=false,wasOk=false;
+    verifBtn.addEventListener('click',function(){
+      if(locked||input.value.trim()==='')return;
+      locked=true;input.disabled=true;
+      var ok=scoreE3Q2Field(input.value)===1;
+      wasOk=ok;
+      input.classList.add(ok?'correct':'wrong');
+      if(ok)validCount++;
+      flashIcon(ok);if(ok)beepOk();else beepErr();
+      fb.classList.add('show',ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Bon raisonnement !':'❌ Précise le pronom et la fonction.')+'</span>';
+      verifBtn.style.display='none';resetBtn.style.display='inline-block';
+      doneCount++;
+      if(doneCount>=E3Q2_ITEMS.length)endE3Q2Aggregate(validCount);
+    });
+    resetBtn.addEventListener('click',function(){
+      if(!locked)return;
+      locked=false;if(wasOk)validCount--;
+      input.disabled=false;input.value='';input.classList.remove('correct','wrong');
+      fb.classList.remove('show','ok','ko');fb.innerHTML='';
+      verifBtn.style.display='inline-block';verifBtn.disabled=true;resetBtn.style.display='none';
+    });
+  });
+}
+function endE3Q2Aggregate(validCount){
+  var pts= validCount>=2?3:(validCount===1?1:0);
+  scGlobal+=pts;errGlobal+=(3-pts);
+  var msg = pts===3 ? "Excellentes justifications\u00a0! Tu expliques bien le lien entre pronom et fonction."
+    : pts===1 ? "Bien\u00a0! Essaie de mentionner le pronom obtenu et la fonction déduite."
+    : "Les justifications doivent nommer le pronom (l', leur…) et en déduire la fonction.";
+  var fb=document.createElement('div');fb.className='fb-box inline show '+(pts===3?'ok':(pts===1?'mid':'ko'));
+  fb.innerHTML='<span class="fb-titre">Score\u00a0: '+pts+' / 3</span>'+msg;
+  $('listE3Q2').appendChild(fb);
+  var corrige=document.createElement('div');corrige.className='corrige-box';
+  corrige.innerHTML='<span class="lbl">Corrigé</span>'
+    +"Phrase 1\u00a0: J'obtiens l' → le groupe est COD.<br>"
+    +"Phrase 2\u00a0: J'obtiens leur → le groupe est COI.<br>"
+    +"Phrase 3\u00a0: Aucun pronom complément ne convient ; orageux caractérise le sujet après devient → attribut du sujet.";
+  $('listE3Q2').appendChild(corrige);
+  recapItems.push({l:'E2 · Q2 — Justifications',s:pts===3?'Réussi':(pts===1?'Partiel':'À revoir')});
+  updateGlobal();
+  setTimeout(showResults,500);
+}
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var pct=scGlobal/TOTAL;
+  $('r-score').textContent=scGlobal;
+  var s= pct>=.9?5: pct>=.7?4: pct>=.5?3: pct>=.25?2:1;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg = pct>=.88 ? "Excellent\u00a0! Maîtrise solide."
+    : pct>=.70 ? "Très bien\u00a0! Quelques points à consolider."
+    : pct>=.50 ? "Bien. Relis les corrigés."
+    : "Continue\u00a0! Reprends les manipulations syntaxiques.";
+  $('r-msg').textContent=msg;
+  var rl=$('recap-list');rl.innerHTML='';
+  recapItems.forEach(function(r){
+    var d=document.createElement('div');d.textContent=r.l+' — '+r.s;rl.appendChild(d);
+  });
+  $('results').classList.add('show');
+  beepFinal(pct>=.70);
+  if(pct>=.70){emojiRain(['📝','📖','✒️','🖋️','📜']);}
+}
+
+/* ══ RESTART ══ */
+function resetAll(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardA').style.display='';
+  $('cardB').classList.add('locked');
+  $('e2q1Wrap').style.display='';
+  $('e2q2Wrap').style.display='none';
+  $('e3q1Wrap').style.display='';
+  $('e3q2Wrap').style.display='none';
+  scGlobal=0;errGlobal=0;recapItems=[];
+  buildQ1();buildQ2();buildE3Q1();buildE3Q2();
+  updateGlobal();
+  $('spA').textContent='';$('spB').textContent='';
+}
+$('btn-restart').addEventListener('click',function(){
+  resetAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildCorpus();
+buildQ1();
+buildQ2();
+buildE3Q1();
+buildE3Q2();
+updateGlobal();
+</script>
+</body>
+</html>
