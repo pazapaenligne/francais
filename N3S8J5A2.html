@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J5 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5c518;--day-color:#f5c518;--day-dark:#8a6000;--day-dark2:#5c4000;
+  --day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.28);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffaf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:900px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--blue);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.consigne-box{margin:0 0 1rem;background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.92rem;color:var(--day-dark2);
+  font-weight:700;line-height:1.6;text-align:center;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.main-layout{display:flex;gap:1.2rem;flex-wrap:wrap;align-items:flex-start;justify-content:center;}
+.grid-panel{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  box-shadow:0 5px 22px rgba(0,0,0,.07);padding:1rem;flex:0 0 auto;}
+.xgrid{display:grid;gap:2px;background:#2a2a2a;padding:2px;border-radius:6px;
+  width:min(94vw,480px);aspect-ratio:1;}
+.cell{position:relative;background:#111;aspect-ratio:1;}
+.cell.white{background:var(--surface);}
+.cell input{width:100%;height:100%;border:none;background:transparent;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-weight:800;text-transform:uppercase;
+  font-size:clamp(.7rem,2.6vw,1.1rem);color:var(--text);padding:0;caret-color:var(--day-dark);}
+.cell input:focus{outline:2px solid var(--day-dark);outline-offset:-2px;background:var(--day-light);}
+.cell .num{position:absolute;top:1px;left:2px;font-size:.5rem;font-family:'JetBrains Mono',monospace;
+  font-weight:800;color:var(--day-dark2);pointer-events:none;line-height:1;}
+.cell.hl input{background:var(--day-light);}
+.cell.correct input{background:#eaf7e2;color:#2f5c15;}
+.cell.wrong input{background:var(--err-light);color:var(--err-dark);}
+.cell.revealed input{background:var(--day-border);color:var(--day-dark2);}
+
+.clues-panel{flex:1 1 260px;min-width:240px;max-width:360px;}
+.clue-block{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  box-shadow:0 5px 22px rgba(0,0,0,.07);padding:.9rem 1rem;margin-bottom:1rem;}
+.clue-block-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem;}
+.clue-item{font-size:.86rem;line-height:1.55;padding:.5rem .6rem;border-radius:8px;cursor:pointer;
+  margin-bottom:.3rem;border:1.5px solid transparent;transition:background .12s,border-color .12s;}
+.clue-item:hover{background:var(--day-light);}
+.clue-item.active{background:var(--day-light);border-color:var(--day-dark);}
+.clue-item.found{color:#2f7a1f;}
+.clue-item.found::after{content:' ✓';font-weight:800;}
+.clue-num{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--day-dark2);margin-right:.3rem;}
+.clue-fb{font-size:.78rem;color:var(--err-dark);background:var(--err-light);border-left:3px solid var(--err);
+  padding:.4rem .5rem;border-radius:6px;margin:.3rem 0 .5rem;display:none;line-height:1.5;}
+.clue-fb.show{display:block;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0;justify-content:center;}
+.btn{border:none;border-radius:99px;font-family:Arial,sans-serif;font-weight:800;
+  font-size:clamp(.88rem,2.5vw,.97rem);padding:.75rem 1.6rem;min-height:2.8rem;cursor:pointer;
+  transition:background .15s,opacity .15s;}
+.btn-verify{background:var(--day-dark);color:#fff;}
+.btn-verify:hover:not(:disabled){background:#6e4c00;}
+.btn-verify:disabled{opacity:.4;cursor:default;}
+.btn-reset{background:none;border:1.5px solid var(--day-border);color:var(--day-dark2);}
+.btn-reset:hover{background:var(--day-light);}
+.btn-sol{background:none;border:1.5px solid var(--err-border);color:var(--err-dark);}
+.btn-sol:hover{background:var(--err-light);}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;margin-top:1rem;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#6e4c00;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 5</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Grille de mots croisés — 4 temps simples</div>
+</header>
+
+<div class="consigne-box">✏️ Conjugue chaque verbe au temps et à la personne indiqués. Écris ta réponse en majuscules, sans accent.</div>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 14 mots</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Trouvés&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">14</span></span>
+</div>
+
+<div class="main-layout">
+  <div class="grid-panel">
+    <div class="xgrid" id="xgrid"></div>
+  </div>
+  <div class="clues-panel">
+    <div class="clue-block">
+      <div class="clue-block-title">Horizontales →</div>
+      <div id="cluesH"></div>
+    </div>
+    <div class="clue-block">
+      <div class="clue-block-title">Verticales ↓</div>
+      <div id="cluesV"></div>
+    </div>
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-verify" id="btnVerify">Vérifier</button>
+  <button class="btn btn-reset" id="btnReset">↺ Recommencer</button>
+  <button class="btn btn-sol" id="btnSol">Solution</button>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 14</div>
+    <div class="res-msg" id="r-msg"></div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+var DATA = {"height": 14, "width": 14, "grid": [[null, null, null, "E", null, "P", "R", "E", "N", "I", "O", "N", "S", null], ["M", "A", "R", "C", "H", "A", null, null, null, null, "B", null, null, null], [null, null, null, "R", null, "R", null, null, null, null, "E", null, null, null], [null, null, null, "I", null, "T", null, "L", "I", "S", "I", "O", "N", "S"], [null, null, null, "T", null, "I", null, null, null, null, "S", null, null, "A"], [null, null, null, null, null, "R", null, null, "O", null, "S", null, null, "U"], [null, null, null, null, null, "E", null, null, "B", null, "E", null, null, "R"], [null, null, null, "F", "I", "N", "I", "S", "S", "E", "N", "T", null, "O"], [null, null, null, "E", null, "T", null, null, "E", null, "T", null, null, "N"], [null, null, null, "R", null, null, null, null, "R", null, null, "V", "I", "T"], [null, null, null, "A", null, null, null, null, "V", null, null, null, null, null], [null, null, null, "I", "R", "E", "Z", null, "A", null, null, null, null, null], [null, null, null, null, null, "U", null, "V", "I", "E", "N", "D", "R", "A"], [null, null, null, null, null, "T", null, null, "S", null, null, null, null, null]], "words": [{"id": "H3", "orient": "H", "r": 0, "c": 5, "answer": "PRENIONS", "num": 2, "verb": "prendre", "temps": "imparfait", "personne": "nous", "contexte": "Nous __ le même sentier chaque matin pour rejoindre la rivière.", "fb": "Prendre, groupe 3, imparfait, 1re pers. plur. : radical pren- (de nous prenons) + terminaison -ions → prenions."}, {"id": "H1", "orient": "H", "r": 1, "c": 0, "answer": "MARCHA", "num": 4, "verb": "marcher", "temps": "passé simple", "personne": "il", "contexte": "Il __ soudainement rapidement.", "fb": "Marcher, groupe 1, passé simple, 3e pers. sing. : radical march- + terminaison -a → marcha."}, {"id": "H7", "orient": "H", "r": 3, "c": 7, "answer": "LISIONS", "num": 5, "verb": "lire", "temps": "imparfait", "personne": "nous", "contexte": "Nous __ les rapports des explorateurs avec beaucoup d'attention.", "fb": "Lire, groupe 3, imparfait, 1re pers. plur. : radical lis- (de nous lisons) + terminaison -ions → lisions. l-i-s-i-o-n-s."}, {"id": "H2", "orient": "H", "r": 7, "c": 3, "answer": "FINISSENT", "num": 8, "verb": "finir", "temps": "présent", "personne": "ils", "contexte": "Ils __ toujours leurs expériences avant de rédiger leurs conclusions.", "fb": "Finir, groupe 2, présent, 3e pers. plur. : radical finiss- + terminaison -ent → finissent."}, {"id": "H5", "orient": "H", "r": 9, "c": 11, "answer": "VIT", "num": 9, "verb": "voir", "temps": "passé simple", "personne": "il", "contexte": "Il __ la lumière au loin et accéléra le pas.", "fb": "Voir est irrégulier au passé simple : 3e pers. sing. → vit. v-i-t. Attention : pas de -s ni de -t final visible : v-i-t."}, {"id": "H4", "orient": "H", "r": 11, "c": 3, "answer": "IREZ", "num": 10, "verb": "aller", "temps": "futur simple", "personne": "vous", "contexte": "Vous __ observer les étoiles depuis le sommet de la colline.", "fb": "Aller est irrégulier au futur : radical ir- + terminaison -ez → irez. i-r-e-z."}, {"id": "H6", "orient": "H", "r": 12, "c": 7, "answer": "VIENDRA", "num": 12, "verb": "venir", "temps": "futur simple", "personne": "elle", "contexte": "Elle __ nous rejoindre dès que ses recherches seront terminées.", "fb": "Venir est irrégulier au futur : radical viendr- + terminaison -a → viendra. v-i-e-n-d-r-a."}, {"id": "V3", "orient": "V", "r": 0, "c": 3, "answer": "ECRIT", "num": 1, "verb": "écrire", "temps": "présent", "personne": "elle", "contexte": "Elle __ ses observations dans son carnet.", "fb": "Écrire, groupe 3, présent, 3e pers. sing. : radical écri- + terminaison -t → écrit. Sans accent : ECRIT."}, {"id": "V1", "orient": "V", "r": 0, "c": 5, "answer": "PARTIRENT", "num": 2, "verb": "partir", "temps": "passé simple", "personne": "ils", "contexte": "Ils __ avant l'aube pour éviter la chaleur du désert.", "fb": "Partir, groupe 3, passé simple, 3e pers. plur. : radical part- + terminaison -irent → partirent. p-a-r-t-i-r-e-n-t."}, {"id": "V7", "orient": "V", "r": 0, "c": 10, "answer": "OBEISSENT", "num": 3, "verb": "obéir", "temps": "présent", "personne": "ils", "contexte": "Ils __ toujours aux règles établies par leur équipe.", "fb": "Obéir, groupe 2, présent, 3e pers. plur. : radical obéiss- + terminaison -ent → obéissent. Sans accent : OBEISSENT."}, {"id": "V6", "orient": "V", "r": 3, "c": 13, "answer": "SAURONT", "num": 6, "verb": "savoir", "temps": "futur simple", "personne": "ils", "contexte": "Ils __ enfin la vérité quand les résultats seront publiés.", "fb": "Savoir est irrégulier au futur : radical saur- + terminaison -ont → sauront. s-a-u-r-o-n-t."}, {"id": "V5", "orient": "V", "r": 5, "c": 8, "answer": "OBSERVAIS", "num": 7, "verb": "observer", "temps": "imparfait", "personne": "tu", "contexte": "Tu __ les étoiles chaque nuit depuis la terrasse de la maison.", "fb": "Observer, groupe 1, imparfait, 2e pers. sing. : radical observ- + terminaison -ais → observais. o-b-s-e-r-v-a-i-s."}, {"id": "V2", "orient": "V", "r": 7, "c": 3, "answer": "FERAI", "num": 8, "verb": "faire", "temps": "futur simple", "personne": "je", "contexte": "Je __ de mon mieux pour terminer ce rapport avant demain.", "fb": "Faire est irrégulier au futur : radical fer- + terminaison -ai → ferai. f-e-r-a-i."}, {"id": "V4", "orient": "V", "r": 11, "c": 5, "answer": "EUT", "num": 11, "verb": "avoir", "temps": "passé simple", "personne": "il", "contexte": "Il __ soudain la certitude qu'il avait pris la bonne décision.", "fb": "Avoir est irrégulier au passé simple : 3e pers. sing. → eut. Sans accent dans la grille : EUT. e-u-t."}]};
+
+function $(id){return document.getElementById(id);}
+function norm(s){
+  return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+
+var H=DATA.height, W=DATA.width;
+var cellEls={};   // "r,c" -> input element
+var cellWrap={};  // "r,c" -> wrapper div
+var wordCells={}; // wordId -> [[r,c],...]
+var currentOrient='H';
+var currentWordId=null;
+var foundWords={};
+
+DATA.words.forEach(function(w){
+  var cells=[];
+  for(var i=0;i<w.answer.length;i++){
+    cells.push(w.orient==='H'?[w.r,w.c+i]:[w.r+i,w.c]);
+  }
+  wordCells[w.id]=cells;
+});
+
+/* numbering map: cell -> number (only start cells) */
+var numberAt={};
+DATA.words.forEach(function(w){
+  var key=w.r+','+w.c;
+  numberAt[key]=w.num;
+});
+
+function buildGrid(){
+  var grid=$('xgrid');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns='repeat('+W+',1fr)';
+  for(var r=0;r<H;r++){
+    for(var c=0;c<W;c++){
+      var letter=DATA.grid[r][c];
+      var div=document.createElement('div');
+      div.className='cell'+(letter?' white':'');
+      if(letter){
+        var key=r+','+c;
+        if(numberAt[key]){
+          var numEl=document.createElement('span');numEl.className='num';numEl.textContent=numberAt[key];
+          div.appendChild(numEl);
+        }
+        var inp=document.createElement('input');
+        inp.maxLength=1;inp.autocomplete='off';inp.autocapitalize='off';inp.spellcheck=false;
+        inp.dataset.r=r;inp.dataset.c=c;
+        inp.addEventListener('input',onCellInput);
+        inp.addEventListener('keydown',onCellKeydown);
+        inp.addEventListener('focus',function(e){onCellFocus(e.target);});
+        div.appendChild(inp);
+        cellEls[key]=inp;cellWrap[key]=div;
+      }
+      grid.appendChild(div);
+    }
+  }
+}
+
+function wordsAtCell(r,c){
+  var res=[];
+  DATA.words.forEach(function(w){
+    wordCells[w.id].forEach(function(cell){
+      if(cell[0]===r&&cell[1]===c)res.push(w);
+    });
+  });
+  return res;
+}
+
+function onCellFocus(inp){
+  var r=+inp.dataset.r,c=+inp.dataset.c;
+  var ws=wordsAtCell(r,c);
+  var pick=ws.find(function(w){return w.orient===currentOrient;})||ws[0];
+  if(pick)setActiveWord(pick.id,false);
+}
+
+function clearHighlights(){
+  Object.keys(cellWrap).forEach(function(k){cellWrap[k].classList.remove('hl');});
+  document.querySelectorAll('.clue-item').forEach(function(el){el.classList.remove('active');});
+}
+function setActiveWord(wid,focusFirst){
+  clearHighlights();
+  var w=DATA.words.find(function(x){return x.id===wid;});
+  if(!w)return;
+  currentWordId=wid;currentOrient=w.orient;
+  wordCells[wid].forEach(function(cell){
+    var k=cell[0]+','+cell[1];
+    if(cellWrap[k])cellWrap[k].classList.add('hl');
+  });
+  var clueEl=document.querySelector('.clue-item[data-id="'+wid+'"]');
+  if(clueEl)clueEl.classList.add('active');
+  if(focusFirst){
+    var first=wordCells[wid][0];
+    var k=first[0]+','+first[1];
+    if(cellEls[k])cellEls[k].focus();
+  }
+}
+
+function nextCellInDir(r,c,dr,dc){
+  var nr=r+dr,nc=c+dc;
+  var k=nr+','+nc;
+  if(cellEls[k])return [nr,nc];
+  return null;
+}
+
+function checkWord(w){
+  if(foundWords[w.id])return null;
+  var cells=wordCells[w.id];
+  var typed='';
+  var anyFilled=false;
+  cells.forEach(function(cell){
+    var k=cell[0]+','+cell[1];
+    var v=cellEls[k].value||'';
+    if(v)anyFilled=true;
+    typed+=v;
+  });
+  var clueEl=document.querySelector('.clue-item[data-id="'+w.id+'"]');
+  var fbEl=$('fb_'+w.id);
+  if(norm(typed)===norm(w.answer)){
+    foundWords[w.id]=true;
+    cells.forEach(function(cell){
+      var k=cell[0]+','+cell[1];
+      cellEls[k].disabled=true;
+      cellEls[k].classList.remove('wrong');
+      cellEls[k].classList.add('correct');
+      cellEls[k].parentElement.classList.remove('wrong');
+      cellEls[k].parentElement.classList.add('correct');
+    });
+    if(clueEl)clueEl.classList.add('found');
+    if(fbEl){fbEl.classList.remove('show');fbEl.innerHTML='';}
+    return true;
+  }else if(anyFilled && typed.length===w.answer.length){
+    cells.forEach(function(cell){
+      var k=cell[0]+','+cell[1];
+      cellEls[k].classList.add('wrong');
+      cellEls[k].parentElement.classList.add('wrong');
+    });
+    if(fbEl){fbEl.classList.add('show');fbEl.innerHTML='❌ '+w.fb;}
+    return false;
+  }
+  return null;
+}
+
+function wordIsComplete(w){
+  return wordCells[w.id].every(function(cell){
+    var k=cell[0]+','+cell[1];
+    return cellEls[k].value;
+  });
+}
+
+function autoCheckAt(r,c){
+  wordsAtCell(r,c).forEach(function(w){
+    if(foundWords[w.id])return;
+    if(wordIsComplete(w)){
+      var res=checkWord(w);
+      if(res!==null){
+        updateGlobal();
+        flashIcon(res);
+        if(res)beepOk();else beepErr();
+        if(Object.keys(foundWords).length>=TOTAL){
+          $('btnVerify').disabled=true;
+          setTimeout(showResults,500);
+        }
+      }
+    }
+  });
+}
+
+function onCellInput(e){
+  var inp=e.target;
+  var val=norm(inp.value).replace(/[^A-Z]/g,'');
+  inp.value=val.slice(0,1);
+  inp.classList.remove('correct','wrong','revealed');
+  var wrap=inp.parentElement;wrap.classList.remove('correct','wrong','revealed');
+  var r=+inp.dataset.r,c=+inp.dataset.c;
+  wordsAtCell(r,c).forEach(function(w){
+    if(foundWords[w.id])return;
+    var fbEl=$('fb_'+w.id);
+    if(fbEl)fbEl.classList.remove('show');
+    wordCells[w.id].forEach(function(cell){
+      var k=cell[0]+','+cell[1];
+      cellEls[k].classList.remove('wrong');
+      cellEls[k].parentElement.classList.remove('wrong');
+    });
+  });
+  if(val){
+    var dr=currentOrient==='V'?1:0, dc=currentOrient==='H'?1:0;
+    var nxt=nextCellInDir(r,c,dr,dc);
+    if(nxt){cellEls[nxt[0]+','+nxt[1]].focus();}
+  }
+  autoCheckAt(r,c);
+}
+
+function onCellKeydown(e){
+  var inp=e.target;
+  var r=+inp.dataset.r,c=+inp.dataset.c;
+  if(e.key==='ArrowRight'){e.preventDefault();currentOrient='H';var n=nextCellInDir(r,c,0,1);if(n)cellEls[n[0]+','+n[1]].focus();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();currentOrient='H';var n=nextCellInDir(r,c,0,-1);if(n)cellEls[n[0]+','+n[1]].focus();}
+  else if(e.key==='ArrowDown'){e.preventDefault();currentOrient='V';var n=nextCellInDir(r,c,1,0);if(n)cellEls[n[0]+','+n[1]].focus();}
+  else if(e.key==='ArrowUp'){e.preventDefault();currentOrient='V';var n=nextCellInDir(r,c,-1,0);if(n)cellEls[n[0]+','+n[1]].focus();}
+  else if(e.key==='Backspace'){
+    if(!inp.value){
+      e.preventDefault();
+      var dr=currentOrient==='V'?-1:0, dc=currentOrient==='H'?-1:0;
+      var n=nextCellInDir(r,c,dr,dc);
+      if(n){var el=cellEls[n[0]+','+n[1]];el.focus();el.value='';el.classList.remove('correct','wrong','revealed');el.parentElement.classList.remove('correct','wrong','revealed');}
+    }
+  }
+  else if(e.key==='Tab'){
+    e.preventDefault();
+    var order=DATA.words.map(function(w){return w.id;});
+    var idx=order.indexOf(currentWordId);
+    var nidx=(idx+(e.shiftKey?-1:1)+order.length)%order.length;
+    setActiveWord(order[nidx],true);
+  }
+}
+
+/* ══ CLUE LISTS ══ */
+function buildClues(){
+  var hList=DATA.words.filter(function(w){return w.orient==='H';}).sort(function(a,b){return a.num-b.num;});
+  var vList=DATA.words.filter(function(w){return w.orient==='V';}).sort(function(a,b){return a.num-b.num;});
+  function render(list,container){
+    container.innerHTML='';
+    list.forEach(function(w){
+      var item=document.createElement('div');item.className='clue-item';item.dataset.id=w.id;
+      item.innerHTML='<span class="clue-num">'+w.num+'</span>Verbe : <em>'+w.verb+'</em> — '+w.temps+', '+w.personne+'.<br>« '+w.contexte.replace('__','……')+' » <span style="color:var(--muted);">('+w.answer.length+' lettres)</span>';
+      item.addEventListener('click',function(){setActiveWord(w.id,true);});
+      container.appendChild(item);
+      var fb=document.createElement('div');fb.className='clue-fb';fb.id='fb_'+w.id;
+      container.appendChild(fb);
+    });
+  }
+  render(hList,$('cluesH'));
+  render(vList,$('cluesV'));
+}
+
+/* ══ SCORE / GLOBAL ══ */
+var TOTAL=14;
+function updateGlobal(){
+  var found=Object.keys(foundWords).length;
+  var pct=Math.round(found/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=found+' / '+TOTAL+' mots';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=found;
+  $('cnt-rem').textContent=TOTAL-found;
+}
+
+/* ══ VÉRIFIER (secours manuel : revérifie tout, utile pour un mot complet non détecté) ══ */
+$('btnVerify').addEventListener('click',function(){
+  var errCount=0;
+  DATA.words.forEach(function(w){
+    if(foundWords[w.id])return;
+    var res=checkWord(w);
+    if(res===false)errCount++;
+  });
+  $('cnt-ko').textContent=errCount;
+  updateGlobal();
+  flashIcon(errCount===0 && Object.keys(foundWords).length>0);
+  if(errCount===0 && Object.keys(foundWords).length===TOTAL){beepOk();}
+  else if(errCount>0){beepErr();}else{beepOk();}
+
+  if(Object.keys(foundWords).length>=TOTAL){
+    $('btnVerify').disabled=true;
+    setTimeout(showResults,500);
+  }
+});
+
+/* ══ SOLUTION ══ */
+$('btnSol').addEventListener('click',function(){
+  DATA.words.forEach(function(w){
+    var cells=wordCells[w.id];
+    cells.forEach(function(cell,i){
+      var k=cell[0]+','+cell[1];
+      var inp=cellEls[k];
+      inp.value=w.answer[i];
+      inp.disabled=true;
+      inp.classList.remove('wrong','correct');
+      inp.classList.add('revealed');
+      inp.parentElement.classList.remove('wrong','correct');
+      inp.parentElement.classList.add('revealed');
+    });
+    var fbEl=$('fb_'+w.id);if(fbEl){fbEl.classList.remove('show');}
+  });
+  $('btnVerify').disabled=true;
+});
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var tot=Object.keys(foundWords).length;
+  $('r-score').textContent=tot;
+  var msg;
+  if(tot===14)msg='Super travail\u00a0!.';
+  else if(tot>=11)msg='Très bonne grille\u00a0! Quelques formes irrégulières à revoir.';
+  else if(tot>=7)msg='Bonne tentative. Revois les terminaisons signalées.';
+  else msg='Revois les terminaisons.';
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  beepFinal(tot>=11);
+  if(tot>=11){emojiRain(['📝','📖','✒️','🖋️','📜']);}
+}
+
+/* ══ RESET ══ */
+function resetAll(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  foundWords={};
+  Object.keys(cellEls).forEach(function(k){
+    var inp=cellEls[k];
+    inp.value='';inp.disabled=false;
+    inp.classList.remove('correct','wrong','revealed');
+    inp.parentElement.classList.remove('correct','wrong','revealed');
+  });
+  document.querySelectorAll('.clue-item').forEach(function(el){el.classList.remove('found','active');});
+  document.querySelectorAll('.clue-fb').forEach(function(el){el.classList.remove('show');el.innerHTML='';});
+  $('btnVerify').disabled=false;
+  $('cnt-ko').textContent='0';
+  updateGlobal();
+}
+$('btnReset').addEventListener('click',resetAll);
+$('btn-restart').addEventListener('click',function(){
+  resetAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildGrid();
+buildClues();
+updateGlobal();
+</script>
+</body>
+</html>
