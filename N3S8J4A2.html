@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J4 – 3e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#3ab5d8;--day-color:#3ab5d8;--day-dark:#1a6e88;--day-dark2:#124f63;
+  --day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#f0fafd;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
+.wrap{width:100%;max-width:800px;position:relative;z-index:1;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.09;
+  width:320px;height:320px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.07;
+  width:240px;height:240px;background:var(--day);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--green);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--pink);top:180px;left:-25px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.prog-wrap{width:100%;margin-bottom:.7rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
+
+.part-card{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  padding:0 0 1.1rem;box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.part-card.locked{opacity:.44;pointer-events:none;}
+.part-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.part-head{padding:.9rem 1.2rem .5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.part-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.part-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.part-sc{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:800;
+  color:var(--day-dark2);margin-left:auto;}
+.part-consigne{font-size:.95rem;color:#4a4f58;line-height:1.65;font-style:italic;
+  padding:0 1.2rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;}
+
+.board-wrap{background:#171009;border-bottom:2px solid #4a3528;padding:10px;margin:0 1.2rem 1rem;border-radius:10px;}
+.board-svg{width:100%;height:auto;display:block;border-radius:8px;}
+.fiche{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(.6) rotate(var(--rot));
+  transition:opacity .4s ease,transform .55s cubic-bezier(.3,1.5,.5,1);}
+.fiche.on{opacity:1;transform:scale(1) rotate(var(--rot));}
+.stamp1{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(1.6) rotate(-8deg);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.3,1.6,.5,1);}
+.stamp1.on{opacity:.92;transform:scale(1) rotate(-8deg);}
+.stamp1-fail{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(1.6) rotate(6deg);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.3,1.6,.5,1);}
+.stamp1-fail.on{opacity:.88;transform:scale(1) rotate(6deg);}
+
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin:0 1.2rem .4rem;letter-spacing:.05em;}
+.q-phrase{margin:0 1.2rem .9rem;font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+  line-height:1.85;padding:.75rem 1rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);font-style:italic;}
+.q-effet{margin:0 1.2rem .5rem;font-size:.88rem;color:var(--day-dark2);font-weight:700;}
+
+.opts-col{margin:0 1.2rem;display:flex;flex-direction:column;gap:.4rem;}
+.opt-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.9rem,2.4vw,1rem);font-weight:600;
+  padding:.6rem 1rem;cursor:pointer;min-height:50px;
+  transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;
+  text-align:left;display:flex;align-items:center;gap:.5rem;word-break:break-word;line-height:1.5;width:100%;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;
+  color:#2f5c15!important;animation:glowOk .5s ease;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;
+  color:var(--err-dark)!important;animation:wrongShake .35s ease;}
+@keyframes glowOk{0%{box-shadow:0 0 0 0 rgba(95,168,47,.55);}100%{box-shadow:0 0 0 10px rgba(95,168,47,0);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-letter{width:24px;height:24px;border-radius:50%;flex-shrink:0;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;
+  font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.6rem 1.2rem 0;line-height:1.75;
+  padding:.75rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+
+.nav-row{padding:.9rem 1.2rem 0;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#0d3a4a;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  font-size:5rem;z-index:250;pointer-events:none;opacity:0;}
+.flash.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  25%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--yellow),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.4rem 0 .1rem;}
+.stars{font-size:1.9rem;margin-bottom:.5rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#0d3a4a;}
+.bilan-particles{position:relative;height:60px;overflow:visible;pointer-events:none;}
+.particle{position:absolute;bottom:0;font-size:1.4rem;animation:particleUp 2.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0);opacity:1;}
+  100%{transform:translateY(-140px) rotate(25deg);opacity:0;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash" id="flash"></div>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 3e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 4</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">🔎 Enquête sur les temps du récit</div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 8 points</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Corrects&nbsp;: <span id="cnt-ok">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="cnt-ko">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="cnt-rem">8</span></span>
+</div>
+
+<div class="part-card" id="cardA">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Activité 1</span>
+    <span class="part-label">Choisis l'étiquette la plus précise</span>
+    <span class="part-sc" id="spA"></span>
+  </div>
+  <div class="part-consigne">🏷️ Pour chaque phrase, choisis l'étiquette la plus précise&nbsp;: arrière-plan, habitude, premier plan ou action ponctuelle.</div>
+  <div class="board-wrap"><svg id="board1" class="board-svg" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div id="qA"></div>
+</div>
+
+<div class="part-card locked" id="cardB">
+  <div class="part-stripe"></div>
+  <div class="part-head">
+    <span class="part-badge">Activité 2</span>
+    <span class="part-label">Choisis la bonne phrase</span>
+    <span class="part-sc" id="spB"></span>
+  </div>
+  <div class="part-consigne">🎯 Choisis la phrase qui produit l'effet demandé.</div>
+  <div class="board-wrap"><svg id="board2" class="board-svg" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div id="qB"></div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="bilan-particles" id="particles"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.5rem;">/ 8 points</div>
+    <div class="stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ══ AUDIO ══ */
+var actx=null,aReady=false;
+function initA(){if(aReady)return;aReady=true;try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(freq1,freq2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq1,actx.currentTime);
+  if(freq2)o.frequency.exponentialRampToValueAtTime(freq2,actx.currentTime+dur);
+  g.gain.setValueAtTime(.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){tone(660,880,.12,'sine');setTimeout(function(){tone(880,1100,.12,'sine');},110);}
+function beepErr(){tone(220,90,.22,'sawtooth');}
+function beepFinal(ok){
+  if(!ok){tone(160,110,.4,'sine');return;}
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){setTimeout(function(){tone(f,null,.16,'sine');},i*130);});
+}
+function csRand(){var a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function flashIcon(ok){
+  var f=$('flash');f.textContent=ok?'✓':'✗';f.style.color=ok?'#2f7a1f':'#c0392b';
+  f.classList.remove('play');void f.offsetWidth;f.classList.add('play');
+}
+
+var TOTAL=8,scGlobal=0,errGlobal=0;
+function updateGlobal(){
+  var pct=Math.round(scGlobal/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scGlobal+' / '+TOTAL+' points';$('prog-pct').textContent=pct+'%';
+  $('cnt-ok').textContent=scGlobal;$('cnt-ko').textContent=errGlobal;
+  $('cnt-rem').textContent=Math.max(0,TOTAL-scGlobal-errGlobal);
+}
+
+/* ══ TABLEAU D'ENQUÊTE (générique, 4 fiches) ══ */
+function buildBoard(svgId){
+  var s='';
+  s+='<rect width="600" height="220" fill="#5b3a1e"/>';
+  s+='<rect x="10" y="10" width="580" height="200" rx="6" fill="#c9a06a"/>';
+  var seed=42;
+  for(var k=0;k<150;k++){
+    seed=(seed*1103515245+12345)&0x7fffffff;var gx=15+(seed%570);
+    seed=(seed*1103515245+12345)&0x7fffffff;var gy=15+(seed%190);
+    s+='<circle cx="'+gx+'" cy="'+gy+'" r="1.2" fill="#00000011"/>';
+  }
+  var positions=[[130,90],[280,70],[400,110],[520,80]];
+  var rotations=[-6,4,-3,6];
+  for(var i=0;i<4;i++){
+    s+='<g transform="translate('+positions[i][0]+','+positions[i][1]+')"><g class="fiche" id="'+svgId+'_fiche'+i+'" style="--rot:'+rotations[i]+'deg">'
+      +'<rect x="-26" y="-17" width="56" height="46" rx="3" fill="#00000022" transform="translate(2,3)"/>'
+      +'<rect x="-28" y="-19" width="56" height="46" rx="3" fill="#f7f3ea" stroke="#d8cdb6" stroke-width="1"/>'
+      +'<text x="0" y="8" text-anchor="middle" font-size="16">📄</text>'
+      +'</g></g>';
+  }
+  s+='<g transform="translate(470,175)"><g class="stamp1" id="'+svgId+'_stampOk">'
+    +'<rect x="-95" y="-20" width="190" height="40" rx="6" fill="none" stroke="#1a6e88" stroke-width="3.5"/>'
+    +'<text x="0" y="7" text-anchor="middle" font-family="Arial" font-size="15" font-weight="900" fill="#1a6e88" letter-spacing="1">MISSION ACCOMPLIE</text>'
+    +'</g></g>';
+  s+='<g transform="translate(470,175)"><g class="stamp1-fail" id="'+svgId+'_stampKo">'
+    +'<rect x="-90" y="-20" width="180" height="40" rx="6" fill="none" stroke="#c0392b" stroke-width="3.5"/>'
+    +'<text x="0" y="7" text-anchor="middle" font-family="Arial" font-size="15" font-weight="900" fill="#c0392b" letter-spacing="1">À REVOIR</text>'
+    +'</g></g>';
+  $(svgId).innerHTML=s;
+}
+function revealFiches(svgId,correctFlags){
+  for(var i=0;i<4;i++){
+    var f=$(svgId+'_fiche'+i);if(f)f.classList.toggle('on',!!correctFlags[i]);
+  }
+}
+function playStamp(svgId,ok){
+  var st=$(svgId+(ok?'_stampOk':'_stampKo'));
+  if(st)st.classList.add('on');
+}
+
+/* ══ DONNÉES ACTIVITÉ 1 ══ */
+var ACT1=[
+ {phrase:"La rivière brillait sous le soleil.",
+  opts:['arrière-plan','habitude','premier plan','action ponctuelle'],correct:0,
+  fb:["Très bien, cette phrase décrit le décor.",
+      "Tu as repéré une action qui dure. Ici, la phrase présente surtout le cadre.",
+      "Tu cherches l'action principale. Ici, le récit prend d'abord le temps de montrer le paysage.",
+      "Tu as vu un fait précis. Ici, l'effet principal est descriptif."]},
+ {phrase:"Tous les dimanches, elle écrivait à sa grand-mère.",
+  opts:['arrière-plan','habitude','premier plan','action ponctuelle'],correct:1,
+  fb:["Tu repères bien le contexte. L'expression « tous les dimanches » guide surtout vers l'habitude.",
+      "Exact, le complément de temps montre une répétition régulière.",
+      "Tu as pensé à une action importante. Ici, l'idée centrale est la répétition.",
+      "Tu repères un fait bref. Ici, l'action revient régulièrement."]},
+ {phrase:"Tout à coup, le chien aboya.",
+  opts:['arrière-plan','habitude','premier plan','action ponctuelle'],correct:3,
+  fb:["Tu as cherché le cadre. Ici, « tout à coup » met surtout en lumière un surgissement.",
+      "Tu as pensé à une répétition. Ici, l'action se produit une seule fois dans la scène.",
+      "Ce choix fonctionne aussi dans l'analyse du récit. L'étiquette la plus précise ici est action ponctuelle.",
+      "Bravo, le verbe raconte un fait bref qui surgit."]},
+ {phrase:"Le facteur arriva, tendit la lettre et repartit.",
+  opts:['arrière-plan','habitude','premier plan','action ponctuelle'],correct:2,
+  fb:["Tu repères le cadre. Ici, la phrase raconte surtout ce qui fait avancer la scène.",
+      "Tu as pensé à une répétition. Ici, les actions s'enchaînent une fois dans le récit.",
+      "Très bien, cette succession d'actions appartient au premier plan.",
+      "Tu as bien vu le caractère bref. Ici, l'ensemble de la phrase forme surtout une suite d'événements de premier plan."]}
+];
+
+/* ══ DONNÉES ACTIVITÉ 2 ══ */
+var ACT2=[
+ {effet:"Installer le décor avant l'arrivée du héros.",
+  opts:["Le château dominait la vallée et ses tours se dressaient dans la brume.",
+        "Le château domina la vallée et ses tours se dressèrent dans la brume.",
+        "Le château dominera la vallée et ses tours se dresseront dans la brume."],correct:0,
+  fb:["Exact, l'imparfait convient bien à une description de décor.",
+      "Tu as choisi une forme dynamique. Pour installer un cadre, l'imparfait est plus efficace.",
+      "Tu repères bien un temps de récit possible dans d'autres contextes. Ici, on travaille les temps du passé."]},
+ {effet:"Raconter trois actions rapides du personnage.",
+  opts:["Il ouvrait la porte, avançait, regardait autour de lui.",
+        "Il ouvrit la porte, avança, regarda autour de lui.",
+        "Il ouvre la porte, avance, regarde autour de lui."],correct:1,
+  fb:["Tu as choisi un temps qui peut ralentir la scène. Pour une suite brève et achevée, le passé simple convient mieux.",
+      "Très bien, le passé simple met en valeur la succession des actions.",
+      "Tu as repéré une forme vive du récit. Ici, l'activité porte sur les temps du passé."]},
+ {effet:"Montrer une habitude dans l'enfance.",
+  opts:["Quand il était petit, il rangeait toujours ses billes dans une boîte rouge.",
+        "Quand il fut petit, il rangea toujours ses billes dans une boîte rouge.",
+        "Quand il était petit, il rangea toujours ses billes dans une boîte rouge."],correct:0,
+  fb:["Bravo, l'imparfait exprime ici une habitude.",
+      "Tu as repéré un récit au passé. Pour une habitude répétée, l'imparfait est le meilleur choix.",
+      "Tu as bien vu le cadre temporel. L'effet d'habitude demande aussi l'imparfait pour l'action répétée."]},
+ {effet:"Montrer une action en cours interrompue par un événement bref.",
+  opts:["La foule admira la scène quand le rideau se levait.",
+        "La foule admirait la scène quand le rideau se leva.",
+        "La foule admira quand le rideau se leva."],correct:1,
+  fb:["Tu as bien vu qu'il fallait deux actions différentes. Pour l'action en cours, l'imparfait convient mieux à « admirait ».",
+      "Exact, l'imparfait montre la durée et le passé simple marque l'événement bref.",
+      "Tu repères bien deux événements du récit. Ici, l'effet demandé met surtout en valeur une action en train de se dérouler."]}
+];
+
+var scA=0,errA=0,curA=0,scB=0,errB=0,curB=0;
+var correctFlagsA=[false,false,false,false],correctFlagsB=[false,false,false,false];
+var LETTERS=['A','B','C','D'];
+
+function buildA(){
+  scA=0;errA=0;curA=0;correctFlagsA=[false,false,false,false];
+  buildBoard('board1');revealFiches('board1',correctFlagsA);
+  renderQA();
+}
+function renderQA(){
+  var zone=$('qA');zone.innerHTML='';
+  if(curA>=ACT1.length){ endA(); return; }
+  var d=ACT1[curA];
+  var num=document.createElement('div');num.className='q-num';num.textContent='Question '+(curA+1)+' / 4';
+  zone.appendChild(num);
+  var ph=document.createElement('div');ph.className='q-phrase';ph.textContent='« '+d.phrase+' »';
+  zone.appendChild(ph);
+  var col=document.createElement('div');col.className='opts-col';
+  var answered=false;
+  d.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=LETTERS[i];
+    var sp=document.createElement('span');sp.textContent=txt;
+    btn.appendChild(lt);btn.appendChild(sp);
+    btn.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      var ok=(i===d.correct);
+      Array.prototype.forEach.call(col.children,function(b,bi){
+        b.disabled=true;
+        if(bi===d.correct)b.classList.add('correct');
+        else if(bi===i)b.classList.add('wrong');
+      });
+      flashIcon(ok);
+      if(ok){scA++;beepOk();}else{errA++;beepErr();}
+      var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas la bonne étiquette.')+'</span>'+d.fb[i];
+      zone.appendChild(fb);
+      curA++;
+      correctFlagsA[curA-1]=ok;
+      revealFiches('board1',correctFlagsA);
+      $('spA').textContent='Score\u00a0: '+scA+' / 4';
+      updateGlobal();
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curA<ACT1.length)?'Question suivante →':'Activité 2 →';
+      next.addEventListener('click',function(){
+        if(curA>=ACT1.length){
+          setTimeout(function(){
+            playStamp('board1',scA>=3);
+            setTimeout(function(){
+              $('cardA').style.display='none';
+              $('cardB').classList.remove('locked');
+              buildB();
+              var cb=$('cardB');if(cb)cb.scrollIntoView({behavior:'smooth',block:'start'});
+            },900);
+          },200);
+        }else{
+          renderQA();
+        }
+      });
+      nav.appendChild(next);
+      zone.appendChild(nav);
+    });
+    col.appendChild(btn);
+  });
+  zone.appendChild(col);
+}
+function endA(){ $('spA').textContent='Score Activité 1\u00a0: '+scA+' / 4'; }
+
+function buildB(){
+  scB=0;errB=0;curB=0;correctFlagsB=[false,false,false,false];
+  buildBoard('board2');revealFiches('board2',correctFlagsB);
+  renderQB();
+}
+function renderQB(){
+  var zone=$('qB');zone.innerHTML='';
+  if(curB>=ACT2.length){ endB(); return; }
+  var d=ACT2[curB];
+  var num=document.createElement('div');num.className='q-num';num.textContent='Question '+(curB+1)+' / 4';
+  zone.appendChild(num);
+  var eff=document.createElement('div');eff.className='q-effet';eff.textContent='🎯 Effet recherché\u00a0: '+d.effet;
+  zone.appendChild(eff);
+  var col=document.createElement('div');col.className='opts-col';
+  var answered=false;
+  d.opts.forEach(function(txt,i){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    var lt=document.createElement('span');lt.className='opt-letter';lt.textContent=LETTERS[i];
+    var sp=document.createElement('span');sp.textContent=txt;
+    btn.appendChild(lt);btn.appendChild(sp);
+    btn.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      var ok=(i===d.correct);
+      Array.prototype.forEach.call(col.children,function(b,bi){
+        b.disabled=true;
+        if(bi===d.correct)b.classList.add('correct');
+        else if(bi===i)b.classList.add('wrong');
+      });
+      flashIcon(ok);
+      if(ok){scB++;beepOk();}else{errB++;beepErr();}
+      var fb=document.createElement('div');fb.className='fb-box show '+(ok?'ok':'ko');
+      fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Correct !':'❌ Ce n\u2019est pas le bon choix.')+'</span>'+d.fb[i];
+      zone.appendChild(fb);
+      curB++;
+      correctFlagsB[curB-1]=ok;
+      revealFiches('board2',correctFlagsB);
+      $('spB').textContent='Score\u00a0: '+scB+' / 4';
+      updateGlobal();
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curB<ACT2.length)?'Question suivante →':'Voir le résultat →';
+      next.addEventListener('click',function(){
+        if(curB>=ACT2.length){
+          setTimeout(function(){
+            playStamp('board2',scB>=3);
+            setTimeout(showResults,900);
+          },200);
+        }else{
+          renderQB();
+        }
+      });
+      nav.appendChild(next);
+      zone.appendChild(nav);
+    });
+    col.appendChild(btn);
+  });
+  zone.appendChild(col);
+}
+function endB(){ $('spB').textContent='Score Activité 2\u00a0: '+scB+' / 4'; }
+
+/* ══ RÉSULTATS ══ */
+function emojiRain(theme){
+  var box=$('particles');box.innerHTML='';
+  for(var i=0;i<24;i++){
+    var p=document.createElement('span');p.className='particle';
+    p.textContent=theme[Math.floor(csRand()*theme.length)];
+    p.style.left=(csRand()*100)+'%';
+    p.style.animationDelay=(csRand()*.9)+'s';
+    p.style.fontSize=(1+csRand()*.7)+'rem';
+    box.appendChild(p);
+  }
+}
+function showResults(){
+  var tot=scA+scB;
+  $('r-score').textContent=tot;
+  var s= tot<=2?1: tot<=4?2: tot<=6?3: tot<=7?4:5;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg = tot>=7 ? "Excellent\u00a0! Tu identifies parfaitement les valeurs des temps du récit."
+    : tot>=5 ? "Très bon travail, encore quelques nuances à revoir."
+    : tot>=3 ? "Bon travail global. Relis les explications des questions manquées."
+    : "Reprends les valeurs des temps du récit avant de continuer.";
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  beepFinal(tot>=5);
+  if(tot>=5){emojiRain(['📝','📖','✒️','🖋️','📜']);}
+}
+
+/* ══ RESTART ══ */
+$('btn-restart').addEventListener('click',function(){
+  $('results').classList.remove('show');
+  $('particles').innerHTML='';
+  $('cardA').style.display='';
+  $('cardB').classList.add('locked');
+  buildA();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+document.addEventListener('pointerdown',initA,{once:true});
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
