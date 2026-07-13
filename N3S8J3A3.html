@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Défi final — La mine des accords — 3e S8 J3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;background:#080408;color:#eee;font-family:Arial,Helvetica,sans-serif;min-height:100vh;padding:16px;}
+.wrap{max-width:640px;margin:0 auto;}
+.header-center{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#e5c417;border-radius:999px;padding:5px 16px;}
+.logo-badge .dots{display:flex;gap:4px;}
+.logo-badge .dots i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#7a1f1f;}
+.logo-badge .dots i:nth-child(2){background:#5a3800;}
+.logo-badge .dots i:nth-child(3){background:#1c3d0f;}
+.logo-badge .lab{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:800;color:#2e2200;letter-spacing:.5px;}
+.week{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#c9bfa3;margin:8px 0 4px;letter-spacing:1px;}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,4.2vw,1.8rem);margin:2px 0 4px;color:#e5c417;font-weight:900;}
+.sub{font-size:.88rem;color:#c9bfa3;margin-bottom:6px;}
+
+.extrait-card{background:#100808;border:1px solid #4a3a1a;border-top:4px solid #e5c417;border-radius:10px;
+ padding:16px 18px;margin-bottom:14px;}
+.extrait-card .lab{font-family:'Orbitron',sans-serif;font-size:.68rem;color:#e5c417;text-transform:uppercase;
+ letter-spacing:1px;font-weight:800;margin-bottom:8px;}
+.extrait-txt{font-family:Georgia,serif;font-size:.92rem;line-height:1.8;color:#ddd0b0;font-style:italic;}
+.extrait-src{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#8a7a5a;text-align:right;margin-top:6px;}
+
+.mission-card{background:#100808;border:1px solid #4a3a1a;border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+.mission-card p{font-size:.9rem;line-height:1.65;color:#ddd0b0;margin:0 0 8px;}
+.btn-commencer{display:block;width:100%;font-family:'Orbitron',sans-serif;background:linear-gradient(135deg,#e5c417,#8b6914);
+ color:#1a1300;border:none;border-radius:8px;padding:16px;font-weight:900;font-size:1rem;letter-spacing:1px;
+ cursor:pointer;min-height:54px;box-shadow:0 6px 20px rgba(229,196,23,.3);margin-top:8px;}
+.btn-commencer:hover{filter:brightness(1.08);}
+
+#phase2{display:none;}
+#phase2.active{display:block;}
+
+.hud{display:flex;justify-content:space-between;align-items:center;background:#100808;border:2px solid #e5c417;
+ border-radius:10px 10px 0 0;padding:10px 16px;font-family:'Orbitron',sans-serif;font-size:.78rem;color:#e5c417;font-weight:800;}
+.hud span.gold{color:#f0c040;font-family:'JetBrains Mono',monospace;}
+
+.track-wrap{background:linear-gradient(180deg,#1a1206,#0d0a06);border:2px solid #e5c417;border-top:none;
+ padding:22px 16px 16px;overflow-x:auto;position:relative;}
+.track-wrap::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,
+ rgba(255,255,255,.02) 0 2px, transparent 2px 26px);pointer-events:none;}
+.act-bands{display:flex;min-width:600px;gap:4px;margin-bottom:6px;}
+.act-band{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:800;
+ text-transform:uppercase;letter-spacing:.5px;padding:4px 2px;border-radius:5px 5px 0 0;opacity:.55;transition:opacity .3s;}
+.act-band.active{opacity:1;box-shadow:0 0 10px currentColor;}
+.track{display:flex;align-items:center;gap:4px;min-width:600px;position:relative;padding:22px 0 14px;}
+.rail-bed{position:absolute;left:10px;right:10px;top:50%;height:14px;transform:translateY(-50%);z-index:0;
+ background:repeating-linear-gradient(90deg,#3a2e12 0 6px, #2a2010 6px 10px);border-radius:3px;
+ box-shadow:inset 0 2px 4px rgba(0,0,0,.5);}
+.rail-line{position:absolute;left:10px;right:10px;top:50%;height:4px;background:#1a1508;transform:translateY(-50%);
+ z-index:1;border-radius:2px;box-shadow:0 0 0 1px #4a3a1a;}
+.rail-fill{position:absolute;left:10px;top:50%;height:4px;
+ background:linear-gradient(90deg,#8b6914,#e5c417,#f5dd6e,#e5c417);background-size:200% 100%;
+ transform:translateY(-50%);z-index:2;transition:width .6s cubic-bezier(.3,1.4,.4,1);border-radius:2px;
+ box-shadow:0 0 12px rgba(229,196,23,.7);animation:shimmerFill 2.5s linear infinite;}
+@keyframes shimmerFill{0%{background-position:0% 0;}100%{background-position:200% 0;}}
+.dot{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#3a2e14,#1a1408);
+ border:2px solid #5a4a24;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;
+ color:#8a7a5a;position:relative;z-index:3;flex-shrink:0;font-family:'JetBrains Mono',monospace;
+ box-shadow:0 2px 4px rgba(0,0,0,.4);transition:all .3s;}
+.dot.done{background:radial-gradient(circle at 35% 30%,#a8dd80,#4a8a2a);border-color:#89c843;color:#0a2005;
+ box-shadow:0 0 10px rgba(137,200,67,.6);}
+.dot.current{border-color:#e5c417;box-shadow:0 0 0 4px rgba(229,196,23,.25),0 0 14px rgba(229,196,23,.8);
+ color:#e5c417;animation:pulseDot 1.4s ease-in-out infinite;}
+@keyframes pulseDot{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+.wagon-ic{position:absolute;top:-24px;font-size:1.7rem;transform:translateX(-50%);transition:left .6s cubic-bezier(.3,1.4,.4,1);
+ z-index:4;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));animation:wagonBounce 1s ease-in-out infinite;}
+@keyframes wagonBounce{0%,100%{transform:translateX(-50%) translateY(0) rotate(-3deg);}50%{transform:translateX(-50%) translateY(-4px) rotate(3deg);}}
+
+.extrait-permanent{background:#100808;border:1px solid #4a3a1a;border-left:4px solid #e5c417;border-radius:0 0 10px 10px;
+ padding:12px 16px;margin-bottom:14px;font-family:Georgia,serif;font-size:.82rem;line-height:1.7;color:#c9bfa3;font-style:italic;}
+
+.qcard{background:#100808;border:1px solid #4a3a1a;border-radius:10px;padding:18px 20px;margin-bottom:14px;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.act-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.q-text{font-size:clamp(.92rem,2.8vw,1rem);line-height:1.6;color:#f0e8d0;margin-bottom:14px;font-weight:600;}
+.q-text .quote{font-family:Georgia,serif;font-style:italic;color:#e5c417;}
+
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt-btn{font-family:Arial,sans-serif;text-align:left;padding:11px 14px;min-height:48px;border:1.5px solid #4a3a1a;
+ border-radius:8px;background:#1a1408;color:#ddd0b0;font-weight:600;cursor:pointer;font-size:clamp(.85rem,2.5vw,.94rem);
+ line-height:1.4;transition:all .15s;display:flex;align-items:center;gap:10px;}
+.opt-btn .letter{font-family:'Orbitron',sans-serif;font-weight:900;color:#e5c417;flex-shrink:0;}
+.opt-btn:hover:not(:disabled){border-color:#e5c417;background:#241c0c;}
+.opt-btn.ok{border-color:#89c843;background:rgba(137,200,67,.15);color:#89c843;}
+.opt-btn.ko{border-color:#e74c3c;background:rgba(231,76,60,.13);color:#e74c3c;}
+.opt-btn:disabled{cursor:default;opacity:.85;}
+
+.feedback{margin-top:12px;padding:.7rem 1rem;border-radius:8px;font-size:clamp(.85rem,2.5vw,.93rem);line-height:1.65;}
+.feedback.ok{background:rgba(137,200,67,.12);border-left:4px solid #89c843;color:#a8dd80;}
+.feedback.ko{background:rgba(231,76,60,.1);border-left:4px solid #e74c3c;color:#e8a090;}
+
+.corrige-box{margin-top:10px;background:#1a1408;border:1.5px dashed #4a3a1a;border-radius:8px;padding:.7rem 1rem;
+ font-size:.82rem;line-height:1.6;color:#c9bfa3;}
+.corrige-box .lab{font-family:'Orbitron',sans-serif;font-size:.62rem;text-transform:uppercase;letter-spacing:1px;
+ font-weight:800;color:#8a7a5a;display:block;margin-bottom:4px;}
+
+.btn-nav{font-family:'Orbitron',sans-serif;background:#e5c417;color:#1a1300;border:none;border-radius:8px;
+ padding:12px 26px;font-weight:800;font-size:.88rem;cursor:pointer;min-height:2.8rem;display:block;margin:14px auto 0;
+ animation:pulseNav 1.4s ease-in-out infinite;}
+@keyframes pulseNav{0%,100%{box-shadow:0 0 0 0 rgba(229,196,23,.5);}50%{box-shadow:0 0 0 8px rgba(229,196,23,0);}}
+.btn-nav:hover{filter:brightness(1.06);}
+
+.overlay{position:fixed;inset:0;background:rgba(5,3,2,.88);display:none;align-items:center;justify-content:center;padding:20px;z-index:600;}
+.overlay.show{display:flex;animation:fade .4s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{background:#100808;border:2px solid #e5c417;border-radius:14px;padding:26px;max-width:440px;text-align:center;
+ box-shadow:0 20px 50px rgba(229,196,23,.25);}
+.modal .trophy{font-size:3rem;}
+.modal h2{margin:6px 0 10px;color:#e5c417;font-family:'Orbitron',sans-serif;font-size:1.05rem;line-height:1.4;}
+.bilan-score{font-family:'Orbitron',monospace;font-size:clamp(2.2rem,8vw,3rem);font-weight:900;color:#f0c040;margin-bottom:4px;}
+.bilan-detail{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#c9bfa3;line-height:1.8;margin-bottom:14px;white-space:pre-line;}
+.rappel-box{background:rgba(229,196,23,.08);border:1px solid #4a3a1a;border-radius:8px;padding:12px 14px;
+ font-size:.82rem;line-height:1.6;color:#ddd0b0;margin-bottom:16px;text-align:left;}
+.replay{background:#e5c417;color:#1a1300;border:none;border-radius:8px;padding:13px 26px;font-size:.92rem;
+ font-weight:800;cursor:pointer;min-height:2.8rem;font-family:'Orbitron',sans-serif;}
+.replay:hover{filter:brightness(1.06);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header-center">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 3E</span></div>
+    <div class="week">SEMAINE 8 — JOUR 3</div>
+    <h1>⛏ La mine des accords</h1>
+    <div class="sub">Défi final : l'accord de l'adjectif dans le groupe nominal</div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div id="phase1">
+    <div class="mission-card">
+      <p>⛏ <b>Mission : traverser la mine des accords</b></p>
+      <p>12 barrières réparties en 4 galeries t'attendent. Pour chacune, choisis une seule réponse, lis le feedback pour comprendre, puis continue une fois la bonne réponse trouvée.</p>
+      <p>Chaque bonne réponse fait avancer le wagon d'une case et rapporte des pièces d'or.</p>
+    </div>
+
+    <button class="btn-commencer" id="btnCommencer">🚂 DESCENDRE DANS LA MINE</button>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div id="phase2">
+    <div class="hud">
+      <span>⛏ GALERIE <span id="galNum">1</span>/4</span>
+      <span class="gold">🟡 <span id="goldCount">0</span></span>
+      <span>❓ <span id="qNum">1</span>/12</span>
+    </div>
+    <div class="track-wrap">
+      <div class="act-bands" id="actBands"></div>
+      <div class="track" id="track">
+        <div class="rail-bed"></div>
+        <div class="rail-line"></div>
+        <div class="rail-fill" id="railFill"></div>
+      </div>
+    </div>
+    <div class="extrait-permanent" id="extraitTxt2"></div>
+
+    <div id="qZone"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">💎</div>
+    <h2 id="modalTitre">Trésor trouvé !</h2>
+    <div class="bilan-score" id="bilanScore"></div>
+    <div class="bilan-detail" id="bilanDetail"></div>
+    <div class="rappel-box"><b>À retenir :</b> Dans un groupe nominal, les adjectifs s'accordent avec le nom noyau, même si d'autres mots sont placés entre eux. Il faut donc repérer d'abord le nom qualifié avant de choisir la terminaison.</div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   N3S8J3 — La mine des accords — 3e
+   Défi final : accord de l'adjectif dans le GN (4 activités × 3 questions = 12 barrières)
+   Feedback détaillé par choix (A/B/C/D) + corrigé formel après réussite.
+   ═══════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+
+const EXTRAIT = "Au bout de la rue Guénégaud, quand on vient des quais, on trouve le passage du Pont-Neuf, une sorte de corridor étroit et sombre qui va de la rue Mazarine à la rue de Seine. Ce passage a trente pas de longueur et deux de largeur au plus ; il est pavé de dalles jaunâtres, usées, descellées, suant toujours une humidité acre ; la vitre qui le couvre, coupée à angle droit, est noire de crasse. Par les beaux jours d'été, quand un lourd soleil brûle les rues, une lueur blanche et sale tombe de la verrière et traîne misérablement dans le passage.";
+
+$('extraitTxt2').textContent = EXTRAIT;
+
+const ACT_COLORS = ['#e5c417','#4488cc','#2288aa','#cc2244'];
+const ACT_NAMES = ['Activité 1 — Repérer l\'accord', 'Activité 2 — Transformer au pluriel', 'Activité 3 — Justifier l\'accord', 'Activité 4 — Phrase correcte'];
+
+const QUESTIONS_SRC = [
+  // ACTIVITÉ 1
+  {act:0, q:'Dans le groupe nominal « un corridor étroit et sombre », quel mot commande l\'accord des adjectifs ?',
+   opts:['corridor','étroit','sombre','un'], correct:0,
+   fb:["Bravo. corridor est le nom noyau du groupe nominal. Les adjectifs étroit et sombre s'accordent avec lui.",
+       "Ce mot est un adjectif. Il s'accorde avec le nom, mais ce n'est pas lui qui commande l'accord.",
+       "Ce mot est aussi un adjectif. Il dépend du nom corridor.",
+       "Le déterminant s'accorde avec le nom, mais ce n'est pas lui qui commande l'accord des adjectifs."],
+   corrige:"Réponse attendue : A. Le nom noyau est corridor. Les adjectifs étroit et sombre s'accordent avec lui."},
+  {act:0, q:'Dans l\'expression « de dalles jaunâtres, usées, descellées », quel groupe de mots s\'accorde avec dalles ?',
+   opts:['jaunâtres, usées, descellées','de, largeur, plus','passage, sombre, corridor','le, couvre, noire'], correct:0,
+   fb:["Correct. Les trois adjectifs qualifient dalles et prennent donc le féminin pluriel.",
+       "Ces mots n'appartiennent pas au même groupe nominal.",
+       "Ces mots viennent d'autres groupes du texte.",
+       "Ces mots ne se rapportent pas à dalles."],
+   corrige:"Réponse attendue : A. Les adjectifs jaunâtres, usées et descellées qualifient dalles. Ils sont donc au féminin pluriel."},
+  {act:0, q:'Pourquoi écrit-on « une lueur blanche et sale » ?',
+   opts:['Parce que soleil est masculin singulier.','Parce que lueur est féminin singulier.','Parce qu\'il y a deux adjectifs.','Parce que verrière est féminin singulier.'], correct:1,
+   fb:["Les adjectifs ne s'accordent pas avec soleil ici.",
+       "Oui. blanche et sale qualifient lueur, nom féminin singulier.",
+       "Le nombre d'adjectifs ne change pas la règle.",
+       "Pas vraiment… de la verrière complète le nom, mais ne commande pas l'accord des adjectifs."],
+   corrige:"Réponse attendue : B. Les adjectifs blanche et sale s'accordent avec lueur, nom féminin singulier."},
+  // ACTIVITÉ 2
+  {act:1, q:'Choisis la bonne transformation au pluriel de « un corridor étroit et sombre ».',
+   opts:['des corridor étroits et sombres','des corridors étroits et sombres','des corridors étroit et sombre','des corridors étroites et sombres'], correct:1,
+   fb:["Presque. Les adjectifs sont bien accordés, mais il manque le s à corridors.",
+       "Correct. Le nom et les deux adjectifs sont bien au masculin pluriel.",
+       "Les adjectifs doivent aussi passer au pluriel.",
+       "Pas vraiment… corridors est masculin pluriel, donc on écrit étroits."],
+   corrige:"Réponse attendue : B. On écrit des corridors étroits et sombres : tout le groupe passe au masculin pluriel."},
+  {act:1, q:'Choisis la bonne transformation au pluriel de « la vitre noire de crasse ».',
+   opts:['les vitres noires de crasse','les vitres noir de crasse','les vitres noires de crasses','les vitre noires de crasse'], correct:0,
+   fb:["Correct. vitres est féminin pluriel, donc noires aussi.",
+       "L'adjectif doit s'accorder avec vitres.",
+       "Ici, on ne met pas crasse au pluriel.",
+       "Le nom vitre doit aussi passer au pluriel."],
+   corrige:"Réponse attendue : A. On écrit les vitres noires de crasse. L'adjectif noires s'accorde avec vitres."},
+  {act:1, q:'Choisis la bonne transformation au pluriel de « une lueur blanche et sale ».',
+   opts:['des lueurs blanches et sales','des lueurs blanche et sale','des lueurs blanches et sale','des lueurs blancs et sales'], correct:0,
+   fb:["Bravo. Le nom et les deux adjectifs sont au féminin pluriel.",
+       "Les deux adjectifs doivent passer au pluriel.",
+       "Pas vraiment… sale doit aussi s'accorder avec lueurs.",
+       "Pas vraiment… blancs serait masculin pluriel, ce qui ne convient pas."],
+   corrige:"Réponse attendue : A. On écrit des lueurs blanches et sales : nom et adjectifs sont au féminin pluriel."},
+  // ACTIVITÉ 3
+  {act:2, q:'Dans « dalles jaunâtres, usées, descellées », pourquoi les trois adjectifs se terminent-ils par -es ?',
+   opts:['Parce qu\'ils s\'accordent avec dalles, féminin pluriel.','Parce qu\'ils s\'accordent avec passage, masculin singulier.','Parce qu\'ils s\'accordent avec humidité, féminin singulier.','Parce que cette terminaison ne change jamais.'], correct:0,
+   fb:["Correct. Les trois adjectifs qualifient dalles, donc ils sont au féminin pluriel.",
+       "Attention . passage n'est pas le nom qualifié ici.",
+       "Pas vraiment… humidité appartient à un autre groupe.",
+       "Pas vraiment… Les adjectifs changent selon le genre et le nombre du nom."],
+   corrige:"Réponse attendue : A. Les trois adjectifs s'accordent avec dalles, nom féminin pluriel. C'est un cas fréquent d'accord complexe : plusieurs adjectifs dépendent du même nom."},
+  {act:2, q:'Dans « la vitre qui le couvre, coupée à angle droit », avec quel mot coupée s\'accorde-t-il ?',
+   opts:['angle','droit','vitre','crasse'], correct:2,
+   fb:["Attention : angle est dans un complément.",
+       "Pas vraiment… droit qualifie angle.",
+       "Oui. coupée qualifie vitre, nom féminin singulier.",
+       "Attention : crasse arrive plus loin dans la phrase et ne commande pas cet accord."],
+   corrige:"Réponse attendue : C. Le mot coupée qualifie vitre. Il s'accorde donc au féminin singulier, même si d'autres mots sont placés entre les deux."},
+  {act:2, q:'Choisis la bonne transformation au pluriel de « la vitre coupée à angle droit ».',
+   opts:['les vitres coupés à angle droit','les vitres coupées à angle droit','les vitres coupée à angle droit','les vitres couper à angle droit'], correct:1,
+   fb:["Pas vraiment… coupés est masculin pluriel.",
+       "Correct. vitres est féminin pluriel, donc coupées aussi.",
+       "L'adjectif doit être au pluriel.",
+       "Ici, il faut un adjectif accordé, pas un infinitif."],
+   corrige:"Réponse attendue : B. On écrit les vitres coupées à angle droit. L'adjectif participe passé employé comme adjectif s'accorde avec le nom."},
+  // ACTIVITÉ 4
+  {act:3, q:'Choisis la phrase où tous les accords dans le groupe nominal sont corrects.',
+   opts:['Les passages sont des corridors étroits et sombres.','Les passages sont des corridors étroites et sombres.','Les passages sont des corridor étroits et sombres.','Les passages sont des corridors étroits et sombre.'], correct:0,
+   fb:["Correct. Tous les mots sont bien accordés au masculin pluriel.",
+       "Attention : étroites est féminin pluriel.",
+       "Il manque le s à corridors.",
+       "Pas vraiment… sombre doit aussi se mettre au pluriel."],
+   corrige:"Réponse attendue : A. Dans cette phrase, corridors, étroits et sombres sont tous au masculin pluriel."},
+  {act:3, q:'Choisis la phrase où tous les accords dans le groupe nominal sont corrects.',
+   opts:['Des lueurs blanches et sales tombent des verrières noires.','Des lueurs blanche et sales tombent des verrières noir.','Des lueurs blancs et sales tombent des verrières noires.','Des lueurs blanches et sale tombent des verrières noires.'], correct:0,
+   fb:["Correct. Tous les adjectifs s'accordent avec les noms qu'ils qualifient.",
+       "Attention : blanche et noir ne sont pas correctement accordés.",
+       "Pas vraiment… blancs est masculin pluriel, alors que lueurs est féminin pluriel.",
+       "Pas vraiment… sale doit aussi être au pluriel."],
+   corrige:"Réponse attendue : A. lueurs est féminin pluriel : blanches et sales s'accordent avec lui. verrières est aussi féminin pluriel : noires s'accorde avec ce nom."},
+  {act:3, q:'Choisis la phrase où tous les accords dans le groupe nominal sont corrects.',
+   opts:['Les vitres coupées à angle droit sont noires de crasse.','Les vitres coupé à angle droit sont noir de crasse.','Les vitres coupées à angle droit sont noir de crasse.','Les vitres coupé à angle droit sont noires de crasse.'], correct:0,
+   fb:["Bravo. coupées et noires s'accordent correctement avec vitres.",
+       "Les deux adjectifs devraient être au féminin pluriel.",
+       "Attention : noir devrait s'accorder avec vitres.",
+       "Pas vraiment… coupé devrait être au féminin pluriel."],
+   corrige:"Réponse attendue : A. Les adjectifs coupées et noires s'accordent tous deux avec vitres, féminin pluriel."}
+];
+
+const N = QUESTIONS_SRC.length;
+const LETTERS = ['A','B','C','D'];
+let QUESTIONS = [];
+let state = [];
+let cur = 0, gold = 0, totalErrors = 0;
+
+function shuffleArr(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildShuffledQuestions(){
+  QUESTIONS = QUESTIONS_SRC.map(src=>{
+    const order = shuffleArr([0,1,2,3]); // nouvelle position -> ancien index
+    const opts = order.map(oldI=>src.opts[oldI]);
+    const fb = order.map(oldI=>src.fb[oldI]);
+    const correct = order.indexOf(src.correct);
+    return {act:src.act, q:src.q, opts, fb, correct, corrige:src.corrige};
+  });
+  state = QUESTIONS.map(()=>({tries:[], done:false}));
+}
+
+function buildTrack(){
+  buildShuffledQuestions();
+  const bands = $('actBands');
+  bands.innerHTML = '';
+  ACT_NAMES.forEach((name,i)=>{
+    const b = document.createElement('div');
+    b.className = 'act-band';
+    b.id = 'band'+i;
+    b.style.color = ACT_COLORS[i];
+    b.style.background = ACT_COLORS[i]+'22';
+    b.textContent = 'Galerie '+(i+1);
+    bands.appendChild(b);
+  });
+
+  const track = $('track');
+  track.querySelectorAll('.dot,.wagon-ic').forEach(el=>el.remove());
+  QUESTIONS.forEach((q,i)=>{
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.id = 'dot'+i;
+    dot.style.borderColor = ACT_COLORS[q.act];
+    dot.textContent = (i+1);
+    track.appendChild(dot);
+  });
+  const wagon = document.createElement('div');
+  wagon.className = 'wagon-ic';
+  wagon.id = 'wagonIc';
+  wagon.textContent = '🚂';
+  track.appendChild(wagon);
+  updateTrack();
+}
+
+function updateTrack(){
+  QUESTIONS.forEach((q,i)=>{
+    const dot = $('dot'+i);
+    dot.classList.remove('current','done');
+    if(state[i].done){ dot.classList.add('done'); dot.textContent = '✓'; }
+    else if(i===cur){ dot.classList.add('current'); dot.textContent = (i+1); }
+    else { dot.textContent = (i+1); }
+  });
+  ACT_NAMES.forEach((_,i)=>{
+    $('band'+i).classList.toggle('active', i===QUESTIONS[cur].act);
+  });
+  const pct = (cur/(N))*100;
+  $('railFill').style.width = pct+'%';
+  const dotEl = $('dot'+cur);
+  if(dotEl){
+    const wagon = $('wagonIc');
+    wagon.style.left = dotEl.offsetLeft + dotEl.offsetWidth/2 + 'px';
+  }
+  $('galNum').textContent = QUESTIONS[cur].act+1;
+  $('qNum').textContent = cur+1;
+  $('goldCount').textContent = gold;
+}
+
+function render(){
+  const zone = $('qZone');
+  zone.innerHTML = '';
+  const item = QUESTIONS[cur];
+  const st = state[cur];
+
+  const card = document.createElement('div');
+  card.className = 'qcard';
+  card.id = 'card'+cur;
+
+  const lab = document.createElement('div');
+  lab.className = 'act-label';
+  lab.style.color = ACT_COLORS[item.act];
+  lab.textContent = ACT_NAMES[item.act] + ' · Question ' + ((cur % 3) + 1) + '/3';
+  card.appendChild(lab);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.textContent = item.q;
+  card.appendChild(qtext);
+
+  const optsDiv = document.createElement('div');
+  optsDiv.className = 'opts';
+  item.opts.forEach((txt,oi)=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    const wasTried = st.tries.includes(oi);
+    if(st.done && oi!==item.correct && !wasTried){
+      // rien
+    }
+    if(wasTried){
+      b.classList.add(oi===item.correct ? 'ok' : 'ko');
+      b.disabled = true;
+    }
+    if(st.done && oi===item.correct){
+      b.classList.add('ok');
+      b.disabled = true;
+    }
+    if(st.done){
+      b.disabled = true;
+    }
+    b.innerHTML = '<span class="letter">'+LETTERS[oi]+'.</span><span>'+txt+'</span>';
+    if(!wasTried && !(st.done)){
+      b.addEventListener('click', ()=>selectOpt(oi));
+    }
+    optsDiv.appendChild(b);
+  });
+  card.appendChild(optsDiv);
+
+  if(st.tries.length>0){
+    const lastOi = st.tries[st.tries.length-1];
+    const fb = document.createElement('div');
+    fb.className = 'feedback ' + (lastOi===item.correct ? 'ok' : 'ko');
+    fb.textContent = item.fb[lastOi];
+    card.appendChild(fb);
+  }
+
+  if(st.done){
+    const corr = document.createElement('div');
+    corr.className = 'corrige-box';
+    corr.innerHTML = '<span class="lab">Corrigé</span>'+item.corrige;
+    card.appendChild(corr);
+
+    const nav = document.createElement('button');
+    nav.className = 'btn-nav';
+    nav.textContent = cur<N-1 ? 'Barrière suivante ▸' : 'Voir le trésor final ▸';
+    nav.addEventListener('click', ()=>{
+      if(cur<N-1){ cur++; render(); updateTrack(); }
+      else { showBilan(); }
+    });
+    card.appendChild(nav);
+  }
+
+  zone.appendChild(card);
+}
+
+function selectOpt(oi){
+  const item = QUESTIONS[cur];
+  const st = state[cur];
+  if(st.done) return;
+  st.tries.push(oi);
+  if(oi===item.correct){
+    st.done = true;
+    gold += 10;
+  } else {
+    totalErrors++;
+  }
+  render();
+  updateTrack();
+}
+
+function showBilan(){
+  const modal = $('overlay');
+  const perfect = state.every(s=>s.tries.length===1);
+  $('modalTitre').textContent = perfect ? '💎 Trésor trouvé sans une seule erreur !' : '💎 Trésor trouvé !';
+  $('bilanScore').textContent = gold+' 🟡';
+  const nbEssaisTotal = state.reduce((a,s)=>a+s.tries.length,0);
+  $('bilanDetail').textContent = '12 / 12 barrières franchies\n'+totalErrors+' erreur'+(totalErrors>1?'s':'')+' au total\n'+nbEssaisTotal+' tentative'+(nbEssaisTotal>1?'s':'')+' en tout';
+  modal.classList.add('show');
+}
+
+function rejouer(){
+  cur = 0; gold = 0; totalErrors = 0;
+  $('overlay').classList.remove('show');
+  buildTrack();
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+$('btnCommencer').addEventListener('click', ()=>{
+  $('phase1').style.display = 'none';
+  $('phase2').classList.add('active');
+  buildTrack();
+  render();
+});
+</script>
+</body>
+</html>
