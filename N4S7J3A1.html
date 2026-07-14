@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – S7 J3 – 4e – Accord sujet-verbe</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(141,198,63,.25);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;--orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+    /* DASH */
+    .dash{width:100%;max-width:720px;background:var(--dark);border:2px solid var(--dark3);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#5a8a5a;text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-border);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-border);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#5a8a5a;text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .part-b{display:flex;align-items:center;gap:.4rem;background:var(--dark2);border:1.5px solid var(--dark3);
+      border-radius:8px;padding:.28rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.15);border-color:var(--green);color:#4ade80;}
+    .chip-ko{background:rgba(239,68,68,.15);border-color:var(--red);color:#fca5a5;}
+    .chip-rem{background:rgba(141,198,63,.15);border-color:var(--day-color);color:var(--day-border);}
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+    /* BLOCS */
+    .bloc-partie{width:100%;max-width:720px;position:relative;z-index:1;}
+    .partie-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;
+      background:var(--day-light);border-radius:12px;padding:.85rem 1rem;
+      border:2px solid var(--day-border);border-left:5px solid var(--day-dark);}
+    .part-icon{font-size:1.1rem;flex-shrink:0;}
+    .part-titre{font-size:1.05rem;font-weight:800;color:var(--day-dark);}
+    .part-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .part-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.25rem .75rem;border-radius:99px;background:var(--day-dark);color:#fff;}
+    /* CARTES */
+    .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem 1.1rem;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      animation:fadeUp .35s ease both;margin-bottom:.9rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.55rem;}
+    .q-consigne{font-size:.9rem;color:var(--muted);margin-bottom:.8rem;line-height:1.6;}
+    /* Q1 — boutons binaires */
+    .q1-item{padding:.7rem .2rem;border-bottom:1px solid var(--border);}
+    .q1-item:last-child{border-bottom:none;}
+    .q1-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:.3rem;}
+    .q1-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;font-style:italic;
+      color:var(--text);line-height:1.85;margin-bottom:.45rem;}
+    .q1-phrase .lacune{color:var(--day-dark);font-weight:900;font-style:normal;}
+    .q1-btns{display:flex;gap:.4rem;flex-wrap:wrap;}
+    .ab-btn{padding:.4rem .85rem;border-radius:7px;border:2px solid var(--border);
+      background:var(--surface);font-size:clamp(.95rem,2.6vw,1.05rem);
+      font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);
+      cursor:pointer;transition:all .15s;min-height:44px;-webkit-tap-highlight-color:transparent;}
+    .ab-btn:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .ab-btn.sel{background:var(--day-dark);color:#fff;border-color:var(--day-dark);}
+    .ab-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .ab-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .ab-btn.locked{cursor:default;}
+    .q1-expl{font-size:.88rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      display:none;padding:.35rem .4rem .1rem;line-height:1.6;}
+    .q1-expl.show{display:block;}
+    /* Q2 — saisies */
+    .q2-item{margin-bottom:.85rem;padding-bottom:.85rem;border-bottom:1px solid var(--border);}
+    .q2-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+    .q2-phrase{font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;font-style:italic;
+      color:var(--text);line-height:1.85;margin-bottom:.45rem;
+      background:var(--day-light);border-left:4px solid var(--day-dark);
+      border-radius:8px;padding:.65rem .9rem;}
+    .q2-phrase u{text-decoration-color:var(--day-dark);text-decoration-thickness:2px;font-style:normal;}
+    .saisie-sujet{font-size:.95rem;font-family:Arial,sans-serif;font-weight:600;
+      padding:.38rem .65rem;border:2px solid var(--day-border);border-radius:8px;
+      background:var(--day-light);color:var(--text);width:100%;max-width:380px;
+      outline:none;transition:border-color .15s;}
+    .saisie-sujet:focus{border-color:var(--day-dark);}
+    .saisie-sujet.ok-input{border-color:var(--green);background:var(--green-pale);color:#14532d;}
+    .saisie-sujet.ko-input{border-color:var(--red);background:var(--red-pale);color:#7f1d1d;}
+    .q2-fb-inline{font-size:.85rem;font-family:'JetBrains Mono',monospace;
+      display:none;padding:.3rem .4rem 0;line-height:1.6;}
+    .q2-fb-inline.show{display:block;}
+    .q2-fb-inline.ok-fb{color:#14532d;}
+    .q2-fb-inline.ko-fb{color:#7f1d1d;}
+    /* Q3 — boutons binaires avec label */
+    .q3-item{padding:.7rem .2rem;border-bottom:1px solid var(--border);}
+    .q3-item:last-child{border-bottom:none;}
+    /* CORRIGÉ */
+    .corrige-bloc{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:.9rem 1.1rem;margin-top:.8rem;display:none;}
+    .corrige-bloc.show{display:block;animation:fadeUp .3s ease both;}
+    .corrige-titre{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:#a8c888;margin-bottom:.55rem;}
+    .corrige-item{font-size:.9rem;color:#c8e0b8;line-height:1.65;margin-bottom:.25rem;}
+    .corrige-item strong{color:#fff;}
+    /* SYNTHÈSE */
+    .synthese-bloc{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-dark);border-radius:var(--radius);
+      padding:1rem 1.2rem;margin-top:1rem;display:none;}
+    .synthese-bloc.show{display:block;animation:fadeUp .3s ease both;}
+    .synthese-titre{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.45rem;}
+    .synthese-texte{font-size:.95rem;color:var(--text);line-height:1.8;}
+    /* FB */
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.6rem;display:none;line-height:1.75;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border-left:5px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border-left:5px solid var(--red);color:#7f1d1d;}
+    .fb.mid-fb{background:#fff8ee;border-left:5px solid var(--orange);color:#7a4000;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.45rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .fb ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+    .fb ul li{margin-bottom:.3rem;line-height:1.75;}
+    /* BTN */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.4;cursor:default;}
+    .btn-dark{background:var(--dark2);color:#fff;border:1.5px solid var(--dark3);}
+    .nav-wrap{width:100%;text-align:center;margin:.7rem 0 .3rem;}
+    /* RÉSULTATS */
+    .results-global{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-global.show{display:block;animation:fadeUp .4s ease both;}
+    .results-card{background:var(--dark);border:2px solid var(--dark3);border-radius:var(--radius);
+      padding:2rem 1.3rem;box-shadow:0 4px 24px rgba(0,0,0,.2);text-align:center;
+      position:relative;overflow:hidden;margin-top:1.5rem;}
+    .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .res-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:#a8c888;margin-bottom:.5rem;}
+    .res-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;}
+    .res-score .s-num{color:var(--day-border);}
+    .res-denom{font-size:1.5rem;color:#5a8a5a;}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .badge-ok{display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#a8c888;margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .recap-bloc{text-align:left;background:var(--dark2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.8rem;}
+    .recap-ligne{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#a8c888;
+      margin-bottom:.3rem;display:flex;justify-content:space-between;align-items:center;}
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}.q1-btns{flex-direction:column;}.saisie-sujet{max-width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5c518"></span>
+    Pazapa &middot; Français &middot; 4ème
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 3</div>
+  <h1>J&rsquo;observe et je teste &middot; <span class="hl">L&rsquo;accord sujet-verbe</span></h1>
+  <div class="theme-badge">Grammaire &mdash; accord sujet-verbe</div>
+</header>
+
+<!-- DASH -->
+<div class="dash">
+  <div class="dash-titre">Test de réactivation &mdash; 3 questions &mdash; 14 points</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Question 1 en cours&hellip;</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/14</div>
+      <div class="dash-score-label">Points</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-p1"><span style="font-weight:700;">Q1</span><span id="nb-s-p1" style="font-weight:900;">0/6</span></div>
+    <div class="part-b" id="nb-p2"><span style="font-weight:700;">Q2</span><span id="nb-s-p2" style="font-weight:900;">0/4</span></div>
+    <div class="part-b" id="nb-p3"><span style="font-weight:700;">Q3</span><span id="nb-s-p3" style="font-weight:900;">0/4</span></div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">14</span> restants</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 14 points</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- Q1 -->
+<div class="bloc-partie" id="bloc-p1">
+  <div class="partie-header">
+    <div class="part-icon">&#128221;</div>
+    <div>
+      <div class="part-titre">Question 1 &mdash; Choix de la forme verbale</div>
+      <div class="part-sous">6 points &mdash; choisis la forme correcte, puis valide</div>
+    </div>
+    <div class="part-badge" id="badge-p1">0/6</div>
+  </div>
+  <div class="card" id="card-q1">
+    <div class="card-stripe"></div>
+    <div class="q-label">Q1 &mdash; Pour chaque phrase, choisis la forme verbale correcte.</div>
+    <div id="q1-items"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;">
+      <button class="btn btn-primary" id="btn-val-q1" onclick="validerQ1()" disabled style="opacity:.4;">
+        Vérifier &mdash; <span id="cpt-q1">0/6 réponses</span>
+      </button>
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="fb" id="fb-q1"></div>
+    <div class="corrige-bloc" id="cor-q1">
+      <div class="corrige-titre">Corrigé</div>
+      <div class="corrige-item"><strong>1. repose</strong> &mdash; Le noyau du sujet est <em>rangée</em> (singulier).</div>
+      <div class="corrige-item"><strong>2. jouent</strong> &mdash; Le sujet est <em>les enfants</em> (pluriel).</div>
+      <div class="corrige-item"><strong>3. connais</strong> &mdash; <em>Qui</em> reprend <em>toi</em> (2e personne du singulier).</div>
+      <div class="corrige-item"><strong>4. apporte</strong> &mdash; <em>Chacun</em> est singulier.</div>
+      <div class="corrige-item"><strong>5. sont</strong> &mdash; Le sujet est <em>les clés</em> (pluriel).</div>
+      <div class="corrige-item"><strong>6. sont</strong> &mdash; <em>Plusieurs</em> est un sujet pluriel.</div>
+    </div>
+  </div>
+  <div class="nav-wrap">
+    <button class="btn btn-primary" id="btn-vers-p2" onclick="allerQ2()" disabled style="opacity:.45;min-width:220px;">
+      Question 2 &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="bloc-partie" id="bloc-p2" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128221;</div>
+    <div>
+      <div class="part-titre">Question 2 &mdash; Identifier le sujet du verbe</div>
+      <div class="part-sous">4 points &mdash; recopie le sujet du verbe souligné</div>
+    </div>
+    <div class="part-badge" id="badge-p2">0/4</div>
+  </div>
+  <div class="card" id="card-q2">
+    <div class="card-stripe"></div>
+    <div class="q-label">Q2 &mdash; Recopie uniquement le sujet du verbe souligné.</div>
+    <div id="q2-items"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;">
+      <button class="btn btn-primary" id="btn-val-q2" onclick="validerQ2()" disabled style="opacity:.4;">
+        Vérifier &mdash; <span id="cpt-q2">0/4 réponses</span>
+      </button>
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="fb" id="fb-q2"></div>
+    <div class="corrige-bloc" id="cor-q2">
+      <div class="corrige-titre">Corrigé</div>
+      <div class="corrige-item"><strong>1.</strong> les vieux oliviers</div>
+      <div class="corrige-item"><strong>2.</strong> le responsable du groupe</div>
+      <div class="corrige-item"><strong>3.</strong> vous</div>
+      <div class="corrige-item"><strong>4.</strong> la majorité des habitants</div>
+    </div>
+  </div>
+  <div class="nav-wrap">
+    <button class="btn btn-primary" id="btn-vers-p3" onclick="allerQ3()" disabled style="opacity:.45;min-width:220px;">
+      Question 3 &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="bloc-partie" id="bloc-p3" style="display:none;">
+  <div class="partie-header">
+    <div class="part-icon">&#128270;</div>
+    <div>
+      <div class="part-titre">Question 3 &mdash; Repérer le piège</div>
+      <div class="part-sous">4 points &mdash; avec quel mot le verbe s&rsquo;accorde-t-il&nbsp;?</div>
+    </div>
+    <div class="part-badge" id="badge-p3">0/4</div>
+  </div>
+  <div class="card" id="card-q3">
+    <div class="card-stripe"></div>
+    <div class="q-label">Q3 &mdash; Dans chaque phrase, indique avec quel mot le verbe s&rsquo;accorde.</div>
+    <div id="q3-items"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;">
+      <button class="btn btn-primary" id="btn-val-q3" onclick="validerQ3()" disabled style="opacity:.4;">
+        Vérifier &mdash; <span id="cpt-q3">0/4 réponses</span>
+      </button>
+      <button class="btn btn-dark" onclick="resetTout()">&#8635;&nbsp;Recommencer</button>
+    </div>
+    <div class="fb" id="fb-q3"></div>
+    <div class="corrige-bloc" id="cor-q3">
+      <div class="corrige-titre">Corrigé</div>
+      <div class="corrige-item"><strong>1.</strong> panier &mdash; noyau du sujet <em>le panier de pommes</em>.</div>
+      <div class="corrige-item"><strong>2.</strong> feuilles &mdash; noyau du sujet <em>les feuilles de cet arbre</em>.</div>
+      <div class="corrige-item"><strong>3.</strong> foule &mdash; noyau du sujet <em>une foule de visiteurs</em>.</div>
+      <div class="corrige-item"><strong>4.</strong> documents &mdash; noyau du sujet <em>les documents du directeur</em>.</div>
+      <div class="corrige-item" style="margin-top:.5rem;font-style:italic;color:#86efac;">
+        Le verbe s&rsquo;accorde toujours avec le noyau du groupe sujet, jamais avec un complément du nom.
+      </div>
+    </div>
+  </div>
+  <div class="nav-wrap">
+    <button class="btn btn-primary" id="btn-verdict" onclick="afficherVerdict()" disabled style="opacity:.45;min-width:220px;">
+      Voir le bilan &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- SYNTHÈSE -->
+<div class="synthese-bloc" id="synthese">
+  <div class="synthese-titre">&#128218; À retenir</div>
+  <div class="synthese-texte">
+    Pour accorder correctement un verbe, commence toujours par identifier le sujet, puis repère son noyau. Le verbe s&rsquo;accorde avec ce noyau, même si d&rsquo;autres mots s&rsquo;intercalent entre le sujet et le verbe.
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="results-global" id="results-global">
+  <div class="results-card">
+    <div class="res-titre">Bilan &mdash; Accord sujet-verbe</div>
+    <div class="res-score"><span class="s-num" id="res-num">0</span><span class="res-denom">/14</span></div>
+    <div class="stars" id="res-stars"></div>
+    <div id="res-badge"></div>
+    <div class="recap-bloc" id="recap-bloc"></div>
+    <div class="res-msg" id="res-msg"></div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">&#8635;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var scoreOk=0,q1Sc=0,q2Sc=0,q3Sc=0,TOTAL=14;
+var q1Sel={},q1Done=false,q2Done=false,q3Sel={},q3Done=false;
+
+function g(id){return document.getElementById(id);}
+function animerEl(el,ok){if(!el)return;el.classList.remove('anim-ok','anim-ko');void el.offsetWidth;el.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(){
+  var pct=Math.round(scoreOk/TOTAL*100);
+  g('prog-fill').style.width=pct+'%';
+  g('prog-label').textContent=scoreOk+' / '+TOTAL+' points';
+  g('prog-pct').textContent=pct+'\u00a0%';
+  g('dash-total').textContent=scoreOk;
+  var done=(q1Done?6:0)+(q2Done?4:0)+(q3Done?4:0);
+  g('chip-ok').textContent=scoreOk;
+  g('chip-ko').textContent=done-scoreOk;
+  g('chip-rem').textContent=TOTAL-done;
+}
+
+/* \u2500\u2500 Q1 \u2500\u2500 */
+var Q1=[
+  {ph:'La rang\u00e9e de livres \u2026 sur l\u2019\u00e9tag\u00e8re.',a:'repose',b:'reposent',c:'a',
+   e:'Le noyau du sujet est <span class="hl-ok">rang\u00e9e</span> (singulier). \u2192 <span class="hl-ok">repose</span>.'},
+  {ph:'Les enfants du voisin \u2026 dans le jardin.',a:'joue',b:'jouent',c:'b',
+   e:'Le sujet est <span class="hl-ok">les enfants</span> (pluriel). \u2192 <span class="hl-ok">jouent</span>.'},
+  {ph:'C\u2019est toi qui \u2026 la r\u00e9ponse.',a:'connais',b:'conna\u00eet',c:'a',
+   e:'<span class="hl-ok">Qui</span> reprend <span class="hl-ok">toi</span> (2e personne du singulier). \u2192 <span class="hl-ok">connais</span>.'},
+  {ph:'Chacun des \u00e9l\u00e8ves \u2026 son manuel.',a:'apporte',b:'apportent',c:'a',
+   e:'<span class="hl-ok">Chacun</span> est singulier. \u2192 <span class="hl-ok">apporte</span>.'},
+  {ph:'Les cl\u00e9s de la maison \u2026 sur la table.',a:'est',b:'sont',c:'b',
+   e:'Le sujet est <span class="hl-ok">les cl\u00e9s</span> (pluriel). \u2192 <span class="hl-ok">sont</span>.'},
+  {ph:'Plusieurs d\u2019entre nous \u2026 pr\u00eats.',a:'sommes',b:'sont',c:'b',
+   e:'<span class="hl-ok">Plusieurs</span> est un sujet pluriel. \u2192 <span class="hl-ok">sont</span>.'}
+];
+
+function buildQ1(){
+  var wrap=g('q1-items');if(!wrap)return;wrap.innerHTML='';
+  for(var i=0;i<Q1.length;i++){
+    (function(q,idx){
+      var div=document.createElement('div');div.className='q1-item';
+      var num=document.createElement('div');num.className='q1-num';num.textContent='Phrase '+(idx+1);div.appendChild(num);
+      var parts=q.ph.split('\u2026');
+      var ph=document.createElement('div');ph.className='q1-phrase';
+      ph.appendChild(document.createTextNode(parts[0]));
+      var lac=document.createElement('span');lac.className='lacune';lac.textContent='\u2026';ph.appendChild(lac);
+      if(parts[1])ph.appendChild(document.createTextNode(parts[1]));
+      div.appendChild(ph);
+      var btns=document.createElement('div');btns.className='q1-btns';
+      [{k:'a',t:q.a},{k:'b',t:q.b}].forEach(function(opt){
+        var btn=document.createElement('button');btn.className='ab-btn';btn.textContent=opt.t;
+        btn.setAttribute('data-k',opt.k);btn.setAttribute('data-idx',idx);
+        btn.addEventListener('click',function(){
+          if(q1Done)return;
+          btns.querySelectorAll('.ab-btn').forEach(function(b){b.classList.remove('sel');});
+          btn.classList.add('sel');q1Sel[idx]=opt.k;majCptQ1();
+        });
+        btns.appendChild(btn);
+      });
+      div.appendChild(btns);
+      var expl=document.createElement('div');expl.className='q1-expl';expl.id='q1ex-'+idx;expl.innerHTML=q.e;
+      div.appendChild(expl);
+      wrap.appendChild(div);
+    })(Q1[i],i);
+  }
+}
+
+function majCptQ1(){
+  var n=Object.keys(q1Sel).length;
+  var bv=g('btn-val-q1'),cpt=g('cpt-q1');
+  if(bv){bv.disabled=n<6;bv.style.opacity=n<6?'.4':'1';}
+  if(cpt)cpt.textContent=n+'/6 r\u00e9ponses';
+}
+
+function validerQ1(){
+  if(q1Done)return;q1Done=true;
+  var bv=g('btn-val-q1');if(bv)bv.style.display='none';
+  var sc=0;
+  for(var i=0;i<Q1.length;i++){
+    var ok=(q1Sel[i]===Q1[i].c);if(ok)sc++;
+    document.querySelectorAll('[data-idx="'+i+'"]').forEach(function(b){
+      b.classList.remove('sel');b.classList.add('locked');b.disabled=true;
+      if(b.getAttribute('data-k')===Q1[i].c)b.classList.add('ok-opt');
+      else if(b.getAttribute('data-k')===q1Sel[i]&&!ok)b.classList.add('ko-opt');
+    });
+    var ex=g('q1ex-'+i);if(ex)ex.classList.add('show');
+  }
+  q1Sc=sc;scoreOk+=sc;
+  g('badge-p1').textContent=sc+'/6';
+  var nbs=g('nb-s-p1');if(nbs)nbs.textContent=sc+'/6';
+  if(sc===6){var nb=g('nb-p1');if(nb){nb.style.background='rgba(34,197,94,.2)';nb.style.borderColor='var(--green)';if(nbs)nbs.style.color='#4ade80';}}
+  var fb=g('fb-q1');var err=6-sc;
+  if(fb){
+    if(sc===6){fb.className='fb show ok-fb';fb.innerHTML='<span class="fb-titre">\u2713 Parfait\u00a0! 6/6</span>Tu choisis correctement les formes verbales selon le noyau du sujet.';jouerOk();}
+    else if(sc>=4){fb.className='fb mid-fb show';fb.innerHTML='<span class="fb-titre">'+sc+'/6.</span>Relis les explications des phrases manqu\u00e9es\u00a0: identifie toujours le <span class="hl-neu">noyau du sujet</span> avant d\u2019accorder.';}
+    else{fb.className='fb show ko-fb';fb.innerHTML='<span class="fb-titre">'+sc+'/6.</span>Attention\u00a0: le verbe s\u2019accorde avec le <span class="hl-ok">noyau du groupe sujet</span>, pas forc\u00e9ment avec le mot juste avant.';jouerErreur();}
+  }
+  g('cor-q1').classList.add('show');
+  animerEl(g('card-q1'),sc>=4);majProg();
+  g('dash-statut').textContent='Question 2 en cours\u2026';
+  var btn2=g('btn-vers-p2');if(btn2){btn2.disabled=false;btn2.style.opacity='1';}
+}
+
+function allerQ2(){
+  g('bloc-p1').style.display='none';
+  g('bloc-p2').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* \u2500\u2500 Q2 \u2500\u2500 */
+var Q2=[
+  {ph:'Au sommet de la colline, les vieux oliviers <u>r\u00e9sistent</u> au vent.',
+   variantes:['les vieux oliviers','les oliviers'],corrige:'les vieux oliviers'},
+  {ph:'Le responsable du groupe <u>v\u00e9rifie</u> les documents.',
+   variantes:['le responsable du groupe','le responsable'],corrige:'le responsable du groupe'},
+  {ph:'C\u2019est vous qui <u>d\u00e9cidez</u> aujourd\u2019hui.',
+   variantes:['vous'],corrige:'vous'},
+  {ph:'La majorit\u00e9 des habitants <u>participe</u> \u00e0 la r\u00e9union.',
+   variantes:['la majorit\u00e9 des habitants','la majorit\u00e9'],corrige:'la majorit\u00e9 des habitants'}
+];
+
+function buildQ2(){
+  var wrap=g('q2-items');if(!wrap)return;wrap.innerHTML='';
+  for(var i=0;i<Q2.length;i++){
+    (function(q,idx){
+      var div=document.createElement('div');div.className='q2-item';
+      var ph=document.createElement('div');ph.className='q2-phrase';ph.innerHTML=q.ph;div.appendChild(ph);
+      var inp=document.createElement('input');inp.type='text';inp.className='saisie-sujet';
+      inp.placeholder='Recopie le sujet\u2026';inp.id='q2s-'+idx;
+      inp.setAttribute('autocomplete','off');inp.setAttribute('autocorrect','off');inp.setAttribute('spellcheck','false');
+      inp.addEventListener('change',function(){majCptQ2();});
+      inp.addEventListener('keyup',function(){majCptQ2();});
+      div.appendChild(inp);
+      var fb=document.createElement('div');fb.className='q2-fb-inline';fb.id='q2fb-'+idx;div.appendChild(fb);
+      wrap.appendChild(div);
+    })(Q2[i],i);
+  }
+}
+
+function majCptQ2(){
+  var n=0;for(var i=0;i<4;i++){var s=g('q2s-'+i);if(s&&s.value.trim().length>0)n++;}
+  var bv=g('btn-val-q2'),cpt=g('cpt-q2');
+  if(bv){bv.disabled=n<4;bv.style.opacity=n<4?'.4':'1';}
+  if(cpt)cpt.textContent=n+'/4 r\u00e9ponses';
+}
+
+function norm(s){return s.trim().toLowerCase().replace(/[\s\u00a0]+/g,' ').replace(/['\u2019]/g,"'");}
+
+function validerQ2(){
+  if(q2Done)return;q2Done=true;
+  var bv=g('btn-val-q2');if(bv)bv.style.display='none';
+  var sc=0;
+  for(var i=0;i<Q2.length;i++){
+    var inp=g('q2s-'+i);var fb=g('q2fb-'+i);
+    if(!inp)continue;inp.disabled=true;
+    var val=norm(inp.value);
+    if(val.length===0){inp.classList.add('ko-input');if(fb){fb.className='q2-fb-inline show ko-fb';fb.innerHTML='Attendu\u00a0: <strong>'+Q2[i].corrige+'</strong>.';}continue;}
+    var ok=Q2[i].variantes.some(function(v){return norm(v)===val||val.indexOf(norm(v))>=0||norm(v).indexOf(val)>=0;});
+    if(ok){sc++;inp.classList.add('ok-input');if(fb){fb.className='q2-fb-inline show ok-fb';fb.textContent='\u2713 Correct\u00a0!';}}
+    else{inp.classList.add('ko-input');if(fb){fb.className='q2-fb-inline show ko-fb';fb.innerHTML='Attendu\u00a0: <strong>'+Q2[i].corrige+'</strong>.';}}
+  }
+  q2Sc=sc;scoreOk+=sc;
+  g('badge-p2').textContent=sc+'/4';
+  var nbs=g('nb-s-p2');if(nbs)nbs.textContent=sc+'/4';
+  if(sc===4){var nb=g('nb-p2');if(nb){nb.style.background='rgba(34,197,94,.2)';nb.style.borderColor='var(--green)';if(nbs)nbs.style.color='#4ade80';}}
+  var fb2=g('fb-q2');
+  if(fb2){
+    if(sc===4){fb2.className='fb show ok-fb';fb2.innerHTML='<span class="fb-titre">\u2713 Excellent\u00a0! 4/4</span>Tu rep\u00e8res correctement le sujet du verbe.';jouerOk();}
+    else if(sc>=2){fb2.className='fb mid-fb show';fb2.innerHTML='<span class="fb-titre">'+sc+'/4 &mdash; Bon travail\u00a0!</span>Fais attention aux <span class="hl-neu">groupes nominaux d\u00e9velopp\u00e9s</span>\u00a0: recopie tout le groupe sujet.';}
+    else{fb2.className='fb show ko-fb';fb2.innerHTML='<span class="fb-titre">'+sc+'/4.</span>Le sujet n\u2019est pas toujours le mot plac\u00e9 juste avant le verbe.';jouerErreur();}
+  }
+  g('cor-q2').classList.add('show');
+  animerEl(g('card-q2'),sc>=2);majProg();
+  g('dash-statut').textContent='Question 3 en cours\u2026';
+  var btn3=g('btn-vers-p3');if(btn3){btn3.disabled=false;btn3.style.opacity='1';}
+}
+
+function allerQ3(){
+  g('bloc-p2').style.display='none';
+  g('bloc-p3').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* \u2500\u2500 Q3 \u2500\u2500 */
+var Q3=[
+  {ph:'Le panier de pommes est lourd.',a:'panier',b:'pommes',c:'a'},
+  {ph:'Les feuilles de cet arbre tombent d\u00e9j\u00e0.',a:'feuilles',b:'arbre',c:'a'},
+  {ph:'Une foule de visiteurs attend devant le monument.',a:'foule',b:'visiteurs',c:'a'},
+  {ph:'Les documents du directeur sont pr\u00eats.',a:'documents',b:'directeur',c:'a'}
+];
+
+function buildQ3(){
+  var wrap=g('q3-items');if(!wrap)return;wrap.innerHTML='';
+  for(var i=0;i<Q3.length;i++){
+    (function(q,idx){
+      var div=document.createElement('div');div.className='q3-item';
+      var num=document.createElement('div');num.className='q1-num';num.textContent='Phrase '+(idx+1);div.appendChild(num);
+      var ph=document.createElement('div');ph.className='q1-phrase';ph.textContent=q.ph;div.appendChild(ph);
+      var btns=document.createElement('div');btns.className='q1-btns';
+      [{k:'a',t:q.a},{k:'b',t:q.b}].forEach(function(opt){
+        var btn=document.createElement('button');btn.className='ab-btn';btn.textContent=opt.t;
+        btn.setAttribute('data-k3',opt.k);btn.setAttribute('data-i3',idx);
+        btn.addEventListener('click',function(){
+          if(q3Done)return;
+          btns.querySelectorAll('.ab-btn').forEach(function(b){b.classList.remove('sel');});
+          btn.classList.add('sel');q3Sel[idx]=opt.k;majCptQ3();
+        });
+        btns.appendChild(btn);
+      });
+      div.appendChild(btns);
+      wrap.appendChild(div);
+    })(Q3[i],i);
+  }
+}
+
+function majCptQ3(){
+  var n=Object.keys(q3Sel).length;
+  var bv=g('btn-val-q3'),cpt=g('cpt-q3');
+  if(bv){bv.disabled=n<4;bv.style.opacity=n<4?'.4':'1';}
+  if(cpt)cpt.textContent=n+'/4 r\u00e9ponses';
+}
+
+function validerQ3(){
+  if(q3Done)return;q3Done=true;
+  var bv=g('btn-val-q3');if(bv)bv.style.display='none';
+  var sc=0;
+  for(var i=0;i<Q3.length;i++){
+    var ok=(q3Sel[i]===Q3[i].c);if(ok)sc++;
+    document.querySelectorAll('[data-i3="'+i+'"]').forEach(function(b){
+      b.classList.remove('sel');b.classList.add('locked');b.disabled=true;
+      if(b.getAttribute('data-k3')===Q3[i].c)b.classList.add('ok-opt');
+      else if(b.getAttribute('data-k3')===q3Sel[i]&&!ok)b.classList.add('ko-opt');
+    });
+  }
+  q3Sc=sc;scoreOk+=sc;
+  g('badge-p3').textContent=sc+'/4';
+  var nbs=g('nb-s-p3');if(nbs)nbs.textContent=sc+'/4';
+  if(sc===4){var nb=g('nb-p3');if(nb){nb.style.background='rgba(34,197,94,.2)';nb.style.borderColor='var(--green)';if(nbs)nbs.style.color='#4ade80';}}
+  var fb3=g('fb-q3');
+  if(fb3){
+    if(sc===4){fb3.className='fb show ok-fb';fb3.innerHTML='<span class="fb-titre">\u2713 Excellent\u00a0! 4/4</span>Tu ma\u00eetrises d\u00e9j\u00e0 tr\u00e8s bien l\u2019accord sujet-verbe.';jouerOk();}
+    else if(sc>=2){fb3.className='fb mid-fb show';fb3.innerHTML='<span class="fb-titre">'+sc+'/4.</span>Souviens-toi\u00a0: le verbe s\u2019accorde avec le <span class="hl-neu">noyau du groupe sujet</span>, jamais avec un compl\u00e9ment du nom.';}
+    else{fb3.className='fb show ko-fb';fb3.innerHTML='<span class="fb-titre">'+sc+'/4.</span>Le verbe s\u2019accorde toujours avec le <span class="hl-ok">noyau du groupe sujet</span>, jamais avec un compl\u00e9ment du nom.';jouerErreur();}
+  }
+  g('cor-q3').classList.add('show');
+  animerEl(g('card-q3'),sc>=2);majProg();
+  g('dash-statut').textContent='Test termin\u00e9\u00a0!';
+  var bvd=g('btn-verdict');if(bvd){bvd.disabled=false;bvd.style.opacity='1';}
+}
+
+function afficherVerdict(){
+  g('synthese').classList.add('show');
+  g('results-global').classList.add('show');
+  g('res-num').textContent=scoreOk;
+  var pct=scoreOk/TOTAL;
+  var stars=pct>=.9?5:pct>=.7?4:pct>=.5?3:pct>=.3?2:1;
+  g('res-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(pct>=.9){badge='<div class="badge-ok">\u2713 Excellent\u00a0! Tu ma\u00eetrises d\u00e9j\u00e0 tr\u00e8s bien l\u2019accord sujet-verbe.</div>';msg='';pluie();}
+  else if(pct>=.7){badge='<div class="badge-ok">\u2713 Tr\u00e8s bien\u00a0!</div>';msg='Quelques pi\u00e8ges restent \u00e0 surveiller.';pluie();}
+  else if(pct>=.5){badge='<div class="badge-ko">Bien.</div>';msg='Les bases sont solides. Le parcours t\u2019aidera \u00e0 gagner en pr\u00e9cision.';}
+  else{badge='<div class="badge-ko">Continue\u00a0!</div>';msg='Les activit\u00e9s qui suivent vont te permettre de revoir les principaux cas d\u2019accord.';}
+  g('res-badge').innerHTML=badge;
+  g('res-msg').textContent=msg;
+  g('recap-bloc').innerHTML=
+    '<div class="recap-ligne"><span>Choisir la bonne forme verbale</span><span>'+q1Sc+'/6</span></div>'+
+    '<div class="recap-ligne"><span>Identifier le sujet</span><span>'+q2Sc+'/4</span></div>'+
+    '<div class="recap-ligne"><span>Rep\u00e9rer le noyau du sujet</span><span>'+q3Sc+'/4</span></div>';
+}
+
+function resetTout(){
+  scoreOk=0;q1Sc=0;q2Sc=0;q3Sc=0;q1Sel={};q1Done=false;q2Done=false;q3Sel={};q3Done=false;
+  ['results-global','synthese'].forEach(function(id){var e=g(id);if(e)e.classList.remove('show');});
+  g('bloc-p1').style.display='';
+  ['bloc-p2','bloc-p3'].forEach(function(id){var e=g(id);if(e)e.style.display='none';});
+  ['fb-q1','fb-q2','fb-q3'].forEach(function(id){var e=g(id);if(e)e.className='fb';});
+  ['cor-q1','cor-q2','cor-q3'].forEach(function(id){var e=g(id);if(e)e.className='corrige-bloc';});
+  var m={'p1':'0/6','p2':'0/4','p3':'0/4'};
+  ['p1','p2','p3'].forEach(function(id){
+    var b=g('nb-'+id),s=g('nb-s-'+id);
+    if(b){b.style.background='';b.style.borderColor='';}
+    if(s){s.textContent=m[id];s.style.color='';}
+    var bd=g('badge-'+id);if(bd)bd.textContent=m[id];
+  });
+  ['btn-vers-p2','btn-vers-p3','btn-verdict'].forEach(function(id){var e=g(id);if(e){e.disabled=true;e.style.opacity='.45';}});
+  ['btn-val-q1','btn-val-q2','btn-val-q3'].forEach(function(id){var e=g(id);if(e){e.style.display='';e.disabled=true;e.style.opacity='.4';}});
+  g('cpt-q1').textContent='0/6 r\u00e9ponses';
+  g('cpt-q2').textContent='0/4 r\u00e9ponses';
+  g('cpt-q3').textContent='0/4 r\u00e9ponses';
+  g('dash-statut').textContent='Question 1 en cours\u2026';
+  majProg();buildQ1();buildQ2();buildQ3();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildQ1();buildQ2();buildQ3();majProg();
+</script>
+</body>
+</html>
