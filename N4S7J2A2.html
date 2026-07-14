@@ -19,6 +19,10 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
   min-height:100vh;display:flex;flex-direction:column;align-items:center;
   padding:1.5rem .75rem 3rem;overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative;}
 .wrap{width:100%;max-width:760px;position:relative;z-index:1;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:160px;height:160px;
+  background:var(--blue);bottom:100px;right:-30px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:110px;height:110px;
+  background:var(--green);top:180px;left:-25px;pointer-events:none;}
 
 header{text-align:center;margin-bottom:1rem;}
 .logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
@@ -49,10 +53,14 @@ h1 .hl{color:var(--day-dark);}
   animation:waveMove 3s linear infinite;}
 @keyframes waveMove{from{transform:translateX(0);}to{transform:translateX(-40px);}}
 
-.hud-bar{display:flex;justify-content:center;gap:1.4rem;margin-bottom:.6rem;flex-wrap:wrap;}
-.hud-item{text-align:center;}
-.hud-val{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.2rem;color:var(--day-dark2);}
-.hud-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;}
+.chips{display:flex;gap:.45rem;justify-content:center;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:99px;
+  font-size:.74rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+  border:1.5px solid var(--border);background:var(--surface);white-space:nowrap;}
+.chip .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.chip.ok .cdot{background:#5fa82f;}
+.chip.ko .cdot{background:var(--err);}
+.chip.rem .cdot{background:var(--muted);}
 .stars-row{text-align:center;font-size:1.3rem;letter-spacing:.15em;margin-bottom:.6rem;}
 .star{color:#ddd;}
 .star.on{color:#f5c518;}
@@ -172,10 +180,10 @@ h1 .hl{color:var(--day-dark);}
 .res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
   background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
 .res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
-  font-size:clamp(2.4rem,8vw,3.6rem);color:var(--day-dark2);margin:.3rem 0 .1rem;}
-.res-stars{font-size:1.7rem;margin-bottom:.6rem;letter-spacing:.15em;}
+  font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark2);margin:.3rem 0 .1rem;}
+.res-stars{font-size:1.9rem;margin-bottom:.6rem;letter-spacing:.15em;}
 .res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
-.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.8rem;
+.recap-list{text-align:left;font-family:'JetBrains Mono',monospace;font-size:.82rem;
   color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);
   padding:.7rem 1rem;margin-bottom:1rem;}
 .recap-list div{padding:.15rem 0;}
@@ -186,6 +194,7 @@ h1 .hl{color:var(--day-dark);}
 </style>
 </head>
 <body>
+<div class="bubble1"></div><div class="bubble2"></div>
 <div class="flash" id="flash"></div>
 
 <div class="wrap">
@@ -237,10 +246,10 @@ h1 .hl{color:var(--day-dark);}
   </div>
 </div>
 
-<div class="hud-bar">
-  <div class="hud-item"><div class="hud-val" id="hud-reussis">0</div><div class="hud-lbl">Réussis</div></div>
-  <div class="hud-item"><div class="hud-val" id="hud-restants">7</div><div class="hud-lbl">Restants</div></div>
-  <div class="hud-item"><div class="hud-val" id="hud-erreurs">0</div><div class="hud-lbl">Erreurs</div></div>
+<div class="chips">
+  <span class="chip ok"><span class="cdot"></span>Réussis&nbsp;: <span id="hud-reussis">0</span></span>
+  <span class="chip ko"><span class="cdot"></span>Erreurs&nbsp;: <span id="hud-erreurs">0</span></span>
+  <span class="chip rem"><span class="cdot"></span>Restants&nbsp;: <span id="hud-restants">7</span></span>
 </div>
 <div class="stars-row" id="stars-row"></div>
 <div class="prog-wrap">
@@ -339,7 +348,7 @@ function flashIcon(ok){
 /* ══ DÉFIS ══ */
 var DEFIS=[
  {type:'assoc',
-  consigne:"Associe chaque phrase à son code (banque de codes ci-dessous).",
+  consigne:"🏷️ Associe chaque phrase à son code (banque de codes ci-dessous).",
   banqueCodes:[
    {c:'A',type:'déclaratif',forme:'affirmative'},
    {c:'B',type:'déclaratif',forme:'exclamative'},
@@ -357,48 +366,48 @@ var DEFIS=[
    {phrase:"« Ne bougez plus\u00a0! »",code:'F'},
    {phrase:"« Vous avancez en silence. »",code:'A'}
   ],
-  indice:"Repère d'abord si la phrase donne un ordre, pose une question ou fait une déclaration&nbsp;: c'est le type. Regarde ensuite la ponctuation et la négation&nbsp;: c'est la forme.",
+  indice:null,
   corrige:"La suite attendue est bien <strong>E - D - C - B - F - A</strong>."},
  {type:'qcm',
-  consigne:"Choisis le bilan juste.",
+  consigne:"📋 Choisis le bilan juste.",
   options:["Une phrase a toujours un seul type et une seule forme.","Une phrase peut combiner un type et plusieurs formes.","Une phrase exclamative est un type de phrase.","Une phrase interrogative appartient aux formes."],
   correct:1,
   indice:"Repère de vérification&nbsp;: pense aux phrases comme « Ne bougez plus&nbsp;! ».",
   corrige:"« Ne bougez plus&nbsp;! » est une phrase de type injonctif, à la forme négative et à la forme exclamative."},
  {type:'qcm',
   phraseDepart:"Tu fermes la porte.",
-  consigne:"Objectif\u00a0: obtenir une phrase interrogative.",
+  consigne:"🎯 Objectif\u00a0: obtenir une phrase interrogative.",
   options:["Ferme la porte.","Fermes-tu la porte\u00a0?","Comme tu fermes la porte\u00a0!","Tu ne fermes plus la porte."],
   correct:1,
-  indice:"L'interrogation inverse souvent le sujet et le verbe, ou ajoute un point d'interrogation.",
+  indice:"Méthode utile pour transformer une phrase&nbsp;: je repère d'abord le type. Je regarde ensuite la forme. Je modifie seulement ce que demande la consigne.",
   corrige:"« Fermes-tu la porte&nbsp;? » transforme la phrase en interrogation."},
  {type:'qcm',
   phraseDepart:"Rangez vos cahiers.",
-  consigne:"Objectif\u00a0: obtenir une phrase injonctive à la forme négative.",
+  consigne:"🎯 Objectif\u00a0: obtenir une phrase injonctive à la forme négative.",
   options:["Ne rangez pas vos cahiers.","Rangez vos cahiers\u00a0?","Vos cahiers sont rangés.","Comme vous rangez vos cahiers\u00a0!"],
   correct:0,
-  indice:"Garde l'ordre (l'injonction) mais encadre le verbe par la négation.",
+  indice:"Méthode utile pour transformer une phrase&nbsp;: je repère d'abord le type. Je regarde ensuite la forme. Je modifie seulement ce que demande la consigne.",
   corrige:"« Ne rangez pas vos cahiers. » garde la consigne et passe à la forme négative."},
  {type:'qcm',
   phraseDepart:"Ce château est magnifique.",
-  consigne:"Objectif\u00a0: obtenir une phrase déclarative à la forme exclamative.",
+  consigne:"🎯 Objectif\u00a0: obtenir une phrase déclarative à la forme exclamative.",
   options:["Ce château est-il magnifique\u00a0?","Ce château est magnifique.","Magnifique, ce château.","Comme ce château est magnifique\u00a0!"],
   correct:3,
-  indice:"La phrase doit rester une déclaration mais exprimer une émotion forte.",
+  indice:"Méthode utile pour transformer une phrase&nbsp;: je repère d'abord le type. Je regarde ensuite la forme. Je modifie seulement ce que demande la consigne.",
   corrige:"« Comme ce château est magnifique&nbsp;! » reste une déclaration et ajoute la forme exclamative."},
  {type:'qcm',
   phraseDepart:"Vous partez maintenant\u00a0?",
-  consigne:"Objectif\u00a0: obtenir une phrase déclarative à la forme affirmative.",
+  consigne:"🎯 Objectif\u00a0: obtenir une phrase déclarative à la forme affirmative.",
   options:["Partez maintenant\u00a0!","Comme vous partez maintenant\u00a0!","Vous partez maintenant.","Vous ne partez plus maintenant."],
   correct:2,
-  indice:"Retire la marque d'interrogation et garde une simple affirmation.",
+  indice:"Méthode utile pour transformer une phrase&nbsp;: je repère d'abord le type. Je regarde ensuite la forme. Je modifie seulement ce que demande la consigne.",
   corrige:"« Vous partez maintenant. » transforme la question en phrase déclarative affirmative."},
  {type:'qcm',
   phraseDepart:"Elle sourit.",
-  consigne:"Objectif\u00a0: obtenir une phrase déclarative à la forme négative.",
+  consigne:"🎯 Objectif\u00a0: obtenir une phrase déclarative à la forme négative.",
   options:["Sourit-elle\u00a0?","Elle ne sourit pas.","Souris\u00a0!","Comme elle sourit\u00a0!"],
   correct:1,
-  indice:"Encadre le verbe avec la négation « ne… pas ».",
+  indice:"Méthode utile pour transformer une phrase&nbsp;: je repère d'abord le type. Je regarde ensuite la forme. Je modifie seulement ce que demande la consigne.",
   corrige:"« Elle ne sourit pas. » conserve le type déclaratif et passe à la forme négative."}
 ];
 var TOTAL=DEFIS.length;
