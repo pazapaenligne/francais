@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je relève le défi — Le correcteur du manuscrit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Lora:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --jour:#8dc63f; --jour-fonce:#3d7a10; --jour-clair:#f0fadf; --jour-pale:#c8e88a;
+  --day-glow:rgba(141,198,63,.35);
+  --bg:#fffdf7;
+  --vert:#22c55e; --vert-bg:#e7faec; --vert-bd:#86efac;
+  --rouge:#ef4444; --rouge-bg:#fdeaea; --rouge-bd:#fca5a5;
+  --orange:#e8902a; --orange-bg:#fdf3e6;
+  --acier:#6b5a40; --acier-clair:#f5f0e8; --acier-bord:#e0cca8;
+  --txt:#2a1a04; --gris:#8a7050;
+}
+body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;min-height:100vh;line-height:1.6;position:relative;overflow-x:hidden;}
+
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.38;}
+.bubble.b1{width:130px;height:130px;background:#f5c518;top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:var(--jour);bottom:30px;left:-26px;}
+.bubble.b3{width:74px;height:74px;background:#8dc63f;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:#f9c0bb;top:26%;left:-32px;}
+
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;color:#5a4000;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.2px;
+  padding:7px 15px;border-radius:22px;box-shadow:0 4px 14px rgba(245,197,24,.4);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+
+/* ===== PHASE 1 ===== */
+.phase1{min-height:100vh;background:radial-gradient(ellipse at 50% 40%,#0e1a08 0%,#081004 60%,#040a02 100%);
+  display:flex;align-items:center;justify-content:center;padding:24px 16px;position:relative;z-index:2;}
+.phase1.out{animation:p1out .65s ease-in forwards;}
+@keyframes p1out{to{opacity:0;transform:scale(1.03);visibility:hidden;}}
+.p1-inner{max-width:760px;width:100%;animation:fadeUp .6s ease;}
+.brief-card{background:rgba(8,16,4,.95);border:1.5px solid rgba(141,198,63,.3);border-radius:18px;
+  padding:0 0 28px;box-shadow:0 20px 60px rgba(0,0,0,.85);position:relative;overflow:hidden;}
+.brief-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,transparent,var(--jour),var(--jour-pale),var(--jour),transparent);
+  background-size:300%;animation:slide 3.5s linear infinite;}
+.brief-inner{padding:26px 26px 0;}
+.brief-badge-wrap{text-align:center;margin-bottom:14px;}
+.brief-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5vw,2.1rem);
+  color:#eaf5de;text-align:center;margin-bottom:8px;}
+.brief-titre .accent{color:var(--jour-pale);}
+.brief-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgba(141,198,63,.65);
+  letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:20px;}
+.brief-texte{font-family:Arial,Helvetica,sans-serif;font-size:clamp(1.02rem,3vw,1.15rem);
+  color:#eef2e6;line-height:1.9;border-left:3px solid rgba(141,198,63,.5);
+  padding-left:14px;margin-bottom:18px;font-weight:500;}
+.brief-texte b{font-weight:800;color:var(--jour-pale);}
+.brief-mission{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:22px;}
+.bm-card{background:rgba(141,198,63,.09);border:1px solid rgba(141,198,63,.28);border-radius:11px;
+  padding:13px 10px;text-align:center;}
+.bm-num{width:30px;height:30px;margin:0 auto 7px;border-radius:50%;background:rgba(141,198,63,.2);
+  color:var(--jour-pale);font-family:'Orbitron',sans-serif;font-weight:900;font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(141,198,63,.4);}
+.bm-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;color:var(--jour-pale);
+  text-transform:uppercase;margin-bottom:3px;}
+.bm-desc{font-size:.72rem;color:rgba(230,240,220,.72);line-height:1.4;}
+.btn-commencer{display:block;width:calc(100% - 52px);margin:0 26px 26px;font-family:'Orbitron',sans-serif;
+  font-weight:900;font-size:clamp(.95rem,3vw,1.15rem);letter-spacing:2px;padding:20px;border:none;
+  border-radius:13px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;
+  cursor:pointer;min-height:60px;text-transform:uppercase;box-shadow:0 6px 20px var(--day-glow);
+  animation:pulse 2.4s ease-in-out infinite;}
+.btn-commencer:hover{transform:translateY(-3px);}
+
+/* ===== PHASE 2 ===== */
+.phase2{display:none;min-height:100vh;position:relative;z-index:2;}
+.phase2.active{display:block;animation:fadeUp .5s ease;}
+.p2-wrap{max-width:1300px;margin:0 auto;padding:16px 12px 60px;}
+.p2-header{text-align:center;margin-bottom:14px;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.88rem;letter-spacing:2px;color:var(--gris);
+  text-transform:uppercase;margin:10px 0 6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,2rem);
+  line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#0f2404;font-family:'Orbitron',sans-serif;
+  font-weight:700;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;
+  padding:9px 20px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);}
+
+.p2-grid{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:18px;align-items:start;}
+@media(max-width:880px){.p2-grid{grid-template-columns:1fr;}}
+@media(min-width:881px){.col-gauche{position:sticky;top:14px;}}
+.col-gauche{display:flex;flex-direction:column;gap:12px;}
+
+.score-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:16px;padding:16px 18px;
+  text-align:center;box-shadow:0 6px 24px rgba(74,85,104,.08);}
+.score-geant{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);
+  color:var(--jour-fonce);line-height:1;}
+.score-pts{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;color:var(--gris);}
+.progress-track{height:10px;background:var(--jour-clair);border-radius:20px;overflow:hidden;margin-top:12px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--jour-fonce),var(--jour));border-radius:20px;
+  width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+.score-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;justify-content:center;}
+.btn-recommencer-perm{width:100%;margin-top:12px;font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:clamp(.8rem,2.3vw,.87rem);letter-spacing:.5px;padding:12px;border:1.5px solid var(--acier);
+  border-radius:10px;background:#fff;color:var(--acier);cursor:pointer;min-height:2.8rem;}
+.btn-recommencer-perm:hover{background:var(--acier-clair);}
+.chip-sc{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:16px;}
+.chip-sc.ok{background:var(--vert-bg);color:#166534;}
+.chip-sc.ko{background:var(--rouge-bg);color:#991b1b;}
+.chip-sc.rs{background:var(--acier-clair);color:var(--acier);}
+
+.fiches-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:16px;padding:12px 13px;
+  box-shadow:0 6px 24px rgba(74,85,104,.08);}
+.fiches-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:2px;color:var(--jour-fonce);margin-bottom:8px;}
+.fiche-item{display:flex;align-items:center;gap:9px;background:var(--jour-clair);border:1px solid var(--jour-pale);
+  border-radius:9px;padding:8px 11px;margin-bottom:6px;cursor:pointer;transition:all .25s;min-height:2.8rem;}
+.fiche-item:last-child{margin-bottom:0;}
+.fiche-item.active{border-color:var(--jour-fonce);box-shadow:0 2px 8px var(--day-glow);}
+.fiche-item.done{background:var(--vert-bg);border-color:var(--vert-bd);}
+.fiche-num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gris);width:18px;flex:0 0 auto;}
+.fiche-lbl2{font-size:.82rem;color:var(--gris);flex:1;line-height:1.3;}
+.fiche-item.active .fiche-lbl2{color:var(--jour-fonce);font-weight:700;}
+.fiche-item.done .fiche-lbl2{color:#166534;font-weight:700;}
+.fiche-status{font-size:.9rem;}
+
+.ref-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:16px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(74,85,104,.08);}
+.ref-btn{width:100%;background:var(--jour-clair);border:none;padding:13px 16px;text-align:left;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;color:var(--jour-fonce);
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:2.8rem;
+  text-transform:uppercase;letter-spacing:.5px;animation:pulse 2.6s ease-in-out infinite;}
+.ref-btn.open{animation:none;}
+.ref-btn .chev{transition:transform .3s;}
+.ref-btn.open .chev{transform:rotate(180deg);}
+.ref-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.ref-body.open{max-height:500px;}
+.ref-inner{padding:14px 16px;font-size:1.02rem;line-height:1.85;color:var(--txt);
+  font-family:'Lora',serif;font-style:italic;font-weight:500;}
+.ref-inner .fautif{font-family:Arial,sans-serif;font-style:normal;font-weight:800;color:var(--rouge);
+  text-decoration:underline;text-decoration-thickness:2px;}
+
+/* col droite */
+.q-card{background:#fff;border:1.5px solid var(--acier-bord);border-radius:16px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(74,85,104,.08);animation:fadeUp .4s ease;}
+.q-stripe{height:5px;background:linear-gradient(90deg,var(--jour-fonce),var(--jour),var(--jour-pale),var(--jour-fonce));
+  background-size:300%;animation:slide 4s linear infinite;}
+.q-body{padding:18px 20px;}
+.q-etape{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:1.5px;color:#fff;background:var(--jour);border-radius:6px;padding:5px 11px;
+  display:inline-block;margin-bottom:12px;}
+.q-consigne{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;line-height:1.6;margin-bottom:14px;color:var(--txt);}
+
+/* Q1 */
+.texte-ref{font-family:'Lora',serif;font-style:italic;font-weight:500;background:var(--jour-clair);
+  border-left:3px solid var(--jour);border-radius:0 8px 8px 0;padding:13px 15px;margin-bottom:16px;
+  font-size:clamp(1rem,2.8vw,1.1rem);line-height:1.9;}
+.texte-ref b{font-family:Arial,sans-serif;font-style:normal;font-weight:800;color:var(--jour-fonce);
+  text-decoration:underline;text-decoration-thickness:2px;}
+.zone-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:1px;color:var(--gris);margin-bottom:8px;}
+.zone-saisie{width:100%;min-height:160px;border:1.5px solid var(--acier-bord);border-radius:10px;
+  padding:13px 15px;font-size:clamp(.95rem,2.6vw,1.05rem);font-family:'Lora',serif;line-height:1.85;
+  resize:vertical;margin-bottom:16px;}
+.zone-saisie:focus{outline:none;border-color:var(--jour);}
+.zone-saisie.cok{background:var(--vert-bg);border-color:var(--vert);}
+.zone-saisie.cko{background:var(--rouge-bg);border-color:var(--rouge);}
+.zone-saisie:disabled{opacity:1;color:var(--txt);}
+.mots-trouves{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
+.mot-chip{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;padding:6px 12px;border-radius:16px;}
+.mot-chip.ok{background:var(--vert-bg);color:#166534;}
+.mot-chip.ko{background:var(--rouge-bg);color:#991b1b;}
+
+/* Q2 chips */
+.chip-counter{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--gris);margin-bottom:10px;}
+.chip-alerte{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.chip-alerte.show{max-height:60px;}
+.chip-alerte-inner{background:var(--rouge-bg);color:#7a2018;padding:9px 13px;border-radius:9px;font-size:.85rem;margin-bottom:10px;}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.chip{min-height:50px;background:var(--jour-clair);border:1.5px solid var(--jour-pale);border-radius:20px;
+  padding:8px 15px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;color:var(--jour-fonce);}
+.chip.sel{background:var(--jour);color:#fff;border-color:var(--jour-fonce);}
+.chip.locked{opacity:.4;cursor:not-allowed;}
+.just-field{border:1.5px solid var(--acier-bord);border-radius:12px;padding:13px 15px;margin-bottom:10px;}
+.just-lbl{font-style:italic;font-weight:700;color:var(--jour-fonce);margin-bottom:8px;font-family:'Lora',serif;}
+.just-mots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+.mot-cle{background:var(--jour-pale);color:var(--jour-fonce);border:none;border-radius:16px;
+  padding:8px 13px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;min-height:44px;}
+.mot-cle:hover{background:var(--jour);color:#fff;}
+.just-textarea{width:100%;min-height:65px;border:1.5px solid var(--acier-bord);border-radius:9px;
+  padding:10px 13px;font-size:.92rem;font-family:Arial,sans-serif;resize:vertical;}
+.just-textarea.cok{background:var(--vert-bg);border-color:var(--vert);}
+.just-textarea.cko{background:var(--rouge-bg);border-color:var(--rouge);}
+.just-fb{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.just-fb.show{max-height:150px;margin-top:7px;}
+.just-fb-inner{font-size:.83rem;padding:8px 11px;border-radius:8px;line-height:1.55;}
+.just-fb.ok .just-fb-inner{background:var(--vert-bg);color:#166534;}
+.just-fb.ko .just-fb-inner{background:var(--rouge-bg);color:#7a2018;}
+
+/* Q3 */
+.q3-phrase{font-family:'Lora',serif;font-style:italic;font-weight:500;background:var(--jour-clair);
+  border-left:3px solid var(--jour);border-radius:0 8px 8px 0;padding:12px 15px;margin-bottom:16px;
+  font-size:clamp(1.05rem,3.2vw,1.2rem);}
+.q3-input{width:100%;min-height:50px;border:1.5px solid var(--acier-bord);border-radius:10px;
+  padding:12px 15px;font-size:clamp(.95rem,2.6vw,1.05rem);font-family:'Lora',serif;margin-bottom:16px;}
+.q3-input:focus{outline:none;border-color:var(--jour);}
+.q3-input.cok{background:var(--vert-bg);border-color:var(--vert);}
+.q3-input.cko{background:var(--rouge-bg);border-color:var(--rouge);}
+.q3-input:disabled{opacity:1;color:var(--txt);}
+
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-valider{flex:2;min-width:160px;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  letter-spacing:1px;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));
+  color:#fff;cursor:pointer;min-height:2.8rem;box-shadow:0 3px 12px var(--day-glow);}
+.btn-valider:disabled{opacity:.5;cursor:not-allowed;}
+.btn-suivant{flex:2;min-width:160px;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  letter-spacing:1px;padding:14px;border:none;border-radius:10px;background:var(--vert);color:#fff;
+  cursor:pointer;min-height:2.8rem;display:none;box-shadow:0 3px 12px rgba(34,197,94,.35);}
+.btn-suivant.show{display:inline-block;animation:pop .4s;}
+.btn-recommencer{flex:1;min-width:150px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.85rem,2.4vw,.92rem);
+  letter-spacing:.5px;padding:14px;border:1.5px solid var(--acier);border-radius:10px;background:#fff;
+  color:var(--acier);cursor:pointer;min-height:2.8rem;display:none;}
+.btn-recommencer.show{display:inline-block;animation:pop .4s;}
+
+.feedback{max-height:0;overflow:hidden;transition:max-height .35s ease;margin-top:14px;}
+.feedback.show{max-height:400px;}
+.feedback-inner{padding:.85rem 1rem;border-radius:10px;font-size:clamp(.9rem,2.5vw,1rem);line-height:1.75;}
+.feedback.ok .feedback-inner{background:var(--vert-bg);border-left:5px solid var(--vert);color:#166534;}
+.feedback.warn .feedback-inner{background:var(--orange-bg);border-left:5px solid var(--orange);color:#8a5a10;}
+.feedback.ko .feedback-inner{background:var(--rouge-bg);border-left:5px solid var(--rouge);color:#7a2018;}
+.fb-titre{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:1px;
+  font-family:'JetBrains Mono',monospace;margin-bottom:5px;font-weight:700;}
+
+.verdict-card{background:#fff;border:1px solid var(--acier-bord);border-radius:20px;padding:30px 22px;
+  text-align:center;position:relative;overflow:hidden;}
+.verdict-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  background:linear-gradient(90deg,var(--jour-fonce),var(--jour),var(--jour-pale),var(--jour-fonce));
+  background-size:300%;animation:slide 5s linear infinite;}
+.verdict-tampon{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.9rem,3.8vw,1.35rem);
+  letter-spacing:1.5px;padding:11px 24px;border-radius:12px;border:3.5px solid;display:inline-block;
+  transform:rotate(-4deg);animation:stampPop .6s cubic-bezier(.3,1.6,.5,1);margin-bottom:14px;}
+.verdict-tampon.ok{color:#3fa66f;border-color:#3fa66f;}
+.verdict-tampon.moyen{color:#e8902a;border-color:#e8902a;}
+.verdict-tampon.ko{color:var(--rouge);border-color:var(--rouge);}
+.verdict-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.8rem,10vw,4.5rem);
+  line-height:1;color:var(--jour-fonce);margin-bottom:4px;}
+.verdict-etoiles{font-size:1.9rem;letter-spacing:4px;margin:6px 0 14px;color:var(--acier-bord);}
+.verdict-etoiles .plein{color:#f5c518;}
+.verdict-msg{font-size:clamp(.88rem,2.5vw,1rem);line-height:1.8;color:var(--txt);margin-bottom:16px;}
+.verdict-recap{text-align:left;background:var(--jour-clair);border-radius:12px;padding:14px 18px;
+  margin:16px 0;font-size:.82rem;line-height:1.9;font-family:'JetBrains Mono',monospace;}
+.verdict-recap div{display:flex;justify-content:space-between;gap:10px;}
+.corrige-btn{width:100%;background:var(--jour-clair);border:1px solid var(--jour-pale);border-radius:10px;
+  padding:12px 14px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.75rem;color:var(--jour-fonce);
+  cursor:pointer;text-transform:uppercase;letter-spacing:.5px;min-height:2.8rem;margin-top:8px;}
+.corrige-body{max-height:0;overflow:hidden;transition:max-height .4s ease;text-align:left;}
+.corrige-body.open{max-height:900px;}
+.corrige-inner{padding:14px 4px;font-size:.88rem;line-height:1.85;}
+.corrige-inner .item{margin-bottom:8px;}
+.corrige-inner b{color:var(--jour-fonce);}
+.btn-rejouer{min-height:2.8rem;font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:14px 26px;border:none;border-radius:10px;background:var(--acier);color:#fff;cursor:pointer;margin-top:10px;}
+
+.flash-center{position:fixed;top:50%;left:50%;z-index:500;font-size:5rem;pointer-events:none;
+  opacity:0;font-family:Arial,sans-serif;}
+.flash-center.go{animation:flashPop .55s ease-out;}
+.flash-center.ok{color:var(--vert);}
+.flash-center.ko{color:var(--rouge);}
+.confetti{position:fixed;width:9px;height:9px;top:-14px;z-index:400;pointer-events:none;border-radius:2px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+@keyframes slide{0%{background-position:0%;}100%{background-position:300%;}}
+@keyframes stampPop{0%{opacity:0;transform:scale(2.4) rotate(-8deg);}60%{opacity:1;transform:scale(1.1) rotate(-8deg);}100%{opacity:1;transform:scale(1) rotate(-6deg);}}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.35);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@keyframes confFall{to{transform:translateY(110vh) rotate(360deg);opacity:0;}}
+</style>
+</head>
+<body>
+
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+
+<!-- ===== PHASE 1 ===== -->
+<div id="phase1" class="phase1">
+  <div class="p1-inner">
+    <div class="brief-card">
+      <div class="brief-inner">
+        <div class="brief-badge-wrap">
+          <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 3ÈME</div>
+        </div>
+        <h1 class="brief-titre">Deviens le <span class="accent">correcteur</span> du manuscrit</h1>
+        <div class="brief-sous">Semaine 7 · Jour 3 · Accords sujet-verbe</div>
+        <div class="brief-texte">Un texte truffé d'erreurs d'accord t'attend. <b>Six formes fautives</b> se sont glissées dans ce manuscrit : à toi de les corriger, de justifier tes choix, puis de transformer une phrase en changeant son sujet.</div>
+        <div class="brief-mission">
+          <div class="bm-card"><div class="bm-num">1</div><div class="bm-titre">Corriger</div><div class="bm-desc">6 erreurs d'accord</div></div>
+          <div class="bm-card"><div class="bm-num">2</div><div class="bm-titre">Justifier</div><div class="bm-desc">4 verbes expliqués</div></div>
+          <div class="bm-card"><div class="bm-num">3</div><div class="bm-titre">Transformer</div><div class="bm-desc">1 phrase réécrite</div></div>
+        </div>
+      </div>
+      <button class="btn-commencer" id="startBtn">Ouvrir le manuscrit ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PHASE 2 ===== -->
+<div id="phase2" class="phase2">
+  <div class="p2-wrap">
+    <div class="p2-header">
+      <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 3ÈME</div>
+      <div class="semaine">Semaine 7 — Jour 3</div>
+      <h1 class="titre">Je relève <span class="accent">le Défi</span></h1>
+      <div class="badge-theme">🖋️ Le correcteur du manuscrit · / 12</div>
+    </div>
+
+    <div class="p2-grid">
+      <div class="col-gauche">
+        <div class="score-card">
+          <div class="score-geant" id="scoreGeant">0</div>
+          <div class="score-pts">/ 12 pts</div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="score-chips">
+            <span class="chip-sc ok">Corrects : <span id="chipOk">0</span></span>
+            <span class="chip-sc ko">Erreurs : <span id="chipKo">0</span></span>
+            <span class="chip-sc rs">Restantes : <span id="chipRs">3</span></span>
+          </div>
+          <button class="btn-recommencer-perm" id="btnRecommencerPerm">🔄 Recommencer le défi</button>
+        </div>
+
+        <div class="fiches-card">
+          <div class="fiches-lbl">Épreuves</div>
+          <div id="fichesList"></div>
+        </div>
+
+        <div class="ref-card">
+          <button class="ref-btn" id="refBtn">Texte de départ <span class="chev">▾</span></button>
+          <div class="ref-body" id="refBody">
+            <div class="ref-inner">Au lever du jour, une multitude de voyageurs <span class="fautif">attendent</span> devant la porte de la ville. Ni le gardien ni le messager ne <span class="fautif">sont arrivé</span> pour ouvrir le passage. C'est pourtant toi qui <span class="fautif">veille</span> sur les entrées. Chacun des habitants <span class="fautif">préparent</span> ses provisions pendant que les habitants des quartiers voisins <span class="fautif">s'inquiète</span> du retard. Plus d'un marchand <span class="fautif">renoncent</span> finalement à poursuivre sa route.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-droite" id="colDroite"></div>
+    </div>
+  </div>
+</div>
+
+<div class="flash-center" id="flashCenter"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let actx=null, son=true;
+
+/* ============ DONNÉES ============ */
+const TEXTE_DEPART="Au lever du jour, une multitude de voyageurs attendent devant la porte de la ville. Ni le gardien ni le messager ne sont arrivé pour ouvrir le passage. C'est pourtant toi qui veille sur les entrées. Chacun des habitants préparent ses provisions pendant que les habitants des quartiers voisins s'inquiète du retard. Plus d'un marchand renoncent finalement à poursuivre sa route.";
+
+const CORRECTIONS=[
+ {fautif:"attendent", correct:"attend", regle:"noyau = multitude (singulier)"},
+ {fautif:"sont arrivé", correct:"est arrivé", regle:"ni… ni avec deux sujets singuliers → singulier"},
+ {fautif:"veille", correct:"veilles", regle:"qui reprend toi"},
+ {fautif:"préparent", correct:"prépare", regle:"chacun → singulier"},
+ {fautif:"s'inquiète", correct:"s'inquiètent", regle:"sujet pluriel (les habitants)"},
+ {fautif:"renoncent", correct:"renonce", regle:"plus d'un → singulier"}
+];
+
+const JUST_VERBES=["attend","est arrivé","veilles","prépare","s'inquiètent","renonce"];
+const JUST_CHOISIS=["attend","est arrivé","veilles","s'inquiètent"];
+const MOTS_CLES_INSER=["noyau","multitude","chacun","plus d'un","qui reprend","toi","deux sujets","singulier","pluriel","accord"];
+const MOTS_CLES_DETECT=["noyau","multitude","chacun","plus d'un","qui reprend","toi","deux sujets","singulier","pluriel","accord"];
+const JUST_REF={
+ "attend":"Le noyau du sujet est multitude, qui est singulier.",
+ "est arrivé":"Les deux sujets reliés par ni… ni sont singuliers ; le verbe reste au singulier.",
+ "veilles":"Qui reprend toi ; le verbe est à la deuxième personne du singulier.",
+ "prépare":"Chacun est un sujet singulier.",
+ "s'inquiètent":"Le sujet est les habitants, au pluriel.",
+ "renonce":"Après plus d'un, le verbe se met au singulier."
+};
+
+/* ============ ÉTAT ============ */
+const ETAPES=["Q1 — Correction","Q2 — Justification","Q3 — Transformation"];
+let phase=0;
+const etapeDone=[false,false,false];
+
+/* Q1 */
+let q1Valide=false, q1Trouves=[false,false,false,false,false,false], q1Score=0;
+/* Q2 */
+let q2Selected=[];
+let q2Justif={};
+let q2Score=0;
+/* Q3 */
+let q3Valide=false, q3Vous=false, q3Veillez=false, q3Score=0;
+
+function totalScore(){return q1Score+q2Score+q3Score;}
+function updScoreboard(){
+  $('scoreGeant').textContent=totalScore();
+  const done=[etapeDone[0],etapeDone[1],etapeDone[2]].filter(Boolean).length;
+  const ok=[q1Score===6,q2Score===4,q3Score===2].filter((v,i)=>etapeDone[i]&&v).length;
+  const ko=[etapeDone[0]&&q1Score<6,etapeDone[1]&&q2Score<4,etapeDone[2]&&q3Score<2].filter(Boolean).length;
+  $('chipOk').textContent=ok;
+  $('chipKo').textContent=ko;
+  $('chipRs').textContent=3-done;
+  $('progressFill').style.width=Math.round((done/3)*100)+'%';
+}
+
+function buildFichesNav(){
+  const w=$('fichesList');w.innerHTML='';
+  ETAPES.forEach((lbl,i)=>{
+    const el=document.createElement('div');el.className='fiche-item';el.id='fiche'+i;
+    el.innerHTML='<span class="fiche-num">'+(i+1)+'</span><span class="fiche-lbl2">'+lbl+'</span><span class="fiche-status" id="fst'+i+'"></span>';
+    el.addEventListener('click',()=>{if(etapeDone[i]||i<=phase){phase=i;renderPhase();}});
+    w.appendChild(el);
+  });
+}
+function updFichesNav(){
+  ETAPES.forEach((_,i)=>{
+    const el=$('fiche'+i);if(!el)return;
+    el.classList.toggle('active',i===phase);
+    el.classList.toggle('done',etapeDone[i]);
+    $('fst'+i).textContent=etapeDone[i]?'✓':'';
+  });
+}
+
+function renderPhase(){
+  if(phase===0)renderQ1();
+  else if(phase===1)renderQ2();
+  else if(phase===2)renderQ3();
+  updFichesNav();
+  updScoreboard();
+}
+
+function renderTexteRef(){
+  let h='<div class="texte-ref">Au lever du jour, une multitude de voyageurs <b>attendent</b> devant la porte de la ville. Ni le gardien ni le messager ne <b>sont arrivé</b> pour ouvrir le passage. C\'est pourtant toi qui <b>veille</b> sur les entrées. Chacun des habitants <b>préparent</b> ses provisions pendant que les habitants des quartiers voisins <b>s\'inquiète</b> du retard. Plus d\'un marchand <b>renoncent</b> finalement à poursuivre sa route.</div>';
+  return h;
+}
+function renderTexteCorrige(){
+  let h='<div class="zone-lbl">Texte corrigé</div>';
+  h+='<div class="texte-ref">Au lever du jour, une multitude de voyageurs <b>attend</b> devant la porte de la ville. Ni le gardien ni le messager n\'<b>est arrivé</b> pour ouvrir le passage. C\'est pourtant toi qui <b>veilles</b> sur les entrées. Chacun des habitants <b>prépare</b> ses provisions pendant que les habitants des quartiers voisins <b>s\'inquiètent</b> du retard. Plus d\'un marchand <b>renonce</b> finalement à poursuivre sa route.</div>';
+  return h;
+}
+
+/* ============ Q1 — CORRECTION LIBRE ============ */
+function renderQ1(){
+  let html='<div class="q-card"><div class="q-stripe"></div><div class="q-body">';
+  html+='<div class="q-etape">Épreuve 1 / 3</div>';
+  html+='<div class="q-consigne">📝 Ce texte contient six erreurs d\'accord. Recopie-le en corrigeant toutes les erreurs.</div>';
+  html+='<div class="zone-lbl">Ta version corrigée</div>';
+  html+='<textarea class="zone-saisie'+(q1Valide?(q1Score===6?' cok':' cko'):'')+'" id="q1Zone" placeholder="Recopie le texte corrigé ici…" '+(q1Valide?'disabled':'')+'>'+(window._q1Text||'')+'</textarea>';
+  if(q1Valide){
+    html+='<div class="mots-trouves">';
+    CORRECTIONS.forEach((c,i)=>{
+      html+='<span class="mot-chip '+(q1Trouves[i]?'ok':'ko')+'">'+(q1Trouves[i]?'✓ ':'✗ ')+c.correct+'</span>';
+    });
+    html+='</div>';
+  }
+  html+='<div class="btn-row">';
+  html+='<button class="btn-valider" id="btnValiderQ1" '+(q1Valide?'disabled':'')+'>Valider ma correction</button>';
+  html+='<button class="btn-recommencer'+(q1Valide?' show':'')+'" id="btnRecommencerQ1">🔄 Recommencer</button>';
+  html+='<button class="btn-suivant'+(q1Valide?' show':'')+'" id="btnSuivantQ1">Épreuve suivante ▸</button>';
+  html+='</div>';
+  if(q1Valide){
+    let cls,msg;
+    if(q1Score===6){cls='ok';msg='🟢 Excellent ! Tu as corrigé toutes les erreurs.';}
+    else if(q1Score>=4){cls='warn';msg='🟠 Très bien ! Quelques accords restent à vérifier.';}
+    else{cls='ko';msg='🔴 Relis chaque phrase en recherchant le véritable sujet du verbe.';}
+    html+='<div class="feedback show '+cls+'"><div class="feedback-inner"><span class="fb-titre">'+q1Score+'/6</span>'+msg+'</div></div>';
+  }
+  html+='</div></div>';
+  $('colDroite').innerHTML=renderTexteRef()+html;
+
+  if(!q1Valide){
+    $('q1Zone').addEventListener('input',()=>{window._q1Text=$('q1Zone').value;});
+    $('btnValiderQ1').addEventListener('click',validerQ1);
+  }
+  $('btnRecommencerQ1').addEventListener('click',recommencerQ1);
+  $('btnSuivantQ1').addEventListener('click',()=>{etapeDone[0]=true;phase=1;renderPhase();});
+}
+function tokenize(txt){
+  return txt.toLowerCase().split(/[^a-zà-öø-ÿ']+/i).filter(Boolean);
+}
+function validerQ1(){
+  if(q1Valide)return;
+  const txt=$('q1Zone').value;
+  window._q1Text=txt;
+  const tokens=tokenize(txt);
+  q1Trouves=CORRECTIONS.map(c=>{
+    const parts=c.correct.toLowerCase().split(' ');
+    if(parts.length===1)return tokens.includes(parts[0]);
+    for(let i=0;i<tokens.length-1;i++){
+      if(tokens[i]===parts[0]&&tokens[i+1]===parts[1])return true;
+    }
+    return false;
+  });
+  q1Score=q1Trouves.filter(Boolean).length;
+  q1Valide=true;
+  if(q1Score===6){flashCenter(true);beepOk();}else{flashCenter(false);beepErr();}
+  updScoreboard();
+  renderQ1();
+}
+function recommencerQ1(){
+  q1Valide=false;q1Trouves=[false,false,false,false,false,false];q1Score=0;window._q1Text='';
+  updScoreboard();
+  renderQ1();
+}
+
+/* ============ Q2 — CHIPS + JUSTIFICATIONS ============ */
+function renderQ2(){
+  let html='<div class="q-card"><div class="q-stripe"></div><div class="q-body">';
+  html+='<div class="q-etape">Épreuve 2 / 3</div>';
+  html+='<div class="q-consigne">✍️ Justifie pourquoi chacun de ces quatre verbes s\'accorde ainsi : rédige une phrase pour chacun.</div>';
+  html+='<div class="zone-lbl">Boîte à mots-clés (clique pour insérer dans la phrase active)</div>';
+  html+='<div class="just-mots" style="margin-bottom:16px">';
+  MOTS_CLES_INSER.forEach(m=>{html+='<button class="mot-cle" data-m="'+m+'">'+m+'</button>';});
+  html+='</div>';
+  JUST_CHOISIS.forEach((v,i)=>{
+    const jd=q2Justif[i]||{};
+    let cls='just-textarea';
+    if(jd.tried)cls+=jd.ok?' cok':' cko';
+    html+='<div class="just-field"><div class="just-lbl">« '+v+' »</div>';
+    html+='<textarea class="'+cls+'" id="just_'+i+'" placeholder="Écris ta phrase de justification…" '+(jd.tried?'disabled':'')+'>'+(jd.txt||'')+'</textarea>';
+    html+='<div class="btn-row" style="margin-top:8px"><button class="btn-valider" id="btnValiderJust'+i+'" '+(jd.tried?'disabled':'')+'>Valider cette phrase</button></div>';
+    if(jd.tried){
+      html+='<div class="just-fb show '+(jd.ok?'ok':'ko')+'"><div class="just-fb-inner">'+(jd.ok?'✔ Justification correcte.':'✗ Ta phrase doit contenir un mot-clé grammatical et faire plus de 10 caractères.')+'<br><b>Corrigé :</b> '+JUST_REF[v]+'</div></div>';
+    }
+    html+='</div>';
+  });
+  const allValidated=JUST_CHOISIS.every((_,i)=>q2Justif[i]&&q2Justif[i].tried);
+  if(allValidated){
+    let cls,msg;
+    if(q2Score===4){cls='ok';msg='🟢 Excellentes justifications !';}
+    else if(q2Score>=2){cls='warn';msg="🟠 Tes explications sont globalement justes ; pense à nommer précisément la règle.";}
+    else{cls='ko';msg='🔴 Les justifications doivent expliquer l\'accord en s\'appuyant sur le sujet ou la règle.';}
+    html+='<div class="feedback show '+cls+'"><div class="feedback-inner"><span class="fb-titre">'+q2Score+'/4</span>'+msg+'</div></div>';
+  }
+  html+='<div class="btn-row" style="margin-top:14px"><button class="btn-suivant'+(allValidated?' show':'')+'" id="btnSuivantQ2">Épreuve suivante ▸</button></div>';
+  html+='</div></div>';
+  $('colDroite').innerHTML=renderTexteCorrige()+html;
+
+  let activeJustField=0;
+  document.querySelectorAll('.mot-cle').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const ta=$('just_'+activeJustField);
+      if(ta&&!ta.disabled){ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+b.dataset.m+' ';ta.focus();}
+    });
+  });
+  JUST_CHOISIS.forEach((_,i)=>{
+    const ta=$('just_'+i);
+    if(ta&&!ta.disabled){
+      ta.addEventListener('focus',()=>{activeJustField=i;});
+      const vb=$('btnValiderJust'+i);
+      if(vb)vb.addEventListener('click',()=>validerJust2(i));
+    }
+  });
+  $('btnSuivantQ2').addEventListener('click',()=>{if(!allValidated)return;etapeDone[1]=true;phase=2;renderPhase();});
+}
+function validerJust2(i){
+  if(q2Justif[i]&&q2Justif[i].tried)return;
+  const ta=$('just_'+i);
+  const txt=ta.value;
+  if(txt.trim().length===0)return;
+  const norm=txt.toLowerCase();
+  const hasKw=MOTS_CLES_DETECT.some(k=>norm.includes(k));
+  const valid=hasKw&&txt.trim().length>10;
+  q2Justif[i]={txt:txt,tried:true,ok:valid};
+  if(valid){flashCenter(true);beepOk();}else{flashCenter(false);beepErr();}
+  computeQ2Score();
+  updScoreboard();
+  renderQ2();
+}
+function computeQ2Score(){
+  q2Score=Object.values(q2Justif).filter(j=>j&&j.tried&&j.ok).length;
+}
+
+/* ============ Q3 — TRANSFORMATION ============ */
+function renderQ3(){
+  let html='<div class="q-card"><div class="q-stripe"></div><div class="q-body">';
+  html+='<div class="q-etape">Épreuve 3 / 3</div>';
+  html+='<div class="q-consigne">🔁 Réécris la troisième phrase en remplaçant « C\'est pourtant toi qui » par « C\'est pourtant vous qui ».</div>';
+  html+='<div class="q3-phrase">C\'est pourtant toi qui veilles sur les entrées.</div>';
+  html+='<input type="text" class="q3-input'+(q3Valide?(q3Score===2?' cok':' cko'):'')+'" id="q3Input" placeholder="Écris la phrase transformée…" '+(q3Valide?'disabled':'')+' value="'+(window._q3Text||'')+'">';
+  html+='<div class="btn-row">';
+  html+='<button class="btn-valider" id="btnValiderQ3" '+(q3Valide?'disabled':'')+'>Valider ma phrase</button>';
+  html+='<button class="btn-recommencer'+(q3Valide?' show':'')+'" id="btnRecommencerQ3">🔄 Recommencer</button>';
+  html+='<button class="btn-suivant'+(q3Valide?' show':'')+'" id="btnSuivantQ3">Voir le bilan ▸</button>';
+  html+='</div>';
+  if(q3Valide){
+    let cls,msg;
+    if(q3Score===2){cls='ok';msg='🟢 Parfait !';}
+    else if(q3Score===1){cls='warn';msg="🟠 Presque ! Vérifie l'accord du verbe avec vous.";}
+    else{cls='ko';msg='🔴 Le verbe doit s\'accorder avec vous.';}
+    html+='<div class="feedback show '+cls+'"><div class="feedback-inner"><span class="fb-titre">'+q3Score+'/2</span>'+msg+'</div></div>';
+  }
+  html+='</div></div>';
+  $('colDroite').innerHTML=renderTexteRef()+html;
+
+  if(!q3Valide){
+    $('q3Input').addEventListener('input',()=>{window._q3Text=$('q3Input').value;});
+    $('btnValiderQ3').addEventListener('click',validerQ3);
+  }
+  $('btnRecommencerQ3').addEventListener('click',recommencerQ3);
+  $('btnSuivantQ3').addEventListener('click',()=>{if(!q3Valide)return;etapeDone[2]=true;showVerdict();});
+}
+function validerQ3(){
+  if(q3Valide)return;
+  const txt=$('q3Input').value;
+  window._q3Text=txt;
+  const tokens=tokenize(txt);
+  q3Vous=tokens.includes('vous');
+  q3Veillez=tokens.includes('veillez');
+  q3Score=(q3Vous?1:0)+(q3Veillez?1:0);
+  q3Valide=true;
+  if(q3Score===2){flashCenter(true);beepOk();}else{flashCenter(false);beepErr();}
+  updScoreboard();
+  renderQ3();
+}
+function recommencerQ3(){
+  q3Valide=false;q3Vous=false;q3Veillez=false;q3Score=0;window._q3Text='';
+  updScoreboard();
+  renderQ3();
+}
+
+/* ============ VERDICT ============ */
+function showVerdict(){
+  const total=totalScore(), pct=Math.round(total/12*100);
+  let tampon,cls;
+  if(total>=10){tampon='DÉFI RELEVÉ';cls='ok';}
+  else if(total>=8){tampon='TRÈS BIEN';cls='ok';}
+  else if(total>=6){tampon='BON TRAVAIL';cls='moyen';}
+  else{tampon='À REPRENDRE';cls='ko';}
+
+  let msg;
+  if(total>=10)msg="Défi relevé ! Tu maîtrises les principaux accords sujet-verbe, même dans les cas les plus délicats.";
+  else if(total>=8)msg="Très bien ! Tu identifies correctement la plupart des accords.";
+  else if(total>=6)msg="Bon travail ! Quelques automatismes restent à consolider.";
+  else msg="Continue ! Reprends les règles puis tente de nouveau le défi.";
+
+  const nbEtoiles=total>=10?5:total>=8?4:total>=6?3:total>=3?2:1;
+  let etoilesHtml='';
+  for(let s=0;s<5;s++){etoilesHtml+=s<nbEtoiles?'<span class="plein">★</span>':'☆';}
+
+  const statut=(score,max)=>score===max?'Réussi':(score>=max/2?'Partiel':'À revoir');
+
+  let html='<div class="verdict-card">';
+  html+='<div class="verdict-tampon '+cls+'">'+tampon+'</div>';
+  html+='<div class="verdict-note">'+total+' / 12</div>';
+  html+='<div class="verdict-etoiles">'+etoilesHtml+'</div>';
+  html+='<div class="verdict-msg">'+msg+'</div>';
+  html+='<div class="verdict-recap">';
+  html+='<div><span>Correction du texte</span><span>'+q1Score+'/6 → '+statut(q1Score,6)+'</span></div>';
+  html+='<div><span>Justification des accords</span><span>'+q2Score+'/4 → '+statut(q2Score,4)+'</span></div>';
+  html+='<div><span>Transformation de phrase</span><span>'+q3Score+'/2 → '+statut(q3Score,2)+'</span></div>';
+  html+='</div>';
+  html+='<div class="verdict-msg">Un bon correcteur ne se fie jamais au mot le plus proche du verbe. Il identifie d\'abord le véritable sujet, repère son noyau et applique la règle d\'accord adaptée. C\'est cette démarche qui permet d\'écrire avec précision, même dans les phrases les plus complexes.</div>';
+  html+='<div class="corrige-accordion"><button class="corrige-btn" id="corrigeBtn">Voir le texte corrigé complet ▾</button>';
+  html+='<div class="corrige-body" id="corrigeBody"><div class="corrige-inner">';
+  html+='<div class="item">Au lever du jour, une multitude de voyageurs <b>attend</b> devant la porte de la ville. Ni le gardien ni le messager n\'<b>est arrivé</b> pour ouvrir le passage. C\'est pourtant toi qui <b>veilles</b> sur les entrées. Chacun des habitants <b>prépare</b> ses provisions pendant que les habitants des quartiers voisins <b>s\'inquiètent</b> du retard. Plus d\'un marchand <b>renonce</b> finalement à poursuivre sa route.</div>';
+  html+='</div></div></div>';
+  html+='<button class="btn-rejouer" id="btnRejouer">🔄 Recommencer le défi</button>';
+  html+='</div>';
+  $('colDroite').innerHTML=html;
+  $('corrigeBtn').addEventListener('click',()=>{$('corrigeBody').classList.toggle('open');$('corrigeBtn').classList.toggle('open');});
+  $('btnRejouer').addEventListener('click',rejouer);
+  updFichesNav();
+  beepFinal(total>=10);
+  if(total>=10)confettiBurst();
+}
+function rejouer(){
+  q1Valide=false;q1Trouves=[false,false,false,false,false,false];q1Score=0;window._q1Text='';
+  q2Selected=[];q2Justif={};q2Score=0;
+  q3Valide=false;q3Vous=false;q3Veillez=false;q3Score=0;window._q3Text='';
+  etapeDone[0]=etapeDone[1]=etapeDone[2]=false;
+  phase=0;
+  updScoreboard();
+  renderPhase();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ FLASH / CONFETTIS / SONS ============ */
+function flashCenter(ok){
+  const el=$('flashCenter');
+  el.className='flash-center';void el.offsetWidth;
+  el.textContent=ok?'✓':'✗';
+  el.classList.add(ok?'ok':'ko');
+  void el.offsetWidth;
+  el.classList.add('go');
+  setTimeout(()=>el.classList.remove('go'),600);
+}
+function confettiBurst(){
+  const cols=['#8dc63f','#f5c518','#3d7a10','#f9c0bb','#c8e88a'];
+  for(let i=0;i<40;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.style.left=(Math.random()*100)+'vw';
+    c.style.background=cols[Math.floor(Math.random()*cols.length)];
+    c.style.animation='confFall '+(2+Math.random()*1.5)+'s linear forwards';
+    c.style.animationDelay=(Math.random()*.6)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+function initA(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function tone(f1,f2,d,tp,vol,dl){
+  if(!actx||!son)return;const t=actx.currentTime+(dl||0);
+  const o=actx.createOscillator(),g=actx.createGain();o.type=tp||'sine';
+  o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol||0.12,t+0.012);g.gain.exponentialRampToValueAtTime(0.0006,t+d);
+  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+d+0.03);
+}
+function beepOk(){initA();tone(523,784,.15,'sine',.12,0);tone(784,1046,.13,'sine',.10,.09);}
+function beepErr(){initA();tone(300,180,.22,'sine',.11,0);}
+function beepFinal(fanfare){
+  initA();
+  if(fanfare){[523,659,784,1046,1318].forEach((f,k)=>tone(f,f,.25,'sine',.12,k*.09));}
+  else{tone(220,140,.5,'sine',.13,0);}
+}
+
+/* ============ INIT ============ */
+buildFichesNav();
+updScoreboard();
+renderPhase();
+
+$('startBtn').addEventListener('click',()=>{
+  initA();if(actx&&actx.state==='suspended')actx.resume();
+  $('phase1').classList.add('out');
+  setTimeout(()=>{$('phase1').style.display='none';},680);
+  $('phase2').classList.add('active');
+});
+$('refBtn').addEventListener('click',()=>{
+  $('refBtn').classList.toggle('open');$('refBody').classList.toggle('open');
+});
+$('btnRecommencerPerm').addEventListener('click',()=>{
+  if(confirm('Recommencer le défi depuis le début ? Ta progression actuelle sera perdue.')){
+    rejouer();
+  }
+});
+document.addEventListener('pointerdown',initA,{once:true});
+</script>
+</body>
+</html>
