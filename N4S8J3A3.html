@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi — Ces/Ses/C'est/S'est — 4e S8 J3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@500;700&family=Lora:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+:root{
+ --jour:#8dc63f;--jour-fonce:#5a8a1a;--jour-clair:#f2f9e8;--day-glow:rgba(141,198,63,.32);
+ --bg:#fffdf9;--rouge:#8a2e2e;--vert:#2f6b3a;--rouge-bg:#f4e2df;--vert-bg:#e2eddd;
+ --acier:#4a3a24;--acier-bord:#dce8c8;--txt:#241c10;--gris:#6b5a3d;
+}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;min-height:100vh;padding:16px;}
+.wrap{max-width:680px;margin:0 auto;}
+.header-center{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:var(--jour);border-radius:999px;padding:5px 16px;}
+.logo-badge .dots{display:flex;gap:4px;}
+.logo-badge .dots i{width:8px;height:8px;border-radius:50%;display:block;}
+.logo-badge .dots i:nth-child(1){background:#7a1f1f;}
+.logo-badge .dots i:nth-child(2){background:#5a3800;}
+.logo-badge .dots i:nth-child(3){background:#1c3d0f;}
+.logo-badge .lab{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:800;color:#1a3300;letter-spacing:.5px;}
+.week{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#7a6a48;margin:8px 0 4px;letter-spacing:1px;}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.15rem,4.2vw,1.7rem);margin:2px 0 4px;color:var(--jour-fonce);font-weight:900;}
+.sub{font-size:.9rem;color:var(--gris);margin-bottom:10px;}
+
+.mission-card{background:#fff;border:1px solid var(--acier-bord);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 3px 12px rgba(60,40,10,.06);}
+.mission-card p{font-size:.92rem;line-height:1.7;color:#33260f;margin:0 0 10px;}
+.btn-commencer{display:block;width:100%;font-family:'Orbitron',sans-serif;background:linear-gradient(135deg,var(--jour),var(--jour-fonce));
+ color:#fff;border:none;border-radius:10px;padding:16px;font-weight:900;font-size:1rem;letter-spacing:1px;
+ cursor:pointer;min-height:54px;box-shadow:0 6px 20px var(--day-glow);margin-top:8px;}
+.btn-commencer:hover{filter:brightness(1.05);}
+
+.phase{display:none;}
+.phase.active{display:block;}
+
+.defi-badge{display:inline-block;background:var(--jour);color:#1a3300;font-family:'Orbitron',sans-serif;font-weight:800;
+ font-size:.72rem;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:20px;margin-bottom:14px;}
+
+.hud{display:flex;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.hud-dot{width:26px;height:26px;border-radius:50%;background:#f0e6d8;border:2px solid var(--acier-bord);
+ display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+ font-weight:800;color:var(--gris);transition:all .3s;}
+.hud-dot.done{background:var(--vert);border-color:var(--vert);color:#fff;}
+.hud-dot.current{border-color:var(--jour-fonce);box-shadow:0 0 8px var(--day-glow);color:var(--jour-fonce);}
+
+.qcard{background:#fff;border:1px solid var(--acier-bord);border-top:4px solid var(--jour);border-radius:12px;
+ padding:20px 22px;margin-bottom:16px;box-shadow:0 4px 16px rgba(60,40,10,.08);animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.qnum{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gris);font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.q-text{font-size:clamp(1rem,3vw,1.1rem);line-height:1.6;color:#241c10;margin-bottom:16px;font-family:'Lora',serif;font-weight:600;}
+.q-text .cible{color:var(--jour-fonce);font-weight:800;}
+
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt{background:#fdfbf7;color:#241c10;border:1.5px solid var(--acier-bord);border-radius:10px;padding:12px 16px;font-size:.9rem;
+ text-align:left;cursor:pointer;transition:all .15s;line-height:1.4;}
+.opt:hover:not(:disabled){background:var(--jour-clair);border-color:var(--jour);}
+.opt:disabled{cursor:default;opacity:.9;}
+.opt.correct{background:var(--vert-bg);border-color:var(--vert);}
+.opt.wrong{background:var(--rouge-bg);border-color:var(--rouge);}
+.feedback{margin-top:14px;padding:.75rem 1rem;border-radius:8px;font-size:.9rem;line-height:1.6;}
+.feedback.ok{background:var(--vert-bg);border-left:4px solid var(--vert);color:#1a4a22;}
+.feedback.no{background:var(--rouge-bg);border-left:4px solid var(--rouge);color:#5a1e1e;}
+
+.btn-nav{font-family:'Orbitron',sans-serif;background:var(--jour);color:#fff;border:none;border-radius:8px;
+ padding:12px 26px;font-weight:800;font-size:.9rem;cursor:pointer;min-height:2.8rem;display:block;margin:16px auto 0;
+ animation:pulseNav 1.4s ease-in-out infinite;}
+@keyframes pulseNav{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 8px transparent;}}
+.btn-nav:hover{filter:brightness(1.08);}
+
+/* DÉFI 2 : texte à corriger */
+.texte-corr{background:#fff;border:1px solid var(--acier-bord);border-radius:12px;padding:20px 22px;margin-bottom:16px;
+ box-shadow:0 4px 16px rgba(60,40,10,.08);}
+.texte-corr p{font-family:'Lora',serif;font-size:1.02rem;line-height:2.4;color:#241c10;}
+select.blank{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;border:2px solid var(--jour);
+ border-radius:6px;padding:3px 6px;background:var(--jour-clair);color:var(--jour-fonce);cursor:pointer;margin:0 2px;}
+select.blank.ok{background:var(--vert-bg);border-color:var(--vert);color:#1a4a22;}
+select.blank.ko{background:var(--rouge-bg);border-color:var(--rouge);color:#5a1e1e;}
+select.blank:disabled{cursor:default;}
+
+.btn-valider{display:block;width:100%;font-family:'Orbitron',sans-serif;background:var(--jour);color:#fff;border:none;
+ border-radius:10px;padding:15px;font-weight:900;font-size:.95rem;cursor:pointer;min-height:2.8rem;margin-top:6px;}
+.btn-valider:hover{filter:brightness(1.05);}
+.btn-valider:disabled{opacity:.5;cursor:default;}
+
+.explic-table{margin-top:16px;border-collapse:collapse;width:100%;font-size:.82rem;}
+.explic-table td{border-bottom:1px solid var(--acier-bord);padding:8px 6px;line-height:1.5;vertical-align:top;}
+.explic-table td:first-child{font-weight:800;color:var(--jour-fonce);white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+.explic-label{font-family:'Orbitron',sans-serif;font-size:.68rem;text-transform:uppercase;letter-spacing:1px;
+ font-weight:800;color:var(--gris);margin:16px 0 6px;}
+
+.overlay{position:fixed;inset:0;background:rgba(20,14,6,.85);display:none;align-items:center;justify-content:center;padding:20px;z-index:600;}
+.overlay.show{display:flex;animation:fade .4s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{background:#fff;border:2px solid var(--jour);border-radius:14px;padding:26px;max-width:460px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.modal .trophy{font-size:3rem;}
+.modal h2{margin:6px 0 10px;color:var(--jour-fonce);font-family:'Orbitron',sans-serif;font-size:1.02rem;line-height:1.4;}
+.bilan-score{font-family:'Orbitron',monospace;font-size:clamp(2.2rem,8vw,3.2rem);font-weight:900;color:var(--jour-fonce);margin-bottom:6px;}
+.bilan-msg{font-size:.9rem;line-height:1.6;color:#33260f;margin-bottom:16px;}
+.replay{background:var(--jour);color:#fff;border:none;border-radius:8px;padding:13px 26px;font-size:.92rem;
+ font-weight:800;cursor:pointer;min-height:2.8rem;font-family:'Orbitron',sans-serif;}
+.replay:hover{filter:brightness(1.06);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header-center">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span><span class="lab">PAZAPA · FRANÇAIS · 4E</span></div>
+    <div class="week">SEMAINE 8 — JOUR 3</div>
+    <h1>Je relève le défi</h1>
+    <div class="sub">Ces / Ses / C'est / S'est</div>
+  </div>
+
+  <div id="phase1" class="phase active">
+    <div class="mission-card">
+      <p>🎯 <b>Mission : deux défis à relever</b></p>
+      <p><b>Défi n°1</b> : identifie la classe grammaticale du mot en gras dans chaque phrase.</p>
+      <p><b>Défi n°2</b> : un texte contient des erreurs sur ces/ses/c'est/s'est. Corrige-le entièrement.</p>
+    </div>
+
+    <button class="btn-commencer" id="btnCommencer">🎯 COMMENCER LE DÉFI N°1</button>
+  </div>
+
+  <!-- DÉFI 1 -->
+  <div id="phaseDefi1" class="phase">
+    <div style="text-align:center"><span class="defi-badge">Défi n°1 — Classe grammaticale</span></div>
+    <div class="hud" id="hud1"></div>
+    <div id="qZone1"></div>
+  </div>
+
+  <!-- TRANSITION -->
+  <div id="phaseTransition" class="phase">
+    <div class="mission-card" style="text-align:center;">
+      <p>✅ <b>Défi n°1 terminé !</b></p>
+      <p>Passons maintenant à la correction du texte.</p>
+    </div>
+    <button class="btn-commencer" id="btnDefi2">🎯 COMMENCER LE DÉFI N°2</button>
+  </div>
+
+  <!-- DÉFI 2 -->
+  <div id="phaseDefi2" class="phase">
+    <div style="text-align:center"><span class="defi-badge">Défi n°2 — Corriger le texte</span></div>
+    <div class="texte-corr">
+      <p id="texteCorr"></p>
+      <button class="btn-valider" id="btnValiderD2">CORRIGER LE TEXTE</button>
+      <div id="explicZone"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">🏆</div>
+    <h2 id="modalTitre">Les deux défis sont relevés !</h2>
+    <div class="bilan-score" id="bilanScore"></div>
+    <div class="bilan-msg" id="bilanMsg"></div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   N4S8J3 — Ces/Ses/C'est/S'est — 4e
+   Défi 1 : 8 QCM classe grammaticale (4 options)
+   Défi 2 : texte à corriger (8 blancs à choix, ces/ses/c'est/s'est)
+   ═══════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+
+/* ── DÉFI 1 ── */
+const OPTIONS_D1 = ["déterminant démonstratif","déterminant possessif","pronom + verbe","présentatif"];
+const QUESTIONS_D1 = [
+  {phrase:"$CIBLES$ livres sont rangés sur l'étagère du fond.", cible:"Ces", correct:0, just:"ces : déterminant démonstratif. Il montre les livres."},
+  {phrase:"Lina a oublié $CIBLES$ gants au gymnase.", cible:"ses", correct:1, just:"ses : déterminant possessif. Les gants appartiennent à Lina."},
+  {phrase:"$CIBLES$ une très bonne idée pour le journal du collège.", cible:"C'est", correct:3, just:"c'est : présentatif. On peut remplacer par « cela est »."},
+  {phrase:"Karim $CIBLES$ levé très tôt ce matin.", cible:"s'est", correct:2, just:"s'est : pronom + verbe. Il s'agit du verbe pronominal se lever au passé composé."},
+  {phrase:"$CIBLES$ réponses sont justes et bien rédigées.", cible:"Ses", correct:1, just:"ses : déterminant possessif."},
+  {phrase:"$CIBLES$ élèves participent au concours de lecture.", cible:"Ces", correct:0, just:"ces : déterminant démonstratif."},
+  {phrase:"$CIBLES$ encore trop bruyant dans le couloir.", cible:"C'est", correct:3, just:"c'est : présentatif."},
+  {phrase:"Inès $CIBLES$ blessée pendant l'entraînement.", cible:"s'est", correct:2, just:"s'est : pronom + verbe."}
+];
+const N1 = QUESTIONS_D1.length;
+const state1 = QUESTIONS_D1.map(()=>({tries:0, done:false, firstTryOk:false}));
+let cur1 = 0;
+
+function buildHud1(){
+  const hud = $('hud1');
+  hud.innerHTML = '';
+  for(let i=0;i<N1;i++){
+    const d = document.createElement('div');
+    d.className = 'hud-dot';
+    d.id = 'h1d'+i;
+    d.textContent = (i+1);
+    hud.appendChild(d);
+  }
+  updateHud1();
+}
+function updateHud1(){
+  for(let i=0;i<N1;i++){
+    const d = $('h1d'+i);
+    d.classList.remove('current','done');
+    if(state1[i].done) d.classList.add('done');
+    else if(i===cur1) d.classList.add('current');
+  }
+}
+
+function renderD1(){
+  const zone = $('qZone1');
+  zone.innerHTML = '';
+  const item = QUESTIONS_D1[cur1];
+  const st = state1[cur1];
+
+  const card = document.createElement('div');
+  card.className = 'qcard';
+  card.id = 'card1_'+cur1;
+
+  const num = document.createElement('div');
+  num.className = 'qnum';
+  num.textContent = 'Phrase '+(cur1+1)+' / '+N1;
+  card.appendChild(num);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.innerHTML = item.phrase.replace('$CIBLES$', '<span class="cible">'+item.cible+'</span>');
+  card.appendChild(qtext);
+
+  const opts = document.createElement('div');
+  opts.className = 'opts';
+  OPTIONS_D1.forEach((txt,oi)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    const wasTried = st.wrongTries && st.wrongTries.includes(oi);
+    if(wasTried){ b.classList.add('wrong'); b.disabled = true; }
+    if(st.done && oi===item.correct){ b.classList.add('correct'); b.disabled = true; }
+    if(st.done) b.disabled = true;
+    if(!wasTried && !st.done){
+      b.addEventListener('click', ()=>selectD1(oi));
+    }
+    b.textContent = txt;
+    opts.appendChild(b);
+  });
+  card.appendChild(opts);
+
+  if(st.done){
+    const fb = document.createElement('div');
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ ' + item.just;
+    card.appendChild(fb);
+
+    const nav = document.createElement('button');
+    nav.className = 'btn-nav';
+    nav.textContent = cur1<N1-1 ? 'Phrase suivante ▸' : 'Voir le défi n°2 ▸';
+    nav.addEventListener('click', ()=>{
+      if(cur1<N1-1){ cur1++; renderD1(); updateHud1(); }
+      else { showTransition(); }
+    });
+    card.appendChild(nav);
+  }
+
+  zone.appendChild(card);
+}
+
+function selectD1(oi){
+  const item = QUESTIONS_D1[cur1];
+  const st = state1[cur1];
+  if(st.done) return;
+  st.tries++;
+  if(oi===item.correct){
+    st.done = true;
+    if(st.tries===1) st.firstTryOk = true;
+  } else {
+    if(!st.wrongTries) st.wrongTries = [];
+    st.wrongTries.push(oi);
+  }
+  renderD1();
+  updateHud1();
+}
+
+function showTransition(){
+  showPhase('phaseTransition');
+}
+
+/* ── DÉFI 2 ── */
+const TEXTE_PARTS = [
+  "Par une fraîche matinée d'automne, ",
+  " vieux arbres semblaient garder les secrets du jardin. Camille avançait lentement entre ",
+  " branches basses, attentive au moindre bruit. Tout à coup, elle ",
+  " arrêtée devant une pierre recouverte de mousse. « ",
+  " étrange », murmura-t-elle en observant les gravures presque effacées. Elle reprit ensuite ",
+  " recherches avec patience, tandis que ",
+  " feuilles dorées tourbillonnaient autour d'elle. En levant les yeux, elle ",
+  " aperçue qu'un rayon de soleil traversait enfin les nuages. « ",
+  " peut-être ici que commence l'histoire », pensa-t-elle avant de poursuivre son chemin."
+];
+const BLANKS_D2 = [
+  {correct:"Ces", just:"Déterminant démonstratif : il désigne des arbres précis. On peut penser à ceux-là."},
+  {correct:"ces", just:"Déterminant démonstratif : il désigne les branches précises de ces arbres."},
+  {correct:"s'est", just:"Verbe pronominal s'arrêter au passé composé."},
+  {correct:"C'est", just:"Peut être remplacé par cela est étrange."},
+  {correct:"ses", just:"Déterminant possessif : les recherches sont celles de Camille."},
+  {correct:"ces", just:"Déterminant démonstratif : il désigne les feuilles observées."},
+  {correct:"s'est", just:"Verbe pronominal s'apercevoir au passé composé."},
+  {correct:"C'est", just:"Peut être remplacé par cela est peut-être ici."}
+];
+const OPTIONS_D2 = ["ces","ses","c'est","s'est"];
+
+function buildTexteD2(){
+  const p = $('texteCorr');
+  p.innerHTML = '';
+  TEXTE_PARTS.forEach((part,i)=>{
+    p.appendChild(document.createTextNode(part));
+    if(i<BLANKS_D2.length){
+      const sel = document.createElement('select');
+      sel.className = 'blank';
+      sel.id = 'blank'+i;
+      const optDefault = document.createElement('option');
+      optDefault.value = '';
+      optDefault.textContent = '—';
+      sel.appendChild(optDefault);
+      OPTIONS_D2.forEach(o=>{
+        const opt = document.createElement('option');
+        opt.value = o;
+        opt.textContent = o;
+        sel.appendChild(opt);
+      });
+      p.appendChild(sel);
+    }
+  });
+}
+
+let d2Corrected = false;
+function correctD2(){
+  if(d2Corrected) return;
+  let allFilled = true;
+  BLANKS_D2.forEach((b,i)=>{
+    if(!$('blank'+i).value) allFilled = false;
+  });
+  if(!allFilled){ alert('Complète tous les blancs avant de corriger.'); return; }
+  d2Corrected = true;
+
+  let score2 = 0;
+  const explicZone = $('explicZone');
+  explicZone.innerHTML = '<div class="explic-label">Explications</div>';
+  const table = document.createElement('table');
+  table.className = 'explic-table';
+
+  BLANKS_D2.forEach((b,i)=>{
+    const sel = $('blank'+i);
+    sel.disabled = true;
+    const chosenNorm = sel.value.toLowerCase();
+    const correctNorm = b.correct.toLowerCase();
+    const isOk = chosenNorm === correctNorm;
+    sel.classList.add(isOk ? 'ok' : 'ko');
+    if(isOk) score2++;
+
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td');
+    td1.textContent = b.correct;
+    const td2 = document.createElement('td');
+    td2.textContent = (isOk ? '✅ ' : '❌ (tu as mis « '+sel.value+' ») ') + b.just;
+    tr.appendChild(td1); tr.appendChild(td2);
+    table.appendChild(tr);
+  });
+  explicZone.appendChild(table);
+  $('btnValiderD2').disabled = true;
+
+  window.__score2 = score2;
+  const finalBtn = document.createElement('button');
+  finalBtn.className = 'btn-nav';
+  finalBtn.style.marginTop = '16px';
+  finalBtn.textContent = 'Voir le bilan final ▸';
+  finalBtn.addEventListener('click', showBilan);
+  explicZone.appendChild(finalBtn);
+}
+
+/* ── NAVIGATION GÉNÉRALE ── */
+function showPhase(id){
+  document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function showBilan(){
+  const nbD1 = state1.filter(s=>s.firstTryOk).length;
+  const score2 = window.__score2 || 0;
+  const total = nbD1 + score2;
+  $('bilanScore').textContent = total+' / 16';
+  $('bilanMsg').textContent = 'Défi n°1 : '+nbD1+'/8 du premier coup. Défi n°2 : '+score2+'/8 corrections exactes.';
+  $('overlay').classList.add('show');
+}
+
+function rejouer(){
+  cur1 = 0;
+  state1.forEach(s=>{ s.tries=0; s.done=false; s.firstTryOk=false; s.wrongTries=[]; });
+  d2Corrected = false;
+  $('btnValiderD2').disabled = false;
+  $('overlay').classList.remove('show');
+  buildHud1();
+  renderD1();
+  buildTexteD2();
+  $('explicZone').innerHTML = '';
+  showPhase('phase1');
+}
+
+$('btnCommencer').addEventListener('click', ()=>{
+  showPhase('phaseDefi1');
+  buildHud1();
+  renderD1();
+});
+$('btnDefi2').addEventListener('click', ()=>{
+  showPhase('phaseDefi2');
+});
+$('btnValiderD2').addEventListener('click', correctD2);
+
+buildTexteD2();
+</script>
+</body>
+</html>
