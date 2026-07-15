@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J2 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#b94040;--day-color:#b94040;--day-dark:#7a1f1f;--day-dark2:#551414;
+  --day-light:#f7eded;--day-border:#e2a3a3;--day-glow:rgba(185,64,64,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fdf5f5;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;position:relative;}
+.wrap{width:100%;max-width:800px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.hud-bar{display:flex;justify-content:center;gap:1.4rem;margin:1rem 0 .6rem;flex-wrap:wrap;}
+.hud-item{text-align:center;}
+.hud-val{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.2rem;color:var(--day-dark2);}
+.hud-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;}
+.prog-wrap{width:100%;margin-bottom:1rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+
+.partie{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.partie-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.partie-head{padding:.9rem 1.2rem .5rem;}
+.partie-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;}
+.consigne{padding:.6rem 1.2rem 0;font-style:italic;font-size:.92rem;color:#4a4f58;line-height:1.65;}
+
+.phrase-support{margin:1rem 1.2rem;padding:.75rem .95rem;background:var(--day-light);
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);
+  font-size:clamp(1.02rem,3vw,1.15rem);font-weight:700;font-style:italic;color:var(--text);line-height:1.75;}
+
+.qcard{margin:1rem 1.2rem;padding:1rem;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.q-phrase{font-size:clamp(1rem,2.9vw,1.12rem);font-weight:700;font-style:italic;color:var(--text);
+  line-height:1.75;padding:.6rem .8rem;background:#fff;border-left:4px solid var(--day-dark);
+  border-radius:var(--radius-sm);margin-bottom:.6rem;}
+.q-consigne{font-size:.9rem;color:#4a4f58;margin-bottom:.7rem;line-height:1.55;}
+
+.opts-col{display:flex;flex-direction:column;gap:.5rem;}
+.opt-btn{background:#fff;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.86rem,2.3vw,.96rem);font-weight:600;
+  padding:.65rem .9rem;cursor:pointer;text-align:left;line-height:1.55;
+  display:flex;gap:.55rem;transition:background .12s,border-color .12s;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;}
+.opt-btn.mid{background:#fff5e0!important;border-color:var(--orange)!important;}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.mid .opt-letter{background:var(--orange);color:#fff;}
+
+.laby-track{display:flex;flex-direction:column;gap:0;margin-top:.4rem;}
+.laby-checkpoint{position:relative;padding:.85rem 0 .85rem 1.6rem;border-left:3px dashed var(--day-border);}
+.laby-checkpoint:last-child{border-left:3px dashed transparent;}
+.laby-checkpoint::before{content:'';position:absolute;left:-8px;top:1.1rem;width:14px;height:14px;
+  border-radius:50%;background:var(--day-dark);border:3px solid var(--surface2);}
+.laby-seg{font-weight:800;font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  color:var(--day-dark2);margin-bottom:.5rem;background:var(--day-light);
+  display:inline-block;padding:.25rem .6rem;border-radius:99px;}
+.laby-opts{display:flex;flex-wrap:wrap;gap:.5rem;}
+.laby-pill{background:#fff;border:1.5px solid var(--day-border);border-radius:99px;
+  font-family:Arial,sans-serif;font-size:.82rem;font-weight:600;padding:.45rem .9rem;
+  cursor:pointer;transition:background .12s,border-color .12s;}
+.laby-pill:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.laby-pill.good{background:#eaf7e2!important;border-color:#5fa82f!important;color:#2f5c15!important;font-weight:800;}
+.laby-pill.bad{background:var(--err-light)!important;border-color:var(--err)!important;color:var(--err-dark)!important;}
+.laby-pill:disabled{cursor:default;}
+.fb-mini{font-size:.85rem;display:none;margin-top:.6rem;line-height:1.7;
+  padding:.65rem .85rem;border-radius:var(--radius-sm);border-left:4px solid;}
+.fb-mini.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-mini.show.mid{display:block;background:#fff5e0;border-color:var(--orange);color:#8a5600;}
+
+.nav-row{padding:0 1.2rem 1.1rem;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#551414;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.4rem,8vw,3.6rem);color:var(--day-dark2);margin:.3rem 0 .1rem;}
+.res-stars{font-size:1.7rem;margin-bottom:.6rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.emoji-rain{position:fixed;top:-40px;font-size:1.6rem;pointer-events:none;z-index:300;
+  animation:rainFall linear forwards;}
+@keyframes rainFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1;}
+  100%{transform:translateY(105vh) rotate(360deg);opacity:.85;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 2</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Reconnaître les fonctions dans la phrase</div>
+</header>
+
+<div class="hud-bar">
+  <div class="hud-item"><div class="hud-val" id="hudScore">0</div><div class="hud-lbl">/ 17 pts</div></div>
+</div>
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 17</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="partie" id="partie1">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Activité 1 — Remplacer en gardant la bonne fonction</span></div>
+  <div id="q1List"></div>
+  <div class="nav-row" id="nav1" style="display:none;">
+    <button class="btn-next" id="btnTo2">Activité 2 →</button>
+  </div>
+</div>
+
+<div class="partie" id="partie2" style="display:none;">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Activité 2 — Choisir le bon test grammatical</span></div>
+  <div class="phrase-support">« Dans le garage, Hugo range ses outils avec soin. »</div>
+  <div id="q2List"></div>
+  <div class="nav-row" id="nav2" style="display:none;">
+    <button class="btn-next" id="btnTo3">Activité 3 →</button>
+  </div>
+</div>
+
+<div class="partie" id="partie3" style="display:none;">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Activité 3 — Le labyrinthe des étiquettes</span></div>
+  <div id="q3List"></div>
+  <div class="nav-row" id="nav3" style="display:none;">
+    <button class="btn-next" id="btnFinish">Voir le résultat →</button>
+  </div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.3rem;">/ 17 points</div>
+    <div class="res-stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <button class="btn-next" id="btn-restart" style="min-height:2.9rem;">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function shuffleIdx(n){
+  var arr=[];for(var i=0;i<n;i++)arr.push(i);
+  for(var i=arr.length-1;i>0;i--){
+    var a=new Uint32Array(1);crypto.getRandomValues(a);
+    var j=a[0]%(i+1);
+    var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  }
+  return arr;
+}
+var TOTAL=17, scGlobal=0;
+function updateGlobal(){
+  var pct=Math.round(scGlobal/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scGlobal+' / '+TOTAL;$('prog-pct').textContent=pct+'%';
+  $('hudScore').textContent=scGlobal;
+}
+
+/* ══ ACTIVITÉ 1 ══ */
+var Q1=[
+ {phrase:"Le jeune écrivain salue le public.",
+  consigne:"Choisis la transformation où le sujet devient un pronom personnel.",
+  opts:[
+   {t:"Il salue le public.",fb:"Excellent. Il remplace le groupe sujet Le jeune écrivain.",correct:true},
+   {t:"Le jeune écrivain le salue.",fb:"Tu as bien repéré un pronom. Ici, le remplace le public, donc le COD.",correct:false},
+   {t:"Le public salue le jeune écrivain",fb:"Cette phrase reste correcte. Les rôles changent : le sujet devient Le public.",correct:false}
+  ]},
+ {phrase:"J'entends la sirène.",
+  consigne:"Choisis la transformation où le COD devient un pronom.",
+  opts:[
+   {t:"Je lui entends.",fb:"Tu mobilises bien un pronom. Avec entendre, le complément direct appelle le pronom le / la / l'.",correct:false},
+   {t:"Je l'entends.",fb:"Parfait. L' remplace la sirène, COD du verbe entends.",correct:true},
+   {t:"La sirène m'entend.",fb:"Cette phrase fonctionne, et le sens change : La sirène devient le sujet.",correct:false}
+  ]},
+ {phrase:"Ali reste calme.",
+  consigne:"Choisis la transformation où l'attribut du sujet devient un groupe nominal.",
+  opts:[
+   {t:"Ali reste un élève exemplaire.",fb:"Très bien. Un élève exemplaire est un groupe nominal attribut du sujet Ali.",correct:true},
+   {t:"Un élève exemplaire reste Ali.",fb:"Tu construis une inversion. Pour garder la structure la plus claire du sujet suivi du verbe d'état, la phrase A guide mieux le raisonnement.",correct:false},
+   {t:"Ali le reste.",fb:"Tu utilises un pronom, et le verbe reste attend ici un attribut du sujet exprimé autrement.",correct:false}
+  ]},
+ {phrase:"Lina parle à ses voisines.",
+  consigne:"Choisis la transformation où le COI devient un pronom.",
+  opts:[
+   {t:"Lina les parle.",fb:"Tu choisis un pronom de complément direct. Avec parler à, le pronom attendu est celui du COI.",correct:false},
+   {t:"Lina leur parle.",fb:"Exact. Leur remplace le groupe à ses voisines.",correct:true},
+   {t:"Leur Lina parle.",fb:"Tu places bien le pronom en tête. Ici, dans la phrase verbale, le pronom COI se place avant le verbe.",correct:false}
+  ]}
+];
+
+/* ══ ACTIVITÉ 2 ══ */
+var Q2=[
+ {consigne:"Quel test aide le mieux à reconnaître la fonction de <strong>Dans le garage</strong>\u00a0?",
+  opts:[
+   {t:"Je déplace le groupe : « Hugo range ses outils avec soin dans le garage. »",fb:"Oui. Le déplacement met en valeur un complément circonstanciel de lieu.",correct:true},
+   {t:"Je remplace le groupe par les.",fb:"Tu mobilises le test du pronom. Ici, le groupe apporte surtout une précision de lieu.",correct:false},
+   {t:"J'accorde le verbe avec le groupe.",fb:"Tu penses à un excellent test pour le sujet. Ici, le groupe sert à situer l'action.",correct:false}
+  ]},
+ {consigne:"Quel test aide le mieux à reconnaître la fonction de <strong>ses outils</strong>\u00a0?",
+  opts:[
+   {t:"Je déplace le groupe en tête de phrase.",fb:"Le déplacement peut fonctionner, et le test du pronom révèle plus directement la fonction cherchée.",correct:false},
+   {t:"Je l'encadre par c'est ... qui.",fb:"Tu penses à une tournure utile pour mettre en relief. Ici, le remplacement par un pronom de COD donne une preuve très claire.",correct:false},
+   {t:"Je remplace le groupe par les : « Hugo les range avec soin dans le garage. »",fb:"Bravo. Les confirme la fonction de COD.",correct:true}
+  ]},
+ {consigne:"Quel test aide le mieux à reconnaître la fonction de <strong>Hugo</strong>\u00a0?",
+  opts:[
+   {t:"Je le remplace par y.",fb:"Tu mobilises un pronom adverbial. Pour le sujet, l'accord du verbe est le repère le plus fort.",correct:false},
+   {t:"Je change le nombre : « Hugo et Zoé rangent leurs outils avec soin. »",fb:"Très bien. L'accord de rangent montre que Hugo occupe la fonction sujet.",correct:true},
+   {t:"Je le supprime.",fb:"La suppression fait apparaître un manque important. L'accord du verbe apporte ici la meilleure preuve.",correct:false}
+  ]},
+ {consigne:"Quel test aide le mieux à reconnaître la fonction de <strong>avec soin</strong>\u00a0?",
+  opts:[
+   {t:"Je retire le groupe : « Dans le garage, Hugo range ses outils. »",fb:"Exact. La phrase reste correcte et le groupe apporte une précision de manière : c'est un complément circonstanciel.",correct:true},
+   {t:"Je remplace le groupe par le.",fb:"Tu explores le test du COD. Ici, le groupe indique comment l'action se déroule.",correct:false},
+   {t:"Je transforme le groupe en sujet.",fb:"Tu tentes une transformation audacieuse. Le groupe sert surtout à préciser la manière.",correct:false}
+  ]}
+];
+
+/* ══ ACTIVITÉ 3 ══ */
+/* Phrases 1 et 2 : vrai labyrinthe, une étiquette à choisir par groupe de mots
+   (étiquettes extraites des 3 combinaisons données par la prof, un intrus par groupe) */
+var LABY=[
+ {phrase:"Pendant l'orage, les marins observent le ciel avec inquiétude.",
+  segments:[
+   {seg:"Pendant l'orage",opts:["sujet","complément circonstanciel de temps","complément du nom"],correct:1},
+   {seg:"les marins",opts:["complément circonstanciel de lieu","sujet","COD"],correct:1},
+   {seg:"le ciel",opts:["attribut du sujet","COD","sujet"],correct:1},
+   {seg:"avec inquiétude",opts:["COD","complément circonstanciel de manière","attribut du sujet"],correct:1}
+  ],
+  recap:"Pendant l'orage = complément circonstanciel de temps. Les marins = sujet. Le ciel = COD. Avec inquiétude = complément circonstanciel de manière. Excellent, tous les groupes sont bien identifiés\u00a0!"},
+ {phrase:"Le portrait de la reine semble magnifique.",
+  segments:[
+   {seg:"de la reine",opts:["complément du nom","COI","COD"],correct:0},
+   {seg:"magnifique",opts:["attribut du sujet","épithète liée","complément du nom"],correct:0}
+  ],
+  recap:"De la reine = complément du nom (il complète le nom portrait). Magnifique = attribut du sujet, relié grâce au verbe d'état semble."},
+ {phrase:"Ce camarade très calme aide souvent ses amis.",
+  segments:[
+   {seg:"très",opts:["adjectif qualificatif","adverbe"],correct:1},
+   {seg:"souvent",opts:["nom commun","adverbe"],correct:1},
+   {seg:"ses amis",opts:["sujet","COI","COD"],correct:2}
+  ],
+  recap:"Très = adverbe, car il intensifie calme. Souvent = adverbe, car il précise le verbe aide. Ses amis = COD, car le groupe reçoit directement l'action d'aide."}
+];
+
+var LETTERS=['A','B','C'];
+function buildQList(containerId, questions, numPrefix, onAllDone){
+  var list=$(containerId);list.innerHTML='';
+  var doneCount=0;
+  questions.forEach(function(q,idx){
+    var div=document.createElement('div');div.className='qcard';
+    var html='<div class="q-num">'+numPrefix+' '+(idx+1)+' / '+questions.length+'</div>';
+    if(q.phrase)html+='<div class="q-phrase">'+q.phrase+'</div>';
+    html+='<div class="q-consigne">'+q.consigne+'</div>';
+    div.innerHTML=html;
+    var col=document.createElement('div');col.className='opts-col';
+    var answered=false;
+    var order=shuffleIdx(q.opts.length);
+    order.forEach(function(oi){
+      var o=q.opts[oi];
+      var btn=document.createElement('button');btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter"></span><span>'+o.t+'</span>';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        Array.prototype.forEach.call(col.children,function(b){b.disabled=true;});
+        btn.classList.add(o.correct?'correct':'mid');
+        var fb=document.createElement('div');fb.className='fb-mini show '+(o.correct?'ok':'mid');
+        fb.textContent=o.fb;
+        div.appendChild(fb);
+        if(o.correct){scGlobal++;}
+        updateGlobal();
+        doneCount++;
+        if(doneCount>=questions.length)onAllDone();
+      });
+      col.appendChild(btn);
+    });
+    Array.prototype.forEach.call(col.children,function(b,bi){b.querySelector('.opt-letter').textContent=LETTERS[bi];});
+    div.appendChild(col);
+    list.appendChild(div);
+  });
+}
+
+buildQList('q1List',Q1,'Question',function(){$('nav1').style.display='flex';});
+
+$('btnTo2').addEventListener('click',function(){
+  $('partie1').style.display='none';
+  $('partie2').style.display='';
+  buildQList('q2List',Q2,'Question',function(){$('nav2').style.display='flex';});
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+var ACT3_TOTAL=9; /* 4 + 2 + 3 étiquettes */
+function buildActivite3(){
+  var list=$('q3List');list.innerHTML='';
+  var doneCount=0;
+  function checkAllDone(){doneCount++;if(doneCount>=ACT3_TOTAL)$('nav3').style.display='flex';}
+
+  LABY.forEach(function(phraseData,pIdx){
+    var card=document.createElement('div');card.className='qcard';
+    card.innerHTML='<div class="q-num">Phrase '+(pIdx+1)+' / '+LABY.length+' — Labyrinthe des étiquettes</div>'
+      +'<div class="q-phrase">'+phraseData.phrase+'</div>'
+      +'<div class="q-consigne">Pour chaque groupe surligné, choisis la bonne étiquette.</div>';
+    var track=document.createElement('div');track.className='laby-track';
+    var segDone=0;
+    phraseData.segments.forEach(function(segData){
+      var cp=document.createElement('div');cp.className='laby-checkpoint';
+      cp.innerHTML='<div class="laby-seg">'+segData.seg+'</div>';
+      var pills=document.createElement('div');pills.className='laby-opts';
+      var order=shuffleIdx(segData.opts.length);
+      var answered=false;
+      order.forEach(function(oi){
+        var pill=document.createElement('button');pill.className='laby-pill';pill.textContent=segData.opts[oi];
+        pill.addEventListener('click',function(){
+          if(answered)return;answered=true;
+          var ok=(oi===segData.correct);
+          Array.prototype.forEach.call(pills.children,function(p){p.disabled=true;});
+          pill.classList.add(ok?'good':'bad');
+          if(!ok){
+            var correctPill=Array.prototype.find.call(pills.children,function(p,bi){return order[bi]===segData.correct;});
+            if(correctPill)correctPill.classList.add('good');
+          }
+          if(ok)scGlobal++;
+          updateGlobal();
+          segDone++;
+          checkAllDone();
+          if(segDone>=phraseData.segments.length){
+            var recap=document.createElement('div');recap.className='fb-mini show ok';
+            recap.textContent=phraseData.recap;
+            card.appendChild(recap);
+          }
+        });
+        pills.appendChild(pill);
+      });
+      cp.appendChild(pills);
+      track.appendChild(cp);
+    });
+    card.appendChild(track);
+    list.appendChild(card);
+  });
+}
+
+$('btnTo3').addEventListener('click',function(){
+  $('partie2').style.display='none';
+  $('partie3').style.display='';
+  buildActivite3();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+$('btnFinish').addEventListener('click',function(){
+  showResults();
+});
+
+function showResults(){
+  $('partie3').style.display='none';
+  var pct=scGlobal/TOTAL;
+  $('r-score').textContent=scGlobal;
+  var s= pct>=.9?5: pct>=.7?4: pct>=.5?3: pct>=.25?2:1;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg = pct>=.9 ? "Excellent\u00a0! Tu maîtrises les tests grammaticaux et les fonctions dans la phrase."
+    : pct>=.7 ? "Très bon travail\u00a0! Quelques fonctions restent à consolider."
+    : pct>=.5 ? "Bon travail global. Relis les explications des questions manquées."
+    : "Reprends les tests grammaticaux (pronom, déplacement, accord, suppression) avant de retenter.";
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  if(pct>=.9)emojiRain();
+}
+
+function emojiRain(){
+  var EMOJIS=['📚','✏️','📝','🔍','✨','💫'];
+  for(var i=0;i<25;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div');el.className='emoji-rain';
+        el.textContent=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+        el.style.left=(Math.random()*100)+'vw';
+        var dur=(2.2+Math.random()*1.6).toFixed(2);
+        el.style.animationDuration=dur+'s';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},dur*1000+200);
+      }, i*70);
+    })(i);
+  }
+}
+
+$('btn-restart').addEventListener('click',function(){
+  scGlobal=0;
+  $('results').classList.remove('show');
+  $('partie1').style.display='';
+  $('partie2').style.display='none';
+  $('partie3').style.display='none';
+  $('nav1').style.display='none';
+  $('nav2').style.display='none';
+  $('nav3').style.display='none';
+  buildQList('q1List',Q1,'Question',function(){$('nav1').style.display='flex';});
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+updateGlobal();
+</script>
+</body>
+</html>
