@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J1 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Lora:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5a623;--day-color:#f5a623;--day-dark:#c47a10;--day-dark2:#8a5600;
+  --day-light:#fff5e0;--day-border:#f5d080;--day-glow:rgba(245,166,35,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#fffaf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;position:relative;}
+.wrap{width:100%;max-width:840px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.hud-bar{display:flex;justify-content:center;gap:1.4rem;margin:1rem 0 .6rem;flex-wrap:wrap;}
+.hud-item{text-align:center;}
+.hud-val{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.2rem;color:var(--day-dark2);}
+.hud-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;}
+.prog-wrap{width:100%;margin-bottom:1rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+
+/* TEXTE SUPPORT — toujours visible */
+.texte-card{background:var(--surface2);border:1.5px solid var(--day-border);border-radius:var(--radius);
+  padding:1.1rem 1.2rem;margin-bottom:1rem;}
+.texte-toggle{width:100%;background:none;border:none;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:space-between;font-family:inherit;}
+.toggle-icon{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  color:var(--day-dark2);background:#fff;border:1px solid var(--day-border);border-radius:99px;
+  padding:.2rem .6rem;white-space:nowrap;}
+#texteBody{overflow:hidden;max-height:4000px;transition:max-height .4s ease,opacity .3s ease,margin-top .3s ease;
+  margin-top:.7rem;opacity:1;}
+#texteBody.collapsed{max-height:0;opacity:0;margin-top:0;}
+.texte-card .lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;display:block;}
+.texte-titre{font-family:'Lora',serif;font-weight:700;font-style:italic;font-size:1.02rem;
+  color:var(--day-dark2);margin-bottom:.7rem;}
+.texte-corps{font-family:'Lora',serif;font-weight:500;font-size:.95rem;line-height:1.85;color:var(--text);}
+.texte-corps p{margin-bottom:.7rem;}
+.texte-corps sup{color:var(--day-dark);font-weight:700;font-size:.7em;}
+.texte-source{font-size:.78rem;color:var(--muted);margin-top:.6rem;font-style:italic;}
+.lexique{margin-top:.9rem;padding-top:.8rem;border-top:1.5px dashed var(--day-border);}
+.lexique .lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;display:block;}
+.lex-list{font-size:.78rem;color:#5a5f68;line-height:1.75;column-count:2;column-gap:1.2rem;}
+@media(max-width:560px){.lex-list{column-count:1;}}
+.lex-list div{break-inside:avoid;}
+.lex-list b{color:var(--day-dark2);}
+
+/* PARTIE */
+.partie{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.partie-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.partie-head{padding:.9rem 1.2rem .5rem;}
+.partie-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;}
+.consigne{padding:.6rem 1.2rem 0;font-style:italic;font-size:.92rem;color:#4a4f58;line-height:1.65;}
+
+/* Mouvement (Partie A) */
+.mvt{margin:1rem 1.2rem;padding:1rem;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.mvt-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.mvt-citation{font-family:'Lora',serif;font-style:italic;font-weight:600;font-size:1rem;
+  color:var(--text);line-height:1.7;padding:.65rem .85rem;background:#fff;
+  border-left:4px solid var(--day-dark);border-radius:var(--radius-sm);margin-bottom:.7rem;}
+.select-wrap{position:relative;margin-bottom:.6rem;}
+.dd-btn{width:100%;text-align:left;padding:.7rem .85rem;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.85rem,2.3vw,.95rem);background:#fff;color:var(--muted);
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.6rem;line-height:1.5;}
+.dd-btn .dd-txt{flex:1;color:var(--text);}
+.dd-btn.placeholder .dd-txt{color:var(--muted);}
+.dd-btn .dd-arrow{flex-shrink:0;font-size:.75rem;color:var(--day-dark2);transition:transform .15s;}
+.dd-btn.open .dd-arrow{transform:rotate(180deg);}
+.dd-btn:disabled{opacity:.75;cursor:default;}
+.dd-panel{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--day-border);
+  border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:20;overflow:hidden;display:none;}
+.dd-panel.open{display:block;}
+.dd-opt{padding:.65rem .85rem;font-size:clamp(.85rem,2.3vw,.95rem);line-height:1.55;color:var(--text);
+  cursor:pointer;border-bottom:1px solid var(--border);}
+.dd-opt:last-child{border-bottom:none;}
+.dd-opt:hover{background:var(--day-light);}
+
+/* Questions Partie B */
+.qgroup{margin:1rem 1.2rem;}
+.qgroup-titre{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.7rem;}
+.qsub{margin-bottom:1rem;padding:.9rem;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.qsub-lbl{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--day-dark);font-weight:800;margin-bottom:.4rem;}
+.qsub-txt{font-size:.92rem;font-weight:700;color:var(--text);line-height:1.6;margin-bottom:.7rem;}
+
+.opts-col{display:flex;flex-direction:column;gap:.5rem;}
+.opt-btn{background:#fff;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.85rem,2.3vw,.95rem);font-weight:600;
+  padding:.65rem .9rem;cursor:pointer;min-height:48px;text-align:left;
+  transition:background .12s,border-color .12s;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn.selected{background:var(--day-light);border-color:var(--day-dark);border-width:2px;
+  box-shadow:0 0 0 3px rgba(196,122,16,.15);}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;color:#2f5c15!important;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;color:var(--err-dark)!important;}
+.opt-btn:disabled{cursor:default;}
+
+.fb-mini{font-size:.85rem;display:none;margin-top:.55rem;line-height:1.7;
+  padding:.65rem .85rem;border-radius:var(--radius-sm);border-left:4px solid;}
+.fb-mini.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-mini.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+
+.fb-box{font-size:clamp(.9rem,2.5vw,1rem);display:none;margin:.8rem 1.2rem;line-height:1.8;
+  padding:.8rem 1rem;border-radius:var(--radius-sm);border-left:5px solid;}
+.fb-box.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-box.show.mid{display:block;background:#fff5e0;border-color:var(--orange);color:#8a5600;}
+.fb-box.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+.fb-titre{font-weight:800;display:block;margin-bottom:.15rem;}
+
+.nav-row{padding:0 1.2rem 1.1rem;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#6e4c00;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--green),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.4rem,8vw,3.6rem);color:var(--day-dark2);margin:.3rem 0 .1rem;}
+.res-sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.7rem;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 1</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Molière — scène d'exposition du Malade imaginaire</div>
+</header>
+
+<div class="hud-bar">
+  <div class="hud-item"><div class="hud-val" id="hudScore">0</div><div class="hud-lbl">/ 16 pts</div></div>
+</div>
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 16</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="texte-card">
+  <button type="button" class="texte-toggle" id="texteToggle">
+    <span class="lbl" style="margin-bottom:0;">Texte support</span>
+    <span class="toggle-icon" id="toggleIcon">▾ Réduire</span>
+  </button>
+  <div id="texteBody">
+  <div class="texte-titre">La scène est à Paris — Acte premier, scène première</div>
+  <div class="texte-corps">
+    <p><strong>ARGAN</strong>, seul dans sa chambre, assis, une table devant lui, compte des parties d'apothicaire<sup>1</sup> avec des jetons<sup>2</sup> ; il fait, parlant à lui-même, les dialogues suivants.</p>
+    <p>— Trois et deux font cinq, et cinq font dix, et dix font vingt. Trois et deux font cinq. « Plus, du vingt-quatrième<sup>3</sup>, un petit clystère<sup>4</sup> insinuatif<sup>5</sup>, préparatif, et rémollient<sup>6</sup>, pour amollir, humecter, et rafraîchir les entrailles de Monsieur. »</p>
+    <p>— Ce qui me plaît, de Monsieur Fleurant, mon apothicaire, c'est que ses parties sont toujours fort civiles<sup>7</sup>. « Les entrailles de Monsieur, trente sols<sup>8</sup>. » Oui, mais, Monsieur Fleurant, ce n'est pas tout que d'être civil, il faut être aussi raisonnable, et ne pas écorcher les malades. Trente sols un lavement, je suis votre serviteur<sup>9</sup>, je vous l'ai déjà dit. Vous ne me les avez mis dans les autres parties qu'à vingt sols, et vingt sols en langage d'apothicaire, c'est-à-dire dix sols ; les voilà, dix sols. […]</p>
+    <p>Allons, qu'on m'ôte tout ceci, il n'y a personne ; j'ai beau dire, on me laisse toujours seul ; il n'y a pas moyen de les arrêter<sup>10</sup> ici. <em>(Il agite une sonnette pour faire venir ses gens.)</em> Ils n'entendent point, et ma sonnette ne fait pas assez de bruit.</p>
+    <p>Drelin, drelin, drelin, point d'affaire. Drelin, drelin, drelin, ils sont sourds. Toinette. Drelin, drelin, drelin. Tout comme si je ne sonnais point. […], drelin, drelin ; j'enrage. <em>(Il ne sonne plus, mais il crie.)</em> Drelin, drelin, drelin. […]. Est-il possible qu'on laisse comme cela un pauvre malade tout seul ! Drelin, drelin, drelin ; voilà qui est pitoyable !<sup>11</sup> Drelin, drelin, drelin. Ah ! mon Dieu, ils me laisseront ici mourir. Drelin, drelin, drelin.</p>
+  </div>
+  <div class="texte-source">Molière, <em>Le Malade imaginaire</em>, acte I, scène 1, 1673.</div>
+  <div class="lexique">
+    <span class="lbl">Lexique</span>
+    <div class="lex-list">
+      <div><b>1.</b> factures de pharmacien.</div>
+      <div><b>2.</b> petites pièces plates utilisées pour faire les comptes.</div>
+      <div><b>3.</b> du 24 du mois.</div>
+      <div><b>4.</b> lavement.</div>
+      <div><b>5.</b> qui imbibe bien.</div>
+      <div><b>6.</b> adoucissant.</div>
+      <div><b>7.</b> polies.</div>
+      <div><b>8.</b> anciennes unités de monnaie.</div>
+      <div><b>9.</b> je ne suis pas d'accord, il n'en est pas question.</div>
+      <div><b>10.</b> retenir.</div>
+      <div><b>11.</b> qui inspire la pitié.</div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div class="partie" id="partieA">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Partie A</span></div>
+  <div class="consigne">Cette scène se compose de quatre mouvements. Pour chacun, choisis dans le menu déroulant le résumé qui correspond le mieux.</div>
+  <div id="mvtList"></div>
+  <div class="fb-box" id="fbA"></div>
+  <div class="nav-row" id="navA" style="display:none;">
+    <button class="btn-next" id="btnToB">Partie B →</button>
+  </div>
+</div>
+
+<div class="partie" id="partieB" style="display:none;">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Partie B</span></div>
+  <div class="consigne">Réponds à chaque question, puis choisis la citation du texte qui justifie ta réponse.</div>
+  <div id="qContent"></div>
+  <div class="nav-row" id="navB" style="display:none;">
+    <button class="btn-next" id="btnNextQ">Question suivante →</button>
+  </div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div class="res-sub" id="r-sub"></div>
+    <div class="res-msg" id="r-msg"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+var TOTAL=16, scGlobal=0;
+function shuffleIdx(n){
+  var arr=[];for(var i=0;i<n;i++)arr.push(i);
+  for(var i=arr.length-1;i>0;i--){
+    var a=new Uint32Array(1);crypto.getRandomValues(a);
+    var j=a[0]%(i+1);
+    var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  }
+  return arr;
+}
+function updateGlobal(){
+  var pct=Math.round(scGlobal/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scGlobal+' / '+TOTAL;$('prog-pct').textContent=pct+'%';
+  $('hudScore').textContent=scGlobal;
+}
+
+/* ══ PARTIE A ══ */
+var MVTS=[
+ {citation:"ARGAN, seul dans sa chambre, assis, une table devant lui, compte des parties d\u2019apothicaire avec des jetons\u00a0; il fait, parlant \u00e0 lui-m\u00eame, les dialogues suivants.<br>\u2014 Trois et deux font cinq, et cinq font dix, et dix font vingt. Trois et deux font cinq. \u00ab\u00a0Plus, du vingt-quatri\u00e8me, un petit clyst\u00e8re insinuatif, pr\u00e9paratif, et r\u00e9mollient, pour amollir, humecter, et rafra\u00eechir les entrailles de Monsieur.\u00a0\u00bb",
+  opts:["Argan, seul sur sc\u00e8ne, compte \u00e0 voix haute ses factures de pharmacien et r\u00e9cite le d\u00e9tail de ses soins m\u00e9dicaux, r\u00e9v\u00e9lant imm\u00e9diatement son obsession pour la maladie.",
+        "Argan discute avec son apothicaire Monsieur Fleurant qui lui rend visite pour lui pr\u00e9senter sa facture mensuelle.",
+        "Argan lit un livre de m\u00e9decine pour se diagnostiquer lui-m\u00eame, convaincu d'\u00eatre atteint d'une grave maladie."],
+  correct:0,
+  fb:"Ce premier mouvement est la sc\u00e8ne d'exposition\u00a0: Moli\u00e8re installe son personnage principal en pleine action. D\u00e8s le lever du rideau, le spectateur voit Argan seul, comptant des factures de pharmacien. Son obsession est imm\u00e9diatement visible\u00a0: avant m\u00eame qu'il parle, son geste dit tout."},
+ {citation:"\u2014 Ce qui me pla\u00eet, de Monsieur Fleurant, mon apothicaire, c\u2019est que ses parties sont toujours fort civiles. \u00ab\u00a0Les entrailles de Monsieur, trente sols.\u00a0\u00bb Oui, mais, Monsieur Fleurant, ce n\u2019est pas tout que d\u2019\u00eatre civil, il faut \u00eatre aussi raisonnable, et ne pas \u00e9corcher les malades. Trente sols un lavement, je suis votre serviteur, je vous l\u2019ai d\u00e9j\u00e0 dit. Vous ne me les avez mis dans les autres parties qu\u2019\u00e0 vingt sols, et vingt sols en langage d\u2019apothicaire, c\u2019est-\u00e0-dire dix sols\u00a0; les voil\u00e0, dix sols.",
+  opts:["Argan prend la d\u00e9fense de son apothicaire face \u00e0 des critiques injustes et r\u00e8gle sa facture sans discuter.",
+        "Argan s'indigne du prix excessif d'un lavement et n\u00e9gocie imaginairement avec son apothicaire absent, r\u00e9v\u00e9lant \u00e0 la fois son hypocondrie et son avarice.",
+        "Argan d\u00e9couvre que son apothicaire l'a tromp\u00e9 sur les prix et d\u00e9cide de changer de pharmacien."],
+  correct:1,
+  fb:"Ce deuxi\u00e8me mouvement est comique car Argan parle \u00e0 quelqu'un qui n'est pas l\u00e0. Il s'adresse \u00e0 « Monsieur Fleurant » comme si l'apothicaire \u00e9tait pr\u00e9sent. Cette dispute imaginaire r\u00e9v\u00e8le deux traits du personnage\u00a0: son hypocondrie (il consomme beaucoup de soins) et son avarice (il refuse de trop payer)."},
+ {citation:"Allons, qu\u2019on m\u2019\u00f4te tout ceci, il n\u2019y a personne\u00a0; j\u2019ai beau dire, on me laisse toujours seul\u00a0; il n\u2019y a pas moyen de les arr\u00eater ici. <em>(Il agite une sonnette pour faire venir ses gens.)</em> Ils n\u2019entendent point, et ma sonnette ne fait pas assez de bruit.",
+  opts:["Argan appelle ses domestiques, mais constate qu'il est seul et agite sa sonnette sans obtenir de r\u00e9ponse.",
+        "Argan range lui-m\u00eame ses papiers et d\u00e9cide d'aller chercher ses domestiques dans les autres pi\u00e8ces.",
+        "Argan demande \u00e0 Toinette de lui apporter ses rem\u00e8des et s'impatiente parce qu'elle arrive trop lentement."],
+  correct:0,
+  fb:"Ce troisi\u00e8me mouvement introduit la deuxi\u00e8me obsession d'Argan\u00a0: \u00eatre servi et entour\u00e9. La transition entre les deux obsessions est nette\u00a0: il passe de ses factures \u00e0 sa sonnette. La didascalie « il agite une sonnette » est importante\u00a0: elle annonce le comique de geste qui va dominer la fin de la sc\u00e8ne."},
+ {citation:"Drelin, drelin, drelin, point d\u2019affaire. Drelin, drelin, drelin, ils sont sourds. Toinette. Drelin, drelin, drelin. Tout comme si je ne sonnais point. [\u2026], drelin, drelin\u00a0; j\u2019enrage. <em>(Il ne sonne plus, mais il crie.)</em> Drelin, drelin, drelin. [\u2026]. Est-il possible qu\u2019on laisse comme cela un pauvre malade tout seul\u00a0! Drelin, drelin, drelin\u00a0; voil\u00e0 qui est pitoyable\u00a0! Drelin, drelin, drelin. Ah\u00a0! mon Dieu, ils me laisseront ici mourir. Drelin, drelin, drelin.",
+  opts:["Argan, toujours sans r\u00e9ponse, agite fr\u00e9n\u00e9tiquement sa sonnette, puis crie, s'\u00e9nerve et se convainc qu'il va mourir abandonn\u00e9 de tous, dans une mont\u00e9e comique d'agitation et de d\u00e9sespoir.",
+        "Argan appelle successivement tous ses domestiques par leur pr\u00e9nom et finit par s'endormir, \u00e9puis\u00e9 par ses efforts.",
+        "Toinette arrive enfin et Argan lui reproche vertement de ne pas avoir entendu la sonnette plus t\u00f4t."],
+  correct:0,
+  fb:"Ce quatri\u00e8me mouvement est le moment le plus comique de la sc\u00e8ne\u00a0: la r\u00e9p\u00e9tition obsessionnelle de « Drelin, drelin, drelin » cr\u00e9e un effet sonore et visuel tr\u00e8s fort sur sc\u00e8ne. L'escalade est progressive\u00a0: sonnette \u2192 cris \u2192 conviction de mourir. Moli\u00e8re fait rire par l'exc\u00e8s et par l'\u00e9cart entre la situation r\u00e9elle (personne ne vient) et la dramatisation d'Argan (« ils me laisseront ici mourir »)."}
+];
+var scA=0,doneA=0;
+function buildA(){
+  var list=$('mvtList');list.innerHTML='';
+  MVTS.forEach(function(m,idx){
+    var div=document.createElement('div');div.className='mvt';
+    div.innerHTML='<div class="mvt-num">Mouvement '+(idx+1)+' / 4</div>'
+      +'<div class="mvt-citation">'+m.citation+'</div>';
+    var wrap=document.createElement('div');wrap.className='select-wrap';
+    var ddBtn=document.createElement('button');ddBtn.type='button';ddBtn.className='dd-btn placeholder';
+    ddBtn.innerHTML='<span class="dd-txt">— Choisis un résumé —</span><span class="dd-arrow">▾</span>';
+    var ddPanel=document.createElement('div');ddPanel.className='dd-panel';
+    var chosenIdx=null;
+    var order=shuffleIdx(3);
+    order.forEach(function(oi){
+      var opt=document.createElement('div');opt.className='dd-opt';opt.textContent=m.opts[oi];
+      opt.addEventListener('click',function(){
+        chosenIdx=oi;
+        ddBtn.querySelector('.dd-txt').textContent=m.opts[oi];
+        ddBtn.classList.remove('placeholder');
+        ddPanel.classList.remove('open');ddBtn.classList.remove('open');
+        verifBtn.disabled=false;
+      });
+      ddPanel.appendChild(opt);
+    });
+    ddBtn.addEventListener('click',function(){
+      if(ddBtn.disabled)return;
+      var willOpen=!ddPanel.classList.contains('open');
+      document.querySelectorAll('.dd-panel.open').forEach(function(p){p.classList.remove('open');});
+      document.querySelectorAll('.dd-btn.open').forEach(function(b){b.classList.remove('open');});
+      if(willOpen){ddPanel.classList.add('open');ddBtn.classList.add('open');}
+    });
+    wrap.appendChild(ddBtn);wrap.appendChild(ddPanel);
+    var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-next';
+    verifBtn.textContent='Valider';verifBtn.style.minHeight='2.6rem';verifBtn.disabled=true;
+    var fb=document.createElement('div');fb.className='fb-mini';
+    var locked=false;
+    verifBtn.addEventListener('click',function(){
+      if(locked||chosenIdx===null)return;
+      locked=true;ddBtn.disabled=true;verifBtn.disabled=true;verifBtn.style.display='none';
+      var ok=(chosenIdx===m.correct);
+      if(ok)scA++;
+      scGlobal+=ok?1:0;updateGlobal();
+      fb.classList.add('show',ok?'ok':'ko');
+      fb.innerHTML=ok?'✅ Correct !':m.fb;
+      doneA++;
+      if(doneA>=MVTS.length)endA();
+    });
+    div.appendChild(wrap);div.appendChild(verifBtn);div.appendChild(fb);
+    list.appendChild(div);
+  });
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.select-wrap')){
+    document.querySelectorAll('.dd-panel.open').forEach(function(p){p.classList.remove('open');});
+    document.querySelectorAll('.dd-btn.open').forEach(function(b){b.classList.remove('open');});
+  }
+});
+function endA(){
+  $('fbA').classList.add('show','ok');
+  $('fbA').innerHTML='<span class="fb-titre">Partie A — Score\u00a0: '+scA+' / 4</span>';
+  $('navA').style.display='flex';
+}
+$('btnToB').addEventListener('click',function(){
+  $('partieA').style.display='none';
+  $('partieB').style.display='';
+  buildQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ══ PARTIE B ══ */
+var QUESTIONS=[
+ {titre:"Les fonctions de la sc\u00e8ne d'exposition",
+  qa:{txt:"Quelles informations essentielles cette sc\u00e8ne d'exposition donne-t-elle au spectateur qui d\u00e9couvre la pi\u00e8ce pour la premi\u00e8re fois\u00a0?",
+      opts:["Elle pr\u00e9sente le d\u00e9cor de la pi\u00e8ce et les costumes des personnages sans rien r\u00e9v\u00e9ler sur l'intrigue.",
+            "Elle pr\u00e9sente le personnage principal, son obsession, son trait de caract\u00e8re dominant et sa situation).",
+            "Elle expose le conflit central de la pi\u00e8ce entre Argan et son m\u00e9decin Monsieur Fleurant qui veut l'escroquer."],
+      correct:1,
+      fb:"La sc\u00e8ne d'exposition doit donner au spectateur les informations n\u00e9cessaires pour comprendre la suite. Ici, Moli\u00e8re nous dit tout en quelques minutes\u00a0: Argan est seul (solitude), il compte des factures de pharmacien (hypocondrie), il marchande les prix (avarice) et personne ne r\u00e9pond \u00e0 sa sonnette (isolement). C'est une exposition remarquablement efficace."},
+  qb:{txt:"Quelle didascalie initiale r\u00e9sume \u00e0 elle seule toutes ces informations\u00a0?",
+      opts:["« La sc\u00e8ne est \u00e0 Paris »",
+            "« ARGAN, seul dans sa chambre, assis, une table devant lui, compte des parties d'apothicaire avec des jetons »",
+            "« Il agite une sonnette pour faire venir ses gens »"],
+      correct:1,
+      fb:"« Seul dans sa chambre, assis, une table devant lui, compte des parties d'apothicaire avec des jetons »\u00a0: chaque mot de cette didascalie est signifiant. « Seul » \u2192 isolement. « Assis » \u2192 immobilit\u00e9, passivit\u00e9. « Compte des parties d'apothicaire » \u2192 obsession m\u00e9dicale. En trois lignes, Moli\u00e8re repr\u00e9sente son personnage enti\u00e8rement."}},
+ {titre:"Le monologue et le comique de situation",
+  qa:{txt:"Comment appelle-t-on le fait pour Argan de s'adresser \u00e0 un personnage absent comme si celui-ci \u00e9tait pr\u00e9sent\u00a0? Quel effet cela produit-il\u00a0?",
+      opts:["C'est un apart\u00e9\u00a0: Argan parle au public pour lui confier ses pens\u00e9es secr\u00e8tes sans que les autres personnages l'entendent.",
+            "C'est un monologue mimant un dialogue\u00a0: Argan parle \u00e0 son apothicaire absent, ce qui cr\u00e9e un effet comique car le spectateur voit un homme seul discuter avec une facture.",
+            "C'est un dialogue int\u00e9rieur\u00a0: Argan h\u00e9site entre payer et ne pas payer, et laisse entendre ses deux voix int\u00e9rieures."],
+      correct:1,
+      fb:"Ce proc\u00e9d\u00e9 s'appelle le monologue. Argan parle seul mais fait comme si Monsieur Fleurant lui r\u00e9pondait. Le comique vient de l'\u00e9cart entre ce que le spectateur voit (un homme seul avec une facture) et ce qu'Argan croit vivre (une dispute avec son apothicaire)."},
+  qb:{txt:"Quelle r\u00e9plique illustre le mieux ce comique de situation o\u00f9 Argan interpelle quelqu'un qui n'est pas l\u00e0\u00a0?",
+      opts:["« Trois et deux font cinq, et cinq font dix »",
+            "« Oui, mais, Monsieur Fleurant, ce n'est pas tout que d'\u00eatre civil, il faut \u00eatre aussi raisonnable »",
+            "« Drelin, drelin, drelin, point d'affaire »"],
+      correct:1,
+      fb:"« Oui, mais, Monsieur Fleurant » est la formule la plus claire\u00a0: Argan r\u00e9pond \u00e0 une facture avec « oui, mais », comme s'il r\u00e9pondait \u00e0 une personne. Le titre de politesse « Monsieur » renforce l'absurdit\u00e9 comique\u00a0: il est extr\u00eamement poli avec du papier."}},
+ {titre:"L'hypocondrie et l'avarice\u00a0: deux obsessions contradictoires",
+  qa:{txt:"Quelle contradiction r\u00e9v\u00e8le le personnage d'Argan dans son rapport aux soins m\u00e9dicaux\u00a0?",
+      opts:["Argan veut se soigner correctement mais n'a pas les moyens financiers de payer ses m\u00e9dicaments.",
+            "Argan se dit gravement malade et a besoin de soins, mais refuse de payer le prix de ces soins.",
+            "Argan ne croit pas vraiment en la m\u00e9decine mais continue \u00e0 consulter des m\u00e9decins par habitude et par peur de la mort."],
+      correct:1,
+      fb:"La contradiction est au c\u0153ur du personnage d'Argan\u00a0: il consomme des soins m\u00e9dicaux en quantit\u00e9 mais refuse d'en payer le prix normal. Il se plaint d'\u00eatre malade mais se plaint encore plus des tarifs. Cette contradiction est la source principale du comique de caract\u00e8re dans la pi\u00e8ce."},
+  qb:{txt:"Quelle formule du texte concentre le mieux cette contradiction entre hypocondrie et avarice\u00a0?",
+      opts:["« un petit clyst\u00e8re insinuatif, pr\u00e9paratif, et r\u00e9mollient »",
+            "« ne pas \u00e9corcher les malades. Trente sols un lavement, je suis votre serviteur »",
+            "« on me laisse toujours seul »"],
+      correct:1,
+      fb:"« Ne pas \u00e9corcher les malades. Trente sols un lavement, je suis votre serviteur »\u00a0: en une seule phrase, Argan r\u00e9v\u00e8le tout. « \u00c9corcher les malades » dit qu'il se croit victime. « Je suis votre serviteur » (= il n'en est pas question) dit son refus absolu de payer. Un homme vraiment malade paierait sans marchander\u00a0: l'avarice d\u00e9masque l'hypocondrie."}},
+ {titre:"La satire de la m\u00e9decine",
+  qa:{txt:"Comment Moli\u00e8re critique-t-il la m\u00e9decine et les m\u00e9decins de son \u00e9poque \u00e0 travers cette sc\u00e8ne\u00a0?",
+      opts:["Il montre que les m\u00e9decins sont incomp\u00e9tents et que leurs rem\u00e8des ne gu\u00e9rissent pas les vrais malades.",
+            "Il montre que la m\u00e9decine est un commerce co\u00fbteux, avec un vocabulaire hyperbolique (« insinuatif, pr\u00e9paratif, r\u00e9mollient ») qui masque des soins inutiles, prescrits \u00e0 des patients qui n'en ont pas besoin.",
+            "Il montre que les malades imaginaires abusent du syst\u00e8me m\u00e9dical et ruinent les apothicaires honn\u00eates."],
+      correct:1,
+      fb:"Moli\u00e8re se moque de la m\u00e9decine de son \u00e9poque de deux fa\u00e7ons\u00a0: par le vocabulaire absurdement technique (« insinuatif, pr\u00e9paratif, r\u00e9mollient » pour d\u00e9signer un simple lavement) et par le commerce que font les apothicaires des maladies imaginaires. Argan est le client id\u00e9al\u00a0: hypocondriaque, il ach\u00e8te des soins dont il n'a pas besoin. La m\u00e9decine de Moli\u00e8re est une satire de la m\u00e9decine de son temps, souvent peu efficace et tr\u00e8s ch\u00e8re."},
+  qb:{txt:"Quel passage du texte illustre le mieux le vocabulaire m\u00e9dical hyperbolique et inutilement compliqu\u00e9 que Moli\u00e8re tourne en ridicule\u00a0?",
+      opts:["« Drelin, drelin, drelin, point d'affaire »",
+            "« un petit clyst\u00e8re insinuatif, pr\u00e9paratif, et r\u00e9mollient, pour amollir, humecter, et rafra\u00eechir les entrailles de Monsieur »",
+            "« il n'y a pas moyen de les arr\u00eater ici »"],
+      correct:1,
+      fb:"« Un petit clyst\u00e8re insinuatif, pr\u00e9paratif, et r\u00e9mollient, pour amollir, humecter, et rafra\u00eechir les entrailles de Monsieur »\u00a0: trois adjectifs savants pour d\u00e9signer un lavement, trois verbes pompeux pour d\u00e9crire son action. Cette accumulation de termes m\u00e9dicaux pour un soin banal est comique\u00a0: plus le vocabulaire est savant, plus le traitement est ridicule."}},
+ {titre:"Le comique de r\u00e9p\u00e9tition",
+  qa:{txt:"Quel est l'effet comique produit par la r\u00e9p\u00e9tition de « Drelin, drelin, drelin » dans la derni\u00e8re partie de la sc\u00e8ne\u00a0?",
+      opts:["La r\u00e9p\u00e9tition cr\u00e9e un effet de suspense\u00a0: le spectateur attend avec anxi\u00e9t\u00e9 de savoir si quelqu'un va finalement r\u00e9pondre \u00e0 Argan.",
+            "La r\u00e9p\u00e9tition cr\u00e9e un comique de r\u00e9p\u00e9tition\u00a0: plus Argan sonne et crie, plus il est ridicule et impuissant, et plus le spectateur rit de son agitation inutile.",
+            "La r\u00e9p\u00e9tition cr\u00e9e un effet rythmique\u00a0: le son de la sonnette devient une m\u00e9lodie qui donne un rythme lyrique \u00e0 la sc\u00e8ne."],
+      correct:1,
+      fb:"Le comique de r\u00e9p\u00e9tition fonctionne sur l'escalade\u00a0: Argan sonne \u2192 pas de r\u00e9ponse \u2192 il sonne encore \u2192 pas de r\u00e9ponse \u2192 il crie \u2192 toujours rien. Chaque r\u00e9p\u00e9tition de « Drelin » augmente le ridicule. Argan r\u00e9p\u00e8te le m\u00eame geste inutilement, comme une machine, et c'est cela qui fait rire."},
+  qb:{txt:"Quelle didascalie montre que cette r\u00e9p\u00e9tition s'intensifie et que la situation s'aggrave pour Argan\u00a0?",
+      opts:["« il fait, parlant \u00e0 lui-m\u00eame, les dialogues suivants »",
+            "« Il agite une sonnette pour faire venir ses gens »",
+            "« Il ne sonne plus, mais il crie »"],
+      correct:2,
+      fb:"« Il ne sonne plus, mais il crie »\u00a0: cette courte didascalie marque l'escalade. Argan a \u00e9puis\u00e9 un moyen (la sonnette) et en essaie un autre (les cris), tout aussi inefficace. La progression\u00a0: sonnette \u2192 cris \u2192 « j'enrage » \u2192 « ils me laisseront ici mourir » montre l'intensification comique de la sc\u00e8ne."}},
+ {titre:"La dimension path\u00e9tique sous le comique",
+  qa:{txt:"Derri\u00e8re le comique de cette sc\u00e8ne, quelle image plus sombre d'Argan Moli\u00e8re nous donne-t-il \u00e0 voir\u00a0?",
+      opts:["Argan est pr\u00e9sent\u00e9 comme un personnage enti\u00e8rement ridicule dont Moli\u00e8re se moque sans aucune sympathie.",
+            "Argan appara\u00eet comme un homme profond\u00e9ment seul, angoiss\u00e9 par la mort, que son entourage ignore et abandonne.",
+            "Argan est pr\u00e9sent\u00e9 comme un tyran domestique qui terrorise ses serviteurs et m\u00e9rite d'\u00eatre abandonn\u00e9."],
+      correct:1,
+      fb:"Moli\u00e8re est un auteur complexe\u00a0: ses com\u00e9dies font rire mais elles montrent aussi la v\u00e9rit\u00e9 humaine. Argan est ridicule, oui — mais il est aussi seul. Personne ne r\u00e9pond \u00e0 sa sonnette. Sa peur de mourir est sincère, m\u00eame si elle est exag\u00e9r\u00e9e."},
+  qb:{txt:"Quelle phrase du texte exprime le mieux cette angoisse sincère d'Argan sous le masque comique\u00a0?",
+      opts:["« j'enrage »",
+            "« voil\u00e0 qui est pitoyable\u00a0! »",
+            "« Ah\u00a0! mon Dieu, ils me laisseront ici mourir. »"],
+      correct:2,
+      fb:"« Ils me laisseront ici mourir »\u00a0: Argan ne fait plus semblant d'\u00eatre malade, il exprime une vraie peur. Le mot « mourir » sort du registre comique pour toucher \u00e0 quelque chose de r\u00e9el. Moli\u00e8re place cette phrase au c\u0153ur du « Drelin » pour rappeler que derri\u00e8re l'hypocondrie, il y a une angoisse existentielle."}}
+];
+var curQ=0,scB=0;
+function buildQ(){
+  if(curQ>=QUESTIONS.length){endB();return;}
+  var q=QUESTIONS[curQ];
+  var cont=$('qContent');cont.innerHTML='';
+  var grp=document.createElement('div');grp.className='qgroup';
+  grp.innerHTML='<div class="qgroup-titre">Q'+(curQ+1)+' — '+q.titre+'</div>';
+  cont.appendChild(grp);
+  var answeredCount=0;
+  ['qa','qb'].forEach(function(key,gi){
+    var sub=q[key];
+    var box=document.createElement('div');box.className='qsub';
+    box.innerHTML='<div class="qsub-lbl">Question '+(gi===0?'A':'B')+'</div><div class="qsub-txt">'+sub.txt+'</div>';
+    var col=document.createElement('div');col.className='opts-col';
+    var answered=false;
+    var order=shuffleIdx(sub.opts.length);
+    order.forEach(function(oi){
+      var txt=sub.opts[oi];
+      var btn=document.createElement('button');btn.className='opt-btn';btn.textContent=txt;
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        var ok=(oi===sub.correct);
+        Array.prototype.forEach.call(col.children,function(b,bi){
+          b.disabled=true;
+          if(order[bi]===sub.correct)b.classList.add('correct');
+          else if(order[bi]===oi)b.classList.add('wrong');
+        });
+        var fb=document.createElement('div');fb.className='fb-mini show '+(ok?'ok':'ko');
+        fb.innerHTML=ok?'✅ Correct !':sub.fb;
+        box.appendChild(fb);
+        if(ok)scB++;
+        scGlobal+=ok?1:0;updateGlobal();
+        answeredCount++;
+        if(answeredCount>=2){$('navB').style.display='flex';}
+      });
+      col.appendChild(btn);
+    });
+    box.appendChild(col);
+    grp.appendChild(box);
+  });
+  $('navB').style.display='none';
+  $('btnNextQ').textContent=(curQ<QUESTIONS.length-1)?'Question suivante →':'Voir le résultat →';
+}
+$('btnNextQ').addEventListener('click',function(){
+  curQ++;
+  buildQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+function endB(){
+  showResults();
+}
+
+/* ══ RÉSULTATS ══ */
+function showResults(){
+  $('partieB').style.display='none';
+  $('r-score').textContent=scGlobal;
+  $('r-sub').textContent='/ 16 — Partie A : '+scA+' / 4 · Partie B : '+scB+' / 12';
+  var msg;
+  if(scGlobal>=15)msg="Analyse compl\u00e8te\u00a0! Tu ma\u00eetrises cette sc\u00e8ne d'exposition de Moli\u00e8re.";
+  else if(scGlobal>=11)msg="Tr\u00e8s bonne analyse. Quelques nuances \u00e0 approfondir.";
+  else if(scGlobal>=7)msg="Bonne lecture. Relis les passages signal\u00e9s.";
+  else msg="Relis le texte et le lexique avant de retenter.";
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+}
+
+$('texteToggle').addEventListener('click',function(){
+  var body=$('texteBody'),icon=$('toggleIcon');
+  var collapsed=body.classList.toggle('collapsed');
+  icon.textContent=collapsed?'▸ Afficher':'▾ Réduire';
+});
+
+buildA();
+updateGlobal();
+</script>
+</body>
+</html>
