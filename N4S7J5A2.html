@@ -22,7 +22,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 .b2{width:240px;height:240px;background:var(--jour-pale);bottom:-80px;left:-70px;}
 .b3{width:150px;height:150px;background:#9be7a5;top:45%;right:-70px;}
 .b4{width:130px;height:130px;background:#f9b8c5;top:30%;left:-60px;}
-.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;width:100%;}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;width:100%;}
 
 /* HEADER */
 .header{text-align:center;margin-bottom:18px;}
@@ -40,10 +40,6 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 /* CONSIGNE + RÉFÉRENTIEL */
 .consigne-box{background:#fff;border:1.5px solid #e0ddd5;border-radius:16px;box-shadow:0 5px 22px rgba(0,0,0,.07);padding:14px 18px;margin-bottom:14px;}
 .consigne-box p{font-style:italic;font-size:.92rem;color:#4a4f58;line-height:1.7;}
-.refcard{background:var(--jour-clair);border:1.5px solid var(--jour-pale);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
-.refcard .lbl{font-family:'Orbitron',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1.5px;color:var(--jour-fonce);text-transform:uppercase;margin-bottom:10px;display:block;}
-.ref-list{display:flex;flex-wrap:wrap;gap:6px 8px;}
-.ref-verb{font-size:.83rem;color:#4a4f58;background:#fff;border:1px solid var(--jour-pale);border-radius:99px;padding:4px 12px;}
 
 /* GAME PANEL */
 .game{background:var(--dark);border:2px solid var(--jour);border-radius:18px;padding:16px 14px;margin-bottom:20px;box-shadow:0 0 24px var(--day-glow),inset 0 0 40px rgba(0,0,0,.3);}
@@ -86,7 +82,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 .cell.white.wrong .cell-input{color:var(--rouge);}
 
 .clues-panel{}
-.clues-layout{display:flex;flex-direction:column;gap:12px;min-width:260px;max-width:360px;}
+.clues-layout{display:flex;flex-direction:column;gap:12px;min-width:280px;max-width:400px;}
 .clues-card{background:#fff;border-radius:14px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,.07);max-height:340px;overflow-y:auto;}
 .clues-section-title{font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:1.5px;color:var(--jour-fonce);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .clues-section-title::after{content:'';flex:1;height:1.5px;background:var(--jour-pale);}
@@ -130,16 +126,11 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
   <div class="semaine">Semaine 7 – Jour 5</div>
   <h1 class="titre">Je m'<span class="accent">entraîne</span></h1>
   <div class="sous-titre">Mots croisés · Verbes irréguliers au présent</div>
-  <div class="badge-revision">🗝️ GRILLE DES IRRÉGULIERS · S7 J5 · VENDREDI</div>
+  <div class="badge-revision">🗝️ GRILLE DES IRRÉGULIERS · S7 J5</div>
 </div>
 
 <div class="consigne-box">
   <p>Conjugue chaque verbe au présent de l'indicatif, à la personne indiquée. Écris ta réponse en majuscules, sans accent.</p>
-</div>
-
-<div class="refcard">
-  <span class="lbl">Référentiel — verbes de la grille</span>
-  <div class="ref-list" id="refList"></div>
 </div>
 
 <div class="game">
@@ -185,14 +176,6 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--txt
 
 <script>
 var ROWS=15, COLS=15;
-var VERBES=['aller','prendre','voir','\u00eatre','vouloir','\u00e9crire','recevoir','venir','faire','savoir','tenir','suivre','pouvoir','dire'];
-(function(){
-  var el=document.getElementById('refList');
-  VERBES.forEach(function(v){
-    var s=document.createElement('span');s.className='ref-verb';s.textContent=v;
-    el.appendChild(s);
-  });
-})();
 
 var WORDS=[
   {word:"RECOIVENT", r:5,  c:3,  horiz:true,  clue:"Ils ___ (recevoir, pr\u00e9sent, 3e pers. pl.)"},
@@ -229,7 +212,7 @@ var cnt=1;
 starts.forEach(function(s){if(!numMap[s.k]){numMap[s.k]=cnt++;cellData[s.r][s.c].num=numMap[s.k];}});
 WORDS.forEach(function(w){w.num=numMap[w.r+','+w.c];});
 
-var CS=Math.max(24,Math.min(32,Math.floor((window.innerWidth*0.42)/(COLS+1))));
+var CS=Math.max(32,Math.min(46,Math.floor((window.innerWidth*0.55)/(COLS+1))));
 var grid=document.getElementById('cw-grid');
 grid.style.gridTemplateColumns='repeat('+COLS+','+CS+'px)';
 grid.style.gridTemplateRows='repeat('+ROWS+','+CS+'px)';
@@ -284,14 +267,59 @@ function onFocus(e){
   else setActive(cands[0]);
 }
 function normLetter(v){return v.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z]/g,'');}
+var wordDone={};
 function onInput(e){
   var v=normLetter(e.target.value); e.target.value=v;
+  var r=+e.target.dataset.r, c=+e.target.dataset.c;
+  var cell=e.target.closest('.cell');
+  if(cell&&!cell.classList.contains('correct')) cell.classList.remove('wrong');
   if(v&&activeWord){
     var cs=cells(activeWord);
-    var idx=cs.findIndex(function(p){return p.r===+e.target.dataset.r&&p.c===+e.target.dataset.c;});
+    var idx=cs.findIndex(function(p){return p.r===r&&p.c===c;});
     if(idx>=0&&idx<cs.length-1){var ni=inputs[cs[idx+1].r+','+cs[idx+1].c];if(ni)ni.focus();}
   }
-  updateProgress();
+  checkWordsAt(r,c);
+}
+function checkWordsAt(r,c){
+  if(verified) return;
+  WORDS.filter(function(w){return cells(w).some(function(p){return p.r===r&&p.c===c;});})
+  .forEach(function(w){
+    var key=w.num+'-'+(w.horiz?'h':'v');
+    if(wordDone[key]) return;
+    var cs=cells(w);
+    var filled=cs.every(function(p){return inputs[p.r+','+p.c].value.length===1;});
+    if(!filled) return;
+    var ok=cs.every(function(p,i){return inputs[p.r+','+p.c].value===w.word[i];});
+    var cl=document.getElementById('cr-'+w.num+'-'+(w.horiz?'h':'v'));
+    if(ok){
+      wordDone[key]=true;
+      cs.forEach(function(p){
+        var el=document.querySelector('.cell[data-r="'+p.r+'"][data-c="'+p.c+'"]');
+        if(el){el.classList.remove('active','wrong');el.classList.add('correct');}
+        inputs[p.r+','+p.c].disabled=true;
+      });
+      if(cl) cl.classList.add('done');
+      updateAutoScore();
+      if(Object.keys(wordDone).length===WORDS.length) verifier();
+    } else {
+      cs.forEach(function(p){
+        var el=document.querySelector('.cell[data-r="'+p.r+'"][data-c="'+p.c+'"]');
+        if(el&&!el.classList.contains('correct')) el.classList.add('wrong');
+      });
+    }
+  });
+}
+function updateAutoScore(){
+  var ok=Object.keys(wordDone).length;
+  document.getElementById('cnt-ok').textContent=ok;
+  document.getElementById('cnt-rem').textContent=WORDS.length-ok;
+  var pct=Math.round(ok/WORDS.length*100);
+  document.getElementById('xp-fill').style.width=pct+'%';
+  document.getElementById('xp-pct').textContent=pct+' %';
+  document.getElementById('score-lbl').textContent=ok+' / '+WORDS.length+' mots trouv\u00e9s';
+  var nb= ok===14?5: ok>=11?4: ok>=7?3: ok>=4?2:1;
+  var et=document.getElementById('etoiles');
+  Array.from(et.children).forEach(function(s,i){s.classList.toggle('on', i<nb && ok>0);});
 }
 function onKeydown(e){
   var r=+e.target.dataset.r, c=+e.target.dataset.c;
@@ -416,11 +444,12 @@ function solution(){
 
 function recommencer(){
   verified=false;
+  wordDone={};
   document.getElementById('btn-verifier').disabled=false;
   document.getElementById('btn-sol').classList.remove('show');
   document.getElementById('btn-rec').classList.remove('show');
   document.getElementById('feedback').className='feedback';
-  document.querySelectorAll('.cell-input').forEach(function(i){i.value='';});
+  document.querySelectorAll('.cell-input').forEach(function(i){i.value='';i.disabled=false;});
   document.querySelectorAll('.cell.white').forEach(function(c){c.classList.remove('correct','wrong','active');});
   document.querySelectorAll('.clue-row').forEach(function(c){c.classList.remove('active','done');});
   var et=document.getElementById('etoiles');Array.from(et.children).forEach(function(s){s.classList.remove('on');});
