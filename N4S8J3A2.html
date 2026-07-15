@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Je m'entraîne – S8 J3 – 4e</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#8dc63f;--day-color:#8dc63f;--day-dark:#3d7a10;--day-dark2:#254d09;
+  --day-light:#f0faeb;--day-border:#b5e08a;--day-glow:rgba(141,198,63,.25);
+  --bg:#fffdf7;--surface:#fff;--surface2:#f5faf0;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--orange:#f5a623;--pink:#f28b82;--blue:#3ab5d8;
+  --err:#c0392b;--err-dark:#7a1f1f;--err-light:#fdf0ef;--err-border:#e2a3a3;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;--radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem .75rem 3rem;overflow-x:hidden;position:relative;}
+.wrap{width:100%;max-width:800px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:1rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.32rem;background:var(--yellow);color:#7a3d00;border-radius:50px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;letter-spacing:.04em;
+  padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.4);margin-bottom:.5rem;}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.35rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;}
+h1 .hl{color:var(--day-dark);}
+.theme-badge{display:inline-block;margin-top:.5rem;font-size:.85rem;font-weight:700;
+  color:var(--day-dark2);background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:99px;padding:.3rem .95rem;}
+
+.hud-bar{display:flex;justify-content:center;gap:1.4rem;margin:1rem 0 .6rem;flex-wrap:wrap;}
+.hud-item{text-align:center;}
+.hud-val{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.2rem;color:var(--day-dark2);}
+.hud-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;}
+.prog-wrap{width:100%;margin-bottom:1rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.28rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day));
+  border-radius:99px;transition:width .5s ease;width:0%;}
+
+.refcard{background:linear-gradient(135deg,var(--day-light),#fff);border:2px solid var(--day-dark);border-radius:var(--radius);
+  padding:1rem 1.15rem;margin-bottom:1rem;box-shadow:0 4px 16px rgba(61,122,16,.12);}
+.refcard .lbl{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;
+  color:var(--day-dark2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.7rem;}
+.ref-row{display:flex;align-items:center;gap:.7rem;font-size:.9rem;color:var(--text);line-height:1.5;
+  margin-bottom:.55rem;padding:.5rem .65rem;border-radius:10px;border-left-width:4px;border-left-style:solid;}
+.ref-row:last-child{margin-bottom:0;}
+.ref-row:nth-child(2){background:#fdf0ef;border-left-color:var(--err);}
+.ref-row:nth-child(3){background:#e8f6fb;border-left-color:var(--blue);}
+.ref-row:nth-child(4){background:#fff5e0;border-left-color:var(--orange);}
+.ref-row:nth-child(5){background:#f7eded;border-left-color:#b94040;}
+.ref-row strong{font-weight:900;color:var(--day-dark2);}
+.ref-letter{flex-shrink:0;width:30px;height:30px;border-radius:9px;color:#fff;
+  font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.18);}
+.ref-row:nth-child(2) .ref-letter{background:var(--err);}
+.ref-row:nth-child(3) .ref-letter{background:var(--blue);}
+.ref-row:nth-child(4) .ref-letter{background:var(--orange);}
+.ref-row:nth-child(5) .ref-letter{background:#b94040;}
+
+.partie{background:var(--surface);border:1.5px solid #e0ddd5;border-radius:var(--radius);
+  box-shadow:0 5px 22px rgba(0,0,0,.07);overflow:hidden;margin-bottom:1rem;}
+.partie-stripe{height:4px;background:linear-gradient(90deg,var(--day-dark),var(--day),var(--day-border),var(--day-dark));}
+.partie-head{padding:.9rem 1.2rem .5rem;}
+.partie-badge{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:800;
+  background:var(--day-dark);color:#fff;border-radius:99px;padding:.18rem .65rem;
+  text-transform:uppercase;letter-spacing:.06em;}
+.consigne{padding:.6rem 1.2rem 0;font-style:italic;font-size:.92rem;color:#4a4f58;line-height:1.65;}
+
+.qcard{margin:1rem 1.2rem;padding:1rem;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);
+  font-weight:700;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:.05em;}
+.q-phrase{font-size:clamp(1rem,2.9vw,1.12rem);font-weight:700;font-style:italic;color:var(--text);
+  line-height:1.75;padding:.6rem .8rem;background:#fff;border-left:4px solid var(--day-dark);
+  border-radius:var(--radius-sm);margin-bottom:.7rem;}
+.q-phrase strong{font-style:normal;color:var(--day-dark2);text-decoration:underline;text-decoration-color:var(--day-dark);}
+.blank-input{display:inline-block;width:110px;padding:.25rem .5rem;margin:0 .15rem;
+  border:none;border-bottom:2.5px solid var(--day-dark);background:var(--day-light);
+  border-radius:6px 6px 0 0;font-family:Arial,sans-serif;font-weight:700;font-style:normal;
+  font-size:.95rem;color:var(--text);text-align:center;}
+.blank-input:focus{outline:none;background:#fff;border-bottom-color:var(--day-dark2);}
+.blank-input.correct{background:#eaf7e2;border-bottom-color:#5fa82f;color:#2f5c15;}
+.blank-input.wrong{background:var(--err-light);border-bottom-color:var(--err);color:var(--err-dark);}
+.blank-input:disabled{cursor:default;}
+
+.opts-col{display:flex;flex-direction:column;gap:.5rem;}
+.opt-btn{background:#fff;border:1.5px solid var(--day-border);border-radius:var(--radius-sm);
+  font-family:Arial,sans-serif;font-size:clamp(.86rem,2.3vw,.96rem);font-weight:600;
+  padding:.65rem .9rem;cursor:pointer;text-align:left;line-height:1.55;
+  display:flex;gap:.55rem;transition:background .12s,border-color .12s;}
+.opt-btn:hover:not(:disabled){background:var(--day-light);border-color:var(--day-dark);}
+.opt-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;}
+.opt-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:800;font-family:'JetBrains Mono',monospace;background:var(--day-border);color:var(--day-dark2);}
+.opt-btn.correct .opt-letter{background:#5fa82f;color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--err);color:#fff;}
+
+.fb-mini{font-size:.85rem;display:none;margin-top:.6rem;line-height:1.7;
+  padding:.65rem .85rem;border-radius:var(--radius-sm);border-left:4px solid;}
+.fb-mini.show.ok{display:block;background:#eaf7e2;border-color:#5fa82f;color:#2f5c15;}
+.fb-mini.show.ko{display:block;background:var(--err-light);border-color:var(--err);color:var(--err-dark);}
+
+.texte-trous{margin:1rem 1.2rem;padding:1rem;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-size:clamp(1rem,2.8vw,1.1rem);line-height:2.4;color:var(--text);}
+.trou-btn{display:inline-flex;align-items:center;justify-content:center;min-width:64px;
+  border:1.5px dashed var(--day-dark);border-radius:8px;background:var(--day-light);
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--day-dark2);
+  padding:.15rem .5rem;cursor:pointer;margin:0 .15rem;}
+.trou-btn.correct{background:#eaf7e2;border-color:#5fa82f;border-style:solid;color:#2f5c15;}
+.trou-btn.wrong{background:var(--err-light);border-color:var(--err);border-style:solid;color:var(--err-dark);}
+.trou-btn:disabled{cursor:default;}
+.banque-mots{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 1.2rem 1rem;}
+.mot-chip{background:#fff;border:1.5px solid var(--day-border);border-radius:99px;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--day-dark2);
+  padding:.4rem .9rem;cursor:pointer;}
+.mot-chip:hover{background:var(--day-light);}
+.mot-chip.active{background:var(--day-dark);color:#fff;}
+
+.table-just{margin:1rem 1.2rem;}
+.tj-row{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tj-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);width:22px;flex-shrink:0;}
+.tj-mot{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--day-dark2);
+  background:var(--day-light);border-radius:8px;padding:.25rem .6rem;flex-shrink:0;}
+.tj-tests{display:flex;gap:.4rem;flex-wrap:wrap;}
+.tj-btn{background:#fff;border:1.5px solid var(--day-border);border-radius:99px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.75rem;
+  width:30px;height:30px;cursor:pointer;}
+.tj-btn:hover:not(:disabled){background:var(--day-light);}
+.tj-btn.correct{background:#eaf7e2!important;border-color:#5fa82f!important;color:#2f5c15!important;}
+.tj-btn.wrong{background:var(--err-light)!important;border-color:var(--err)!important;color:var(--err-dark)!important;}
+.tj-btn:disabled{cursor:default;}
+.tj-fb{flex-basis:100%;font-size:.8rem;line-height:1.6;padding:.4rem .6rem;border-radius:8px;display:none;margin-top:.3rem;}
+.tj-fb.show.ok{display:block;background:#eaf7e2;color:#2f5c15;}
+.tj-fb.show.ko{display:block;background:var(--err-light);color:var(--err-dark);}
+
+.nav-row{padding:0 1.2rem 1.1rem;display:flex;justify-content:flex-end;}
+.btn-next{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:clamp(.88rem,2.5vw,.97rem);
+  padding:.75rem 1.6rem;min-height:3rem;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-next:hover:not(:disabled){background:#254d09;}
+.btn-next:disabled{opacity:.35;cursor:default;}
+
+.results{display:none;}
+.results.show{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.results-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.1);
+  padding:1.6rem 1.3rem;text-align:center;position:relative;overflow:hidden;}
+.res-stripe{position:absolute;top:0;left:0;right:0;height:5px;
+  background:linear-gradient(90deg,var(--day),var(--blue),var(--yellow),var(--pink));}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:clamp(2.4rem,8vw,3.6rem);color:var(--day-dark2);margin:.3rem 0 .1rem;}
+.res-stars{font-size:1.7rem;margin-bottom:.6rem;letter-spacing:.15em;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:#4a4f58;margin-bottom:1rem;line-height:1.6;}
+.btn-restart{background:var(--day-dark);color:#fff;border:none;border-radius:99px;
+  font-family:Arial,sans-serif;font-weight:800;font-size:.95rem;padding:.85rem 1.8rem;
+  min-height:3rem;cursor:pointer;}
+.btn-restart:hover{background:#254d09;}
+
+.emoji-rain{position:fixed;top:-40px;font-size:1.6rem;pointer-events:none;z-index:300;animation:rainFall linear forwards;}
+@keyframes rainFall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(105vh) rotate(360deg);opacity:.85;}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span><span class="logo-dot" style="background:#8dc63f"></span><span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 4e
+  </div>
+  <div class="week-label">Semaine 8 · Jour 3</div>
+  <h1>Je m'<span class="hl">entraîne</span></h1>
+  <div class="theme-badge">Ces / ses / c'est / s'est</div>
+</header>
+
+<div class="hud-bar">
+  <div class="hud-item"><div class="hud-val" id="hudScore">0</div><div class="hud-lbl">/ 25 pts</div></div>
+</div>
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-label">0 / 25</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="refcard">
+  <span class="lbl">📋 Banque de tests</span>
+  <div class="ref-row"><span class="ref-letter">A</span><span>On peut remplacer par <strong>ceux-là / celles-là</strong>.</span></div>
+  <div class="ref-row"><span class="ref-letter">B</span><span>On peut remplacer par <strong>le sien, la sienne, les siens ou les siennes</strong>.</span></div>
+  <div class="ref-row"><span class="ref-letter">C</span><span>On peut remplacer par <strong>cela est</strong>.</span></div>
+  <div class="ref-row"><span class="ref-letter">D</span><span>Il s'agit d'un <strong>verbe pronominal conjugué au passé composé</strong>.</span></div>
+</div>
+
+<div class="partie" id="partie1">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Activité 1 — Choisir le bon test</span></div>
+  <div class="consigne">Pour chaque phrase, choisis le test grammatical qui permet de justifier le mot souligné.</div>
+  <div id="q1List"></div>
+</div>
+
+<div class="partie" id="partie2" style="display:none;">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Activité 2 — Choisir le bon duo</span></div>
+  <div class="consigne">Choisis, à chaque fois, le bon duo parmi Ces, ses, c'est et s'est.</div>
+  <div id="q2List"></div>
+</div>
+
+<div class="partie" id="partie3" style="display:none;">
+  <div class="partie-stripe"></div>
+  <div class="partie-head"><span class="partie-badge">Activité 3 — Texte à compléter et justifier</span></div>
+  <div class="consigne" id="consigne3">Complète le texte avec ces, ses, c'est ou s'est. Clique sur un trou, puis choisis le mot dans la banque.</div>
+  <div class="texte-trous" id="texteTrous"></div>
+  <div class="banque-mots" id="banqueMots"></div>
+  <div class="fb-mini" id="fbTexte" style="margin:0 1.2rem 1rem;"></div>
+  <div class="nav-row" id="navTexte" style="display:none;">
+    <button class="btn-next" id="btnToTable">Question 2 — Justifier chaque mot →</button>
+  </div>
+  <div id="tableSection" style="display:none;">
+    <div class="consigne">Recopie le tableau et complète-le : pour chaque mot, choisis le test (A-D) qui le justifie.</div>
+    <div class="table-just" id="tableJust"></div>
+  </div>
+  <div class="nav-row" id="nav3" style="display:none;">
+    <button class="btn-next" id="btnFinish">Voir le résultat →</button>
+  </div>
+</div>
+
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="res-stripe"></div>
+    <div class="res-score" id="r-score">0</div>
+    <div style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;margin-bottom:.3rem;">/ 25 points</div>
+    <div class="res-stars" id="r-stars"></div>
+    <div class="res-msg" id="r-msg"></div>
+    <button class="btn-restart" id="btn-restart">↺ Recommencer</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function shuffleIdx(n){
+  var arr=[];for(var i=0;i<n;i++)arr.push(i);
+  for(var i=arr.length-1;i>0;i--){
+    var a=new Uint32Array(1);crypto.getRandomValues(a);
+    var j=a[0]%(i+1);
+    var t=arr[i];arr[i]=arr[j];arr[j]=t;
+  }
+  return arr;
+}
+var TOTAL=25, scGlobal=0;
+function updateGlobal(){
+  var pct=Math.round(scGlobal/TOTAL*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-label').textContent=scGlobal+' / '+TOTAL;$('prog-pct').textContent=pct+'%';
+  $('hudScore').textContent=scGlobal;
+}
+
+var TESTS=[
+ "On peut remplacer par ceux-là / celles-là.",
+ "On peut remplacer par le sien, la sienne, les siens ou les siennes.",
+ "On peut remplacer par cela est.",
+ "Il s'agit d'un verbe pronominal conjugué au passé composé."
+];
+var LETTERS=['A','B','C','D'];
+
+/* ══ ACTIVITÉ 1 ══ */
+var Q1=[
+ {phrase:"<strong>Ces</strong> montagnes restent enneigées toute l'année.",correct:0,
+  fb:["Ces est un déterminant démonstratif\u00a0: il sert à désigner des montagnes précises. On peut remplacer le groupe nominal par celles-là.",
+      "Le test du possessif permet de reconnaître ses, qui exprime une appartenance.",
+      "Le remplacement par cela est permet d'identifier c'est.",
+      "Ce test concerne uniquement un verbe pronominal au passé composé (s'est levé, s'est installé\u2026)."]},
+ {phrase:"Nora a oublié <strong>ses</strong> lunettes sur son bureau.",correct:1,
+  fb:["Le remplacement par ceux-là ou celles-là permet de reconnaître ces, qui désigne.",
+      "Ses est un déterminant possessif\u00a0: les lunettes appartiennent à Nora. On peut penser à les siennes.",
+      "Le test cela est permet d'identifier c'est.",
+      "Aucun verbe pronominal au passé composé n'apparaît dans cette phrase."]},
+ {phrase:"<strong>C'est</strong> une décision difficile.",correct:2,
+  fb:["Ce test permet de reconnaître ces, déterminant démonstratif.",
+      "Ce test sert à identifier ses, déterminant possessif.",
+      "On peut dire « Cela est une décision difficile ». Le remplacement fonctionne\u00a0: il s'agit donc de c'est.",
+      "Aucun verbe pronominal n'est employé dans cette phrase."]},
+ {phrase:"Ali <strong>s'est</strong> caché sous le canapé.",correct:3,
+  fb:["Ce test concerne ces.",
+      "Ce test concerne ses.",
+      "Le remplacement par cela est ne fonctionne pas ici.",
+      "Le verbe est se cacher. Il est conjugué au passé composé\u00a0: s'est caché."]},
+ {phrase:"<strong>Ces</strong> photographies ont été prises au printemps.",correct:0,
+  fb:["Ces désigne les photographies dont on parle. On peut les remplacer par celles-là.",
+      "Le possessif correspondrait à ses photographies, c'est-à-dire les photographies de quelqu'un.",
+      "Le test cela est ne fonctionne pas ici.",
+      "Il ne s'agit pas d'un verbe pronominal."]},
+ {phrase:"Emma <strong>s'est</strong> aperçue de son erreur avant de rendre sa copie.",correct:3,
+  fb:["Le test des démonstratifs permet d'identifier ces.",
+      "Le test des possessifs permet d'identifier ses.",
+      "Le remplacement par cela est ne convient pas.",
+      "Le verbe est s'apercevoir. Il est conjugué au passé composé\u00a0: s'est aperçue."]}
+];
+var curAct1=0;
+function buildAct1(){
+  renderAct1Q();
+}
+function renderAct1Q(){
+  var list=$('q1List');list.innerHTML='';
+  if(curAct1>=Q1.length){goToPartie2();return;}
+  var q=Q1[curAct1];
+  var card=document.createElement('div');card.className='qcard';
+  card.innerHTML='<div class="q-num">Question '+(curAct1+1)+' / 6</div>'
+    +'<div class="q-phrase">'+q.phrase+'</div>';
+  var col=document.createElement('div');col.className='opts-col';
+  var order=shuffleIdx(4);
+  var answered=false;
+  order.forEach(function(oi){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-letter"></span><span>'+TESTS[oi]+'</span>';
+    btn.addEventListener('click',function(){
+      if(answered)return;answered=true;
+      var ok=(oi===q.correct);
+      Array.prototype.forEach.call(col.children,function(b){b.disabled=true;});
+      btn.classList.add(ok?'correct':'wrong');
+      var fb=document.createElement('div');fb.className='fb-mini show '+(ok?'ok':'ko');
+      fb.innerHTML=(ok?'✅ ':'❌ ')+q.fb[oi];
+      card.appendChild(fb);
+      if(ok)scGlobal++;
+      updateGlobal();
+      var nav=document.createElement('div');nav.className='nav-row';
+      var next=document.createElement('button');next.className='btn-next';
+      next.textContent=(curAct1<Q1.length-1)?'Question suivante →':'Activité 2 →';
+      next.addEventListener('click',function(){curAct1++;renderAct1Q();});
+      nav.appendChild(next);card.appendChild(nav);
+    });
+    col.appendChild(btn);
+  });
+  Array.prototype.forEach.call(col.children,function(b,bi){b.querySelector('.opt-letter').textContent=LETTERS[bi];});
+  card.appendChild(col);
+  list.appendChild(card);
+}
+
+/* ══ ACTIVITÉ 2 ══ */
+var Q2=[
+ {before:"",mid1:"élèves ont observé comment Yanis ",mid2:"préparé pour l'oral.",
+  b1:"Ces",b2:"s'est",
+  fb:"Ces élèves\u00a0: on montre un groupe, comme ceux-là. S'est préparé\u00a0: verbe pronominal se préparer au passé composé."},
+ {before:"Lina range ",mid1:"feuilles et dit\u00a0: « ",mid2:"déjà l'heure de partir\u00a0! »",
+  b1:"ses",b2:"c'est",
+  fb:"Ses feuilles\u00a0: ce sont les feuilles de Lina, donc la possession. C'est déjà l'heure\u00a0: on peut dire cela est déjà l'heure."},
+ {before:"",mid1:"chaussures brillent\u00a0; Inès ",mid2:"appliquée pour les nettoyer.",
+  b1:"Ces",b2:"s'est",
+  fb:"Ces chaussures\u00a0: on désigne un groupe, comme celles-là. S'est appliquée\u00a0: verbe pronominal s'appliquer au passé composé."},
+ {before:"Le professeur montre ",mid1:"exemples\u00a0; Hugo pense que ",mid2:"facile à retenir.",
+  b1:"ces",b2:"c'est",
+  fb:"Ces exemples\u00a0: on montre des exemples, comme ceux-là. C'est facile\u00a0: on peut dire cela est facile."},
+ {before:"",mid1:"affiches attirent le public, et Maud ",mid2:"entraînée toute la semaine pour la présentation.",
+  b1:"ces",b2:"s'est",
+  fb:"Ces affiches\u00a0: on désigne des affiches, comme celles-là. S'est entraînée\u00a0: verbe pronominal s'entraîner au passé composé."}
+];
+var curAct2=0;
+function normApos(s){
+  return String(s).trim().toLowerCase()
+    .replace(/[\u2018\u2019\u02BC\u0060\u00B4]/g,"'");
+}
+function buildAct2(){
+  renderAct2Q();
+}
+function renderAct2Q(){
+  var list=$('q2List');list.innerHTML='';
+  if(curAct2>=Q2.length){goToPartie3();return;}
+  var q=Q2[curAct2];
+  var card=document.createElement('div');card.className='qcard';
+  card.innerHTML='<div class="q-num">Question '+(curAct2+1)+' / 5</div>';
+  var phraseDiv=document.createElement('div');phraseDiv.className='q-phrase';
+  phraseDiv.appendChild(document.createTextNode(q.before));
+  var inp1=document.createElement('input');inp1.type='text';inp1.className='blank-input';inp1.autocomplete='off';
+  phraseDiv.appendChild(inp1);
+  phraseDiv.appendChild(document.createTextNode(' '+q.mid1));
+  var inp2=document.createElement('input');inp2.type='text';inp2.className='blank-input';inp2.autocomplete='off';
+  phraseDiv.appendChild(inp2);
+  phraseDiv.appendChild(document.createTextNode(' '+q.mid2));
+  card.appendChild(phraseDiv);
+
+  var verifBtn=document.createElement('button');verifBtn.type='button';verifBtn.className='btn-next';
+  verifBtn.textContent='Vérifier';verifBtn.style.minHeight='2.6rem';verifBtn.disabled=true;
+  function refreshBtn(){verifBtn.disabled=(inp1.value.trim()===''||inp2.value.trim()==='');}
+  inp1.addEventListener('input',refreshBtn);
+  inp2.addEventListener('input',refreshBtn);
+  var locked=false;
+  verifBtn.addEventListener('click',function(){
+    if(locked||inp1.value.trim()===''||inp2.value.trim()==='')return;
+    locked=true;inp1.disabled=true;inp2.disabled=true;verifBtn.style.display='none';
+    var ok1=(normApos(inp1.value)===normApos(q.b1));
+    var ok2=(normApos(inp2.value)===normApos(q.b2));
+    var ok=ok1&&ok2;
+    inp1.classList.add(ok1?'correct':'wrong');
+    inp2.classList.add(ok2?'correct':'wrong');
+    var fb=document.createElement('div');fb.className='fb-mini show '+(ok?'ok':'ko');
+    fb.innerHTML=(ok?'✅ ':'❌ Réponse attendue\u00a0: '+q.b1+' / '+q.b2+'. ')+q.fb;
+    card.appendChild(fb);
+    if(ok)scGlobal++;
+    updateGlobal();
+    var nav=document.createElement('div');nav.className='nav-row';
+    var next=document.createElement('button');next.className='btn-next';
+    next.textContent=(curAct2<Q2.length-1)?'Question suivante →':'Activité 3 →';
+    next.addEventListener('click',function(){curAct2++;renderAct2Q();});
+    nav.appendChild(next);card.appendChild(nav);
+  });
+  card.appendChild(verifBtn);
+  list.appendChild(card);
+}
+
+/* ══ ACTIVITÉ 3 ══ */
+var TEXTE_PARTS=[
+ "Ce matin, Léa relit ",
+ " notes avant de passer à l'oral. Devant ",
+ " camarades déjà installés, elle pense que ",
+ " le moment. Puis elle ",
+ " avancée vers le tableau avec ",
+ " fiches. À la fin, elle explique que ",
+ " conseils du professeur l'ont rassurée et que tout ",
+ " bien passé."
+];
+var TROUS=[
+ {mot:"ses",test:1},
+ {mot:"ces",test:0},
+ {mot:"c'est",test:2},
+ {mot:"s'est",test:3},
+ {mot:"ses",test:1},
+ {mot:"ces",test:0},
+ {mot:"s'est",test:3}
+];
+var MOTS_BANQUE=["ces","ses","c'est","s'est"];
+var trouEls=[],selectedTrouIdx=null,trouDone=0;
+
+function buildTexte(){
+  var el=$('texteTrous');el.innerHTML='';
+  trouEls=[];
+  TEXTE_PARTS.forEach(function(part,i){
+    el.appendChild(document.createTextNode(part));
+    if(i<TROUS.length){
+      var btn=document.createElement('button');btn.className='trou-btn';btn.textContent='?';btn.type='button';
+      btn.dataset.idx=i;
+      btn.addEventListener('click',function(){
+        if(btn.disabled)return;
+        selectedTrouIdx=i;
+        document.querySelectorAll('.trou-btn').forEach(function(b){b.style.outline='';});
+        btn.style.outline='2px solid var(--day-dark)';
+      });
+      el.appendChild(btn);
+      trouEls.push(btn);
+    }
+  });
+  var bk=$('banqueMots');bk.innerHTML='';
+  MOTS_BANQUE.forEach(function(m){
+    var chip=document.createElement('button');chip.className='mot-chip';chip.type='button';chip.textContent=m;
+    chip.addEventListener('click',function(){
+      if(selectedTrouIdx===null)return;
+      var btn=trouEls[selectedTrouIdx];
+      if(btn.disabled)return;
+      btn.disabled=true;btn.style.outline='';
+      btn.textContent=m;
+      var ok=(m===TROUS[selectedTrouIdx].mot);
+      btn.classList.add(ok?'correct':'wrong');
+      if(!ok)btn.textContent=m+' ✗';
+      if(ok)scGlobal++;
+      updateGlobal();
+      trouDone++;
+      selectedTrouIdx=null;
+      if(trouDone>=TROUS.length){
+        var fb=$('fbTexte');
+        fb.classList.add('show','ok');
+        fb.innerHTML='<span style="font-weight:800;">Texte complété\u00a0:</span> Ce matin, Léa relit <strong>ses</strong> notes avant de passer à l\u2019oral. Devant <strong>ces</strong> camarades déjà installés, elle pense que <strong>c\u2019est</strong> le moment. Puis elle <strong>s\u2019est</strong> avancée vers le tableau avec <strong>ses</strong> fiches. À la fin, elle explique que <strong>ces</strong> conseils du professeur l\u2019ont rassurée et que tout <strong>s\u2019est</strong> bien passé.';
+        $('navTexte').style.display='flex';
+      }
+    });
+    bk.appendChild(chip);
+  });
+}
+
+var JUST_TEXT=[
+ "On peut remplacer par les siennes\u00a0: ce sont les notes de Léa.",
+ "On peut remplacer par ceux-là / celles-là\u00a0: on montre les camarades.",
+ "On peut remplacer par cela est\u00a0: cela est le moment.",
+ "On repère le verbe pronominal s'avancer au passé composé.",
+ "On peut remplacer par les siennes\u00a0: ce sont les fiches de Léa.",
+ "On peut remplacer par ceux-là\u00a0: on désigne les conseils du professeur.",
+ "On repère le verbe pronominal se passer au passé composé\u00a0: tout s'est bien passé."
+];
+var doneTable=0;
+function buildTable(){
+  $('tableSection').style.display='';
+  var el=$('tableJust');el.innerHTML='';
+  TROUS.forEach(function(tr,idx){
+    var row=document.createElement('div');row.className='tj-row';
+    row.innerHTML='<span class="tj-num">'+(idx+1)+'.</span><span class="tj-mot">'+tr.mot+'</span>';
+    var testsWrap=document.createElement('div');testsWrap.className='tj-tests';
+    var answered=false;
+    var order=shuffleIdx(4);
+    order.forEach(function(ti){
+      var btn=document.createElement('button');btn.className='tj-btn';btn.textContent=LETTERS[ti];btn.type='button';
+      btn.addEventListener('click',function(){
+        if(answered)return;answered=true;
+        var ok=(ti===tr.test);
+        Array.prototype.forEach.call(testsWrap.children,function(b){b.disabled=true;});
+        btn.classList.add(ok?'correct':'wrong');
+        var fb=document.createElement('div');fb.className='tj-fb show '+(ok?'ok':'ko');
+        fb.innerHTML=(ok?'✅ ':'❌ Test attendu\u00a0: '+LETTERS[tr.test]+'. ')+JUST_TEXT[idx];
+        row.appendChild(fb);
+        if(ok)scGlobal++;
+        updateGlobal();
+        doneTable++;
+        if(doneTable>=TROUS.length)$('nav3').style.display='flex';
+      });
+      testsWrap.appendChild(btn);
+    });
+    row.appendChild(testsWrap);
+    el.appendChild(row);
+  });
+}
+
+function goToPartie2(){
+  $('partie1').style.display='none';
+  $('partie2').style.display='';
+  buildAct2();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goToPartie3(){
+  $('partie2').style.display='none';
+  $('partie3').style.display='';
+  buildTexte();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+$('btnToTable').addEventListener('click',function(){
+  $('navTexte').style.display='none';
+  buildTable();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+$('btnFinish').addEventListener('click',function(){
+  showResults();
+});
+
+function emojiRain(){
+  var EMOJIS=['📚','✏️','📝','🔍','✨','💫'];
+  for(var i=0;i<25;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div');el.className='emoji-rain';
+        el.textContent=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+        el.style.left=(Math.random()*100)+'vw';
+        var dur=(2.2+Math.random()*1.6).toFixed(2);
+        el.style.animationDuration=dur+'s';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},dur*1000+200);
+      }, i*70);
+    })(i);
+  }
+}
+
+function showResults(){
+  $('partie3').style.display='none';
+  var pct=scGlobal/TOTAL;
+  $('r-score').textContent=scGlobal;
+  var s= pct>=.9?5: pct>=.7?4: pct>=.5?3: pct>=.25?2:1;
+  $('r-stars').textContent='⭐'.repeat(s)+'☆'.repeat(5-s);
+  var msg = pct>=.9 ? "Excellent\u00a0! Tu maîtrises parfaitement ces / ses / c'est / s'est."
+    : pct>=.7 ? "Très bon travail\u00a0! Quelques confusions restent à corriger."
+    : pct>=.5 ? "Bon travail global. Relis les tests grammaticaux des questions manquées."
+    : "Reprends les 4 tests (celles-là, les siennes, cela est, verbe pronominal) avant de retenter.";
+  $('r-msg').textContent=msg;
+  $('results').classList.add('show');
+  if(pct>=.9)emojiRain();
+}
+
+$('btn-restart').addEventListener('click',function(){
+  scGlobal=0;curAct1=0;curAct2=0;trouDone=0;doneTable=0;selectedTrouIdx=null;
+  $('results').classList.remove('show');
+  $('partie1').style.display='';
+  $('partie2').style.display='none';
+  $('partie3').style.display='none';
+  $('nav3').style.display='none';
+  $('navTexte').style.display='none';
+  $('tableSection').style.display='none';
+  $('fbTexte').className='fb-mini';
+  buildAct1();
+  updateGlobal();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+buildAct1();
+updateGlobal();
+</script>
+</body>
+</html>
