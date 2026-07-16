@@ -1,443 +1,301 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pazapa – Le Renard et la Cigogne – 5ème</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;
-      --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
-      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
-      --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;
-      --text:#1a1d23;--muted:#555860;--radius:16px;
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
-      min-height:100vh;display:flex;flex-direction:column;align-items:center;
-      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
-    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
-      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
-    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
-      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
-    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
-      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
-    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
-      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
-    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;max-width:800px;}
-    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;
-      box-shadow:0 2px 8px rgba(245,197,24,.45);color:#000;font-size:.78rem;font-weight:700;
-      letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;
-      margin-bottom:.5rem;white-space:nowrap;}
-    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
-    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.45rem;}
-    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
-    h1 .hl{color:var(--day-color);}
-    .main-layout{display:flex;gap:1.2rem;width:100%;max-width:900px;
-      align-items:flex-start;position:relative;z-index:1;}
-    .col-left{flex:1 1 0;min-width:0;}
-    .col-right{width:240px;flex-shrink:0;}
-    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
-      padding:1.3rem 1.1rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;margin-bottom:1.2rem;}
-    .card:last-child{margin-bottom:0;}
-    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
-      border-radius:var(--radius) var(--radius) 0 0;
-      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--pink));}
-    .card-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
-      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.9rem;}
-    /* Fable */
-    .fable-titre{font-size:1.05rem;font-weight:900;color:var(--text);margin-bottom:.8rem;text-align:center;}
-    .fable-body{font-size:.97rem;line-height:2;color:var(--text);}
-    .fable-body .verse{display:flex;gap:.5rem;}
-    .fable-body .vnum{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
-      min-width:1.4rem;text-align:right;flex-shrink:0;padding-top:.3rem;}
-    .fable-body .vtext{flex:1;}
-    .fable-source{font-size:.85rem;color:var(--muted);margin-top:.8rem;font-style:italic;text-align:right;}
-    /* Tokens */
-    .tok{display:inline;cursor:pointer;border-radius:3px;padding:1px 2px;
-      transition:background .12s,color .12s;-webkit-user-select:none;user-select:none;
-      -webkit-tap-highlight-color:transparent;}
-    .tok:hover{background:rgba(245,166,35,.18);}
-    .tok.correct{background:rgba(141,198,63,.35);color:#1a4a00;font-weight:700;}
-    .tok.wrong{background:rgba(232,0,45,.18);color:#8b0000;}
-    /* Indicateur multi-groupes */
-    .grp-dots{display:none;gap:.4rem;align-items:center;margin-bottom:.6rem;}
-    .grp-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--day-color);
-      background:#fff;transition:background .3s;}
-    .grp-dot.hit{background:var(--green);border-color:var(--green);}
-    /* Carnet */
-    .carnet-card{text-align:center;}
-    .carnet-wrap{display:flex;justify-content:center;margin:.4rem 0 .6rem;}
-    .carnet-svg{width:90px;height:110px;}
-    .page-line{transition:opacity .4s;opacity:.15;}
-    .page-line.filled{opacity:1;}
-    .carnet-bar-wrap{width:100%;background:#eee;border-radius:99px;height:8px;margin-top:.2rem;overflow:hidden;}
-    .carnet-bar{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--day-color),var(--yellow));
-      width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
-    .carnet-score{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-top:.4rem;}
-    /* Référentiel */
-    .ref-item{margin-bottom:.65rem;font-size:.88rem;line-height:1.6;color:var(--text);}
-    .ref-item:last-child{margin-bottom:0;}
-    .ref-term{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);
-      display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.1rem;}
-    /* Question */
-    .q-progress{display:flex;gap:.35rem;margin-bottom:.9rem;flex-wrap:wrap;}
-    .q-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:#fff;
-      display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;
-      font-size:.72rem;font-weight:700;color:var(--muted);transition:all .3s;}
-    .q-dot.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
-    .q-dot.done-ok{border-color:var(--green);background:rgba(141,198,63,.15);color:#1a4a00;}
-    .q-dot.done-ko{border-color:var(--pink);background:rgba(242,139,130,.15);color:#8b0000;}
-    .q-label{font-size:.75rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;
-      letter-spacing:.1em;color:var(--day-dark);font-weight:700;margin-bottom:.35rem;}
-    .q-text{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.7rem;}
-    .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;
-      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;
-      display:inline-flex;align-items:center;gap:.4rem;transition:transform .15s,box-shadow .15s;}
-    .btn:active{transform:scale(.96);}
-    .btn-next{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
-    .btn-next:hover{box-shadow:0 5px 18px var(--day-glow);}
-    .btn-retry{background:var(--bg);color:var(--text);border:2px solid var(--border);}
-    .btn-retry:hover{border-color:var(--day-color);}
-    .q-feedback{display:none;margin-top:.75rem;padding:.65rem .85rem;border-radius:8px;
-      font-size:.9rem;line-height:1.6;border-left:4px solid;}
-    .q-feedback.show{display:block;}
-    .q-feedback.ko{background:rgba(242,139,130,.1);border-color:var(--pink);color:#7a0000;}
-    /* Score */
-    .score-card{display:none;text-align:center;}
-    .score-card.show{display:block;}
-    .score-big{font-size:3rem;font-weight:900;color:var(--day-color);line-height:1;}
-    .score-sub{font-size:1rem;color:var(--muted);margin-top:.3rem;}
-    .score-msg{font-size:.95rem;color:var(--text);margin-top:.8rem;line-height:1.55;}
-    .score-bravo{display:none;margin-top:.8rem;padding:.65rem 1rem;border-radius:10px;
-      background:rgba(141,198,63,.15);border:2px solid var(--green);
-      color:#1a4a00;font-size:.95rem;font-weight:700;}
-    .score-bravo.show{display:block;}
-    /* Flash */
-    .flash-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
-      z-index:500;font-size:3.5rem;pointer-events:none;opacity:0;}
-    .flash-pop.run-ok{animation:flashOk .55s cubic-bezier(.34,1.56,.64,1) forwards;}
-    .flash-pop.run-err{animation:flashErr .5s cubic-bezier(.34,1.56,.64,1) forwards;}
-    @keyframes flashOk{0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
-      50%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}
-      100%{opacity:0;transform:translate(-50%,-50%) scale(.8);}}
-    @keyframes flashErr{0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
-      40%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
-      100%{opacity:0;transform:translate(-50%,-50%) scale(.6);}}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-    .card{animation:fadeUp .4s ease both;}
-    @media(max-width:680px){.main-layout{flex-direction:column;}.col-right{width:100%;}}
-  </style>
-</head>
-<body>
-<div class="bubble1"></div><div class="bubble2"></div>
-<div class="flash-pop" id="flashpop"></div>
-
-<header>
-  <div class="logo-badge">
-    <span class="logo-dot" style="background:#e8002d"></span>
-    <span class="logo-dot" style="background:#8dc63f"></span>
-    <span class="logo-dot" style="background:#3ab5d8"></span>
-    Pazapa &middot; Fran&ccedil;ais &middot; 5&egrave;me
-  </div>
-  <div class="week-label">Semaine 7 &ndash; Jour 1</div>
-  <h1>J&rsquo;explore &middot; <span class="hl">La Fontaine, Le Renard et la Cigogne</span></h1>
-</header>
-
-<div class="main-layout">
-  <div class="col-left">
-
-    <div class="card" id="qcard">
-      <div class="card-stripe"></div>
-      <div class="card-title">Question en cours</div>
-      <div style="font-size:.9rem;line-height:1.6;color:var(--muted);margin-bottom:.9rem;padding:.55rem .8rem;background:var(--day-light);border-radius:8px;border-left:3px solid var(--day-border);">
-        &#128269; Maintenant, observe attentivement le texte et rep&egrave;re les informations essentielles pour mieux comprendre l&rsquo;histoire.
+<div style="max-width:680px;margin:0 auto;font-family:Arial,sans-serif;background:#fffdf7;border-radius:18px;padding:0;overflow:hidden;position:relative;border:1.5px solid #e8e4d9;box-shadow:0 4px 24px rgba(0,0,0,.06);">
+  <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:#f5d080;border-radius:50%;opacity:.13;pointer-events:none;"> </div>
+  <div style="position:absolute;bottom:-50px;left:-30px;width:180px;height:180px;background:#f5a623;border-radius:50%;opacity:.10;pointer-events:none;"> </div>
+  <div style="position:absolute;bottom:-20px;right:-20px;width:100px;height:100px;background:#f5d080;border-radius:50%;opacity:.09;pointer-events:none;"> </div>
+  <div style="position:absolute;top:60px;left:-30px;width:120px;height:120px;background:#fff5e0;border-radius:50%;opacity:.13;pointer-events:none;"> </div>
+  <div style="position:relative;z-index:1;padding:34px 30px 36px;">
+    <div style="text-align:center;margin-bottom:8px;">
+      <div style="display:inline-block;background:#f5c518;border-radius:50px;padding:6px 16px;box-shadow:0 2px 8px rgba(245,197,24,.45);">
+        <span style="color:#e8002d;font-size:14px;">●</span> <span style="color:#8dc63f;font-size:14px;">●</span> <span style="color:#3ab5d8;font-size:14px;">●</span> <span style="font-family:monospace;font-size:13px;font-weight:800;color:#000;letter-spacing:.5px;"> Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me</span>
       </div>
-      <div class="q-progress" id="qdots"></div>
-      <div class="q-label" id="qlabel">Q1 / 6</div>
-      <div class="q-text" id="qtext"></div>
-      <div class="grp-dots" id="grpdots"></div>
-      <div class="q-feedback" id="qfb"></div>
-      <div id="qactions" style="margin-top:.75rem;display:flex;gap:.6rem;flex-wrap:wrap;"></div>
+    </div>
+    <div style="text-align:center;font-family:monospace;font-size:15px;color:#c47a10;margin:10px 0 16px;font-weight:600;letter-spacing:.3px;">Semaine 7 &ndash; Jour 1</div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:#1a1d23;line-height:1.3;">&#128214; J&rsquo;explore</div>
+    </div>
+    <div style="height:4px;border-radius:4px;background:linear-gradient(90deg,#c47a10,#f5a623,#f5d080,#c47a10);margin-bottom:22px;"> </div>
+
+    <!-- CONSIGNE -->
+    <div style="background:#fff5e0;border:1.5px solid #f5d080;border-radius:14px;padding:18px 22px;margin-bottom:22px;">
+      <p style="margin:0;color:#1a1d23;font-size:16px;line-height:1.9;">Lis attentivement chaque partie de cette fiche. Quand tu penses l&rsquo;avoir comprise, clique sur &laquo;&nbsp;J&rsquo;ai lu cette partie&nbsp;&raquo;&nbsp;: un court texte &agrave; trous appara&icirc;tra pour v&eacute;rifier ta lecture. Une fois les 5 v&eacute;rifications r&eacute;ussies, tu pourras passer &agrave; la suite.</p>
     </div>
 
-    <div class="card score-card" id="scorecard">
-      <div class="card-stripe"></div>
-      <div class="score-big" id="scoreval"></div>
-      <div class="score-sub">sur 6 questions</div>
-      <div class="score-msg" id="scoremsg"></div>
-      <div class="score-bravo" id="scorebravo">Bravo&nbsp;! Tu es pr&ecirc;t.e &agrave; passer &agrave; l&rsquo;&eacute;tape suivante&nbsp;!</div>
+    <!-- TITRE FICHE -->
+    <div style="background:linear-gradient(135deg,#c47a10,#8a5a08);border-radius:12px;padding:16px 22px;margin-bottom:20px;box-shadow:0 3px 10px rgba(196,122,16,.3);">
+      <div style="font-size:.78rem;font-weight:900;color:#ffe9b8;text-transform:uppercase;letter-spacing:1.8px;margin-bottom:6px;">Fiche le&ccedil;on</div>
+      <div style="font-size:1.3rem;font-weight:900;color:#fff;">&#128214; Le classicisme (XVII<sup>e</sup> si&egrave;cle)</div>
     </div>
 
-    <div class="card">
-      <div class="card-stripe"></div>
-      <div class="card-title">Texte support</div>
-      <div class="fable-titre">LE RENARD ET LA CIGOGNE</div>
-      <div class="fable-body" id="fable"></div>
-      <div class="fable-source">Jean de La Fontaine, <em>Fables</em>, Livre&nbsp;I, 14.</div>
-    </div>
-
-  </div>
-  <div class="col-right">
-
-    <div class="card carnet-card">
-      <div class="card-stripe"></div>
-      <div class="card-title">Carnet du lecteur</div>
-      <div class="carnet-wrap">
-        <svg class="carnet-svg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
-          <rect x="8" y="4" width="68" height="96" rx="5" ry="5" fill="#1a1d23"/>
-          <rect x="8" y="4" width="10" height="96" rx="3" ry="3" fill="#000"/>
-          <rect x="20" y="10" width="52" height="84" rx="3" ry="3" fill="#fffdf7"/>
-          <text x="46" y="24" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">CARNET DU</text>
-          <text x="46" y="32" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">LECTEUR</text>
-          <line x1="26" y1="38" x2="66" y2="38" stroke="#f5d080" stroke-width="1"/>
-          <line id="pl0" class="page-line" x1="26" y1="46" x2="66" y2="46" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
-          <line id="pl1" class="page-line" x1="26" y1="53" x2="66" y2="53" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
-          <line id="pl2" class="page-line" x1="26" y1="60" x2="66" y2="60" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
-          <line id="pl3" class="page-line" x1="26" y1="67" x2="66" y2="67" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
-          <line id="pl4" class="page-line" x1="26" y1="74" x2="66" y2="74" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
-          <line id="pl5" class="page-line" x1="26" y1="81" x2="52" y2="81" stroke="#8dc63f" stroke-width="2.5" stroke-linecap="round"/>
-          <text x="66" y="92" text-anchor="middle" font-family="Arial" font-size="8" fill="#f5d080">&#9733;</text>
-        </svg>
+    <!-- ===== SECTION 1 ===== -->
+    <div id="fiche-sec-1" style="position:relative;background:#ffffff;border:2px solid #f5d080;border-top:5px solid #f5a623;border-radius:12px;padding:18px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+      <div class="sec-content" data-sec="1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,#f5a623,#c47a10);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;flex-shrink:0;box-shadow:0 2px 5px rgba(196,122,16,.35);">1</div>
+          <div style="font-size:1rem;font-weight:900;color:#c47a10;">Qu&rsquo;est-ce que le classicisme&nbsp;?</div>
+        </div>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.92rem;line-height:1.8;">Le <strong>classicisme</strong> est un mouvement litt&eacute;raire et artistique qui se d&eacute;veloppe en France au XVII<sup>e</sup> si&egrave;cle, principalement sous le r&egrave;gne de <strong>Louis XIV</strong>.</p>
+        <p style="margin:0 0 14px;color:#1a1d23;font-size:.92rem;line-height:1.8;">Les &eacute;crivains classiques recherchent l&rsquo;<strong>ordre</strong>, l&rsquo;<strong>&eacute;quilibre</strong> et la <strong>mesure</strong>. Ils s&rsquo;inspirent des &oelig;uvres de l&rsquo;Antiquit&eacute; grecque, consid&eacute;r&eacute;es comme des mod&egrave;les de perfection.</p>
+        <button class="btn-verif" data-sec="1" style="border:none;background:#f5a623;color:#fff;font-weight:800;font-size:.88rem;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;">&#9989; J&rsquo;ai lu cette partie</button>
       </div>
-      <div class="carnet-bar-wrap"><div class="carnet-bar" id="carnetbar"></div></div>
-      <div class="carnet-score" id="carnetscore">0 / 6 rep&egrave;res</div>
+      <div class="sec-overlay" data-sec="1" style="display:none;position:absolute;inset:0;background:#fffbeb;border-radius:10px;padding:18px 20px;overflow:auto;">
+        <div style="font-size:.85rem;font-weight:900;color:#8a6000;margin-bottom:10px;">&#128269; V&eacute;rifions ta lecture&nbsp;: compl&egrave;te le texte</div>
+        <p style="margin:0 0 8px;color:#1a1d23;font-size:.88rem;line-height:2;">
+          Le <input type="text" class="blank" data-answer="classicisme" style="width:110px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> est un mouvement litt&eacute;raire et artistique qui se d&eacute;veloppe en France au <input type="text" class="blank" data-answer="XVIIe|17|17e" style="width:70px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> si&egrave;cle, principalement sous le r&egrave;gne de <input type="text" class="blank" data-answer="Louis XIV" style="width:110px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.
+        </p>
+        <p style="margin:0 0 12px;color:#1a1d23;font-size:.88rem;line-height:2;">
+          Les &eacute;crivains classiques recherchent l&rsquo;<input type="text" class="blank" data-answer="ordre|equilibre" data-group="oe1" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">, l&rsquo;<input type="text" class="blank" data-answer="ordre|equilibre" data-group="oe1" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> et la <input type="text" class="blank" data-answer="mesure" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.
+        </p>
+        <div class="verif-msg" data-sec="1" style="font-size:.82rem;font-weight:700;margin-bottom:10px;min-height:1.2em;"></div>
+        <button class="btn-valider" data-sec="1" style="border:none;background:#8dc63f;color:#fff;font-weight:800;font-size:.85rem;padding:9px 16px;border-radius:8px;cursor:pointer;">Valider mes r&eacute;ponses</button>
+        <button class="btn-retour" data-sec="1" style="border:2px solid #8a6a40;background:transparent;color:#8a6a40;font-weight:800;font-size:.85rem;padding:8px 16px;border-radius:8px;cursor:pointer;margin-left:8px;">&#8617; Retourner au texte</button>
+      </div>
     </div>
 
-    <div class="card">
-      <div class="card-stripe"></div>
-      <div class="card-title">R&eacute;f&eacute;rentiel</div>
-      <div class="ref-item"><span class="ref-term">Fable</span>Court r&eacute;cit souvent en vers avec une morale explicite.</div>
-      <div class="ref-item"><span class="ref-term">Morale</span>Le&ccedil;on tir&eacute;e de la fable, souvent &agrave; la fin.</div>
-      <div class="ref-item"><span class="ref-term">Comparaison</span>Rapprochement de deux &eacute;l&eacute;ments &agrave; l&rsquo;aide d&rsquo;un outil (comme, tel&hellip;).</div>
-      <div class="ref-item"><span class="ref-term">Ironie</span>Dire le contraire de ce qu&rsquo;on pense pour produire un effet critique ou comique.</div>
-      <div class="ref-item"><span class="ref-term">Satire</span>Critique d&rsquo;un d&eacute;faut ou d&rsquo;un vice par le rire ou l&rsquo;ironie.</div>
+    <!-- ===== SECTION 2 ===== -->
+    <div id="fiche-sec-2" style="position:relative;background:#ffffff;border:2px solid #f5d080;border-top:5px solid #f5a623;border-radius:12px;padding:18px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+      <div class="sec-content" data-sec="2">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,#f5a623,#c47a10);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;flex-shrink:0;box-shadow:0 2px 5px rgba(196,122,16,.35);">2</div>
+          <div style="font-size:1rem;font-weight:900;color:#c47a10;">Les principes du classicisme</div>
+        </div>
+        <p style="margin:0 0 12px;color:#1a1d23;font-size:.9rem;line-height:1.8;">Les auteurs classiques souhaitent cr&eacute;er des &oelig;uvres qui respectent plusieurs grands principes.</p>
+        <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+          <p style="margin:0 0 4px;font-size:.9rem;font-weight:900;color:#c47a10;">&#9989; Plaire et instruire</p>
+          <p style="margin:0;font-size:.86rem;color:#1a1d23;line-height:1.6;">Une &oelig;uvre classique doit divertir le lecteur ou le spectateur, mais aussi lui transmettre une <strong>le&ccedil;on de morale</strong>.</p>
+        </div>
+        <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+          <p style="margin:0 0 4px;font-size:.9rem;font-weight:900;color:#c47a10;">&#9989; La raison</p>
+          <p style="margin:0;font-size:.86rem;color:#1a1d23;line-height:1.6;">Les personnages cherchent &agrave; agir avec <strong>r&eacute;flexion</strong> et <strong>ma&icirc;trise</strong>. La raison est pr&eacute;f&eacute;r&eacute;e aux exc&egrave;s et aux passions.</p>
+        </div>
+        <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+          <p style="margin:0 0 4px;font-size:.9rem;font-weight:900;color:#c47a10;">&#9989; La vraisemblance</p>
+          <p style="margin:0;font-size:.86rem;color:#1a1d23;line-height:1.6;">Les &eacute;v&eacute;nements doivent sembler <strong>possibles</strong>, m&ecirc;me s&rsquo;ils sont invent&eacute;s.</p>
+        </div>
+        <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <p style="margin:0 0 4px;font-size:.9rem;font-weight:900;color:#c47a10;">&#9989; La bienséance</p>
+          <p style="margin:0;font-size:.86rem;color:#1a1d23;line-height:1.6;">Ce qui pourrait choquer le public est souvent <strong>racont&eacute;</strong> plut&ocirc;t que <strong>montr&eacute;</strong>.</p>
+        </div>
+        <button class="btn-verif" data-sec="2" style="border:none;background:#f5a623;color:#fff;font-weight:800;font-size:.88rem;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;">&#9989; J&rsquo;ai lu cette partie</button>
+      </div>
+      <div class="sec-overlay" data-sec="2" style="display:none;position:absolute;inset:0;background:#fffbeb;border-radius:10px;padding:18px 20px;overflow:auto;">
+        <div style="font-size:.85rem;font-weight:900;color:#8a6000;margin-bottom:10px;">&#128269; V&eacute;rifions ta lecture&nbsp;: compl&egrave;te le texte</div>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;">Une &oelig;uvre classique doit <input type="text" class="blank" data-answer="plaire" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> et <input type="text" class="blank" data-answer="instruire" style="width:100px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;">Les personnages cherchent &agrave; agir avec r&eacute;flexion&nbsp;: c&rsquo;est le r&egrave;gne de la <input type="text" class="blank" data-answer="raison" style="width:100px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;">Les &eacute;v&eacute;nements doivent sembler possibles&nbsp;: c&rsquo;est la <input type="text" class="blank" data-answer="vraisemblance" style="width:140px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <p style="margin:0 0 12px;color:#1a1d23;font-size:.88rem;line-height:2;">&Eacute;viter de choquer le public&nbsp;: c&rsquo;est la <input type="text" class="blank" data-answer="bienseance" style="width:130px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <div class="verif-msg" data-sec="2" style="font-size:.82rem;font-weight:700;margin-bottom:10px;min-height:1.2em;"></div>
+        <button class="btn-valider" data-sec="2" style="border:none;background:#8dc63f;color:#fff;font-weight:800;font-size:.85rem;padding:9px 16px;border-radius:8px;cursor:pointer;">Valider mes r&eacute;ponses</button>
+        <button class="btn-retour" data-sec="2" style="border:2px solid #8a6a40;background:transparent;color:#8a6a40;font-weight:800;font-size:.85rem;padding:8px 16px;border-radius:8px;cursor:pointer;margin-left:8px;">&#8617; Retourner au texte</button>
+      </div>
     </div>
+
+    <!-- ===== SECTION 3 ===== -->
+    <div id="fiche-sec-3" style="position:relative;background:#ffffff;border:2px solid #f5d080;border-top:5px solid #f5a623;border-radius:12px;padding:18px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+      <div class="sec-content" data-sec="3">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,#f5a623,#c47a10);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;flex-shrink:0;box-shadow:0 2px 5px rgba(196,122,16,.35);">3</div>
+          <div style="font-size:1rem;font-weight:900;color:#c47a10;">Les r&egrave;gles du th&eacute;&acirc;tre classique</div>
+        </div>
+        <p style="margin:0 0 12px;color:#1a1d23;font-size:.9rem;line-height:1.8;">Les dramaturges respectent souvent la <strong>r&egrave;gle des trois unit&eacute;s</strong>&nbsp;:</p>
+        <div style="display:grid;grid-template-columns:1fr;gap:.6rem;margin-bottom:14px;">
+          <div style="background:#fff5e0;border:2px solid #f5a623;border-radius:8px;padding:10px 14px;">
+            <p style="margin:0;font-size:.88rem;color:#1a1d23;line-height:1.6;"><strong style="color:#c47a10;">Unit&eacute; d&rsquo;action</strong>&nbsp;: une seule intrigue principale.</p>
+          </div>
+          <div style="background:#fff5e0;border:2px solid #f5a623;border-radius:8px;padding:10px 14px;">
+            <p style="margin:0;font-size:.88rem;color:#1a1d23;line-height:1.6;"><strong style="color:#c47a10;">Unit&eacute; de temps</strong>&nbsp;: l&rsquo;action se d&eacute;roule en moins de vingt-quatre heures.</p>
+          </div>
+          <div style="background:#fff5e0;border:2px solid #f5a623;border-radius:8px;padding:10px 14px;">
+            <p style="margin:0;font-size:.88rem;color:#1a1d23;line-height:1.6;"><strong style="color:#c47a10;">Unit&eacute; de lieu</strong>&nbsp;: toute l&rsquo;histoire se d&eacute;roule dans un m&ecirc;me lieu.</p>
+          </div>
+        </div>
+        <button class="btn-verif" data-sec="3" style="border:none;background:#f5a623;color:#fff;font-weight:800;font-size:.88rem;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;">&#9989; J&rsquo;ai lu cette partie</button>
+      </div>
+      <div class="sec-overlay" data-sec="3" style="display:none;position:absolute;inset:0;background:#fffbeb;border-radius:10px;padding:18px 20px;overflow:auto;">
+        <div style="font-size:.85rem;font-weight:900;color:#8a6000;margin-bottom:10px;">&#128269; V&eacute;rifions ta lecture&nbsp;: compl&egrave;te le texte</div>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;">Unit&eacute; d&rsquo;<input type="text" class="blank" data-answer="action" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">&nbsp;: une seule intrigue.</p>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;">Unit&eacute; de <input type="text" class="blank" data-answer="temps" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">&nbsp;: moins de <input type="text" class="blank" data-answer="24" style="width:60px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> heures.</p>
+        <p style="margin:0 0 12px;color:#1a1d23;font-size:.88rem;line-height:2;">Unit&eacute; de <input type="text" class="blank" data-answer="lieu" style="width:90px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">&nbsp;: un seul endroit.</p>
+        <div class="verif-msg" data-sec="3" style="font-size:.82rem;font-weight:700;margin-bottom:10px;min-height:1.2em;"></div>
+        <button class="btn-valider" data-sec="3" style="border:none;background:#8dc63f;color:#fff;font-weight:800;font-size:.85rem;padding:9px 16px;border-radius:8px;cursor:pointer;">Valider mes r&eacute;ponses</button>
+        <button class="btn-retour" data-sec="3" style="border:2px solid #8a6a40;background:transparent;color:#8a6a40;font-weight:800;font-size:.85rem;padding:8px 16px;border-radius:8px;cursor:pointer;margin-left:8px;">&#8617; Retourner au texte</button>
+      </div>
+    </div>
+
+    <!-- ===== SECTION 4 ===== -->
+    <div id="fiche-sec-4" style="position:relative;background:#ffffff;border:2px solid #f5d080;border-top:5px solid #f5a623;border-radius:12px;padding:18px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+      <div class="sec-content" data-sec="4">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,#f5a623,#c47a10);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;flex-shrink:0;box-shadow:0 2px 5px rgba(196,122,16,.35);">4</div>
+          <div style="font-size:1rem;font-weight:900;color:#c47a10;">Les grands auteurs du classicisme</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:10px 14px;">
+            <p style="margin:0;font-size:.88rem;color:#1a1d23;line-height:1.7;"><strong style="color:#c47a10;">Moli&egrave;re</strong>&nbsp;: il critique les d&eacute;fauts des hommes gr&acirc;ce &agrave; la com&eacute;die.</p>
+          </div>
+          <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:10px 14px;">
+            <p style="margin:0;font-size:.88rem;color:#1a1d23;line-height:1.7;"><strong style="color:#c47a10;">Jean Racine</strong>&nbsp;: il &eacute;crit des trag&eacute;dies o&ugrave; les personnages sont confront&eacute;s &agrave; de violents conflits.</p>
+          </div>
+          <div style="background:#fff5e0;border-left:5px solid #f5a623;border-radius:8px;padding:10px 14px;">
+            <p style="margin:0;font-size:.88rem;color:#1a1d23;line-height:1.7;"><strong style="color:#c47a10;">Jean de La Fontaine</strong>&nbsp;: il transmet des le&ccedil;ons de morale gr&acirc;ce &agrave; ses fables.</p>
+          </div>
+        </div>
+        <button class="btn-verif" data-sec="4" style="border:none;background:#f5a623;color:#fff;font-weight:800;font-size:.88rem;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;">&#9989; J&rsquo;ai lu cette partie</button>
+      </div>
+      <div class="sec-overlay" data-sec="4" style="display:none;position:absolute;inset:0;background:#fffbeb;border-radius:10px;padding:18px 20px;overflow:auto;">
+        <div style="font-size:.85rem;font-weight:900;color:#8a6000;margin-bottom:10px;">&#128269; V&eacute;rifions ta lecture&nbsp;: compl&egrave;te le texte</div>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;"><input type="text" class="blank" data-answer="Moliere" style="width:100px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> critique les d&eacute;fauts des hommes gr&acirc;ce &agrave; la <input type="text" class="blank" data-answer="comedie" style="width:100px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <p style="margin:0 0 10px;color:#1a1d23;font-size:.88rem;line-height:2;"><input type="text" class="blank" data-answer="Racine" style="width:100px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;"> &eacute;crit des <input type="text" class="blank" data-answer="tragedies" style="width:110px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <p style="margin:0 0 12px;color:#1a1d23;font-size:.88rem;line-height:2;">La Fontaine transmet des le&ccedil;ons de morale gr&acirc;ce &agrave; ses <input type="text" class="blank" data-answer="fables" style="width:100px;border:none;border-bottom:2px solid #f5a623;background:transparent;font-size:.88rem;text-align:center;">.</p>
+        <div class="verif-msg" data-sec="4" style="font-size:.82rem;font-weight:700;margin-bottom:10px;min-height:1.2em;"></div>
+        <button class="btn-valider" data-sec="4" style="border:none;background:#8dc63f;color:#fff;font-weight:800;font-size:.85rem;padding:9px 16px;border-radius:8px;cursor:pointer;">Valider mes r&eacute;ponses</button>
+        <button class="btn-retour" data-sec="4" style="border:2px solid #8a6a40;background:transparent;color:#8a6a40;font-weight:800;font-size:.85rem;padding:8px 16px;border-radius:8px;cursor:pointer;margin-left:8px;">&#8617; Retourner au texte</button>
+      </div>
+    </div>
+
+    <!-- ===== SECTION 5 : À RETENIR / JE RETIENS ===== -->
+    <div id="fiche-sec-5" style="position:relative;background:linear-gradient(160deg,#1a1f2e,#232a3d);border:2px solid #f5c518;border-radius:14px;overflow:hidden;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,.15);">
+      <div class="sec-content" data-sec="5">
+        <div style="padding:14px 20px;border-bottom:1px solid #3a4258;background:rgba(245,197,24,.08);">
+          <div style="font-size:1rem;font-weight:900;color:#f5c518;">&#9733; &Agrave; retenir</div>
+        </div>
+        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
+          <div style="font-size:.92rem;color:#f0e6cc;line-height:1.7;">&#10004;&#65039; Un mouvement litt&eacute;raire du <strong style="color:#f5c518;">XVII<sup>e</sup> si&egrave;cle</strong>&nbsp;;</div>
+          <div style="font-size:.92rem;color:#f0e6cc;line-height:1.7;">&#10004;&#65039; La recherche de l&rsquo;<strong style="color:#f5c518;">ordre, de l&rsquo;&eacute;quilibre et de la raison</strong>&nbsp;;</div>
+          <div style="font-size:.92rem;color:#f0e6cc;line-height:1.7;">&#10004;&#65039; Des &oelig;uvres qui veulent <strong style="color:#f5c518;">plaire et instruire</strong>&nbsp;;</div>
+          <div style="font-size:.92rem;color:#f0e6cc;line-height:1.7;">&#10004;&#65039; Le respect de la <strong style="color:#f5c518;">vraisemblance</strong> et de la <strong style="color:#f5c518;">biens&eacute;ance</strong>&nbsp;;</div>
+          <div style="font-size:.92rem;color:#f0e6cc;line-height:1.7;">&#10004;&#65039; Au th&eacute;&acirc;tre, la pr&eacute;sence fr&eacute;quente de la <strong style="color:#f5c518;">r&egrave;gle des trois unit&eacute;s</strong>.</div>
+        </div>
+        <div style="padding:14px 20px;">
+          <p style="margin:0 0 12px;font-size:.85rem;font-weight:900;color:#f5c518;">Je retiens</p>
+          <p style="margin:0 0 14px;font-size:.86rem;color:#f0e6cc;line-height:1.7;">Le classicisme est un mouvement litt&eacute;raire du XVII<sup>e</sup> si&egrave;cle qui cherche &agrave; repr&eacute;senter des personnages et des situations vraisemblables en respectant des r&egrave;gles de clart&eacute;, d&rsquo;&eacute;quilibre et de raison.</p>
+        </div>
+        <div style="padding:0 20px 16px;">
+          <button class="btn-verif" data-sec="5" style="border:none;background:#f5c518;color:#1a1d23;font-weight:800;font-size:.88rem;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;">&#9989; J&rsquo;ai lu cette partie</button>
+        </div>
+      </div>
+      <div class="sec-overlay" data-sec="5" style="display:none;position:absolute;inset:0;background:#232a3d;border-radius:10px;padding:18px 20px;overflow:auto;">
+        <div style="font-size:.85rem;font-weight:900;color:#f5c518;margin-bottom:10px;">&#128269; V&eacute;rifions ta lecture&nbsp;: compl&egrave;te le texte</div>
+        <p style="margin:0 0 12px;color:#f0e6cc;font-size:.88rem;line-height:2;">
+          Le classicisme est un mouvement litt&eacute;raire du <input type="text" class="blank" data-answer="XVIIe|17|17e" style="width:70px;border:none;border-bottom:2px solid #f5c518;background:transparent;color:#fff;font-size:.88rem;text-align:center;"> si&egrave;cle qui cherche &agrave; repr&eacute;senter des personnages et des situations vraisemblables en respectant des r&egrave;gles de clart&eacute;, d&rsquo;<input type="text" class="blank" data-answer="equilibre" style="width:100px;border:none;border-bottom:2px solid #f5c518;background:transparent;color:#fff;font-size:.88rem;text-align:center;"> et de <input type="text" class="blank" data-answer="raison" style="width:100px;border:none;border-bottom:2px solid #f5c518;background:transparent;color:#fff;font-size:.88rem;text-align:center;">.
+        </p>
+        <div class="verif-msg" data-sec="5" style="font-size:.82rem;font-weight:700;margin-bottom:10px;min-height:1.2em;"></div>
+        <button class="btn-valider" data-sec="5" style="border:none;background:#8dc63f;color:#fff;font-weight:800;font-size:.85rem;padding:9px 16px;border-radius:8px;cursor:pointer;">Valider mes r&eacute;ponses</button>
+        <button class="btn-retour" data-sec="5" style="border:2px solid #8a6a40;background:transparent;color:#8a6a40;font-weight:800;font-size:.85rem;padding:8px 16px;border-radius:8px;cursor:pointer;margin-left:8px;">&#8617; Retourner au texte</button>
+      </div>
+    </div>
+
+    <!-- MESSAGE DE VALIDATION GLOBALE -->
+    <div id="fiche-validation" style="display:none;background:#f0faeb;border:2px solid #8dc63f;border-radius:14px;padding:18px 22px;text-align:center;">
+      <p style="margin:0;color:#3d7a10;font-size:1rem;font-weight:800;">&#9989; Fiche lue et v&eacute;rifi&eacute;e en entier&nbsp;! Tu peux passer &agrave; la suite du parcours.</p>
+    </div>
+    <div id="fiche-progress" style="text-align:center;font-family:monospace;font-size:.8rem;color:#8a6a40;margin-top:10px;">0 / 5 parties valid&eacute;es</div>
 
   </div>
 </div>
 
 <script>
-/* ══ FABLE TOKENISÉE PAR VERS ══ */
-var VERS = [
-  {v:1, tokens:[{id:'v1t0',w:'Compère'},{id:'v1t1',w:'le'},{id:'v1t2',w:'Renard'},{id:'v1t3',w:'se'},{id:'v1t4',w:'mit'},{id:'v1t5',w:'un'},{id:'v1t6',w:'jour'},{id:'v1t7',w:'en'},{id:'v1t8',w:'frais,'}]},
-  {v:2, tokens:[{id:'v2t0',w:'Et'},{id:'v2t1',w:'retint'},{id:'v2t2',w:'à'},{id:'v2t3',w:'dîner'},{id:'v2t4',w:'commère'},{id:'v2t5',w:'la'},{id:'v2t6',w:'Cigogne.'}]},
-  {v:3, tokens:[{id:'v3t0',w:'Le'},{id:'v3t1',w:'régal'},{id:'v3t2',w:'fut'},{id:'v3t3',w:'petit'},{id:'v3t4',w:'et'},{id:'v3t5',w:'sans'},{id:'v3t6',w:'beaucoup'},{id:'v3t7',w:"d'aprêts"},{id:'v3t8',w:':'}]},
-  {v:4, indent:true, tokens:[{id:'v4t0',w:'Le'},{id:'v4t1',w:'galant,'},{id:'v4t2',w:'pour'},{id:'v4t3',w:'toute'},{id:'v4t4',w:'besogne,'}]},
-  {v:5, tokens:[{id:'v5t0',w:'Avait'},{id:'v5t1',w:'un'},{id:'v5t2',w:'brouet'},{id:'v5t3',w:'clair'},{id:'v5t4',w:'(il'},{id:'v5t5',w:'vivait'},{id:'v5t6',w:'chichement).'}]},
-  {v:6, tokens:[{id:'v6t0',w:'Ce'},{id:'v6t1',w:'brouet'},{id:'v6t2',w:'fut'},{id:'v6t3',w:'par'},{id:'v6t4',w:'lui'},{id:'v6t5',w:'servi'},{id:'v6t6',w:'sur'},{id:'v6t7',w:'une'},{id:'v6t8',w:'assiette'},{id:'v6t9',w:':'}]},
-  {v:7, tokens:[{id:'v7t0',w:'La'},{id:'v7t1',w:'cigogne'},{id:'v7t2',w:'au'},{id:'v7t3',w:'long'},{id:'v7t4',w:'bec'},{id:'v7t5',w:"n'en"},{id:'v7t6',w:'put'},{id:'v7t7',w:'attraper'},{id:'v7t8',w:'miette,'}]},
-  {v:8, tokens:[{id:'v8t0',w:'Et'},{id:'v8t1',w:'le'},{id:'v8t2',w:'drôle'},{id:'v8t3',w:'eût'},{id:'v8t4',w:'lapé'},{id:'v8t5',w:'le'},{id:'v8t6',w:'tout'},{id:'v8t7',w:'en'},{id:'v8t8',w:'un'},{id:'v8t9',w:'moment.'}]},
-  {v:9, tokens:[{id:'v9t0',w:'Pour'},{id:'v9t1',w:'se'},{id:'v9t2',w:'venger'},{id:'v9t3',w:'de'},{id:'v9t4',w:'cette'},{id:'v9t5',w:'tromperie,'}]},
-  {v:10, tokens:[{id:'v10t0',w:'A'},{id:'v10t1',w:'quelque'},{id:'v10t2',w:'temps'},{id:'v10t3',w:'de'},{id:'v10t4',w:'là,'},{id:'v10t5',w:'la'},{id:'v10t6',w:'cigogne'},{id:'v10t7',w:'le'},{id:'v10t8',w:'prie.'}]},
-  {v:11, tokens:[{id:'v11t0',w:'« Volontiers,'},{id:'v11t1',w:'lui'},{id:'v11t2',w:'dit-il,'},{id:'v11t3',w:'car'},{id:'v11t4',w:'avec'},{id:'v11t5',w:'mes'},{id:'v11t6',w:'amis,'}]},
-  {v:12, indent:true, tokens:[{id:'v12t0',w:'Je'},{id:'v12t1',w:'ne'},{id:'v12t2',w:'fais'},{id:'v12t3',w:'point'},{id:'v12t4',w:'cérémonie.'},{id:'v12t5',w:'»'}]},
-  {v:13, indent:true, tokens:[{id:'v13t0',w:'A'},{id:'v13t1',w:"l'heure"},{id:'v13t2',w:'dite,'},{id:'v13t3',w:'il'},{id:'v13t4',w:'courut'},{id:'v13t5',w:'au'},{id:'v13t6',w:'logis'}]},
-  {v:14, tokens:[{id:'v14t0',w:'De'},{id:'v14t1',w:'la'},{id:'v14t2',w:'cigogne'},{id:'v14t3',w:'son'},{id:'v14t4',w:'hôtesse,'}]},
-  {v:15, tokens:[{id:'v15t0',w:'Loua'},{id:'v15t1',w:'très'},{id:'v15t2',w:'fort'},{id:'v15t3',w:'sa'},{id:'v15t4',w:'politesse,'}]},
-  {v:16, tokens:[{id:'v16t0',w:'Trouva'},{id:'v16t1',w:'le'},{id:'v16t2',w:'dîner'},{id:'v16t3',w:'cuit'},{id:'v16t4',w:'à'},{id:'v16t5',w:'point.'}]},
-  {v:17, tokens:[{id:'v17t0',w:'Bon'},{id:'v17t1',w:'appétit'},{id:'v17t2',w:'surtout,'},{id:'v17t3',w:'renards'},{id:'v17t4',w:"n'en"},{id:'v17t5',w:'manquent'},{id:'v17t6',w:'point.'}]},
-  {v:18, tokens:[{id:'v18t0',w:'Il'},{id:'v18t1',w:'se'},{id:'v18t2',w:'réjouissait'},{id:'v18t3',w:'à'},{id:'v18t4',w:"l'odeur"},{id:'v18t5',w:'de'},{id:'v18t6',w:'la'},{id:'v18t7',w:'viande'}]},
-  {v:19, tokens:[{id:'v19t0',w:'Mise'},{id:'v19t1',w:'en'},{id:'v19t2',w:'menus'},{id:'v19t3',w:'morceaux,'},{id:'v19t4',w:'et'},{id:'v19t5',w:"qu'il"},{id:'v19t6',w:'croyait'},{id:'v19t7',w:'friande.'}]},
-  {v:20, indent:true, tokens:[{id:'v20t0',w:'On'},{id:'v20t1',w:'servit,'},{id:'v20t2',w:'pour'},{id:'v20t3',w:"l'embarrasser,"}]},
-  {v:21, tokens:[{id:'v21t0',w:'En'},{id:'v21t1',w:'un'},{id:'v21t2',w:'vase'},{id:'v21t3',w:'à'},{id:'v21t4',w:'long'},{id:'v21t5',w:'col'},{id:'v21t6',w:'et'},{id:'v21t7',w:"d'étroite"},{id:'v21t8',w:'embouchure.'}]},
-  {v:22, tokens:[{id:'v22t0',w:'Le'},{id:'v22t1',w:'bec'},{id:'v22t2',w:'de'},{id:'v22t3',w:'la'},{id:'v22t4',w:'cigogne'},{id:'v22t5',w:'y'},{id:'v22t6',w:'pouvait'},{id:'v22t7',w:'bien'},{id:'v22t8',w:'passer,'}]},
-  {v:23, tokens:[{id:'v23t0',w:'Mais'},{id:'v23t1',w:'le'},{id:'v23t2',w:'museau'},{id:'v23t3',w:'du'},{id:'v23t4',w:'sire'},{id:'v23t5',w:'était'},{id:'v23t6',w:"d'autre"},{id:'v23t7',w:'mesure.'}]},
-  {v:24, tokens:[{id:'v24t0',w:'Il'},{id:'v24t1',w:'lui'},{id:'v24t2',w:'fallut'},{id:'v24t3',w:'à'},{id:'v24t4',w:'jeun'},{id:'v24t5',w:'retourner'},{id:'v24t6',w:'au'},{id:'v24t7',w:'logis,'}]},
-  {v:25, tokens:[{id:'v25t0',w:'Honteux'},{id:'v25t1',w:'comme'},{id:'v25t2',w:'un'},{id:'v25t3',w:'renard'},{id:'v25t4',w:"qu'une"},{id:'v25t5',w:'poule'},{id:'v25t6',w:'aurait'},{id:'v25t7',w:'pris,'}]},
-  {v:26, indent:true, tokens:[{id:'v26t0',w:'Serrant'},{id:'v26t1',w:'la'},{id:'v26t2',w:'queue,'},{id:'v26t3',w:'et'},{id:'v26t4',w:'portant'},{id:'v26t5',w:'bas'},{id:'v26t6',w:"l'oreille."}]},
-  {v:27, indent:true, tokens:[{id:'v27t0',w:'Trompeurs,'},{id:'v27t1',w:"c'est"},{id:'v27t2',w:'pour'},{id:'v27t3',w:'vous'},{id:'v27t4',w:'que'},{id:'v27t5',w:"j'écris"},{id:'v27t6',w:':'}]},
-  {v:28, indent:true, tokens:[{id:'v28t0',w:'Attendez-vous'},{id:'v28t1',w:'à'},{id:'v28t2',w:'la'},{id:'v28t3',w:'pareille.'}]}
-];
-
-var QUESTIONS = [
-  {
-    num:1,
-    text:"Clique sur les deux vers qui décrivent le repas chiche que le Renard sert à la Cigogne et qui permettent de comprendre sa ruse. (2 occurrences attendues)",
-    groups:[
-      ['v5t0','v5t1','v5t2','v5t3','v5t4','v5t5','v5t6'],
-      ['v7t0','v7t1','v7t2','v7t3','v7t4','v7t5','v7t6','v7t7','v7t8']
-    ],
-    answers:['v5t0','v5t1','v5t2','v5t3','v5t4','v5t5','v5t6','v7t0','v7t1','v7t2','v7t3','v7t4','v7t5','v7t6','v7t7','v7t8'],
-    fb_ok:null,
-    fb_ko:"Ces deux vers décrivent le cœur de la ruse du Renard. «Un brouet clair» (une soupe claire et peu nourrissante) servi sur une assiette plate : la Cigogne, avec son long bec, ne peut en attraper la moindre miette. La parenthèse «(il vivait chichement)» est ironique : La Fontaine suggère que le Renard est avare, pas seulement maladroit. La ruse tient à un écart physique : bec long contre assiette plate."
-  },
-  {
-    num:2,
-    text:"Clique sur la réplique du Renard qui révèle son hypocrisie et son arrogance lorsqu'il accepte l'invitation de la Cigogne.",
-    groups:[['v11t0','v11t1','v11t2','v11t3','v11t4','v11t5','v11t6','v12t0','v12t1','v12t2','v12t3','v12t4','v12t5']],
-    answers:['v11t0','v11t1','v11t2','v11t3','v11t4','v11t5','v11t6','v12t0','v12t1','v12t2','v12t3','v12t4','v12t5'],
-    fb_ok:null,
-    fb_ko:"Cette réplique est savoureuse d'hypocrisie : le Renard accepte l'invitation de la Cigogne en disant qu'il «ne fait point cérémonie» avec ses amis. Il se présente comme quelqu'un de simple et de généreux — alors qu'il vient tout juste de lui jouer un mauvais tour. La Fontaine glisse une ironie mordante : le Renard appelle la Cigogne «son amie» alors qu'il l'a trompée."
-  },
-  {
-    num:3,
-    text:"Clique sur les deux vers qui montrent que le Renard se réjouit d'avance du repas et révèlent son avidité. (2 occurrences attendues)",
-    groups:[
-      ['v17t0','v17t1','v17t2','v17t3','v17t4','v17t5','v17t6'],
-      ['v18t0','v18t1','v18t2','v18t3','v18t4','v18t5','v18t6','v18t7']
-    ],
-    answers:['v17t0','v17t1','v17t2','v17t3','v17t4','v17t5','v17t6','v18t0','v18t1','v18t2','v18t3','v18t4','v18t5','v18t6','v18t7'],
-    fb_ok:null,
-    fb_ko:"Ces deux vers dessinent un portrait satirique du Renard goinfre. «Bon appétit surtout, renards n'en manquent point» est une remarque ironique du narrateur (La Fontaine lui-même s'adresse au lecteur) : les renards n'ont jamais faim d'appétit, c'est leur nature. «Il se réjouissait à l'odeur de la viande» montre un Renard qui se lèche déjà les babines — ce qui rend sa déconvenue encore plus comique et méritée."
-  },
-  {
-    num:4,
-    text:"Clique sur les deux vers qui décrivent le stratagème de la Cigogne : l'arme dont elle se sert pour se venger.",
-    groups:[['v20t0','v20t1','v20t2','v20t3','v21t0','v21t1','v21t2','v21t3','v21t4','v21t5','v21t6','v21t7','v21t8']],
-    answers:['v20t0','v20t1','v20t2','v20t3','v21t0','v21t1','v21t2','v21t3','v21t4','v21t5','v21t6','v21t7','v21t8'],
-    fb_ok:null,
-    fb_ko:"La vengeance de la Cigogne est d'une élégante symétrie : le Renard avait utilisé une assiette plate (contre le bec long) ; la Cigogne utilise un vase à long col (contre le museau court). «Pour l'embarrasser» dit clairement l'intention : ce n'est pas un choix de vaisselle innocent, c'est un acte délibéré. La vengeance est calculée, intelligente et juste."
-  },
-  {
-    num:5,
-    text:"Clique sur la comparaison finale qui décrit la honte du Renard en utilisant une image particulièrement piquante.",
-    groups:[['v25t0','v25t1','v25t2','v25t3','v25t4','v25t5','v25t6','v25t7','v26t0','v26t1','v26t2','v26t3','v26t4','v26t5','v26t6']],
-    answers:['v25t0','v25t1','v25t2','v25t3','v25t4','v25t5','v25t6','v25t7','v26t0','v26t1','v26t2','v26t3','v26t4','v26t5','v26t6'],
-    fb_ok:null,
-    fb_ko:"Cette comparaison est une des plus célèbres de La Fontaine. «Honteux comme un renard qu'une poule aurait pris» : l'image est doublement humiliante. Le renard, symbole de ruse et d'intelligence, se retrouve ici vaincu — et par qui ? Une cigogne, et métaphoriquement par une simple poule. L'image du renard qui «serre la queue et porte bas l'oreille» est celle d'un animal battu, humilié, qui n'a plus aucune arrogance."
-  },
-  {
-    num:6,
-    text:"Clique sur les deux derniers vers qui constituent la morale de la fable et qui s'adressent directement au lecteur.",
-    groups:[['v27t0','v27t1','v27t2','v27t3','v27t4','v27t5','v27t6','v28t0','v28t1','v28t2','v28t3']],
-    answers:['v27t0','v27t1','v27t2','v27t3','v27t4','v27t5','v27t6','v28t0','v28t1','v28t2','v28t3'],
-    fb_ok:null,
-    fb_ko:"La morale est ici explicite et directe : La Fontaine parle à la première personne («j'écris») et s'adresse directement aux lecteurs trompeurs («c'est pour vous»). Cette interpellation directe est frappante : la fable n'est pas un simple divertissement, c'est un avertissement. «Attendez-vous à la pareille» : celui qui trompe sera trompé."
+(function() {
+  function normalize(s) {
+    return s.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/['’]/g, '')
+      .replace(/\s+/g, ' ');
   }
-];
 
-var curQ=0,groupsValidated=[],results=[],done=false,audioCtx=null;
-document.addEventListener('pointerdown',function ia(){
-  if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
-  document.removeEventListener('pointerdown',ia);
-},{once:true});
-window.addEventListener('DOMContentLoaded',function(){buildFable();buildDots();showQuestion(0);});
+  var validated = {};
+  var progress = document.getElementById('fiche-progress');
+  var validation = document.getElementById('fiche-validation');
 
-function buildFable(){
-  var container=document.getElementById('fable');
-  VERS.forEach(function(ligne){
-    var div=document.createElement('div');
-    div.className='verse';
-    
-    var vtxt=document.createElement('span');
-    vtxt.className='vtext';
-    ligne.tokens.forEach(function(tok,i){
-      if(i>0) vtxt.appendChild(document.createTextNode(' '));
-      var s=document.createElement('span');
-      s.className='tok';s.id=tok.id;s.textContent=tok.w;
-      s.addEventListener('click',function(){onTok(tok.id);});
-      vtxt.appendChild(s);
-    });
-    div.appendChild(vtxt);
-    container.appendChild(div);
-  });
-}
-function buildDots(){
-  var wrap=document.getElementById('qdots');
-  QUESTIONS.forEach(function(q,i){
-    var d=document.createElement('div');d.className='q-dot';d.id='dot'+i;d.textContent=q.num;wrap.appendChild(d);
-  });
-}
-function updateDots(){
-  QUESTIONS.forEach(function(q,i){
-    var d=document.getElementById('dot'+i);d.className='q-dot';
-    if(i<curQ)d.classList.add(results[i]?'done-ok':'done-ko');
-    else if(i===curQ)d.classList.add('active');
-  });
-}
-function showQuestion(idx){
-  var q=QUESTIONS[idx];groupsValidated=[];
-  document.getElementById('qlabel').textContent='Q'+q.num+' / 6';
-  document.getElementById('qtext').textContent=q.text;
-  var fb=document.getElementById('qfb');fb.className='q-feedback';fb.textContent='';
-  var gd=document.getElementById('grpdots');gd.innerHTML='';
-  if(q.groups.length>1){
-    gd.style.display='flex';
-    q.groups.forEach(function(_,gi){
-      var dot=document.createElement('div');dot.className='grp-dot';dot.id='gd'+gi;gd.appendChild(dot);
-    });
-  } else {gd.style.display='none';}
-  clearMarks();updateDots();renderActions(false,false);
-}
-function renderActions(answered,isOk){
-  var wrap=document.getElementById('qactions');wrap.innerHTML='';
-  if(!answered)return;
-  if(!isOk){var br=document.createElement('button');br.className='btn btn-retry';
-    br.textContent='Réessayer';br.onclick=reessayer;wrap.appendChild(br);}
-  var bn=document.createElement('button');bn.className='btn btn-next';
-  bn.textContent=curQ<QUESTIONS.length-1?'Question suivante \u2192':'Voir le résultat';
-  bn.onclick=curQ<QUESTIONS.length-1?suivant:showScore;wrap.appendChild(bn);
-}
-function onTok(id){
-  if(done)return;
-  var fb=document.getElementById('qfb');
-  if(fb.classList.contains('show')&&results[curQ]!==undefined)return;
-  var q=QUESTIONS[curQ],groupIdx=-1;
-  q.groups.forEach(function(grp,gi){if(grp.indexOf(id)!==-1)groupIdx=gi;});
-  if(groupIdx===-1){validerErreur();return;}
-  if(groupsValidated.indexOf(groupIdx)===-1){
-    groupsValidated.push(groupIdx);
-    q.groups[groupIdx].forEach(function(tid){var el=document.getElementById(tid);if(el)el.classList.add('correct');});
-    var gdot=document.getElementById('gd'+groupIdx);if(gdot)gdot.classList.add('hit');
+  function updateProgress() {
+    var count = Object.keys(validated).filter(function(k){ return validated[k]; }).length;
+    progress.textContent = count + ' / 5 parties valid\u00e9es';
+    validation.style.display = (count === 5) ? 'block' : 'none';
   }
-  if(groupsValidated.length===q.groups.length)validerSucces();
-}
-function validerSucces(){
-  var q=QUESTIONS[curQ];results[curQ]=true;
-  q.answers.forEach(function(id){var el=document.getElementById(id);if(el){el.classList.remove('wrong');el.classList.add('correct');}});
-  flashPop(true);beepOk();updateCarnet(results.filter(Boolean).length);renderActions(true,true);
-}
-function validerErreur(){
-  var q=QUESTIONS[curQ];results[curQ]=false;
-  q.answers.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('correct');});
-  var fb=document.getElementById('qfb');
-  if(q.fb_ko){fb.textContent=q.fb_ko;fb.className='q-feedback show ko';}
-  flashPop(false);beepErr();updateCarnet(results.filter(Boolean).length);renderActions(true,false);
-}
-function reessayer(){
-  groupsValidated=[];results[curQ]=undefined;clearMarks();
-  var fb=document.getElementById('qfb');fb.className='q-feedback';fb.textContent='';
-  var q=QUESTIONS[curQ];
-  q.groups.forEach(function(_,gi){var gd=document.getElementById('gd'+gi);if(gd)gd.classList.remove('hit');});
-  renderActions(false,false);
-}
-function suivant(){curQ++;showQuestion(curQ);document.getElementById('qcard').scrollIntoView({behavior:'smooth',block:'nearest'});}
-function showScore(){
-  done=true;document.getElementById('qcard').style.display='none';
-  var sc=document.getElementById('scorecard');sc.classList.add('show');
-  var score=results.filter(Boolean).length;
-  document.getElementById('scoreval').textContent=score+' / 6';
-  var msg='';
-  if(score===6)msg='Bravo\u00a0! Tu as repéré tous les passages clés de la fable.';
-  else if(score>=4)msg='Bon repérage\u00a0! Relis les passages signalés.';
-  else msg='On s\u2019accroche\u00a0! Relis attentivement la fable et retente.';
-  document.getElementById('scoremsg').textContent=msg;
-  if(score>=4)document.getElementById('scorebravo').classList.add('show');
-  updateCarnet(score);updateDots();beepFinal(score);
-  if(score>=5)launchEmojis();
-}
-function updateCarnet(score){
-  var pct=Math.round((score/6)*100);
-  document.getElementById('carnetbar').style.width=pct+'%';
-  document.getElementById('carnetscore').textContent=score+' / 6 rep\u00e8res';
-  for(var i=0;i<6;i++){var l=document.getElementById('pl'+i);if(l){if(i<score)l.classList.add('filled');else l.classList.remove('filled');}}
-}
-function clearMarks(){document.querySelectorAll('.tok').forEach(function(el){el.classList.remove('correct','wrong');});}
-function flashPop(isOk){
-  var el=document.getElementById('flashpop');
-  el.textContent=isOk?'\u2713':'\u2715';el.style.color=isOk?'#8dc63f':'#e8002d';
-  el.className='flash-pop';void el.offsetWidth;el.classList.add(isOk?'run-ok':'run-err');
-}
-function getCtx(){if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}return audioCtx;}
-function beepOk(){var ctx=getCtx();if(!ctx)return;[[600,.08],[900,.12]].forEach(function(p,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=p[0];var t=ctx.currentTime+i*.13;g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.01,t+.18);o.start(t);o.stop(t+.2);});}
-function beepErr(){var ctx=getCtx();if(!ctx)return;var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sawtooth';o.frequency.value=280;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.3);o.start(ctx.currentTime);o.stop(ctx.currentTime+.32);}
-function beepFinal(score){var ctx=getCtx();if(!ctx)return;if(score>=5){[523,659,784,880,1047].forEach(function(freq,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=freq;var t=ctx.currentTime+i*.17;g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.01,t+.28);o.start(t);o.stop(t+.3);});}else{var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=220;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.5);o.start(ctx.currentTime);o.stop(ctx.currentTime+.55);}}
-function launchEmojis(){
-  var pool=['\u2B50','\u2728','\u{1F4DC}','\u{1F4D6}','\u{1F3AF}','\u{1F4A1}','\u{1F389}','\u2764\uFE0F'];
-  for(var i=0;i<25;i++){(function(idx){setTimeout(function(){var el=document.createElement('div');el.textContent=pool[Math.floor(Math.random()*pool.length)];el.style.cssText=['position:fixed','pointer-events:none','z-index:999','font-size:'+(1.3+Math.random()*1.3)+'rem','left:'+(Math.random()*96)+'vw','top:-2rem','opacity:1','transition:transform '+(1.5+Math.random()*1.3)+'s linear, opacity .4s linear '+(1.3+Math.random()*.9)+'s'].join(';');document.body.appendChild(el);requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.transform='translateY('+(window.innerHeight+60)+'px) rotate('+(Math.random()*360)+'deg)';el.style.opacity='0';});});setTimeout(function(){el.remove();},3200);},idx*100+Math.random()*80);})(i);}
-}
+
+  document.querySelectorAll('.btn-verif').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var sec = btn.getAttribute('data-sec');
+      var overlay = document.querySelector('.sec-overlay[data-sec="' + sec + '"]');
+      overlay.style.display = 'block';
+    });
+  });
+
+  document.querySelectorAll('.btn-valider').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var sec = btn.getAttribute('data-sec');
+      var overlay = document.querySelector('.sec-overlay[data-sec="' + sec + '"]');
+      var msg = document.querySelector('.verif-msg[data-sec="' + sec + '"]');
+      var blanks = Array.prototype.slice.call(overlay.querySelectorAll('.blank'));
+      var allCorrect = true;
+      var handled = {};
+
+      blanks.forEach(function(input, idx) {
+        if (handled[idx]) return;
+        var group = input.getAttribute('data-group');
+
+        if (group) {
+          // Trouver tous les inputs du même groupe (réponses interchangeables)
+          var groupInputs = blanks.filter(function(i) { return i.getAttribute('data-group') === group; });
+          var acceptedSet = normalize(input.getAttribute('data-answer').split('|')[0]) ;
+          // Construire l'ensemble des réponses acceptées à partir des options (avant le |) de chaque input du groupe
+          var answerPool = [];
+          groupInputs.forEach(function(gi) {
+            gi.getAttribute('data-answer').split('|').forEach(function(a) { answerPool.push(normalize(a)); });
+          });
+          var uniquePool = Array.from(new Set(answerPool));
+          var values = groupInputs.map(function(gi) { return normalize(gi.value); });
+          var ok = values.every(function(v) { return uniquePool.indexOf(v) !== -1; });
+          // Vérifier aussi que les valeurs saisies sont distinctes entre elles (pas le même mot répété)
+          var distinct = new Set(values).size === values.length;
+          var groupOk = ok && distinct;
+          groupInputs.forEach(function(gi) {
+            gi.style.borderBottomColor = groupOk ? '#3d7a10' : '#b94040';
+            gi.style.color = groupOk ? '#3d7a10' : '#b94040';
+            var gIdx = blanks.indexOf(gi);
+            handled[gIdx] = true;
+          });
+          if (!groupOk) allCorrect = false;
+          return;
+        }
+
+        var accepted = input.getAttribute('data-answer').split('|').map(normalize);
+        var value = normalize(input.value);
+        var ok = accepted.indexOf(value) !== -1;
+        if (ok) {
+          input.style.borderBottomColor = '#3d7a10';
+          input.style.color = '#3d7a10';
+        } else {
+          input.style.borderBottomColor = '#b94040';
+          input.style.color = '#b94040';
+          allCorrect = false;
+        }
+        handled[idx] = true;
+      });
+
+      if (allCorrect) {
+        msg.textContent = '\u2705 Bravo, toutes les r\u00e9ponses sont correctes !';
+        msg.style.color = '#3d7a10';
+        validated[sec] = true;
+        setTimeout(function() {
+          overlay.style.display = 'none';
+        }, 2200);
+        updateProgress();
+      } else {
+        msg.textContent = '\u274c Certaines r\u00e9ponses sont incorrectes. V\u00e9rifie et r\u00e9essaie.';
+        msg.style.color = '#b94040';
+      }
+    });
+  });
+
+
+  document.querySelectorAll('.btn-retour').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var sec = btn.getAttribute('data-sec');
+      var overlay = document.querySelector('.sec-overlay[data-sec="' + sec + '"]');
+      overlay.style.display = 'none';
+    });
+  });
+
+  updateProgress();
+})();
 </script>
-</body>
-</html>
