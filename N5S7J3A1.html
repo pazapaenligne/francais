@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – S7 J3 – 5e – leur / leurs</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(61,122,16,.22);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;--orange:#f5a623;
+      --dark:#1a1f2e;--dark2:#232a3d;--dark3:#2d3448;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+    .dash{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;box-shadow:0 2px 10px rgba(61,122,16,.1);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-dark);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.28rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .part-b{display:flex;align-items:center;gap:.25rem;background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:8px;padding:.18rem .45rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.12);border-color:var(--green);color:#15803d;}
+    .chip-ko{background:rgba(239,68,68,.1);border-color:var(--red);color:#b91c1c;}
+    .chip-rem{background:rgba(141,198,63,.15);border-color:var(--day-color);color:var(--day-dark);}
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+    .card{width:100%;max-width:720px;background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;position:relative;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);animation:fadeUp .35s ease both;
+      margin-bottom:.9rem;z-index:1;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.55rem;}
+    .q-consigne{font-size:.9rem;color:var(--muted);margin-bottom:.65rem;line-height:1.6;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-dark);border-radius:10px;
+      padding:.85rem 1rem;margin-bottom:.8rem;
+      font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+      line-height:1.85;}
+    .q-phrase .leur{color:#3d7a10;font-weight:900;}
+    .q-phrase .leurs{color:#1a6e88;font-weight:900;}
+    .q-phrase .lacune{color:var(--day-dark);font-weight:900;letter-spacing:.05em;}
+    .q-phrase .nom{color:#7a1f1f;font-weight:900;}
+    .opts{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;font-weight:600;
+      color:var(--text);cursor:pointer;transition:all .15s;text-align:left;min-height:50px;
+      -webkit-tap-highlight-color:transparent;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+      color:var(--muted);flex-shrink:0;min-width:20px;}
+    .opt-btn.ok-opt{background:var(--green-pale);border-color:var(--green);color:#14532d;}
+    .opt-btn.ok-opt .opt-letter{color:#14532d;}
+    .opt-btn.ko-opt{background:var(--red-pale);border-color:var(--red);color:#7f1d1d;}
+    .opt-btn.ko-opt .opt-letter{color:#7f1d1d;}
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.55rem;display:none;line-height:1.75;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border-left:5px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border-left:5px solid var(--red);color:#7f1d1d;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.4rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .corrige-bloc{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:var(--radius);padding:.9rem 1.1rem;margin-top:.8rem;display:none;}
+    .corrige-bloc.show{display:block;animation:fadeUp .3s ease both;}
+    .corrige-titre{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.5rem;}
+    .corrige-texte{font-size:.9rem;color:var(--text);line-height:1.7;}
+    .corrige-texte strong{color:var(--day-dark);}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--border);color:var(--text);border:1.5px solid var(--day-border);}
+    .btn-dark:hover{background:var(--day-light);}
+    .nav-wrap{width:100%;max-width:720px;text-align:center;margin:.7rem 0 .3rem;position:relative;z-index:1;}
+    .bilan-bloc{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .bilan-bloc.show{display:block;animation:fadeUp .4s ease both;}
+    .bilan-card{background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 20px rgba(61,122,16,.1);text-align:center;
+      position:relative;overflow:hidden;margin-top:1rem;}
+    .bilan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .bilan-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.5rem;}
+    .bilan-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);}
+    .bilan-denom{font-size:1.5rem;color:var(--muted);}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .badge-ok{display:inline-block;background:var(--green-pale);color:#14532d;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:var(--red-pale);color:#7f1d1d;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .bilan-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--muted);margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .recap-bloc{text-align:left;background:var(--surface);border-radius:10px;border:1.5px solid var(--day-border);
+      padding:.8rem 1rem;margin-bottom:.9rem;}
+    .recap-ligne{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);
+      margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem;}
+    .recap-ok{color:#15803d;font-weight:700;}
+    .recap-ko{color:#b91c1c;font-weight:700;}
+    .corrige-global{text-align:left;background:var(--surface);border-radius:10px;border:1.5px solid var(--day-border);
+      padding:.8rem 1rem;margin-bottom:.8rem;}
+    .corrige-global-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.5rem;}
+    .corrige-global-item{font-size:.9rem;color:var(--text);line-height:1.7;margin-bottom:.28rem;}
+    .corrige-global-item strong{color:var(--day-dark);}
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5c518"></span>
+    Pazapa · Français · 5ème
+  </div>
+  <div class="week-label">Semaine 7 – Jour 3</div>
+  <h1>J'observe et je teste · <span class="hl">leur / leurs</span></h1>
+  <div class="theme-badge">Orthographe — pronom · déterminant possessif</div>
+</header>
+
+<div class="dash">
+  <div class="dash-titre">Test de réactivation — 10 questions — 10 points</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Question 1 en cours…</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/10</div>
+      <div class="dash-score-label">Points</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-q1"><span style="font-weight:700;">Q1</span><span id="nb-s1" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q2"><span style="font-weight:700;">Q2</span><span id="nb-s2" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q3"><span style="font-weight:700;">Q3</span><span id="nb-s3" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q4"><span style="font-weight:700;">Q4</span><span id="nb-s4" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q5"><span style="font-weight:700;">Q5</span><span id="nb-s5" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q6"><span style="font-weight:700;">Q6</span><span id="nb-s6" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q7"><span style="font-weight:700;">Q7</span><span id="nb-s7" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q8"><span style="font-weight:700;">Q8</span><span id="nb-s8" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q9"><span style="font-weight:700;">Q9</span><span id="nb-s9" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q10"><span style="font-weight:700;">Q10</span><span id="nb-s10" style="font-weight:900;">—</span></div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">10</span> restants</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 10 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div id="zone-q"></div>
+<div class="nav-wrap" id="nav-wrap" style="display:none;">
+  <button class="btn btn-primary" id="btn-nav">Question suivante →</button>
+</div>
+<div class="nav-wrap">
+  <button class="btn btn-dark" onclick="resetTout()">↺ Recommencer</button>
+</div>
+
+<div class="bilan-bloc" id="bilan-bloc">
+  <div class="bilan-card">
+    <div class="bilan-titre">Bilan — leur / leurs</div>
+    <div class="bilan-score"><span id="bilan-num">0</span><span class="bilan-denom">/10</span></div>
+    <div class="stars" id="bilan-stars"></div>
+    <div id="bilan-badge"></div>
+    <div class="bilan-msg" id="bilan-msg"></div>
+    <div class="recap-bloc" id="recap-bloc"></div>
+    <div class="corrige-global">
+      <div class="corrige-global-titre">Corrigé</div>
+      <div class="corrige-global-item"><strong>1. C</strong> — Leur remplace des personnes. Placé devant un verbe, il s'agit d'un pronom.</div>
+      <div class="corrige-global-item"><strong>2. B</strong> — Leur accompagne le nom chat : c'est un déterminant possessif.</div>
+      <div class="corrige-global-item"><strong>3. leurs</strong> — Bagages est un nom pluriel : on écrit leurs.</div>
+      <div class="corrige-global-item"><strong>4. leur</strong> — Le mot ne complète pas un nom.</div>
+      <div class="corrige-global-item"><strong>5. B</strong> — Remplacer par à eux. Exemple : Je leur parle. Je parle à eux.</div>
+      <div class="corrige-global-item"><strong>6. C</strong> — Le déterminant et le nom sont tous les deux au singulier.</div>
+      <div class="corrige-global-item"><strong>7. B</strong> — Je souris à eux permet de reconnaître le pronom.</div>
+      <div class="corrige-global-item"><strong>8. leur</strong> — Ballon est un nom singulier.</div>
+      <div class="corrige-global-item"><strong>9. leurs</strong> — Affaires est au pluriel.</div>
+      <div class="corrige-global-item"><strong>10. B</strong> — Le pronom personnel est correctement employé.</div>
+    </div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">↺ Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+/* Couleurs s\u00E9mantiques */
+var CL={leur:'<span class="leur">leur</span>',leurs:'<span class="leurs">leurs</span>'};
+
+var QS=[
+  /* Q1 \u2014 3 options, r\u00E9ponse C */
+  {num:1,type:'qcm',
+   ph:'Dans quelle phrase <span class="leur">leur</span> est-il un pronom personnel\u00a0?',
+   opts:[
+     {l:'A.',t:'<span class="leur">Leur</span> maison domine la vall\u00e9e.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Ici, <span class="hl-ko">leur</span> accompagne le nom <span class="hl-neu">maison</span>\u00a0: c\u2019est un d\u00e9terminant possessif.'},
+     {l:'B.',t:'Ils ont aim\u00e9 <span class="leurs">leurs</span> cadeaux.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Ici, <span class="hl-ko">leurs</span> accompagne le nom <span class="hl-neu">cadeaux</span>\u00a0: c\u2019est un d\u00e9terminant possessif.'},
+     {l:'C.',t:'Je <span class="leur">leur</span> explique la consigne.',ok:true,
+      fb:'<span class="fb-titre">\u2713 Bravo\u00a0!</span><span class="hl-ok">Leur</span> remplace des personnes. Plac\u00e9 devant un verbe, il s\u2019agit d\u2019un pronom.'}
+   ],
+   cor:'<strong>C</strong> \u2014 <em>Leur</em> remplace des personnes. Plac\u00e9 devant un verbe, il s\u2019agit d\u2019un pronom.'},
+
+  /* Q2 \u2014 3 options, r\u00E9ponse B */
+  {num:2,type:'qcm',
+   ph:'Quelle phrase contient un d\u00e9terminant possessif\u00a0?',
+   opts:[
+     {l:'A.',t:'Nous <span class="leur">leur</span> \u00e9crivons souvent.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Un d\u00e9terminant n\u2019est jamais plac\u00e9 devant un verbe.'},
+     {l:'B.',t:'<span class="leur">Leur</span> chat dort pr\u00e8s de la chemin\u00e9e.',ok:true,
+      fb:'<span class="fb-titre">\u2713 Exact\u00a0!</span><span class="hl-ok">Leur</span> accompagne le nom <span class="hl-ok">chat</span>. Il s\u2019agit donc d\u2019un d\u00e9terminant possessif.'},
+     {l:'C.',t:'Je <span class="leur">leur</span> t\u00e9l\u00e9phone demain.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Un d\u00e9terminant n\u2019est jamais plac\u00e9 devant un verbe.'}
+   ],
+   cor:'<strong>B</strong> \u2014 <em>Leur</em> accompagne le nom <em>chat</em> : c\u2019est un d\u00e9terminant possessif.'},
+
+  /* Q3 \u2014 binaire, r\u00E9ponse leurs */
+  {num:3,type:'bin',
+   ph:'Les voyageurs reprennent <span class="lacune">___</span> <span class="nom">bagages</span>.',
+   consigne:'Compl\u00e8te la phrase.',
+   opts:[
+     {l:'A.',t:'leur',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Observe le nom qui suit.'},
+     {l:'B.',t:'leurs',ok:true,
+      fb:'<span class="fb-titre">\u2713 Tr\u00e8s bien\u00a0!</span><span class="hl-ok">Bagages</span> est un nom pluriel\u00a0: on \u00e9crit <span class="hl-ok">leurs</span>.'}
+   ],
+   cor:'<strong>leurs</strong> \u2014 <em>Bagages</em> est un nom pluriel : on \u00e9crit leurs.'},
+
+  /* Q4 \u2014 binaire, r\u00E9ponse leur */
+  {num:4,type:'bin',
+   ph:'Je <span class="lacune">___</span> apporte les documents.',
+   consigne:'Compl\u00e8te la phrase.',
+   opts:[
+     {l:'A.',t:'leur',ok:true,
+      fb:'<span class="fb-titre">\u2713 Bravo\u00a0!</span>'},
+     {l:'B.',t:'leurs',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le mot ne compl\u00e8te pas un nom.'}
+   ],
+   cor:'<strong>leur</strong> \u2014 Le mot ne compl\u00e8te pas un nom.'},
+
+  /* Q5 \u2014 3 options, r\u00E9ponse B */
+  {num:5,type:'qcm',
+   ph:'Quelle manipulation permet de reconna\u00eetre le pronom personnel\u00a0?',
+   opts:[
+     {l:'A.',t:'Observer le temps du verbe.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le temps du verbe n\u2019aide pas \u00e0 reconna\u00eetre la nature de <span class="hl-neu">leur</span>.'},
+     {l:'B.',t:'Remplacer par <em>\u00e0 eux</em>.',ok:true,
+      fb:'<span class="fb-titre">\u2713 Exact\u00a0!</span>Cette manipulation est tr\u00e8s efficace. Exemple\u00a0: <em>Je <span class="hl-ok">leur</span> parle.</em> \u2192 <em>Je parle <span class="hl-ok">\u00e0 eux</span>.</em>'},
+     {l:'C.',t:'Mettre le verbe au pluriel.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le nombre du verbe n\u2019indique pas la nature de <span class="hl-neu">leur</span>.'}
+   ],
+   cor:'<strong>B</strong> \u2014 Remplacer par <em>\u00e0 eux</em>. Exemple : Je leur parle. Je parle \u00e0 eux.'},
+
+  /* Q6 \u2014 3 options, r\u00E9ponse C */
+  {num:6,type:'qcm',
+   ph:'Quelle phrase est correctement \u00e9crite\u00a0?',
+   opts:[
+     {l:'A.',t:'Les sportifs rangent <span class="leurs">leurs</span> <span class="nom">\u00e9quipement</span>.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le d\u00e9terminant est mal accord\u00e9.'},
+     {l:'B.',t:'Les sportifs rangent <span class="leur">leur</span> <span class="nom">\u00e9quipements</span>.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le d\u00e9terminant suit le nombre du nom.'},
+     {l:'C.',t:'Les sportifs rangent <span class="leur">leur</span> <span class="nom">\u00e9quipement</span>.',ok:true,
+      fb:'<span class="fb-titre">\u2713 Excellent\u00a0!</span>Le d\u00e9terminant et le nom sont tous les deux au singulier.'}
+   ],
+   cor:'<strong>C</strong> \u2014 Le d\u00e9terminant et le nom sont tous les deux au singulier.'},
+
+  /* Q7 \u2014 3 options, r\u00E9ponse B */
+  {num:7,type:'qcm',
+   ph:'Dans quelle phrase peut-on remplacer <span class="leur">leur</span> par <em>\u00e0 eux</em>\u00a0?',
+   opts:[
+     {l:'A.',t:'<span class="leur">Leur</span> professeur arrive.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Ici, <span class="hl-ko">leur</span> accompagne un nom.'},
+     {l:'B.',t:'Je <span class="leur">leur</span> souris.',ok:true,
+      fb:'<span class="fb-titre">\u2713 Bravo\u00a0!</span><em>Je souris \u00e0 eux</em> permet de reconna\u00eetre le pronom.'},
+     {l:'C.',t:'<span class="leurs">Leurs</span> voisins d\u00e9m\u00e9nagent.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span><span class="hl-ko">Leurs</span> accompagne le nom <span class="hl-neu">voisins</span>.'}
+   ],
+   cor:'<strong>B</strong> \u2014 Je souris \u00e0 eux permet de reconna\u00eetre le pronom.'},
+
+  /* Q8 \u2014 binaire, r\u00E9ponse leur */
+  {num:8,type:'bin',
+   ph:'Les enfants retrouvent <span class="lacune">___</span> <span class="nom">ballon</span>.',
+   consigne:'Compl\u00e8te la phrase.',
+   opts:[
+     {l:'A.',t:'leurs',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le nom qui suit est au singulier.'},
+     {l:'B.',t:'leur',ok:true,
+      fb:'<span class="fb-titre">\u2713 Tr\u00e8s bien\u00a0!</span><span class="hl-ok">Ballon</span> est un nom singulier.'}
+   ],
+   cor:'<strong>leur</strong> \u2014 <em>Ballon</em> est un nom singulier.'},
+
+  /* Q9 \u2014 binaire, r\u00E9ponse leurs */
+  {num:9,type:'bin',
+   ph:'Les apprenants rangentt <span class="lacune">___</span> <span class="nom">affaires</span> avant la fin de la s\u00e9ance.',
+   consigne:'Compl\u00e8te la phrase.',
+   opts:[
+     {l:'A.',t:'leur',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Observe le nom qui suit.'},
+     {l:'B.',t:'leurs',ok:true,
+      fb:'<span class="fb-titre">\u2713 Parfait\u00a0!</span><span class="hl-ok">Affaires</span> est au pluriel.'}
+   ],
+   cor:'<strong>leurs</strong> \u2014 <em>Affaires</em> est au pluriel.'},
+
+  /* Q10 \u2014 3 options, r\u00E9ponse B */
+  {num:10,type:'qcm',
+   ph:'Quelle phrase est correctement orthographi\u00e9e\u00a0?',
+   opts:[
+     {l:'A.',t:'Je <span class="leurs">leurs</span> pr\u00e9sente le nouveau projet.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Lorsque le mot remplace des personnes, on \u00e9crit <span class="hl-ok">leur</span>.'},
+     {l:'B.',t:'Je <span class="leur">leur</span> pr\u00e9sente le nouveau projet.',ok:true,
+      fb:'<span class="fb-titre">\u2713 Bravo\u00a0!</span>Le pronom personnel est correctement employ\u00e9.'},
+     {l:'C.',t:'Je <span class="leur">leur</span> pr\u00e9sentent le nouveau projet.',ok:false,
+      fb:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Le choix de <em>leur</em> est correct. Pense aussi \u00e0 accorder le verbe avec le sujet <em>je</em>\u00a0: <span class="hl-ok">je pr\u00e9sente</span>.'}
+   ],
+   cor:'<strong>B</strong> \u2014 Le pronom personnel est correctement employ\u00e9.'}
+];
+
+var scoreOk=0,cur=0,done=[];
+function g(id){return document.getElementById(id);}
+function animerEl(el,ok){if(!el)return;el.classList.remove('anim-ok','anim-ko');void el.offsetWidth;el.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(){
+  var pct=Math.round(scoreOk/10*100);
+  g('prog-fill').style.width=pct+'%';
+  g('prog-label').textContent=scoreOk+' / 10 points';
+  g('prog-pct').textContent=pct+'\u00a0%';
+  g('dash-total').textContent=scoreOk;
+  g('chip-ok').textContent=scoreOk;
+  g('chip-ko').textContent=done.length-scoreOk;
+  g('chip-rem').textContent=10-done.length;
+}
+
+function afficherQ(idx){
+  var zone=g('zone-q');zone.innerHTML='';
+  var q=QS[idx];
+  var card=document.createElement('div');card.className='card';card.id='card-q'+q.num;
+  card.appendChild(Object.assign(document.createElement('div'),{className:'card-stripe'}));
+  var lbl=document.createElement('div');lbl.className='q-label';
+  var types={qcm:'QCM',bin:'Compl\u00e9ter'};
+  lbl.textContent='Question n\u00b0\u00a0'+q.num+' \u2014 '+(types[q.type]||'');
+  card.appendChild(lbl);
+  if(q.consigne){var cs=document.createElement('div');cs.className='q-consigne';cs.textContent=q.consigne;card.appendChild(cs);}
+  var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=q.ph;card.appendChild(ph);
+  var opts=document.createElement('div');opts.className='opts';
+  q.opts.forEach(function(opt,oi){
+    var btn=document.createElement('button');btn.className='opt-btn';
+    btn.innerHTML='<span class="opt-letter">'+opt.l+'</span><span>'+opt.t+'</span>';
+    btn.addEventListener('click',function(){choisir(q,oi,btn,opts,card);});
+    opts.appendChild(btn);
+  });
+  card.appendChild(opts);
+  var fb=document.createElement('div');fb.className='fb';fb.id='fb-q'+q.num;card.appendChild(fb);
+  var cor=document.createElement('div');cor.className='corrige-bloc';cor.id='cor-q'+q.num;
+  var ct=document.createElement('div');ct.className='corrige-titre';ct.textContent='Corrig\u00e9';cor.appendChild(ct);
+  var ci=document.createElement('div');ci.className='corrige-texte';ci.innerHTML=q.cor;cor.appendChild(ci);
+  card.appendChild(cor);
+  zone.appendChild(card);
+  g('dash-statut').textContent='Question '+q.num+' en cours\u2026';
+  g('nav-wrap').style.display='none';
+}
+
+function choisir(q,oi,btn,optsEl,card){
+  if(done.indexOf(q.num)>=0)return;
+  done.push(q.num);
+  var ok=q.opts[oi].ok;
+  if(ok){scoreOk++;jouerOk();}else jouerErreur();
+  var allB=optsEl.querySelectorAll('.opt-btn');
+  allB.forEach(function(b,bi){
+    b.disabled=true;
+    if(q.opts[bi].ok)b.classList.add('ok-opt');
+    else if(bi===oi&&!ok)b.classList.add('ko-opt');
+  });
+  var fbEl=g('fb-q'+q.num);
+  fbEl.className='fb show '+(ok?'ok-fb':'ko-fb');
+  fbEl.innerHTML=q.opts[oi].fb;
+  g('cor-q'+q.num).classList.add('show');
+  animerEl(card,ok);
+  var nb=g('nb-q'+q.num),nbs=g('nb-s'+q.num);
+  if(nb&&nbs){
+    nbs.textContent=ok?'\u2713':'\u2717';nbs.style.color=ok?'#15803d':'#b91c1c';
+    if(ok){nb.style.background='rgba(34,197,94,.12)';nb.style.borderColor='var(--green)';}
+    else{nb.style.background='rgba(239,68,68,.1)';nb.style.borderColor='var(--red)';}
+  }
+  majProg();
+  g('nav-wrap').style.display='';
+  var btnNav=g('btn-nav');
+  if(cur<QS.length-1){
+    btnNav.textContent='Question suivante \u2192';btnNav.onclick=suivant;
+  } else {
+    btnNav.textContent='Voir le bilan \u2192';btnNav.onclick=afficherBilan;
+  }
+}
+
+function suivant(){
+  cur++;g('nav-wrap').style.display='none';
+  afficherQ(cur);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function afficherBilan(){
+  g('nav-wrap').style.display='none';g('zone-q').innerHTML='';
+  g('bilan-bloc').classList.add('show');
+  g('bilan-num').textContent=scoreOk;
+  var stars=scoreOk===10?5:scoreOk>=8?4:scoreOk>=6?3:scoreOk>=4?2:1;
+  g('bilan-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(scoreOk===10){badge='<div class="badge-ok">\u2713 10/10 \u2014 Excellent\u00a0!</div>';msg='Tu ma\u00eetrises parfaitement leur et leurs.';pluie();}
+  else if(scoreOk>=7){badge='<div class="badge-ok">'+scoreOk+'/10 \u2014 Tr\u00e8s bien\u00a0!</div>';msg='Quelques points \u00e0 consolider. Relis le corrig\u00e9.';if(scoreOk>=9)pluie();}
+  else if(scoreOk>=5){badge='<div class="badge-ko">'+scoreOk+'/10 \u2014 Bien.</div>';msg='Rep\u00e8re toujours le mot qui suit\u00a0: si c\u2019est un nom, c\u2019est un d\u00e9terminant. Si c\u2019est un verbe, c\u2019est un pronom.';}
+  else{badge='<div class="badge-ko">'+scoreOk+'/10 \u2014 Continue\u00a0!</div>';msg='Astuce\u00a0: teste le remplacement par \u00ab\u00a0\u00e0 eux\u00a0\u00bb pour le pronom, et observe le nom qui suit pour le d\u00e9terminant.';}
+  g('bilan-badge').innerHTML=badge;
+  g('bilan-msg').textContent=msg;
+  var recap='';
+  for(var i=1;i<=10;i++){
+    var nbs=g('nb-s'+i);var v=nbs?nbs.textContent:'\u2014';var isOk=(v==='\u2713');
+    recap+='<div class="recap-ligne"><span>Question '+i+'</span><span class="'+(isOk?'recap-ok':'recap-ko')+'">'+v+'</span></div>';
+  }
+  g('recap-bloc').innerHTML=recap;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetTout(){
+  scoreOk=0;cur=0;done=[];
+  g('bilan-bloc').classList.remove('show');
+  g('nav-wrap').style.display='none';g('zone-q').innerHTML='';
+  for(var i=1;i<=10;i++){
+    var nb=g('nb-q'+i),nbs=g('nb-s'+i);
+    if(nb){nb.style.background='';nb.style.borderColor='';}
+    if(nbs){nbs.textContent='\u2014';nbs.style.color='';}
+  }
+  majProg();afficherQ(0);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+afficherQ(0);majProg();
+</script>
+</body>
+</html>
