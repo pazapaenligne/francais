@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le Parcours de l'Expert — Le Renard et la Cigogne</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#08060f;font-family:Arial,sans-serif}
+body{min-height:100vh;overflow-x:hidden;overflow-y:auto;}
+
+/* ── FOND ── */
+#bg{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 50% 40%, #12103a 0%, #08060f 65%);overflow:hidden;}
+#particles{position:fixed;inset:0;pointer-events:none;z-index:1;}
+
+/* ── LAYOUT ── */
+#app{position:relative;z-index:2;width:100%;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:18px 20px 40px;gap:14px;}
+
+#titre{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(13px,2vw,22px);letter-spacing:4px;
+  color:#e5c417;text-shadow:0 0 18px rgba(229,196,23,0.5),0 0 40px rgba(229,196,23,0.2);text-align:center;}
+#sous-titre{font-family:'Orbitron',monospace;font-size:9px;color:rgba(229,196,23,0.4);letter-spacing:5px;
+  text-align:center;margin-top:2px;}
+
+/* ── TEXTE SUPPORT (bouton + panneau) ── */
+#texteBtn{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1.5px;color:#e5c417;
+  background:rgba(229,196,23,0.1);border:1px solid rgba(229,196,23,0.35);border-radius:20px;
+  padding:9px 18px;cursor:pointer;min-height:2.6rem;}
+#texteBtn:hover{background:rgba(229,196,23,0.2);}
+#textePanel{display:none;width:100%;max-width:700px;background:linear-gradient(160deg,rgba(16,14,44,0.98),rgba(8,7,25,0.99));
+  border:1.5px solid rgba(229,196,23,0.3);border-radius:14px;padding:20px 24px;color:#dde8ff;
+  font-size:clamp(.85rem,2.2vw,.95rem);line-height:1.85;}
+#textePanel.show{display:block;}
+#textePanel .titrefable{font-family:'Orbitron',monospace;color:#e5c417;font-size:.85rem;letter-spacing:1px;margin-bottom:10px;}
+#textePanel .attrib{color:#8899bb;font-size:.78rem;margin-top:10px;font-style:italic;}
+
+/* ── LIGNE DE PROGRESSION ── */
+#parcours-wrap{width:100%;max-width:860px;position:relative;padding:10px 0 6px;}
+#parcours-rail{position:absolute;top:50%;left:40px;right:40px;height:4px;background:rgba(255,255,255,0.06);
+  border-radius:2px;transform:translateY(-50%);}
+#parcours-fill{height:100%;border-radius:2px;width:0%;background:linear-gradient(90deg,#4466ff,#44aaff,#e5c417);
+  transition:width 0.6s ease;box-shadow:0 0 10px rgba(100,180,255,0.6);}
+#stations{position:relative;display:flex;justify-content:space-between;align-items:center;}
+.station{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;cursor:default;}
+.station-orbe{width:clamp(36px,5vw,52px);height:clamp(36px,5vw,52px);border-radius:50%;
+  border:2.5px solid rgba(255,255,255,0.12);background:rgba(20,18,50,0.9);
+  display:flex;align-items:center;justify-content:center;font-size:clamp(14px,2vw,20px);
+  transition:all 0.4s ease;position:relative;z-index:2;}
+.station-label{font-family:'Orbitron',monospace;font-size:clamp(7px,0.8vw,9px);color:rgba(255,255,255,0.35);
+  text-align:center;white-space:nowrap;transition:color 0.4s;max-width:80px;}
+.station.fait .station-orbe{background:linear-gradient(135deg,#224400,#336600);border-color:#89c843;
+  box-shadow:0 0 16px rgba(137,200,67,0.5);}
+.station.fait .station-label{color:#89c843;}
+.station.actif .station-orbe{background:linear-gradient(135deg,#1a1060,#2a1880);border-color:#e5c417;
+  box-shadow:0 0 20px rgba(229,196,23,0.7),0 0 40px rgba(229,196,23,0.3);animation:pulseOrbe 1.8s ease-in-out infinite;}
+.station.actif .station-label{color:#e5c417;font-weight:700;}
+.station.futur .station-orbe{opacity:0.4;}
+@keyframes pulseOrbe{0%,100%{box-shadow:0 0 16px rgba(229,196,23,0.6),0 0 30px rgba(229,196,23,0.2);}
+  50%{box-shadow:0 0 28px rgba(229,196,23,0.9),0 0 55px rgba(229,196,23,0.4);}}
+.station-num{position:absolute;top:-8px;right:-6px;width:16px;height:16px;border-radius:50%;
+  background:#e5c417;color:#0a0600;font-size:8px;font-weight:700;font-family:'Orbitron',monospace;
+  display:flex;align-items:center;justify-content:center;z-index:3;}
+
+/* ── PANNEAU QUESTION ── */
+#question-panel{width:100%;max-width:820px;background:linear-gradient(160deg,rgba(16,14,44,0.98),rgba(8,7,25,0.99));
+  border:1.5px solid rgba(229,196,23,0.25);border-radius:16px;padding:24px 28px 20px;
+  box-shadow:0 0 40px rgba(0,0,0,0.8),inset 0 0 30px rgba(229,196,23,0.03);
+  flex:1;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;}
+#question-panel::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;
+  border-radius:50%;background:radial-gradient(circle,rgba(229,196,23,0.08) 0%,transparent 70%);pointer-events:none;}
+#level-badge{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;}
+#level-tag{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;color:#e5c417;
+  background:rgba(229,196,23,0.1);border:1px solid rgba(229,196,23,0.3);padding:4px 10px;border-radius:4px;}
+#etoiles-wrap{display:flex;gap:4px;}
+.etoile{font-size:14px;transition:all 0.3s;}
+#question-txt{font-size:clamp(13px,1.8vw,17px);color:#dde8ff;line-height:1.75;
+  border-left:3px solid rgba(229,196,23,0.4);padding-left:16px;}
+#reponses{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:640px){#reponses{grid-template-columns:1fr;}}
+.rep{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:10px;cursor:pointer;
+  border:1.5px solid rgba(80,100,180,0.3);background:rgba(20,22,60,0.6);transition:all .13s;min-height:50px;}
+.rep:hover{border-color:rgba(229,196,23,0.6);background:rgba(40,38,90,0.8);
+  box-shadow:0 0 14px rgba(229,196,23,0.15);transform:translateX(3px);}
+.rep-l{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;font-family:'Orbitron',monospace;background:rgba(40,60,160,0.6);
+  border:1.5px solid rgba(100,140,255,0.4);color:#88aaff;}
+.rep-t{font-size:clamp(11px,1.4vw,14px);color:#c0cef0;line-height:1.4;}
+.rep.ok{border-color:#89c843;background:rgba(30,60,10,0.8);box-shadow:0 0 18px rgba(137,200,67,0.35);transform:none;}
+.rep.ko{border-color:#e74c3c;background:rgba(60,10,10,0.8);box-shadow:0 0 14px rgba(231,76,60,0.25);}
+.rep.reveal{border-color:rgba(137,200,67,0.5);background:rgba(30,60,10,0.4);}
+#feedback{min-height:32px;display:flex;align-items:center;font-size:clamp(.82rem,2.2vw,.92rem);font-weight:600;
+  padding:0 4px;line-height:1.6;transition:all .3s;}
+#feedback.ok{color:#89c843;}
+#feedback.ko{color:#e47a6a;}
+#feedback.wait{color:rgba(229,196,23,0.7);}
+#delai-bar{height:3px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;}
+#delai-fill{height:100%;width:100%;border-radius:2px;background:linear-gradient(90deg,#4466ff,#e5c417);
+  transform:scaleX(0);transform-origin:left;}
+
+/* ── DASHBOARD ── */
+#dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px;}
+@media(max-width:640px){#dashboard{grid-template-columns:1fr 1fr;}}
+.dash-bloc{background:rgba(10,12,40,0.7);border:1px solid rgba(100,130,220,0.18);border-radius:10px;
+  padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+.dash-label{font-family:'Orbitron',monospace;font-size:7.5px;color:rgba(180,200,255,0.45);
+  letter-spacing:2px;text-transform:uppercase;}
+.dash-val{font-family:'Orbitron',monospace;font-size:clamp(13px,1.6vw,18px);color:#c8daff;font-weight:700;}
+
+/* ── OVERLAY ── */
+#overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,3,12,0.95);padding:20px;overflow-y:auto;}
+.carte{background:linear-gradient(160deg,#0e0c2e,#070519);border:2px solid rgba(229,196,23,0.4);
+  border-radius:18px;padding:36px 34px;text-align:center;max-width:560px;width:100%;
+  box-shadow:0 0 60px rgba(229,196,23,0.15);max-height:90vh;overflow-y:auto;}
+.carte h1{font-family:'Orbitron',monospace;font-size:clamp(15px,2.2vw,24px);color:#e5c417;
+  letter-spacing:3px;margin-bottom:4px;text-shadow:0 0 20px rgba(229,196,23,0.5);}
+.carte-scene{width:calc(100% + 68px);margin:-36px -34px 20px;border-radius:16px 16px 0 0;overflow:hidden;}
+.carte-scene img{width:100%;display:block;}
+.carte .sub{font-family:'Orbitron',monospace;font-size:9px;color:rgba(229,196,23,0.4);
+  letter-spacing:4px;margin-bottom:22px;}
+.carte p{color:#b8c8e8;font-size:13px;line-height:1.9;margin-bottom:22px;text-align:left;}
+.carte p b{color:#e5c417;}
+.btn-go{padding:13px 36px;background:linear-gradient(135deg,#b89010,#e5c417,#b89010);border:none;
+  border-radius:8px;cursor:pointer;font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  color:#080400;letter-spacing:2px;box-shadow:0 4px 20px rgba(229,196,23,0.35);transition:all .15s;
+  min-height:2.8rem;}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(229,196,23,0.55);}
+
+.recap-station{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:10px;
+  background:rgba(16,14,44,0.8);border:1px solid rgba(255,255,255,0.07);margin-bottom:7px;}
+.recap-icone{font-size:22px;width:32px;text-align:center;}
+.recap-info{flex:1;text-align:left;}
+.recap-titre{font-family:'Orbitron',monospace;font-size:10px;color:#88aacc;letter-spacing:1px;}
+.recap-q{font-size:11px;color:#99aac8;margin-top:2px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div id="bg"><canvas id="particles"></canvas></div>
+
+<div id="overlay">
+  <div class="carte">
+        <h1>LE PARCOURS</h1>
+    <div class="sub">DE L'EXPERT</div>
+    <p>
+      Une fable de <b>La Fontaine</b> t'attend : <b>Le Pot de terre et le Pot de fer</b>.<br><br>
+      <b>5 stations</b> à franchir pour interpréter la fable.<br>
+      Chaque bonne réponse te fait avancer.<br>
+      En cas d'erreur : <b>pas d'élimination</b>,<br>
+      mais un délai avant de continuer et une étoile en moins.<br><br>
+      Atteins la dernière station pour devenir <b>Expert !</b>
+    </p>
+    <button class="btn-go" onclick="startGame()">▶ Commencer</button>
+  </div>
+</div>
+
+<div id="app">
+  <div>
+    <div id="titre">LE PARCOURS DE L'EXPERT</div>
+    <div id="sous-titre">LE POT DE TERRE ET LE POT DE FER — PAZAPA</div>
+  </div>
+
+  <button id="texteBtn">📖 Relire le texte</button>
+  <div id="textePanel">
+    <div class="titrefable">LE POT DE TERRE ET LE POT DE FER</div>
+    Le Pot de fer proposa<br>
+    Au Pot de terre un voyage.<br>
+    Celui-ci s'en excusa,<br>
+    Disant qu'il ferait que sage<sup>(1)</sup><br>
+    De garder le coin du feu ;<br>
+    Car il lui fallait si peu,<br>
+    Si peu, que la moindre chose<br>
+    De son débris serait cause.<sup>(2)</sup><br>
+    Il n'en reviendrait morceau.<br>
+    « Pour vous, dit-il, dont la peau<br>
+    Est plus dure que la mienne,<br>
+    Je ne vois rien qui vous tienne.<br>
+    — Nous vous mettrons à couvert,<br>
+    Repartit le Pot de fer.<br>
+    Si quelque matière dure<br>
+    Vous menace d'aventure,<br>
+    Entre deux je passerai,<sup>(3)</sup><br>
+    Et du coup vous sauverai. »<br>
+    Cette offre le persuade.<br>
+    Pot de fer son camarade<br>
+    Se met droit à ses côtés.<br>
+    Mes gens s'en vont à trois pieds,<br>
+    Clopin-clopant comme ils peuvent,<br>
+    L'un contre l'autre jetés,<br>
+    Au moindre hoquet<sup>(4)</sup> qu'ils treuvent.<sup>(5)</sup><br>
+    Le pot de terre en souffre.<br>
+    il n'eut pas fait cent pas<br>
+    Que par son Compagnon il fut mis en éclats,<br>
+    Sans qu'il eût lieu de se plaindre.<br>
+    Ne nous associons qu'avecque nos égaux ;<br>
+    Ou bien il nous faudra craindre<br>
+    Le destin d'un de ces Pots.
+    <div class="attrib">J. de La Fontaine, Fables, V, 2.<br><br>
+    Notes :<br>
+    (1) il ferait sagement.<br>
+    (2) la moindre chose serait cause de sa casse.<br>
+    (3) je m'interposerai.<br>
+    (4) obstacle, empêchement.<br>
+    (5) trouvent.</div>
+  </div>
+
+  <div id="parcours-wrap">
+    <div id="parcours-rail"><div id="parcours-fill"></div></div>
+    <div id="stations"></div>
+  </div>
+
+  <div id="question-panel">
+    <div id="level-badge">
+      <div id="level-tag">STATION 1</div>
+      <div id="etoiles-wrap"></div>
+    </div>
+    <div id="question-txt"></div>
+    <div id="reponses"></div>
+    <div id="feedback"></div>
+    <div id="delai-bar"><div id="delai-fill"></div></div>
+
+    <div id="dashboard">
+      <div class="dash-bloc"><div class="dash-label">TEMPS</div><div class="dash-val" id="val-temps">0:00</div></div>
+      <div class="dash-bloc"><div class="dash-label">TENTATIVES</div><div class="dash-val" id="val-tent">0</div></div>
+      <div class="dash-bloc"><div class="dash-label">ÉTOILES EN JEU</div><div class="dash-val" id="val-etoiles">⭐⭐⭐</div></div>
+      <div class="dash-bloc"><div class="dash-label">PROGRESSION</div><div class="dash-val" id="val-prog">0 / 6</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════ QUESTIONS — reprises mot pour mot ════════ */
+const STATIONS = [
+  {
+    label:"Se connaître",icone:"🪞",
+    q:"Au début de la fable, le Pot de terre refuse le voyage en expliquant ses raisons. Avec le recul de toute la fable, avait-il eu raison de refuser au départ ? Qu'est-ce que cela dit sur l'importance de se connaître soi-même ?",
+    ch:[
+      "Non, il avait tort : en refusant, il montrait de la lâcheté. Il aurait dû faire confiance à son ami le Pot de fer.",
+      "Oui, il avait raison : il connaissait ses propres limites et les avait exprimées clairement. Se connaître soi-même est une forme de sagesse qui permet d'éviter les situations dangereuses.",
+      "La question ne se pose pas : dans une fable, les personnages ne font que ce que l'auteur a décidé ; ils n'ont pas de vraie liberté de choix."
+    ],a:1,
+    fb:"Le Pot de terre avait dit exactement ce qui allait se passer : « Il n'en reviendrait morceau. » La leçon est profonde : se connaître soi-même — ses forces et ses limites — est une forme de sagesse. Céder à la pression des autres contre son propre jugement est souvent une erreur. La Fontaine dit implicitement : faites confiance à votre instinct quand il vous avertit d'un danger."
+  },
+  {
+    label:"Bonnes intentions",icone:"⚖️",
+    q:"Le Pot de fer avait de bonnes intentions : il voulait protéger son ami. Pourtant, c'est lui qui le brise. Que dit cette situation sur la relation entre les bonnes intentions et les résultats de nos actes ?",
+    ch:[
+      "La fable dit que les bonnes intentions sont toujours suffisantes : si on veut aider quelqu'un sincèrement, on y arrive toujours.",
+      "La fable dit que les bonnes intentions ne suffisent pas : quand les forces sont trop inégales.",
+      "La fable dit que les bonnes intentions sont inutiles : il vaut mieux ne pas aider les autres pour ne pas risquer de les blesser."
+    ],a:1,
+    fb:"La fable illustre une vérité importante : entre des personnes d'inégale puissance, même la meilleure intention peut produire des effets destructeurs. Le Pot de fer ne voulait pas briser son ami — mais sa simple présence à ses côtés était dangereuse. Ce n'est pas la mauvaise volonté qui détruit le Pot de terre : c'est l'inégalité structurelle entre les deux."
+  },
+  {
+    label:"La Fontaine et nous",icone:"🖋️",
+    q:"La Fontaine écrit en 1678 pour la cour de Louis XIV, mais aussi pour tous ses contemporains. Pourquoi utilise-t-il « nous » dans la morale plutôt que « vous » ou « il » ? Quel effet cela produit-il ?",
+    ch:[
+      "Il utilise « nous » parce que c'est plus élégant à l'époque de Louis XIV : c'est un choix stylistique.",
+      "Il utilise « nous » pour s'inclure lui-même dans l'avertissement : personne n'est à l'abri de l'erreur du Pot de terre, pas même l'auteur. Ce « nous » crée une solidarité entre le fabuliste et ses lecteurs.",
+      "Il utilise « nous » car il s'adresse uniquement aux membres de la cour royale qui voyageaient souvent ensemble."
+    ],a:1,
+    fb:"Le choix du « nous » est un geste d'humilité de la part de La Fontaine : il ne dit pas « vous, les hommes, vous faites cela », il dit « nous » — lui compris. C'est aussi une stratégie rhétorique : en s'incluant dans la leçon, il la rend moins condescendante et plus facile à accepter. Le lecteur ne se sent pas jugé, mais accompagné."
+  },
+  {
+    label:"Une morale juste ?",icone:"🔑",
+    q:"La morale dit : « Ne nous associons qu'avecque nos égaux. » Penses-tu que cette leçon est toujours juste ? Peut-on imaginer des situations où une amitié ou une association entre des personnes inégales peut très bien fonctionner ?",
+    ch:[
+      "Non, la morale de La Fontaine est absolument juste et s'applique à toutes les situations : il ne faut jamais s'associer avec quelqu'un de différent.",
+      "La morale est souvent vraie, mais pas toujours : il existe des situations où des personnes d'inégale force peuvent s'associer avec succès, à condition que le plus fort respecte la fragilité du plus faible et adapte son comportement.",
+      "La morale est fausse : La Fontaine exagère le danger des associations inégales et ignore les nombreux exemples de coopération réussie entre des personnes différentes."
+    ],a:1,
+    fb:"La morale de La Fontaine est sage, mais elle n'est pas absolue. Ce qui détruit le Pot de terre, ce n'est pas uniquement l'inégalité de leurs constitutions : c'est aussi le fait que le Pot de fer ne prend aucune précaution. Il marche à son rythme, « clopin-clopant », « L'un contre l'autre jetés ». S'il avait vraiment voulu protéger son ami, il aurait ralenti, fait attention. La bonne intention sans l'adaptation est insuffisante."
+  },
+  {
+    label:"Toujours actuelle ?",icone:"⏳",
+    q:"La Fontaine a écrit cette fable en 1678. Penses-tu que la situation qu'elle décrit (une association dangereuse entre un faible et un fort) existe encore aujourd'hui ? Dans quels domaines de la vie actuelle peut-on retrouver ce type de situation ?",
+    ch:[
+      "Non : cette situation était propre au XVIIe siècle et n'existe plus dans nos sociétés modernes où les droits de chacun sont protégés.",
+      "Oui : on retrouve ce type de situation dans de nombreux domaines — les relations entre pays puissants et pays fragiles, entre grandes entreprises et petits artisans, entre adultes et enfants — où la différence de puissance peut causer des torts involontaires.",
+      "Oui, mais uniquement dans le domaine des voyages : la fable parle de voyage et ne s'applique qu'à cette situation précise."
+    ],a:1,
+    fb:"Les fables de La Fontaine ont plus de 350 ans et sont encore étudiées dans le monde entier. Leur longévité prouve leur universalité. La situation du Pot de terre et du Pot de fer se retrouve partout : dans les relations internationales (un petit pays allié à une grande puissance), dans les affaires (une petite entreprise associée à un grand groupe), dans les relations personnelles. La leçon reste toujours d'actualité."
+  }
+];
+
+/* ════════ ÉTAT ════════ */
+let qIdx=0, etoilesTotal=0, etoilesQuestion=0, locked=false;
+let timerInterval=null, timerSec=0, tentatives=0;
+const DELAI_ERREUR=3000;
+const MAX_ETOILES=3;
+const LETTRES=['A','B','C'];
+const historique=[];
+
+/* ════════ PARTICULES FOND ════════ */
+(function(){
+  const cv=document.getElementById('particles');
+  const ctx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const pts=Array.from({length:60},()=>({
+    x:Math.random()*cv.width,y:Math.random()*cv.height,
+    r:.5+Math.random()*1.5,s:.1+Math.random()*.3,
+    a:Math.random()*Math.PI*2,op:Math.random()*.5+.1
+  }));
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    pts.forEach(p=>{
+      p.y-=p.s;p.x+=Math.sin(p.a)*0.2;p.a+=0.01;
+      if(p.y<-4)p.y=cv.height+4;
+      ctx.save();ctx.globalAlpha=p.op;
+      ctx.fillStyle='#8899ff';
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',()=>{cv.width=window.innerWidth;cv.height=window.innerHeight;});
+})();
+
+/* ════════ DASHBOARD ════════ */
+function startTimer(){
+  clearInterval(timerInterval);timerSec=0;tentatives=0;
+  timerInterval=setInterval(()=>{
+    timerSec++;
+    const m=Math.floor(timerSec/60),s=timerSec%60;
+    const el=document.getElementById('val-temps');
+    if(el) el.textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+function updateDash(){
+  const e=document.getElementById('val-etoiles');
+  const t=document.getElementById('val-tent');
+  const p=document.getElementById('val-prog');
+  if(e) e.textContent='⭐'.repeat(etoilesQuestion)+'☆'.repeat(MAX_ETOILES-etoilesQuestion);
+  if(t) t.textContent=tentatives;
+  if(p) p.textContent=qIdx+' / '+STATIONS.length;
+}
+
+/* ════════ AUDIO ════════ */
+let ac=null;
+function beep(f,d,t,v){
+  try{
+    if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended')ac.resume();
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type=t||'sine';o.frequency.value=f;
+    g.gain.setValueAtTime(v||0.07,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d/1000);
+    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d/1000);
+  }catch(e){}
+}
+const sOk=()=>{beep(880,70,'sine',.09);setTimeout(()=>beep(1100,120,'sine',.09),80);};
+const sKo=()=>beep(200,250,'sawtooth',.1);
+const sNext=()=>beep(440,60,'sine',.06);
+const sWin=()=>{[523,659,784,880,1047,1319].forEach((n,i)=>setTimeout(()=>beep(n,100,'sine',.1),i*120));};
+
+/* ════════ CONSTRUIRE LA LIGNE ════════ */
+function buildParcours(){
+  const el=document.getElementById('stations');
+  el.innerHTML='';
+  STATIONS.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='station futur';div.id='st-'+i;
+    div.innerHTML='<div class="station-orbe">'+s.icone+'<span class="station-num">'+(i+1)+'</span></div>'
+      +'<div class="station-label">'+s.label+'</div>';
+    el.appendChild(div);
+  });
+  updateParcours();
+}
+function updateParcours(){
+  STATIONS.forEach((_,i)=>{
+    const el=document.getElementById('st-'+i);
+    if(!el)return;
+    el.className='station '+(i<qIdx?'fait':i===qIdx?'actif':'futur');
+  });
+  const pct=Math.min(100,qIdx/STATIONS.length*100);
+  document.getElementById('parcours-fill').style.width=pct+'%';
+}
+
+/* ════════ ÉTOILES ════════ */
+function setEtoiles(n){
+  const el=document.getElementById('etoiles-wrap');
+  el.innerHTML='';
+  for(let i=0;i<MAX_ETOILES;i++){
+    const s=document.createElement('span');
+    s.className='etoile';s.textContent=i<n?'⭐':'☆';
+    el.appendChild(s);
+  }
+}
+
+/* ════════ AFFICHER QUESTION ════════ */
+function showQuestion(){
+  if(qIdx>=STATIONS.length){endGame();return;}
+  locked=false;
+  etoilesQuestion=MAX_ETOILES;
+  const st=STATIONS[qIdx];
+
+  document.getElementById('level-tag').textContent='STATION '+(qIdx+1)+' — '+st.label.toUpperCase();
+  setEtoiles(MAX_ETOILES);
+
+  document.getElementById('question-txt').textContent=st.q;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='';
+  document.getElementById('delai-fill').style.transition='none';
+  document.getElementById('delai-fill').style.transform='scaleX(0)';
+
+  const rep=document.getElementById('reponses');
+  rep.innerHTML='';
+  st.ch.forEach((c,i)=>{
+    const btn=document.createElement('div');
+    btn.className='rep';
+    btn.innerHTML='<div class="rep-l">'+LETTRES[i]+'</div><div class="rep-t">'+c+'</div>';
+    btn.onclick=()=>answer(i,st.a,btn,rep,st);
+    rep.appendChild(btn);
+  });
+
+  updateParcours();
+  startTimer();
+  tentatives=0;
+  updateDash();
+  sNext();
+}
+
+/* ════════ RÉPONDRE ════════ */
+function answer(chosen,correct,btn,rep,st){
+  if(locked)return;
+  locked=true;
+  rep.querySelectorAll('.rep').forEach(b=>b.style.cursor='default');
+
+  if(chosen===correct){
+    btn.classList.add('ok');
+    sOk();
+    document.getElementById('feedback').textContent='✓ Bonne réponse !';
+    document.getElementById('feedback').className='ok';
+    clearInterval(timerInterval);
+    historique.push({station:st,etoiles:etoilesQuestion,ok:true});
+    etoilesTotal+=etoilesQuestion;
+    qIdx++;
+    setTimeout(()=>showQuestion(),1400);
+  } else {
+    tentatives++;
+    updateDash();
+    btn.classList.add('ko');
+    rep.querySelectorAll('.rep')[correct].classList.add('reveal');
+    sKo();
+    etoilesQuestion=Math.max(0,etoilesQuestion-1);
+    setEtoiles(etoilesQuestion);
+    updateDash();
+    const fb=document.getElementById('feedback');
+    fb.textContent=st.fb;
+    fb.className='ko';
+    setTimeout(()=>{
+      const fill=document.getElementById('delai-fill');
+      fill.style.transition='transform '+DELAI_ERREUR+'ms linear';
+      fill.style.transform='scaleX(1)';
+    },50);
+    setTimeout(()=>{
+      rep.querySelectorAll('.rep').forEach(b=>{
+        b.classList.remove('ko','reveal','ok');
+        b.style.cursor='pointer';
+      });
+      document.getElementById('delai-fill').style.transition='none';
+      document.getElementById('delai-fill').style.transform='scaleX(0)';
+      fb.textContent='Essaie à nouveau !';
+      fb.className='wait';
+      locked=false;
+    },DELAI_ERREUR+100);
+  }
+}
+
+/* ════════ FIN ════════ */
+function endGame(){
+  sWin();
+  const totalEtoiles=STATIONS.length*MAX_ETOILES;
+  const pct=etoilesTotal/totalEtoiles;
+  const scoreFinal=Math.round(pct*10);
+  let msg;
+  if(scoreFinal>=9)msg="🏆 Bien joué ! Tu as parfaitement interprété les enjeux de cette fable de La Fontaine.";
+  else if(scoreFinal>=7)msg="Très bonne interprétation. La réflexion est solide.";
+  else if(scoreFinal>=4)msg="Bonne tentative. Relis les feedbacks et retente.";
+  else msg="On s'accroche et on reprend la fable et les questions précédentes !";
+
+  const ov=document.getElementById('overlay');
+  ov.innerHTML='<div class="carte">'
+    +'<h1>PARCOURS TERMINÉ</h1>'
+    +'<div class="sub">SCORE : '+scoreFinal+' / 10</div>'
+    +'<p style="text-align:center">'+msg+'</p>'
+    +buildRecap()
+    +'<button class="btn-go" style="margin-top:18px" onclick="restartGame()">↺ Recommencer</button>'
+    +'</div>';
+  ov.style.display='flex';
+}
+function buildRecap(){
+  return '<div style="display:flex;flex-direction:column;gap:7px;margin:10px 0">'+
+    historique.map(h=>
+      '<div class="recap-station">'
+      +'<span class="recap-icone">'+h.station.icone+'</span>'
+      +'<div class="recap-info">'
+      +'<div class="recap-titre">'+h.station.label+'</div>'
+      +'<div class="recap-q">'+h.station.q.slice(0,90)+'…</div>'
+      +'</div>'
+      +'<div>'+'⭐'.repeat(h.etoiles)+'☆'.repeat(MAX_ETOILES-h.etoiles)+'</div>'
+      +'</div>'
+    ).join('')
+  +'</div>';
+}
+
+/* ════════ START / RESTART ════════ */
+function startGame(){
+  if(!ac)try{ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  document.getElementById('overlay').style.display='none';
+  qIdx=0;etoilesTotal=0;historique.length=0;
+  buildParcours();
+  showQuestion();
+}
+function restartGame(){
+  document.getElementById('overlay').style.display='none';
+  qIdx=0;etoilesTotal=0;historique.length=0;
+  buildParcours();
+  showQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('texteBtn').addEventListener('click',()=>{
+  document.getElementById('textePanel').classList.toggle('show');
+});
+</script>
+</body>
+</html>
