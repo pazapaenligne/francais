@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Le Pot de terre et le Pot de fer – 4ème</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;
+      --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--pink:#f28b82;
+      --text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;max-width:800px;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;
+      box-shadow:0 2px 8px rgba(245,197,24,.45);color:#000;font-size:.78rem;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;
+      margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--muted);margin-bottom:.45rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-color);}
+    .main-layout{display:flex;gap:1.2rem;width:100%;max-width:900px;
+      align-items:flex-start;position:relative;z-index:1;}
+    .col-left{flex:1 1 0;min-width:0;}
+    .col-right{width:240px;flex-shrink:0;}
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem 1.1rem;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;margin-bottom:1.2rem;}
+    .card:last-child{margin-bottom:0;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--pink));}
+    .card-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.9rem;}
+    .fable-titre{font-size:1.05rem;font-weight:900;color:var(--text);margin-bottom:.8rem;text-align:center;line-height:1.4;}
+    .fable-body{font-size:.97rem;line-height:2;color:var(--text);}
+    .fable-body .verse{display:block;}
+    .fable-source{font-size:.85rem;color:var(--muted);margin-top:.8rem;font-style:italic;text-align:right;}
+    .notes{font-size:.82rem;color:var(--muted);margin-top:.8rem;line-height:1.75;
+      border-top:1px solid var(--border);padding-top:.7rem;}
+    .tok{display:inline;cursor:pointer;border-radius:3px;padding:1px 2px;
+      transition:background .12s,color .12s;-webkit-user-select:none;user-select:none;
+      -webkit-tap-highlight-color:transparent;}
+    .tok:hover{background:rgba(245,166,35,.18);}
+    .tok.correct{background:rgba(141,198,63,.35);color:#1a4a00;font-weight:700;}
+    .tok.wrong{background:rgba(232,0,45,.18);color:#8b0000;}
+    .grp-dots{display:none;gap:.4rem;align-items:center;margin-bottom:.6rem;}
+    .grp-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--day-color);
+      background:#fff;transition:background .3s;}
+    .grp-dot.hit{background:var(--green);border-color:var(--green);}
+    .carnet-card{text-align:center;}
+    .carnet-wrap{display:flex;justify-content:center;margin:.4rem 0 .6rem;}
+    .carnet-svg{width:90px;height:110px;}
+    .page-line{transition:opacity .4s;opacity:.15;}
+    .page-line.filled{opacity:1;}
+    .carnet-bar-wrap{width:100%;background:#eee;border-radius:99px;height:8px;margin-top:.2rem;overflow:hidden;}
+    .carnet-bar{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+    .carnet-score{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-top:.4rem;}
+    .ref-item{margin-bottom:.65rem;font-size:.88rem;line-height:1.6;color:var(--text);}
+    .ref-item:last-child{margin-bottom:0;}
+    .ref-term{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);
+      display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.1rem;}
+    .q-progress{display:flex;gap:.35rem;margin-bottom:.9rem;flex-wrap:wrap;}
+    .q-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:#fff;
+      display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;
+      font-size:.72rem;font-weight:700;color:var(--muted);transition:all .3s;}
+    .q-dot.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+    .q-dot.done-ok{border-color:var(--green);background:rgba(141,198,63,.15);color:#1a4a00;}
+    .q-dot.done-ko{border-color:var(--pink);background:rgba(242,139,130,.15);color:#8b0000;}
+    .q-label{font-size:.75rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+      letter-spacing:.1em;color:var(--day-dark);font-weight:700;margin-bottom:.35rem;}
+    .q-text{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.55;margin-bottom:.7rem;}
+    .btn{padding:.55rem 1.1rem;border-radius:8px;border:none;cursor:pointer;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;
+      display:inline-flex;align-items:center;gap:.4rem;transition:transform .15s,box-shadow .15s;}
+    .btn:active{transform:scale(.96);}
+    .btn-next{background:var(--day-color);color:#fff;box-shadow:0 3px 12px var(--day-glow);}
+    .btn-next:hover{box-shadow:0 5px 18px var(--day-glow);}
+    .btn-retry{background:var(--bg);color:var(--text);border:2px solid var(--border);}
+    .btn-retry:hover{border-color:var(--day-color);}
+    .q-feedback{display:none;margin-top:.75rem;padding:.65rem .85rem;border-radius:8px;
+      font-size:.9rem;line-height:1.6;border-left:4px solid;}
+    .q-feedback.show{display:block;}
+    .q-feedback.ko{background:rgba(242,139,130,.1);border-color:var(--pink);color:#7a0000;}
+    .score-card{display:none;text-align:center;}
+    .score-card.show{display:block;}
+    .score-big{font-size:3rem;font-weight:900;color:var(--day-color);line-height:1;}
+    .score-sub{font-size:1rem;color:var(--muted);margin-top:.3rem;}
+    .score-msg{font-size:.95rem;color:var(--text);margin-top:.8rem;line-height:1.55;}
+    .score-bravo{display:none;margin-top:.8rem;padding:.65rem 1rem;border-radius:10px;
+      background:rgba(141,198,63,.15);border:2px solid var(--green);
+      color:#1a4a00;font-size:.95rem;font-weight:700;}
+    .score-bravo.show{display:block;}
+    .flash-pop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+      z-index:500;font-size:3.5rem;pointer-events:none;opacity:0;}
+    .flash-pop.run-ok{animation:flashOk .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+    .flash-pop.run-err{animation:flashErr .5s cubic-bezier(.34,1.56,.64,1) forwards;}
+    @keyframes flashOk{0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.8);}}
+    @keyframes flashErr{0%{opacity:1;transform:translate(-50%,-50%) scale(0);}
+      40%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.6);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .card{animation:fadeUp .4s ease both;}
+    @media(max-width:680px){.main-layout{flex-direction:column;}.col-right{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="flash-pop" id="flashpop"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#e8002d"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Fran&ccedil;ais &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine 8 &ndash; Jour 1</div>
+  <h1>J&rsquo;explore &middot; <span class="hl">La Fontaine, Le Pot de terre et le Pot de fer</span></h1>
+</header>
+
+<div class="main-layout">
+  <div class="col-left">
+
+    <div class="card" id="qcard">
+      <div class="card-stripe"></div>
+      <div class="card-title">Question en cours</div>
+      <div style="font-size:.9rem;line-height:1.6;color:var(--muted);margin-bottom:.9rem;padding:.55rem .8rem;background:var(--day-light);border-radius:8px;border-left:3px solid var(--day-border);">
+        &#128269; Maintenant, observe attentivement le texte et rep&egrave;re les informations essentielles pour mieux comprendre l&rsquo;histoire.
+      </div>
+      <div class="q-progress" id="qdots"></div>
+      <div class="q-label" id="qlabel">Q1 / 6</div>
+      <div class="q-text" id="qtext"></div>
+      <div class="grp-dots" id="grpdots"></div>
+      <div class="q-feedback" id="qfb"></div>
+      <div id="qactions" style="margin-top:.75rem;display:flex;gap:.6rem;flex-wrap:wrap;"></div>
+    </div>
+
+    <div class="card score-card" id="scorecard">
+      <div class="card-stripe"></div>
+      <div class="score-big" id="scoreval"></div>
+      <div class="score-sub">sur 6 questions</div>
+      <div class="score-msg" id="scoremsg"></div>
+      <div class="score-bravo" id="scorebravo">Bravo&nbsp;! Tu es pr&ecirc;t.e &agrave; passer &agrave; l&rsquo;&eacute;tape suivante&nbsp;!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Texte support</div>
+      <div class="fable-titre">LE POT DE TERRE<br>ET LE POT DE FER</div>
+      <div class="fable-body" id="fable"></div>
+      <div class="fable-source">J. de La Fontaine, <em>Fables</em>, V, 2.</div>
+      <div class="notes">
+        (1) il ferait sagement.<br>
+        (2) la moindre chose serait cause de sa casse.<br>
+        (3) je m&rsquo;interposerai.<br>
+        (4) obstacle, emp&ecirc;chement.<br>
+        (5) trouvent.
+      </div>
+    </div>
+
+  </div>
+  <div class="col-right">
+
+    <div class="card carnet-card">
+      <div class="card-stripe"></div>
+      <div class="card-title">Carnet du fabuliste</div>
+      <div class="carnet-wrap">
+        <svg class="carnet-svg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="4" width="68" height="96" rx="5" ry="5" fill="#1a1d23"/>
+          <rect x="8" y="4" width="10" height="96" rx="3" ry="3" fill="#000"/>
+          <rect x="20" y="10" width="52" height="84" rx="3" ry="3" fill="#fffdf7"/>
+          <text x="46" y="24" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">CARNET DU</text>
+          <text x="46" y="32" text-anchor="middle" font-family="Arial" font-size="5.5" font-weight="700" fill="#1a1d23">FABULISTE</text>
+          <line x1="26" y1="38" x2="66" y2="38" stroke="#f5d080" stroke-width="1"/>
+          <line id="pl0" class="page-line" x1="26" y1="46" x2="66" y2="46" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl1" class="page-line" x1="26" y1="53" x2="66" y2="53" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl2" class="page-line" x1="26" y1="60" x2="66" y2="60" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl3" class="page-line" x1="26" y1="67" x2="66" y2="67" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl4" class="page-line" x1="26" y1="74" x2="66" y2="74" stroke="#f5a623" stroke-width="2" stroke-linecap="round"/>
+          <line id="pl5" class="page-line" x1="26" y1="81" x2="52" y2="81" stroke="#8dc63f" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="66" y="92" text-anchor="middle" font-family="Arial" font-size="8" fill="#f5d080">&#9733;</text>
+        </svg>
+      </div>
+      <div class="carnet-bar-wrap"><div class="carnet-bar" id="carnetbar"></div></div>
+      <div class="carnet-score" id="carnetscore">0 / 6 rep&egrave;res</div>
+    </div>
+
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-title">R&eacute;f&eacute;rentiel</div>
+      <div class="ref-item"><span class="ref-term">Fable</span>Court r&eacute;cit souvent en vers avec une morale explicite.</div>
+      <div class="ref-item"><span class="ref-term">Morale</span>Le&ccedil;on tir&eacute;e de la fable, souvent &agrave; la fin.</div>
+      <div class="ref-item"><span class="ref-term">Personnification</span>Action humaine pr&ecirc;t&eacute;e &agrave; un objet ou un animal.</div>
+      <div class="ref-item"><span class="ref-term">Ironie</span>Dire le contraire de ce qu&rsquo;on pense pour produire un effet critique.</div>
+      <div class="ref-item"><span class="ref-term">Satire sociale</span>Critique d&rsquo;un d&eacute;faut ou d&rsquo;une in&eacute;galit&eacute; par le rire ou l&rsquo;ironie.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var VERS = [
+  {tokens:[{id:'v1t0',w:'Le'},{id:'v1t1',w:'Pot'},{id:'v1t2',w:'de'},{id:'v1t3',w:'fer'},{id:'v1t4',w:'proposa'}]},
+  {tokens:[{id:'v2t0',w:'Au'},{id:'v2t1',w:'Pot'},{id:'v2t2',w:'de'},{id:'v2t3',w:'terre'},{id:'v2t4',w:'un'},{id:'v2t5',w:'voyage.'}]},
+  {tokens:[{id:'v3t0',w:'Celui-ci'},{id:'v3t1',w:"s'en"},{id:'v3t2',w:'excusa,'}]},
+  {tokens:[{id:'v4t0',w:'Disant'},{id:'v4t1',w:"qu'il"},{id:'v4t2',w:'ferait'},{id:'v4t3',w:'que'},{id:'v4t4',w:'sage',nc:true}]},
+  {tokens:[{id:'v5t0',w:'De'},{id:'v5t1',w:'garder'},{id:'v5t2',w:'le'},{id:'v5t3',w:'coin'},{id:'v5t4',w:'du'},{id:'v5t5',w:'feu'},{id:'v5t6',w:';'}]},
+  {tokens:[{id:'v6t0',w:'Car'},{id:'v6t1',w:'il'},{id:'v6t2',w:'lui'},{id:'v6t3',w:'fallait'},{id:'v6t4',w:'si'},{id:'v6t5',w:'peu,'}]},
+  {tokens:[{id:'v7t0',w:'Si'},{id:'v7t1',w:'peu,'},{id:'v7t2',w:'que'},{id:'v7t3',w:'la'},{id:'v7t4',w:'moindre'},{id:'v7t5',w:'chose'}]},
+  {tokens:[{id:'v8t0',w:'De'},{id:'v8t1',w:'son'},{id:'v8t2',w:'d\u00e9bris'},{id:'v8t3',w:'serait'},{id:'v8t4',w:'cause',nc:true},{id:'v8t5',w:'.'}]},
+  {tokens:[{id:'v9t0',w:'Il'},{id:'v9t1',w:"n'en"},{id:'v9t2',w:'reviendrait'},{id:'v9t3',w:'morceau.'}]},
+  {tokens:[{id:'v10t0',w:'"Pour'},{id:'v10t1',w:'vous,'},{id:'v10t2',w:'dit-il,'},{id:'v10t3',w:'dont'},{id:'v10t4',w:'la'},{id:'v10t5',w:'peau'}]},
+  {tokens:[{id:'v11t0',w:'Est'},{id:'v11t1',w:'plus'},{id:'v11t2',w:'dure'},{id:'v11t3',w:'que'},{id:'v11t4',w:'la'},{id:'v11t5',w:'mienne,'}]},
+  {tokens:[{id:'v12t0',w:'Je'},{id:'v12t1',w:'ne'},{id:'v12t2',w:'vois'},{id:'v12t3',w:'rien'},{id:'v12t4',w:'qui'},{id:'v12t5',w:'vous'},{id:'v12t6',w:'tienne.'}]},
+  {tokens:[{id:'v13t0',w:'— Nous'},{id:'v13t1',w:'vous'},{id:'v13t2',w:'mettrons'},{id:'v13t3',w:'\u00e0'},{id:'v13t4',w:'couvert,'}]},
+  {tokens:[{id:'v14t0',w:'Repartit'},{id:'v14t1',w:'le'},{id:'v14t2',w:'Pot'},{id:'v14t3',w:'de'},{id:'v14t4',w:'fer.'}]},
+  {tokens:[{id:'v15t0',w:'Si'},{id:'v15t1',w:'quelque'},{id:'v15t2',w:'mati\u00e8re'},{id:'v15t3',w:'dure'}]},
+  {tokens:[{id:'v16t0',w:'Vous'},{id:'v16t1',w:'menace'},{id:'v16t2',w:"d'aventure,"}]},
+  {tokens:[{id:'v17t0',w:'Entre'},{id:'v17t1',w:'deux'},{id:'v17t2',w:'je'},{id:'v17t3',w:'passerai',nc:true},{id:'v17t4',w:','}]},
+  {tokens:[{id:'v18t0',w:'Et'},{id:'v18t1',w:'du'},{id:'v18t2',w:'coup'},{id:'v18t3',w:'vous'},{id:'v18t4',w:'sauverai."'}]},
+  {tokens:[{id:'v19t0',w:'Cette'},{id:'v19t1',w:'offre'},{id:'v19t2',w:'le'},{id:'v19t3',w:'persuade.'}]},
+  {tokens:[{id:'v20t0',w:'Pot'},{id:'v20t1',w:'de'},{id:'v20t2',w:'fer'},{id:'v20t3',w:'son'},{id:'v20t4',w:'camarade'}]},
+  {tokens:[{id:'v21t0',w:'Se'},{id:'v21t1',w:'met'},{id:'v21t2',w:'droit'},{id:'v21t3',w:'\u00e0'},{id:'v21t4',w:'ses'},{id:'v21t5',w:'c\u00f4t\u00e9s.'}]},
+  {tokens:[{id:'v22t0',w:'Mes'},{id:'v22t1',w:'gens'},{id:'v22t2',w:"s'en"},{id:'v22t3',w:'vont'},{id:'v22t4',w:'\u00e0'},{id:'v22t5',w:'trois'},{id:'v22t6',w:'pieds,'}]},
+  {tokens:[{id:'v23t0',w:'Clopin-clopant'},{id:'v23t1',w:'comme'},{id:'v23t2',w:'ils'},{id:'v23t3',w:'peuvent,'}]},
+  {tokens:[{id:'v24t0',w:'L\u2019un'},{id:'v24t1',w:'contre'},{id:'v24t2',w:"l'autre"},{id:'v24t3',w:'jet\u00e9s,'}]},
+  {tokens:[{id:'v25t0',w:'Au'},{id:'v25t1',w:'moindre'},{id:'v25t2',w:'hoquet',nc:true},{id:'v25t3',w:"qu'ils"},{id:'v25t4',w:'treuvent',nc:true},{id:'v25t5',w:'.'}]},
+  {tokens:[{id:'v26t0',w:'Le'},{id:'v26t1',w:'pot'},{id:'v26t2',w:'de'},{id:'v26t3',w:'terre'},{id:'v26t4',w:'en'},{id:'v26t5',w:'souffre'},{id:'v26t6',w:';'}]},
+  {tokens:[{id:'v27t0',w:'il'},{id:'v27t1',w:"n'eut"},{id:'v27t2',w:'pas'},{id:'v27t3',w:'fait'},{id:'v27t4',w:'cent'},{id:'v27t5',w:'pas'}]},
+  {tokens:[{id:'v28t0',w:'Que'},{id:'v28t1',w:'par'},{id:'v28t2',w:'son'},{id:'v28t3',w:'Compagnon'},{id:'v28t4',w:'il'},{id:'v28t5',w:'fut'},{id:'v28t6',w:'mis'},{id:'v28t7',w:'en'},{id:'v28t8',w:'\u00e9clats,'}]},
+  {tokens:[{id:'v29t0',w:'Sans'},{id:'v29t1',w:"qu'il"},{id:'v29t2',w:'e\u00fbt'},{id:'v29t3',w:'lieu'},{id:'v29t4',w:'de'},{id:'v29t5',w:'se'},{id:'v29t6',w:'plaindre.'}]},
+  {tokens:[{id:'v30t0',w:'Ne'},{id:'v30t1',w:'nous'},{id:'v30t2',w:'associons'},{id:'v30t3',w:"qu'avecque"},{id:'v30t4',w:'nos'},{id:'v30t5',w:'\u00e9gaux'},{id:'v30t6',w:';'}]},
+  {tokens:[{id:'v31t0',w:'Ou'},{id:'v31t1',w:'bien'},{id:'v31t2',w:'il'},{id:'v31t3',w:'nous'},{id:'v31t4',w:'faudra'},{id:'v31t5',w:'craindre'}]},
+  {tokens:[{id:'v32t0',w:'Le'},{id:'v32t1',w:'destin'},{id:'v32t2',w:"d'un"},{id:'v32t3',w:'de'},{id:'v32t4',w:'ces'},{id:'v32t5',w:'Pots.'}]}
+];
+
+var QUESTIONS = [
+  {
+    num:1,
+    text:"Clique sur les deux vers qui présentent les deux personnages de la fable et leur proposition initiale.",
+    groups:[['v1t0','v1t1','v1t2','v1t3','v1t4','v2t0','v2t1','v2t2','v2t3','v2t4','v2t5']],
+    answers:['v1t0','v1t1','v1t2','v1t3','v1t4','v2t0','v2t1','v2t2','v2t3','v2t4','v2t5'],
+    fb_ok:null,
+    fb_ko:"Ces deux premiers vers constituent la situation initiale de la fable : ils présentent les deux personnages (Pot de fer / Pot de terre) et le déclencheur de l'action (la proposition de voyage). Remarque : les deux personnages prennent une majuscule car La Fontaine les traite comme des personnages à part entière, presque humains. C'est le procédé de la personnification."
+  },
+  {
+    num:2,
+    text:"Clique sur la raison principale que le Pot de terre donne pour refuser le voyage.",
+    groups:[['v6t0','v6t1','v6t2','v6t3','v6t4','v6t5','v7t0','v7t1','v7t2','v7t3','v7t4','v7t5','v8t0','v8t1','v8t2','v8t3','v8t4','v8t5','v9t0','v9t1','v9t2','v9t3']],
+    answers:['v6t0','v6t1','v6t2','v6t3','v6t4','v6t5','v7t0','v7t1','v7t2','v7t3','v7t4','v7t5','v8t0','v8t1','v8t2','v8t3','v8t4','v8t5','v9t0','v9t1','v9t2','v9t3'],
+    fb_ok:null,
+    fb_ko:"Le Pot de terre refuse car il est fragile : \u00abla moindre chose\u00bb pourrait causer sa casse. La répétition de \u00absi peu\u00bb insiste sur l'extrême fragilité du Pot de terre par rapport au Pot de fer. C'est un argument de prudence : le Pot de terre connaît ses propres limites et les accepte."
+  },
+  {
+    num:3,
+    text:"Clique sur la prise de parole directe du Pot de fer qui cherche à convaincre le Pot de terre d'accepter le voyage.",
+    groups:[['v13t0','v13t1','v13t2','v13t3','v13t4','v14t0','v14t1','v14t2','v14t3','v14t4','v15t0','v15t1','v15t2','v15t3','v16t0','v16t1','v16t2','v17t0','v17t1','v17t2','v17t3','v17t4','v17t5','v18t0','v18t1','v18t2','v18t3','v18t4']],
+    answers:['v13t0','v13t1','v13t2','v13t3','v13t4','v14t0','v14t1','v14t2','v14t3','v14t4','v15t0','v15t1','v15t2','v15t3','v16t0','v16t1','v16t2','v17t0','v17t1','v17t2','v17t3','v17t4','v17t5','v18t0','v18t1','v18t2','v18t3','v18t4'],
+    fb_ok:null,
+    fb_ko:"C'est l'argument central du Pot de fer : il promet de protéger le Pot de terre en s'interposant (\u00abEntre deux je passerai\u00bb) si un obstacle les menace. Cet argument semble généreux et rassurant."
+  },
+  {
+    num:4,
+    text:"Clique sur les vers qui décrivent la façon dont les deux pots voyagent ensemble et qui laissent déjà pressentir le danger.",
+    groups:[['v22t0','v22t1','v22t2','v22t3','v22t4','v22t5','v22t6','v23t0','v23t1','v23t2','v23t3','v24t0','v24t1','v24t2','v24t3','v25t0','v25t1','v25t2','v25t3','v25t4','v25t5']],
+    answers:['v22t0','v22t1','v22t2','v22t3','v22t4','v22t5','v22t6','v23t0','v23t1','v23t2','v23t3','v24t0','v24t1','v24t2','v24t3','v25t0','v25t1','v25t2','v25t3','v25t4','v25t5'],
+    fb_ok:null,
+    fb_ko:"\u00abClopin-clopant\u00bb (en boitant, de fa\u00e7on maladroite) et \u00abL\u2019un contre l\u2019autre jet\u00e9s\u00bb montrent que les deux pots se heurtent \u00e0 chaque obstacle. La Fontaine d\u00e9crit une marche chaotique qui rend in\u00e9vitable la catastrophe. La formule \u00abAu moindre hoquet\u00bb (au moindre obstacle) dit que les chocs sont constants. Le danger \u00e9tait pr\u00e9visible d\u00e8s le d\u00e9part."
+  },
+  {
+    num:5,
+    text:"Clique sur les vers qui décrivent la conséquence tragique du voyage pour le Pot de terre.",
+    groups:[['v26t0','v26t1','v26t2','v26t3','v26t4','v26t5','v26t6','v27t0','v27t1','v27t2','v27t3','v27t4','v27t5','v28t0','v28t1','v28t2','v28t3','v28t4','v28t5','v28t6','v28t7','v28t8','v29t0','v29t1','v29t2','v29t3','v29t4','v29t5','v29t6']],
+    answers:['v26t0','v26t1','v26t2','v26t3','v26t4','v26t5','v26t6','v27t0','v27t1','v27t2','v27t3','v27t4','v27t5','v28t0','v28t1','v28t2','v28t3','v28t4','v28t5','v28t6','v28t7','v28t8','v29t0','v29t1','v29t2','v29t3','v29t4','v29t5','v29t6'],
+    fb_ok:null,
+    fb_ko:"La chute est brutale et rapide : \u00abil n\u2019eut pas fait cent pas\u00bb dit que la catastrophe arrive tr\u00e8s vite, presque imm\u00e9diatement. \u00abMis en \u00e9clats par son Compagnon\u00bb est la grande ironie tragique de la fable : c\u2019est celui qui devait le prot\u00e9ger qui le brise. \u00abSans qu\u2019il e\u00fbt lieu de se plaindre\u00bb : le Pot de terre avait \u00e9t\u00e9 pr\u00e9venu d\u00e8s le d\u00e9part \u2014 il ne peut s\u2019en prendre qu\u2019\u00e0 lui-m\u00eame d\u2019avoir accept\u00e9."
+  },
+  {
+    num:6,
+    text:"Clique sur les vers qui constituent la morale de la fable et qui s'adressent directement au lecteur.",
+    groups:[['v30t0','v30t1','v30t2','v30t3','v30t4','v30t5','v30t6','v31t0','v31t1','v31t2','v31t3','v31t4','v31t5','v32t0','v32t1','v32t2','v32t3','v32t4','v32t5']],
+    answers:['v30t0','v30t1','v30t2','v30t3','v30t4','v30t5','v30t6','v31t0','v31t1','v31t2','v31t3','v31t4','v31t5','v32t0','v32t1','v32t2','v32t3','v32t4','v32t5'],
+    fb_ok:null,
+    fb_ko:"La morale est formul\u00e9e \u00e0 la premi\u00e8re personne du pluriel (\u00abnous\u00bb) : La Fontaine s\u2019inclut dans l\u2019enseignement et s\u2019adresse \u00e0 tous ses lecteurs. \u00abNe nous associons qu\u2019avecque nos \u00e9gaux\u00bb : il vaut mieux fr\u00e9quenter des personnes de m\u00eame force ou de m\u00eame condition que soi."
+  }
+];
+
+var curQ=0,groupsValidated=[],results=[],done=false,audioCtx=null;
+document.addEventListener('pointerdown',function ia(){
+  if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  document.removeEventListener('pointerdown',ia);
+},{once:true});
+window.addEventListener('DOMContentLoaded',function(){buildFable();buildDots();showQuestion(0);});
+
+function buildFable(){
+  var container=document.getElementById('fable');
+  VERS.forEach(function(ligne){
+    var div=document.createElement('div');
+    div.className='verse';
+    var vtxt=document.createElement('span');
+    vtxt.className='vtext';
+    ligne.tokens.forEach(function(tok,i){
+      if(i>0) vtxt.appendChild(document.createTextNode(' '));
+      var s=document.createElement('span');
+      if(tok.nc){s.textContent=tok.w;}
+      else{s.className='tok';s.id=tok.id;s.textContent=tok.w;
+        s.addEventListener('click',function(){onTok(tok.id);});}
+      vtxt.appendChild(s);
+    });
+    div.appendChild(vtxt);
+    container.appendChild(div);
+  });
+}
+function buildDots(){
+  var wrap=document.getElementById('qdots');
+  QUESTIONS.forEach(function(q,i){
+    var d=document.createElement('div');d.className='q-dot';d.id='dot'+i;d.textContent=q.num;wrap.appendChild(d);
+  });
+}
+function updateDots(){
+  QUESTIONS.forEach(function(q,i){
+    var d=document.getElementById('dot'+i);d.className='q-dot';
+    if(i<curQ)d.classList.add(results[i]?'done-ok':'done-ko');
+    else if(i===curQ)d.classList.add('active');
+  });
+}
+function showQuestion(idx){
+  var q=QUESTIONS[idx];groupsValidated=[];
+  document.getElementById('qlabel').textContent='Q'+q.num+' / 6';
+  document.getElementById('qtext').textContent=q.text;
+  var fb=document.getElementById('qfb');fb.className='q-feedback';fb.textContent='';
+  var gd=document.getElementById('grpdots');gd.innerHTML='';
+  if(q.groups.length>1){gd.style.display='flex';
+    q.groups.forEach(function(_,gi){var dot=document.createElement('div');dot.className='grp-dot';dot.id='gd'+gi;gd.appendChild(dot);});
+  } else {gd.style.display='none';}
+  clearMarks();updateDots();renderActions(false,false);
+}
+function renderActions(answered,isOk){
+  var wrap=document.getElementById('qactions');wrap.innerHTML='';
+  if(!answered)return;
+  if(!isOk){var br=document.createElement('button');br.className='btn btn-retry';
+    br.textContent='Réessayer';br.onclick=reessayer;wrap.appendChild(br);}
+  var bn=document.createElement('button');bn.className='btn btn-next';
+  bn.textContent=curQ<QUESTIONS.length-1?'Question suivante \u2192':'Voir le résultat';
+  bn.onclick=curQ<QUESTIONS.length-1?suivant:showScore;wrap.appendChild(bn);
+}
+function onTok(id){
+  if(done)return;
+  var fb=document.getElementById('qfb');
+  if(fb.classList.contains('show')&&results[curQ]!==undefined)return;
+  var q=QUESTIONS[curQ],groupIdx=-1;
+  q.groups.forEach(function(grp,gi){if(grp.indexOf(id)!==-1)groupIdx=gi;});
+  if(groupIdx===-1){validerErreur();return;}
+  if(groupsValidated.indexOf(groupIdx)===-1){
+    groupsValidated.push(groupIdx);
+    q.groups[groupIdx].forEach(function(tid){var el=document.getElementById(tid);if(el)el.classList.add('correct');});
+    var gdot=document.getElementById('gd'+groupIdx);if(gdot)gdot.classList.add('hit');
+  }
+  if(groupsValidated.length===q.groups.length)validerSucces();
+}
+function validerSucces(){
+  var q=QUESTIONS[curQ];results[curQ]=true;
+  q.answers.forEach(function(id){var el=document.getElementById(id);if(el){el.classList.remove('wrong');el.classList.add('correct');}});
+  flashPop(true);beepOk();updateCarnet(results.filter(Boolean).length);renderActions(true,true);
+}
+function validerErreur(){
+  var q=QUESTIONS[curQ];results[curQ]=false;
+  q.answers.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('correct');});
+  var fb=document.getElementById('qfb');
+  if(q.fb_ko){fb.textContent=q.fb_ko;fb.className='q-feedback show ko';}
+  flashPop(false);beepErr();updateCarnet(results.filter(Boolean).length);renderActions(true,false);
+}
+function reessayer(){
+  groupsValidated=[];results[curQ]=undefined;clearMarks();
+  var fb=document.getElementById('qfb');fb.className='q-feedback';fb.textContent='';
+  var q=QUESTIONS[curQ];q.groups.forEach(function(_,gi){var gd=document.getElementById('gd'+gi);if(gd)gd.classList.remove('hit');});
+  renderActions(false,false);
+}
+function suivant(){curQ++;showQuestion(curQ);document.getElementById('qcard').scrollIntoView({behavior:'smooth',block:'nearest'});}
+function showScore(){
+  done=true;document.getElementById('qcard').style.display='none';
+  var sc=document.getElementById('scorecard');sc.classList.add('show');
+  var score=results.filter(Boolean).length;
+  document.getElementById('scoreval').textContent=score+' / 6';
+  var msg='';
+  if(score===6)msg='Carnet du fabuliste compl\u00e9t\u00e9\u00a0! Tu as rep\u00e9r\u00e9 tous les passages cl\u00e9s de la fable.';
+  else if(score>=4)msg='Bon rep\u00e9rage\u00a0! Relis les passages signal\u00e9s.';
+  else msg='Relis attentivement la fable et retente.';
+  document.getElementById('scoremsg').textContent=msg;
+  if(score>=4)document.getElementById('scorebravo').classList.add('show');
+  updateCarnet(score);updateDots();beepFinal(score);
+  if(score>=5)launchEmojis();
+}
+function updateCarnet(score){
+  var pct=Math.round((score/6)*100);
+  document.getElementById('carnetbar').style.width=pct+'%';
+  document.getElementById('carnetscore').textContent=score+' / 6 rep\u00e8res';
+  for(var i=0;i<6;i++){var l=document.getElementById('pl'+i);if(l){if(i<score)l.classList.add('filled');else l.classList.remove('filled');}}
+}
+function clearMarks(){document.querySelectorAll('.tok').forEach(function(el){el.classList.remove('correct','wrong');});}
+function flashPop(isOk){
+  var el=document.getElementById('flashpop');
+  el.textContent=isOk?'\u2713':'\u2715';el.style.color=isOk?'#8dc63f':'#e8002d';
+  el.className='flash-pop';void el.offsetWidth;el.classList.add(isOk?'run-ok':'run-err');
+}
+function getCtx(){if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}return audioCtx;}
+function beepOk(){var ctx=getCtx();if(!ctx)return;[[600,.08],[900,.12]].forEach(function(p,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=p[0];var t=ctx.currentTime+i*.13;g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.01,t+.18);o.start(t);o.stop(t+.2);});}
+function beepErr(){var ctx=getCtx();if(!ctx)return;var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sawtooth';o.frequency.value=280;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.3);o.start(ctx.currentTime);o.stop(ctx.currentTime+.32);}
+function beepFinal(score){var ctx=getCtx();if(!ctx)return;if(score>=5){[523,659,784,880,1047].forEach(function(freq,i){var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=freq;var t=ctx.currentTime+i*.17;g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.01,t+.28);o.start(t);o.stop(t+.3);});}else{var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=220;g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.01,ctx.currentTime+.5);o.start(ctx.currentTime);o.stop(ctx.currentTime+.55);}}
+function launchEmojis(){
+  var pool=['\u2B50','\u2728','\u{1F4DC}','\u{1F4D6}','\u{1F3AF}','\u{1F4A1}','\u{1F389}','\u2764\uFE0F'];
+  for(var i=0;i<25;i++){(function(idx){setTimeout(function(){var el=document.createElement('div');el.textContent=pool[Math.floor(Math.random()*pool.length)];el.style.cssText=['position:fixed','pointer-events:none','z-index:999','font-size:'+(1.3+Math.random()*1.3)+'rem','left:'+(Math.random()*96)+'vw','top:-2rem','opacity:1','transition:transform '+(1.5+Math.random()*1.3)+'s linear, opacity .4s linear '+(1.3+Math.random()*.9)+'s'].join(';');document.body.appendChild(el);requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.transform='translateY('+(window.innerHeight+60)+'px) rotate('+(Math.random()*360)+'deg)';el.style.opacity='0';});});setTimeout(function(){el.remove();},3200);},idx*100+Math.random()*80);})(i);}
+}
+</script>
+</body>
+</html>
