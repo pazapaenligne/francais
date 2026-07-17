@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Je m'entraîne — La modalisation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --border:#e8e2d4;
+  --text:#1c1c1c;
+  --muted:#8a8272;
+  --day:#b94040;
+  --day-dark:#7a1f1f;
+  --day-light:#f7eded;
+  --day-border:#e2a3a3;
+  --green:#1f7a3d;
+  --green-bg:#e7faec;
+  --green-txt:#14532d;
+  --red:#b3261e;
+  --red-bg:#fdeaea;
+  --red-txt:#7f1d1d;
+  --orange:#f5a623;
+  --c-cert:#1a6e88;   --c-cert-bg:#e8f6fb;
+  --c-doute:#6b4fa8;  --c-doute-bg:#f1ecfb;
+  --c-jug:#a8641a;    --c-jug-bg:#fdf3e7;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:.95rem;
+  line-height:1.6;
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+}
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.35;z-index:0;pointer-events:none;}
+.b1{width:180px;height:180px;background:#f5e08a;top:-60px;right:-50px;}
+.b2{width:150px;height:150px;background:var(--day-light);bottom:-40px;left:-40px;}
+.b3{width:110px;height:110px;background:#b5e08a;top:40%;right:-60px;opacity:.25;}
+.b4{width:120px;height:120px;background:#f7c6c6;top:15%;left:-60px;opacity:.22;}
+
+.wrap{max-width:800px;margin:0 auto;padding:18px 16px 60px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:#f5a623;border:1px solid #e09410;border-radius:999px;padding:5px 14px;margin-bottom:10px;}
+.logo-badge .dots{display:flex;gap:3px;}
+.logo-badge .dot{width:8px;height:8px;border-radius:50%;}
+.dot.o{background:#7a3d00;}
+.dot.g{background:#ffffff;}
+.dot.r{background:#7a3d00;opacity:.45;}
+.logo-badge span{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#7a3d00;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:0 0 4px;color:var(--text);}
+.week-label{font-size:.88rem;font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.04);animation:fadeUp .4s ease;position:relative;overflow:hidden;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--day),var(--day-border));}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.intro-titre{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);letter-spacing:.03em;margin-bottom:.7rem;}
+.intro-txt{font-size:.98rem;line-height:2.05;}
+.intro-txt p{margin:0 0 .65rem;}
+.intro-txt p:last-child{margin-bottom:0;}
+.intro-mot{display:inline-block;font-weight:800;color:#fff;border-radius:6px;padding:.1em .5em;margin:0 .12em;}
+.intro-mot.cert{background:var(--c-cert);}
+.intro-mot.doute{background:var(--c-doute);}
+.intro-mot.jug{background:var(--c-jug);}
+
+.btn{font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:3rem;border-radius:12px;border:none;cursor:pointer;padding:0 1.4rem;transition:.15s;}
+.btn-start{display:block;width:100%;background:var(--day);color:#fff;font-size:1rem;}
+.btn-start:hover{background:var(--day-dark);}
+
+#quizZone{display:none;}
+#quizZone.show{display:block;}
+
+.progress-bar-outer{background:var(--day-light);border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--day-border);}
+.progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--day),var(--day-dark));width:0%;transition:width .5s ease;border-radius:999px;}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);}
+.chip.ok{color:var(--green);border-color:var(--green);}
+.chip.ko{color:var(--red);border-color:var(--red);}
+.chip.rest{color:var(--muted);}
+.dots-prog{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;}
+.pdot{width:11px;height:11px;border-radius:50%;background:#e0dacb;transition:.2s;}
+.pdot.done{background:var(--green);}
+.pdot.done-ko{background:var(--red);}
+.pdot.active{background:var(--orange);transform:scale(1.35);}
+
+.theme-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);background:var(--day-light);border:1px solid var(--day-border);border-radius:999px;padding:3px 10px;margin-bottom:8px;}
+.q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;}
+.consigne{font-size:.9rem;color:var(--text);margin-bottom:.8rem;}
+
+.extrait-box{border:2px solid var(--day-border);background:var(--day-light);border-radius:12px;padding:.9rem 1.05rem;margin-bottom:1rem;}
+.extrait-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--day-dark);font-weight:800;margin-bottom:.4rem;}
+.extrait-txt{font-style:italic;font-size:.98rem;line-height:1.85;white-space:pre-line;}
+.extrait-source{margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);text-align:right;}
+
+.q-phrase{background:var(--day-light);border-left:4px solid var(--day);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;font-style:italic;font-weight:700;font-size:clamp(1.05rem,3.2vw,1.2rem);line-height:1.85;}
+.q-texte{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;line-height:1.6;margin-bottom:1rem;}
+
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:Arial,sans-serif;
+  font-size:clamp(.95rem,2.6vw,1.05rem);
+  min-height:50px;text-align:left;
+  padding:.65rem .9rem;border-radius:12px;
+  border:2px solid var(--border);background:var(--surface);color:var(--text);
+  cursor:pointer;transition:.15s;line-height:1.5;
+}
+.opt span:last-child{flex:1;min-width:0;word-break:break-word;}
+.opt:hover:not(.locked){border-color:var(--day);background:var(--day-light);}
+.opt.selected{border-color:var(--day);background:var(--day-light);}
+.opt .lettre{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.78rem;display:flex;align-items:center;justify-content:center;border:1px solid var(--day-border);}
+.opt.selected .lettre{background:var(--day);color:#fff;}
+.opt.locked{cursor:default;}
+.opt.correct{border-color:var(--green);background:var(--green-bg);box-shadow:0 0 0 3px rgba(31,122,61,.14);}
+.opt.correct .lettre{background:var(--green);color:#fff;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);box-shadow:0 0 0 3px rgba(179,38,30,.12);}
+.opt.wrong .lettre{background:var(--red);color:#fff;}
+
+.fb-box{display:none;padding:.75rem 1rem;line-height:1.75;font-size:clamp(.9rem,2.5vw,1rem);border-left:5px solid var(--border);border-radius:10px;margin-bottom:1rem;}
+.fb-box.show{display:block;}
+.fb-box.ok{border-left-color:var(--green);background:var(--green-bg);}
+.fb-box.ko{border-left-color:var(--red);background:var(--red-bg);}
+.fb-titre{font-weight:800;font-style:normal;display:block;margin-bottom:.35rem;}
+.hl-neu{font-weight:700;color:var(--day-dark);}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-valider{background:var(--day);color:#fff;}
+.btn-valider:disabled{background:#e5ddc9;color:#a99f86;cursor:not-allowed;}
+.btn-valider:hover:not(:disabled){background:var(--day-dark);}
+.btn-retry{background:var(--surface);color:var(--text);border:2px solid var(--border);}
+.btn-retry:hover{border-color:var(--day);}
+.btn-suivant{background:var(--day-dark);color:#fff;display:none;}
+.btn-suivant.show{display:inline-block;}
+
+.flash-pop{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.4);font-size:5rem;z-index:50;pointer-events:none;opacity:0;}
+.flash-pop.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+
+#resultats{display:none;text-align:center;}
+#resultats.show{display:block;}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark);}
+.res-stars{font-size:1.9rem;letter-spacing:.15em;color:#d8b23a;margin:.3rem 0;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;margin-bottom:.8rem;}
+.res-sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.8;}
+.recap-list{text-align:left;font-size:.82rem;font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:.8rem;margin-bottom:1rem;}
+.recap-item{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);}
+.recap-item .st{font-weight:800;flex-shrink:0;}
+.recap-item .st.ok{color:var(--green);}
+.recap-item .st.ko{color:var(--red);}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;border:3px solid var(--day-dark);color:var(--day-dark);border-radius:10px;padding:.3rem .9rem;transform:rotate(-6deg) scale(0);margin-bottom:.6rem;}
+.stamp.play{animation:stampPop .5s ease forwards .1s;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}60%{transform:rotate(-6deg) scale(1.2);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.confetti{position:absolute;font-size:1.2rem;top:-30px;pointer-events:none;animation:particleUp 2.4s ease-in forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(340px) rotate(200deg);opacity:0;}}
+.btn-restart{background:var(--day);color:#fff;margin-top:.4rem;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <div class="dots"><div class="dot o"></div><div class="dot g"></div><div class="dot r"></div></div>
+    <span>Pazapa · Français · 5e</span>
+  </div>
+  <h1>Je m'entraîne</h1>
+  <div class="week-label">Semaine 8 · Jour 2</div>
+</header>
+
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge">La modalisation</div>
+  <div class="intro-titre">📌 Contexte</div>
+  <div class="intro-txt">
+    <p>Un locuteur ne se contente pas d'informer : il exprime aussi ce qu'il pense de ce qu'il dit. C'est la <span class="hl-neu">modalisation</span>.</p>
+    <p>Trois grandes valeurs à repérer&nbsp;: la <span class="intro-mot cert">certitude</span>, le <span class="intro-mot doute">doute</span> et le <span class="intro-mot jug">jugement</span>.</p>
+    <p>Trois ateliers t'attendent&nbsp;: trier des phrases, choisir le bon curseur d'expression, puis analyser un extrait de La Fontaine.</p>
+  </div>
+</div>
+
+<button class="btn btn-start" id="btnStart">Commencer les activités ▶</button>
+
+<div id="quizZone">
+  <div class="card">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progFill"></div></div>
+    <div class="chips">
+      <div class="chip ok">✔ Corrects&nbsp;: <span id="chOk">0</span></div>
+      <div class="chip ko">✘ Erreurs&nbsp;: <span id="chKo">0</span></div>
+      <div class="chip rest">⏳ Restants&nbsp;: <span id="chRest">16</span></div>
+    </div>
+    <div class="dots-prog" id="dotsProg"></div>
+  </div>
+
+  <div class="card" id="qCard"><div class="card-stripe"></div><div id="qBody"></div></div>
+</div>
+
+<div class="card" id="resultats">
+  <div class="card-stripe"></div>
+  <div class="stamp" id="stamp">TERMINÉ</div>
+  <div class="res-score" id="resScore">0/16</div>
+  <div class="res-stars" id="resStars"></div>
+  <div class="res-msg" id="resMsg"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="recap-list" id="recapList"></div>
+  <button class="btn btn-restart" id="btnRestart">↺ Recommencer toute l'activité</button>
+</div>
+
+</div>
+
+<div class="flash-pop" id="flashPop"></div>
+
+<script>
+/* ══════════ PAZAPA — N5S8J2A1 — La modalisation ══════════ */
+
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fr(s){ return String(s).replace(/ ([:;!?])/g,'\u00a0$1'); }
+function aff(s){ return fr(esc(s)); }
+
+var EXTRAIT={
+  txt:"« Hé ! bonjour, Monsieur du Corbeau.\nQue vous êtes joli ! que vous me semblez beau !\nVous êtes le Phénix des hôtes de ces bois. »",
+  source:"Jean de La Fontaine, Le Corbeau et le Renard (1668)"
+};
+
+/* ── DONNÉES (contenu professeure — verbatim) ── */
+var DATA=[
+
+/* ══ ACTIVITÉ 1 — Le tri des étiquettes ══ */
+{act:1,actLabel:"Activité 1 · Le tri des étiquettes",emoji:"🏷️",
+ consigne:"Pour chaque phrase, choisis la bonne étiquette.",
+ label:"Question n° 1",
+ phrase:"Il semble que l'orage approche.",
+ options:["Certitude","Doute","Jugement"],
+ ans:1,
+ fb:"Il semble que marque le doute.",
+ recap:"Act. 1 — Q1"},
+
+{act:1,actLabel:"Activité 1 · Le tri des étiquettes",emoji:"🏷️",
+ consigne:"Pour chaque phrase, choisis la bonne étiquette.",
+ label:"Question n° 2",
+ phrase:"Cette idée est brillante.",
+ options:["Certitude","Doute","Jugement"],
+ ans:2,
+ fb:"Brillante exprime un jugement valorisant.",
+ recap:"Act. 1 — Q2"},
+
+{act:1,actLabel:"Activité 1 · Le tri des étiquettes",emoji:"🏷️",
+ consigne:"Pour chaque phrase, choisis la bonne étiquette.",
+ label:"Question n° 3",
+ phrase:"Bien sûr, le chevalier reviendra.",
+ options:["Certitude","Doute","Jugement"],
+ ans:0,
+ fb:"Bien sûr marque la certitude.",
+ recap:"Act. 1 — Q3"},
+
+{act:1,actLabel:"Activité 1 · Le tri des étiquettes",emoji:"🏷️",
+ consigne:"Pour chaque phrase, choisis la bonne étiquette.",
+ label:"Question n° 4",
+ phrase:"Peut-être le témoin a raison.",
+ options:["Certitude","Doute","Jugement"],
+ ans:1,
+ fb:"Peut-être exprime l'hésitation.",
+ recap:"Act. 1 — Q4"},
+
+{act:1,actLabel:"Activité 1 · Le tri des étiquettes",emoji:"🏷️",
+ consigne:"Pour chaque phrase, choisis la bonne étiquette.",
+ label:"Question n° 5",
+ phrase:"Je trouve cette scène émouvante.",
+ options:["Certitude","Doute","Jugement"],
+ ans:2,
+ fb:"Je trouve annonce un avis personnel, et émouvante porte un jugement.",
+ recap:"Act. 1 — Q5"},
+
+{act:1,actLabel:"Activité 1 · Le tri des étiquettes",emoji:"🏷️",
+ consigne:"Pour chaque phrase, choisis la bonne étiquette.",
+ label:"Question n° 6",
+ phrase:"Il est évident que la porte est fermée.",
+ options:["Certitude","Doute","Jugement"],
+ ans:0,
+ fb:"Il est évident que exprime une certitude forte.",
+ recap:"Act. 1 — Q6"},
+
+/* ══ ACTIVITÉ 2 — L'atelier du curseur ══ */
+{act:2,actLabel:"Activité 2 · L'atelier du curseur",emoji:"🎚️",
+ consigne:"Choisis, pour chaque situation, la phrase qui correspond au bon effet.",
+ label:"Question n° 1",
+ question:"Choisis la phrase qui exprime le doute.",
+ options:["Demain, le voyage commence.","Demain, le voyage commencera peut-être.","Demain, le voyage commencera sûrement."],
+ ans:1,
+ fb:"Peut-être introduit le doute.",
+ recap:"Act. 2 — Q1"},
+
+{act:2,actLabel:"Activité 2 · L'atelier du curseur",emoji:"🎚️",
+ consigne:"Choisis, pour chaque situation, la phrase qui correspond au bon effet.",
+ label:"Question n° 2",
+ question:"Choisis la phrase qui exprime un jugement positif.",
+ options:["Ce héros agit.","Ce héros agit avec courage.","Ce héros agit sûrement."],
+ ans:1,
+ fb:"Avec courage valorise le héros.",
+ recap:"Act. 2 — Q2"},
+
+{act:2,actLabel:"Activité 2 · L'atelier du curseur",emoji:"🎚️",
+ consigne:"Choisis, pour chaque situation, la phrase qui correspond au bon effet.",
+ label:"Question n° 3",
+ question:"Choisis la phrase qui exprime une forte certitude.",
+ options:["Il est certain que le plan réussira.","Le plan réussira peut-être.","Je trouve ce plan malin."],
+ ans:0,
+ fb:"Il est certain que exprime une forte certitude.",
+ recap:"Act. 2 — Q3"},
+
+{act:2,actLabel:"Activité 2 · L'atelier du curseur",emoji:"🎚️",
+ consigne:"Choisis, pour chaque situation, la phrase qui correspond au bon effet.",
+ label:"Question n° 4",
+ question:"Choisis la phrase qui exprime une émotion admirative.",
+ options:["Quel spectacle grandiose !","Le spectacle a lieu ce soir.","Le spectacle aura peut-être du succès."],
+ ans:0,
+ fb:"Le vocabulaire appréciatif et le point d'exclamation traduisent l'admiration.",
+ recap:"Act. 2 — Q4"},
+
+{act:2,actLabel:"Activité 2 · L'atelier du curseur",emoji:"🎚️",
+ consigne:"Choisis, pour chaque situation, la phrase qui correspond au bon effet.",
+ label:"Question n° 5",
+ question:"Choisis la phrase qui exprime un avis personnel.",
+ options:["Ce personnage ment.","À mon avis, ce personnage ment.","Ce personnage ment sûrement."],
+ ans:1,
+ fb:"À mon avis marque explicitement l'opinion personnelle.",
+ recap:"Act. 2 — Q5"},
+
+/* ══ ACTIVITÉ 3 — Lecture d'un extrait ══ */
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",
+ consigne:"Lis cet extrait de Jean de La Fontaine, Le Corbeau et le Renard (1668), puis réponds.",
+ label:"Question n° 1",
+ extrait:true,
+ question:"Quel est l'effet principal de ces paroles du renard ?",
+ options:["Il flatte le corbeau.","Il raconte un combat.","Il donne une règle de vie."],
+ ans:0,
+ fb:"Le renard flatte le corbeau pour l'influencer.",
+ recap:"Act. 3 — Q1"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",
+ consigne:"Lis cet extrait de Jean de La Fontaine, Le Corbeau et le Renard (1668), puis réponds.",
+ label:"Question n° 2",
+ extrait:true,
+ question:"Quel groupe de mots porte le jugement le plus valorisant ?",
+ options:["bonjour","Monsieur du Corbeau","le Phénix des hôtes de ces bois"],
+ ans:2,
+ fb:"Le Phénix des hôtes de ces bois est une image très valorisante : le corbeau est présenté comme un être exceptionnel.",
+ recap:"Act. 3 — Q2"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",
+ consigne:"Lis cet extrait de Jean de La Fontaine, Le Corbeau et le Renard (1668), puis réponds.",
+ label:"Question n° 3",
+ extrait:true,
+ question:"Quel procédé montre une émotion vive ?",
+ options:["Les points d'exclamation.","Le nom Corbeau.","L'article le."],
+ ans:0,
+ fb:"Les points d'exclamation donnent de l'intensité et de l'émotion.",
+ recap:"Act. 3 — Q3"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",
+ consigne:"Lis cet extrait de Jean de La Fontaine, Le Corbeau et le Renard (1668), puis réponds.",
+ label:"Question n° 4",
+ extrait:true,
+ question:"Dans vous me semblez beau, le verbe semblez exprime surtout :",
+ options:["Une certitude absolue.","Une impression personnelle.","Un jugement péjoratif."],
+ ans:1,
+ fb:"Vous me semblez beau exprime une impression personnelle : le renard présente son regard sur le corbeau.",
+ recap:"Act. 3 — Q4"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",
+ consigne:"Lis cet extrait de Jean de La Fontaine, Le Corbeau et le Renard (1668), puis réponds.",
+ label:"Question n° 5",
+ extrait:true,
+ question:"Choisis le commentaire le plus juste sur la modalisation dans cet extrait.",
+ options:["Le renard parle de façon neutre, sans modaliser son discours.","Le renard multiplie les marques d'admiration pour influencer le corbeau.","Le renard cherche surtout à rabaisser le corbeau."],
+ ans:1,
+ fb:"La modalisation sert ici à flatter : exclamations, vocabulaire mélioratif, image hyperbolique.",
+ recap:"Act. 3 — Q5"}
+];
+
+var NB=DATA.length;
+var TOTAL=NB; /* 16 — 1 point par question */
+var LABELS=['A','B','C'];
+var RAIN=['📌','📝','✏️','💬','🔎','✨'];
+
+var state=DATA.map(function(){return {done:false,pts:0,pick:null};});
+var cur=0;
+
+/* ── AUDIO ── */
+var actx=null,audioReady=false;
+function initA(){
+  if(audioReady)return;
+  try{ actx=new (window.AudioContext||window.webkitAudioContext)(); audioReady=true; }catch(e){}
+}
+document.addEventListener('pointerdown',function once(){
+  initA();
+  if(actx&&actx.state==='suspended')actx.resume();
+  document.removeEventListener('pointerdown',once);
+});
+function tone(f1,f2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(f1,actx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f2,1),actx.currentTime+dur);
+  g.gain.setValueAtTime(.15,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){ if(!actx)return; tone(660,880,.12,'sine'); setTimeout(function(){tone(880,1100,.14,'sine');},110); }
+function beepErr(){ tone(220,90,.22,'sawtooth'); }
+function beepFinal(ok){
+  if(!actx)return;
+  if(ok){ [523,659,784,988,1175].forEach(function(f,i){ setTimeout(function(){tone(f,f,.18,'triangle');},i*140); }); }
+  else { tone(200,120,.5,'sine'); }
+}
+
+/* ── UTILS ── */
+function flash(sym){
+  var el=$('flashPop'); el.textContent=sym;
+  el.classList.remove('play'); void el.offsetWidth; el.classList.add('play');
+}
+function ptsObtenus(){ return state.reduce(function(s,st){return s+st.pts;},0); }
+function nbTraites(){ return state.filter(function(st){return st.done;}).length; }
+function majHud(){
+  var t=nbTraites(), ok=ptsObtenus();
+  $('chOk').textContent=ok;
+  $('chKo').textContent=t-ok;
+  $('chRest').textContent=TOTAL-t;
+  $('progFill').style.width=Math.round(t/TOTAL*100)+'%';
+  var h='';
+  for(var i=0;i<NB;i++){
+    var c='pdot';
+    if(state[i].done) c+=(state[i].pts===1?' done':' done-ko');
+    else if(i===cur) c+=' active';
+    h+='<div class="'+c+'"></div>';
+  }
+  $('dotsProg').innerHTML=h;
+}
+
+/* ── DÉMARRAGE ── */
+$('btnStart').addEventListener('click',function(){
+  $('btnStart').style.display='none';
+  $('quizZone').classList.add('show');
+  render(0);
+  $('quizZone').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ── RENDU ── */
+function render(i){
+  cur=i;
+  var d=DATA[i], st=state[i];
+  var h='';
+  h+='<div class="theme-badge">'+aff(d.actLabel)+'</div>';
+  h+='<div class="q-label">'+aff(d.label)+'</div>';
+  h+='<div class="consigne">'+d.emoji+' '+aff(d.consigne)+'</div>';
+
+  if(d.extrait){
+    h+='<div class="extrait-box"><div class="extrait-lbl">Extrait</div>'
+      +'<div class="extrait-txt">'+aff(EXTRAIT.txt)+'</div>'
+      +'<div class="extrait-source">'+aff(EXTRAIT.source)+'</div></div>';
+    h+='<div class="q-texte">'+aff(d.question)+'</div>';
+  } else if(d.phrase){
+    h+='<div class="q-phrase">'+aff(d.phrase)+'</div>';
+  } else {
+    h+='<div class="q-texte">'+aff(d.question)+'</div>';
+  }
+
+  h+='<div class="opts" id="optsWrap">';
+  d.options.forEach(function(o,idx){
+    h+='<button type="button" class="opt" data-idx="'+idx+'"><span class="lettre">'+LABELS[idx]+'</span><span>'+aff(o)+'</span></button>';
+  });
+  h+='</div>';
+
+  h+='<div class="fb-box" id="fbBox"></div>';
+  h+='<div class="btn-row">';
+  h+='<button class="btn btn-valider" id="btnValider" disabled>Valider</button>';
+  h+='<button class="btn btn-retry" id="btnRetry" style="display:none;">↺ Recommencer cette question</button>';
+  h+='<button class="btn btn-suivant" id="btnNext">'+(i===NB-1?'Voir le bilan →':'Suivant →')+'</button>';
+  h+='</div>';
+
+  $('qBody').innerHTML=h;
+  attach(i);
+  if(st.done) restore(i);
+  majHud();
+}
+
+/* ── INTERACTIONS ── */
+function attach(i){
+  $('optsWrap').addEventListener('click',function(ev){
+    var b=ev.target.closest('.opt');
+    if(!b||b.classList.contains('locked'))return;
+    Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(x){x.classList.remove('selected');});
+    b.classList.add('selected');
+    state[i].pick=parseInt(b.dataset.idx,10);
+    $('btnValider').disabled=false;
+  });
+  $('btnValider').addEventListener('click',function(){ valider(i); });
+  $('btnRetry').addEventListener('click',function(){ retry(i); });
+  $('btnNext').addEventListener('click',function(){
+    if(i===NB-1){ bilan(); } else { render(i+1); }
+  });
+}
+
+/* ── VALIDATION ── */
+function valider(i){
+  var d=DATA[i], st=state[i];
+  if(st.done)return;
+  st.done=true;
+  $('btnValider').disabled=true;
+  $('btnValider').style.display='none';
+
+  var ok = st.pick===d.ans;
+  st.pts = ok?1:0;
+  verrouOpts(i);
+
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(d.fb);
+
+  flash(ok?'✓':'✗');
+  if(ok)beepOk(); else beepErr();
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+  majHud();
+}
+
+function verrouOpts(i){
+  var d=DATA[i], st=state[i];
+  Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(b){
+    b.classList.add('locked');
+    var idx=parseInt(b.dataset.idx,10);
+    if(idx===d.ans)b.classList.add('correct');
+    else if(idx===st.pick)b.classList.add('wrong');
+  });
+}
+
+/* ── RECOMMENCER UNE QUESTION ── */
+function retry(i){
+  state[i]={done:false,pts:0,pick:null};
+  render(i);
+}
+
+/* ── RESTAURATION ── */
+function restore(i){
+  var d=DATA[i], st=state[i];
+  var ok=st.pts===1;
+  $('btnValider').style.display='none';
+  verrouOpts(i);
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(d.fb);
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+}
+
+/* ── BILAN ── */
+function bilan(){
+  var s1=0,s2=0,s3=0;
+  DATA.forEach(function(d,i){
+    if(d.act===1)s1+=state[i].pts;
+    else if(d.act===2)s2+=state[i].pts;
+    else s3+=state[i].pts;
+  });
+  var total=s1+s2+s3;
+
+  $('quizZone').classList.remove('show');
+  $('resultats').classList.add('show');
+  $('resScore').textContent=total+'/'+TOTAL;
+  $('resSub').innerHTML='Activité 1 : '+s1+'/6<br>Activité 2 : '+s2+'/5<br>Activité 3 : '+s3+'/5';
+
+  var msg;
+  if(total>=15) msg="Maîtrise complète ! Tu repères et analyses la modalisation sans hésiter.";
+  else if(total>=11) msg="Très bon travail. Quelques nuances restent à affiner.";
+  else if(total>=7) msg="Bonne base. Reprends les questions signalées en rouge.";
+  else msg="Relis les marques de certitude, de doute et de jugement avant de retenter.";
+  $('resMsg').textContent=msg;
+
+  var nb=total>0?Math.max(1,Math.round(total/TOTAL*5)):0;
+  var stars='';
+  for(var k=1;k<=5;k++) stars+= (k<=nb?'★':'☆');
+  $('resStars').textContent=stars;
+
+  var r='';
+  DATA.forEach(function(d,i){
+    var ok=state[i].pts===1;
+    r+='<div class="recap-item"><span>'+aff(d.recap)+'</span><span class="st '+(ok?'ok':'ko')+'">'+(ok?'✓':'✗')+'</span></div>';
+  });
+  $('recapList').innerHTML=r;
+
+  var stamp=$('stamp'); stamp.classList.remove('play'); void stamp.offsetWidth; stamp.classList.add('play');
+  beepFinal(total/TOTAL>=.7);
+
+  if(total/TOTAL>=.7){
+    for(var c=0;c<26;c++){
+      (function(){
+        var el=document.createElement('div');
+        el.className='confetti';
+        el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+        el.style.left=(Math.random()*100)+'%';
+        el.style.animationDelay=(Math.random()*.8)+'s';
+        $('resultats').appendChild(el);
+        setTimeout(function(){el.remove();},3000);
+      })();
+    }
+  }
+  $('resultats').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── RECOMMENCER TOUT ── */
+$('btnRestart').addEventListener('click',function(){
+  state=DATA.map(function(){return {done:false,pts:0,pick:null};});
+  cur=0;
+  Array.prototype.forEach.call(document.querySelectorAll('.confetti'),function(c){c.remove();});
+  $('resultats').classList.remove('show');
+  $('quizZone').classList.add('show');
+  render(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
