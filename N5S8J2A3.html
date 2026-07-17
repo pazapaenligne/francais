@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Je relève le défi — Le détective des témoignages</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --jour:#e2536f; --jour-fonce:#a8324a; --jour-clair:#fdeef1; --jour-pale:#f3a8b8;
+  --day-glow:rgba(226,83,111,.35);
+  --bg:#fffdf7;
+  --vert:#22c55e; --vert-bg:#e7faec; --vert-bd:#86efac;
+  --rouge:#ef4444; --rouge-bg:#fdeaea; --rouge-bd:#fca5a5;
+  --gris:#8a7050; --txt:#2a1a04;
+}
+body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;min-height:100vh;line-height:1.6;position:relative;overflow-x:hidden;}
+
+.bubble{position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px);opacity:.35;}
+.bubble.b1{width:130px;height:130px;background:#f5c518;top:-34px;right:-30px;}
+.bubble.b2{width:96px;height:96px;background:var(--jour);bottom:30px;left:-26px;}
+.bubble.b3{width:74px;height:74px;background:#8dc63f;top:42%;right:-28px;}
+.bubble.b4{width:84px;height:84px;background:#9dd4e8;top:26%;left:-32px;}
+
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:#f5c518;color:#5a4000;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.2px;
+  padding:7px 15px;border-radius:22px;box-shadow:0 4px 14px rgba(245,197,24,.4);}
+.logo-badge .pts{display:inline-flex;gap:4px;}
+.logo-badge .pts i{width:9px;height:9px;border-radius:50%;display:block;}
+.logo-badge .pts i:nth-child(1){background:#7a1f1f;}
+.logo-badge .pts i:nth-child(2){background:#5a3800;}
+.logo-badge .pts i:nth-child(3){background:#3d7a10;}
+
+/* PHASE 1 */
+.phase1{min-height:100vh;background:radial-gradient(ellipse at 50% 40%,#2a0c16 0%,#1a0910 60%,#0d0508 100%);
+  display:flex;align-items:center;justify-content:center;padding:24px 16px;position:relative;z-index:2;}
+.phase1.out{animation:p1out .65s ease-in forwards;}
+@keyframes p1out{to{opacity:0;transform:scale(1.03);visibility:hidden;}}
+.p1-inner{max-width:640px;width:100%;animation:fadeUp .6s ease;}
+.brief-card{background:rgba(20,6,10,.95);border:1.5px solid rgba(226,83,111,.3);border-radius:18px;
+  padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,.85);position:relative;overflow:hidden;}
+.brief-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,transparent,var(--jour),var(--jour-pale),var(--jour),transparent);
+  background-size:300%;animation:slide 3.5s linear infinite;}
+.brief-badge-wrap{text-align:center;margin-bottom:16px;}
+.brief-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,1.9rem);
+  color:#fbe3e8;text-align:center;margin-bottom:8px;}
+.brief-titre .accent{color:var(--jour-pale);}
+.brief-sous{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgba(226,83,111,.7);
+  letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:22px;}
+.brief-texte{font-size:clamp(1rem,3vw,1.1rem);color:#e8d0d5;line-height:1.9;text-align:center;margin-bottom:22px;font-weight:500;}
+.brief-texte b{font-weight:800;color:var(--jour-pale);}
+.btn-commencer{display:block;width:100%;font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(.95rem,3vw,1.1rem);letter-spacing:2px;padding:20px;border:none;border-radius:13px;
+  background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;cursor:pointer;
+  min-height:60px;text-transform:uppercase;box-shadow:0 6px 20px var(--day-glow);
+  animation:pulse 2.4s ease-in-out infinite;}
+.btn-commencer:hover{transform:translateY(-3px);}
+
+/* PHASE 2 */
+.phase2{display:none;min-height:100vh;position:relative;z-index:2;}
+.phase2.active{display:block;animation:fadeUp .5s ease;}
+.p2-wrap{max-width:900px;margin:0 auto;padding:16px 12px 60px;}
+.p2-header{text-align:center;margin-bottom:14px;}
+.semaine{font-family:'Orbitron',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--gris);
+  text-transform:uppercase;margin:10px 0 6px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.2rem,4.2vw,1.8rem);
+  line-height:1.15;margin-bottom:6px;}
+.titre .accent{color:var(--jour-fonce);}
+.badge-theme{display:inline-block;background:var(--jour);color:#fff;font-family:'Orbitron',sans-serif;
+  font-weight:700;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;
+  padding:9px 18px;border-radius:24px;box-shadow:0 4px 14px var(--day-glow);}
+
+.card{background:#fff;border:1.5px solid #e8d8a8;border-radius:16px;padding:18px 20px;
+  margin:16px 0;box-shadow:0 6px 20px rgba(74,85,104,.08);}
+.card h2{font-family:'Orbitron',sans-serif;font-size:.95rem;color:var(--jour-fonce);margin-bottom:10px;
+  text-transform:uppercase;letter-spacing:.5px;}
+.card h3{font-size:1rem;color:var(--txt);margin:12px 0 4px;font-weight:800;}
+.situation{font-size:clamp(.92rem,2.6vw,1rem);line-height:1.75;}
+.temoignage{background:var(--jour-clair);border-left:4px solid var(--jour);border-radius:0 8px 8px 0;
+  padding:10px 14px;margin:8px 0;font-size:.92rem;}
+.temoignage b{color:var(--jour-fonce);}
+
+/* Défi 1 table */
+.tbl{width:100%;border-collapse:collapse;margin-top:8px;}
+.tbl th{font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;
+  color:var(--jour-fonce);padding:8px 4px;border-bottom:2px solid #e8d8a8;text-align:center;}
+.tbl th:first-child{text-align:left;}
+.tbl td{padding:8px 4px;border-bottom:1px solid #f0e6d0;text-align:center;font-size:.9rem;}
+.tbl td:first-child{text-align:left;font-weight:700;}
+.radio-cell{cursor:pointer;}
+.radio-dot{width:26px;height:26px;border-radius:50%;border:2px solid #d8c9a0;display:inline-flex;
+  align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:transparent;
+  transition:all .15s;background:#fff;}
+.radio-dot.picked{border-color:var(--jour);background:var(--jour-clair);color:var(--jour-fonce);}
+.radio-dot.picked::after{content:'✓';}
+.radio-dot.correct{border-color:var(--vert);background:var(--vert-bg);color:#166534;}
+.radio-dot.wrong{border-color:var(--rouge);background:var(--rouge-bg);color:#991b1b;}
+
+/* Défi 2 select */
+.expr-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0e6d0;}
+.expr-label{font-weight:800;min-width:160px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--jour-fonce);}
+.expr-select{flex:1;min-width:200px;padding:9px 10px;border:1.5px solid #d8c9a0;border-radius:8px;
+  font-size:.88rem;min-height:44px;font-family:inherit;}
+.expr-select.correct{border-color:var(--vert);background:var(--vert-bg);}
+.expr-select.wrong{border-color:var(--rouge);background:var(--rouge-bg);}
+
+/* Défi 3 */
+textarea.reponse{width:100%;min-height:70px;border:1.5px solid #d8c9a0;border-radius:8px;padding:10px;
+  font-family:inherit;font-size:.9rem;resize:vertical;}
+.corrige-box{background:var(--vert-bg);border-left:4px solid var(--vert);border-radius:0 8px 8px 0;
+  padding:10px 14px;margin-top:10px;font-size:.88rem;display:none;}
+.corrige-box.show{display:block;}
+
+.btn-action{font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(.82rem,2.4vw,.92rem);
+  letter-spacing:.5px;padding:12px 22px;border:none;border-radius:10px;cursor:pointer;min-height:2.6rem;
+  background:linear-gradient(135deg,var(--jour),var(--jour-fonce));color:#fff;box-shadow:0 3px 12px var(--day-glow);
+  margin-top:10px;}
+.btn-action.secondary{background:#fff;border:1.5px solid var(--jour);color:var(--jour-fonce);box-shadow:none;}
+.feedback-defi{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:.88rem;font-weight:700;display:none;}
+.feedback-defi.show{display:block;}
+.feedback-defi.ok{background:var(--vert-bg);color:#166534;}
+.feedback-defi.partiel{background:#fdf3e0;color:#7a5a10;}
+
+.bilan-wrap{max-width:600px;margin:20px auto 0;}
+.verdict-card{background:#fff;border:1px solid #e8d8a8;border-radius:20px;padding:28px 22px;
+  text-align:center;display:none;}
+.verdict-card.show{display:block;animation:fadeUp .5s ease;}
+.verdict-note{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.2rem,8vw,3.2rem);
+  color:var(--jour-fonce);margin-bottom:10px;}
+.verdict-msg{font-size:.95rem;line-height:1.7;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+@keyframes slide{0%{background-position:0%;}100%{background-position:300%;}}
+</style>
+</head>
+<body>
+
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+
+<!-- ===== PHASE 1 ===== -->
+<div id="phase1" class="phase1">
+  <div class="p1-inner">
+    <div class="brief-card">
+      <div class="brief-badge-wrap">
+        <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 5ÈME</div>
+      </div>
+      <h1 class="brief-titre">🎯 Le Détective <span class="accent">des Témoignages</span></h1>
+      <div class="brief-sous">Semaine 8 · Jour 2 · Fait, hypothèse, opinion</div>
+      <div class="brief-texte">Un vase a été cassé dans la salle des arts plastiques. Aide le directeur à démêler les <b>faits</b>, les <b>hypothèses</b> et les <b>opinions</b> dans les témoignages recueillis.</div>
+      <button class="btn-commencer" id="startBtn">Commencer ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PHASE 2 ===== -->
+<div id="phase2" class="phase2">
+  <div class="p2-wrap">
+    <div class="p2-header">
+      <div class="logo-badge"><span class="pts"><i></i><i></i><i></i></span>PAZAPA · FRANÇAIS · 5ÈME</div>
+      <div class="semaine">Semaine 8 — Jour 2</div>
+      <h1 class="titre">🎯 Le Détective <span class="accent">des Témoignages</span></h1>
+      <div class="badge-theme">Fait · Hypothèse · Opinion</div>
+    </div>
+
+    <div class="card">
+      <h2>Situation</h2>
+      <div class="situation">Un vase a été cassé dans la salle des arts plastiques. Le directeur a recueilli plusieurs témoignages, mais ils ne se valent pas : certains rapportent des faits, d'autres des suppositions ou des opinions.<br><br>Ta mission : aider le directeur à déterminer quelles informations sont fiables avant de rédiger son rapport.</div>
+    </div>
+
+    <div class="card">
+      <h2>Document 1 — Les témoignages</h2>
+      <div class="temoignage"><b>Témoignage d'Adam</b><br>J'ai entendu un grand bruit pendant la récréation. En entrant dans la salle, le vase était cassé.</div>
+      <div class="temoignage"><b>Témoignage de Karim</b><br>Ce doit être Yanis qui a cassé le vase. Il est souvent maladroit.</div>
+      <div class="temoignage"><b>Témoignage de Ali</b><br>Il est possible que le vent ait fait tomber le vase, car la fenêtre était ouverte.</div>
+      <div class="temoignage"><b>Témoignage de Sami</b><br>Je pense que quelqu'un a poussé la table sans faire exprès.</div>
+      <div class="temoignage"><b>Témoignage de Luqman</b><br>La fenêtre était ouverte lorsque je suis arrivée.</div>
+    </div>
+
+    <div class="card">
+      <h2>🔎 Défi 1 — Enquête</h2>
+      <p style="font-size:.9rem;margin-bottom:8px">Complète le tableau : pour chaque témoignage, indique s'il s'agit d'un fait, d'une hypothèse ou d'une opinion.</p>
+      <table class="tbl" id="tblDefi1">
+        <tr><th>Témoignage</th><th>Fait</th><th>Hypothèse</th><th>Opinion</th></tr>
+      </table>
+      <button class="btn-action" id="btnDefi1">Valider le Défi 1</button>
+      <div class="feedback-defi" id="fbDefi1"></div>
+    </div>
+
+    <div class="card">
+      <h2>Défi 2 — Trouve les indices</h2>
+      <p style="font-size:.9rem;margin-bottom:8px">Pour chaque expression relevée dans les témoignages, choisis ce qu'elle exprime.</p>
+      <div id="listeDefi2"></div>
+      <button class="btn-action" id="btnDefi2">Valider le Défi 2</button>
+      <div class="feedback-defi" id="fbDefi2"></div>
+    </div>
+
+    <div class="card">
+      <h2>✍️ Défi 3 — Réparer les témoignages</h2>
+      <p style="font-size:.9rem;margin-bottom:10px">Le directeur souhaite un rapport objectif. Réécris les témoignages de Karim et de Sami en supprimant les jugements et les suppositions.</p>
+      <h3>Karim</h3>
+      <textarea class="reponse" id="repKarim" placeholder="Écris ta reformulation ici..."></textarea>
+      <h3>Sami</h3>
+      <textarea class="reponse" id="repSami" placeholder="Écris ta reformulation ici..."></textarea>
+      <button class="btn-action secondary" id="btnDefi3">Voir le corrigé</button>
+      <div class="corrige-box" id="corrigeDefi3">
+        <b>Karim :</b> Le vase était cassé lorsque les élèves sont arrivés.<br>(ou toute reformulation supprimant « Ce doit être Yanis » et « Il est souvent maladroit ».)<br><br>
+        <b>Sami :</b> La table se trouvait près du vase.<br>(ou suppression de l'hypothèse : Je pense que quelqu'un a poussé la table.)
+      </div>
+    </div>
+
+    <div class="bilan-wrap">
+      <div class="verdict-card" id="verdictCard">
+        <div class="verdict-note" id="verdictNote">0 / 9</div>
+        <div class="verdict-msg" id="verdictMsg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+/* ============ DONNÉES — reprises mot pour mot ============ */
+const TEMOIGNAGES = [
+  {nom:"Adam", cats:["fait"]},
+  {nom:"Karim", cats:["hypothese","opinion"]},
+  {nom:"Ali", cats:["hypothese"]},
+  {nom:"Sami", cats:["opinion"]},
+  {nom:"Luqman", cats:["fait"]}
+];
+
+const EXPRESSIONS = [
+  {expr:"ce doit être", valeur:"hypothese_probable", label:"hypothèse très probable"},
+  {expr:"il est possible que", valeur:"possibilite", label:"possibilité"},
+  {expr:"je pense que", valeur:"opinion", label:"opinion"},
+  {expr:"souvent", valeur:"jugement_habitude", label:"jugement fondé sur une habitude"}
+];
+const OPTIONS_DEFI2 = [
+  {v:"hypothese_probable", l:"hypothèse très probable"},
+  {v:"possibilite", l:"possibilité"},
+  {v:"opinion", l:"opinion"},
+  {v:"jugement_habitude", l:"jugement fondé sur une habitude"}
+];
+
+/* ============ CONSTRUCTION DÉFI 1 ============ */
+function buildDefi1(){
+  const tbl = $('tblDefi1');
+  TEMOIGNAGES.forEach((t,i)=>{
+    const row = document.createElement('tr');
+    row.innerHTML = '<td>'+t.nom+'</td>'
+      + ['fait','hypothese','opinion'].map(cat=>
+          '<td class="radio-cell" data-i="'+i+'" data-cat="'+cat+'"><span class="radio-dot"></span></td>'
+        ).join('');
+    tbl.appendChild(row);
+  });
+  document.querySelectorAll('.radio-cell').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      cell.querySelector('.radio-dot').classList.toggle('picked');
+    });
+  });
+}
+let defi1Done=false;
+function checkDefi1(){
+  if(defi1Done) return;
+  let correct=0;
+  TEMOIGNAGES.forEach((t,i)=>{
+    const cells = document.querySelectorAll('.radio-cell[data-i="'+i+'"]');
+    let rowOk = true;
+    cells.forEach(cell=>{
+      const dot = cell.querySelector('.radio-dot');
+      const isPicked = dot.classList.contains('picked');
+      const shouldBePicked = t.cats.includes(cell.dataset.cat);
+      if(isPicked !== shouldBePicked) rowOk = false;
+      if(isPicked) dot.classList.add(shouldBePicked ? 'correct' : 'wrong');
+      else if(shouldBePicked) dot.classList.add('wrong');
+    });
+    if(rowOk) correct++;
+  });
+  defi1Done=true;
+  const fb=$('fbDefi1');
+  fb.classList.add('show', correct===5?'ok':'partiel');
+  fb.textContent = correct+' / 5 témoignages bien classés.';
+  score1=correct;
+  updateBilan();
+}
+
+/* ============ CONSTRUCTION DÉFI 2 ============ */
+function buildDefi2(){
+  const wrap = $('listeDefi2');
+  EXPRESSIONS.forEach((e,i)=>{
+    const row = document.createElement('div');
+    row.className='expr-row';
+    row.innerHTML = '<div class="expr-label">« '+e.expr+' »</div>'
+      + '<select class="expr-select" data-i="'+i+'">'
+      + '<option value="">— choisis —</option>'
+      + OPTIONS_DEFI2.map(o=>'<option value="'+o.v+'">'+o.l+'</option>').join('')
+      + '</select>';
+    wrap.appendChild(row);
+  });
+}
+let defi2Done=false;
+function checkDefi2(){
+  if(defi2Done) return;
+  let correct=0;
+  document.querySelectorAll('.expr-select').forEach(sel=>{
+    const i = sel.dataset.i;
+    const isOk = sel.value === EXPRESSIONS[i].valeur;
+    sel.classList.add(isOk?'correct':'wrong');
+    if(isOk) correct++;
+  });
+  defi2Done=true;
+  const fb=$('fbDefi2');
+  fb.classList.add('show', correct===4?'ok':'partiel');
+  fb.textContent = correct+' / 4 expressions bien identifiées.';
+  score2=correct;
+  updateBilan();
+}
+
+/* ============ DÉFI 3 ============ */
+$('btnDefi3').addEventListener('click', ()=>{
+  $('corrigeDefi3').classList.add('show');
+  defi3Vu=true;
+  updateBilan();
+});
+
+/* ============ BILAN ============ */
+let score1=0, score2=0, defi3Vu=false;
+function updateBilan(){
+  if(!defi1Done || !defi2Done) return;
+  const total = score1+score2;
+  $('verdictNote').textContent = total+' / 9';
+  let msg;
+  if(total===9) msg = "🏆 Excellent travail de détective ! Tu distingues parfaitement faits, hypothèses et opinions.";
+  else if(total>=6) msg = "Bonne enquête ! Relis les témoignages mal classés pour progresser encore.";
+  else msg = "Relis attentivement les témoignages et les expressions de modalisation, puis retente.";
+  if(!defi3Vu) msg += "<br><br>N'oublie pas de vérifier ta réécriture du Défi 3 avec le corrigé.";
+  $('verdictMsg').innerHTML = msg;
+  $('verdictCard').classList.add('show');
+}
+
+/* ============ INIT ============ */
+buildDefi1();
+buildDefi2();
+
+$('startBtn').addEventListener('click', ()=>{
+  $('phase1').classList.add('out');
+  setTimeout(()=>{ $('phase1').style.display='none'; }, 680);
+  $('phase2').classList.add('active');
+});
+$('btnDefi1').addEventListener('click', checkDefi1);
+$('btnDefi2').addEventListener('click', checkDefi2);
+</script>
+</body>
+</html>
