@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Je m'entraîne — Passé composé, plus-que-parfait, futur antérieur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --border:#e8e2d4;
+  --text:#1c1c1c;
+  --muted:#8a8272;
+  --day:#3ab5d8;
+  --day-dark:#1a6e88;
+  --day-light:#e8f6fb;
+  --day-border:#9dd4e8;
+  --green:#1f7a3d;
+  --green-bg:#e7faec;
+  --green-txt:#14532d;
+  --red:#b3261e;
+  --red-bg:#fdeaea;
+  --red-txt:#7f1d1d;
+  --orange:#f5a623;
+  --c-pc:#1a6e88;   --c-pc-bg:#e8f6fb;
+  --c-pqp:#6b4fa8;  --c-pqp-bg:#f1ecfb;
+  --c-fa:#a8641a;   --c-fa-bg:#fdf3e7;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:.95rem;
+  line-height:1.6;
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+}
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.35;z-index:0;pointer-events:none;}
+.b1{width:180px;height:180px;background:#f5e08a;top:-60px;right:-50px;}
+.b2{width:150px;height:150px;background:var(--day-light);bottom:-40px;left:-40px;}
+.b3{width:110px;height:110px;background:#b5e08a;top:40%;right:-60px;opacity:.25;}
+.b4{width:120px;height:120px;background:#f7c6c6;top:15%;left:-60px;opacity:.22;}
+
+.wrap{max-width:820px;margin:0 auto;padding:18px 16px 60px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:#f5a623;border:1px solid #e09410;border-radius:999px;padding:5px 14px;margin-bottom:10px;}
+.logo-badge .dots{display:flex;gap:3px;}
+.logo-badge .dot{width:8px;height:8px;border-radius:50%;}
+.dot.o{background:#7a3d00;}
+.dot.g{background:#ffffff;}
+.dot.r{background:#7a3d00;opacity:.45;}
+.logo-badge span{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#7a3d00;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:0 0 4px;color:var(--text);}
+.week-label{font-size:.88rem;font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.04);animation:fadeUp .4s ease;position:relative;overflow:hidden;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--day),var(--day-border));}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.intro-titre{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);letter-spacing:.03em;margin-bottom:.7rem;}
+.intro-txt{font-size:.98rem;line-height:2.05;}
+.intro-txt p{margin:0 0 .65rem;}
+.intro-txt p:last-child{margin-bottom:0;}
+.intro-mot{display:inline-block;font-weight:800;color:#fff;border-radius:6px;padding:.1em .5em;margin:0 .12em;}
+.intro-mot.pc{background:var(--c-pc);}
+.intro-mot.pqp{background:var(--c-pqp);}
+.intro-mot.fa{background:var(--c-fa);}
+
+.btn{font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:3rem;border-radius:12px;border:none;cursor:pointer;padding:0 1.4rem;transition:.15s;}
+.btn-start{display:block;width:100%;background:var(--day);color:#fff;font-size:1rem;}
+.btn-start:hover{background:var(--day-dark);}
+
+#quizZone{display:none;}
+#quizZone.show{display:block;}
+
+.progress-bar-outer{background:var(--day-light);border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--day-border);}
+.progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--day),var(--day-dark));width:0%;transition:width .5s ease;border-radius:999px;}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);}
+.chip.ok{color:var(--green);border-color:var(--green);}
+.chip.ko{color:var(--red);border-color:var(--red);}
+.chip.rest{color:var(--muted);}
+.dots-prog{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;}
+.pdot{width:11px;height:11px;border-radius:50%;background:#e0dacb;transition:.2s;}
+.pdot.done{background:var(--green);}
+.pdot.done-ko{background:var(--red);}
+.pdot.active{background:var(--orange);transform:scale(1.35);}
+
+.theme-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);background:var(--day-light);border:1px solid var(--day-border);border-radius:999px;padding:3px 10px;margin-bottom:8px;}
+.q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;}
+.consigne{font-size:.9rem;color:var(--text);margin-bottom:.8rem;}
+.aide{font-size:.82rem;color:var(--muted);margin-bottom:.9rem;font-style:italic;}
+
+.extrait-box{border:2px solid var(--day-border);background:var(--day-light);border-radius:12px;padding:.9rem 1.05rem;margin-bottom:1rem;}
+.extrait-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--day-dark);font-weight:800;margin-bottom:.4rem;}
+.extrait-txt{font-style:italic;font-size:.96rem;line-height:1.9;}
+.extrait-txt .lettre-rep{font-style:normal;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--day-dark);background:#fff;border:1px solid var(--day-border);border-radius:4px;padding:0 .3em;font-size:.82em;}
+
+.q-phrase{background:var(--day-light);border-left:4px solid var(--day);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;font-style:italic;font-weight:700;font-size:clamp(1.05rem,3.2vw,1.2rem);line-height:1.85;}
+.q-phrase .trou{font-style:normal;font-family:'JetBrains Mono',monospace;color:var(--day-dark);letter-spacing:.03em;}
+.q-texte{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;line-height:1.6;margin-bottom:1rem;}
+
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:Arial,sans-serif;
+  font-size:clamp(.95rem,2.6vw,1.05rem);
+  min-height:50px;text-align:left;
+  padding:.65rem .9rem;border-radius:12px;
+  border:2px solid var(--border);background:var(--surface);color:var(--text);
+  cursor:pointer;transition:.15s;line-height:1.5;
+}
+.opt span:last-child{flex:1;min-width:0;word-break:break-word;}
+.opt strong{font-style:normal;color:var(--day-dark);}
+.opt:hover:not(.locked){border-color:var(--day);background:var(--day-light);}
+.opt.selected{border-color:var(--day);background:var(--day-light);}
+.opt .lettre{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.78rem;display:flex;align-items:center;justify-content:center;border:1px solid var(--day-border);}
+.opt.selected .lettre{background:var(--day);color:#fff;}
+.opt.locked{cursor:default;}
+.opt.correct{border-color:var(--green);background:var(--green-bg);box-shadow:0 0 0 3px rgba(31,122,61,.14);}
+.opt.correct .lettre{background:var(--green);color:#fff;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);box-shadow:0 0 0 3px rgba(179,38,30,.12);}
+.opt.wrong .lettre{background:var(--red);color:#fff;}
+
+/* ── CLASSEMENT EN COLONNES ── */
+.banque-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem;}
+.banque{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.1rem;min-height:50px;}
+.banque.vide::after{content:"Toutes les formes sont classées.";font-size:.82rem;color:var(--muted);font-style:italic;}
+.etiq{
+  font-family:Arial,sans-serif;font-size:clamp(.86rem,2.3vw,.95rem);
+  min-height:44px;padding:.5rem .85rem;
+  border:2px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);cursor:pointer;
+  transition:.15s;line-height:1.4;max-width:100%;word-break:break-word;text-align:left;
+}
+.etiq:hover:not(.locked){border-color:var(--day);background:var(--day-light);}
+.etiq.sel{border-color:var(--day);background:var(--day-light);box-shadow:0 0 0 3px rgba(58,181,216,.35);font-weight:700;}
+.etiq.locked{cursor:default;}
+.etiq.correct{border-color:var(--green);background:var(--green-bg);}
+.etiq.wrong{border-color:var(--red);background:var(--red-bg);}
+
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:1rem;}
+@media(max-width:560px){ .cols{grid-template-columns:1fr;} }
+.col{
+  border:2px dashed var(--border);border-radius:14px;
+  padding:.55rem .5rem .65rem;background:var(--surface);
+  cursor:pointer;transition:.15s;min-width:0;
+}
+.col.actif{border-color:var(--day);background:var(--day-light);}
+.col.locked{cursor:default;}
+.col-titre{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.02em;text-align:center;
+  padding:.4rem .25rem;border-radius:8px;margin-bottom:.5rem;line-height:1.35;
+}
+.col-pc  .col-titre{background:var(--c-pc-bg);color:var(--c-pc);border:1px solid var(--c-pc);}
+.col-pqp .col-titre{background:var(--c-pqp-bg);color:var(--c-pqp);border:1px solid var(--c-pqp);}
+.col-fa  .col-titre{background:var(--c-fa-bg);color:var(--c-fa);border:1px solid var(--c-fa);}
+.col-body{display:flex;flex-direction:column;gap:6px;min-height:64px;}
+.col-vide{font-size:.75rem;color:var(--muted);font-style:italic;text-align:center;padding:.5rem .2rem;}
+
+.fb-box{display:none;padding:.75rem 1rem;line-height:1.75;font-size:clamp(.9rem,2.5vw,1rem);border-left:5px solid var(--border);border-radius:10px;margin-bottom:1rem;}
+.fb-box.show{display:block;}
+.fb-box.ok{border-left-color:var(--green);background:var(--green-bg);}
+.fb-box.ko{border-left-color:var(--red);background:var(--red-bg);}
+.fb-titre{font-weight:800;font-style:normal;display:block;margin-bottom:.35rem;}
+.fb-box ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+.fb-box li{margin-bottom:.3rem;}
+.hl-ok{color:var(--green-txt);font-weight:700;text-decoration:underline;}
+.hl-neu{color:var(--day-dark);font-weight:700;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-valider{background:var(--day);color:#fff;}
+.btn-valider:disabled{background:#e5ddc9;color:#a99f86;cursor:not-allowed;}
+.btn-valider:hover:not(:disabled){background:var(--day-dark);}
+.btn-retry{background:var(--surface);color:var(--text);border:2px solid var(--border);}
+.btn-retry:hover{border-color:var(--day);}
+.btn-suivant{background:var(--day-dark);color:#fff;display:none;}
+.btn-suivant.show{display:inline-block;}
+
+.flash-pop{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.4);font-size:5rem;z-index:50;pointer-events:none;opacity:0;}
+.flash-pop.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+
+#resultats{display:none;text-align:center;}
+#resultats.show{display:block;}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark);}
+.res-stars{font-size:1.9rem;letter-spacing:.15em;color:#d8b23a;margin:.3rem 0;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;margin-bottom:.8rem;}
+.res-sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.8;}
+.recap-list{text-align:left;font-size:.82rem;font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:.8rem;margin-bottom:1rem;}
+.recap-item{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);}
+.recap-item .st{font-weight:800;flex-shrink:0;}
+.recap-item .st.ok{color:var(--green);}
+.recap-item .st.ko{color:var(--red);}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;border:3px solid var(--day-dark);color:var(--day-dark);border-radius:10px;padding:.3rem .9rem;transform:rotate(-6deg) scale(0);margin-bottom:.6rem;}
+.stamp.play{animation:stampPop .5s ease forwards .1s;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}60%{transform:rotate(-6deg) scale(1.2);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.confetti{position:absolute;font-size:1.2rem;top:-30px;pointer-events:none;animation:particleUp 2.4s ease-in forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(340px) rotate(200deg);opacity:0;}}
+.btn-restart{background:var(--day);color:#fff;margin-top:.4rem;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <div class="dots"><div class="dot o"></div><div class="dot g"></div><div class="dot r"></div></div>
+    <span>Pazapa · Français · 5e</span>
+  </div>
+  <h1>Je m'entraîne</h1>
+  <div class="week-label">Semaine 8 · Jour 4</div>
+</header>
+
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge">Passé composé, plus-que-parfait, futur antérieur</div>
+  <div class="intro-titre">📌 Contexte</div>
+  <div class="intro-txt">
+    <p>Trois temps composés pour situer les actions les unes par rapport aux autres&nbsp;: le <span class="intro-mot pc">passé composé</span> (auxiliaire au présent), le <span class="intro-mot pqp">plus-que-parfait</span> (auxiliaire à l'imparfait) et le <span class="intro-mot fa">futur antérieur</span> (auxiliaire au futur simple).</p>
+    <p>Trois ateliers t'attendent&nbsp;: choisir la bonne forme selon le contexte, trier et ordonner des formes verbales, puis analyser un court récit.</p>
+  </div>
+</div>
+
+<button class="btn btn-start" id="btnStart">Commencer les activités ▶</button>
+
+<div id="quizZone">
+  <div class="card">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progFill"></div></div>
+    <div class="chips">
+      <div class="chip ok">✔ Corrects&nbsp;: <span id="chOk">0</span></div>
+      <div class="chip ko">✘ Erreurs&nbsp;: <span id="chKo">0</span></div>
+      <div class="chip rest">⏳ Restants&nbsp;: <span id="chRest">24</span></div>
+    </div>
+    <div class="dots-prog" id="dotsProg"></div>
+  </div>
+
+  <div class="card" id="qCard"><div class="card-stripe"></div><div id="qBody"></div></div>
+</div>
+
+<div class="card" id="resultats">
+  <div class="card-stripe"></div>
+  <div class="stamp" id="stamp">TERMINÉ</div>
+  <div class="res-score" id="resScore">0/24</div>
+  <div class="res-stars" id="resStars"></div>
+  <div class="res-msg" id="resMsg"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="recap-list" id="recapList"></div>
+  <button class="btn btn-restart" id="btnRestart">↺ Recommencer toute l'activité</button>
+</div>
+
+</div>
+
+<div class="flash-pop" id="flashPop"></div>
+
+<script>
+/* ══════════ PAZAPA — N5S8J4A1 — Passé composé, plus-que-parfait, futur antérieur ══════════ */
+
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fr(s){ return String(s).replace(/ ([:;!?])/g,'\u00a0$1'); }
+function aff(s){ return fr(esc(s)); }
+function affBold(text,bold){
+  var e=aff(text);
+  if(!bold) return e;
+  var b=aff(bold);
+  var idx=e.indexOf(b);
+  if(idx===-1) return e;
+  return e.slice(0,idx)+'<strong>'+b+'</strong>'+e.slice(idx+b.length);
+}
+
+var EXTRAIT={
+  txt:"Le ciel était encore gris. J'avais préparé <span class=\"lettre-rep\">a</span> mon sac dès l'aube et j'avais fermé <span class=\"lettre-rep\">b</span> la porte en silence. Vers midi, j'ai atteint <span class=\"lettre-rep\">c</span> le vieux phare. « Quand j'aurai trouvé <span class=\"lettre-rep\">d</span> la clé, j'ouvrirai la salle du sommet », me suis-je promis. Une rafale a secoué <span class=\"lettre-rep\">e</span> la tour, mais je suis resté <span class=\"lettre-rep\">f</span> devant la serrure."
+};
+
+/* ── DONNÉES (contenu professeure — verbatim) ── */
+var DATA=[
+
+/* ══ MANIPULATION 1 — Choisir la bonne forme selon le contexte ══ */
+{act:1,actLabel:"Manipulation 1 · Choisir la bonne forme",emoji:"🎯",type:"qcm",
+ consigne:"Choisis la forme qui convient selon le contexte.",
+ label:"Question n° 01",
+ phrase:"Hier soir, nous ___ le documentaire en classe.",
+ options:["avons regardé.","avions regardé.","aurons regardé."],
+ ans:0,
+ fb:"Le repère « hier soir » situe un fait terminé dans le passé. Le passé composé convient.",
+ recap:"Manip. 1 — Q01"},
+
+{act:1,actLabel:"Manipulation 1 · Choisir la bonne forme",emoji:"🎯",type:"qcm",
+ consigne:"Choisis la forme qui convient selon le contexte.",
+ label:"Question n° 02",
+ phrase:"Quand la sonnerie a retenti, les élèves ___ leurs affaires.",
+ options:["ont déjà rangé.","avaient déjà rangé.","auront déjà rangé."],
+ ans:1,
+ fb:"La sonnerie a retenti à un moment précis du passé. Le rangement est déjà accompli avant ce moment. On utilise donc le plus-que-parfait.",
+ recap:"Manip. 1 — Q02"},
+
+{act:1,actLabel:"Manipulation 1 · Choisir la bonne forme",emoji:"🎯",type:"qcm",
+ consigne:"Choisis la forme qui convient selon le contexte.",
+ label:"Question n° 03",
+ phrase:"Demain, dès que tu ___ ton paragraphe, tu le liras à voix haute.",
+ options:["as terminé.","avais terminé.","auras terminé."],
+ ans:2,
+ fb:"Le repère « demain » place la phrase dans l'avenir. L'action de terminer est accomplie avant celle de lire. On utilise le futur antérieur.",
+ recap:"Manip. 1 — Q03"},
+
+{act:1,actLabel:"Manipulation 1 · Choisir la bonne forme",emoji:"🎯",type:"qcm",
+ consigne:"Choisis la forme qui convient selon le contexte.",
+ label:"Question n° 04",
+ phrase:"Avant le début de la réunion, les employés ___ un café.",
+ options:["ont pris.","avaient pris.","auront pris."],
+ ans:1,
+ fb:"Le début de la réunion sert de repère dans le passé. L'action de prendre un café est accomplie avant ce moment. Le plus-que-parfait convient.",
+ recap:"Manip. 1 — Q04"},
+
+{act:1,actLabel:"Manipulation 1 · Choisir la bonne forme",emoji:"🎯",type:"qcm",
+ consigne:"Choisis la forme qui convient selon le contexte.",
+ label:"Question n° 05",
+ phrase:"Ce matin, j'___ mon carnet sur le bureau mais je ne le retrouve plus.",
+ options:["ai posé.","avais posé.","aurai posé."],
+ ans:0,
+ fb:"Le repère « ce matin » convient à un fait achevé dans le passé. Le passé composé est adapté.",
+ recap:"Manip. 1 — Q05"},
+
+/* ══ MANIPULATION 2 — Trier et ordonner les temps composés ══ */
+{act:2,actLabel:"Manipulation 2 · Trier et ordonner",emoji:"🗂️",type:"tri",
+ consigne:"Classe les formes verbales suivantes dans le tableau.",
+ aide:"Clique sur une forme, puis clique sur la colonne où tu veux la ranger. Pour la retirer, clique dessus dans la colonne.",
+ label:"Question n° 01",
+ colonnes:[
+   {k:"pc",cls:"col-pc",titre:"Passé composé"},
+   {k:"pqp",cls:"col-pqp",titre:"Plus-que-parfait"},
+   {k:"fa",cls:"col-fa",titre:"Futur antérieur"}
+ ],
+ items:[
+   {t:"ont bondi",c:"pc"},
+   {t:"avait choisi",c:"pqp"},
+   {t:"aura refermé",c:"fa"},
+   {t:"avons relu",c:"pc"},
+   {t:"avaient attendu",c:"pqp"},
+   {t:"aurez compris",c:"fa"}
+ ],
+ fbOk:"Excellent ! Tu reconnais l'auxiliaire de chaque forme composée.",
+ fbKo:"Observe l'auxiliaire de chaque forme :",
+ fbKoPuces:["auxiliaire au présent → passé composé ;","auxiliaire à l'imparfait → plus-que-parfait ;","auxiliaire au futur simple → futur antérieur."],
+ recap:"Manip. 2 — Classement"},
+
+{act:2,actLabel:"Manipulation 2 · Trier et ordonner",emoji:"🗂️",type:"qcm",
+ consigne:"Choisis la phrase où l'action en gras est antérieure à une autre action passée.",
+ label:"Question n° 02",
+ options:["Quand Nora est arrivée, elle avait fermé la fenêtre.","Quand Nora arrivera, elle aura fermé la fenêtre.","Nora a fermé la fenêtre ce matin."],
+ boldOpts:["avait fermé","aura fermé","a fermé"],
+ ans:0,
+ fb:"Le plus-que-parfait montre une action déjà accomplie avant une autre action passée.",
+ recap:"Manip. 2 — Q02"},
+
+{act:2,actLabel:"Manipulation 2 · Trier et ordonner",emoji:"🗂️",type:"qcm",
+ consigne:"Choisis la phrase où l'action en gras s'accomplit avant une autre action future.",
+ label:"Question n° 03",
+ options:["Quand Noor est arrivée, elle avait lu le message.","Quand Noor arrivera, elle aura lu le message.","Noor a lu le message hier."],
+ boldOpts:["avait lu","aura lu","a lu"],
+ ans:1,
+ fb:"Le futur antérieur exprime une action accomplie avant une autre action future.",
+ recap:"Manip. 2 — Q03"},
+
+{act:2,actLabel:"Manipulation 2 · Trier et ordonner",emoji:"🗂️",type:"qcm",
+ consigne:"Choisis la bonne suite chronologique.",
+ label:"Question n° 04",
+ phrase:"« Quand Sami a ouvert le cahier, il avait déjà trouvé le titre écrit. »",
+ options:["ouvrir le cahier → trouver le titre écrit.","trouver le titre écrit → ouvrir le cahier.","les deux actions avancent ensemble."],
+ ans:1,
+ fb:"Le mot « déjà » et le plus-que-parfait indiquent que le titre est écrit avant l'ouverture du cahier.",
+ recap:"Manip. 2 — Q04"},
+
+/* ══ ACTIVITÉ 3 — Lecture d'un extrait ══ */
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",type:"tri",
+ consigne:"Place les lettres dans le tableau.",
+ aide:"Clique sur une forme, puis clique sur la colonne où tu veux la ranger. Pour la retirer, clique dessus dans la colonne.",
+ label:"Question n° 01",
+ extrait:true,
+ colonnes:[
+   {k:"pqp",cls:"col-pqp",titre:"Plus-que-parfait"},
+   {k:"pc",cls:"col-pc",titre:"Passé composé"},
+   {k:"fa",cls:"col-fa",titre:"Futur antérieur"}
+ ],
+ items:[
+   {t:"a — avais préparé",c:"pqp"},
+   {t:"b — avais fermé",c:"pqp"},
+   {t:"c — ai atteint",c:"pc"},
+   {t:"d — aurai trouvé",c:"fa"},
+   {t:"e — a secoué",c:"pc"},
+   {t:"f — suis resté",c:"pc"}
+ ],
+ fbOk:"Excellent ! Tu repères l'auxiliaire de chaque forme, même en contexte de récit.",
+ fbKo:"Observe l'auxiliaire de chaque forme :",
+ fbKoPuces:["avais préparé, avais fermé → auxiliaire à l'imparfait : plus-que-parfait ;","ai atteint, a secoué, suis resté → auxiliaire au présent : passé composé ;","aurai trouvé → auxiliaire au futur simple : futur antérieur."],
+ recap:"Act. 3 — Classement"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",type:"qcm",
+ consigne:"Réponds à la question à partir de l'extrait.",
+ label:"Question n° 02",
+ extrait:true,
+ question:"Quelle action le texte place dès l'aube ?",
+ options:["J'ai atteint le vieux phare.","J'avais préparé mon sac.","Une rafale a secoué la tour."],
+ ans:1,
+ fb:"Le texte précise « dès l'aube ». Cette expression place l'action très tôt dans la journée.",
+ recap:"Act. 3 — Q02"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",type:"qcm",
+ consigne:"Réponds à la question à partir de l'extrait.",
+ label:"Question n° 03",
+ extrait:true,
+ question:"Quelle forme annonce une action accomplie avant une autre action future ?",
+ options:["ai atteint.","aurai trouvé.","suis resté."],
+ ans:1,
+ fb:"Dans « Quand j'aurai trouvé la clé, j'ouvrirai… », l'action de trouver la clé sera accomplie avant celle d'ouvrir.",
+ recap:"Act. 3 — Q03"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",type:"qcm",
+ consigne:"Réponds à la question à partir de l'extrait.",
+ label:"Question n° 04",
+ extrait:true,
+ question:"Choisis l'ordre chronologique correct.",
+ options:["préparer le sac → fermer la porte → atteindre le phare → trouver la clé.","atteindre le phare → préparer le sac → trouver la clé → fermer la porte.","trouver la clé → atteindre le phare → préparer le sac → fermer la porte."],
+ ans:0,
+ fb:"Les repères du texte donnent l'ordre suivant : préparer le sac ; fermer la porte ; atteindre le phare ; trouver la clé.",
+ recap:"Act. 3 — Q04"},
+
+{act:3,actLabel:"Activité 3 · Lecture d'un extrait",emoji:"📖",type:"qcm",
+ consigne:"Réponds à la question à partir de l'extrait.",
+ label:"Question n° 05",
+ extrait:true,
+ question:"Quel effet produisent les temps composés dans cet extrait ?",
+ options:["Ils organisent la chronologie et montrent l'antériorité de certaines actions.","Ils servent surtout à décrire le paysage.","Ils transforment le texte en dialogue."],
+ ans:0,
+ fb:"Dans cet extrait, les temps composés servent à placer les actions les unes par rapport aux autres. Ils aident le lecteur à suivre le déroulement du récit avec précision.",
+ recap:"Act. 3 — Q05"}
+];
+
+var NB=DATA.length;
+var MAXPTS=DATA.map(function(d){return d.type==='tri'?d.items.length:1;});
+var TOTAL=MAXPTS.reduce(function(a,b){return a+b;},0); /* 24 */
+var LABELS=['A','B','C'];
+var RAIN=['📌','📝','✏️','📘','⏳','✨'];
+
+var state=DATA.map(function(){return {done:false,pts:0,pick:null,assign:null,sel:null,bank:null};});
+var cur=0;
+
+/* ── AUDIO ── */
+var actx=null,audioReady=false;
+function initA(){
+  if(audioReady)return;
+  try{ actx=new (window.AudioContext||window.webkitAudioContext)(); audioReady=true; }catch(e){}
+}
+document.addEventListener('pointerdown',function once(){
+  initA();
+  if(actx&&actx.state==='suspended')actx.resume();
+  document.removeEventListener('pointerdown',once);
+});
+function tone(f1,f2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(f1,actx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f2,1),actx.currentTime+dur);
+  g.gain.setValueAtTime(.15,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){ if(!actx)return; tone(660,880,.12,'sine'); setTimeout(function(){tone(880,1100,.14,'sine');},110); }
+function beepErr(){ tone(220,90,.22,'sawtooth'); }
+function beepFinal(ok){
+  if(!actx)return;
+  if(ok){ [523,659,784,988,1175].forEach(function(f,i){ setTimeout(function(){tone(f,f,.18,'triangle');},i*140); }); }
+  else { tone(200,120,.5,'sine'); }
+}
+
+/* ── UTILS ── */
+function fisher(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var r=new Uint32Array(1); crypto.getRandomValues(r);
+    var j=Math.abs((r[0]^Date.now()))%(i+1);
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function flash(sym){
+  var el=$('flashPop'); el.textContent=sym;
+  el.classList.remove('play'); void el.offsetWidth; el.classList.add('play');
+}
+function ptsObtenus(){ return state.reduce(function(s,st){return s+st.pts;},0); }
+function ptsTraites(){ return state.reduce(function(s,st,i){return s+(st.done?MAXPTS[i]:0);},0); }
+function majHud(){
+  var traites=ptsTraites(), ok=ptsObtenus();
+  $('chOk').textContent=ok;
+  $('chKo').textContent=traites-ok;
+  $('chRest').textContent=TOTAL-traites;
+  $('progFill').style.width=Math.round(traites/TOTAL*100)+'%';
+  var h='';
+  for(var i=0;i<NB;i++){
+    var c='pdot';
+    if(state[i].done) c+=(state[i].pts===MAXPTS[i]?' done':' done-ko');
+    else if(i===cur) c+=' active';
+    h+='<div class="'+c+'"></div>';
+  }
+  $('dotsProg').innerHTML=h;
+}
+
+/* ── DÉMARRAGE ── */
+$('btnStart').addEventListener('click',function(){
+  $('btnStart').style.display='none';
+  $('quizZone').classList.add('show');
+  render(0);
+  $('quizZone').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ── RENDU ── */
+function render(i){
+  cur=i;
+  var d=DATA[i], st=state[i];
+  var h='';
+  h+='<div class="theme-badge">'+aff(d.actLabel)+'</div>';
+  h+='<div class="q-label">'+aff(d.label)+'</div>';
+  h+='<div class="consigne">'+d.emoji+' '+aff(d.consigne)+'</div>';
+  if(d.aide) h+='<div class="aide">'+aff(d.aide)+'</div>';
+
+  if(d.extrait){
+    h+='<div class="extrait-box"><div class="extrait-lbl">Extrait</div><div class="extrait-txt">'+fr(EXTRAIT.txt)+'</div></div>';
+  }
+  if(d.phrase){
+    h+='<div class="q-phrase">'+fr(esc(d.phrase))+'</div>';
+  }
+  if(d.question){
+    h+='<div class="q-texte">'+aff(d.question)+'</div>';
+  }
+
+  if(d.type==='tri'){
+    if(!st.bank) st.bank=fisher(d.items.map(function(it,k){return k;}));
+    if(!st.assign) st.assign=d.items.map(function(){return null;});
+    h+='<div class="banque-lbl">Formes à classer</div>';
+    h+='<div class="banque" id="banque"></div>';
+    h+='<div class="cols" id="cols">';
+    d.colonnes.forEach(function(c){
+      h+='<div class="col '+c.cls+'" data-col="'+c.k+'">'
+        +'<div class="col-titre">'+aff(c.titre)+'</div>'
+        +'<div class="col-body" data-body="'+c.k+'"></div></div>';
+    });
+    h+='</div>';
+  } else {
+    h+='<div class="opts" id="optsWrap">';
+    d.options.forEach(function(o,idx){
+      var lbl=d.boldOpts?affBold(o,d.boldOpts[idx]):aff(o);
+      h+='<button type="button" class="opt" data-idx="'+idx+'"><span class="lettre">'+LABELS[idx]+'</span><span>'+lbl+'</span></button>';
+    });
+    h+='</div>';
+  }
+
+  h+='<div class="fb-box" id="fbBox"></div>';
+  h+='<div class="btn-row">';
+  h+='<button class="btn btn-valider" id="btnValider" disabled>Valider</button>';
+  h+='<button class="btn btn-retry" id="btnRetry" style="display:none;">↺ Recommencer cette question</button>';
+  h+='<button class="btn btn-suivant" id="btnNext">'+(i===NB-1?'Voir le bilan →':'Suivant →')+'</button>';
+  h+='</div>';
+
+  $('qBody').innerHTML=h;
+  attach(i);
+  if(st.done) restore(i);
+  majHud();
+}
+
+/* ── INTERACTIONS ── */
+function attach(i){
+  var d=DATA[i];
+  if(d.type==='tri'){
+    $('banque').addEventListener('click',function(ev){
+      var b=ev.target.closest('.etiq');
+      if(!b||b.classList.contains('locked'))return;
+      var k=parseInt(b.dataset.k,10);
+      state[i].sel=(state[i].sel===k)?null:k;
+      renderTri(i);
+    });
+    $('cols').addEventListener('click',function(ev){
+      var chip=ev.target.closest('.etiq');
+      if(chip&&!chip.classList.contains('locked')){
+        state[i].assign[parseInt(chip.dataset.k,10)]=null;
+        state[i].sel=null;
+        renderTri(i);
+        return;
+      }
+      var col=ev.target.closest('.col');
+      if(!col||col.classList.contains('locked'))return;
+      if(state[i].sel===null)return;
+      state[i].assign[state[i].sel]=col.dataset.col;
+      state[i].sel=null;
+      renderTri(i);
+    });
+    renderTri(i);
+  } else {
+    $('optsWrap').addEventListener('click',function(ev){
+      var b=ev.target.closest('.opt');
+      if(!b||b.classList.contains('locked'))return;
+      Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(x){x.classList.remove('selected');});
+      b.classList.add('selected');
+      state[i].pick=parseInt(b.dataset.idx,10);
+      $('btnValider').disabled=false;
+    });
+  }
+  $('btnValider').addEventListener('click',function(){ valider(i); });
+  $('btnRetry').addEventListener('click',function(){ retry(i); });
+  $('btnNext').addEventListener('click',function(){
+    if(i===NB-1){ bilan(); } else { render(i+1); }
+  });
+}
+
+function renderTri(i){
+  var d=DATA[i], st=state[i];
+  var hb='';
+  st.bank.forEach(function(k){
+    if(st.assign[k]!==null)return;
+    hb+='<button type="button" class="etiq'+(st.sel===k?' sel':'')+'" data-k="'+k+'">'+aff(d.items[k].t)+'</button>';
+  });
+  var banque=$('banque');
+  banque.innerHTML=hb;
+  banque.className='banque'+(hb===''?' vide':'');
+  d.colonnes.forEach(function(c){
+    var body=document.querySelector('#cols [data-body="'+c.k+'"]');
+    var hc='';
+    st.bank.forEach(function(k){
+      if(st.assign[k]!==c.k)return;
+      hc+='<button type="button" class="etiq" data-k="'+k+'">'+aff(d.items[k].t)+'</button>';
+    });
+    body.innerHTML=hc||'<div class="col-vide">Colonne vide</div>';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#cols .col'),function(col){
+    if(st.sel!==null)col.classList.add('actif'); else col.classList.remove('actif');
+  });
+  $('btnValider').disabled = st.assign.indexOf(null)!==-1;
+}
+
+/* ── VALIDATION ── */
+function valider(i){
+  var d=DATA[i], st=state[i];
+  if(st.done)return;
+  st.done=true;
+  $('btnValider').disabled=true;
+  $('btnValider').style.display='none';
+  var fb=$('fbBox'), pts=0, ok=false;
+
+  if(d.type==='tri'){
+    st.sel=null;
+    renderTri(i);
+    d.items.forEach(function(it,k){ if(st.assign[k]===it.c)pts++; });
+    ok = pts===d.items.length;
+    verrouTri(i);
+    fb.className='fb-box show '+(ok?'ok':'ko');
+    if(ok){
+      fb.innerHTML='<span class="fb-titre">✅ Classement complet '+pts+'/'+d.items.length+'</span>'+aff(d.fbOk);
+    } else {
+      var puces='';
+      d.fbKoPuces.forEach(function(p){ puces+='<li>'+aff(p)+'</li>'; });
+      fb.innerHTML='<span class="fb-titre">❌ '+pts+'/'+d.items.length+' forme'+(pts>1?'s':'')+' bien classée'+(pts>1?'s':'')+'</span>'
+        +aff(d.fbKo)+'<ul>'+puces+'</ul>';
+    }
+  } else {
+    ok = st.pick===d.ans;
+    pts = ok?1:0;
+    verrouOpts(i);
+    fb.className='fb-box show '+(ok?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(d.fb);
+  }
+
+  st.pts=pts;
+  flash(ok?'✓':'✗');
+  if(ok)beepOk(); else beepErr();
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+  majHud();
+}
+
+function verrouTri(i){
+  var d=DATA[i], st=state[i];
+  Array.prototype.forEach.call(document.querySelectorAll('#cols .col'),function(c){c.classList.add('locked');c.classList.remove('actif');});
+  Array.prototype.forEach.call(document.querySelectorAll('#cols .etiq'),function(b){
+    var k=parseInt(b.dataset.k,10);
+    b.classList.add('locked');
+    b.classList.add(st.assign[k]===d.items[k].c?'correct':'wrong');
+  });
+  $('banque').classList.add('locked');
+}
+
+function verrouOpts(i){
+  var d=DATA[i], st=state[i];
+  Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(b){
+    b.classList.add('locked');
+    var idx=parseInt(b.dataset.idx,10);
+    if(idx===d.ans)b.classList.add('correct');
+    else if(idx===st.pick)b.classList.add('wrong');
+  });
+}
+
+/* ── RECOMMENCER UNE QUESTION ── */
+function retry(i){
+  state[i]={done:false,pts:0,pick:null,assign:null,sel:null,bank:null};
+  render(i);
+}
+
+/* ── RESTAURATION ── */
+function restore(i){
+  var d=DATA[i], st=state[i];
+  var fb=$('fbBox');
+  $('btnValider').style.display='none';
+  if(d.type==='tri'){
+    renderTri(i);
+    verrouTri(i);
+    var ok=st.pts===d.items.length;
+    fb.className='fb-box show '+(ok?'ok':'ko');
+    if(ok){ fb.innerHTML='<span class="fb-titre">✅ Classement complet '+st.pts+'/'+d.items.length+'</span>'+aff(d.fbOk); }
+    else {
+      var puces='';
+      d.fbKoPuces.forEach(function(p){ puces+='<li>'+aff(p)+'</li>'; });
+      fb.innerHTML='<span class="fb-titre">❌ '+st.pts+'/'+d.items.length+' forme'+(st.pts>1?'s':'')+' bien classée'+(st.pts>1?'s':'')+'</span>'+aff(d.fbKo)+'<ul>'+puces+'</ul>';
+    }
+  } else {
+    var okq=st.pts===1;
+    verrouOpts(i);
+    fb.className='fb-box show '+(okq?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(okq?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(d.fb);
+  }
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+}
+
+/* ── BILAN ── */
+function bilan(){
+  var s1=0,s2=0,s3=0;
+  DATA.forEach(function(d,i){
+    if(d.act===1)s1+=state[i].pts;
+    else if(d.act===2)s2+=state[i].pts;
+    else s3+=state[i].pts;
+  });
+  var total=s1+s2+s3;
+
+  $('quizZone').classList.remove('show');
+  $('resultats').classList.add('show');
+  $('resScore').textContent=total+'/'+TOTAL;
+  $('resSub').innerHTML='Manipulation 1 : '+s1+'/5<br>Manipulation 2 : '+s2+'/9<br>Activité 3 : '+s3+'/10';
+
+  var msg;
+  if(total>=22) msg="Maîtrise complète ! Tu situes les actions les unes par rapport aux autres sans hésiter.";
+  else if(total>=17) msg="Très bon travail. Quelques repères restent à consolider.";
+  else if(total>=12) msg="Bonne base. Reprends les questions signalées en rouge.";
+  else msg="Relis les repères sur les trois temps composés avant de retenter.";
+  $('resMsg').textContent=msg;
+
+  var nb=total>0?Math.max(1,Math.round(total/TOTAL*5)):0;
+  var stars='';
+  for(var k=1;k<=5;k++) stars+= (k<=nb?'★':'☆');
+  $('resStars').textContent=stars;
+
+  var r='';
+  DATA.forEach(function(d,i){
+    var full=state[i].pts===MAXPTS[i];
+    var val=MAXPTS[i]>1?(state[i].pts+'/'+MAXPTS[i]):(full?'✓':'✗');
+    r+='<div class="recap-item"><span>'+aff(d.recap)+'</span><span class="st '+(full?'ok':'ko')+'">'+val+'</span></div>';
+  });
+  $('recapList').innerHTML=r;
+
+  var stamp=$('stamp'); stamp.classList.remove('play'); void stamp.offsetWidth; stamp.classList.add('play');
+  beepFinal(total/TOTAL>=.7);
+
+  if(total/TOTAL>=.7){
+    for(var c=0;c<26;c++){
+      (function(){
+        var el=document.createElement('div');
+        el.className='confetti';
+        el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+        el.style.left=(Math.random()*100)+'%';
+        el.style.animationDelay=(Math.random()*.8)+'s';
+        $('resultats').appendChild(el);
+        setTimeout(function(){el.remove();},3000);
+      })();
+    }
+  }
+  $('resultats').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── RECOMMENCER TOUT ── */
+$('btnRestart').addEventListener('click',function(){
+  state=DATA.map(function(){return {done:false,pts:0,pick:null,assign:null,sel:null,bank:null};});
+  cur=0;
+  Array.prototype.forEach.call(document.querySelectorAll('.confetti'),function(c){c.remove();});
+  $('resultats').classList.remove('show');
+  $('quizZone').classList.add('show');
+  render(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
