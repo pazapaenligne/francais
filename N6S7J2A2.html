@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Je m'entraîne — Adjectifs qualificatifs et attribut du sujet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Lora:ital,wght@0,500;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --border:#e8e2d4;
+  --text:#1c1c1c;
+  --muted:#8a8272;
+  --day:#b94040;
+  --day-dark:#7a1f1f;
+  --day-light:#f7eded;
+  --day-border:#e2a3a3;
+  --green:#1f7a3d;
+  --green-bg:#e7faec;
+  --green-txt:#14532d;
+  --red:#b3261e;
+  --red-bg:#fdeaea;
+  --red-txt:#7f1d1d;
+  --orange:#f5a623;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:.95rem;
+  line-height:1.6;
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+}
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.35;z-index:0;pointer-events:none;}
+.b1{width:180px;height:180px;background:#f5e08a;top:-60px;right:-50px;}
+.b2{width:150px;height:150px;background:var(--day-light);bottom:-40px;left:-40px;}
+.b3{width:110px;height:110px;background:#b5e08a;top:40%;right:-60px;opacity:.25;}
+.b4{width:120px;height:120px;background:#f7c6c6;top:15%;left:-60px;opacity:.22;}
+
+.wrap{max-width:780px;margin:0 auto;padding:18px 16px 60px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:#f5a623;border:1px solid #e09410;border-radius:999px;padding:5px 14px;margin-bottom:10px;}
+.logo-badge .dots{display:flex;gap:3px;}
+.logo-badge .dot{width:8px;height:8px;border-radius:50%;}
+.dot.o{background:#7a3d00;}
+.dot.g{background:#ffffff;}
+.dot.r{background:#7a3d00;opacity:.45;}
+.logo-badge span{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#7a3d00;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:0 0 4px;color:var(--text);}
+.week-label{font-size:.88rem;font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.04);animation:fadeUp .4s ease;position:relative;overflow:hidden;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--day),var(--day-border));}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.intro-titre{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);letter-spacing:.03em;margin-bottom:.5rem;}
+.intro-txt{font-size:.92rem;line-height:1.75;}
+
+.btn{font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:3rem;border-radius:12px;border:none;cursor:pointer;padding:0 1.4rem;transition:.15s;}
+.btn-start{display:block;width:100%;background:var(--day);color:#fff;font-size:1rem;}
+.btn-start:hover{background:var(--day-dark);}
+
+#quizZone{display:none;}
+#quizZone.show{display:block;}
+
+.progress-bar-outer{background:var(--day-light);border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--day-border);}
+.progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--day),var(--day-dark));width:0%;transition:width .5s ease;border-radius:999px;}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);}
+.chip.ok{color:var(--green);border-color:var(--green);}
+.chip.ko{color:var(--red);border-color:var(--red);}
+.chip.rest{color:var(--muted);}
+.dots-prog{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.pdot{width:9px;height:9px;border-radius:50%;background:#e0dacb;transition:.2s;}
+.pdot.done{background:var(--green);}
+.pdot.done-ko{background:var(--red);}
+.pdot.active{background:var(--orange);transform:scale(1.35);}
+
+.theme-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);background:var(--day-light);border:1px solid var(--day-border);border-radius:999px;padding:3px 10px;margin-bottom:8px;}
+.q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;}
+.consigne{font-size:.9rem;color:var(--text);margin-bottom:.5rem;}
+.astuce{font-size:.84rem;color:var(--day-dark);background:var(--day-light);border-left:3px solid var(--day);border-radius:8px;padding:.55rem .8rem;margin-bottom:1rem;font-style:italic;}
+
+.poem-box{background:var(--surface);border:2px solid var(--day-border);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1rem;}
+.poem-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--day-dark);font-weight:800;margin-bottom:.7rem;}
+.poem-line{display:flex;align-items:baseline;flex-wrap:wrap;gap:.4rem;margin-bottom:.55rem;font-family:'Lora',serif;font-size:1rem;}
+.poem-line:last-child{margin-bottom:0;}
+.wchip{
+  font-family:'Lora',serif;font-size:1rem;font-style:italic;
+  padding:.2rem .6rem;border-radius:8px;border:2px solid var(--border);
+  background:var(--day-light);cursor:pointer;transition:.12s;
+}
+.wchip:hover:not(.locked){border-color:var(--day);}
+.wchip.sel{border-color:var(--day-dark);background:var(--day);color:#fff;font-weight:700;}
+.wchip.locked{cursor:default;}
+.wchip.correct{border-color:var(--green);background:var(--green-bg);color:var(--green-txt);font-weight:700;}
+.wchip.missed{border-color:var(--green);background:var(--surface);color:var(--green-txt);font-weight:700;text-decoration:underline dashed;}
+.wchip.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red-txt);font-weight:700;}
+.poem-source{margin-top:.9rem;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);}
+
+.q-phrase{background:var(--day-light);border-left:4px solid var(--day);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;font-style:italic;font-weight:700;font-size:clamp(1.02rem,3vw,1.15rem);line-height:1.7;font-family:'Lora',serif;}
+
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:Arial,sans-serif;
+  font-size:clamp(.92rem,2.5vw,1rem);
+  min-height:48px;text-align:left;
+  padding:.6rem .85rem;border-radius:12px;
+  border:2px solid var(--border);background:var(--surface);color:var(--text);
+  cursor:pointer;transition:.15s;line-height:1.5;
+}
+.opt span:last-child{flex:1;min-width:0;word-break:break-word;font-style:italic;}
+.opt.aucun span:last-child{font-style:normal;font-weight:700;color:var(--muted);}
+.opt:hover:not(.locked){border-color:var(--day);background:var(--day-light);}
+.opt.selected{border-color:var(--day);background:var(--day-light);}
+.opt.locked{cursor:default;}
+.opt.correct{border-color:var(--green);background:var(--green-bg);box-shadow:0 0 0 3px rgba(31,122,61,.14);}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);box-shadow:0 0 0 3px rgba(179,38,30,.12);}
+
+.fb-box{display:none;padding:.75rem 1rem;line-height:1.75;font-size:clamp(.9rem,2.5vw,1rem);border-left:5px solid var(--border);border-radius:10px;margin-bottom:1rem;}
+.fb-box.show{display:block;}
+.fb-box.ok{border-left-color:var(--green);background:var(--green-bg);}
+.fb-box.ko{border-left-color:var(--red);background:var(--red-bg);}
+.fb-titre{font-weight:800;font-style:normal;display:block;margin-bottom:.35rem;}
+.fb-box ul{margin:.4rem 0 .1rem 1.2rem;padding:0;}
+.fb-box li{margin-bottom:.3rem;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-valider{background:var(--day);color:#fff;}
+.btn-valider:disabled{background:#e5ddc9;color:#a99f86;cursor:not-allowed;}
+.btn-valider:hover:not(:disabled){background:var(--day-dark);}
+.btn-retry{background:var(--surface);color:var(--text);border:2px solid var(--border);}
+.btn-retry:hover{border-color:var(--day);}
+.btn-suivant{background:var(--day-dark);color:#fff;display:none;}
+.btn-suivant.show{display:inline-block;}
+
+.flash-pop{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.4);font-size:5rem;z-index:50;pointer-events:none;opacity:0;}
+.flash-pop.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+
+#resultats{display:none;text-align:center;}
+#resultats.show{display:block;}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.6rem,9vw,4rem);color:var(--day-dark);}
+.res-stars{font-size:1.8rem;letter-spacing:.15em;color:#d8b23a;margin:.3rem 0;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;margin-bottom:.8rem;}
+.res-sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.8;}
+.recap-list{text-align:left;font-size:.8rem;font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:.8rem;margin-bottom:1rem;max-height:280px;overflow-y:auto;}
+.recap-item{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);}
+.recap-item .st{font-weight:800;flex-shrink:0;}
+.recap-item .st.ok{color:var(--green);}
+.recap-item .st.ko{color:var(--red);}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;border:3px solid var(--day-dark);color:var(--day-dark);border-radius:10px;padding:.3rem .9rem;transform:rotate(-6deg) scale(0);margin-bottom:.6rem;}
+.stamp.play{animation:stampPop .5s ease forwards .1s;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}60%{transform:rotate(-6deg) scale(1.2);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.confetti{position:absolute;font-size:1.2rem;top:-30px;pointer-events:none;animation:particleUp 2.4s ease-in forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(340px) rotate(200deg);opacity:0;}}
+.btn-restart{background:var(--day);color:#fff;margin-top:.4rem;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <div class="dots"><div class="dot o"></div><div class="dot g"></div><div class="dot r"></div></div>
+    <span>Pazapa · Français · 6e</span>
+  </div>
+  <h1>Je m'entraîne</h1>
+  <div class="week-label">Semaine 7 · Jour 2</div>
+</header>
+
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge">Adjectifs qualificatifs · Attribut du sujet</div>
+  <div class="intro-titre">🎯 Contexte</div>
+  <div class="intro-txt">Un mot peut donner une précision sur un nom (l'adjectif qualificatif) ou sur un sujet, relié par un verbe d'état (l'attribut du sujet). Deux missions de repérage t'attendent : clique sur les bons mots dans le texte.</div>
+</div>
+
+<button class="btn btn-start" id="btnStart">Commencer les missions ▶</button>
+
+<div id="quizZone">
+  <div class="card">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progFill"></div></div>
+    <div class="chips">
+      <div class="chip ok">✔ Corrects&nbsp;: <span id="chOk">0</span></div>
+      <div class="chip ko">✘ Erreurs&nbsp;: <span id="chKo">0</span></div>
+      <div class="chip rest">⏳ Restants&nbsp;: <span id="chRest">29</span></div>
+    </div>
+    <div class="dots-prog" id="dotsProg"></div>
+  </div>
+
+  <div class="card" id="qCard"><div class="card-stripe"></div><div id="qBody"></div></div>
+</div>
+
+<div class="card" id="resultats">
+  <div class="card-stripe"></div>
+  <div class="stamp" id="stamp">TERMINÉ</div>
+  <div class="res-score" id="resScore">0/29</div>
+  <div class="res-stars" id="resStars"></div>
+  <div class="res-msg" id="resMsg"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="recap-list" id="recapList"></div>
+  <button class="btn btn-restart" id="btnRestart">↺ Recommencer toute l'activité</button>
+</div>
+
+</div>
+
+<div class="flash-pop" id="flashPop"></div>
+
+<script>
+/* ══════════ PAZAPA — N6S7J2A1 — Adjectifs qualificatifs / Attribut du sujet ══════════ */
+
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fr(s){ return String(s).replace(/ ([:;!?])/g,'\u00a0$1'); }
+function aff(s){ return fr(esc(s)); }
+
+/* ══ ACTIVITÉ 1 — Repère les adjectifs qualificatifs (surlignage global) ══ */
+/* Chaque ligne du poème devient une liste de jetons cliquables (nom + mot testé),
+   tous avec le même aspect visuel : rien ne doit indiquer la réponse avant validation. */
+var POEME_SRC=[
+  ["Une source","corrompue"],
+  ["Un secret","divulgué"],
+  ["Une absence","pesante"],
+  ["Une éternité","passagère"],
+  ["Des ténèbres","fidèles"],
+  ["Des tonnerres","captifs"],
+  ["Des flammes","immobiles"],
+  ["La neige","en cendre"],
+  ["La bouche","fermée"],
+  ["Les dents","serrées"],
+  ["La parole","niée"],
+  ["Muette"],
+  ["Bourdonnante"],
+  ["Glorieuse"],
+  ["Engloutie"]
+];
+var ADJ_TARGETS={corrompue:1,"divulgué":1,pesante:1,passagère:1,fidèles:1,captifs:1,immobiles:1,fermée:1,serrées:1,niée:1,Muette:1,Bourdonnante:1,Glorieuse:1,Engloutie:1};
+var TRAP_WORD="en cendre";
+
+var POEME=[]; /* liste plate de jetons : {line, text, target, trap} */
+POEME_SRC.forEach(function(words,line){
+  words.forEach(function(w){
+    POEME.push({line:line,text:w,target:!!ADJ_TARGETS[w],trap:(w===TRAP_WORD)});
+  });
+});
+var NB_ADJ=POEME.filter(function(t){return t.target;}).length; /* 14 */
+
+var FB1_OK="Excellent ! Tu as bien reconnu les adjectifs qualificatifs. Ils servent à donner des informations sur un nom (qualité, état ou caractéristique).";
+var FB1_MISS="Tu progresses ! Relis chaque groupe nominal et pose-toi cette question : quel mot donne une précision sur le nom ? Ce mot est souvent un adjectif qualificatif.";
+var FB1_TRAP="Presque ! « En cendre » apporte une précision sur le nom, mais ce n'est pas un adjectif qualificatif. Il s'agit d'un groupe prépositionnel introduit par en.";
+var FB1_FINAL="Bravo pour cette mission ! Reconnaître les adjectifs qualificatifs est une compétence importante. Elle t'aidera à mieux comprendre les textes et à enrichir tes propres écrits. Continue ainsi !";
+
+/* ══ ACTIVITÉ 2 — Repère les attributs du sujet (15 phrases) ══ */
+var PHRASES=[
+ {phrase:"Il paraît que tu me cherches ?",opts:[
+   {t:"paraît que",type:"verb"},{t:"cherches",type:"verb"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:false,note:"« Il paraît que » est une expression."},
+ {phrase:"Son chien est devenu très maigre.",opts:[
+   {t:"chien",type:"other"},{t:"devenu",type:"verb"},{t:"très maigre",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true},
+ {phrase:"Il cuit des gâteaux.",opts:[
+   {t:"cuit",type:"verb"},{t:"des gâteaux",type:"complement"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:false},
+ {phrase:"Tous ont l'air mécontents.",opts:[
+   {t:"Tous",type:"other"},{t:"l'air",type:"verb"},{t:"mécontents",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true},
+ {phrase:"Tout devenait clair et limpide.",opts:[
+   {t:"Tout",type:"other"},{t:"devenait",type:"verb"},{t:"clair et limpide",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true},
+ {phrase:"Francis reste tard devant la télévision.",opts:[
+   {t:"reste",type:"verb"},{t:"tard",type:"complement"},{t:"devant la télévision",type:"complement"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:3,hasAttr:false,note:"« reste » signifie ici « demeure » dans un lieu ou un moment, pas un état."},
+ {phrase:"Quand il fait trop chaud, je ne quitte pas ma maison.",opts:[
+   {t:"il",type:"other"},{t:"chaud",type:"attr"},{t:"je ne quitte pas ma maison",type:"complement"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:1,hasAttr:true},
+ {phrase:"Madame corrige les feuilles pendant midi.",opts:[
+   {t:"corrige",type:"verb"},{t:"les feuilles",type:"complement"},{t:"pendant midi",type:"complement"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:3,hasAttr:false},
+ {phrase:"Nos enfants sont grands maintenant.",opts:[
+   {t:"Nos enfants",type:"other"},{t:"grands",type:"attr"},{t:"maintenant",type:"complement"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:1,hasAttr:true},
+ {phrase:"La Meuse avait l'air rapide.",opts:[
+   {t:"La Meuse",type:"other"},{t:"l'air",type:"verb"},{t:"rapide",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true},
+ {phrase:"Ces enfants paraissaient fatigués.",opts:[
+   {t:"Ces enfants",type:"other"},{t:"paraissaient",type:"verb"},{t:"fatigués",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true},
+ {phrase:"Les grands champions sont rares.",opts:[
+   {t:"Les grands champions",type:"other"},{t:"rares",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:1,hasAttr:true},
+ {phrase:"De jolis géraniums rouges ornent ma terrasse en été.",opts:[
+   {t:"jolis géraniums rouges",type:"other"},{t:"ornent",type:"verb"},{t:"ma terrasse en été",type:"complement"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:3,hasAttr:false},
+ {phrase:"Mon petit frère devient de plus en plus bavard.",opts:[
+   {t:"Mon petit frère",type:"other"},{t:"de plus en plus",type:"complement"},{t:"bavard",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true},
+ {phrase:"Cette balançoire me paraissait assez solide.",opts:[
+   {t:"Cette balançoire",type:"other"},{t:"assez",type:"other"},{t:"solide",type:"attr"},{t:"Aucun attribut du sujet.",type:"aucun"}
+  ],ans:2,hasAttr:true}
+];
+
+var FB2_OK="Bravo ! Tu as bien repéré l'attribut du sujet. Il donne une information sur le sujet grâce à un verbe d'état.";
+var FB2_MISS="Tu progresses ! Cherche le verbe de la phrase. S'il s'agit d'un verbe d'état (être, paraître, sembler, devenir, avoir l'air…), demande-toi : quel mot décrit le sujet ? C'est souvent l'attribut du sujet.";
+var FB2_COMP="Continue tes recherches ! Le mot choisi apporte une autre information (lieu, temps, manière…), mais il ne décrit pas le sujet. L'attribut du sujet indique toujours une caractéristique ou un état du sujet.";
+var FB2_VERB="Bien essayé ! Attention : certains verbes peuvent avoir plusieurs sens. Par exemple : rester calme → calme est un attribut du sujet ; rester tard à l'école → il n'y a pas d'attribut du sujet. Observe toujours si le verbe exprime un état ou une action.";
+var FB2_FINAL="Excellent travail ! Tu sais maintenant reconnaître les attributs du sujet. Pour réussir, pense toujours à ces deux étapes : repérer le verbe, puis vérifier s'il s'agit d'un verbe d'état qui décrit le sujet.";
+
+var NB1=1;              /* Activité 1 = un seul grand écran de surlignage */
+var NB2=PHRASES.length;  /* 15 */
+var NB=NB1+NB2;          /* 16 écrans au total */
+var TOTAL=NB_ADJ+PHRASES.length; /* 14 + 15 = 29 */
+var RAIN=['📌','📝','✏️','🔎','✨','📖'];
+
+var state1={done:false,pts:0,sel:[]};
+var state2=PHRASES.map(function(){return {done:false,pts:0,pick:null};});
+var cur=0;
+
+/* ── AUDIO ── */
+var actx=null,audioReady=false;
+function initA(){ if(audioReady)return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); audioReady=true; }catch(e){} }
+document.addEventListener('pointerdown',function once(){
+  initA(); if(actx&&actx.state==='suspended')actx.resume();
+  document.removeEventListener('pointerdown',once);
+});
+function tone(f1,f2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(f1,actx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f2,1),actx.currentTime+dur);
+  g.gain.setValueAtTime(.15,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){ if(!actx)return; tone(660,880,.12,'sine'); setTimeout(function(){tone(880,1100,.14,'sine');},110); }
+function beepErr(){ tone(220,90,.22,'sawtooth'); }
+function beepFinal(ok){
+  if(!actx)return;
+  if(ok){ [523,659,784,988,1175].forEach(function(f,i){ setTimeout(function(){tone(f,f,.18,'triangle');},i*140); }); }
+  else { tone(200,120,.5,'sine'); }
+}
+
+/* ── UTILS ── */
+function flash(sym){
+  var el=$('flashPop'); el.textContent=sym;
+  el.classList.remove('play'); void el.offsetWidth; el.classList.add('play');
+}
+function ptsObtenus(){ return state1.pts + state2.reduce(function(s,st){return s+st.pts;},0); }
+function nbTraites(){
+  var t=0;
+  if(state1.done) t+=NB_ADJ;
+  t += state2.filter(function(st){return st.done;}).length;
+  return t;
+}
+function majHud(){
+  var traites=nbTraites(), ok=ptsObtenus();
+  $('chOk').textContent=ok;
+  $('chKo').textContent=traites-ok;
+  $('chRest').textContent=TOTAL-traites;
+  $('progFill').style.width=Math.round(traites/TOTAL*100)+'%';
+  var h='';
+  for(var i=0;i<NB;i++){
+    var done = i===0 ? state1.done : state2[i-1].done;
+    var pts = i===0 ? state1.pts : state2[i-1].pts;
+    var full = i===0 ? (pts===NB_ADJ) : (pts===1);
+    var c='pdot';
+    if(done) c+=(full?' done':' done-ko');
+    else if(i===cur) c+=' active';
+    h+='<div class="'+c+'"></div>';
+  }
+  $('dotsProg').innerHTML=h;
+}
+
+/* ── DÉMARRAGE ── */
+$('btnStart').addEventListener('click',function(){
+  $('btnStart').style.display='none';
+  $('quizZone').classList.add('show');
+  render(0);
+  $('quizZone').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ── RENDU ── */
+function render(i){
+  cur=i;
+  var h='';
+  if(i===0){
+    h+='<div class="theme-badge">Activité 1 · Repère les adjectifs qualificatifs</div>';
+    h+='<div class="q-label">Mission de surlignage</div>';
+    h+='<div class="consigne">🎯 Lis attentivement l\'extrait. Clique uniquement sur les adjectifs qualificatifs.</div>';
+    h+='<div class="astuce">Un adjectif qualificatif donne une précision sur un nom : il indique une qualité, un état ou une caractéristique.</div>';
+    h+='<div class="poem-box"><div class="poem-lbl">📖 Extrait</div><div id="poemLines"></div>';
+    h+='<div class="poem-source">Jean Tardieu, <em>Formeries</em>, Gallimard.</div></div>';
+    h+='<div class="fb-box" id="fbBox"></div>';
+    h+='<div class="btn-row">';
+    h+='<button class="btn btn-valider" id="btnValider">Valider</button>';
+    h+='<button class="btn btn-retry" id="btnRetry" style="display:none;">↺ Recommencer cette mission</button>';
+    h+='<button class="btn btn-suivant" id="btnNext">Suivant →</button>';
+    h+='</div>';
+    $('qBody').innerHTML=h;
+    renderPoeme();
+    attach1();
+    if(state1.done) restore1();
+  } else {
+    var d=PHRASES[i-1], st=state2[i-1];
+    h+='<div class="theme-badge">Activité 2 · Repère les attributs du sujet</div>';
+    h+='<div class="q-label">Phrase '+i+' / '+NB2+'</div>';
+    h+='<div class="consigne">🎯 Clique sur l\'attribut du sujet, ou sur « Aucun attribut du sujet » s\'il n\'y en a pas.</div>';
+    h+='<div class="q-phrase">'+aff(d.phrase)+'</div>';
+    h+='<div class="opts" id="optsWrap">';
+    d.opts.forEach(function(o,idx){
+      h+='<button type="button" class="opt'+(o.type==='aucun'?' aucun':'')+'" data-idx="'+idx+'"><span>'+aff(o.t)+'</span></button>';
+    });
+    h+='</div>';
+    h+='<div class="fb-box" id="fbBox"></div>';
+    h+='<div class="btn-row">';
+    h+='<button class="btn btn-valider" id="btnValider" disabled>Valider</button>';
+    h+='<button class="btn btn-retry" id="btnRetry" style="display:none;">↺ Recommencer cette question</button>';
+    h+='<button class="btn btn-suivant" id="btnNext">'+(i===NB-1?'Voir le bilan →':'Suivant →')+'</button>';
+    h+='</div>';
+    $('qBody').innerHTML=h;
+    attach2(i-1);
+    if(st.done) restore2(i-1);
+  }
+  majHud();
+}
+
+/* ── ACTIVITÉ 1 : rendu et logique ── */
+function renderPoeme(){
+  var h='';
+  var lines={};
+  POEME.forEach(function(t,k){ (lines[t.line]=lines[t.line]||[]).push(k); });
+  Object.keys(lines).forEach(function(lineKey){
+    h+='<div class="poem-line">';
+    lines[lineKey].forEach(function(k){
+      var t=POEME[k];
+      var sel=state1.sel.indexOf(k)!==-1;
+      h+='<button type="button" class="wchip'+(sel?' sel':'')+'" data-k="'+k+'">'+aff(t.text)+'</button>';
+    });
+    h+='</div>';
+  });
+  $('poemLines').innerHTML=h;
+}
+function attach1(){
+  $('poemLines').addEventListener('click',function(ev){
+    var b=ev.target.closest('.wchip');
+    if(!b||b.classList.contains('locked'))return;
+    var k=parseInt(b.dataset.k,10);
+    var idx=state1.sel.indexOf(k);
+    if(idx===-1)state1.sel.push(k); else state1.sel.splice(idx,1);
+    renderPoeme();
+  });
+  $('btnValider').addEventListener('click',function(){ valider1(); });
+  $('btnRetry').addEventListener('click',function(){ retry1(); });
+  $('btnNext').addEventListener('click',function(){ render(1); });
+}
+function valider1(){
+  if(state1.done)return;
+  state1.done=true;
+  $('btnValider').style.display='none';
+
+  var foundCorrect=0, missed=false, trapSel=false, wrongOther=false;
+  POEME.forEach(function(l,k){
+    var sel=state1.sel.indexOf(k)!==-1;
+    if(l.target && sel) foundCorrect++;
+    if(l.target && !sel) missed=true;
+    if(!l.target && sel && l.trap) trapSel=true;
+    if(!l.target && sel && !l.trap) wrongOther=true;
+  });
+  state1.pts=foundCorrect;
+
+  Array.prototype.forEach.call(document.querySelectorAll('.wchip'),function(b){
+    var k=parseInt(b.dataset.k,10), l=POEME[k];
+    var sel=state1.sel.indexOf(k)!==-1;
+    b.classList.add('locked');
+    if(l.target && sel) b.classList.add('correct');
+    else if(l.target && !sel) b.classList.add('missed');
+    else if(!l.target && sel) b.classList.add('wrong');
+  });
+
+  var ok = foundCorrect===NB_ADJ && !trapSel && !wrongOther;
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  if(ok){
+    fb.innerHTML='<span class="fb-titre">✅ Mission réussie '+foundCorrect+'/'+NB_ADJ+'</span>'+aff(FB1_FINAL);
+  } else {
+    var puces='';
+    if(missed) puces+='<li>'+aff(FB1_MISS)+'</li>';
+    if(trapSel) puces+='<li>'+aff(FB1_TRAP)+'</li>';
+    if(wrongOther) puces+='<li>Continue tes recherches ! Le nom désigne une personne, un animal, un objet ou une idée. Cherche plutôt le mot qui décrit ce nom ou lui apporte une précision.</li>';
+    fb.innerHTML='<span class="fb-titre">❌ '+foundCorrect+'/'+NB_ADJ+' adjectif'+(foundCorrect>1?'s':'')+' trouvé'+(foundCorrect>1?'s':'')+'</span><ul>'+puces+'</ul>';
+  }
+  flash(ok?'✓':'✗');
+  if(ok)beepOk(); else beepErr();
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+  majHud();
+}
+function retry1(){
+  state1={done:false,pts:0,sel:[]};
+  render(0);
+}
+function restore1(){
+  Array.prototype.forEach.call(document.querySelectorAll('.wchip'),function(b){
+    var k=parseInt(b.dataset.k,10), l=POEME[k];
+    var sel=state1.sel.indexOf(k)!==-1;
+    b.classList.add('locked');
+    if(l.target && sel) b.classList.add('correct');
+    else if(l.target && !sel) b.classList.add('missed');
+    else if(!l.target && sel) b.classList.add('wrong');
+  });
+  $('btnValider').style.display='none';
+  var ok=state1.pts===NB_ADJ;
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  if(ok){ fb.innerHTML='<span class="fb-titre">✅ Mission réussie '+state1.pts+'/'+NB_ADJ+'</span>'+aff(FB1_FINAL); }
+  else { fb.innerHTML='<span class="fb-titre">❌ '+state1.pts+'/'+NB_ADJ+' adjectif'+(state1.pts>1?'s':'')+' trouvé'+(state1.pts>1?'s':'')+'</span>'; }
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+}
+
+/* ── ACTIVITÉ 2 : rendu et logique ── */
+function attach2(idx){
+  $('optsWrap').addEventListener('click',function(ev){
+    var b=ev.target.closest('.opt');
+    if(!b||b.classList.contains('locked'))return;
+    Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(x){x.classList.remove('selected');});
+    b.classList.add('selected');
+    state2[idx].pick=parseInt(b.dataset.idx,10);
+    $('btnValider').disabled=false;
+  });
+  $('btnValider').addEventListener('click',function(){ valider2(idx); });
+  $('btnRetry').addEventListener('click',function(){ retry2(idx); });
+  $('btnNext').addEventListener('click',function(){
+    if(cur===NB-1){ bilan(); } else { render(cur+1); }
+  });
+}
+function fb2For(d,pickIdx){
+  if(pickIdx===d.ans) return {ok:true,txt:FB2_OK};
+  var picked=d.opts[pickIdx];
+  if(d.hasAttr && picked.type==='aucun') return {ok:false,txt:FB2_MISS};
+  if(picked.type==='verb') return {ok:false,txt:FB2_VERB};
+  return {ok:false,txt:FB2_COMP};
+}
+function valider2(idx){
+  var d=PHRASES[idx], st=state2[idx];
+  if(st.done)return;
+  st.done=true;
+  $('btnValider').disabled=true;
+  $('btnValider').style.display='none';
+  var ok = st.pick===d.ans;
+  st.pts = ok?1:0;
+  Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(b){
+    b.classList.add('locked');
+    var i=parseInt(b.dataset.idx,10);
+    if(i===d.ans) b.classList.add('correct');
+    else if(i===st.pick) b.classList.add('wrong');
+  });
+  var res=fb2For(d,st.pick);
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  var noteTxt = (!ok && d.note) ? (' '+aff(d.note)) : '';
+  fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(res.txt)+noteTxt;
+  flash(ok?'✓':'✗');
+  if(ok)beepOk(); else beepErr();
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+  majHud();
+}
+function retry2(idx){
+  state2[idx]={done:false,pts:0,pick:null};
+  render(idx+1);
+}
+function restore2(idx){
+  var d=PHRASES[idx], st=state2[idx];
+  var ok=st.pts===1;
+  $('btnValider').style.display='none';
+  Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(b){
+    b.classList.add('locked');
+    var i=parseInt(b.dataset.idx,10);
+    if(i===d.ans) b.classList.add('correct');
+    else if(i===st.pick) b.classList.add('wrong');
+  });
+  var res=fb2For(d,st.pick);
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  var noteTxt = (!ok && d.note) ? (' '+aff(d.note)) : '';
+  fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(res.txt)+noteTxt;
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+}
+
+/* ── BILAN ── */
+function bilan(){
+  var s1=state1.pts;
+  var s2=state2.reduce(function(s,st){return s+st.pts;},0);
+  var total=s1+s2;
+
+  $('quizZone').classList.remove('show');
+  $('resultats').classList.add('show');
+  $('resScore').textContent=total+'/'+TOTAL;
+  $('resSub').innerHTML='Activité 1 (adjectifs) : '+s1+'/'+NB_ADJ+'<br>Activité 2 (attributs) : '+s2+'/'+PHRASES.length;
+
+  var msg;
+  if(total>=27) msg="Maîtrise complète ! Tu distingues parfaitement l'adjectif qualificatif et l'attribut du sujet.";
+  else if(total>=21) msg="Très bon travail. Quelques confusions restent à lever.";
+  else if(total>=15) msg="Bonne base. Reprends les items signalés en rouge.";
+  else msg="Relis les définitions de l'adjectif qualificatif et de l'attribut du sujet avant de retenter.";
+  $('resMsg').textContent=msg;
+
+  var nb=total>0?Math.max(1,Math.round(total/TOTAL*5)):0;
+  var stars='';
+  for(var k=1;k<=5;k++) stars+= (k<=nb?'★':'☆');
+  $('resStars').textContent=stars;
+
+  var r='';
+  r+='<div class="recap-item"><span>Act. 1 — Adjectifs qualificatifs</span><span class="st '+(s1===NB_ADJ?'ok':'ko')+'">'+s1+'/'+NB_ADJ+'</span></div>';
+  PHRASES.forEach(function(d,i){
+    var ok=state2[i].pts===1;
+    r+='<div class="recap-item"><span>Act. 2 — Phrase '+(i+1)+'</span><span class="st '+(ok?'ok':'ko')+'">'+(ok?'✓':'✗')+'</span></div>';
+  });
+  $('recapList').innerHTML=r;
+
+  var stamp=$('stamp'); stamp.classList.remove('play'); void stamp.offsetWidth; stamp.classList.add('play');
+  beepFinal(total/TOTAL>=.7);
+
+  if(total/TOTAL>=.7){
+    for(var c=0;c<26;c++){
+      (function(){
+        var el=document.createElement('div');
+        el.className='confetti';
+        el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+        el.style.left=(Math.random()*100)+'%';
+        el.style.animationDelay=(Math.random()*.8)+'s';
+        $('resultats').appendChild(el);
+        setTimeout(function(){el.remove();},3000);
+      })();
+    }
+  }
+  $('resultats').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── RECOMMENCER TOUT ── */
+$('btnRestart').addEventListener('click',function(){
+  state1={done:false,pts:0,sel:[]};
+  state2=PHRASES.map(function(){return {done:false,pts:0,pick:null};});
+  cur=0;
+  Array.prototype.forEach.call(document.querySelectorAll('.confetti'),function(c){c.remove();});
+  $('resultats').classList.remove('show');
+  $('quizZone').classList.add('show');
+  render(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
