@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – S7 J3 – 6e – Serai / serais</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#8dc63f;--day-dark:#3d7a10;
+      --day-light:#f0faeb;--day-border:#b5e08a;
+      --day-glow:rgba(61,122,16,.2);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;--orange:#f5a623;
+      --dark:#1a1f2e;--text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+    .dash{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;box-shadow:0 2px 10px rgba(61,122,16,.08);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-dark);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.12);border-color:var(--green);color:#15803d;}
+    .chip-ko{background:rgba(239,68,68,.1);border-color:var(--red);color:#b91c1c;}
+    .chip-rem{background:rgba(141,198,63,.15);border-color:var(--day-color);color:var(--day-dark);}
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+    .section-header{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-dark);color:#fff;border-radius:12px 12px 0 0;
+      padding:.7rem 1.1rem;display:flex;align-items:center;gap:.7rem;margin-top:.3rem;}
+    .section-num{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;opacity:.85;}
+    .section-titre{font-size:1rem;font-weight:800;}
+    .section-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.22rem .7rem;border-radius:99px;background:rgba(255,255,255,.2);color:#fff;}
+    .card{width:100%;max-width:720px;background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;position:relative;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);animation:fadeUp .35s ease both;
+      margin-bottom:.9rem;z-index:1;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.55rem;}
+    .q-consigne{font-size:.9rem;color:var(--muted);margin-bottom:.6rem;line-height:1.6;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-dark);border-radius:10px;
+      padding:.85rem 1rem;margin-bottom:.8rem;
+      font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);
+      line-height:1.85;font-style:italic;}
+    .q-phrase strong{font-style:normal;color:var(--day-dark);}
+    .q-phrase .label-ab{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.8rem;
+      color:var(--day-dark);font-style:normal;margin-right:.4rem;}
+    .ref-phrases{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.7rem .95rem;margin-bottom:.9rem;}
+    .ref-phrases-titre{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.4rem;}
+    .ref-phrase-ligne{font-size:1rem;font-weight:700;font-style:italic;color:var(--text);line-height:1.7;}
+    .ref-phrase-ligne strong{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--day-dark);margin-right:.3rem;}
+    .opts{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem;}
+    .opt-btn{display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;font-weight:600;
+      color:var(--text);cursor:pointer;transition:all .15s;text-align:left;min-height:52px;
+      -webkit-tap-highlight-color:transparent;}
+    .opt-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt-btn:disabled{cursor:default;}
+    .opt-btn.sel-opt{background:var(--day-light);border-color:var(--day-dark);color:var(--day-dark);}
+    /* Checkbox style pour Ex2 */
+    .chk-row{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;
+      border-radius:8px;border:2px solid var(--border);background:var(--surface);
+      cursor:pointer;transition:all .15s;min-height:50px;margin-bottom:.4rem;
+      -webkit-tap-highlight-color:transparent;}
+    .chk-row:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .chk-box{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;font-weight:900;color:#fff;}
+    .chk-box.on{background:var(--day-dark);border-color:var(--day-dark);}
+    .chk-label{font-size:1rem;font-weight:600;color:var(--text);}
+    .chk-row.locked{cursor:default;}
+    .chk-row.res-ok{background:var(--green-pale);border-color:var(--green);}
+    .chk-row.res-ko{background:var(--red-pale);border-color:var(--red);}
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.55rem;display:none;line-height:1.75;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border-left:5px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border-left:5px solid var(--red);color:#7f1d1d;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.4rem;font-size:1rem;}
+    .hl-ok{color:#14532d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-ko{color:#7f1d1d;font-weight:900;text-decoration:underline;text-underline-offset:3px;}
+    .hl-neu{color:var(--day-dark);font-weight:900;}
+    .fb-exemple{display:block;margin-top:.5rem;padding-left:.2rem;}
+    .fb-exemple .ligne{display:block;margin-bottom:.2rem;}
+    /* Encart info (non noté) */
+    .info-card{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.2rem 1.3rem;margin-bottom:.9rem;position:relative;z-index:1;
+      box-shadow:0 2px 10px rgba(61,122,16,.08);}
+    .info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border));}
+    .info-titre{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:800;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.6rem;}
+    .info-texte{font-size:.95rem;color:var(--text);line-height:1.85;}
+    .info-texte .ligne{display:block;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-primary:disabled{opacity:.45;cursor:default;}
+    .btn-dark{background:var(--border);color:var(--text);border:1.5px solid var(--day-border);}
+    .btn-dark:hover{background:var(--day-light);}
+    .nav-wrap{width:100%;max-width:720px;text-align:center;margin:.7rem 0 .3rem;position:relative;z-index:1;}
+    .bilan-bloc{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .bilan-bloc.show{display:block;animation:fadeUp .4s ease both;}
+    .bilan-card{background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 20px rgba(61,122,16,.08);text-align:center;
+      position:relative;overflow:hidden;margin-top:1rem;}
+    .bilan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--yellow));}
+    .bilan-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.5rem;}
+    .bilan-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);}
+    .bilan-denom{font-size:1.5rem;color:var(--muted);}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .badge-ok{display:inline-block;background:var(--green-pale);color:#14532d;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:var(--red-pale);color:#7f1d1d;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .bilan-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--muted);margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .parties-bilan{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.8rem;}
+    .partie-chip{background:var(--surface);border:1.5px solid var(--day-border);border-radius:10px;
+      padding:.5rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .partie-chip strong{color:var(--day-dark);}
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5c518"></span>
+    Pazapa · Français · 6ème
+  </div>
+  <div class="week-label">Semaine 7 – Jour 3</div>
+  <h1>J'observe et je teste · <span class="hl">Serai / serais</span></h1>
+  <div class="theme-badge">Conjugaison — futur simple · conditionnel présent</div>
+</header>
+
+<div class="dash">
+  <div class="dash-titre">Test de réactivation — 9 questions — 9 points</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Test n° 1 en cours…</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/9</div>
+      <div class="dash-score-label">Points</div>
+    </div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">9</span> restants</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 9 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div id="zone-main"></div>
+<div class="nav-wrap" id="nav-wrap" style="display:none;">
+  <button class="btn btn-primary" id="btn-nav">Continuer →</button>
+</div>
+<div class="nav-wrap">
+  <button class="btn btn-dark" onclick="resetTout()">↺ Recommencer</button>
+</div>
+
+<div class="bilan-bloc" id="bilan-bloc">
+  <div class="bilan-card">
+    <div class="bilan-titre">Bilan — Serai / serais</div>
+    <div class="bilan-score"><span id="bilan-num">0</span><span class="bilan-denom">/9</span></div>
+    <div class="stars" id="bilan-stars"></div>
+    <div id="bilan-badge"></div>
+    <div class="bilan-msg" id="bilan-msg"></div>
+    <div class="parties-bilan">
+      <div class="partie-chip">Test 1 <strong id="bil-ex1">0/5</strong></div>
+      <div class="partie-chip">Test 2 (homophones) <strong id="bil-ex2">0/1</strong></div>
+      <div class="partie-chip">Test 2 (verbes) <strong id="bil-ex3">0/3</strong></div>
+    </div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">↺ Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var scoreOk=0,sc1=0,sc2=0,sc3=0;
+var TOTAL=9;
+function g(id){return document.getElementById(id);}
+function animerEl(el,ok){if(!el)return;el.classList.remove('anim-ok','anim-ko');void el.offsetWidth;el.classList.add(ok?'anim-ok':'anim-ko');}
+function majProg(doneCount){
+  var pct=Math.round(scoreOk/TOTAL*100);
+  g('prog-fill').style.width=pct+'%';
+  g('prog-label').textContent=scoreOk+' / '+TOTAL+' points';
+  g('prog-pct').textContent=pct+'\u00a0%';
+  g('dash-total').textContent=scoreOk;
+  g('chip-ok').textContent=scoreOk;
+  g('chip-ko').textContent=doneCount-scoreOk;
+  g('chip-rem').textContent=TOTAL-doneCount;
+}
+
+/* ====== S\u00C9QUENCE ====== */
+/* items : type 'qcm' | 'info' | 'checkbox' */
+
+var ITEMS=[
+  /* --- TEST N\u00B01 --- */
+  {type:'section',exNum:1,titre:'Test n\u00b0 1',consigneGlobale:'Lis les deux phrases.',
+   phraseA:'Phrase A\u00a0: Je serai l\u00e0, promis.',
+   phraseB:'Phrase B\u00a0: Je pensais que je serais l\u00e0.'},
+  {type:'qcm',num:1,exNum:1,
+   refPhrases:['A|Je serai l\u00e0, promis.','B|Je pensais que je serais l\u00e0.'],
+   consigne:'Question 1 \u2013 Que remarques-tu\u00a0?',
+   ph:'\u00c0 l\u2019oral, entend-on une diff\u00e9rence entre \u00ab\u00a0serai\u00a0\u00bb et \u00ab\u00a0serais\u00a0\u00bb\u00a0?',
+   opts:[
+     {t:'Oui, la prononciation est diff\u00e9rente.',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Essaie de prononcer les deux verbes \u00e0 voix haute. Tu entendras qu\u2019ils se prononcent de la m\u00eame mani\u00e8re. L\u2019orthographe d\u00e9pend donc du sens de la phrase.'},
+     {t:'Non, ils se prononcent de la m\u00eame mani\u00e8re.',ok:true,
+      fb:'<span class="fb-titre">\u2705 Exact\u00a0!</span>\u00c0 l\u2019oral, serai et serais se prononcent de la m\u00eame fa\u00e7on. Il faut donc utiliser le contexte pour choisir la bonne orthographe.'}
+   ]},
+  {type:'qcm',num:2,exNum:1,
+   refPhrases:['A|Je serai l\u00e0, promis.','B|Je pensais que je serais l\u00e0.'],
+   consigne:'Question 2 \u2013 Quel mode ou temps est utilis\u00e9\u00a0?',
+   ph:'Dans \u00ab\u00a0Je serai l\u00e0\u00a0\u00bb, le verbe est au\u2026',
+   opts:[
+     {t:'futur simple',ok:true,
+      fb:'<span class="fb-titre">\u2705 Oui\u00a0!</span>\u00ab\u00a0Je serai\u00a0\u00bb exprime un fait situ\u00e9 dans l\u2019avenir\u00a0: c\u2019est le futur simple.'},
+     {t:'conditionnel pr\u00e9sent',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Le conditionnel pr\u00e9sent d\u00e9pendrait d\u2019une autre proposition (comme \u00ab\u00a0je pensais que\u2026\u00a0\u00bb). Ici, \u00ab\u00a0je serai\u00a0\u00bb exprime directement un fait \u00e0 venir\u00a0: c\u2019est le futur simple.'},
+     {t:'imparfait',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>L\u2019imparfait exprimerait une action pass\u00e9e ou habituelle. Ici, \u00ab\u00a0je serai\u00a0\u00bb exprime un fait situ\u00e9 dans l\u2019avenir\u00a0: c\u2019est le futur simple.'}
+   ]},
+  {type:'qcm',num:3,exNum:1,
+   refPhrases:['A|Je serai l\u00e0, promis.','B|Je pensais que je serais l\u00e0.'],
+   consigne:'Question 3 \u2013 Et dans la seconde phrase\u00a0?',
+   ph:'Dans \u00ab\u00a0Je serais l\u00e0\u00a0\u00bb, le verbe est au\u2026',
+   opts:[
+     {t:'futur simple',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Ici, le verbe d\u00e9pend de \u00ab\u00a0je pensais que\u2026\u00a0\u00bb et exprime un fait envisag\u00e9, pas un fait certain\u00a0: c\u2019est le conditionnel pr\u00e9sent, pas le futur simple.'},
+     {t:'conditionnel pr\u00e9sent',ok:true,
+      fb:'<span class="fb-titre">\u2705 Bravo\u00a0!</span>Ici, le verbe est au conditionnel pr\u00e9sent. Il d\u00e9pend du verbe \u00ab\u00a0pensais\u00a0\u00bb et exprime un fait envisag\u00e9.'},
+     {t:'pr\u00e9sent',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Le pr\u00e9sent exprimerait une action qui se d\u00e9roule maintenant. Ici, le verbe d\u00e9pend de \u00ab\u00a0je pensais que\u2026\u00a0\u00bb\u00a0: c\u2019est le conditionnel pr\u00e9sent.'}
+   ]},
+  {type:'qcm',num:4,exNum:1,
+   refPhrases:['A|Je serai l\u00e0, promis.','B|Je pensais que je serais l\u00e0.'],
+   consigne:'Transpose maintenant les deux phrases avec nous.',
+   ph:'<span class="label-ab">Phrase A</span>',
+   opts:[
+     {t:'Nous serions l\u00e0.',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>\u00ab\u00a0Nous serions\u00a0\u00bb est la forme du conditionnel. Ici, il s\u2019agit de transposer la phrase A, qui est au futur simple\u00a0: \u00ab\u00a0Nous serons\u00a0\u00bb.'},
+     {t:'Nous serons l\u00e0.',ok:true,
+      fb:'<span class="fb-titre">\u2705 Tr\u00e8s bien\u00a0!</span>Au futur simple, nous serons permet de reconna\u00eetre facilement le temps.'}
+   ]},
+  {type:'qcm',num:5,exNum:1,
+   refPhrases:['A|Je serai l\u00e0, promis.','B|Je pensais que je serais l\u00e0.'],
+   consigne:null,
+   ph:'<span class="label-ab">Phrase B</span>',
+   opts:[
+     {t:'Nous serons l\u00e0.',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>\u00ab\u00a0Nous serons\u00a0\u00bb est la forme du futur simple. Ici, il s\u2019agit de transposer la phrase B, qui est au conditionnel\u00a0: \u00ab\u00a0Nous serions\u00a0\u00bb.'},
+     {t:'Nous serions l\u00e0.',ok:true,
+      fb:'<span class="fb-titre">\u2705 Exact\u00a0!</span>Avec nous serions, la terminaison -ions permet d\u2019identifier le conditionnel.'}
+   ]},
+  {type:'info',titre:'Ce qu\u2019il faut retenir',
+   lignes:[
+     '\ud83d\udccc Lorsque tu h\u00e9sites entre -ai et -ais, remplace le sujet par nous\u00a0:',
+     'nous serons \u2192 futur simple',
+     'nous serions \u2192 conditionnel pr\u00e9sent'
+   ]},
+
+  /* --- TEST N\u00B02 (homophones caf\u00E9) --- */
+  {type:'section',exNum:2,titre:'Test n\u00b0 2',consigneGlobale:'Lis cette phrase.',
+   phraseA:'J\u2019ai pr\u00e9par\u00e9 du caf\u00e9 pour t\u2019aider \u00e0 te r\u00e9veiller.',phraseB:null},
+  {type:'checkbox',num:6,exNum:2,
+   refPhrases:['\u00A0|J\u2019ai pr\u00e9par\u00e9 du caf\u00e9 pour t\u2019aider \u00e0 te r\u00e9veiller.'],
+   consigne:'Question 1 \u2013 Quels mots peuvent facilement \u00eatre confondus\u00a0? (Coche toutes les bonnes r\u00e9ponses.)',
+   choix:[
+     {t:'\u00e0 / a',ok:true},
+     {t:"te / t'",ok:false},
+     {t:'caf\u00e9 / r\u00e9veiller',ok:true},
+     {t:'pr\u00e9par\u00e9 / caf\u00e9',ok:true}
+   ],
+   fbOk:'<span class="fb-titre">\u2705 Bien vu\u00a0!</span>Les homophones grammaticaux sont souvent les plus difficiles \u00e0 orthographier.',
+   fbKo:'<span class="fb-titre">Pas tout \u00e0 fait.</span>Les homophones grammaticaux sont souvent les plus difficiles \u00e0 orthographier. Relis la phrase et compare les mots propos\u00e9s.'},
+
+  /* --- TEST N\u00B02 (verbes 3e groupe) --- */
+  {type:'section',exNum:3,titre:'Test n\u00b0 2',consigneGlobale:null,phraseA:null,phraseB:null},
+  {type:'qcm',num:7,exNum:3,
+   consigne:'Question 1',
+   ph:'Les verbes du 3\u1d49 groupe sont ceux qui pr\u00e9sentent le plus souvent des terminaisons homophones.',
+   opts:[
+     {t:'Vrai',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Les verbes du 3\u1d49 groupe servent souvent de verbes de remplacement parce que leurs formes se distinguent mieux \u00e0 l\u2019oral (prendre \u2192 pris / prendre). En revanche, ce sont les verbes du 1er groupe qui concentrent le plus de terminaisons homophones et qui sont \u00e0 l\u2019origine de nombreuses h\u00e9sitations orthographiques.'},
+     {t:'Faux',ok:true,
+      fb:'<span class="fb-titre">\u2705 Exact\u00a0!</span>Ce sont surtout les verbes du 1er groupe qui pr\u00e9sentent de nombreuses terminaisons homophones \u00e0 l\u2019oral (-er, -\u00e9, -ez, -ais, -ait, -aient\u2026). C\u2019est pourquoi on utilise souvent des manipulations, comme remplacer le verbe par un verbe du 3\u1d49 groupe (prendre, vendre, mordre\u2026), dont les formes s\u2019entendent davantage, afin de v\u00e9rifier l\u2019orthographe.'}
+   ]},
+  {type:'qcm',num:8,exNum:3,
+   consigne:'Question 2 \u2013 Vrai ou faux\u00a0?',
+   ph:'Remplacer un verbe par un verbe d\u2019un autre groupe permet de v\u00e9rifier s\u2019il s\u2019agit d\u2019un verbe conjugu\u00e9, d\u2019un infinitif ou d\u2019un participe pass\u00e9.',
+   opts:[
+     {t:'Vrai',ok:true,
+      fb:'<span class="fb-titre">\u2705 Bravo\u00a0!</span>Cette manipulation est tr\u00e8s efficace. Par exemple\u00a0:<span class="fb-exemple"><span class="ligne">Il a mang\u00e9. \u2192 Il a vendu.</span><span class="ligne">Il va manger. \u2192 Il va vendre.</span></span>Le remplacement permet d\u2019identifier la forme du verbe sans se fier uniquement \u00e0 la prononciation.'},
+     {t:'Faux',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Le remplacement est une m\u00e9thode de v\u00e9rification. En choisissant un verbe dont les formes s\u2019entendent mieux, tu peux distinguer un infinitif, un participe pass\u00e9 ou un verbe conjugu\u00e9.'}
+   ]},
+  {type:'qcm',num:9,exNum:3,
+   consigne:'Question 3 \u2013 Vrai ou faux\u00a0?',
+   ph:'Changer de personne (par exemple passer de je \u00e0 nous) permet souvent d\u2019identifier le mode ou le temps d\u2019un verbe.',
+   opts:[
+     {t:'Vrai',ok:true,
+      fb:'<span class="fb-titre">\u2705 Exact\u00a0!</span>En passant \u00e0 nous, les terminaisons deviennent souvent plus faciles \u00e0 distinguer.<span class="fb-exemple"><span class="ligne">Exemple\u00a0:</span><span class="ligne">Je serai \u2192 Nous serons (futur)</span><span class="ligne">Je serais \u2192 Nous serions (conditionnel)</span></span>Cette manipulation aide \u00e0 choisir la bonne orthographe.'},
+     {t:'Faux',ok:false,
+      fb:'<span class="fb-titre">\ud83d\udca1</span>Essaie de remplacer je par nous. Les terminaisons changent et permettent souvent d\u2019identifier plus facilement le temps ou le mode du verbe.'}
+   ]},
+  {type:'info',titre:'Bilan',
+   lignes:[
+     '\ud83c\udfaf Les bons r\u00e9flexes \u00e0 retenir\u00a0:',
+     '\u2714 Les verbes du 3\u1d49 groupe comportent souvent des formes homophones.',
+     '\u2714 Remplacer le verbe par un autre permet d\u2019identifier sa forme (infinitif, participe pass\u00e9 ou verbe conjugu\u00e9).',
+     '\u2714 Changer de personne, notamment en utilisant nous, aide \u00e0 reconna\u00eetre le temps ou le mode du verbe.'
+   ]}
+];
+
+var idx=0,done=[];
+
+function buildRefPhrases(list){
+  var box=document.createElement('div');box.className='ref-phrases';
+  var t=document.createElement('div');t.className='ref-phrases-titre';t.textContent='Phrases de r\u00e9f\u00e9rence';box.appendChild(t);
+  list.forEach(function(entry){
+    var parts=entry.split('|');
+    var lbl=parts[0],txt=parts[1];
+    var l=document.createElement('div');l.className='ref-phrase-ligne';
+    if(lbl&&lbl!=='\u00a0'){l.innerHTML='<strong>'+lbl+'</strong>'+txt;}
+    else{l.textContent=txt;}
+    box.appendChild(l);
+  });
+  return box;
+}
+
+function render(){
+  var it=ITEMS[idx];
+  var zone=g('zone-main');zone.innerHTML='';
+
+  if(it.type==='section'){
+    var sec=document.createElement('div');sec.className='section-header';
+    sec.innerHTML='<span class="section-num">Test</span><span class="section-titre">'+it.titre+'</span>';
+    zone.appendChild(sec);
+    var card=document.createElement('div');card.className='card';
+    card.appendChild(Object.assign(document.createElement('div'),{className:'card-stripe'}));
+    if(it.consigneGlobale){var cs=document.createElement('div');cs.className='q-consigne';cs.textContent=it.consigneGlobale;card.appendChild(cs);}
+    if(it.phraseA){var pa=document.createElement('div');pa.className='q-phrase';pa.textContent=it.phraseA;card.appendChild(pa);}
+    if(it.phraseB){var pb=document.createElement('div');pb.className='q-phrase';pb.textContent=it.phraseB;card.appendChild(pb);}
+    zone.appendChild(card);
+    g('dash-statut').textContent=it.titre+' en cours\u2026';
+    avancerAuto();
+    return;
+  }
+
+  if(it.type==='info'){
+    var info=document.createElement('div');info.className='info-card';
+    var t=document.createElement('div');t.className='info-titre';t.textContent=it.titre;info.appendChild(t);
+    var txt=document.createElement('div');txt.className='info-texte';
+    it.lignes.forEach(function(l){var s=document.createElement('span');s.className='ligne';s.textContent=l;txt.appendChild(s);});
+    info.appendChild(txt);
+    zone.appendChild(info);
+    g('nav-wrap').style.display='';
+    g('btn-nav').textContent='Continuer \u2192';
+    g('btn-nav').onclick=function(){idx++;render();window.scrollTo({top:0,behavior:'smooth'});};
+    return;
+  }
+
+  if(it.type==='qcm'){
+    var card=document.createElement('div');card.className='card';card.id='card-q'+it.num;
+    card.appendChild(Object.assign(document.createElement('div'),{className:'card-stripe'}));
+    var lbl=document.createElement('div');lbl.className='q-label';lbl.textContent='Question n\u00b0\u00a0'+it.num;card.appendChild(lbl);
+    if(it.refPhrases){card.appendChild(buildRefPhrases(it.refPhrases));}
+    if(it.consigne){var cs=document.createElement('div');cs.className='q-consigne';cs.textContent=it.consigne;card.appendChild(cs);}
+    if(it.ph){var ph=document.createElement('div');ph.className='q-phrase';ph.innerHTML=it.ph;card.appendChild(ph);}
+    var opts=document.createElement('div');opts.className='opts';
+    it.opts.forEach(function(opt,oi){
+      var btn=document.createElement('button');btn.className='opt-btn';btn.textContent=opt.t;
+      btn.addEventListener('click',function(){choisirQCM(it,oi,opts,card);});
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+    var fb=document.createElement('div');fb.className='fb';fb.id='fb-q'+it.num;card.appendChild(fb);
+    zone.appendChild(card);
+    g('dash-statut').textContent='Question '+it.num+' en cours\u2026';
+    g('nav-wrap').style.display='none';
+    return;
+  }
+
+  if(it.type==='checkbox'){
+    var card=document.createElement('div');card.className='card';card.id='card-q'+it.num;
+    card.appendChild(Object.assign(document.createElement('div'),{className:'card-stripe'}));
+    var lbl=document.createElement('div');lbl.className='q-label';lbl.textContent='Question n\u00b0\u00a0'+it.num;card.appendChild(lbl);
+    if(it.refPhrases){card.appendChild(buildRefPhrases(it.refPhrases));}
+    var cs=document.createElement('div');cs.className='q-consigne';cs.textContent=it.consigne;card.appendChild(cs);
+    var rows=[];var picked=[];
+    it.choix.forEach(function(ch,ci){
+      var row=document.createElement('div');row.className='chk-row';
+      var box=document.createElement('div');box.className='chk-box';
+      var lab=document.createElement('div');lab.className='chk-label';lab.textContent=ch.t;
+      row.appendChild(box);row.appendChild(lab);
+      row.addEventListener('click',function(){
+        if(row.classList.contains('locked'))return;
+        var pi=picked.indexOf(ci);
+        if(pi>=0){picked.splice(pi,1);box.classList.remove('on');box.textContent='';}
+        else{picked.push(ci);box.classList.add('on');box.textContent='\u2713';}
+      });
+      rows.push({row:row,box:box});
+      card.appendChild(row);
+    });
+    var btnV=document.createElement('button');btnV.className='btn btn-primary';btnV.textContent='V\u00e9rifier';btnV.style.marginTop='.4rem';
+    btnV.addEventListener('click',function(){
+      if(done.indexOf(it.num)>=0)return;
+      done.push(it.num);
+      var exact=true;
+      it.choix.forEach(function(ch,ci){
+        var isPicked=picked.indexOf(ci)>=0;
+        rows[ci].row.classList.add('locked');
+        if(ch.ok&&isPicked){rows[ci].row.classList.add('res-ok');}
+        else if(!ch.ok&&isPicked){rows[ci].row.classList.add('res-ko');exact=false;}
+        else if(ch.ok&&!isPicked){rows[ci].row.classList.add('res-ko');exact=false;}
+      });
+      if(exact){scoreOk++;sc2++;}
+      if(exact)jouerOk();else jouerErreur();
+      var fb=g('fb-q'+it.num);
+      fb.className='fb show '+(exact?'ok-fb':'ko-fb');
+      fb.innerHTML=exact?it.fbOk:it.fbKo;
+      animerEl(card,exact);
+      btnV.disabled=true;btnV.style.opacity='.45';
+      majProg(done.length);
+      g('nav-wrap').style.display='';
+      g('btn-nav').textContent='Continuer \u2192';
+      g('btn-nav').onclick=function(){idx++;render();window.scrollTo({top:0,behavior:'smooth'});};
+    });
+    card.appendChild(btnV);
+    var fb=document.createElement('div');fb.className='fb';fb.id='fb-q'+it.num;card.appendChild(fb);
+    zone.appendChild(card);
+    g('dash-statut').textContent='Question '+it.num+' en cours\u2026';
+    g('nav-wrap').style.display='none';
+  }
+}
+
+function avancerAuto(){
+  g('nav-wrap').style.display='';
+  g('btn-nav').textContent='Commencer \u2192';
+  g('btn-nav').onclick=function(){idx++;render();window.scrollTo({top:0,behavior:'smooth'});};
+}
+
+function choisirQCM(it,oi,optsEl,card){
+  if(done.indexOf(it.num)>=0)return;
+  done.push(it.num);
+  var ok=it.opts[oi].ok;
+  if(ok){scoreOk++;if(it.exNum===1)sc1++;else if(it.exNum===3)sc3++;}
+  if(ok)jouerOk();else jouerErreur();
+  optsEl.querySelectorAll('.opt-btn').forEach(function(b,bi){
+    b.disabled=true;if(bi===oi)b.classList.add('sel-opt');
+  });
+  var fb=g('fb-q'+it.num);
+  fb.className='fb show '+(ok?'ok-fb':'ko-fb');
+  fb.innerHTML=it.opts[oi].fb;
+  animerEl(card,ok);
+  majProg(done.length);
+  g('nav-wrap').style.display='';
+  if(idx<ITEMS.length-1){
+    g('btn-nav').textContent='Continuer \u2192';
+    g('btn-nav').onclick=function(){idx++;render();window.scrollTo({top:0,behavior:'smooth'});};
+  } else {
+    g('btn-nav').textContent='Voir le bilan \u2192';
+    g('btn-nav').onclick=afficherBilan;
+  }
+}
+
+function afficherBilan(){
+  g('zone-main').innerHTML='';g('nav-wrap').style.display='none';
+  g('bilan-bloc').classList.add('show');
+  g('bilan-num').textContent=scoreOk;
+  g('bil-ex1').textContent=sc1+'/5';
+  g('bil-ex2').textContent=sc2+'/1';
+  g('bil-ex3').textContent=sc3+'/3';
+  var stars=scoreOk===9?5:scoreOk>=7?4:scoreOk>=5?3:scoreOk>=3?2:1;
+  g('bilan-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(scoreOk===9){badge='<div class="badge-ok">\u2713 9/9 \u2014 Excellent\u00a0!</div>';msg='Tu ma\u00eetrises serai/serais et les manipulations de v\u00e9rification.';pluie();}
+  else if(scoreOk>=6){badge='<div class="badge-ok">'+scoreOk+'/9 \u2014 Tr\u00e8s bien\u00a0!</div>';msg='Quelques points \u00e0 revoir.';pluie();}
+  else if(scoreOk>=4){badge='<div class="badge-ko">'+scoreOk+'/9 \u2014 Bien.</div>';msg='Rep\u00e8re le sujet nous pour distinguer futur et conditionnel.';}
+  else{badge='<div class="badge-ko">'+scoreOk+'/9 \u2014 Continue\u00a0!</div>';msg='Relis les encarts et recommence\u00a0!';}
+  g('bilan-badge').innerHTML=badge;
+  g('bilan-msg').textContent=msg;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetTout(){
+  scoreOk=0;sc1=0;sc2=0;sc3=0;done=[];idx=0;
+  g('bilan-bloc').classList.remove('show');
+  majProg(0);
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+render();majProg(0);
+</script>
+</body>
+</html>
