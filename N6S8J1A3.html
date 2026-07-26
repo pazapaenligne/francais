@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Métro du Savoir — Le Vaillant Petit Tailleur</title>
+<style>
+*{box-sizing:border-box;}
+body{margin:0;background:linear-gradient(160deg,#fdf6e3,#f7ecd0 70%,#fbf1de);color:#3a2e1a;
+ font-family:'Segoe UI',system-ui,Arial,sans-serif;min-height:100vh;padding:18px;}
+.wrap{max-width:720px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+h1{font-size:clamp(1.2rem,4.5vw,1.9rem);margin:0;color:#1f2a3a;}
+.hud{display:flex;align-items:center;gap:10px;}
+.score{font-family:'Consolas',monospace;font-size:clamp(.85rem,3vw,1.02rem);background:#fff;border:1px solid #d7dee8;padding:8px 14px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(31,42,58,.06);}
+.score #score{color:#8b5e34;font-weight:700;}
+.sound{background:#fff;border:1px solid #d7dee8;color:#1f2a3a;font-size:1.05rem;width:42px;height:42px;border-radius:10px;cursor:pointer;}
+.sound:hover{background:#eef2f7;}
+.scenewrap{background:#fff;border:1px solid #d7dee8;border-radius:14px;padding:8px;box-shadow:0 8px 24px rgba(31,42,58,.10);}
+#metro{width:100%;height:auto;display:block;border-radius:10px;}
+.line-dim{stroke:#8b5e34;stroke-opacity:0.28;}
+#prog{stroke:#8b5e34;transition:stroke-dashoffset .75s ease;}
+.station{fill:#fff;stroke:#9aa6b5;stroke-width:4;transition:stroke .4s ease;}
+.station.on{stroke:#8b5e34;}
+.lbl{font-family:'Segoe UI',Arial;font-size:13px;font-weight:700;fill:#8a96a6;transition:fill .4s ease;}
+.lbl.on{fill:#1f2a3a;}
+#train{transition:transform .68s cubic-bezier(.4,.7,.3,1);}
+.qcard{margin-top:16px;background:#fff;border:1px solid #d7dee8;border-radius:14px;padding:18px 18px 20px;box-shadow:0 4px 14px rgba(31,42,58,.06);}
+.qtarget{font-family:'Consolas',monospace;font-size:.8rem;color:#8b5e34;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.qtext{font-size:clamp(1rem,3.4vw,1.2rem);font-weight:600;line-height:1.4;margin-bottom:16px;color:#1f2a3a;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:#f3f6fa;color:#1f2a3a;border:1px solid #cfd8e4;border-radius:10px;padding:14px 16px;font-size:1rem;text-align:left;cursor:pointer;transition:transform .12s,background .2s,border-color .2s;}
+.opt:hover:not(:disabled){background:#f0e4c8;transform:translateY(-2px);border-color:#8b5e34;}
+.opt:disabled{cursor:default;opacity:.9;}
+.opt.correct{background:#22a05a;border-color:#1c8b4d;color:#fff;}
+.opt.wrong{background:#e0445a;border-color:#c8344a;color:#fff;animation:shake .4s;}
+@keyframes shake{25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.feedback{min-height:24px;margin-top:14px;font-weight:700;font-size:1.05rem;}
+.feedback.ok{color:#1f9d57;}.feedback.no{color:#d6263b;}
+.overlay{position:fixed;inset:0;background:rgba(20,30,45,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.overlay.show{display:flex;animation:fade .4s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{background:#fff;border:1px solid #8b5e34;border-radius:18px;padding:30px 26px;max-width:440px;text-align:center;box-shadow:0 20px 50px rgba(20,30,45,.25);}
+.trophy{font-size:3.2rem;}.modal h2{margin:6px 0 8px;color:#8b5e34;}
+.modal p{margin:0 0 14px;color:#46566a;line-height:1.5;}
+.final{font-family:'Consolas',monospace;font-size:1.1rem;color:#8b5e34;margin-bottom:18px;}
+.replay{background:#8b5e34;color:#fff;border:none;border-radius:10px;padding:13px 24px;font-size:1.05rem;font-weight:700;cursor:pointer;}
+.replay:hover{background:#3a8ef0;}
+@media (max-width:560px){.opts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🧵 Le Chemin du Petit Tailleur</h1>
+    <div class="hud">
+      <div class="score">🚉 Stations : <span id="score">0</span> / <span id="total">7</span></div>
+      <button id="soundBtn" class="sound" title="Son">🔊</button>
+    </div>
+  </header>
+  <div class="texte-support" style="background:#fff;border:1px solid #d7dee8;border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(31,42,58,.06);">
+    <div style="font-family:'Consolas',monospace;font-size:.72rem;letter-spacing:1.5px;color:#8b5e34;text-transform:uppercase;margin-bottom:8px;">📖 Le Vaillant Petit Tailleur</div>
+    <div style="font-size:.92rem;line-height:1.85;color:#1f2a3a;max-height:340px;overflow-y:auto;padding-right:6px;">
+      Par un beau matin d'été, un petit tailleur assis sur sa table et de fort bonne humeur, cousait de tout son cœur. Arrive dans la rue une paysanne qui crie :<br>
+      « Bonne confiture à vendre ! Bonne confiture à vendre ! »<br><br>
+
+      Le petit tailleur entendit ces paroles avec plaisir. Il passa sa tête menue<sup>(1)</sup> par la fenêtre et dit :<br>
+      « Venez ici, chère Madame ! C'est ici qu'on vous débarrassera de votre marchandise. »<br><br>
+
+      La femme grimpa les trois marches avec son lourd panier et le tailleur lui fit déballer tous ses pots. Il les examina, les tint en l'air, les renifla et finalement déclara :<br>
+      « Cette confiture me semble bonne. Pesez-m'en donc une demi-once<sup>(2)</sup>, chère Madame. Même s'il y en a un quart de livre, ça ne fera rien. »<br><br>
+
+      La femme, qui avait espéré trouver un bon client, lui donna ce qu'il demandait, mais s'en alla bien fâchée et en grognant.<br><br>
+
+      « Et maintenant, dit le petit tailleur, que Dieu bénisse cette confiture et qu'elle me donne de la force ! »<br>
+      Il prit une miche<sup>(3)</sup> dans le buffet, s'en coupa un grand morceau par le travers et le couvrit de confiture.<br>
+      « Ça ne sera pas mauvais, dit-il. Mais avant d'y mettre les dents, il faut que je termine ce pourpoint<sup>(4)</sup>. »<br><br>
+
+      « Eh ! dit le petit tailleur. Qui vous a invitées ? »<br>
+      Et il chassa ces hôtes indésirables. Mais les mouches, qui ne comprenaient pas la langue humaine, ne se laissèrent pas intimider. Elles revinrent plus nombreuses encore. Alors, comme on dit, le petit tailleur prit la mouche. Il attrapa un torchon et « je vais vous en donner, moi, de la confiture ! » leur en donna un grand coup. Lorsqu'il retira le torchon et compta ses victimes, il n'y avait pas moins de sept mouches raides mortes.<br><br>
+
+      « Tu es un fameux gaillard », se dit-il en admirant sa vaillance. « Il faut que toute la ville le sache. » Et, en toute hâte, il se tailla une ceinture, la cousit et broda dessus en grandes lettres : « Sept d'un coup ». « Eh ! quoi, la ville... c'est le monde entier qui doit savoir ça ! » Et son cœur battait de joie comme une queue d'agneau.<br><br>
+
+      Le tailleur s'attacha la ceinture autour du corps et s'apprêta à partir dans le monde, pensant que son atelier était trop petit pour son courage. Avant de quitter la maison, il chercha autour de lui ce qu'il pourrait emporter. Il ne trouva qu'un fromage et le mit dans sa poche. Devant la porte, il remarqua un oiseau qui s'était pris dans les broussailles ; il lui fit rejoindre le fromage. Après quoi, il partit vaillamment et comme il était léger et agile, il ne ressentit aucune fatigue.
+      <div style="margin-top:12px;font-size:.85rem;color:#5a6472;font-style:italic;">
+        Lexique :<br>
+        1. petite.<br>
+        2. très petite quantité.<br>
+        3. gros pain rond.<br>
+        4. vêtement masculin qui couvre le haut du corps.<br><br>
+        Note : l'expression <i>prendre la mouche</i> signifie « se vexer, s'emporter mal à propos ».
+      </div>
+    </div>
+  </div>
+  <div class="scenewrap"><svg id="metro" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <section class="qcard">
+    <div class="qtarget" id="qtarget">Station 1 / 7</div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+</div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">🏆</div>
+    <h2>Le vaste monde !</h2>
+    <p>Le petit tailleur a traversé toutes les étapes de son histoire et s'élance vers le vaste monde.</p>
+    <div class="final" id="finalScore"></div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+<script>
+/* =========================================================
+   LE MÉTRO DU SAVOIR — carte réaliste — moteur de jeu
+   POUR MODIFIER : édite "questions". La ligne s'adapte au nombre de stations.
+   Noms des stations : tableau NAMES ci-dessous.
+   ========================================================= */
+const questions = [
+  {
+    "question": "Que révèle l'attitude du petit tailleur lorsqu'il examine les pots avant d'acheter ?",
+    "options": [
+      "Il est très pressé.",
+      "Il est prudent et prend le temps de choisir.",
+      "Il ne s'intéresse pas à la confiture.",
+      "Il veut faire plaisir à la paysanne."
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Que peut-on comprendre de la paysanne lorsqu'elle quitte le tailleur ?",
+    "options": [
+      "Elle est satisfaite de sa vente.",
+      "Elle est déçue par ce qu'elle a vendu.",
+      "Elle est amusée par le tailleur.",
+      "Elle veut lui offrir un autre pot."
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Pourquoi le petit tailleur repousse-t-il le moment de manger ?",
+    "options": [
+      "Il préfère terminer son travail avant.",
+      "Il n'a plus faim.",
+      "Il attend un invité.",
+      "Il veut partager son repas."
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Pourquoi le petit tailleur décide-t-il de fabriquer une ceinture ?",
+    "options": [
+      "Il veut remplacer un vieux vêtement.",
+      "Il souhaite garder le souvenir des mouches.",
+      "Il veut montrer son exploit aux autres.",
+      "Il prépare son prochain travail."
+    ],
+    "answer": 2
+  },
+  {
+    "question": "Que montre la réaction du petit tailleur après avoir compté les mouches ?",
+    "options": [
+      "Il regrette son geste.",
+      "Il est fier de ce qu'il a accompli.",
+      "Il a peur des autres insectes.",
+      "Il veut nettoyer son atelier."
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Pourquoi le petit tailleur quitte-t-il son atelier ?",
+    "options": [
+      "Il pense pouvoir accomplir de plus grandes choses.",
+      "Il cherche un nouveau métier.",
+      "Il veut retrouver la paysanne.",
+      "Il souhaite vendre sa ceinture."
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Que montre le fait que le petit tailleur emporte un fromage avant son départ ?",
+    "options": [
+      "Il prépare son voyage.",
+      "Il veut le vendre.",
+      "Il souhaite le donner à la paysanne.",
+      "Il a oublié de déjeuner."
+    ],
+    "answer": 0
+  }
+];
+const N = questions.length;
+let opened=0, busy=false;
+const $=id=>document.getElementById(id);
+const LINE="#8b5e34";
+const NAMES=["L'atelier","Les pots","La paysanne","Le repas","Les mouches","La ceinture","Le grand départ","Le vaste monde"];
+function stationName(i){ return NAMES[i]||("Étape "+i); }
+
+const C=[[70,310],[190,310],[270,235],[270,150],[400,150],[470,225],[615,225]];
+let SEG=[], L=0;
+for(let i=0;i<C.length-1;i++){ const d=Math.hypot(C[i+1][0]-C[i][0],C[i+1][1]-C[i][1]); SEG.push([L,L+d]); L+=d; }
+function point(t){ const tg=t*L;
+  for(let i=0;i<SEG.length;i++){ const [a,b]=SEG[i];
+    if(tg<=b||i===SEG.length-1){ const f=b>a?(tg-a)/(b-a):0; return [C[i][0]+(C[i+1][0]-C[i][0])*f, C[i][1]+(C[i+1][1]-C[i][1])*f]; } }
+  return C[C.length-1];
+}
+function buildMetro(){
+  let s='';
+  s+='<rect width="680" height="380" fill="#fdf3d9"/>';
+  s+='<path d="M-20,340 C120,300 200,330 320,310 S560,290 700,320 L700,380 L-20,380 Z" fill="#c8e0a0"/>';
+  s+='<path d="M-20,300 C150,270 260,300 400,280 S600,260 700,285 L700,340 C560,320 460,340 340,335 S100,330 -20,345 Z" fill="#b0d488" fill-opacity="0.7"/>';
+  /* petits arbres (triangles, pas d'animaux) */
+  [[60,300],[610,285],[150,320],[520,310]].forEach(p=>{
+    s+='<rect x="'+(p[0]-3)+'" y="'+(p[1]-2)+'" width="6" height="14" fill="#8b5e34"/>';
+    s+='<polygon points="'+p[0]+','+(p[1]-32)+' '+(p[0]-16)+','+(p[1]-4)+' '+(p[0]+16)+','+(p[1]-4)+'" fill="#5a8a3a"/>';
+    s+='<polygon points="'+p[0]+','+(p[1]-24)+' '+(p[0]-12)+','+(p[1]-2)+' '+(p[0]+12)+','+(p[1]-2)+'" fill="#6ea048"/>';
+  });
+  /* petite maison (l\'atelier du tailleur) */
+  s+='<rect x="40" y="255" width="46" height="34" fill="#e8d3a0" stroke="#8b5e34" stroke-width="2"/>';
+  s+='<polygon points="33,255 63,228 93,255" fill="#a8432f"/>';
+  s+='<rect x="56" y="270" width="14" height="19" fill="#5a3a1e"/>';
+  /* château/monde au loin */
+  s+='<rect x="600" y="230" width="16" height="34" fill="#c9b896" stroke="#8b5e34" stroke-width="1.5"/>';
+  s+='<polygon points="608,230 600,215 616,215" fill="#a8432f"/>';
+  s+='<rect x="630" y="238" width="14" height="26" fill="#c9b896" stroke="#8b5e34" stroke-width="1.5"/>';
+  s+='<polygon points="637,238 630,224 644,224" fill="#a8432f"/>';
+
+  const poly=C.map(p=>p[0]+','+p[1]).join(' ');
+  const d='M'+C.map(p=>p[0]+','+p[1]).join(' L');
+  s+='<polyline class="line-dim" points="'+poly+'" fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="2,14" stroke-linecap="round"/>';
+  s+='<path id="prog" d="'+d+'" fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" pathLength="'+L.toFixed(1)+'" style="stroke-dasharray:'+L.toFixed(1)+';stroke-dashoffset:'+L.toFixed(1)+'"/>';
+  const above=[true,false,true,false,true,false,true,false];
+  for(let i=0;i<=N;i++){
+    const p=point(i/N), ly = above[i]? p[1]-20 : p[1]+26;
+    s+='<circle class="station" id="st'+i+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="10"/>';
+    s+='<text class="lbl" id="lb'+i+'" x="'+p[0].toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="middle">'+stationName(i)+'</text>';
+  }
+  const t0=point(0);
+  s+='<g id="train" transform="translate('+t0[0].toFixed(1)+','+t0[1].toFixed(1)+')">'
+    +'<line x1="0" y1="-22" x2="0" y2="12" stroke="#6b4423" stroke-width="3" stroke-linecap="round"/>'
+    +'<circle cx="0" cy="-24" r="4" fill="#8b5e34"/>'
+    +'<path d="M -3,-20 Q -14,-14 -12,-2 Q -10,8 2,6 Q 12,4 10,-8 Q 8,-18 -3,-20 Z" fill="#c0392b" stroke="#7a2318" stroke-width="1.5"/>'
+    +'<circle cx="0" cy="14" r="4" fill="#8b5e34"/>'
+    +'</g>';
+  $('metro').innerHTML=s;
+}
+function renderState(){
+  const prog=$('prog'); if(prog) prog.style.strokeDashoffset=(L*(1-opened/N)).toFixed(1);
+  for(let i=0;i<=N;i++){ const st=$('st'+i),lb=$('lb'+i); const on=opened>=i; if(st)st.classList.toggle('on',on); if(lb)lb.classList.toggle('on',on); }
+  const p=point(opened/N); const tr=$('train'); if(tr) tr.setAttribute('transform','translate('+p[0].toFixed(1)+','+p[1].toFixed(1)+')');
+  $('score').textContent=opened; const t=$('total'); if(t) t.textContent=N;
+}
+function loadQuestion(){
+  busy=false; if(opened>=N) return;
+  const q=questions[opened];
+  $('qtarget').textContent='Station '+(opened+1)+' / '+N;
+  $('qtext').textContent=q.question;
+  const opts=$('opts'); opts.innerHTML='';
+  q.options.forEach((txt,idx)=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=txt; b.addEventListener('click',()=>answer(idx,b)); opts.appendChild(b); });
+  const fb=$('feedback'); fb.textContent=''; fb.className='feedback';
+}
+function answer(idx,btn){
+  if(busy) return; const q=questions[opened];
+  if(idx===q.answer){
+    busy=true; const last=(opened+1>=N); const fb=$('feedback');
+    fb.textContent= last ? '🧵 Le voilà parti vers le vaste monde !' : '✅ Étape validée !';
+    fb.className='feedback ok';
+    document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+    if(btn) btn.classList.add('correct');
+    ding();
+    opened++; renderState();
+    if(opened>=N){ arrive(); setTimeout(endGame,1400); }
+    else setTimeout(loadQuestion,1050);
+  } else {
+    const fb=$('feedback'); fb.textContent='❌ Mauvaise direction. Réessaie.'; fb.className='feedback no';
+    deny(); if(btn){ btn.classList.add('wrong'); setTimeout(()=>btn.classList.remove('wrong'),500); }
+  }
+}
+function endGame(){ $('finalScore').textContent='🧵 '+opened+' / '+N+' étapes validées'; $('overlay').classList.add('show'); }
+function rejouer(){ opened=0; renderState(); $('overlay').classList.remove('show'); loadQuestion(); }
+
+let actx=null, son=true;
+function initA(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){ if(!actx||!son) return; const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+ o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.16,t+0.01); g.gain.exponentialRampToValueAtTime(0.0008,t+d);
+ o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02); }
+function ding(){ initA(); beep(620,880,0.14,'sine',0.16); }
+function deny(){ initA(); beep(150,80,0.22,'sawtooth',0.12); }
+function arrive(){ initA(); beep(520,720,0.3,'triangle',0.18); setTimeout(()=>beep(720,960,0.35,'sine',0.15),120); }
+$('soundBtn').addEventListener('click',()=>{ son=!son; initA(); if(actx&&actx.state==='suspended') actx.resume(); $('soundBtn').textContent=son?'🔊':'🔇'; });
+document.addEventListener('pointerdown',initA,{once:true});
+
+buildMetro(); renderState(); loadQuestion();
+</script>
+</body>
+</html>
