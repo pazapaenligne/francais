@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Tableau d'enquête — Les reprises de Yasmine</title>
+<style>
+*{box-sizing:border-box;}
+body{margin:0;background:linear-gradient(160deg,#201712,#2a1f17 60%,#1b130e);color:#f0e7dc;
+ font-family:'Segoe UI',system-ui,Arial,sans-serif;min-height:100vh;padding:18px;}
+.wrap{max-width:680px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+h1{font-size:clamp(1.25rem,4.5vw,2rem);margin:0;}
+.hud{display:flex;align-items:center;gap:10px;}
+.score{font-family:'Consolas',monospace;font-size:clamp(.9rem,3vw,1.05rem);background:#171009;border:1px solid #4a3528;padding:8px 14px;border-radius:10px;white-space:nowrap;}
+.score #score{color:#ff7480;font-weight:700;}
+.sound{background:#171009;border:1px solid #4a3528;color:#f0e7dc;font-size:1.05rem;width:42px;height:42px;border-radius:10px;cursor:pointer;}
+.sound:hover{background:#241a12;}
+.scenewrap{background:#171009;border:1px solid #4a3528;border-radius:14px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.4);}
+#board{width:100%;height:auto;display:block;border-radius:8px;}
+/* indices */
+.evidence{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(.6) rotate(var(--rot));transition:opacity .4s ease,transform .55s cubic-bezier(.3,1.5,.5,1);}
+.evidence.on{opacity:1;transform:scale(1) rotate(var(--rot));}
+.string{stroke:#d6263b;stroke-width:3;stroke-linecap:round;opacity:0;transition:stroke-dashoffset .8s ease,opacity .3s ease;}
+.string.on{opacity:1;}
+.stamp{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(1.6) rotate(-8deg);transition:opacity .4s ease,transform .45s cubic-bezier(.3,1.6,.5,1);}
+.stamp.on{opacity:.9;transform:scale(1) rotate(-8deg);}
+/* carte question */
+.qcard{margin-top:16px;background:#171009;border:1px solid #4a3528;border-radius:14px;padding:18px 18px 20px;}
+.qtarget{font-family:'Consolas',monospace;font-size:.8rem;color:#ff7480;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.qtext{font-size:clamp(1rem,3.4vw,1.2rem);font-weight:600;line-height:1.4;margin-bottom:16px;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{background:#2c211a;color:#f0e7dc;border:1px solid #5a4434;border-radius:10px;padding:14px 16px;font-size:1rem;text-align:left;cursor:pointer;transition:transform .12s,background .2s,border-color .2s;}
+.opt:hover:not(:disabled){background:#3a2c22;transform:translateY(-2px);border-color:#8a6a4a;}
+.opt:disabled{cursor:default;opacity:.85;}
+.opt.correct{background:#1f7a4d;border-color:#34d27f;}
+.opt.wrong{background:#7a2330;border-color:#e06a78;animation:shake .4s;}
+@keyframes shake{25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.feedback{min-height:24px;margin-top:14px;font-weight:700;font-size:1.05rem;}
+.feedback.ok{color:#7fe0a0;}.feedback.no{color:#ff9b9b;}
+.overlay{position:fixed;inset:0;background:rgba(12,8,5,.86);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+.overlay.show{display:flex;animation:fade .4s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.modal{background:linear-gradient(160deg,#2a1f17,#171009);border:1px solid #d6263b;border-radius:18px;padding:30px 26px;max-width:440px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.5);}
+.trophy{font-size:3.4rem;}.modal h2{margin:6px 0 8px;color:#ff7480;}
+.modal p{margin:0 0 14px;color:#e6d8ca;line-height:1.5;}
+.final{font-family:'Consolas',monospace;font-size:1.1rem;color:#ff7480;margin-bottom:18px;}
+.replay{background:#d6263b;color:#fff;border:none;border-radius:10px;padding:13px 24px;font-size:1.05rem;font-weight:700;cursor:pointer;}
+.replay:hover{background:#e8454f;}
+@media (max-width:560px){.opts{grid-template-columns:1fr;}}
+.loupe-wrap{display:inline-flex;vertical-align:middle;margin-right:6px;animation:loupeScan 2.6s ease-in-out infinite;}
+@keyframes loupeScan{
+  0%,100%{transform:rotate(-8deg) translate(0,0);}
+  25%{transform:rotate(4deg) translate(3px,-2px);}
+  50%{transform:rotate(-4deg) translate(-2px,2px);}
+  75%{transform:rotate(6deg) translate(2px,1px);}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="loupe-wrap"><svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="12" fill="#f0e7dc" fill-opacity="0.15" stroke="#ff7480" stroke-width="3.5"/>
+      <circle cx="16" cy="16" r="7" fill="none" stroke="#ff7480" stroke-width="1.5" stroke-opacity="0.5"/>
+      <line x1="25" y1="25" x2="35" y2="35" stroke="#ff7480" stroke-width="4.5" stroke-linecap="round"/>
+    </svg></span> À toi de retrouver toutes les reprises !</h1>
+    <div class="hud">
+      <div class="score">🔍 Indices : <span id="score">0</span> / <span id="total">7</span></div>
+      <button id="soundBtn" class="sound" title="Son">🔊</button>
+    </div>
+  </header>
+  <div class="texte-support" style="background:#171009;border:1px solid #4a3528;border-radius:14px;padding:16px 18px;margin-bottom:14px;">
+    <div style="font-family:'Consolas',monospace;font-size:.72rem;letter-spacing:1.5px;color:#ff7480;text-transform:uppercase;margin-bottom:8px;">📖 Le nouveau projet</div>
+    <div style="font-size:.92rem;line-height:1.8;color:#f0e7dc;">Chaque mercredi après-midi, <b>Yasmine</b> participe à l'atelier scientifique du collège. <u>La jeune collégienne</u> arrive toujours quelques minutes en avance pour préparer son matériel. <u>Elle</u> installe les expériences avec beaucoup de soin avant l'arrivée des autres élèves. Pendant la séance, <u>cette passionnée de sciences</u> observe chaque détail et note ses découvertes dans un carnet. Lorsque le professeur pose une question, <u>l'élève</u> réfléchit quelques instants avant de proposer une réponse. Ses camarades apprécient souvent ses idées, car <u>elle</u> explique clairement son raisonnement. À la fin de l'atelier, <u>la participante</u> aide à ranger les tables et le matériel. Avant de quitter la salle, Yasmine vérifie que tout est propre. <u>L'adolescente</u> repart ensuite avec le sourire, heureuse d'avoir appris de nouvelles choses.</div>
+  </div>
+  <div class="scenewrap"><svg id="board" viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <section class="qcard">
+    <div class="qtarget" id="qtarget">Indice 1 / 5</div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+</div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">🏆</div>
+    <h2>Bravo !</h2>
+    <p>Tu as retrouvé toutes les reprises de Yasmine. Tu sais maintenant distinguer les reprises nominales, qui remplacent le nom par un autre groupe nominal, et les reprises pronominales, qui utilisent un pronom pour éviter les répétitions et assurer la cohérence du texte.</p>
+    <div class="final" id="finalScore"></div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+<script>
+/* =========================================================
+   LE TABLEAU D'ENQUÊTE — moteur de jeu
+   POUR MODIFIER : édite "questions". Le tableau s'adapte au nombre.
+   { question:"...", options:["A","B","C","D"], answer:0 }
+   ========================================================= */
+const questions = [
+  {
+    "question": "Dans le texte : « La jeune collégienne arrive toujours quelques minutes en avance. » Quelle est la nature de « la jeune collégienne » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Dans le texte : « Elle installe les expériences avec beaucoup de soin. » Quelle est la nature de « Elle » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Dans le texte : « Cette passionnée de sciences observe chaque détail. » Quelle est la nature de « cette passionnée de sciences » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Dans le texte : « L'élève réfléchit quelques instants avant de proposer une réponse. » Quelle est la nature de « l'élève » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Dans le texte : « Elle explique clairement son raisonnement. » Quelle est la nature de « Elle » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "Dans le texte : « La participante aide à ranger les tables et le matériel. » Quelle est la nature de « la participante » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 0
+  },
+  {
+    "question": "Dans le texte : « L'adolescente repart ensuite avec le sourire. » Quelle est la nature de « l'adolescente » ?",
+    "options": [
+      "Une reprise nominale",
+      "Une reprise pronominale"
+    ],
+    "answer": 0
+  }
+];
+const N = Math.min(questions.length, 7);   // 7 emplacements d'indices max
+let opened=0, busy=false;
+const $=id=>document.getElementById(id);
+
+const POS=[[132,132],[338,116],[476,210],[250,286],[140,366],[452,360],[300,410]];
+const ROT=[-5,4,-3,6,-4,3,-6];
+const CLUES=[["🎒","la collégienne"],["👆","elle"],["🔬","la passionnée"],["📚","l'élève"],["👆","elle"],["🧹","la participante"],["🚪","l'adolescente"]];
+
+function rng(seed){ return ()=>{ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }; }
+
+function buildBoard(){
+  let s='';
+  s+='<rect width="600" height="460" fill="#5b3a1e"/>';
+  s+='<rect x="14" y="14" width="572" height="432" rx="6" fill="#c9a06a"/>';
+  const r=rng(7);
+  for(let k=0;k<260;k++){ const gx=20+r()*560, gy=20+r()*420, rr=r()<.8?1:2; s+='<circle cx="'+gx.toFixed(0)+'" cy="'+gy.toFixed(0)+'" r="'+rr+'" fill="#00000010"/>'; }
+  // fils rouges (sous les cartes)
+  for(let i=0;i<N-1;i++){
+    const x1=POS[i][0], y1=POS[i][1]-46, x2=POS[i+1][0], y2=POS[i+1][1]-46;
+    const len=Math.hypot(x2-x1,y2-y1).toFixed(1);
+    s+='<line class="string" id="str'+i+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" style="stroke-dasharray:'+len+';stroke-dashoffset:'+len+'"/>';
+  }
+  // cartes-indices
+  for(let i=0;i<N;i++){
+    const x=POS[i][0], y=POS[i][1], ic=CLUES[i][0], lab=CLUES[i][1];
+    s+='<g transform="translate('+x+','+y+')"><g class="evidence" id="ev'+i+'" style="--rot:'+ROT[i]+'deg">'
+      +'<rect x="-42" y="-34" width="88" height="80" rx="4" fill="#00000022" transform="translate(4,5)"/>'
+      +'<rect x="-46" y="-38" width="92" height="84" rx="4" fill="#f7f3ea" stroke="#d8cdb6" stroke-width="1"/>'
+      +'<rect x="-39" y="-31" width="78" height="50" rx="2" fill="#e7ded0"/>'
+      +'<text x="0" y="4" text-anchor="middle" font-size="30">'+ic+'</text>'
+      +'<text x="0" y="38" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12" font-weight="700" fill="#3a3328">'+lab+'</text>'
+      +'<circle cx="0" cy="-46" r="6.5" fill="#d6263b"/><circle cx="-2" cy="-48" r="2" fill="#ff8a96"/>'
+      +'</g></g>';
+  }
+  // tampon "affaire résolue"
+  s+='<g transform="translate(300,392)"><g class="stamp" id="stamp">'
+    +'<rect x="-150" y="-32" width="300" height="64" rx="8" fill="none" stroke="#c0182b" stroke-width="5"/>'
+    +'<text x="0" y="13" text-anchor="middle" font-family="Segoe UI,Arial" font-size="30" font-weight="800" fill="#c0182b" letter-spacing="2">AFFAIRE RÉSOLUE</text>'
+    +'</g></g>';
+  $('board').innerHTML=s;
+}
+
+function renderState(){
+  for(let i=0;i<N;i++){ const e=$('ev'+i); if(e) e.classList.toggle('on', opened>i); }
+  for(let i=0;i<N-1;i++){
+    const st=$('str'+i); if(!st) continue;
+    if(opened>i+1){ st.classList.add('on'); st.style.strokeDashoffset='0'; }
+    else { st.classList.remove('on'); st.style.strokeDashoffset=st.style.strokeDasharray; }
+  }
+  $('stamp').classList.toggle('on', opened>=N);
+  $('score').textContent=opened; const t=$('total'); if(t) t.textContent=N;
+}
+
+function loadQuestion(){
+  busy=false; if(opened>=N) return;
+  const q=questions[opened];
+  $('qtarget').textContent='Indice '+(opened+1)+' / '+N;
+  $('qtext').textContent=q.question;
+  const opts=$('opts'); opts.innerHTML='';
+  q.options.forEach((txt,idx)=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=txt; b.addEventListener('click',()=>answer(idx,b)); opts.appendChild(b); });
+  const fb=$('feedback'); fb.textContent=''; fb.className='feedback';
+}
+
+function answer(idx,btn){
+  if(busy) return; const q=questions[opened];
+  if(idx===q.answer){
+    busy=true; const last=(opened+1>=N); const fb=$('feedback');
+    fb.textContent= last ? '✅ Dernier indice ! L\'affaire est résolue.' : '✅ Nouvel indice trouvé !';
+    fb.className='feedback ok';
+    document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+    if(btn) btn.classList.add('correct');
+    pin();
+    opened++; renderState();
+    if(opened>=N){ resolve(); setTimeout(endGame,1500); }
+    else setTimeout(loadQuestion,1100);
+  } else {
+    const fb=$('feedback'); fb.textContent="💡 Tu progresses ! Relis le texte phrase par phrase en te posant cette question : « Qui est désigné ici ? ». Vérifie s'il s'agit d'un pronom (elle) ou d'un groupe nominal."; fb.className='feedback no';
+    deny(); if(btn){ btn.classList.add('wrong'); setTimeout(()=>btn.classList.remove('wrong'),500); }
+  }
+}
+function endGame(){ $('finalScore').textContent='🔍 '+opened+' / '+N+' indices reliés'; $('overlay').classList.add('show'); }
+function rejouer(){ opened=0; renderState(); $('overlay').classList.remove('show'); loadQuestion(); }
+
+let actx=null, son=true;
+function initA(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,d,type,vol){ if(!actx||!son) return; const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
+ o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.16,t+0.01); g.gain.exponentialRampToValueAtTime(0.0008,t+d);
+ o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d+0.02); }
+function pin(){ initA(); beep(900,300,0.08,'square',0.12); }
+function deny(){ initA(); beep(150,80,0.22,'sawtooth',0.12); }
+function resolve(){ initA(); beep(330,520,0.3,'triangle',0.18); setTimeout(()=>beep(520,660,0.4,'sine',0.16),120); }
+
+$('soundBtn').addEventListener('click',()=>{ son=!son; initA(); if(actx&&actx.state==='suspended') actx.resume(); $('soundBtn').textContent=son?'🔊':'🔇'; });
+document.addEventListener('pointerdown',initA,{once:true});
+
+buildBoard(); renderState(); loadQuestion();
+</script>
+</body>
+</html>
