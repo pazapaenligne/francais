@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Je m'entraîne — Le subjonctif présent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --border:#e8e2d4;
+  --text:#1c1c1c;
+  --muted:#8a8272;
+  --day:#3ab5d8;
+  --day-color:#3ab5d8;
+  --day-dark:#1a6e88;
+  --day-light:#e8f6fb;
+  --day-border:#9dd4e8;
+  --day-glow:rgba(58,181,216,.32);
+  --yellow:#f5e08a;
+  --pink:#f7c6c6;
+  --orange:#f5a623;
+  --green:#1f7a3d;
+  --green-bg:#e7faec;
+  --green-txt:#14532d;
+  --red:#b3261e;
+  --red-bg:#fdeaea;
+  --red-txt:#7f1d1d;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:.95rem;
+  line-height:1.6;
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+}
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.35;z-index:0;pointer-events:none;}
+.b1{width:180px;height:180px;background:var(--yellow);top:-60px;right:-50px;}
+.b2{width:150px;height:150px;background:var(--day-light);bottom:-40px;left:-40px;}
+.b3{width:110px;height:110px;background:var(--day-border);top:40%;right:-60px;opacity:.25;}
+.b4{width:120px;height:120px;background:var(--pink);top:15%;left:-60px;opacity:.22;}
+
+.wrap{max-width:780px;margin:0 auto;padding:18px 16px 60px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:#f5a623;border:1px solid #e09410;border-radius:999px;padding:5px 14px;margin-bottom:10px;}
+.logo-badge .dots{display:flex;gap:3px;}
+.logo-badge .dot{width:8px;height:8px;border-radius:50%;}
+.dot.o{background:#7a3d00;}
+.dot.g{background:#ffffff;}
+.dot.r{background:#7a3d00;opacity:.45;}
+.logo-badge span{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#7a3d00;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:0 0 4px;color:var(--text);}
+.week-label{font-size:.88rem;font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.04);animation:fadeUp .4s ease;position:relative;overflow:hidden;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--day),var(--day-border));}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.intro-titre{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);letter-spacing:.03em;margin-bottom:.7rem;}
+.intro-txt{font-size:.98rem;line-height:2.05;}
+.intro-txt p{margin:0 0 .65rem;}
+.intro-txt p:last-child{margin-bottom:0;}
+.intro-txt .fw{font-weight:800;color:var(--day-dark);}
+.intro-mot{display:inline-block;font-weight:800;color:#fff;background:var(--day-dark);border-radius:6px;padding:.1em .5em;margin:0 .1em;font-family:'JetBrains Mono',monospace;font-size:.88em;}
+
+.btn{font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;border-radius:12px;border:none;cursor:pointer;padding:0 1.4rem;transition:.15s;}
+.btn-start{display:block;width:100%;background:var(--day);color:#fff;font-size:1rem;min-height:3rem;}
+.btn-start:hover{background:var(--day-dark);}
+
+#quizZone{display:none;}
+#quizZone.show{display:block;}
+
+.progress-bar-outer{background:var(--day-light);border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--day-border);}
+.progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--day),var(--day-dark));width:0%;transition:width .5s ease;border-radius:999px;}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);}
+.chip.ok{color:var(--green);border-color:var(--green);}
+.chip.ko{color:var(--red);border-color:var(--red);}
+.chip.rest{color:var(--muted);}
+.dots-prog{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.pdot{width:9px;height:9px;border-radius:50%;background:#e0dacb;transition:.2s;}
+.pdot.done{background:var(--green);}
+.pdot.done-ko{background:var(--red);}
+.pdot.active{background:var(--orange);transform:scale(1.35);}
+
+.theme-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);background:var(--day-light);border:1px solid var(--day-border);border-radius:999px;padding:3px 10px;margin-bottom:8px;}
+.q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px;}
+.consigne{font-size:.9rem;color:var(--text);margin-bottom:.9rem;}
+
+.item-box{background:var(--surface);border:2px solid var(--day-border);border-radius:12px;padding:.95rem 1.1rem;margin-bottom:1rem;}
+.item-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--day-dark);font-weight:800;margin-bottom:.5rem;}
+.item-txt{font-size:clamp(1rem,2.8vw,1.1rem);line-height:2.1;}
+.trou{display:inline-block;min-width:44px;text-align:center;border-bottom:2px solid var(--muted);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.85em;letter-spacing:.06em;}
+.trou.actif{background:var(--day);color:#fff;border-bottom:2px solid var(--day-dark);border-radius:4px 4px 0 0;padding:0 .4em;font-weight:800;animation:pulseTrou 1.4s ease-in-out infinite;}
+@keyframes pulseTrou{0%,100%{box-shadow:0 0 0 0 var(--day-glow);}50%{box-shadow:0 0 0 5px rgba(58,181,216,0);}}
+.trou.rempli{border-bottom:2px solid var(--green);color:var(--green-txt);background:var(--green-bg);border-radius:4px;padding:0 .35em;font-family:Arial,sans-serif;font-size:1em;font-weight:700;letter-spacing:normal;min-width:0;}
+
+.ex-box{border:1px dashed var(--day-border);background:var(--day-light);border-radius:10px;padding:.6rem .85rem;margin-bottom:1rem;}
+.ex-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--day-dark);font-weight:800;margin-bottom:.25rem;}
+.ex-txt{font-size:.86rem;font-style:italic;line-height:1.7;}
+.ex-txt .fl{font-style:normal;font-weight:800;color:var(--day-dark);}
+
+.q-phrase{background:var(--day-light);border-left:4px solid var(--day);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;font-style:italic;font-weight:700;font-size:clamp(1.02rem,3vw,1.15rem);line-height:1.7;}
+
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:Arial,sans-serif;
+  font-size:clamp(.95rem,2.6vw,1.05rem);
+  min-height:50px;text-align:left;
+  padding:.65rem .9rem;border-radius:12px;
+  border:2px solid var(--border);background:var(--surface);color:var(--text);
+  cursor:pointer;transition:.15s;line-height:1.5;
+}
+.opt span:last-child{flex:1;min-width:0;word-break:break-word;font-family:'JetBrains Mono',monospace;font-weight:700;}
+.opt:hover:not(.locked){border-color:var(--day);background:var(--day-light);}
+.opt.selected{border-color:var(--day);background:var(--day-light);box-shadow:0 0 0 3px var(--day-glow);}
+.opt .lettre{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.78rem;display:flex;align-items:center;justify-content:center;border:1px solid var(--day-border);}
+.opt.selected .lettre{background:var(--day);color:#fff;}
+.opt.locked{cursor:default;}
+.opt.correct{border-color:var(--green);background:var(--green-bg);box-shadow:0 0 0 3px rgba(31,122,61,.14);}
+.opt.correct .lettre{background:var(--green);color:#fff;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);box-shadow:0 0 0 3px rgba(179,38,30,.12);}
+.opt.wrong .lettre{background:var(--red);color:#fff;}
+
+.saisie{
+  width:100%;font-family:Arial,sans-serif;
+  font-size:clamp(.95rem,2.6vw,1.05rem);
+  min-height:50px;padding:.65rem .9rem;
+  border:2px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);margin-bottom:1rem;
+}
+.saisie:focus{border-color:var(--day);outline:none;}
+.saisie.correct{border-color:var(--green);background:var(--green-bg);font-weight:700;}
+.saisie.wrong{border-color:var(--red);background:var(--red-bg);font-weight:700;}
+
+.fb-box{display:none;padding:.75rem 1rem;line-height:1.75;font-size:clamp(.9rem,2.5vw,1rem);border-left:5px solid var(--border);border-radius:10px;margin-bottom:1rem;}
+.fb-box.show{display:block;}
+.fb-box.ok{border-left-color:var(--green);background:var(--green-bg);}
+.fb-box.ko{border-left-color:var(--red);background:var(--red-bg);}
+.fb-titre{font-weight:800;font-style:normal;display:block;margin-bottom:.35rem;}
+.hl-ok{color:var(--green-txt);font-weight:700;text-decoration:underline;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-valider{background:var(--day);color:#fff;}
+.btn-valider:disabled{background:#e5ddc9;color:#a99f86;cursor:not-allowed;}
+.btn-valider:hover:not(:disabled){background:var(--day-dark);}
+.btn-retry{background:var(--surface);color:var(--text);border:2px solid var(--border);}
+.btn-retry:hover{border-color:var(--day);}
+.btn-suivant{background:var(--day-dark);color:#fff;display:none;}
+.btn-suivant.show{display:inline-block;}
+
+.flash-pop{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.4);font-size:5rem;z-index:50;pointer-events:none;opacity:0;}
+.flash-pop.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+
+#resultats{display:none;text-align:center;}
+#resultats.show{display:block;}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark);}
+.res-stars{font-size:1.9rem;letter-spacing:.15em;color:#d8b23a;margin:.3rem 0;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;margin-bottom:.8rem;line-height:1.7;}
+.res-sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.8;}
+.recap-list{text-align:left;font-size:.8rem;font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:.8rem;margin-bottom:1rem;max-height:280px;overflow-y:auto;}
+.recap-item{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);}
+.recap-item .st{font-weight:800;flex-shrink:0;}
+.recap-item .st.ok{color:var(--green);}
+.recap-item .st.ko{color:var(--red);}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;border:3px solid var(--day-dark);color:var(--day-dark);border-radius:10px;padding:.3rem .9rem;transform:rotate(-6deg) scale(0);margin-bottom:.6rem;}
+.stamp.play{animation:stampPop .5s ease forwards .1s;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}60%{transform:rotate(-6deg) scale(1.2);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.confetti{position:absolute;font-size:1.2rem;top:-30px;pointer-events:none;animation:particleUp 2.4s ease-in forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(340px) rotate(200deg);opacity:0;}}
+.btn-restart{background:var(--day);color:#fff;margin-top:.4rem;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <div class="dots"><div class="dot o"></div><div class="dot g"></div><div class="dot r"></div></div>
+    <span>Pazapa · Français · 6e</span>
+  </div>
+  <h1>Je m'entraîne</h1>
+  <div class="week-label">Semaine 8 · Jour 4</div>
+</header>
+
+<div class="card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge">Le subjonctif présent</div>
+  <div class="intro-titre">🧩 Contexte</div>
+  <div class="intro-txt">
+    <p>Certaines expressions annoncent le <span class="fw">subjonctif</span>&nbsp;: <span class="intro-mot">il faut que</span>, <span class="intro-mot">bien que</span>, <span class="intro-mot">je souhaite que</span>…</p>
+    <p>Trois missions t'attendent&nbsp;: choisir le bon mode, transformer une phrase, puis conjuguer toi-même au subjonctif présent.</p>
+  </div>
+</div>
+
+<button class="btn btn-start" id="btnStart">Commencer les missions ▶</button>
+
+<div id="quizZone">
+  <div class="card">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progFill"></div></div>
+    <div class="chips">
+      <div class="chip ok">✔ Corrects&nbsp;: <span id="chOk">0</span></div>
+      <div class="chip ko">✘ Erreurs&nbsp;: <span id="chKo">0</span></div>
+      <div class="chip rest">⏳ Restants&nbsp;: <span id="chRest">18</span></div>
+    </div>
+    <div class="dots-prog" id="dotsProg"></div>
+  </div>
+
+  <div class="card" id="qCard"><div class="card-stripe"></div><div id="qBody"></div></div>
+</div>
+
+<div class="card" id="resultats">
+  <div class="card-stripe"></div>
+  <div class="stamp" id="stamp">TERMINÉ</div>
+  <div class="res-score" id="resScore">0/18</div>
+  <div class="res-stars" id="resStars"></div>
+  <div class="res-msg" id="resMsg"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="recap-list" id="recapList"></div>
+  <button class="btn btn-restart" id="btnRestart">↺ Recommencer toute l'activité</button>
+</div>
+
+</div>
+
+<div class="flash-pop" id="flashPop"></div>
+
+<script>
+/* ══════════ PAZAPA — N6S8J4A1 — Le subjonctif présent ══════════ */
+
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fr(s){ return String(s).replace(/ ([:;!?])/g,'\u00a0$1'); }
+function aff(s){ return fr(esc(s)); }
+function norm(s){
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[\u2019\u00b4\u0060]/g,"'")
+    .replace(/[.!?\u2026;:,]+\s*$/,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function normSentence(s){
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[\u2019\u00b4\u0060]/g,"'")
+    .replace(/[.,!?\u2026;:]/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function fisher(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var r=new Uint32Array(1); crypto.getRandomValues(r);
+    var j=Math.abs((r[0]^Date.now()))%(i+1);
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function balancedPositions(n,nbOptions){
+  var seq=[];
+  while(seq.length<n){ for(var p=0;p<nbOptions;p++){ seq.push(p); if(seq.length>=n)break; } }
+  return fisher(seq);
+}
+
+/* ── DONNÉES (contenu professeure — verbatim) ── */
+
+/* Activité 1 — Choisis le bon mode (QCM) */
+var ACT1=[
+ {phrase:"Il faut que tu ___ ton cahier.",
+  options:["prends","prennes","prendras"],ans:1,
+  fbOk:"Bravo ! Après il faut que, le verbe se met au subjonctif présent.",
+  fbKo:"Observe les mots il faut que. Ils annoncent un mode particulier. Cherche la forme du verbe qui convient après cette expression."},
+ {phrase:"Le professeur souhaite que vous ___ attentifs.",
+  options:["êtes","soyez","serez"],ans:1,
+  fbOk:"Exact ! Le verbe être est ici au subjonctif présent.",
+  fbKo:"Le verbe être a une forme spéciale au subjonctif. Pense à l'expression que vous…"},
+ {phrase:"Il est important que nous ___ les consignes.",
+  options:["respectons","respections","respecterons"],ans:1,
+  fbOk:"Bien joué ! Tu as reconnu qu'après il est important que, on utilise le subjonctif.",
+  fbKo:"Repère l'expression il est important que puis cherche la forme du verbe au subjonctif."},
+ {phrase:"Bien que le ciel ___ couvert, nous sortons.",
+  options:["est","soit","sera"],ans:1,
+  fbOk:"Bravo ! Bien que est un excellent indice du subjonctif.",
+  fbKo:"Le mot bien que demande un mode particulier. Vérifie aussi la conjugaison du verbe être."},
+ {phrase:"Je préfère que tu ___ la réponse avant de parler.",
+  options:["réfléchis","réfléchisses","réfléchiras"],ans:1,
+  fbOk:"Très bien ! Tu as choisi la bonne forme du subjonctif.",
+  fbKo:"Après je préfère que, le verbe ne reste pas à l'indicatif. Observe bien sa terminaison."}
+];
+
+/* Activité 2 — Transforme la phrase (saisie, phrase entière) */
+var EXEMPLE={source:"Tu écoutes les consignes.",starter:"Il faut que…",res:"Il faut que tu écoutes les consignes."};
+var ACT2=[
+ {source:"Nous terminons notre travail.",starter:"Il est important que…",
+  ans:"Il est important que nous terminions notre travail.",
+  fbOk:"Excellent ! Tu as transformé la phrase tout en gardant son sens.",
+  fbKo:"Commence par recopier les mots proposés puis transforme uniquement le verbe."},
+ {source:"Vous êtes prudents.",starter:"Bien que…",
+  ans:"Bien que vous soyez prudents",
+  fbOk:"Bravo ! Le verbe est bien au subjonctif.",
+  fbKo:"Le mot bien que est un indice précieux. Vérifie ensuite la forme du verbe être."},
+ {source:"Tu ranges ton matériel.",starter:"Je souhaite que…",
+  ans:"Je souhaite que tu ranges ton matériel.",
+  fbOk:"Très bien ! Tu as utilisé le bon mode.",
+  fbKo:"Après je souhaite que, demande-toi quelle forme prend le verbe."},
+ {source:"Ils viennent à l'heure.",starter:"Il faut que…",
+  ans:"Il faut qu'ils viennent à l'heure.",
+  fbOk:"Bravo ! Tu as trouvé une forme irrégulière du subjonctif.",
+  fbKo:"Le verbe venir change de radical au subjonctif. Observe bien sa conjugaison."},
+ {source:"Nous faisons attention.",starter:"Le professeur demande que…",
+  ans:"Le professeur demande que nous fassions attention.",
+  fbOk:"Excellent ! Tu as correctement transformé la phrase.",
+  fbKo:"Le verbe faire possède une forme particulière au subjonctif."}
+];
+
+/* Activité 3 — Complète avec le bon verbe au subjonctif (saisie, blanc inline) */
+var ACT3=[
+ {segs:["Il faut que tu ",{b:0}," (être) attentif."],ans:"sois",
+  fbKo:"Le verbe être ne garde pas la même forme qu'à l'indicatif."},
+ {segs:["Je souhaite que nous ",{b:0}," (finir) ce travail aujourd'hui."],ans:"finissions",
+  fbKo:"Cherche la terminaison du subjonctif avec nous."},
+ {segs:["Bien que vous ",{b:0}," (avoir) peu de temps, continuez."],ans:"ayez",
+  fbKo:"Le verbe avoir possède une conjugaison particulière au subjonctif."},
+ {segs:["Il est nécessaire qu'ils ",{b:0}," (faire) leurs exercices."],ans:"fassent",
+  fbKo:"Le verbe faire est irrégulier. Pense à sa forme après que."},
+ {segs:["Le professeur demande que chacun ",{b:0}," (prendre) son cahier."],ans:"prenne",
+  fbKo:"Le verbe prendre perd une lettre à certaines personnes au subjonctif. Vérifie sa conjugaison."},
+ {segs:["Avant de commencer, il faut que nous ",{b:0}," (lire) les consignes."],ans:"lisions",
+  fbKo:"Réfléchis attentivement la forme du verbe lire avec nous au subjonctif."},
+ {segs:["Je préfère que tu ",{b:0}," (aller) au tableau."],ans:"ailles",
+  fbKo:"Le verbe aller est irrégulier. Essaie de retrouver sa forme après que tu."},
+ {segs:["Il est important que vous ",{b:0}," (dire) la vérité."],ans:"disiez",
+  fbKo:"Le verbe dire ne se conjugue pas comme à l'indicatif. Vérifie sa terminaison avec vous."}
+];
+
+var TARGET1=balancedPositions(ACT1.length,3);
+function buildShuffled(options,ansIdx,targetPos){
+  var wrongOrig=options.map(function(t,o){return o;}).filter(function(o){return o!==ansIdx;});
+  var wrongShuffled=fisher(wrongOrig);
+  var arr=new Array(options.length);
+  arr[targetPos]={t:options[ansIdx],orig:ansIdx};
+  var wi=0;
+  for(var p=0;p<arr.length;p++){
+    if(p===targetPos)continue;
+    var orig=wrongShuffled[wi++];
+    arr[p]={t:options[orig],orig:orig};
+  }
+  return arr;
+}
+
+/* ── APLATISSEMENT DES ÉCRANS ── */
+var NB1=ACT1.length, NB2=ACT2.length, NB3=ACT3.length;
+var NB=NB1+NB2+NB3; /* 18 */
+var TOTAL=NB;
+var LABELS=['A','B','C'];
+var RAIN=['🧩','📝','✏️','✨','📘','🔎'];
+
+function freshState(){
+  var s=[];
+  for(var i=0;i<NB1;i++) s.push({act:1,done:false,pts:0,shuffled:null,pick:null});
+  for(var i=0;i<NB2;i++) s.push({act:2,done:false,pts:0,txt:''});
+  for(var i=0;i<NB3;i++) s.push({act:3,done:false,pts:0,txt:''});
+  return s;
+}
+var state=freshState();
+var cur=0;
+
+/* ── AUDIO ── */
+var actx=null,audioReady=false;
+function initA(){ if(audioReady)return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); audioReady=true; }catch(e){} }
+document.addEventListener('pointerdown',function once(){
+  initA(); if(actx&&actx.state==='suspended')actx.resume();
+  document.removeEventListener('pointerdown',once);
+});
+function tone(f1,f2,dur,type){
+  if(!actx)return;
+  var o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(f1,actx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f2,1),actx.currentTime+dur);
+  g.gain.setValueAtTime(.15,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
+}
+function beepOk(){ if(!actx)return; tone(660,880,.12,'sine'); setTimeout(function(){tone(880,1100,.14,'sine');},110); }
+function beepErr(){ tone(220,90,.22,'sawtooth'); }
+function beepFinal(ok){
+  if(!actx)return;
+  if(ok){ [523,659,784,988,1175].forEach(function(f,i){ setTimeout(function(){tone(f,f,.18,'triangle');},i*140); }); }
+  else { tone(200,120,.5,'sine'); }
+}
+
+/* ── UTILS ── */
+function flash(sym){
+  var el=$('flashPop'); el.textContent=sym;
+  el.classList.remove('play'); void el.offsetWidth; el.classList.add('play');
+}
+function ptsObtenus(){ return state.reduce(function(s,st){return s+st.pts;},0); }
+function nbTraites(){ return state.filter(function(st){return st.done;}).length; }
+function majHud(){
+  var t=nbTraites(), ok=ptsObtenus();
+  $('chOk').textContent=ok;
+  $('chKo').textContent=t-ok;
+  $('chRest').textContent=TOTAL-t;
+  $('progFill').style.width=Math.round(t/TOTAL*100)+'%';
+  var h='';
+  for(var i=0;i<NB;i++){
+    var c='pdot';
+    if(state[i].done) c+=(state[i].pts===1?' done':' done-ko');
+    else if(i===cur) c+=' active';
+    h+='<div class="'+c+'"></div>';
+  }
+  $('dotsProg').innerHTML=h;
+}
+function screenIndexToLocal(i){
+  if(i<NB1) return {act:1,idx:i,data:ACT1[i]};
+  if(i<NB1+NB2) return {act:2,idx:i-NB1,data:ACT2[i-NB1]};
+  return {act:3,idx:i-NB1-NB2,data:ACT3[i-NB1-NB2]};
+}
+function htmlBlankItem(item,done){
+  var h='';
+  item.segs.forEach(function(seg){
+    if(typeof seg==='string'){ h+=aff(seg); return; }
+    if(done){ h+='<span class="trou rempli">'+aff(item.ans)+'</span>'; }
+    else { h+='<span class="trou actif">?</span>'; }
+  });
+  return h;
+}
+
+/* ── DÉMARRAGE ── */
+$('btnStart').addEventListener('click',function(){
+  $('btnStart').style.display='none';
+  $('quizZone').classList.add('show');
+  render(0);
+});
+
+/* ── RENDU ── */
+function render(i){
+  cur=i;
+  var loc=screenIndexToLocal(i), st=state[i], d=loc.data;
+  var h='';
+
+  if(loc.act===1){
+    if(!st.shuffled) st.shuffled=buildShuffled(d.options,d.ans,TARGET1[loc.idx]);
+    h+='<div class="theme-badge">🧩 Activité 1 · Choisis le bon mode</div>';
+    h+='<div class="q-label">Question '+(loc.idx+1)+'/'+NB1+' · Écran '+(i+1)+'/'+NB+'</div>';
+    h+='<div class="consigne">Pour chaque phrase, choisis la forme qui convient.</div>';
+    h+='<div class="q-phrase">'+aff(d.phrase).replace('___','<span class="trou">___</span>')+'</div>';
+    h+='<div class="opts" id="optsWrap">';
+    st.shuffled.forEach(function(o,idx){
+      h+='<button type="button" class="opt" data-idx="'+idx+'"><span class="lettre">'+LABELS[idx]+'</span><span>'+aff(o.t)+'</span></button>';
+    });
+    h+='</div>';
+  } else if(loc.act===2){
+    h+='<div class="theme-badge">🔄 Activité 2 · Transforme la phrase</div>';
+    h+='<div class="q-label">Question '+(loc.idx+1)+'/'+NB2+' · Écran '+(i+1)+'/'+NB+'</div>';
+    h+='<div class="consigne">Transforme la phrase en commençant par les mots proposés.</div>';
+    if(loc.idx===0){
+      h+='<div class="ex-box"><div class="ex-lbl">Exemple</div><div class="ex-txt">'+aff(EXEMPLE.source)+'<br><span class="fl">'+aff(EXEMPLE.starter)+'</span><br>Réponse : '+aff(EXEMPLE.res)+'</div></div>';
+    }
+    h+='<div class="q-phrase">'+aff(d.source)+'<br>➡ '+aff(d.starter)+'</div>';
+    h+='<input type="text" class="saisie" id="saisie" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Écris la phrase transformée…">';
+  } else {
+    h+='<div class="theme-badge">🧠 Activité 3 · Complète avec le bon verbe</div>';
+    h+='<div class="q-label">Question '+(loc.idx+1)+'/'+NB3+' · Écran '+(i+1)+'/'+NB+'</div>';
+    h+='<div class="consigne">Conjugue le verbe entre parenthèses au subjonctif présent.</div>';
+    h+='<div class="item-box"><div class="item-lbl">Phrase '+(loc.idx+1)+'</div><div class="item-txt" id="itemTxt">'+htmlBlankItem(d,false)+'</div></div>';
+    h+='<input type="text" class="saisie" id="saisie" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Écris la forme conjuguée…">';
+  }
+
+  h+='<div class="fb-box" id="fbBox"></div>';
+  h+='<div class="btn-row">';
+  h+='<button class="btn btn-valider" id="btnValider" disabled>Valider</button>';
+  h+='<button class="btn btn-retry" id="btnRetry" style="display:none;">↺ Recommencer cette question</button>';
+  h+='<button class="btn btn-suivant" id="btnNext">'+(i===NB-1?'Voir le bilan →':'Suivant →')+'</button>';
+  h+='</div>';
+
+  $('qBody').innerHTML=h;
+  attach(i,loc);
+  if(st.done) restore(i,loc);
+  majHud();
+}
+
+/* ── INTERACTIONS ── */
+function attach(i,loc){
+  if(loc.act===1){
+    $('optsWrap').addEventListener('click',function(ev){
+      var b=ev.target.closest('.opt');
+      if(!b||b.classList.contains('locked'))return;
+      Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(x){x.classList.remove('selected');});
+      b.classList.add('selected');
+      state[i].pick=parseInt(b.dataset.idx,10);
+      $('btnValider').disabled=false;
+    });
+  } else {
+    var inp=$('saisie');
+    inp.addEventListener('input',function(){
+      state[i].txt=inp.value;
+      $('btnValider').disabled = inp.value.trim()==='';
+    });
+    inp.addEventListener('keydown',function(ev){
+      if(ev.key==='Enter'&&!$('btnValider').disabled&&!state[i].done) valider(i,loc);
+    });
+  }
+  $('btnValider').addEventListener('click',function(){ valider(i,loc); });
+  $('btnRetry').addEventListener('click',function(){ retry(i); });
+  $('btnNext').addEventListener('click',function(){
+    if(i===NB-1){ bilan(); } else { render(i+1); }
+  });
+}
+
+/* ── VALIDATION ── */
+function valider(i,loc){
+  var st=state[i], d=loc.data;
+  if(st.done)return;
+  st.done=true;
+  $('btnValider').disabled=true;
+  $('btnValider').style.display='none';
+  var ok, fbHtml;
+
+  if(loc.act===1){
+    var correctShIdx=st.shuffled.findIndex(function(o){return o.orig===d.ans;});
+    ok = st.pick===correctShIdx;
+    Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(b){
+      b.classList.add('locked');
+      var idx=parseInt(b.dataset.idx,10);
+      if(idx===correctShIdx)b.classList.add('correct');
+      else if(idx===st.pick)b.classList.add('wrong');
+    });
+    fbHtml='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(ok?d.fbOk:d.fbKo);
+  } else if(loc.act===2){
+    var inp=$('saisie');
+    st.txt=inp.value;
+    ok = normSentence(st.txt)===normSentence(d.ans);
+    inp.disabled=true;
+    inp.classList.add(ok?'correct':'wrong');
+    fbHtml='<span class="fb-titre">'+(ok?'✅ Exact.':'❌ Pas tout à fait.')+'</span>'+aff(ok?d.fbOk:d.fbKo)
+      + (ok?'':'<div style="margin-top:.4rem;">Réponse attendue : <span class="hl-ok">'+aff(d.ans)+'</span></div>');
+  } else {
+    var inp=$('saisie');
+    st.txt=inp.value;
+    ok = norm(st.txt)===norm(d.ans);
+    inp.disabled=true;
+    inp.classList.add(ok?'correct':'wrong');
+    $('itemTxt').innerHTML=htmlBlankItem(d,true);
+    fbHtml='<span class="fb-titre">'+(ok?'✅ Exact.':'❌ Pas tout à fait.')+'</span>'+aff(d.fbKo)
+      + (ok?'':'<div style="margin-top:.4rem;">Forme attendue : <span class="hl-ok">'+aff(d.ans)+'</span></div>');
+  }
+
+  st.pts = ok?1:0;
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  fb.innerHTML=fbHtml;
+
+  flash(ok?'✓':'✗');
+  if(ok)beepOk(); else beepErr();
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+  majHud();
+}
+
+/* ── RECOMMENCER UNE QUESTION ── */
+function retry(i){
+  var loc=screenIndexToLocal(i);
+  if(loc.act===1) state[i]={act:1,done:false,pts:0,shuffled:null,pick:null};
+  else state[i]={act:loc.act,done:false,pts:0,txt:''};
+  render(i);
+}
+
+/* ── RESTAURATION ── */
+function restore(i,loc){
+  var st=state[i], d=loc.data;
+  var ok=st.pts===1, fbHtml;
+
+  $('btnValider').style.display='none';
+  if(loc.act===1){
+    var correctShIdx=st.shuffled.findIndex(function(o){return o.orig===d.ans;});
+    Array.prototype.forEach.call(document.querySelectorAll('#optsWrap .opt'),function(b){
+      b.classList.add('locked');
+      var idx=parseInt(b.dataset.idx,10);
+      if(idx===correctShIdx)b.classList.add('correct');
+      else if(idx===st.pick)b.classList.add('wrong');
+      if(idx===st.pick)b.classList.add('selected');
+    });
+    fbHtml='<span class="fb-titre">'+(ok?'✅ Bonne réponse':'❌ À revoir')+'</span>'+aff(ok?d.fbOk:d.fbKo);
+  } else if(loc.act===2){
+    var inp=$('saisie');
+    inp.value=st.txt; inp.disabled=true;
+    inp.classList.add(ok?'correct':'wrong');
+    fbHtml='<span class="fb-titre">'+(ok?'✅ Exact.':'❌ Pas tout à fait.')+'</span>'+aff(ok?d.fbOk:d.fbKo)
+      + (ok?'':'<div style="margin-top:.4rem;">Réponse attendue : <span class="hl-ok">'+aff(d.ans)+'</span></div>');
+  } else {
+    var inp=$('saisie');
+    inp.value=st.txt; inp.disabled=true;
+    inp.classList.add(ok?'correct':'wrong');
+    $('itemTxt').innerHTML=htmlBlankItem(d,true);
+    fbHtml='<span class="fb-titre">'+(ok?'✅ Exact.':'❌ Pas tout à fait.')+'</span>'+aff(d.fbKo)
+      + (ok?'':'<div style="margin-top:.4rem;">Forme attendue : <span class="hl-ok">'+aff(d.ans)+'</span></div>');
+  }
+  var fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  fb.innerHTML=fbHtml;
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+}
+
+/* ── BILAN ── */
+function bilan(){
+  var s1=0,s2=0,s3=0;
+  state.forEach(function(st){
+    if(st.act===1)s1+=st.pts; else if(st.act===2)s2+=st.pts; else s3+=st.pts;
+  });
+  var total=s1+s2+s3;
+
+  $('quizZone').classList.remove('show');
+  $('resultats').classList.add('show');
+  $('resScore').textContent=total+'/'+TOTAL;
+  $('resSub').innerHTML='Activité 1 : '+s1+'/'+NB1+'<br>Activité 2 : '+s2+'/'+NB2+'<br>Activité 3 : '+s3+'/'+NB3;
+
+  var msg;
+  if(total===TOTAL) msg="Félicitations ! Tu reconnais les déclencheurs du subjonctif et tu sais conjuguer plusieurs verbes à ce mode. Tu es prêt(e) à relever des défis plus complexes.";
+  else if(total>=TOTAL-4) msg="Tu progresses ! Les déclencheurs du subjonctif commencent à devenir familiers. Relis les expressions comme il faut que, bien que ou je souhaite que, puis vérifie la conjugaison du verbe.";
+  else msg="Tu es en train de construire cette nouvelle compétence. Commence toujours par repérer l'expression qui introduit le verbe (il faut que, il est important que, bien que…). Ensuite, concentre-toi sur la forme du verbe. Avec un peu d'entraînement, ces conjugaisons deviendront de plus en plus naturelles.";
+  $('resMsg').textContent=msg;
+
+  var nb=total>0?Math.max(1,Math.round(total/TOTAL*5)):0;
+  var stars='';
+  for(var k=1;k<=5;k++) stars+= (k<=nb?'★':'☆');
+  $('resStars').textContent=stars;
+
+  var r='';
+  state.forEach(function(st,i){
+    var loc=screenIndexToLocal(i);
+    var lbl='Act. '+loc.act+' — Q'+(loc.idx+1);
+    var ok=st.pts===1;
+    r+='<div class="recap-item"><span>'+aff(lbl)+'</span><span class="st '+(ok?'ok':'ko')+'">'+(ok?'✓':'✗')+'</span></div>';
+  });
+  $('recapList').innerHTML=r;
+
+  var stamp=$('stamp'); stamp.classList.remove('play'); void stamp.offsetWidth; stamp.classList.add('play');
+  beepFinal(total/TOTAL>=.7);
+
+  if(total/TOTAL>=.7){
+    for(var c=0;c<26;c++){
+      (function(){
+        var el=document.createElement('div');
+        el.className='confetti';
+        el.textContent=RAIN[Math.floor(Math.random()*RAIN.length)];
+        el.style.left=(Math.random()*100)+'%';
+        el.style.animationDelay=(Math.random()*.8)+'s';
+        $('resultats').appendChild(el);
+        setTimeout(function(){el.remove();},3000);
+      })();
+    }
+  }
+}
+
+/* ── RECOMMENCER TOUT ── */
+$('btnRestart').addEventListener('click',function(){
+  state=freshState();
+  TARGET1=balancedPositions(ACT1.length,3);
+  cur=0;
+  Array.prototype.forEach.call(document.querySelectorAll('.confetti'),function(c){c.remove();});
+  $('resultats').classList.remove('show');
+  $('quizZone').classList.add('show');
+  render(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
