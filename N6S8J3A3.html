@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Manoir des Connaissances — Leur / Leurs</title>
+<style>
+:root{ --bleu:#14324f; --bleu2:#0f2740; --mur:#eef3f9; }
+*{ box-sizing:border-box; }
+body{ margin:0; background:linear-gradient(160deg,#0f2740,#14324f 60%,#102c47); color:#eaf2fb;
+  font-family:'Segoe UI',system-ui,Arial,sans-serif; min-height:100vh; padding:18px; }
+.wrap{ max-width:940px; margin:0 auto; }
+header{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+h1{ font-size:clamp(1.25rem,4.5vw,2rem); font-weight:700; margin:0; letter-spacing:.4px; }
+.hud{ display:flex; align-items:center; gap:10px; }
+.score{ font-family:'Consolas',ui-monospace,monospace; font-size:clamp(.9rem,3vw,1.05rem); background:#0c2236;
+  border:1px solid #2c4a6a; padding:8px 14px; border-radius:10px; white-space:nowrap; }
+.score #score{ color:#f3d98c; font-weight:700; }
+.sound{ background:#0c2236; border:1px solid #2c4a6a; color:#eaf2fb; font-size:1.05rem; width:42px; height:42px;
+  border-radius:10px; cursor:pointer; }
+.sound:hover{ background:#143356; }
+.planwrap{ background:#0c2236; border:1px solid #23456a; border-radius:14px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+#plan{ width:100%; height:auto; display:block; border-radius:8px; }
+/* ---- état des pièces ---- */
+.bp{ stroke:#fff; stroke-opacity:.04; stroke-width:1; }
+.walls line{ stroke:var(--mur); stroke-width:7; stroke-linecap:round; }
+.rfill{ transition:fill .6s ease; }
+.room.locked .rfill{ fill:#21425f; }
+.room.unlocked .rfill{ fill:url(#gold); }
+.rglow{ opacity:0; transition:opacity .9s ease; }
+.room.unlocked .rglow{ opacity:1; }
+.rnum,.rname{ font-family:'Segoe UI',Arial,sans-serif; transition:fill .6s ease; }
+.rnum{ font-size:11px; opacity:.8; }
+.rname{ font-size:13px; font-weight:600; }
+.room.locked .rnum,.room.locked .rname{ fill:#5d7a99; }
+.room.unlocked .rnum,.room.unlocked .rname{ fill:#5b4a23; }
+.rlock{ transform-box:fill-box; transform-origin:center; transition:opacity .5s ease, transform .5s ease; }
+.room.unlocked .rlock{ opacity:0; transform:scale(1.5) translateY(-8px); }
+.room.flash{ animation:flash .9s ease; }
+@keyframes flash{ 0%{filter:brightness(1.9);} 100%{filter:brightness(1);} }
+/* ---- portes ---- */
+.leaf{ fill:#d8b483; stroke:#b9935f; stroke-width:1; transform-box:fill-box; transition:transform 1s cubic-bezier(.2,.85,.25,1); }
+.leaf-v{ transform-origin:50% 0%; }
+.leaf-h{ transform-origin:0% 50%; }
+.door.open .leaf-v{ transform:rotate(82deg); }
+.door.open .leaf-h{ transform:rotate(-82deg); }
+.dlock{ transform-box:fill-box; transform-origin:center; transition:opacity .5s ease, transform .5s ease; }
+.door.open .dlock{ opacity:0; transform:scale(1.7) rotate(18deg); }
+/* ---- coffre final ---- */
+.vbody{ fill:#8a98a8; stroke:#46505e; stroke-width:2; transition:fill .6s ease; }
+.vault.open .vbody{ fill:#cdb56a; }
+.vlock{ transform-box:fill-box; transform-origin:center; transition:opacity .5s ease, transform .5s ease; }
+.vault.open .vlock{ opacity:0; transform:scale(1.7) translateY(-6px); }
+/* ---- carte question ---- */
+.qcard{ margin-top:16px; background:#0c2236; border:1px solid #23456a; border-radius:14px; padding:18px 18px 20px; }
+.qtarget{ font-family:'Consolas',monospace; font-size:.8rem; color:#f3d98c; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.qtext{ font-size:clamp(1rem,3.4vw,1.2rem); font-weight:600; line-height:1.4; margin-bottom:16px; }
+.opts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.opt{ background:#143356; color:#eaf2fb; border:1px solid #2f5a82; border-radius:10px; padding:14px 16px;
+  font-size:1rem; text-align:left; cursor:pointer; transition:transform .12s ease, background .2s ease, border-color .2s; }
+.opt:hover:not(:disabled){ background:#1b4a78; transform:translateY(-2px); border-color:#4b86bd; }
+.opt:disabled{ cursor:default; opacity:.85; }
+.opt.correct{ background:#1f7a4d; border-color:#34d27f; }
+.opt.wrong{ background:#7a2330; border-color:#e06a78; animation:shake .4s; }
+@keyframes shake{ 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+.feedback{ min-height:24px; margin-top:14px; font-weight:700; font-size:1.05rem; }
+.feedback.ok{ color:#6fe3a0; }
+.feedback.no{ color:#ff9b9b; }
+/* ---- fin ---- */
+.overlay{ position:fixed; inset:0; background:rgba(7,20,34,.82); display:none; align-items:center; justify-content:center; padding:20px; z-index:50; }
+.overlay.show{ display:flex; animation:fade .4s ease; }
+@keyframes fade{ from{opacity:0;} to{opacity:1;} }
+.modal{ background:linear-gradient(160deg,#14324f,#0c2236); border:1px solid #b9935f; border-radius:18px;
+  padding:30px 26px; max-width:440px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,.5); }
+.trophy{ font-size:3.4rem; } .modal h2{ margin:6px 0 8px; color:#f3d98c; }
+.modal p{ margin:0 0 14px; color:#cfe0f0; line-height:1.5; }
+.final{ font-family:'Consolas',monospace; font-size:1.1rem; color:#f3d98c; margin-bottom:18px; }
+.replay{ background:#d8b483; color:#3a2a18; border:none; border-radius:10px; padding:13px 24px; font-size:1.05rem;
+  font-weight:700; cursor:pointer; }
+.replay:hover{ background:#e7c79a; }
+@media (max-width:560px){ .opts{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏠 Le Manoir des Connaissances</h1>
+    <div class="hud">
+      <div class="score">🔓 Verrous ouverts : <span id="score">0</span> / 10</div>
+      <button id="soundBtn" class="sound" title="Activer / couper le son">🔊</button>
+    </div>
+  </header>
+  <div class="texte-support" style="background:#0c2236;border:1px solid #23456a;border-radius:14px;padding:16px 18px;margin-bottom:14px;">
+    <div style="font-family:'Consolas',monospace;font-size:.72rem;letter-spacing:1.5px;color:#f3d98c;text-transform:uppercase;margin-bottom:8px;">📖 Texte à compléter (leur / leurs)</div>
+    <div style="font-size:.92rem;line-height:1.85;color:#eaf2fb;">Ce matin, les élèves de 6e partent en sortie nature avec ___ professeur de sciences. Avant le départ, ils rangent ___ affaires dans un sac à dos. Chacun vérifie que ___ gourde est bien remplie. Pendant la promenade, ils observent des oiseaux dans ___ habitat naturel. Ensuite, ils dessinent ___ observations dans un carnet. Au moment du pique-nique, ils partagent ___ repas avec enthousiasme. Avant de repartir, ils ramassent tous ___ déchets pour respecter l'environnement. De retour au collège, le professeur félicite les élèves pour ___ sérieux. En rentrant chez eux, ils racontent ___ aventure à ___ parents.</div>
+  </div>
+  <div class="planwrap">
+    <svg id="plan" viewBox="0 0 798 336" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="glow"><stop offset="0" stop-color="#ffe7a8" stop-opacity="0.55"/><stop offset="1" stop-color="#ffe7a8" stop-opacity="0"/></radialGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e8bd"/><stop offset="1" stop-color="#e7cf94"/></linearGradient></defs><rect width="798" height="336" fill="#14324f"/><line class="bp" x1="0" y1="0" x2="0" y2="336"/><line class="bp" x1="28" y1="0" x2="28" y2="336"/><line class="bp" x1="56" y1="0" x2="56" y2="336"/><line class="bp" x1="84" y1="0" x2="84" y2="336"/><line class="bp" x1="112" y1="0" x2="112" y2="336"/><line class="bp" x1="140" y1="0" x2="140" y2="336"/><line class="bp" x1="168" y1="0" x2="168" y2="336"/><line class="bp" x1="196" y1="0" x2="196" y2="336"/><line class="bp" x1="224" y1="0" x2="224" y2="336"/><line class="bp" x1="252" y1="0" x2="252" y2="336"/><line class="bp" x1="280" y1="0" x2="280" y2="336"/><line class="bp" x1="308" y1="0" x2="308" y2="336"/><line class="bp" x1="336" y1="0" x2="336" y2="336"/><line class="bp" x1="364" y1="0" x2="364" y2="336"/><line class="bp" x1="392" y1="0" x2="392" y2="336"/><line class="bp" x1="420" y1="0" x2="420" y2="336"/><line class="bp" x1="448" y1="0" x2="448" y2="336"/><line class="bp" x1="476" y1="0" x2="476" y2="336"/><line class="bp" x1="504" y1="0" x2="504" y2="336"/><line class="bp" x1="532" y1="0" x2="532" y2="336"/><line class="bp" x1="560" y1="0" x2="560" y2="336"/><line class="bp" x1="588" y1="0" x2="588" y2="336"/><line class="bp" x1="616" y1="0" x2="616" y2="336"/><line class="bp" x1="644" y1="0" x2="644" y2="336"/><line class="bp" x1="672" y1="0" x2="672" y2="336"/><line class="bp" x1="700" y1="0" x2="700" y2="336"/><line class="bp" x1="728" y1="0" x2="728" y2="336"/><line class="bp" x1="756" y1="0" x2="756" y2="336"/><line class="bp" x1="784" y1="0" x2="784" y2="336"/><line class="bp" x1="0" y1="0" x2="798" y2="0"/><line class="bp" x1="0" y1="28" x2="798" y2="28"/><line class="bp" x1="0" y1="56" x2="798" y2="56"/><line class="bp" x1="0" y1="84" x2="798" y2="84"/><line class="bp" x1="0" y1="112" x2="798" y2="112"/><line class="bp" x1="0" y1="140" x2="798" y2="140"/><line class="bp" x1="0" y1="168" x2="798" y2="168"/><line class="bp" x1="0" y1="196" x2="798" y2="196"/><line class="bp" x1="0" y1="224" x2="798" y2="224"/><line class="bp" x1="0" y1="252" x2="798" y2="252"/><line class="bp" x1="0" y1="280" x2="798" y2="280"/><line class="bp" x1="0" y1="308" x2="798" y2="308"/><g class="room unlocked" id="room0"><rect class="rfill" x="24" y="28" width="150" height="140"/><circle class="rglow" cx="99.0" cy="98.0" r="94" fill="url(#glow)"/><text class="rnum" x="99.0" y="50" text-anchor="middle">1</text><text class="rname" x="99.0" y="154" text-anchor="middle">Hall d'entrée</text><g class="rlock"><path d="M89.9,85.0 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="84.7" y="85.0" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="99.0" cy="96.0" r="3.0" fill="#5b6573"/><rect x="97.7" y="96.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room1"><rect class="rfill" x="174" y="28" width="150" height="140"/><circle class="rglow" cx="249.0" cy="98.0" r="94" fill="url(#glow)"/><text class="rnum" x="249.0" y="50" text-anchor="middle">2</text><text class="rname" x="249.0" y="154" text-anchor="middle">Bureau</text><g class="rlock"><path d="M239.9,85.0 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="234.7" y="85.0" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="249.0" cy="96.0" r="3.0" fill="#5b6573"/><rect x="247.7" y="96.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room2"><rect class="rfill" x="324" y="28" width="150" height="140"/><circle class="rglow" cx="399.0" cy="98.0" r="94" fill="url(#glow)"/><text class="rnum" x="399.0" y="50" text-anchor="middle">3</text><text class="rname" x="399.0" y="154" text-anchor="middle">Bibliothèque</text><g class="rlock"><path d="M389.9,85.0 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="384.7" y="85.0" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="399.0" cy="96.0" r="3.0" fill="#5b6573"/><rect x="397.7" y="96.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room3"><rect class="rfill" x="474" y="28" width="150" height="140"/><circle class="rglow" cx="549.0" cy="98.0" r="94" fill="url(#glow)"/><text class="rnum" x="549.0" y="50" text-anchor="middle">4</text><text class="rname" x="549.0" y="154" text-anchor="middle">Salon</text><g class="rlock"><path d="M539.9,85.0 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="534.7" y="85.0" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="549.0" cy="96.0" r="3.0" fill="#5b6573"/><rect x="547.7" y="96.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room4"><rect class="rfill" x="624" y="28" width="150" height="140"/><circle class="rglow" cx="699.0" cy="98.0" r="94" fill="url(#glow)"/><text class="rnum" x="699.0" y="50" text-anchor="middle">5</text><text class="rname" x="699.0" y="154" text-anchor="middle">Salle d'étude</text><g class="rlock"><path d="M689.9,85.0 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="684.7" y="85.0" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="699.0" cy="96.0" r="3.0" fill="#5b6573"/><rect x="697.7" y="96.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room5"><rect class="rfill" x="624" y="168" width="150" height="140"/><circle class="rglow" cx="699.0" cy="238.0" r="94" fill="url(#glow)"/><text class="rnum" x="699.0" y="190" text-anchor="middle">6</text><text class="rname" x="699.0" y="294" text-anchor="middle">Archives</text><g class="rlock"><path d="M689.9,224.9 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="684.7" y="224.9" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="699.0" cy="236.0" r="3.0" fill="#5b6573"/><rect x="697.7" y="236.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room6"><rect class="rfill" x="474" y="168" width="150" height="140"/><circle class="rglow" cx="549.0" cy="238.0" r="94" fill="url(#glow)"/><text class="rnum" x="549.0" y="190" text-anchor="middle">7</text><text class="rname" x="549.0" y="294" text-anchor="middle">Laboratoire</text><g class="rlock"><path d="M539.9,224.9 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="534.7" y="224.9" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="549.0" cy="236.0" r="3.0" fill="#5b6573"/><rect x="547.7" y="236.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room7"><rect class="rfill" x="324" y="168" width="150" height="140"/><circle class="rglow" cx="399.0" cy="238.0" r="94" fill="url(#glow)"/><text class="rnum" x="399.0" y="190" text-anchor="middle">8</text><text class="rname" x="399.0" y="294" text-anchor="middle">Galerie</text><g class="rlock"><path d="M389.9,224.9 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="384.7" y="224.9" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="399.0" cy="236.0" r="3.0" fill="#5b6573"/><rect x="397.7" y="236.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room8"><rect class="rfill" x="174" y="168" width="150" height="140"/><circle class="rglow" cx="249.0" cy="238.0" r="94" fill="url(#glow)"/><text class="rnum" x="249.0" y="190" text-anchor="middle">9</text><text class="rname" x="249.0" y="294" text-anchor="middle">Salle secrète</text><g class="rlock"><path d="M239.9,224.9 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="234.7" y="224.9" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="249.0" cy="236.0" r="3.0" fill="#5b6573"/><rect x="247.7" y="236.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="room locked" id="room9"><rect class="rfill" x="24" y="168" width="150" height="140"/><circle class="rglow" cx="99.0" cy="238.0" r="94" fill="url(#glow)"/><text class="rnum" x="99.0" y="190" text-anchor="middle">10</text><text class="rname" x="99.0" y="294" text-anchor="middle">Bureau du maître</text><g class="rlock"><path d="M89.9,224.9 v-7.8 a9.1,9.1 0 0 1 18.2,0 v7.8" fill="none" stroke="#8f9aab" stroke-width="3.9"/><rect x="84.7" y="224.9" width="28.6" height="22.1" rx="3" fill="#cdd5df"/><circle cx="99.0" cy="236.0" r="3.0" fill="#5b6573"/><rect x="97.7" y="236.0" width="2.6" height="6.5" fill="#5b6573"/></g></g><g class="walls"><line x1="24" y1="28" x2="774" y2="28"/><line x1="24" y1="308" x2="774" y2="308"/><line x1="24" y1="28" x2="24" y2="308"/><line x1="774" y1="28" x2="774" y2="308"/><line x1="174" y1="28" x2="174" y2="72.0"/><line x1="174" y1="124.0" x2="174" y2="168"/><line x1="324" y1="28" x2="324" y2="72.0"/><line x1="324" y1="124.0" x2="324" y2="168"/><line x1="474" y1="28" x2="474" y2="72.0"/><line x1="474" y1="124.0" x2="474" y2="168"/><line x1="624" y1="28" x2="624" y2="72.0"/><line x1="624" y1="124.0" x2="624" y2="168"/><line x1="174" y1="168" x2="174" y2="212.0"/><line x1="174" y1="264.0" x2="174" y2="308"/><line x1="324" y1="168" x2="324" y2="212.0"/><line x1="324" y1="264.0" x2="324" y2="308"/><line x1="474" y1="168" x2="474" y2="212.0"/><line x1="474" y1="264.0" x2="474" y2="308"/><line x1="624" y1="168" x2="624" y2="212.0"/><line x1="624" y1="264.0" x2="624" y2="308"/><line x1="24" y1="168" x2="174" y2="168"/><line x1="174" y1="168" x2="324" y2="168"/><line x1="324" y1="168" x2="474" y2="168"/><line x1="474" y1="168" x2="624" y2="168"/><line x1="624" y1="168" x2="673.0" y2="168"/><line x1="725.0" y1="168" x2="774" y2="168"/></g><g class="door" id="door0"><rect class="leaf leaf-v" x="171" y="72.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M168.5,91.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="165.4" y="91.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="174.0" cy="98.0" r="1.8" fill="#5b6573"/><rect x="173.2" y="98.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door1"><rect class="leaf leaf-v" x="321" y="72.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M318.5,91.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="315.4" y="91.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="324.0" cy="98.0" r="1.8" fill="#5b6573"/><rect x="323.2" y="98.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door2"><rect class="leaf leaf-v" x="471" y="72.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M468.5,91.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="465.4" y="91.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="474.0" cy="98.0" r="1.8" fill="#5b6573"/><rect x="473.2" y="98.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door3"><rect class="leaf leaf-v" x="621" y="72.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M618.5,91.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="615.4" y="91.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="624.0" cy="98.0" r="1.8" fill="#5b6573"/><rect x="623.2" y="98.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door8"><rect class="leaf leaf-v" x="171" y="212.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M168.5,231.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="165.4" y="231.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="174.0" cy="238.0" r="1.8" fill="#5b6573"/><rect x="173.2" y="238.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door7"><rect class="leaf leaf-v" x="321" y="212.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M318.5,231.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="315.4" y="231.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="324.0" cy="238.0" r="1.8" fill="#5b6573"/><rect x="323.2" y="238.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door6"><rect class="leaf leaf-v" x="471" y="212.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M468.5,231.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="465.4" y="231.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="474.0" cy="238.0" r="1.8" fill="#5b6573"/><rect x="473.2" y="238.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door5"><rect class="leaf leaf-v" x="621" y="212.0" width="6" height="52" rx="2"/><g class="dlock"><path d="M618.5,231.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="615.4" y="231.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="624.0" cy="238.0" r="1.8" fill="#5b6573"/><rect x="623.2" y="238.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="door" id="door4"><rect class="leaf leaf-h" x="673.0" y="165" width="52" height="6" rx="2"/><g class="dlock"><path d="M693.5,161.4 v-4.7 a5.5,5.5 0 0 1 10.9,0 v4.7" fill="none" stroke="#8f9aab" stroke-width="2.3"/><rect x="690.4" y="161.4" width="17.2" height="13.3" rx="3" fill="#cdd5df"/><circle cx="699.0" cy="168.0" r="1.8" fill="#5b6573"/><rect x="698.2" y="168.0" width="1.6" height="3.9" fill="#5b6573"/></g></g><g class="vault locked" id="vault"><rect class="vbody" x="78.0" y="227.0" width="42" height="36" rx="4"/><circle cx="99.0" cy="245.0" r="8.5" fill="none" stroke="#46505e" stroke-width="2.6"/><line x1="99.0" y1="245.0" x2="105.0" y2="240.0" stroke="#46505e" stroke-width="2.4"/><g class="vlock"><path d="M94.1,212.1 v-4.2 a4.9,4.9 0 0 1 9.8,0 v4.2" fill="none" stroke="#8f9aab" stroke-width="2.1"/><rect x="91.3" y="212.1" width="15.4" height="11.9" rx="3" fill="#cdd5df"/><circle cx="99.0" cy="218.0" r="1.6" fill="#5b6573"/><rect x="98.3" y="218.0" width="1.4" height="3.5" fill="#5b6573"/></g></g></svg>
+  </div>
+  <section class="qcard">
+    <div class="qtarget" id="qtarget">Verrou 1 / 10</div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+</div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="trophy">🏆</div>
+    <h2>Félicitations !</h2>
+    <p>Tu as exploré l'intégralité du Manoir des Connaissances.</p>
+    <div class="final" id="finalScore">🔓 10 / 10 verrous ouverts</div>
+    <button class="replay" onclick="rejouer()">🔄 Rejouer</button>
+  </div>
+</div>
+<script>
+/* =========================================================
+   LE MANOIR DES CONNAISSANCES — logique du jeu
+   ---------------------------------------------------------
+   POUR MODIFIER LES QUESTIONS : édite simplement le tableau
+   "questions" ci-dessous (10 entrées). Chaque entrée :
+     { question:"...", options:["A","B","C","D"], answer:0 }
+   "answer" = index (0,1,2,3) de la bonne réponse.
+   ========================================================= */
+const questions = [
+  {
+    "question": "Ce matin, les élèves de 6e partent en sortie nature avec ___ professeur de sciences.",
+    "options": ["leur", "leurs"],
+    "answer": 0
+  },
+  {
+    "question": "Avant le départ, ils rangent ___ affaires dans un sac à dos.",
+    "options": ["leurs", "leur"],
+    "answer": 0
+  },
+  {
+    "question": "Chacun vérifie que ___ gourde est bien remplie.",
+    "options": ["leur", "leurs"],
+    "answer": 0
+  },
+  {
+    "question": "Pendant la promenade, ils observent des oiseaux dans ___ habitat naturel.",
+    "options": ["leurs", "leur"],
+    "answer": 1
+  },
+  {
+    "question": "Ensuite, ils dessinent ___ observations dans un carnet.",
+    "options": ["leur", "leurs"],
+    "answer": 1
+  },
+  {
+    "question": "Au moment du pique-nique, ils partagent ___ repas avec enthousiasme.",
+    "options": ["leurs", "leur"],
+    "answer": 1
+  },
+  {
+    "question": "Avant de repartir, ils ramassent tous ___ déchets pour respecter l'environnement.",
+    "options": ["leur", "leurs"],
+    "answer": 1
+  },
+  {
+    "question": "De retour au collège, le professeur félicite les élèves pour ___ sérieux.",
+    "options": ["leurs", "leur"],
+    "answer": 1
+  },
+  {
+    "question": "En rentrant chez eux, ils racontent ___ aventure à … parents. (1er blanc)",
+    "options": ["leur", "leurs"],
+    "answer": 0
+  },
+  {
+    "question": "En rentrant chez eux, ils racontent … aventure à ___ parents. (2e blanc)",
+    "options": ["leurs", "leur"],
+    "answer": 0
+  }
+];
+
+const TOTAL = 10;        // 10 verrous à ouvrir
+let opened = 0;          // nombre de verrous déjà ouverts
+let busy = false;        // bloque les clics pendant l'animation
+const $ = id => document.getElementById(id);
+
+/* Met à jour l'état visuel du plan selon "opened" */
+function renderState(){
+  for(let i=0;i<10;i++){
+    const el=$('room'+i); const unlocked = opened>=i;
+    el.classList.toggle('unlocked', unlocked);
+    el.classList.toggle('locked', !unlocked);
+  }
+  for(let i=0;i<9;i++){ const d=$('door'+i); if(d) d.classList.toggle('open', opened>i); }
+  $('vault').classList.toggle('open', opened>=10);
+  $('score').textContent = opened;
+}
+
+/* Affiche la question correspondant au verrou courant */
+function loadQuestion(){
+  busy=false;
+  if(opened>=TOTAL) return;
+  const q=questions[opened];
+  $('qtarget').textContent='Verrou '+(opened+1)+' / '+TOTAL;
+  $('qtext').textContent=q.question;
+  const opts=$('opts'); opts.innerHTML='';
+  q.options.forEach((txt,idx)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=txt;
+    b.addEventListener('click',()=>answer(idx,b));
+    opts.appendChild(b);
+  });
+  const fb=$('feedback'); fb.textContent=''; fb.className='feedback';
+}
+
+/* Traite la réponse de l'élève */
+function answer(idx,btn){
+  if(busy) return;
+  const q=questions[opened];
+  if(idx===q.answer){
+    busy=true;
+    const fb=$('feedback'); fb.textContent='✅ Verrou ouvert !'; fb.className='feedback ok';
+    document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+    if(btn) btn.classList.add('correct');
+    unlockSound();
+    opened++;
+    renderState();
+    flashRoom(opened);                 // la pièce atteinte s'illumine
+    if(opened>=TOTAL) setTimeout(endGame,1300);
+    else setTimeout(loadQuestion,1150); // laisse le temps à la porte de pivoter
+  } else {
+    const fb=$('feedback'); fb.textContent='❌ Ce verrou reste fermé. Réessaie.'; fb.className='feedback no';
+    deniedSound();
+    if(btn){ btn.classList.add('wrong'); setTimeout(()=>btn.classList.remove('wrong'),500); }
+  }
+}
+
+function flashRoom(i){ const el=$('room'+i); if(!el) return; el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),900); }
+function endGame(){ $('finalScore').textContent='🔓 '+opened+' / '+TOTAL+' verrous ouverts'; $('overlay').classList.add('show'); }
+function rejouer(){ opened=0; renderState(); $('overlay').classList.remove('show'); loadQuestion(); }
+
+/* ---- Effets sonores légers (facultatifs, Web Audio) ---- */
+let actx=null, son=true;
+function initA(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function beep(f1,f2,dur,type,vol){
+  if(!actx||!son) return;
+  const o=actx.createOscillator(), g=actx.createGain(), t=actx.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.18,t+0.012); g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+dur+0.02);
+}
+function unlockSound(){ initA(); beep(420,820,0.16,'triangle',0.16); setTimeout(()=>beep(190,95,0.22,'sine',0.22),70); }
+function deniedSound(){ initA(); beep(150,80,0.22,'sawtooth',0.12); }
+
+$('soundBtn').addEventListener('click',()=>{ son=!son; initA(); if(actx&&actx.state==='suspended') actx.resume(); $('soundBtn').textContent=son?'🔊':'🔇'; });
+document.addEventListener('pointerdown',initA,{once:true});
+
+/* Démarrage */
+renderState();
+loadQuestion();
+</script>
+</body>
+</html>
