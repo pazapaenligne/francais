@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Je m'entraîne — Le Vaillant Petit Tailleur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Lora:ital,wght@0,500;0,600;0,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --border:#e8e2d4;
+  --text:#1c1c1c;
+  --muted:#8a8272;
+  --day:#f5a623;
+  --day-color:#f5a623;
+  --day-dark:#c47a10;
+  --day-light:#fff5e0;
+  --day-border:#f5d080;
+  --day-glow:rgba(245,166,35,.35);
+  --yellow:#f5e08a;
+  --pink:#f7c6c6;
+  --orange:#f5a623;
+  --green:#1f7a3d;
+  --green-bg:#e7faec;
+  --green-txt:#14532d;
+  --red:#b3261e;
+  --red-bg:#fdeaea;
+  --red-txt:#7f1d1d;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:.95rem;
+  line-height:1.6;
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+}
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.35;z-index:0;pointer-events:none;}
+.b1{width:180px;height:180px;background:var(--yellow);top:-60px;right:-50px;}
+.b2{width:150px;height:150px;background:var(--day-light);bottom:-40px;left:-40px;}
+.b3{width:110px;height:110px;background:#b5e08a;top:40%;right:-60px;opacity:.25;}
+.b4{width:120px;height:120px;background:var(--pink);top:15%;left:-60px;opacity:.22;}
+
+.wrap{max-width:780px;margin:0 auto;padding:18px 16px 60px;position:relative;z-index:1;}
+
+header{text-align:center;margin-bottom:14px;}
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:#f5a623;border:1px solid #e09410;border-radius:999px;padding:5px 14px;margin-bottom:10px;}
+.logo-badge .dots{display:flex;gap:3px;}
+.logo-badge .dot{width:8px;height:8px;border-radius:50%;}
+.dot.o{background:#7a3d00;}
+.dot.g{background:#ffffff;}
+.dot.r{background:#7a3d00;opacity:.45;}
+.logo-badge span{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#7a3d00;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:0 0 4px;color:var(--text);}
+.week-label{font-size:.88rem;font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.3rem;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.04);animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.intro-titre{font-size:.85rem;text-transform:uppercase;font-weight:800;color:var(--day-dark);letter-spacing:.03em;margin-bottom:.5rem;}
+.intro-txt{font-size:.92rem;line-height:1.75;}
+
+.poem-card{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--day);border-radius:var(--radius);padding:1.3rem 1.4rem;margin-bottom:18px;}
+.poem-titre{font-family:'Lora',serif;font-weight:700;font-size:1.15rem;text-transform:uppercase;letter-spacing:.02em;margin-bottom:.9rem;color:var(--text);}
+.poem-txt{font-family:'Lora',serif;font-size:clamp(.92rem,2.6vw,1.02rem);line-height:1.9;white-space:pre-line;color:var(--text);}
+.poem-txt .note-num{font-family:'JetBrains Mono',monospace;font-size:.72em;color:var(--day-dark);vertical-align:super;font-weight:700;}
+.notes-box{margin-top:1.1rem;padding-top:.9rem;border-top:1px dashed var(--day-border);}
+.notes-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--day-dark);font-weight:800;margin-bottom:.4rem;}
+.notes-list{font-size:.8rem;color:var(--muted);line-height:1.8;}
+.notes-list span{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);}
+.notes-remarque{margin-top:.7rem;font-size:.8rem;color:var(--day-dark);font-style:italic;background:var(--day-light);border-radius:8px;padding:.5rem .75rem;}
+
+.btn{font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;min-height:2.8rem;border-radius:12px;border:none;cursor:pointer;padding:0 1.4rem;transition:.15s;}
+.btn-start{display:block;width:100%;background:var(--day);color:#fff;font-size:1rem;min-height:3rem;}
+.btn-start:hover{background:var(--day-dark);}
+
+#quizZone{display:none;}
+#quizZone.show{display:block;}
+
+.progress-wrap{margin-bottom:14px;}
+.progress-bar-outer{background:var(--day-light);border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--day-border);}
+.progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--day),var(--day-dark));width:0%;transition:width .5s ease;border-radius:999px;}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);}
+.chip.ok{color:var(--green);border-color:var(--green);}
+.chip.ko{color:var(--red);border-color:var(--red);}
+.chip.rest{color:var(--muted);}
+
+.q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:4px;}
+.q-titre{font-size:.85rem;font-weight:800;color:var(--text);margin-bottom:.6rem;}
+.q-texte{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;line-height:1.6;margin-bottom:1rem;}
+
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt{
+  display:flex;align-items:center;gap:.7rem;
+  font-family:Arial,sans-serif;
+  font-size:clamp(.92rem,2.5vw,1.02rem);
+  min-height:50px;
+  text-align:left;
+  padding:.65rem .9rem;
+  border-radius:12px;
+  border:2px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  cursor:pointer;
+  transition:.15s;
+  line-height:1.5;
+}
+.opt span:last-child{flex:1;min-width:0;word-break:break-word;}
+.opt:hover:not(.locked){border-color:var(--day);background:var(--day-light);}
+.opt.selected{border-color:var(--day);background:var(--day-light);box-shadow:0 0 0 3px var(--day-glow);}
+.opt .lettre{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.78rem;display:flex;align-items:center;justify-content:center;border:1px solid var(--day-border);}
+.opt.selected .lettre{background:var(--day);color:#fff;}
+.opt.locked{cursor:default;}
+.opt.correct{border-color:var(--green);background:var(--green-bg);}
+.opt.correct .lettre{background:var(--green);color:#fff;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);}
+.opt.wrong .lettre{background:var(--red);color:#fff;}
+
+.btn-valider{background:var(--day);color:#fff;}
+.btn-valider:disabled{background:#e5ddc9;color:#a99f86;cursor:not-allowed;}
+.btn-valider:hover:not(:disabled){background:var(--day-dark);}
+
+.fb-box{display:none;padding:.75rem 1rem;line-height:1.75;font-size:clamp(.9rem,2.5vw,1rem);border-left:5px solid var(--border);border-radius:10px;margin-bottom:1rem;}
+.fb-box.show{display:block;}
+.fb-box.ok{border-left-color:var(--green);background:var(--green-bg);}
+.fb-box.ko{border-left-color:var(--red);background:var(--red-bg);}
+.fb-titre{font-weight:800;display:block;}
+.hl-ok{color:var(--green-txt);font-weight:700;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-retry{background:var(--surface);color:var(--text);border:2px solid var(--border);}
+.btn-retry:hover{border-color:var(--day);}
+.btn-suivant{background:var(--day-dark);color:#fff;display:none;}
+.btn-suivant.show{display:inline-block;}
+
+.flash-pop{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%) scale(.4);font-size:5rem;z-index:50;pointer-events:none;opacity:0;}
+.flash-pop.play{animation:flashPop 1s ease forwards;}
+@keyframes flashPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1);}}
+
+#resultats{display:none;text-align:center;position:relative;overflow:hidden;}
+#resultats.show{display:block;}
+.res-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(2.8rem,10vw,4.5rem);color:var(--day-dark);}
+.res-stars{font-size:1.9rem;letter-spacing:.15em;color:#d8b23a;margin:.3rem 0;}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;margin-bottom:.8rem;}
+.recap-list{text-align:left;font-size:.8rem;font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border);padding-top:.8rem;margin-bottom:1rem;max-height:280px;overflow-y:auto;}
+.recap-item{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);}
+.recap-item .st{font-weight:800;}
+.recap-item .st.ok{color:var(--green);}
+.recap-item .st.ko{color:var(--red);}
+.stamp{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;border:3px solid var(--day-dark);color:var(--day-dark);border-radius:10px;padding:.3rem .9rem;transform:rotate(-6deg) scale(0);margin-bottom:.6rem;}
+.stamp.play{animation:stampPop .5s ease forwards .1s;}
+@keyframes stampPop{0%{transform:rotate(-6deg) scale(0);opacity:0;}60%{transform:rotate(-6deg) scale(1.2);opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.confetti{position:absolute;font-size:1.2rem;top:-30px;pointer-events:none;animation:particleUp 2.4s ease-in forwards;}
+@keyframes particleUp{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(340px) rotate(200deg);opacity:0;}}
+.btn-restart{background:var(--day);color:#fff;margin-top:.4rem;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="logo-badge">
+    <div class="dots"><div class="dot o"></div><div class="dot g"></div><div class="dot r"></div></div>
+    <span>Pazapa · Français · 6e</span>
+  </div>
+  <h1>Je m'entraîne</h1>
+  <div class="week-label">Semaine 8 · Jour 1</div>
+</header>
+
+<div class="card">
+  <div class="intro-titre">📖 Contexte</div>
+  <div class="intro-txt">Lis attentivement cet extrait du Vaillant Petit Tailleur, puis réponds aux questions de compréhension. Pour chacune, choisis ensuite la citation qui justifie ta réponse.</div>
+</div>
+
+<div class="poem-card">
+  <div class="poem-titre">Le Vaillant Petit Tailleur</div>
+  <div class="poem-txt">Par un beau matin d'été, un petit tailleur assis sur sa table et de fort bonne humeur, cousait de tout son cœur. Arrive dans la rue une paysanne qui crie&nbsp;: « Bonne confiture à vendre&nbsp;! Bonne confiture à vendre&nbsp;! »
+
+Le petit tailleur entendit ces paroles avec plaisir. Il passa sa tête menue<span class="note-num">(1)</span> par la fenêtre et dit&nbsp;: « Venez ici, chère Madame&nbsp;! C'est ici qu'on vous débarrassera de votre marchandise. »
+
+La femme grimpa les trois marches avec son lourd panier et le tailleur lui fit déballer tous ses pots. Il les examina, les tint en l'air, les renifla et finalement déclara&nbsp;: « Cette confiture me semble bonne. Pesez-m'en donc une demi-once<span class="note-num">(2)</span>, chère Madame. Même s'il y en a un quart de livre, ça ne fera rien. »
+
+La femme, qui avait espéré trouver un bon client, lui donna ce qu'il demandait, mais s'en alla bien fâchée et en grognant.
+
+« Et maintenant, dit le petit tailleur, que Dieu bénisse cette confiture et qu'elle me donne de la force&nbsp;! »
+
+Il prit une miche<span class="note-num">(3)</span> dans le buffet, s'en coupa un grand morceau par le travers et le couvrit de confiture.
+
+« Ça ne sera pas mauvais, dit-il. Mais avant d'y mettre les dents, il faut que je termine ce pourpoint<span class="note-num">(4)</span>. »
+
+« Eh&nbsp;! dit le petit tailleur. Qui vous a invitées&nbsp;? » Et il chassa ces hôtes indésirables. Mais les mouches, qui ne comprenaient pas la langue humaine, ne se laissèrent pas intimider. Elles revinrent plus nombreuses encore. Alors, comme on dit, le petit tailleur prit la mouche. Il attrapa un torchon et, « je vais vous en donner, moi, de la confiture&nbsp;! », leur en donna un grand coup. Lorsqu'il retira le torchon et compta ses victimes, il n'y avait pas moins de sept mouches raides mortes.
+
+« Tu es un fameux gaillard », se dit-il en admirant sa vaillance. « Il faut que toute la ville le sache. » Et, en toute hâte, il se tailla une ceinture, la cousit et broda dessus en grandes lettres&nbsp;: « Sept d'un coup ». « Eh&nbsp;! quoi, la ville… c'est le monde entier qui doit savoir ça&nbsp;! » Et son cœur battait de joie comme une queue d'agneau.
+
+Le tailleur s'attacha la ceinture autour du corps et s'apprêta à partir dans le monde, pensant que son atelier était trop petit pour son courage. Avant de quitter la maison, il chercha autour de lui ce qu'il pourrait emporter. Il ne trouva qu'un fromage et le mit dans sa poche. Devant la porte, il remarqua un oiseau qui s'était pris dans les broussailles&nbsp;; il lui fit rejoindre le fromage. Après quoi, il partit vaillamment et comme il était léger et agile, il ne ressentit aucune fatigue.</div>
+  <div class="notes-box">
+    <div class="notes-lbl">Lexique</div>
+    <div class="notes-list">
+      <span>(1)</span> petite.<br>
+      <span>(2)</span> très petite quantité.<br>
+      <span>(3)</span> gros pain rond.<br>
+      <span>(4)</span> vêtement masculin qui couvre le haut du corps.
+    </div>
+    <div class="notes-remarque">Note : l'expression <em>prendre la mouche</em> signifie « se vexer, s'emporter mal à propos ».</div>
+  </div>
+</div>
+
+<button class="btn btn-start" id="btnStart">Commencer les questions ▶</button>
+
+<div id="quizZone">
+  <div class="card progress-wrap">
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progFill"></div></div>
+    <div class="chips">
+      <div class="chip ok">✔ Corrects : <span id="chOk">0</span></div>
+      <div class="chip ko">✘ Erreurs : <span id="chKo">0</span></div>
+      <div class="chip rest">⏳ Restants : <span id="chRest">15</span></div>
+    </div>
+  </div>
+
+  <div class="card" id="qCard"></div>
+</div>
+
+<div class="card" id="resultats">
+  <div class="stamp" id="stamp">TERMINÉ</div>
+  <div class="res-score" id="resScore">0/15</div>
+  <div class="res-stars" id="resStars"></div>
+  <div class="res-msg" id="resMsg"></div>
+  <div class="recap-list" id="recapList"></div>
+  <button class="btn btn-restart" id="btnRestart">↺ Recommencer toute l'activité</button>
+</div>
+
+</div>
+
+<div class="flash-pop" id="flashPop"></div>
+
+<script>
+/* ══════════ PAZAPA — N6S8J1A1 — Le Vaillant Petit Tailleur ══════════ */
+
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ── DONNÉES (contenu professeure — sacré, verbatim) ──
+   Les positions A/B/C/D des bonnes réponses sont volontairement
+   fixées par la professeure (déjà équilibrées) : elles ne sont
+   pas mélangées automatiquement. */
+const DATA = [
+{num:1,sous:'A',question:"Pourquoi le petit tailleur appelle-t-il la paysanne ?",
+ options:["Il veut lui demander son chemin.","Il veut lui acheter de la confiture.","Il veut lui vendre un vêtement.","Il veut lui offrir du pain."],ans:1},
+{num:1,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Il prit une miche dans le buffet. »","« Le petit tailleur assis sur sa table cousait de tout son cœur. »","« Venez ici, chère Madame ! C'est ici qu'on vous débarrassera de votre marchandise. »","« Il se tailla une ceinture. »"],ans:2},
+
+{num:2,sous:'A',question:"Que demande finalement le petit tailleur à la paysanne ?",
+ options:["Un fromage.","Un pot entier de confiture.","Une miche de pain.","Une demi-once de confiture."],ans:3},
+{num:2,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Pesez-m'en donc une demi-once, chère Madame. »","« Il prit une miche dans le buffet. »","« Bonne confiture à vendre ! »","« Il trouva un fromage. »"],ans:0},
+
+{num:3,sous:'A',question:"Que fait le petit tailleur avant de manger son pain ?",
+ options:["Il appelle la paysanne.","Il décide de terminer son pourpoint.","Il part se promener.","Il fabrique une ceinture."],ans:1},
+{num:3,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Son cœur battait de joie. »","« Avant d'y mettre les dents, il faut que je termine ce pourpoint. »","« Il prit une miche dans le buffet. »","« Que Dieu bénisse cette confiture. »"],ans:1},
+
+{num:4,sous:'A',question:"Pourquoi les mouches reviennent-elles plus nombreuses ?",
+ options:["Elles suivent la paysanne.","Elles cherchent le fromage.","Elles ne se laissent pas intimider.","Elles veulent sortir de l'atelier."],ans:2},
+{num:4,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Bonne confiture à vendre ! »","« Il chercha autour de lui. »","« Il se tailla une ceinture. »","« Les mouches […] ne se laissèrent pas intimider. Elles revinrent plus nombreuses encore. »"],ans:3},
+
+{num:5,sous:'A',question:"Combien de mouches le petit tailleur tue-t-il ?",
+ options:["Sept.","Dix.","Une seule.","Cinq."],ans:0},
+{num:5,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Les mouches revinrent plus nombreuses encore. »","« Il n'y avait pas moins de sept mouches raides mortes. »","« Je vais vous en donner, moi, de la confiture ! »","« Il prit un torchon. »"],ans:1},
+
+{num:6,sous:'A',question:"Que brode le petit tailleur sur sa ceinture ?",
+ options:["« Le plus courageux ».","« Vive la confiture ».","« Sept d'un coup ».","« Le meilleur tailleur »."],ans:2},
+{num:6,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Tu es un fameux gaillard. »","« Toute la ville le sache. »","« Il se tailla une ceinture. »","« Broda dessus en grandes lettres : \"Sept d'un coup\". »"],ans:3},
+
+{num:7,sous:'A',question:"Pourquoi le petit tailleur décide-t-il de quitter son atelier ?",
+ options:["Il veut retrouver la paysanne.","Il pense que son atelier est trop petit pour son courage.","Il n'a plus de tissu.","Il cherche du travail ailleurs."],ans:1},
+{num:7,sous:'B',question:"Quelle citation justifie ta réponse ?",
+ options:["« Son cœur battait de joie. »","« Il était léger et agile. »","« Son atelier était trop petit pour son courage. »","« Il chercha autour de lui. »"],ans:2},
+
+{num:8,sous:'A',question:"Quels objets le petit tailleur emporte-t-il avec lui ?",
+ options:["Du pain et de la confiture.","Une aiguille et un panier.","Un torchon et un pourpoint.","Un fromage et un oiseau."],ans:3}
+];
+
+const TOTAL=DATA.length; /* 15 */
+const LABELS=['A','B','C','D'];
+const RAIN_EMOJI=['🧵','✂️','🪡','✨','📜','🧶'];
+
+let cur=0;
+let state=DATA.map(()=>({done:false,correct:null,pick:null}));
+let score=0, errCount=0;
+
+/* ── AUDIO ── */
+let actx=null,audioReady=false;
+function initAudio(){ if(audioReady)return; try{actx=new (window.AudioContext||window.webkitAudioContext)(); audioReady=true;}catch(e){} }
+document.addEventListener('pointerdown',function once(){ initAudio(); if(actx&&actx.state==='suspended')actx.resume(); document.removeEventListener('pointerdown',once); });
+function tone(freqStart,freqEnd,dur,type){
+  if(!actx)return;
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(freqStart,actx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,1),actx.currentTime+dur);
+  g.gain.setValueAtTime(.15,actx.currentTime); g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+  o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+dur);
+}
+function beepOk(){ if(!actx)return; tone(660,880,.12,'sine'); setTimeout(()=>tone(880,1100,.14,'sine'),110); }
+function beepErr(){ tone(220,90,.22,'sawtooth'); }
+function beepFinal(ok){
+  if(!actx)return;
+  if(ok){ [523,659,784,988,1175].forEach((f,i)=>setTimeout(()=>tone(f,f,.18,'triangle'),i*140)); }
+  else { tone(200,120,.5,'sine'); }
+}
+
+/* ── UTILS ── */
+function flash(symbol){
+  const el=$('flashPop'); el.textContent=symbol; el.classList.remove('play'); void el.offsetWidth; el.classList.add('play');
+}
+function majChips(){
+  const answered=state.filter(s=>s.done).length;
+  $('chOk').textContent=score;
+  $('chKo').textContent=errCount;
+  $('chRest').textContent=TOTAL-answered;
+  $('progFill').style.width=Math.round(answered/TOTAL*100)+'%';
+}
+
+/* ── DÉMARRAGE ── */
+$('btnStart').addEventListener('click',()=>{
+  $('btnStart').style.display='none';
+  $('quizZone').classList.add('show');
+  renderQuestion(0);
+});
+
+/* ── RENDU D'UNE QUESTION ── */
+function renderQuestion(i){
+  cur=i;
+  const d=DATA[i];
+
+  let h='';
+  h+='<div class="q-label">Q'+(i+1)+' / '+TOTAL+'</div>';
+  h+='<div class="q-titre">📖 Question '+d.num+' · Sous-question '+d.sous+'</div>';
+  h+='<div class="q-texte">'+esc(d.question)+'</div>';
+  h+='<div class="opts" id="optsWrap">';
+  d.options.forEach((o,idx)=>{
+    h+='<button class="opt" data-idx="'+idx+'"><span class="lettre">'+LABELS[idx]+'</span><span>'+esc(o)+'</span></button>';
+  });
+  h+='</div>';
+  h+='<div class="fb-box" id="fbBox"></div>';
+  h+='<div class="btn-row">';
+  h+='<button class="btn btn-valider" id="btnValider" disabled>Valider</button>';
+  h+='<button class="btn btn-retry" id="btnRetry" style="display:none;">↺ Recommencer cette question</button>';
+  h+='<button class="btn btn-suivant" id="btnNext">'+(i===TOTAL-1?'Voir le bilan →':'Question suivante →')+'</button>';
+  h+='</div>';
+
+  $('qCard').innerHTML=h;
+
+  if(state[i].done){
+    restoreAnswered(i);
+  } else {
+    attachInputHandlers(i);
+  }
+  majChips();
+}
+
+function attachInputHandlers(i){
+  document.querySelectorAll('#optsWrap .opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#optsWrap .opt').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      btn.dataset.selected='1';
+      document.querySelectorAll('#optsWrap .opt').forEach(b=>{ if(b!==btn) delete b.dataset.selected; });
+      $('btnValider').disabled=false;
+    });
+  });
+  $('btnValider').addEventListener('click',()=>validerQuestion(i));
+  $('btnRetry').addEventListener('click',()=>recommencerQuestion(i));
+  $('btnNext').addEventListener('click',()=>{
+    if(i===TOTAL-1){ afficherBilan(); } else { renderQuestion(i+1); }
+  });
+}
+
+function getSelectedIndex(){
+  const el=document.querySelector('#optsWrap .opt[data-selected="1"]');
+  return el?parseInt(el.dataset.idx,10):null;
+}
+
+function validerQuestion(i){
+  const d=DATA[i], st=state[i];
+  if(st.done)return;
+  const selIdx=getSelectedIndex();
+  if(selIdx===null)return;
+  const ok=selIdx===d.ans;
+
+  st.done=true; st.correct=ok; st.pick=selIdx;
+  if(ok){ score++; } else { errCount++; }
+
+  $('btnValider').disabled=true;
+  $('btnValider').style.display='none';
+
+  document.querySelectorAll('#optsWrap .opt').forEach(b=>{
+    b.classList.add('locked');
+    const idx=parseInt(b.dataset.idx,10);
+    if(idx===d.ans) b.classList.add('correct');
+    else if(idx===selIdx) b.classList.add('wrong');
+  });
+
+  const fb=$('fbBox');
+  fb.className='fb-box show '+(ok?'ok':'ko');
+  fb.innerHTML='<span class="fb-titre">'+(ok?'✅ Exact.':'❌ Pas tout à fait.')+'</span>'
+    +(ok?'':'La bonne réponse était : <span class="hl-ok">'+esc(d.options[d.ans])+'</span>');
+
+  flash(ok?'✓':'✗');
+  if(ok)beepOk(); else beepErr();
+
+  $('btnRetry').style.display='inline-block';
+  $('btnNext').classList.add('show');
+  majChips();
+}
+
+function recommencerQuestion(i){
+  const st=state[i];
+  if(st.done && st.correct===true){ score=Math.max(0,score-1); }
+  if(st.done && st.correct===false){ errCount=Math.max(0,errCount-1); }
+  state[i]={done:false,correct:null,pick:null};
+  renderQuestion(i);
+}
+
+function restoreAnswered(i){
+  const d=DATA[i], st=state[i];
+  document.querySelectorAll('#optsWrap .opt').forEach(b=>{
+    b.classList.add('locked');
+    const idx=parseInt(b.dataset.idx,10);
+    if(idx===d.ans) b.classList.add('correct');
+    else if(idx===st.pick) b.classList.add('wrong');
+    if(idx===st.pick) b.classList.add('selected');
+  });
+  $('btnValider').style.display='none';
+  const fb=$('fbBox');
+  fb.className='fb-box show '+(st.correct?'ok':'ko');
+  fb.innerHTML='<span class="fb-titre">'+(st.correct?'✅ Exact.':'❌ Pas tout à fait.')+'</span>'
+    +(st.correct?'':'La bonne réponse était : <span class="hl-ok">'+esc(d.options[d.ans])+'</span>');
+  $('btnRetry').style.display='inline-block';
+  $('btnRetry').addEventListener('click',()=>recommencerQuestion(i));
+  $('btnNext').classList.add('show');
+  $('btnNext').addEventListener('click',()=>{ if(i===TOTAL-1){ afficherBilan(); } else { renderQuestion(i+1); } });
+}
+
+/* ── BILAN FINAL ── */
+function afficherBilan(){
+  const total=score;
+
+  $('quizZone').classList.remove('show');
+  $('resultats').classList.add('show');
+
+  $('resScore').textContent=total+'/'+TOTAL;
+
+  let msg='';
+  if(total>=14) msg="Excellent travail ! Tu comprends parfaitement cette histoire.";
+  else if(total>=11) msg="Très bonne lecture. Quelques détails à affiner.";
+  else if(total>=7) msg="Bonne lecture. Relis les passages signalés.";
+  else msg="Relis le texte attentivement avant de retenter.";
+  $('resMsg').textContent=msg;
+
+  const nbStars=Math.max(total>0?1:0,Math.round(total/TOTAL*5));
+  let stars=''; for(let s=1;s<=5;s++){ stars+= s<=nbStars?'★':'☆'; }
+  $('resStars').textContent=stars;
+
+  let recap='';
+  DATA.forEach((d,i)=>{
+    const label='Q'+d.num+' · '+d.sous;
+    const ok=state[i].correct;
+    recap+='<div class="recap-item"><span>'+esc(label)+'</span><span class="st '+(ok?'ok':'ko')+'">'+(ok?'✓':'✗')+'</span></div>';
+  });
+  $('recapList').innerHTML=recap;
+
+  const stamp=$('stamp'); stamp.classList.remove('play'); void stamp.offsetWidth; stamp.classList.add('play');
+  beepFinal(total/TOTAL>=.7);
+
+  if(total/TOTAL>=.7){
+    for(let k=0;k<26;k++){
+      const c=document.createElement('div');
+      c.className='confetti';
+      c.textContent=RAIN_EMOJI[Math.floor(Math.random()*RAIN_EMOJI.length)];
+      c.style.left=Math.random()*100+'%';
+      c.style.animationDelay=(Math.random()*.8)+'s';
+      $('resultats').appendChild(c);
+      setTimeout(()=>c.remove(),3000);
+    }
+  }
+}
+
+/* ── RECOMMENCER TOUTE L'ACTIVITÉ ── */
+$('btnRestart').addEventListener('click',()=>{
+  state=DATA.map(()=>({done:false,correct:null,pick:null}));
+  score=0; errCount=0; cur=0;
+  document.querySelectorAll('.confetti').forEach(c=>c.remove());
+  $('resultats').classList.remove('show');
+  $('quizZone').classList.add('show');
+  renderQuestion(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
