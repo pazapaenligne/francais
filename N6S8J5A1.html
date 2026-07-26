@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – S8 J5 – 6e – Où en es-tu ?</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5c518;--day-dark:#8a6000;
+      --day-light:#fffbeb;--day-border:#f5e08a;
+      --day-glow:rgba(138,96,0,.18);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#22c55e;--green-pale:#e7faec;
+      --red:#ef4444;--red-pale:#fdeaea;--orange:#f5a623;
+      --dark:#1a1f2e;--text:#1a1d23;--muted:#555860;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:1.2rem .75rem 3rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:340px;height:340px;background:var(--day-border);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.08;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bub1{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:180px;height:180px;
+      background:var(--day-border);bottom:120px;right:-40px;pointer-events:none;}
+    .bub2{position:fixed;border-radius:50%;z-index:0;opacity:.05;width:120px;height:120px;
+      background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:1rem;position:relative;z-index:1;width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);
+      color:#3a2c00;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:.35rem 1rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+    h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--text);}
+    h1 .hl{color:var(--day-dark);}
+    .theme-badge{display:inline-block;background:var(--day-light);border:1.5px solid var(--day-border);
+      color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;padding:.3rem .85rem;border-radius:99px;margin-top:.4rem;}
+    .intro-box{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius);
+      padding:.75rem 1.1rem;margin:.9rem 0;font-size:.92rem;color:var(--muted);line-height:1.7;}
+    .dash{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1rem 1.3rem;margin-bottom:1rem;
+      position:relative;z-index:1;box-shadow:0 2px 10px rgba(138,96,0,.08);}
+    .dash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--day-color));}
+    .dash-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.7rem;}
+    .dash-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.65rem;}
+    .dash-statut{flex:1;}
+    .dash-statut-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .dash-statut-nom{font-size:1rem;font-weight:900;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+    .dash-score-num{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:800;color:var(--day-dark);line-height:1;}
+    .dash-score-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+    .parties-row{display:flex;gap:.25rem;flex-wrap:wrap;margin-bottom:.55rem;}
+    .part-b{display:flex;align-items:center;gap:.2rem;background:var(--surface);border:1.5px solid var(--day-border);
+      border-radius:8px;padding:.16rem .4rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+    .chips-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .chip{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;padding:.28rem .75rem;border-radius:99px;border:1.5px solid;}
+    .chip-ok{background:rgba(34,197,94,.12);border-color:var(--green);color:#15803d;}
+    .chip-ko{background:rgba(239,68,68,.1);border-color:var(--red);color:#b91c1c;}
+    .chip-rem{background:rgba(245,197,24,.15);border-color:var(--day-color);color:var(--day-dark);}
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.88rem;font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;color:var(--muted);}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-dark),var(--day-color));border-radius:99px;transition:width .5s ease;}
+    .section-header{width:100%;max-width:720px;position:relative;z-index:1;
+      background:var(--day-dark);color:#fff;border-radius:12px 12px 0 0;
+      padding:.7rem 1.1rem;display:flex;align-items:center;gap:.7rem;margin-top:.3rem;}
+    .section-num{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;opacity:.85;}
+    .section-titre{font-size:1rem;font-weight:800;}
+    .section-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+      font-weight:700;padding:.22rem .7rem;border-radius:99px;background:rgba(255,255,255,.2);color:#fff;}
+    .card{width:100%;max-width:720px;background:var(--surface);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:1.3rem 1.1rem 1.1rem;position:relative;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);animation:fadeUp .35s ease both;
+      margin-bottom:.9rem;z-index:1;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--orange));}
+    .q-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.55rem;}
+    .q-phrase{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-dark);border-radius:10px;
+      padding:.85rem 1rem;margin-bottom:.8rem;
+      font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;color:var(--text);
+      line-height:1.85;font-style:italic;}
+    .vf-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.5rem;}
+    .vf-btn{flex:1;min-width:110px;padding:.6rem .9rem;border-radius:8px;border:2px solid var(--border);
+      background:var(--surface);font-size:clamp(.95rem,2.6vw,1.05rem);font-family:Arial,sans-serif;
+      font-weight:800;color:var(--text);cursor:pointer;transition:all .15s;text-align:center;min-height:50px;
+      -webkit-tap-highlight-color:transparent;}
+    .vf-btn:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn:disabled{cursor:default;}
+    .vf-btn.sel-opt{background:var(--day-light);border-color:var(--day-dark);color:var(--day-dark);}
+    .fb{font-size:clamp(.9rem,2.5vw,1rem);font-family:'JetBrains Mono',monospace;
+      padding:.75rem 1rem;border-radius:8px;margin-top:.55rem;display:none;line-height:1.75;}
+    .fb.show{display:block;}
+    .fb.ok-fb{background:var(--green-pale);border-left:5px solid var(--green);color:#14532d;}
+    .fb.ko-fb{background:var(--red-pale);border-left:5px solid var(--red);color:#7f1d1d;}
+    .fb-titre{display:block;font-weight:900;margin-bottom:.4rem;font-size:1rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.6rem 1.1rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.8rem;-webkit-tap-highlight-color:transparent;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){background:var(--day-color);color:var(--dark);}
+    .btn-dark{background:var(--border);color:var(--text);border:1.5px solid var(--day-border);}
+    .btn-dark:hover{background:var(--day-light);}
+    .nav-wrap{width:100%;max-width:720px;text-align:center;margin:.7rem 0 .3rem;position:relative;z-index:1;}
+    .bilan-bloc{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .bilan-bloc.show{display:block;animation:fadeUp .4s ease both;}
+    .bilan-card{background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:2rem 1.3rem;
+      box-shadow:0 4px 20px rgba(138,96,0,.08);text-align:center;
+      position:relative;overflow:hidden;margin-top:1rem;}
+    .bilan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+      background:linear-gradient(90deg,var(--day-dark),var(--day-color),var(--day-border),var(--orange));}
+    .bilan-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.14em;color:var(--day-dark);margin-bottom:.5rem;}
+    .bilan-score{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:800;line-height:1;
+      margin:.5rem 0 .4rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);}
+    .bilan-denom{font-size:1.5rem;color:var(--muted);}
+    .stars{font-size:1.9rem;margin:.4rem 0 .8rem;letter-spacing:.25rem;}
+    .badge-ok{display:inline-block;background:var(--green-pale);color:#14532d;
+      border:2px solid var(--green);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .badge-ko{display:inline-block;background:var(--red-pale);color:#7f1d1d;
+      border:2px solid var(--red);border-radius:10px;padding:.55rem 1.1rem;
+      font-size:.92rem;font-weight:700;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;}
+    .bilan-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--muted);margin-bottom:.9rem;
+      line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .parties-bilan{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.8rem;}
+    .partie-chip{background:var(--surface);border:1.5px solid var(--day-border);border-radius:10px;
+      padding:.5rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+    .partie-chip strong{color:var(--day-dark);}
+    .corrige-global{text-align:left;background:var(--surface);border-radius:10px;border:1.5px solid var(--day-border);
+      padding:.8rem 1rem;margin-bottom:.8rem;}
+    .corrige-global-titre{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;color:var(--day-dark);margin-bottom:.5rem;}
+    .corrige-global-item{font-size:.88rem;color:var(--text);line-height:1.6;margin-bottom:.22rem;
+      display:flex;gap:.5rem;}
+    .corrige-global-item strong{color:var(--day-dark);min-width:1.4rem;}
+    @keyframes tombeStar{0%{opacity:1;transform:translateY(-30px) scale(1);}100%{opacity:0;transform:translateY(80px) scale(.5);}}
+    .star-p{position:fixed;font-size:1.4rem;pointer-events:none;z-index:9999;animation:tombeStar .9s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popOk{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1);}}
+    @keyframes popKo{0%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}100%{transform:translateX(0);}}
+    .anim-ok{animation:popOk .4s ease both;}
+    .anim-ko{animation:popKo .4s ease both;}
+    @media(max-width:540px){.btn-primary,.btn-dark{width:100%;}.vf-btn{min-width:80px;}}
+  </style>
+</head>
+<body>
+<div class="bub1"></div><div class="bub2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#b94040"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Français · 6ème
+  </div>
+  <div class="week-label">Semaine 8 – Jour 5</div>
+  <h1>&#128269; Où en es-tu&nbsp;?</h1>
+  <div class="theme-badge">Bilan — leur/leurs · subjonctif présent</div>
+</header>
+
+<div class="intro-box">
+  Avant de relever le défi final, réponds à ces affirmations. Elles t'aideront à repérer ce que tu maîtrises déjà.
+</div>
+
+<div class="dash">
+  <div class="dash-titre">Test de réactivation — 8 affirmations — 8 points</div>
+  <div class="dash-row">
+    <div class="dash-statut">
+      <div class="dash-statut-label">Statut</div>
+      <div class="dash-statut-nom" id="dash-statut">Question 1 en cours…</div>
+    </div>
+    <div>
+      <div class="dash-score-num"><span id="dash-total">0</span>/8</div>
+      <div class="dash-score-label">Points</div>
+    </div>
+  </div>
+  <div class="parties-row">
+    <div class="part-b" id="nb-q1"><span style="font-weight:700;">Q1</span><span id="nb-s1" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q2"><span style="font-weight:700;">Q2</span><span id="nb-s2" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q3"><span style="font-weight:700;">Q3</span><span id="nb-s3" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q4"><span style="font-weight:700;">Q4</span><span id="nb-s4" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q5"><span style="font-weight:700;">Q5</span><span id="nb-s5" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q6"><span style="font-weight:700;">Q6</span><span id="nb-s6" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q7"><span style="font-weight:700;">Q7</span><span id="nb-s7" style="font-weight:900;">—</span></div>
+    <div class="part-b" id="nb-q8"><span style="font-weight:700;">Q8</span><span id="nb-s8" style="font-weight:900;">—</span></div>
+  </div>
+  <div class="chips-row">
+    <div class="chip chip-ok"><span id="chip-ok">0</span> corrects</div>
+    <div class="chip chip-ko"><span id="chip-ko">0</span> erreurs</div>
+    <div class="chip chip-rem"><span id="chip-rem">8</span> restants</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">0 / 8 points</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div id="zone-main"></div>
+<div class="nav-wrap" id="nav-wrap" style="display:none;">
+  <button class="btn btn-primary" id="btn-nav">Continuer →</button>
+</div>
+<div class="nav-wrap">
+  <button class="btn btn-dark" onclick="resetTout()">↺ Recommencer</button>
+</div>
+
+<div class="bilan-bloc" id="bilan-bloc">
+  <div class="bilan-card">
+    <div class="bilan-titre">Bilan — Où en es-tu&nbsp;?</div>
+    <div class="bilan-score"><span id="bilan-num">0</span><span class="bilan-denom">/8</span></div>
+    <div class="stars" id="bilan-stars"></div>
+    <div id="bilan-badge"></div>
+    <div class="bilan-msg" id="bilan-msg"></div>
+    <div class="parties-bilan">
+      <div class="partie-chip">leur/leurs <strong id="bil-p1">0/4</strong></div>
+      <div class="partie-chip">Subjonctif <strong id="bil-p2">0/4</strong></div>
+    </div>
+    <div class="corrige-global">
+      <div class="corrige-global-titre">Corrigé</div>
+      <div class="corrige-global-item"><strong>1.</strong> Faux</div>
+      <div class="corrige-global-item"><strong>2.</strong> Vrai</div>
+      <div class="corrige-global-item"><strong>3.</strong> Vrai</div>
+      <div class="corrige-global-item"><strong>4.</strong> Faux</div>
+      <div class="corrige-global-item"><strong>5.</strong> Vrai</div>
+      <div class="corrige-global-item"><strong>6.</strong> Vrai</div>
+      <div class="corrige-global-item"><strong>7.</strong> Faux</div>
+      <div class="corrige-global-item"><strong>8.</strong> Vrai</div>
+    </div>
+    <button class="btn btn-dark" onclick="resetTout()" style="margin:1rem auto 0;display:flex;">↺ Recommencer</button>
+  </div>
+</div>
+
+<script>
+var _actx=null;
+function getCtx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();if(_actx.state==='suspended')_actx.resume();return _actx;}
+function jouerOk(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(520,ctx.currentTime);o.frequency.setValueAtTime(660,ctx.currentTime+.08);o.frequency.setValueAtTime(800,ctx.currentTime+.16);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(e){}}
+function jouerErreur(){try{var ctx=getCtx();var o=ctx.createOscillator(),gn=ctx.createGain();o.connect(gn);gn.connect(ctx.destination);o.frequency.setValueAtTime(280,ctx.currentTime);o.frequency.setValueAtTime(200,ctx.currentTime+.15);gn.gain.setValueAtTime(.18,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.4);o.start(ctx.currentTime);o.stop(ctx.currentTime+.4);}catch(e){}}
+function pluie(){var em=['\u2b50','\u2728','\u2b50'];for(var i=0;i<16;i++){(function(d){setTimeout(function(){var el=document.createElement('span');el.className='star-p';el.textContent=em[Math.floor(Math.random()*em.length)];el.style.left=Math.random()*90+'vw';el.style.top=Math.random()*20+'vh';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);},d);})(i*80);}}
+
+var QS=[
+  {num:1,part:1,
+   ph:'\u00ab\u00a0Leur\u00a0\u00bb s\u2019\u00e9crit toujours avec un s.',
+   correct:false,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Pense \u00e0 la nature du mot\u00a0: accompagne-t-il un nom ou remplace-t-il des personnes\u00a0?'
+  },
+  {num:2,part:1,
+   ph:'Dans \u00ab\u00a0Les \u00e9l\u00e8ves rangent leurs cahiers\u00a0\u00bb, \u00ab\u00a0leurs\u00a0\u00bb est employ\u00e9 parce que le nom qui suit est au pluriel.',
+   correct:true,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Observe le nom plac\u00e9 juste apr\u00e8s leur/leurs. Est-il au singulier ou au pluriel\u00a0?'
+  },
+  {num:3,part:1,
+   ph:'Dans la phrase \u00ab\u00a0Je leur parle\u00a0\u00bb, \u00ab\u00a0leur\u00a0\u00bb est un pronom et il reste invariable.',
+   correct:true,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Demande-toi si leur remplace un groupe de personnes ou accompagne un nom.'
+  },
+  {num:4,part:1,
+   ph:'Dans \u00ab\u00a0Chaque \u00e9l\u00e8ve prend leur cahier\u00a0\u00bb, il faut \u00e9crire \u00ab\u00a0leurs\u00a0\u00bb.',
+   correct:false,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Regarde attentivement le nom qui suit leur. C\u2019est lui qui t\u2019aide \u00e0 choisir l\u2019orthographe.'
+  },
+  {num:5,part:2,
+   ph:'Apr\u00e8s \u00ab\u00a0Il faut que\u00a0\u00bb, le verbe est g\u00e9n\u00e9ralement au subjonctif pr\u00e9sent.',
+   correct:true,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Rep\u00e8re les expressions qui d\u00e9clenchent le subjonctif. \u00ab\u00a0Il faut que\u00a0\u00bb en fait partie.'
+  },
+  {num:6,part:2,
+   ph:'Dans \u00ab\u00a0Il est important que nous respections les consignes\u00a0\u00bb, le verbe est au subjonctif pr\u00e9sent.',
+   correct:true,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Observe la terminaison du verbe et l\u2019expression qui l\u2019introduit.'
+  },
+  {num:7,part:2,
+   ph:'La phrase \u00ab\u00a0Bien que tu es pr\u00eat\u00a0\u00bb est correctement construite.',
+   correct:false,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Apr\u00e8s bien que, v\u00e9rifie toujours si le verbe est au bon mode.'
+  },
+  {num:8,part:2,
+   ph:'Le verbe \u00ab\u00a0\u00eatre\u00a0\u00bb se conjugue \u00ab\u00a0que vous soyez\u00a0\u00bb au subjonctif pr\u00e9sent.',
+   correct:true,
+   fbKo:'<span class="fb-titre">\ud83d\udca1</span>Le verbe \u00eatre poss\u00e8de des formes particuli\u00e8res au subjonctif. Pense \u00e0 les revoir avant de r\u00e9pondre.'
+  }
+];
+
+var scoreOk=0,sc1=0,sc2=0,cur=0,done=[];
+function g(id){return document.getElementById(id);}
+function animerEl(el,ok){if(!el)return;el.classList.remove('anim-ok','anim-ko');void el.offsetWidth;el.classList.add(ok?'anim-ok':'anim-ko');}
+
+function majProg(){
+  var pct=Math.round(scoreOk/8*100);
+  g('prog-fill').style.width=pct+'%';
+  g('prog-label').textContent=scoreOk+' / 8 points';
+  g('prog-pct').textContent=pct+'\u00a0%';
+  g('dash-total').textContent=scoreOk;
+  g('chip-ok').textContent=scoreOk;
+  g('chip-ko').textContent=done.length-scoreOk;
+  g('chip-rem').textContent=8-done.length;
+}
+
+function afficherQ(idx){
+  var zone=g('zone-main');zone.innerHTML='';
+  if(idx===0){
+    var sec=document.createElement('div');sec.className='section-header';
+    sec.innerHTML='<span class="section-num">Partie 1</span><span class="section-titre">Les homonymes leur / leurs</span><span class="section-badge" id="badge-p1">0/4</span>';
+    zone.appendChild(sec);
+  } else if(idx===4){
+    var sec2=document.createElement('div');sec2.className='section-header';
+    sec2.innerHTML='<span class="section-num">Partie 2</span><span class="section-titre">Le subjonctif pr\u00E9sent</span><span class="section-badge" id="badge-p2">0/4</span>';
+    zone.appendChild(sec2);
+  }
+  var q=QS[idx];
+  var card=document.createElement('div');card.className='card';card.id='card-q'+q.num;
+  card.appendChild(Object.assign(document.createElement('div'),{className:'card-stripe'}));
+  var lbl=document.createElement('div');lbl.className='q-label';
+  lbl.textContent='Question '+q.num;card.appendChild(lbl);
+  var ph=document.createElement('div');ph.className='q-phrase';ph.textContent=q.ph;card.appendChild(ph);
+  var row=document.createElement('div');row.className='vf-row';
+  var btnV=document.createElement('button');btnV.className='vf-btn';btnV.textContent='\u2713 Vrai';
+  var btnF=document.createElement('button');btnF.className='vf-btn';btnF.textContent='\u2717 Faux';
+  btnV.addEventListener('click',function(){choisir(q,true,btnV,[btnV,btnF],card);});
+  btnF.addEventListener('click',function(){choisir(q,false,btnF,[btnV,btnF],card);});
+  row.appendChild(btnV);row.appendChild(btnF);
+  card.appendChild(row);
+  var fb=document.createElement('div');fb.className='fb';fb.id='fb-q'+q.num;card.appendChild(fb);
+  zone.appendChild(card);
+  g('dash-statut').textContent='Question '+q.num+' en cours\u2026';
+  g('nav-wrap').style.display='none';
+}
+
+function choisir(q,choix,btn,btns,card){
+  if(done.indexOf(q.num)>=0)return;
+  done.push(q.num);
+  var ok=(choix===q.correct);
+  if(ok){scoreOk++;if(q.part===1)sc1++;else sc2++;jouerOk();}else jouerErreur();
+  btns.forEach(function(b){b.disabled=true;});
+  btn.classList.add('sel-opt');
+  var fb=g('fb-q'+q.num);
+  fb.className='fb show '+(ok?'ok-fb':'ko-fb');
+  fb.innerHTML=ok?'<span class="fb-titre">\u2713 Exact\u00a0!</span>':q.fbKo;
+  animerEl(card,ok);
+  var badge1=g('badge-p1'),badge2=g('badge-p2');
+  if(badge1)badge1.textContent=sc1+'/4';
+  if(badge2)badge2.textContent=sc2+'/4';
+  var nb=g('nb-q'+q.num),nbs=g('nb-s'+q.num);
+  if(nb&&nbs){
+    nbs.textContent=ok?'\u2713':'\u2717';nbs.style.color=ok?'#15803d':'#b91c1c';
+    if(ok){nb.style.background='rgba(34,197,94,.12)';nb.style.borderColor='var(--green)';}
+    else{nb.style.background='rgba(239,68,68,.1)';nb.style.borderColor='var(--red)';}
+  }
+  majProg();
+  g('nav-wrap').style.display='';
+  var btnNav=g('btn-nav');
+  if(cur<QS.length-1){btnNav.textContent='Continuer \u2192';btnNav.onclick=suivant;}
+  else{btnNav.textContent='Voir le bilan \u2192';btnNav.onclick=afficherBilan;}
+}
+
+function suivant(){
+  cur++;g('nav-wrap').style.display='none';
+  afficherQ(cur);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function afficherBilan(){
+  g('nav-wrap').style.display='none';g('zone-main').innerHTML='';
+  g('bilan-bloc').classList.add('show');
+  g('bilan-num').textContent=scoreOk;
+  g('bil-p1').textContent=sc1+'/4';
+  g('bil-p2').textContent=sc2+'/4';
+  var stars=scoreOk===8?5:scoreOk>=6?4:scoreOk>=4?3:scoreOk>=2?2:1;
+  g('bilan-stars').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var badge,msg;
+  if(scoreOk===8){badge='<div class="badge-ok">\u2713 8/8 \u2014 Excellent\u00a0!</div>';msg='Tu es pr\u00eat\u00b7e pour le d\u00e9fi final\u00a0!';pluie();}
+  else if(scoreOk>=6){badge='<div class="badge-ok">'+scoreOk+'/8 \u2014 Tr\u00e8s bien\u00a0!</div>';msg='Encore quelques points \u00e0 revoir avant le d\u00e9fi.';if(scoreOk>=7)pluie();}
+  else if(scoreOk>=4){badge='<div class="badge-ko">'+scoreOk+'/8 \u2014 Bien.</div>';msg='Revois les points restants avant de continuer.';}
+  else{badge='<div class="badge-ko">'+scoreOk+'/8 \u2014 Continue\u00a0!</div>';msg='Prends le temps de revoir leur/leurs et le subjonctif avant le d\u00e9fi final.';}
+  g('bilan-badge').innerHTML=badge;
+  g('bilan-msg').textContent=msg;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetTout(){
+  scoreOk=0;sc1=0;sc2=0;cur=0;done=[];
+  g('bilan-bloc').classList.remove('show');
+  g('nav-wrap').style.display='none';g('zone-main').innerHTML='';
+  for(var i=1;i<=8;i++){
+    var nb=g('nb-q'+i),nbs=g('nb-s'+i);
+    if(nb){nb.style.background='';nb.style.borderColor='';}
+    if(nbs){nbs.textContent='\u2014';nbs.style.color='';}
+  }
+  majProg();afficherQ(0);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+afficherQ(0);majProg();
+</script>
+</body>
+</html>
