@@ -177,15 +177,15 @@ textarea:focus{border-color:var(--jour);box-shadow:0 0 0 3px var(--day-glow);}
 
 <script>
 /* ══════════════════════════════════════
-   DICTÉE · 6e · Accords GN + présent de l'indicatif + majuscules/ponctuation
+   DICTÉE · 6e · Accords GN + présent de l'indicatif + majuscules/ponctuation/accents
    Score /10 · plancher 0
-   Accords : -0,5 pt · Verbes : -0,5 pt · Majuscules/ponctuation : -0,25 pt
+   Accords : -0,5 pt · Verbes : -0,5 pt · Majuscules/ponctuation : -0,25 pt · Accents : -0,25 pt
    ══════════════════════════════════════ */
 
 var TEXTE_REF = "Dans le grand jardin, les petites abeilles dorées butinent les fleurs rouges. Le jeune voisin observe les insectes et dessine les longues tiges vertes. Près du portail, deux chats gris choisissent un coin tranquille puis finissent leur sieste.";
 
 /* ── CIBLES mots : accords GN (0,5 pt), verbes au présent (0,5 pt),
-     majuscules (0,25 pt, comparaison stricte casse+accent) — dans l'ordre du texte ── */
+     majuscules (0,25 pt, comparaison stricte casse+accent, cat par défaut PONCT) — dans l'ordre du texte ── */
 var CIBLES_DEF = [
   {aff:"Dans",        norm:"dans",        cat:"PONCT",  pts:0.25, strict:true},
   {aff:"petites",     norm:"petites",     cat:"ACCORD", pts:0.5},
@@ -229,6 +229,10 @@ function normTok(s){
 }
 function normStrict(s){
   return s.toLowerCase().replace(/['']/g,"'").replace(/[^a-z0-9'à-ÿ]/g,'');
+}
+/* Supprime uniquement les diacritiques, en conservant la casse et les lettres — sert à isoler une faute d'accent pure */
+function stripDiacritics(s){
+  return s.normalize('NFD').replace(/[̀-ͯ]/g,'').normalize('NFC');
 }
 function levenshtein(a,b){
   var m=a.length,n=b.length,d=[];
@@ -323,13 +327,34 @@ function corriger(){
       var isCible=!!cible;
       var isWord=/[a-zA-ZÀ-ɏ]/.test(normTok(rt));
       if(!isWord&&!isCible){tokens.push({rt:rt,ht:ht,status:'ok'});return;}
-      var match;
-      if(isCible&&(cible.strict||cible.ponct)){match=(ht===rt);}
-      else {match=(normStrict(ht)===normStrict(rt));}
-      if(match){
-        tokens.push({rt:rt,ht:ht,status:isCible?'cible_ok':'ok',cible:isCible?cible:null});
+
+      if(isCible&&cible.strict){
+        /* cible "majuscule" (Dans / Le / Près) : distinguer faute d'accent / faute de majuscule, jamais double pénalité */
+        if(ht===rt){
+          tokens.push({rt:rt,ht:ht,status:'cible_ok',cible:cible});
+        } else if(stripDiacritics(ht)===stripDiacritics(rt)){
+          tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:{aff:rt,pts:0.25,cat:'ACCENT'}});
+        } else {
+          /* casse fausse (avec ou sans faute d'accent en plus) : une seule pénalité, catégorie majuscule/ponctuation */
+          tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:{aff:rt,pts:0.25,cat:'PONCT'}});
+        }
+      } else if(isCible&&cible.ponct){
+        if(ht===rt){
+          tokens.push({rt:rt,ht:ht,status:'cible_ok',cible:cible});
+        } else {
+          tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:cible});
+        }
       } else if(isCible){
-        tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:cible});
+        /* cible accord / verbe : isoler une faute d'accent pure d'une vraie faute d'accord ou de conjugaison */
+        if(normStrict(ht)===normStrict(rt)){
+          tokens.push({rt:rt,ht:ht,status:'cible_ok',cible:cible});
+        } else if(stripDiacritics(ht.toLowerCase())===stripDiacritics(rt.toLowerCase())){
+          tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:{aff:rt,pts:0.25,cat:'ACCENT'}});
+        } else {
+          tokens.push({rt:rt,ht:ht,status:'cible_ko',cible:cible});
+        }
+      } else if(normStrict(ht)===normStrict(rt)){
+        tokens.push({rt:rt,ht:ht,status:'ok'});
       } else {
         tokens.push({rt:rt,ht:ht,status:'hors_cible'});
       }
@@ -341,22 +366,27 @@ function corriger(){
       if(!isWord&&!isCible){tokens.push({rt:rt,ht:'',status:'ok'});return;}
       tokens.push({rt:rt,ht:'',status:isCible?'cible_ko':'hors_cible',cible:isCible?cible:null});
     } else if(a.hi>=0){
-      /* mot ajouté par l'élève, absent du texte de référence : on le conserve et on l'affiche en orange, sans pénalité */
       var ht2=hypToks[a.hi];
       var isWord2=/[a-zA-ZÀ-ɏ]/.test(normTok(ht2));
-      if(!isWord2){tokens.push({rt:'',ht:ht2,status:'ok'});return;}
+      if(!isWord2){
+        /* ponctuation ajoutée à tort, absente du texte de référence : signalée et pénalisée */
+        tokens.push({rt:'',ht:ht2,status:'cible_ko',cible:{aff:'(à supprimer)',pts:0.25,cat:'PONCT'}});
+        return;
+      }
+      /* mot ajouté par l'élève, absent du texte de référence : on le conserve et on l'affiche en orange, sans pénalité */
       tokens.push({rt:'',ht:ht2,status:'hors_cible'});
     }
   });
 
   /* Score : pénalités par catégorie, plancher 0, note initiale 10 */
-  var ptsPerdus=0, fACCORD=0, fVERBE=0, fPONCT=0;
+  var ptsPerdus=0, fACCORD=0, fVERBE=0, fPONCT=0, fACCENT=0;
   tokens.forEach(function(t){
     if(t.status==='cible_ko'&&t.cible){
       ptsPerdus+=t.cible.pts;
       if(t.cible.cat==='ACCORD')fACCORD++;
       else if(t.cible.cat==='VERBE')fVERBE++;
       else if(t.cible.cat==='PONCT')fPONCT++;
+      else if(t.cible.cat==='ACCENT')fACCENT++;
     }
   });
   var score=Math.max(0,10-ptsPerdus);
@@ -373,8 +403,9 @@ function corriger(){
   var det='';
   if(fACCORD)det+='Accords : '+fACCORD+' erreur'+(fACCORD>1?'s':'')+' × 0,5 = −'+frnum(fACCORD*0.5)+' pt\n';
   if(fVERBE)det+='Verbes au présent : '+fVERBE+' erreur'+(fVERBE>1?'s':'')+' × 0,5 = −'+frnum(fVERBE*0.5)+' pt\n';
-  if(fPONCT)det+='Majuscules / ponctuation : '+fPONCT+' erreur'+(fPONCT>1?'s':'')+' × 0,25 = −'+frnum(fPONCT*0.25)+' pt';
-  if(!fACCORD&&!fVERBE&&!fPONCT)det='Aucune erreur sur les critères évalués !';
+  if(fPONCT)det+='Majuscules / ponctuation : '+fPONCT+' erreur'+(fPONCT>1?'s':'')+' × 0,25 = −'+frnum(fPONCT*0.25)+' pt\n';
+  if(fACCENT)det+='Accents : '+fACCENT+' erreur'+(fACCENT>1?'s':'')+' × 0,25 = −'+frnum(fACCENT*0.25)+' pt';
+  if(!fACCORD&&!fVERBE&&!fPONCT&&!fACCENT)det='Aucune erreur sur les critères évalués !';
   $('scoreDetail').textContent=det.trim();
 
   var tp=$('scoreTampon');
